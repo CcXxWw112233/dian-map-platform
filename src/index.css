@@ -1,0 +1,73 @@
+
+html, body, :global(#root) {
+  height: 100%;
+  padding: 0;
+  margin: 0;
+}
+:global(.ol-zoom){
+  display: none;
+}
+:global(div.ol-rotate){
+  top:5.5em;
+}
+:global(div.drawLineLength){
+  background-color: rgba(0 ,0 ,0, 0.5);
+  padding: 4px 10px;
+  position: relative;
+  border-radius: 5px;
+  color: #fff;
+  font-weight: bold;
+  font-size: 18px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+:global(div.drawLineLength::after){
+  content:"";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: rgba(0 ,0 ,0, 0.5);
+  bottom: -10px;
+}
+
+:global(div.drawPolygonArea){
+  background-color: rgba(0 ,0 ,0, 0.5);
+  padding: 4px 10px;
+  position: relative;
+  border-radius: 5px;
+  color: #fff;
+  font-weight: bold;
+  font-size: 18px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+:global(.drawPolygonArea::after){
+  content:"";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: rgba(0 ,0 ,0, 0.5);
+  bottom: -10px;
+}
+
+
+
+:global(div.drawPointTip){
+  background-color: rgba(0 ,0 ,0, 0.5);
+  padding: 4px 10px;
+  position: relative;
+  border-radius: 5px;
+  color: #fff;
+  font-weight: bold;
+  font-size: 18px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+:global(.drawPointTip::after){
+  content:"";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: rgba(0 ,0 ,0, 0.5);
+  bottom: -10px;
+}

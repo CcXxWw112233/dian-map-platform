@@ -1,0 +1,25 @@
+.changeBaseMap{
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  background-color: #fff;
+  padding: 8px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-content: space-between;
+  width: 300px;
+}
+.mapitem_box{
+  display: inline-block;
+  vertical-align: text-top;
+  flex: 1;
+  padding: 10px;
+}
+.mapTitle{
+  font-size: 12px;
+}
+.mapitem{
+  flex: 1;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
