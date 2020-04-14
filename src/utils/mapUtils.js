@@ -6,17 +6,21 @@ import Overlay from 'ol/Overlay';
 import {getLength, getArea } from 'ol/sphere'
 
 // 公用画图交互事件
-export const drawFeature = function(getData , type ,style){
+export const drawFeature = function(getData , type ,style, geoFunc){
   getData = getData || false; type = type || 'LineString';
 
   let source = new VectorSource({wrapX: false});
   let layer = new VectorLayer({
     source: source,
   });
-  let draw = new Draw({
+  let options = {
     source: source,
     type: type
-  })
+  }
+  if (geoFunc) {
+    options.geometryFunction = geoFunc
+  }
+  let draw = new Draw(options)
 
   // 设置样式
   if(style){

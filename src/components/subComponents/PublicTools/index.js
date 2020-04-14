@@ -6,6 +6,7 @@ import { fullScreen,exitScreen } from '../../../utils/utils'
 import { always } from 'ol/events/condition'
 import {DragZoom} from 'ol/interaction';
 import {Circle as CircleStyle, Fill, Stroke, Style ,Icon} from 'ol/style';
+import Draw, {createRegularPolygon, createBox} from 'ol/interaction/Draw'
 
 export default class PublicTools extends React.Component {
   constructor(props){
@@ -36,12 +37,23 @@ export default class PublicTools extends React.Component {
     },{
       name:"全屏/退出全屏",
       toolkey:'fullScreen'
+    },{
+      name: '绘制矩形',
+      toolkey: 'drawBox' 
+    },{
+      name: '绘制圆',
+      toolkey: 'drawCircle'
+    },{
+      name: '移除绘制',
+      toolkey: 'removeFeature'
     }]
     this.dragZoom = null;
     this.drawLine = null;
     this.drawPolygon = null;
     this.drawPoint = null ;
     this.isFull = false;
+    this.drawRectangle = null;
+    this.drawCircle = null;
   }
 
   componentDidMount(){
@@ -83,6 +95,7 @@ export default class PublicTools extends React.Component {
           width: 2
       }),
       }));
+      debugger
 
       this.drawPolygon.setActive(false);
       mapMain.map.addInteraction(this.drawPolygon);
@@ -101,6 +114,19 @@ export default class PublicTools extends React.Component {
       this.drawPoint.setActive(false);
       mapMain.map.addInteraction(this.drawPoint);
       this.drawPointGetPoint();
+
+      //画长方形
+      this.drawBox = new drawFeature(false, 'Circle', null, createBox())
+      this.drawBox.setActive(false);
+      mapMain.map.addInteraction(this.drawBox);
+      this.drawBoxGetX()
+
+      // 绘制圆
+      this.drawCircle = new drawFeature(false, 'Circle');
+      this.drawCircle.setActive(false);
+      mapMain.map.addInteraction(this.drawCircle);
+      this.drawCircleGetRadius()
+
     }
   }
 
@@ -124,6 +150,36 @@ export default class PublicTools extends React.Component {
     }
     Object.assign(icon.style, style);
     return icon ;
+  }
+
+  // overlay按钮
+  createOverLayBtnElement =(count) => {
+    let div0 = document.createElement('div')
+    const style0 = {
+      position: 'absolute',
+      top: '10px',
+      right: '-35px',
+      display: 'flex',
+      'flex-direction': 'column'
+    }
+    if (!count) count = 2
+    Object.assign(div0.style,style0)
+    for (let i = 0; i < count; i++) {
+      let div = document.createElement('div')
+      const style1 = {
+        width: '40px',
+        height: '30px',
+        'margin-bottom': '5px', 
+        'background-color': 'white',
+        'line-height': '30px',
+        cursor: 'pointer'
+      }
+      div.innerHTML = '关闭'
+      if (i === 1) div.innerHTML = '设置'
+      Object.assign(div.style, style1)
+      div0.appendChild(div)
+    }
+    return div0
   }
 
   // 画线获取长度
@@ -249,6 +305,46 @@ export default class PublicTools extends React.Component {
     })
   }
 
+  // drawCircle
+  drawCircleGetRadius = () => {
+    const allOverlay = new addOverlay();
+    this.drawCircle.on('drawstart', e =>{
+      const feature = e.feature
+      const overlay = allOverlay.add('drawCircleTip')
+      mapMain.map.addOverlay(overlay)
+      feature.getGeometry().on('change',(evt)=>{
+
+        const radius = feature.getGeometry().getRadius()
+        const el = overlay.getElement()
+        el.innerHTML = radius.toFixed(2) + 'm'
+        const centerPoi = evt.target.getCenter()
+        const lastPoi = evt.target.getLastCoordinate()
+        overlay.setPosition([(centerPoi[0] + lastPoi[0]) / 2, (centerPoi[1] + lastPoi[1]) / 2]);
+      })
+    })
+    this.drawCircle.on('drawend', e=> {
+      this.drawCircle.setActive(false)
+    })
+  }
+
+  drawBoxGetX = () => {
+    const allOverlay = new addOverlay();
+    let overlay = null, firstBtn = null
+    this.drawBox.on('drawstart', e =>{
+      overlay = allOverlay.add('drawBoxTip')
+      mapMain.map.addOverlay(overlay)
+    })
+    this.drawBox.on('drawend', e => {   
+      const el = overlay.getElement()
+      const poi = e.feature.getGeometry().getCoordinates()[0][2]
+      overlay.setPosition(poi)
+      this.drawBox.setActive(false)
+      const overlayEl = this.createOverLayBtnElement();
+      el.appendChild(overlayEl)
+
+    })
+  }
+
   // 激活工具
   toolActive = (val) => {
     // console.log(val)
@@ -304,8 +400,37 @@ export default class PublicTools extends React.Component {
       this.dragZoom.setActive(false)
     }
 
+    if (val.toolkey === 'drawCircle') {
+      let active= this.drawCircle.getActive();
+      if (active) {
+        this.drawCircle.setActive(false)
+      } else {
+        this.drawCircle.setActive(true)
+        this.drawBox.setActive(false)
+        this.drawPolygon.setActive(false);
+        this.drawLine.setActive(false);
+        this.drawPoint.setActive(false);
+        this.dragZoom.setActive(false)
+      }
+    }
+
+    if (val.toolkey === 'drawBox') {
+      let active= this.drawBox.getActive();
+      if (active) {
+        this.drawBox.setActive(false)
+      } else {
+        this.drawBox.setActive(true)
+        this.drawCircle.setActive(false)
+        this.drawPolygon.setActive(false);
+        this.drawLine.setActive(false);
+        this.drawPoint.setActive(false);
+        this.dragZoom.setActive(false)
+        this.drawCircle.setActive(false)
+      }
+    }
+
     // 测面
-    if(val.toolkey === 'measureArea'){
+    if(val.toolkey === 'measureArea') {
       let active = this.drawPolygon.getActive();
       if(active){
         this.drawPolygon.setActive(false);
@@ -328,6 +453,22 @@ export default class PublicTools extends React.Component {
       }else{
         this.drawPoint.setActive(true)
       }
+    }
+
+    if (val.toolkey === 'removeFeature') {
+      this.drawLine.setActive(false);
+      this.dragZoom.setActive(false);
+      this.drawPolygon.setActive(false)
+      this.drawPoint.setActive(false)
+      this.drawBox.setActive(false)
+      this.drawCircle.setActive(false)
+      const overlayArr = mapMain.map.getOverlays().array_
+      overlayArr.forEach(overlay => {
+        mapMain.map.removeOverlay(overlay)
+      })
+      const layerCon = mapMain.map.getLayers()
+      console.log(layerCon)
+
     }
 
 
