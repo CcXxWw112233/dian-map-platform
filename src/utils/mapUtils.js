@@ -6,31 +6,49 @@ import Overlay from 'ol/Overlay';
 import {getLength, getArea } from 'ol/sphere'
 
 // 公用画图交互事件
-export const drawFeature = function(getData , type ,style, geoFunc){
-  getData = getData || false; type = type || 'LineString';
+export const drawFeature = {
+  //
+  initLayer: function(type){
+    if(this.keys[type]){
+      return this.keys[type];
+    }
+    let layer = new VectorLayer({
+      source: new VectorSource({wrapX:false})
+    })
+    initMap.map.addLayer(layer);
+    this.keys[type] = {
+      layer: layer,
+      source: layer.getSource()
+    }
+    return this.keys[type];
+  },
+  draw: null ,
+  keys:{},
+  // 添加绘图功能
+  addDraw:function(getData , type ,style){
 
-  let source = new VectorSource({wrapX: false});
-  let layer = new VectorLayer({
-    source: source,
-  });
-  let options = {
-    source: source,
-    type: type
-  }
-  if (geoFunc) {
-    options.geometryFunction = geoFunc
-  }
-  let draw = new Draw(options)
+    let lay = this.initLayer(type);
+    // 删除已有的，新建一个新的交互逻辑
+    this.removeOtherInterAction();
+    getData = getData || false; type = type || 'LineString';
+    this.draw = new Draw({
+      source: lay.source,
+      type: type
+    })
 
-  // 设置样式
-  if(style){
-    layer.setStyle(style)
-  }
+    // 设置样式
+    if(style){
+      lay.layer.setStyle(style)
+    }
 
-  layer.setZIndex(10);
-  initMap.map.addLayer(layer)
-  draw.set('sourceInDraw',source)
-  return draw ;
+    lay.layer.setZIndex(10);
+    this.draw.set('sourceInDraw',lay.source)
+    return this.draw ;
+  },
+  // 删除action
+  removeOtherInterAction:function(action){
+    initMap.map.removeInteraction(action || this.draw);
+  }
 }
 
 // 创建一个单独的overlay
