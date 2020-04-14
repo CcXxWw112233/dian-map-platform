@@ -6,7 +6,7 @@ import { fullScreen,exitScreen } from '../../../utils/utils'
 import { always } from 'ol/events/condition'
 import {DragZoom} from 'ol/interaction';
 import {Circle as CircleStyle, Fill, Stroke, Style ,Icon} from 'ol/style';
-import Draw, {createRegularPolygon, createBox} from 'ol/interaction/Draw'
+import {createBox} from 'ol/interaction/Draw'
 
 export default class PublicTools extends React.Component {
   constructor(props){
@@ -64,6 +64,7 @@ export default class PublicTools extends React.Component {
   // 统一添加交互
   addInteraction = () =>{
     if(mapMain.map){
+      window.map = mapMain.map
       // 框选放大交互
       this.dragZoom = new DragZoom({
         condition: always,
@@ -95,7 +96,6 @@ export default class PublicTools extends React.Component {
           width: 2
       }),
       }));
-      debugger
 
       this.drawPolygon.setActive(false);
       mapMain.map.addInteraction(this.drawPolygon);
@@ -115,14 +115,24 @@ export default class PublicTools extends React.Component {
       mapMain.map.addInteraction(this.drawPoint);
       this.drawPointGetPoint();
 
+      const myStyle = new Style({
+        fill: new Fill({
+          color:'rgba(255,120,117,0.3)'
+        }),
+        stroke: new Stroke({
+          color: "#f5222d",
+          width: 2
+      }),
+      })
+
       //画长方形
-      this.drawBox = new drawFeature(false, 'Circle', null, createBox())
+      this.drawBox = new drawFeature(false, 'Circle', myStyle, createBox())
       this.drawBox.setActive(false);
       mapMain.map.addInteraction(this.drawBox);
       this.drawBoxGetX()
 
       // 绘制圆
-      this.drawCircle = new drawFeature(false, 'Circle');
+      this.drawCircle = new drawFeature(false, 'Circle', myStyle);
       this.drawCircle.setActive(false);
       mapMain.map.addInteraction(this.drawCircle);
       this.drawCircleGetRadius()
@@ -329,7 +339,7 @@ export default class PublicTools extends React.Component {
 
   drawBoxGetX = () => {
     const allOverlay = new addOverlay();
-    let overlay = null, firstBtn = null
+    let overlay = null
     this.drawBox.on('drawstart', e =>{
       overlay = allOverlay.add('drawBoxTip')
       mapMain.map.addOverlay(overlay)
@@ -462,12 +472,20 @@ export default class PublicTools extends React.Component {
       this.drawPoint.setActive(false)
       this.drawBox.setActive(false)
       this.drawCircle.setActive(false)
-      const overlayArr = mapMain.map.getOverlays().array_
+      const overlayArr = mapMain.map.getOverlays().getArray()
       overlayArr.forEach(overlay => {
         mapMain.map.removeOverlay(overlay)
       })
-      const layerCon = mapMain.map.getLayers()
-      console.log(layerCon)
+      const layerArr = mapMain.map.getLayers().getArray()
+      layerArr.forEach(lyr => {
+        const source = lyr.getSource()
+        if (source.getWrapX() === false) {
+          const features = source.getFeatures()
+          features.forEach(feature => {
+            source.removeFeature(feature)
+          })
+        }
+      })
 
     }
 
