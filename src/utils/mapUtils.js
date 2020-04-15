@@ -15,6 +15,7 @@ export const drawFeature = {
     let layer = new VectorLayer({
       source: new VectorSource({wrapX:false})
     })
+    layer.type = 'vector'
     initMap.map.addLayer(layer);
     this.keys[type] = {
       layer: layer,
@@ -25,7 +26,7 @@ export const drawFeature = {
   draw: null ,
   keys:{},
   // 添加绘图功能
-  addDraw:function(getData , type ,style, geoFunc){
+  addDraw:function(getData , type ,style, geoFunc) {
     let lay = this.initLayer(type);
     // 删除已有的，新建一个新的交互逻辑
     this.removeOtherInterAction();
@@ -48,6 +49,7 @@ export const drawFeature = {
     this.draw.set('sourceInDraw',lay.source)
     return this.draw ;
   },
+
   // 删除action
   removeOtherInterAction:function(action){
     initMap.map.removeInteraction(action || this.draw);
@@ -92,8 +94,8 @@ export const mapOverlay = {
 }
 
 // 可以多个创建overlay
-export const addOverlay = function(){
-  this.overlays = [],
+export const MyOverlay = function(){
+  this.overlays = [];
   this.indexNumber = 0;
   this.add = function(className){
     let ele = document.createElement('div');
@@ -118,20 +120,22 @@ export const addOverlay = function(){
       initMap.map.removeOverlay(item);
     })
     this.overlays = [];
-  },
-  // 单个删除
-  this.remove = function(index){
-    let leng = this.overlays.length ;
-    for(let i = 0; i< leng; i++){
-      let item = this.overlays[i];
-      if(i === index){
-        initMap.map.removeOverlay(item);
+  };
+
+  this.findOverlayById = function(id) {
+    return this.overlays.find(item => item.id === id)
+  }
+
+  this.remove = function(id) {
+    for (let i = 0; i < this.overlays.length; i++) {
+      if(this.overlays[i].id === id) {
+        initMap.map.removeOverlay(this.overlays[i])
         this.overlays.splice(i,1);
-        this.indexNumber -= 1;
-        break;
+        this.indexNumber -= 1
+        break 
       }
     }
-  };
+  }
   // 按照overlay中的下标进行删除
   this.removeByIndex = function(lay){
     // console.log(this)

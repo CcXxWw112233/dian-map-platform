@@ -1,12 +1,20 @@
 import React from 'react'
 import styles from './index.less'
 import mapMain from '../../../utils/INITMAP'
-import { drawFeature ,addOverlay ,formatArea,formatLength} from '../../../utils/mapUtils'
+import { drawFeature ,MyOverlay ,formatArea,formatLength} from '../../../utils/mapUtils'
 import { fullScreen,exitScreen } from '../../../utils/utils'
 import { always } from 'ol/events/condition'
 import {DragZoom} from 'ol/interaction';
 import {Circle as CircleStyle, Fill, Stroke, Style ,Icon} from 'ol/style';
 import {createBox} from 'ol/interaction/Draw'
+
+
+import { lineDrawing } from '../../../utils/drawing/lineDrawing'
+import { pointDrawing } from '../../../utils/drawing/pointDrawing'
+import { polygonDrawing } from '../../../utils/drawing/polygonDrawing'
+import { circleDrawing } from '../../../utils/drawing/circleDrawing'
+import { boxDrawing } from '../../../utils/drawing/boxDrawing'
+import { myZoomIn, myZoomOut, myFullScreen, myDragZoom } from '../../../utils/drawing/public'
 
 export default class PublicTools extends React.Component {
   constructor(props){
@@ -44,6 +52,7 @@ export default class PublicTools extends React.Component {
       name: '绘制圆',
       toolkey: 'drawCircle'
     }]
+    this.allOverlay = null
     this.dragZoom = null;
     this.drawLine = null;
     this.drawPolygon = null;
@@ -86,98 +95,112 @@ export default class PublicTools extends React.Component {
     // console.log(val)
     if(val.toolkey === 'zoomIn'){
       // 调用地图本身存在的放大缩小
-      let zoomIn = document.querySelector('.ol-zoom-in');
-      zoomIn && zoomIn.click();
-      return ;
+      // let zoomIn = document.querySelector('.ol-zoom-in');
+      // zoomIn && zoomIn.click();
+      // return ;
+      myZoomIn()
     }
     if(val.toolkey === 'zoomOut'){
       // 调用地图本身存在的放大缩小
-      let dom = document.querySelector('.ol-zoom-out');
-      dom && dom.click();
-      return ;
+      // let dom = document.querySelector('.ol-zoom-out');
+      // dom && dom.click();
+      // return ;
+      myZoomOut()
     }
 
     if(val.toolkey === 'fullScreen'){
-      if(this.isFull){
-        this.isFull = false;
-        exitScreen();
-      }else{
-        fullScreen();
-        this.isFull = true;
-      }
+      // if(this.isFull){
+      //   this.isFull = false;
+      //   exitScreen();
+      // }else{
+      //   fullScreen();
+      //   this.isFull = true;
+      // }
+      myFullScreen.change()
     }
 
     // 框选放大
     if(val.toolkey === 'dragZoom'){
-      this.drawLine.setActive(false);
-      this.drawPolygon.setActive(false)
-      if(this.dragZoom.getActive()){
-        // 关闭框选放大功能
-        this.dragZoom.setActive(false)
-      }else{
-        // 激活框选放大功能
-        this.dragZoom.setActive(true);
-      }
+      // this.drawLine.setActive(false);
+      // this.drawPolygon.setActive(false)
+      // if(this.dragZoom.getActive()){
+      //   // 关闭框选放大功能
+      //   this.dragZoom.setActive(false)
+      // }else{
+      //   // 激活框选放大功能
+      //   this.dragZoom.setActive(true);
+      // }
+      myDragZoom.setVal()
     }
 
     // 测线
     if(val.toolkey === 'measureLine'){
       // 测量距离交互
-      this.drawLine = drawFeature.addDraw(false, 'LineString' ,
-      new Style({
-        stroke:new Stroke({
-          color: '#f5222d',
-          width:3
-        })
-      }));
-      mapMain.map.addInteraction(this.drawLine);
-      this.drawLineGetLength();
+      // this.drawLine = drawFeature.addDraw(false, 'LineString' ,
+      // new Style({
+      //   stroke:new Stroke({
+      //     color: '#f5222d',
+      //     width:3
+      //   })
+      // }));
+      // mapMain.map.addInteraction(this.drawLine);
+      // this.drawLineGetLength();
+      lineDrawing.createDrawing()
     }
 
     if (val.toolkey === 'drawCircle') {
        // 绘制圆
-       this.drawCircle = drawFeature.addDraw(false, 'Circle', myStyle);
-       mapMain.map.addInteraction(this.drawCircle);
-       this.drawCircleGetRadius()
+      //  this.drawCircle = drawFeature.addDraw(false, 'Circle', myStyle);
+      //  mapMain.map.addInteraction(this.drawCircle);
+      //  this.drawCircleGetRadius()
+      circleDrawing.createDrawing()
     }
 
     if (val.toolkey === 'drawBox') {
       //画长方形
-      this.drawBox = drawFeature.addDraw(false, 'Circle', myStyle, createBox())
-      // this.drawBox.setActive(false);
-      mapMain.map.addInteraction(this.drawBox);
-      this.drawBoxGetX()
+      // this.drawBox = drawFeature.addDraw(false, 'Circle', myStyle, createBox())
+      // // this.drawBox.setActive(false);
+      // mapMain.map.addInteraction(this.drawBox);
+      // this.addDrawBoxEventLinstener()
+      boxDrawing.createDrawing()
     }
 
     // 测面
     if(val.toolkey === 'measureArea') {
        // 测量面积交互
-       this.drawPolygon = drawFeature.addDraw(false, 'Polygon',
-       new Style({
-         fill: new Fill({
-           color:'rgba(255,120,117,0.3)'
-         }),
-         stroke: new Stroke({
-           color: "#f5222d",
-           width: 2
-       }),
-       }));
-       mapMain.map.addInteraction(this.drawPolygon);
-       this.drawPolygonGetArea();
+      //  this.drawPolygon = drawFeature.addDraw(false, 'Polygon',
+      //  new Style({
+      //    fill: new Fill({
+      //      color:'rgba(255,120,117,0.3)'
+      //    }),
+      //    stroke: new Stroke({
+      //      color: "#f5222d",
+      //      width: 2
+      //  }),
+      //  }));
+      //  mapMain.map.addInteraction(this.drawPolygon);
+      //  this.drawPolygonGetArea();
+
+      polygonDrawing.createDrawing()
     }
 
     if(val.toolkey === 'measurePoint'){
       // 挂载拾取坐标点的交互
-      this.drawPoint =  drawFeature.addDraw(false,'Point',new Style({
-        image: new CircleStyle({
-          radius: 7,
-          fill: new Fill({
-            color: '#f5222d'
-          })
-        })
-      }))
-      mapMain.map.addInteraction(this.drawPoint);
-      this.drawPointGetPoint();
+      // this.drawPoint =  drawFeature.addDraw(false,'Point',new Style({
+      //   image: new CircleStyle({
+      //     radius: 7,
+      //     fill: new Fill({
+      //       color: '#f5222d'
+      //     })
+      //   })
+      // }))
+      // mapMain.map.addInteraction(this.drawPoint);
+      // this.drawPointGetPoint();
+      pointDrawing.createDrawing()
+    }
+
+    if (val.toolkey === 'cleanFeatures') {
+      this.cleanAllFeatures()
     }
 
     // 设置active样式
@@ -246,17 +269,25 @@ export default class PublicTools extends React.Component {
     return div0
   }
 
+  getOverlays() {
+    if (!this.allOverlay) {
+      this.allOverlay = new MyOverlay()
+    }
+    return this.allOverlay
+  }
   // 画线获取长度
   drawLineGetLength = ()=>{
     // 构建overlay的类
-    let getoverlay = new addOverlay();
+    let getoverlay = this.getOverlays()
+    // getoverlay.remove('drawLine')
     let overlay = null,icon = null;
     let isStart = false ;
-    // 开始绘制
-    this.drawLine.on('drawstart',(e)=>{
+
+      // 开始绘制
+      this.drawLine.on('drawstart',(e)=>{
       isStart = true;
       // 创建一个overlay，让overlay有单独作用域
-      overlay = getoverlay.add('drawLineLength');
+      overlay = getoverlay.add('drawLine');
       let ele = overlay.getElement();
       mapMain.map.addOverlay(overlay);
       let line = e.feature ;
@@ -308,7 +339,7 @@ export default class PublicTools extends React.Component {
 
   // 画框获取面积
   drawPolygonGetArea = () => {
-    let allOverlay = new addOverlay();
+    let allOverlay = this.getOverlays();
     let overlay = null ,icon = null;
     let isStart = false;
     this.drawPolygon.on('drawstart',(ev)=>{
@@ -349,12 +380,13 @@ export default class PublicTools extends React.Component {
 
   // 画点获取坐标
   drawPointGetPoint = () => {
-    let allOverlay = new addOverlay();
+    let allOverlay = this.getOverlays();
+    // allOverlay.remove('drawPoint')
     let overlay = null,icon = null ;
     this.drawPoint.on('drawstart',(ev)=>{
       let feature = ev.feature ;
       let coordinate = feature.getGeometry().getCoordinates();
-      overlay = allOverlay.add('drawPointTip');
+      overlay = allOverlay.add('drawPoint', 'drawPointTip');
       mapMain.map.addOverlay(overlay);
       overlay.getElement().innerHTML = String(coordinate);
 
@@ -371,10 +403,11 @@ export default class PublicTools extends React.Component {
 
   // drawCircle
   drawCircleGetRadius = () => {
-    const allOverlay = new addOverlay();
+    const allOverlay = this.getOverlays();
+    allOverlay.remove('drawCircle')
     this.drawCircle.on('drawstart', e =>{
       const feature = e.feature
-      const overlay = allOverlay.add('drawCircleTip')
+      const overlay = allOverlay.add('drawCircle')
       mapMain.map.addOverlay(overlay)
       feature.getGeometry().on('change',(evt)=>{
 
@@ -391,11 +424,13 @@ export default class PublicTools extends React.Component {
     })
   }
 
-  drawBoxGetX = () => {
-    const allOverlay = new addOverlay();
+  // 绘制矩形的事件绑定
+  addDrawBoxEventLinstener = () => {
+    const allOverlay = this.getOverlays();
+    allOverlay.remove('drawBox')
     let overlay = null
     this.drawBox.on('drawstart', e =>{
-      overlay = allOverlay.add('drawBoxTip')
+      overlay = allOverlay.add('drawBox')
       mapMain.map.addOverlay(overlay)
     })
     this.drawBox.on('drawend', e => {
@@ -408,6 +443,20 @@ export default class PublicTools extends React.Component {
 
     })
   }
+
+  //移除绘制功能
+  cleanAllFeatures = () => {
+    const map = mapMain.map
+    const layerArr = map.getLayers().getArray()
+    layerArr.forEach(layer => {
+    if (layer.type === 'vector') {
+      layer.getSource().clear() // 清除要素
+      const allOverlay = this.getOverlays()
+      allOverlay.clear() // 清除overlay
+    }
+    })
+  }
+
   render(){
     let { activeTool } = this.state;
     return (
