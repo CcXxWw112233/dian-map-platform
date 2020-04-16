@@ -1,6 +1,6 @@
 import { MyOverlay, drawFeature } from '../mapUtils'
 import mapApp from '../INITMAP'
-import { createIconElement, closeOverlay, myStyle, removeAllEventLinstener } from './public'
+import { myStyle, removeAllEventLinstener } from './public'
 import {createBox} from 'ol/interaction/Draw'
 
 export const boxDrawing = {

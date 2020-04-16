@@ -16,7 +16,9 @@ export const drawFeature = {
       source: new VectorSource({wrapX:false})
     })
     layer.type = 'vector'
-    initMap.map.addLayer(layer);
+    debugger
+    const mapApp = initMap
+    mapApp.map.addLayer(layer);
     this.keys[type] = {
       layer: layer,
       source: layer.getSource()

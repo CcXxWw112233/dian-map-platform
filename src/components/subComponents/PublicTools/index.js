@@ -1,20 +1,20 @@
 import React from 'react'
 import styles from './index.less'
-import mapMain from '../../../utils/INITMAP'
-import { drawFeature ,MyOverlay ,formatArea,formatLength} from '../../../utils/mapUtils'
-import { fullScreen,exitScreen } from '../../../utils/utils'
+import mapMain from 'utils/INITMAP'
+import { drawFeature ,MyOverlay ,formatArea,formatLength} from 'utils/mapUtils'
+import { fullScreen,exitScreen } from 'utils/utils'
 import { always } from 'ol/events/condition'
 import {DragZoom} from 'ol/interaction';
 import {Circle as CircleStyle, Fill, Stroke, Style ,Icon} from 'ol/style';
 import {createBox} from 'ol/interaction/Draw'
 
 
-import { lineDrawing } from '../../../utils/drawing/lineDrawing'
-import { pointDrawing } from '../../../utils/drawing/pointDrawing'
-import { polygonDrawing } from '../../../utils/drawing/polygonDrawing'
-import { circleDrawing } from '../../../utils/drawing/circleDrawing'
-import { boxDrawing } from '../../../utils/drawing/boxDrawing'
-import { myZoomIn, myZoomOut, myFullScreen, myDragZoom } from '../../../utils/drawing/public'
+import { lineDrawing } from 'utils/drawing/lineDrawing'
+import { pointDrawing } from 'utils/drawing/pointDrawing'
+import { polygonDrawing } from 'utils/drawing/polygonDrawing'
+import { circleDrawing } from 'utils/drawing/circleDrawing'
+import { boxDrawing } from 'utils/drawing/boxDrawing'
+import { myZoomIn, myZoomOut, myFullScreen, myDragZoom } from 'utils/drawing/public'
 
 export default class PublicTools extends React.Component {
   constructor(props){

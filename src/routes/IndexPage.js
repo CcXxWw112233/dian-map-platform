@@ -1,6 +1,7 @@
 import React from 'react';
 import { connect } from 'dva';
 import styles from './IndexPage.css';
+import 'antd/dist/antd.css'
 import LayerMap from '../components/maps'
 import ChangeBaseMap from '../components/subComponents/ChangeBaseMap/index'
 import { ChangeMap } from '../utils/utils'
@@ -8,6 +9,8 @@ import PublicTools from '../components/subComponents/PublicTools/index'
 
 import { getMyPosition } from '../utils/getMyPosition'
 import axios from '../services/index'
+
+import ToolBar from 'components/ToolBar'
 
 
 
@@ -84,7 +87,8 @@ class IndexPage extends React.Component{
         {/* 切换底图组件 */}
         <ChangeBaseMap onChange={this.changeMap}/>
         {/* 工具栏 */}
-        <PublicTools></PublicTools>
+        {/* <PublicTools></PublicTools> */}
+        <ToolBar></ToolBar>
 
       </div>
     )
