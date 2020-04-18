@@ -113,32 +113,15 @@ class IndexPage extends React.Component{
   }
   render(){
     const { draw_visible } = this.state
-    const { children } = this.props
+    const { children, aa } = this.props
     return (
       <div className={styles.normal}>
-        {/* 地图主体 */}
-        <LayerMap onLoad={this.MapOnload}/>
-        {/* 切换底图组件 */}
-        {/* <ChangeBaseMap onChange={this.changeMap}/> */}
-        <LayerControl></LayerControl>
-        {/* 工具栏 */}
-        <ToolBar></ToolBar>
-        <Location></Location>
-        <div style={{ width: '300px', height:'100%',position:'absolute', top: '0px', left:draw_visible?0 : -300, backgroundColor:'#fff'}}>
+          <div style={{ width: '300px', height:'100%',position:'absolute', top: '0px', left:draw_visible?0 : -300, backgroundColor:'#fff'}}>
           <div style={{ width:'100%',height:'100%'}}>
            {children}
           </div>
           <div style={{ width:'28px', height:'72px', position:'absolute', bottom: '10px', left: '100%', backgroundColor:'#EFF0EF'}} onClick={this.showDrawer}></div>
         </div>
-        {/* <Drawer
-          title="Basic Drawer"
-          placement={this.state.placement}
-          closable={false}
-          onClose={this.onClose}
-          visible={this.state.visible}
-          mask={false}
-        >
-        </Drawer> */}
       </div>
     )
   }

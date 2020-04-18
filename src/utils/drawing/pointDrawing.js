@@ -11,7 +11,6 @@ export const pointDrawing = {
   isActive: false,
   linsteners: {},
   createDrawing(){
-    debugger
     if (!this.drawing) {
       this.drawing = drawFeature.addDraw(false, 'Point' , new Style({
         image: new CircleStyle({

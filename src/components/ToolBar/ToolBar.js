@@ -82,12 +82,13 @@ export default class ToolBar extends PureComponent {
       },{
         name: '缩小',
         key: 'zoomOut',
-        icon: 'icon-icon-cemian'
+        icon: 'icon-icon-cemian',
+        callBakFn: myZoomOut.bind(myZoomOut)
       },{
         name: '框选区域放大',
         key: 'zoomIn2',
         icon: 'icon-icon-cemian',
-        callBakFn: myZoomOut.bind(myZoomOut)
+        callBakFn: myDragZoom.setVal.bind(myDragZoom)
       }]
     },{
       name: '全屏',
