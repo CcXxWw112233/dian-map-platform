@@ -15,6 +15,7 @@ const initMap = {
         target: mapId,
         view: this.initView()
       })
+      window.map = this.map
       // 回调
       resolve({map:this.map,view:this.view});
     })

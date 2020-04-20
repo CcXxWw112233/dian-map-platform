@@ -1,0 +1,6 @@
+{
+  "name": "CityPanel",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./CityPanel.js"
+}

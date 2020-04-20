@@ -1,0 +1,132 @@
+.wrap {
+  position: absolute;
+  top: 10px;
+  left: 370px;
+  width: 404px;
+  height: 320px;
+  padding: 12px;
+  background:rgba(255,255,255,1);
+  border-radius:4px;
+  font-size: 12px;
+  .cityHeader {
+    position: relative;
+    line-height: 36px;
+    border-bottom: 1px solid #cbcccd;
+    text-align: left;
+    font-size: 14px;
+  }
+  .cityCurrent {
+    font-size: 14px;
+    font-weight: 700;
+  } 
+  .cityPanelClose {
+    position: absolute;
+    right: 0;
+    cursor: pointer;
+    font-size: 1.2em;
+  }
+  .cityList {
+    overflow: hidden;
+    margin-top: 5px;
+    margin-bottom: 6px;
+    padding: 0;
+  }
+  li {
+    list-style: none;
+  }
+  .cityList li {
+    float: left;
+    margin-right: 10px;
+    color: #42a5f5;
+    cursor: pointer;
+  }
+  .cityPCTitle {
+    width: 48%;
+    display: inline-block;
+    border: 1px solid #cbcccd;
+    border-bottom: none;
+    border-radius: 2px;
+    cursor: pointer;
+  }
+  .cityPCTitle span {
+    width: 50%;
+    display: inline-block;
+    text-align: center;
+    border-bottom: 1px solid #cbcccd;
+    cursor: pointer;
+    background-color: #f7f7f7;
+  }
+  .cityPCTitle .citySelet {
+    background-color: #fff;
+    border-bottom: none;
+  }
+  .citySearch {
+    width: 48%;
+    margin-left: 4%;
+    display: inline-block;
+    position: relative;
+  }
+  .citySearch input {
+    border: 1px solid #cbcccd;
+    padding: 5px 0 5px 24px;
+    width: 100%;
+    border-radius: 2px;
+    height: 25px;
+  }
+  .citySearchLogo {
+    left: 6px;
+    top: 5px;
+    position: absolute;
+  }
+  .cityProvinceLetter {
+    margin-top: 10px;
+    white-space: normal;
+    height: 20px;
+    padding: 0;
+  }
+  .cityProvinceLetter li {
+    display: inline-block;
+    background-color: #F5F5F5;
+    margin-left: 6px;
+    cursor: pointer;
+    line-height: 18px;
+    width: 18px;
+    text-align: center;
+    color: #231f1f;
+  }
+  .slimScrollDiv {
+    position: relative;
+    overflow: hidden;
+    width: auto;
+    height: 140px;
+    font-size: 12px;
+  }
+  .cityList dl {
+    width: auto;
+    height: 100%;
+    margin: 4px 0;
+    position: relative;
+    overflow-y: scroll;
+  }
+  .cityList dt {
+    float: left;
+    font-weight: 700;
+    line-height: 20px;
+  }
+  .cityList dd {
+    white-space: normal;
+    line-height: 20px;
+    margin-bottom: 8px;
+    display: block;
+    margin-inline-start: 40px;
+    display: table;
+  }
+  .cityList dd li {
+    display: inline-block;
+    margin-right: 9px;
+    cursor: pointer;
+    color: #999;
+    white-space: normal;
+    line-height: 20px;
+  }
+}

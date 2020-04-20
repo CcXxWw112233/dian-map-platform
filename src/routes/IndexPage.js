@@ -10,9 +10,8 @@ import PublicTools from '../components/subComponents/PublicTools/index'
 import { getMyPosition } from '../utils/getMyPosition'
 import axios from '../services/index'
 
-import { ToolBar, Location, LayerControl } from 'components/index'
+import { ToolBar, Location, LayerControl, Sider, Search, CityPanel } from 'components/index'
 
-import { Drawer } from 'antd'
 
 
 
@@ -41,15 +40,6 @@ class IndexPage extends React.Component{
     this.setState({
       draw_visible: !draw_visible
     })
-    // if (this.state.left === '0px') {
-    //   this.setState({
-    //     left: '-300px'
-    //   })
-    // } else {
-    //   this.setState({
-    //     left: '0px'
-    //   })
-    // }
   }
   onClose = () => {
     this.setState({
@@ -112,8 +102,6 @@ class IndexPage extends React.Component{
     ChangeMap(val,layers,map,showkeys);
   }
   render(){
-    const { draw_visible } = this.state
-    const { children } = this.props
     return (
       <div className={styles.normal}>
         {/* 地图主体 */}
@@ -124,21 +112,10 @@ class IndexPage extends React.Component{
         {/* 工具栏 */}
         <ToolBar></ToolBar>
         <Location></Location>
-        <div style={{ width: '300px', height:'100%',position:'absolute', top: '0px', left:draw_visible?0 : -300, backgroundColor:'#fff'}}>
-          <div style={{ width:'100%',height:'100%'}}>
-           {children}
-          </div>
-          <div style={{ width:'28px', height:'72px', position:'absolute', bottom: '10px', left: '100%', backgroundColor:'#EFF0EF'}} onClick={this.showDrawer}></div>
-        </div>
-        {/* <Drawer
-          title="Basic Drawer"
-          placement={this.state.placement}
-          closable={false}
-          onClose={this.onClose}
-          visible={this.state.visible}
-          mask={false}
-        >
-        </Drawer> */}
+        <Sider width={360} >
+          <Search></Search>
+        </Sider>
+        {/* <CityPanel></CityPanel> */}
       </div>
     )
   }
