@@ -2,7 +2,7 @@ export const getBaseUrl = () => {
   let NODE_ENV = process.env.NODE_ENV ;
   if(NODE_ENV === 'development'){
     return {
-      API_URL: 'http://192.168.1.33',
+      API_URL: 'http://60.205.252.199/api',
       geoserver:""
     }
   }

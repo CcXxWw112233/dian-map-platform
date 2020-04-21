@@ -30,8 +30,8 @@ const Location = () => {
   )
 }
 
-Location.PropTypes = {
-  options: PropTypes.object
-}
+// Location.PropTypes = {
+//   options: PropTypes.object
+// }
 
 export default Location

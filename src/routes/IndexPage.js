@@ -6,6 +6,7 @@ import LayerMap from "../components/maps";
 import { ChangeMap } from "../utils/utils";
 
 import { getMyPosition } from "../utils/getMyPosition";
+import PublicData from '../pages/publicMapData/publickMapData'
 import { Tabs } from "antd";
 import {
   ToolBar,
@@ -69,7 +70,7 @@ class IndexPage extends React.Component {
     // 渲染icon等;
     getMyPosition.drawPosition();
     // 启动监听--移动端才启用监听
-    if (AMap.Browser.mobile) {
+    if (AMap && AMap.Browser.mobile) {
       alert("当前是手机端页面，将启动移动位置更新");
       this.addWatchPosition();
     }
@@ -117,7 +118,7 @@ class IndexPage extends React.Component {
               项目踏勘
             </TabPane>
             <TabPane tab={<span>公共数据</span>} key="2">
-              公共数据
+              <PublicData/>
             </TabPane>
             <TabPane tab={<span>远程协作</span>} key="3">
               远程协作
