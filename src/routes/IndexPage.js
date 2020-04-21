@@ -6,7 +6,7 @@ import LayerMap from "../components/maps";
 import { ChangeMap } from "../utils/utils";
 
 import { getMyPosition } from "../utils/getMyPosition";
-import PublicData from '../pages/publicMapData/publickMapData'
+import PublicData from '../pages/publicMapData/publicMapData'
 import { Tabs } from "antd";
 import {
   ToolBar,
