@@ -7,6 +7,7 @@ const instance = axios.create({
 })
 
 instance.interceptors.request.use(config => {
+  console.log(config)
   return config ;
 })
 
@@ -14,4 +15,14 @@ instance.interceptors.response.use(config => {
   return config ;
 })
 
-export default instance ;
+let request = (method, url, data, header)=>{
+  return instance({
+    method,
+    url,
+    data,
+    headers:{
+      ...header
+    }
+  })
+}
+export {request}

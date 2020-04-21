@@ -36,7 +36,7 @@ export default class LayerControl extends PureComponent {
             <div className={style.layerItem} key="google">
               <p className={style.layerName}>谷歌卫星</p>
             </div>
-            <div className={style.layerItem} key="google">
+            <div className={style.layerItem} key="gaode">
               <p className={style.layerName}>高德地图</p>
             </div>
             <div className={style.layerItem}>

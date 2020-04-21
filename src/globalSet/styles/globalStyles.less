@@ -4,5 +4,28 @@
   font-family: iconfont;
   font-style: normal;
 }
+// slider默认的背景色
+@bg_color_default: #f8f8f7;
+// 标题的默认浅色背景
+@bg_color_shallow:rgba(216,216,216,1);
+// 浅色的文字颜色，包括placeholder
+@color_shallow: rgba(0,0,0,0.25);
+// 子标题或者属性的颜色
+@color_subattr: rgba(0,0,0,0.45);
+// 默认的文字颜色
+@color_default: rgba(0,0,0,0.65);
+// 项目主题色
+@color_theme:#0D4FF7;
+// 比较重要的颜色
+@color_important: rgba(0,0,0,0.85);
 
-// @color_1:　red
+// 默认文字字体
+@default_font: Arial,sans-serif;
+// 默认的文字大小
+@font_normal:normal 14px @default_font;
+// 标题的文字大小
+@font_title:normal bold 18px @default_font;
+
+body{
+  font-family: @default_font;
+}
