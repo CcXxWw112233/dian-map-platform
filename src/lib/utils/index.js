@@ -1,5 +1,7 @@
 import { Feature } from 'ol'
 import { LineString ,Point ,Polygon } from 'ol/geom'
+import Source from 'ol/source/Source';
+import Layer from 'ol/layer/Layer';
 
 // 新建feature
 export const addFeature = function(type, data){
@@ -27,7 +29,11 @@ export const addFeature = function(type, data){
     return feature ;
 }
 
-// 添加交互
-export const drawInteraction = function(){
+// 添加source
+export const VectorSource = function(data){
+    return new Source({...data})
+}
 
+export const VectorLayer = function(data){
+    return new Layer({...data})
 }
