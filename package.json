@@ -3,8 +3,7 @@
   "scripts": {
     "start": "cross-env NODE_ENV=development roadhog server",
     "build": "cross-env NODE_ENV=production roadhog build",
-    "lint": "eslint --ext .js src test",
-    "precommit": "npm run lint"
+    "lint": "eslint --ext .js src test"
   },
   "dependencies": {
     "antd": "^4.1.3",
