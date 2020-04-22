@@ -40,3 +40,10 @@
   font-size: 12px;
   box-shadow: 1px 1px 5px #ddd,-1px -1px 5px #ddd;
 }
+:global(.panels .ant-tabs-content){
+  max-height: 100%;
+  flex: 1;
+}
+:global(.panels .ant-tabs-tabpane){
+  height: 100%;
+}

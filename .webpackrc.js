@@ -4,7 +4,8 @@ import { resolve } from 'path'
 export default {
   define:{
     'process.env':{
-      NODE_ENV: process.env.NODE_ENV
+      NODE_ENV: process.env.NODE_ENV,
+      NODE_ENVI: process.env.NODE_ENVI
     }
   },
   proxy: {
