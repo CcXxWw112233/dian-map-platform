@@ -38,7 +38,6 @@ class PlotDraw extends Observable {
 			source: this.featureSource,
 			// zIndex:999
     });
-    debugger
 		this.drawOverlay.setStyle(this.style);
 		this.setMap(map);
 	}

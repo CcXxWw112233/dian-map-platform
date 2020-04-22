@@ -30,13 +30,13 @@ export function getCircleCenterOfThreePoints(pnt1, pnt2, pnt3) {
 };
 
 export function getIntersectPoint(pntA, pntB, pntC, pntD) {
-    if (pntA[1] == pntB[1]) {
+    if (pntA[1] === pntB[1]) {
         var f = (pntD[0] - pntC[0]) / (pntD[1] - pntC[1]);
         var x = f * (pntA[1] - pntC[1]) + pntC[0];
         var y = pntA[1];
         return [x, y];
     }
-    if (pntC[1] == pntD[1]) {
+    if (pntC[1] === pntD[1]) {
         var e = (pntB[0] - pntA[0]) / (pntB[1] - pntA[1]);
         x = e * (pntC[1] - pntA[1]) + pntA[0];
         y = pntC[1];
@@ -299,13 +299,13 @@ export function getBinomialFactor(n, index) {
 export function getFactorial(n) {
     if (n <= 1)
         return 1;
-    if (n == 2)
+    if (n === 2)
         return 2;
-    if (n == 3)
+    if (n === 3)
         return 6;
-    if (n == 4)
+    if (n === 4)
         return 24;
-    if (n == 5)
+    if (n === 5)
         return 120;
     var result = 1;
     for (var i = 1; i <= n; i++)
@@ -339,11 +339,11 @@ export function getQBSplinePoints(points) {
 };
 
 export function getQuadricBSplineFactor(k, t) {
-    if (k == 0)
+    if (k === 0)
         return Math.pow(t - 1, 2) / 2;
-    if (k == 1)
+    if (k === 1)
         return (-2 * Math.pow(t, 2) + 2 * t + 1) / 2;
-    if (k == 2)
+    if (k === 2)
         return Math.pow(t, 2) / 2;
     return 0;
 };

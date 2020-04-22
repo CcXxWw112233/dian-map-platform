@@ -1,5 +1,7 @@
 import React from 'react'
 import 'ol/ol.css';
+import 'utils/plot2ol/css/ol.css'
+import 'utils/plot2ol/css/plottingol.less'
 import mapSource from '../utils/mapSource'
 import INITMAP from '../utils/INITMAP'
 

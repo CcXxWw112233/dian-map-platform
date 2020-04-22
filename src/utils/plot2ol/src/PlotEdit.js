@@ -42,6 +42,7 @@ class PlotEdit extends Observable {
 
 	}
 	initHelperDom() {
+    debugger
 		if (!this.map || !this.activePlot) {
 			return;
 		}
