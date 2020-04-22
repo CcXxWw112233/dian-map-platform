@@ -29,3 +29,22 @@
 body{
   font-family: @default_font;
 }
+.autoScrollY{
+  overflow-x: hidden;
+  overflow-y: auto;
+  &:hover{
+      &::-webkit-scrollbar-thumb{
+          display: block;
+      }
+  }
+  &::-webkit-scrollbar {
+      background: transparent ;
+      width: 4px;
+      height: 0px;
+  }
+  &::-webkit-scrollbar-thumb{
+      background-color: rgba(0,0,0,0.15);
+      border-radius: 50px;
+      display: none;
+  }
+}
