@@ -15,11 +15,12 @@ class MarkerStyle extends FTStyle {
     */
     constructor() {
         super();
+        debugger
         this._style = {
             image: {
                 //--ol.Image 的全部属性
                 icon: {
-                    src: './assets/marker-begin.png',
+                    src: require('./assets/marker-begin.png'),
                     offset: [0, 0],
                     opacity: 1,
                     scale: 1,
