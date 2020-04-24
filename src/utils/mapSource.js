@@ -1,5 +1,6 @@
 import TileLayer from 'ol/layer/Tile'
 import XYZ from 'ol/source/XYZ';
+import {baseConfig} from '../globalSet/config'
 
 export default {
   baseMaps: {
@@ -37,7 +38,7 @@ export default {
           mid:"td_img_tile",
           source: new XYZ({
             crossOrigin:"anonymous",
-            url: "http://t{0-7}.tianditu.gov.cn/DataServer?T=img_w&x={x}&y={y}&l={z}&tk=56e269a51b3c1af54dc6042407d8fdb3",
+            url: `http://t{0-7}.tianditu.gov.cn/DataServer?T=img_w&x={x}&y={y}&l={z}&tk=${baseConfig.TIANDITU_APP_KEY}`,
             projection: "EPSG:3857"
           })
         })
@@ -50,7 +51,7 @@ export default {
           mid:"td_roadLabel_tile",
           source: new XYZ({
             crossOrigin:"anonymous",
-            url: "http://t{0-7}.tianditu.gov.cn/DataServer?T=cta_w&x={x}&y={y}&l={z}&tk=56e269a51b3c1af54dc6042407d8fdb3",
+            url: `http://t{0-7}.tianditu.gov.cn/DataServer?T=cta_w&x={x}&y={y}&l={z}&tk=${baseConfig.TIANDITU_APP_KEY}`,
             projection: "EPSG:3857"
           })
         })
@@ -62,7 +63,7 @@ export default {
           mid:"td_vec_tile",
           source: new XYZ({
             crossOrigin:"anonymous",
-            url: "http://t{0-7}.tianditu.gov.cn/DataServer?T=vec_w&x={x}&y={y}&l={z}&tk=56e269a51b3c1af54dc6042407d8fdb3",
+            url: "http://t{0-7}.tianditu.gov.cn/DataServer?T=vec_w&x={x}&y={y}&l={z}&tk=${baseConfig.TIANDITU_APP_KEY}",
             projection: "EPSG:3857"
           })
         })
@@ -74,7 +75,7 @@ export default {
           mid:"td_ter_tile",
           source: new XYZ({
             crossOrigin:"anonymous",
-            url: "http://t{0-7}.tianditu.gov.cn/DataServer?T=ter_w&x={x}&y={y}&l={z}&tk=56e269a51b3c1af54dc6042407d8fdb3",
+            url: `http://t{0-7}.tianditu.gov.cn/DataServer?T=ter_w&x={x}&y={y}&l={z}&tk=${baseConfig.TIANDITU_APP_KEY}`,
             projection: "EPSG:3857"
           })
         })
@@ -86,7 +87,7 @@ export default {
           mid:"td_label_tile",
           source: new XYZ({
             crossOrigin:"anonymous",
-            url: "http://t{0-7}.tianditu.gov.cn/DataServer?T=cva_w&x={x}&y={y}&l={z}&tk=56e269a51b3c1af54dc6042407d8fdb3",
+            url: `http://t{0-7}.tianditu.gov.cn/DataServer?T=cva_w&x={x}&y={y}&l={z}&tk=${baseConfig.TIANDITU_APP_KEY}`,
             projection: "EPSG:3857"
           })
         })
