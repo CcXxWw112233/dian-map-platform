@@ -2,6 +2,7 @@ import React from 'react'
 import styles from './publicMapData.less'
 import DataItem from './DataItem'
 import  PublicDataActions  from '../../lib/components/PublicData'
+import globalStyle from '../../globalSet/styles/globalStyles.less'
 const MenuData = require('./public_data.json')
 
 export default class PublicData extends React.Component{
@@ -17,7 +18,7 @@ export default class PublicData extends React.Component{
     }
     render(){
         return (
-        <div className={styles.publicBox}>
+        <div className={styles.publicBox + ` ${globalStyle.autoScrollY}`}>
             {
                 this.AllCheckData.map((item ,index)=>{
                     return (
