@@ -22,15 +22,20 @@
 }
 .layerItems {
   margin-top: 10px;
+  display: -ms-flexbox;
   display: flex;
+  -ms-flex-pack: justify;
   justify-content: space-between;
+  white-space: nowrap;
+  overflow-y: hidden;
 }
 
 .layerItem {
-  width:60px;
-  height:60px;
-  background:#EFF0EF;
-  border-radius:4px;
+  width: 60px;
+  height: 60px;
+  background: #EFF0EF;
+  border-radius: 4px;
+  margin: 0 5px 0 0;
 }
 .layerItem .active {
   border:2px solid rgba(23,105,255,1);

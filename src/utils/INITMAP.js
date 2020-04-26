@@ -2,9 +2,14 @@ import Map from 'ol/Map';
 import View from 'ol/View';
 import {defaults as defaultInteractions, DragRotateAndZoom} from 'ol/interaction';
 
+import TileLayer from "ol/layer/Tile";
+import XYZ from "ol/source/XYZ";
+
 const initMap = {
   map : null,
   view: null,
+  baseMaps:[],
+  operationLayer:[],
   init: function (mapId) {
     return new Promise((resolve,reject)=>{
       this.map = new Map({
@@ -29,6 +34,27 @@ const initMap = {
       maxZoom: 18
     })
     return this.view ;
+  },
+  addLayer: function(layer, layerArr) {
+    const mylayer = this.findLayerById(layer.id, layerArr)
+    if (!mylayer) {
+      this.map.addLayer(layer)
+      layerArr.push(layer)
+    }
+  },
+  findLayerById: function (id, layerArr = []) {
+    layerArr.filter(layer => {
+      return layer.id === id
+    })
+  },
+  createTilelayer: function(options) {
+    return new TileLayer({
+      id: options.id,
+      source: new XYZ({
+        crossOrigin: "anonymous",
+        url: options.url
+      })
+    })
   }
 }
 export default initMap;

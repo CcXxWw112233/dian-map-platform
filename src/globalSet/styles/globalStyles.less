@@ -48,3 +48,22 @@ body{
       display: none;
   }
 }
+.autoScrollX{
+  overflow-x: auto;
+  overflow-y: hidden;
+  &:hover{
+      &::-webkit-scrollbar-thumb{
+          display: block;
+      }
+  }
+  &::-webkit-scrollbar {
+      background: transparent ;
+      width: 0px;
+      height: 4px;
+  }
+  &::-webkit-scrollbar-thumb{
+      background-color: rgba(0,0,0,0.15);
+      border-radius: 50px;
+      display: none;
+  }
+}

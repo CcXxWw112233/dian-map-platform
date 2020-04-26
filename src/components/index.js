@@ -1,9 +1,9 @@
 import DropOption from './DropOption'
 import ToolBar from './ToolBar'
 import Location from './Location'
-import LayerControl from './LayerControl'
+import BasemapGallery from './BasemapGallery/BasemapGallery'
 import Sider from './Sider'
 import Search from './Search'
 import CityPanel from './CityPanel'
 
-export { DropOption, ToolBar, Location, LayerControl, Sider, Search, CityPanel }
+export { DropOption, ToolBar, Location, BasemapGallery, Sider, Search, CityPanel }

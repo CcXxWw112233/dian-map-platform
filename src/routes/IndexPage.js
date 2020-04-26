@@ -11,7 +11,7 @@ import { Tabs } from "antd";
 import {
   ToolBar,
   Location,
-  LayerControl,
+  BasemapGallery,
   Sider,
   Search,
   CityPanel,
@@ -107,7 +107,7 @@ class IndexPage extends React.Component {
         <LayerMap onLoad={this.MapOnload} />
         {/* 切换底图组件 */}
         {/* <ChangeBaseMap onChange={this.changeMap}/> */}
-        <LayerControl></LayerControl>
+        <BasemapGallery></BasemapGallery>
         {/* 工具栏 */}
         <ToolBar></ToolBar>
         <Location></Location>

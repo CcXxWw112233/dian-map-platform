@@ -1,0 +1,6 @@
+{
+  "name": "BasemapGallery",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./BasemapGallery.js"
+}
