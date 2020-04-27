@@ -1,4 +1,5 @@
 import axios from 'axios'
+import originJsonp from "jsonp"
 import { getBaseUrl } from './config'
 
 const instance = axios.create({
@@ -25,4 +26,37 @@ let request = (method, url, data, header)=>{
     }
   })
 }
-export {request}
+const strParam = data => {
+  let url = "";
+  for (var k in data) {
+    let value = data[k] !== undefined ? data[k] : "";
+    url += "&" + k + "=" + encodeURIComponent(value);
+  }
+  return url ? url.substring(1) : "";
+}
+
+// geoserver wfs服务获取方法
+ const getFeature = (url, options) => {
+  const myOptions = {
+    service: "WFS",
+    version: "1.0.0",
+    request: "GetFeature",
+    outputFormat: "text/javascript",
+    format_options: "callback:cb",
+  };
+  const myUrl = url + (url.indexOf("?") < 0 ? "?" : "&") + strParam({...myOptions, ...options});
+  const opts = {
+    param: "callback",
+    name: "cb",
+  };
+  return new Promise((resolve, reject) => {
+    originJsonp(myUrl, opts, (err, data) => {
+      if (!err) {
+        resolve(data);
+      } else {
+        reject(err);
+      }
+    });
+  });
+}
+export {request, getFeature}

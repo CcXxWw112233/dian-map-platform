@@ -3,7 +3,7 @@ export const getBaseUrl = () => {
   if(NODE_ENV === 'development'){
     return {
       API_URL: 'http://60.205.252.199/api',
-      geoserver:""
+      Geo_WFS:"https://map.di-an.com/geoserver/wfs"
     }
   }
   if(NODE_ENV === 'production'){

@@ -16,6 +16,7 @@ import {
   Search,
   CityPanel,
 } from "components/index";
+import Overlay from 'components/Overlay/Overlay'
 
 class IndexPage extends React.Component {
   constructor(props) {
@@ -131,6 +132,7 @@ class IndexPage extends React.Component {
           </div>
         </Sider>
         {/* <CityPanel></CityPanel> */}
+        <Overlay/>
       </div>
     );
   }

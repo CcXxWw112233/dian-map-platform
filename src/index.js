@@ -11,6 +11,7 @@ const app = dva();
 // 3. Model
 // app.model(require('./models/example').default);
 app.model(require('./models/maps').default)
+app.model(require('./models/overlay').default)
 // 4. Router
 app.router(require('./router').default);
 

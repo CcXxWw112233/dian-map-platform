@@ -12,7 +12,7 @@ const DropOption = ({
   const children = options.children
   const menu = children.map(item => (
     <Menu.Item key={item.key}
-    onClick={item.callBakFn}>
+    onClick={item.cb}>
     <MyIcon type={ item.icon }/>
     {item.name}
     </Menu.Item>
@@ -25,7 +25,7 @@ const DropOption = ({
   }
   else {
     return (
-    <Button style={{ border: 'none', padding: '4px 10px', cursor: 'pointer' }}  onClick={options.callBakFn}>
+    <Button style={{ border: 'none', padding: '4px 10px', cursor: 'pointer' }}  onClick={options.cb}>
       <MyIcon type={ icon }/>
       {name}
       </Button>

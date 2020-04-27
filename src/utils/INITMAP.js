@@ -9,7 +9,7 @@ const initMap = {
   map : null,
   view: null,
   baseMaps:[],
-  operationLayer:[],
+  operationLayers:[],
   init: function (mapId) {
     return new Promise((resolve,reject)=>{
       this.map = new Map({
@@ -40,9 +40,11 @@ const initMap = {
     if (!mylayer) {
       this.map.addLayer(layer)
       layerArr.push(layer)
+    } else {
+      console.warn('已存在该ID图层！')
     }
   },
-  findLayerById: function (id, layerArr = []) {
+  findLayerById: function (id, layerArr = this.operationLayers) {
     layerArr.filter(layer => {
       return layer.id === id
     })
@@ -55,6 +57,9 @@ const initMap = {
         url: options.url
       })
     })
+  },
+  removeLayer: function() {
+    
   }
 }
 export default initMap;

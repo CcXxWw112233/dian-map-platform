@@ -1,4 +1,5 @@
 import mapApp from "../INITMAP";
+import React from 'react'
 import { MyOverlay, drawFeature } from "../mapUtils";
 import { Circle as CircleStyle, Fill, Style, Text } from "ol/style";
 import {
@@ -14,7 +15,7 @@ export const textDrawing = {
   el: null,
   isActive: false,
   linsteners: {},
-  createDrawing() {
+  createDrawing({dispatch}) {
     if (!this.drawing) {
       this.drawing = drawFeature.addDraw(
         false,
@@ -35,6 +36,32 @@ export const textDrawing = {
           }),
         })
       );
+      // class MyDiv extends React.Component{
+      //   state = {
+      //     name:"1112222"
+      //   }
+
+      //   handleClick = ()=>{
+      //     this.setState({
+      //       name:"点击了我"
+      //     })
+      //   }
+      //   render(){
+      //     let { name } = this.state;
+      //     return (
+      //       <div className='test' onClick={this.handleClick}>
+      //         {name}
+      //       </div>
+      //     )
+      //   }
+      // }
+      // dispatch({
+      //   type: 'overlay/updateDatas',
+      //   payload:{
+      //     show:true,
+      //     childComponet: <MyDiv/>
+      //   }
+      // })
     }
     if (!this.isActive) {
       mapApp.map.addInteraction(this.drawing);
@@ -53,7 +80,7 @@ export const textDrawing = {
     }
     return this.overlays;
   },
-  addEventLinstener() {
+  addEventLinstener({dispatch, overlay}) {
     const start = this.drawing.on("drawstart", (e) => {
       let point = e.feature;
       let coordinate = point.getGeometry().getCoordinates();
