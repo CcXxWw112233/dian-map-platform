@@ -1,5 +1,9 @@
 .wrap {
   font-family: PingFangSC-Semibold, PingFang SC;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #fafafa;
   .gobackBtn {
     border-radius: 22px;
     width: 22px;
@@ -10,9 +14,6 @@
   .title {
     width: 100%;
     height: 240px;
-    position: absolute;
-    top: 0;
-    left: 0;
     background: rgba(0, 0, 0, 0.09);
     background: linear-gradient(
       180deg,
@@ -21,35 +22,122 @@
     );
     p {
       margin: 0;
-      padding: 0;
+      padding: 0 0 0 18px;
+      text-align: left;
     }
     .name {
       font-size: 24px;
-      font-weight: 600;
       color: rgba(246, 248, 246, 1);
       line-height: 33px;
-      position: absolute;
-      left: 18px;
-      bottom: 70px;
     }
     .date {
       font-size: 14px;
-      font-weight: 600;
       color: rgba(246, 248, 246, 1);
       line-height: 20px;
-      position: absolute;
-      left: 18px;
-      bottom: 47px;
     }
     .tab {
       font-size: 16px;
-      font-weight: 600;
       line-height: 22px;
       margin: 0 5px;
     }
     .slect {
       color: #4090f7;
       border-bottom: 2px solid #4090f7;
+    }
+  }
+  .numberIcon {
+    width: 26px;
+    height: 26px;
+    background: rgba(216, 216, 216, 1);
+    border-radius: 13px;
+    padding: 2px;
+  }
+  .text {
+    font-size: 18px;
+    color: rgba(0, 0, 0, 1);
+    line-height: 25px;
+    margin-left: 10px;
+  }
+  .uploadIcon {
+    width: 48px;
+    height: 48px;
+    border-radius: 4px;
+    display: table;
+    span {
+      display: table-cell;
+      vertical-align: middle;
+    }
+  }
+  .paper {
+    // 图纸
+    background: rgba(181, 245, 236, 1);
+  }
+  .interview {
+    // 访谈
+    background: rgba(255, 231, 186, 1);
+  }
+  .pic {
+    // 图片
+    background: rgba(255, 255, 184, 1);
+  }
+  .video {
+    // 视频
+    background: rgba(217, 247, 190, 1);
+  }
+  .word {
+    // 文档
+    background: rgba(186, 231, 255, 1);
+  }
+  .annotate {
+    // 批注
+    background: rgba(214, 228, 255, 1);
+  }
+  .plotting {
+    // 标绘
+    background: rgba(239, 219, 255, 1);
+  }
+  .uploadItem {
+    display: flex;
+    width: 336px;
+    height: 56px;
+    background: rgba(0, 0, 0, 0.06);
+    margin-bottom: 4px;
+    padding: 4px;
+  }
+  .uploadDetail {
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.65);
+    line-height: 20px;
+    margin: 3px 0 0 10px;
+  }
+  .scoutingItem {
+    margin-top: 10px;
+    background: "#fff";
+    border: 0;
+    p {
+      text-align: left;
+      margin: 0;
+    }
+    i {
+      margin: 0 4px;
+    }
+    :global {
+      .ant-collapse-content-box {
+        padding: 12px;
+        // padding-top: 0 !important;
+      }
+    }
+  }
+  .itemDetail {
+    margin: 0;
+    padding: 0;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #d9d9d9;
+    padding: 12px 0;
+  }
+  :global {
+    .ant-tabs-top-content {
+      height: 100%;
     }
   }
 }
