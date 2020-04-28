@@ -1,7 +1,9 @@
 import { Feature } from 'ol'
-import { LineString ,Point ,Polygon } from 'ol/geom'
-import Source from 'ol/source/Source';
-import Layer from 'ol/layer/Layer';
+import { LineString ,Point ,Polygon ,MultiLineString,MultiPoint,MultiPolygon} from 'ol/geom'
+import VectorSource from 'ol/source/Vector';
+import VectorLayer from 'ol/layer/Vector'
+import {GeoJSON,WKT} from 'ol/format';
+import { getCenter,getBottomLeft,getBottomRight,getTopLeft,getTopRight } from 'ol/extent'
 
 // 新建feature
 export const addFeature = function(type, data){
@@ -16,6 +18,15 @@ export const addFeature = function(type, data){
         if(type === 'Polygon'){
             return new Polygon(data ? data.coordinates: []);
         }
+        if(type === 'MultiLineString'){
+            return new MultiLineString(data ? data.coordinates : []);
+        }
+        if(type === 'MultiPoint'){
+            return new MultiPoint(data ? data.coordinates : []);
+        }
+        if(type === 'MultiPolygon'){
+            return new MultiPolygon(data ? data.coordinates : []);
+        }
     }
 
     let feature = new Feature({
@@ -29,11 +40,31 @@ export const addFeature = function(type, data){
     return feature ;
 }
 
-// 添加source
-export const VectorSource = function(data){
-    return new Source({...data})
+export const getExtent = function(feature){
+    let extent = feature.getGeometry().getExtent();
+    return extent;
 }
 
-export const VectorLayer = function(data){
-    return new Layer({...data})
+export const getPoint = function(extent,type = 'center'){
+    switch(type){
+        case 'center' : return getCenter(extent);
+        case 'topLeft' : return getTopLeft(extent);
+        default : return getCenter(extent); 
+    }
+}
+
+export const loadFeatureJSON = function(data ,type = 'WTK'){
+    if(type === 'WTK'){
+        return new WKT().readFeature(data);
+    }
+    return (new GeoJSON()).readFeature(data);
+}
+
+// 添加source
+export const Source = function(data){
+    return new VectorSource({...data})
+}
+
+export const Layer = function(data){
+    return new VectorLayer({...data})
 }
