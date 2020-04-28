@@ -1,3 +1,4 @@
+const jsons =
 {
     "data":[
         {
@@ -45,8 +46,24 @@
         {
             "name":"地籍地貌","icon":"icon-icon-yongdi","key":"6",
             "child":[
-                {"name":"地籍概况","icon":"","key":"map:landforms:basic"},
-                {"name":"农林耕地","icon":"","key":"map:landforms:forestry"}
+                {
+                    "name":"地籍概况","icon":"","key":"map:landforms:basic",
+                    "loadFeatureKeys":[
+                        // 水路路线图
+                        "lingxi:diji_sxss_polyline",
+                        // 水系设施图
+                        "lingxi:diji_sxss_polygon",
+                        // 居民点计划图
+                        "lingxi:plan_polygon"
+                    ]
+                },
+                {
+                    "name":"农林耕地","icon":"","key":"map:landforms:forestry",
+                    loadFeatureKeys:[
+                        // 农林耕种图
+                        "lingxi:diji_zbtz_polyline",
+                    ]
+                }
             ]
         },
         {
@@ -55,3 +72,5 @@
         }
     ]
 }
+
+export default jsons;

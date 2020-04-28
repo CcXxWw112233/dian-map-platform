@@ -38,7 +38,7 @@ export default class DataItem extends React.Component{
     }
     // 全选
     checkAllBox = (e)=>{
-        let { onChange } = this.props;
+        let { onChange,data } = this.props;
         let checked = e.target.checked;
         let allKey = [];
         if(checked){
@@ -51,23 +51,58 @@ export default class DataItem extends React.Component{
             checkedList: allKey,
             indeterminate: false
         })
-        onChange && onChange(allKey);
+        onChange && onChange(allKey ,data.key);
+    }
+    // 切换是否全选了
+    isAllCheck = (list)=>{
+        let allList = this.getAllKeys(),flag = false;
+        if(list.length === allList.length){
+            flag = true
+        }
+        else {
+            flag = false
+        }
+        this.setState({
+            checkAll: flag,
+            indeterminate: list.length !== 0 ?!flag :false
+        })
     }
     // 单个复选框选择状态
-    boxChange = (checkedList)=>{
+    boxChange = (check)=>{
         let { data = {} ,onChange } = this.props;
-        this.setState({
-            checkedList,
-            checkAll: checkedList.length === data.child.length,
-            indeterminate:!!checkedList.length && checkedList.length < data.child.length
-        })
-        onChange && onChange(checkedList);
+        let checked = check.target.checked;
+        let value = check.target.value;
+        if(checked){
+            this.setState({
+                checkedList: this.state.checkedList.concat([value])
+            },()=>{
+                // 更新全选
+                this.isAllCheck(this.state.checkedList);
+                onChange && onChange(this.state.checkedList,data.key);
+            })
+        }else{
+            let index = this.state.checkedList.findIndex((item) => item === value);
+            let list = [...this.state.checkedList];
+            list.splice(index ,1);
+            this.setState({
+                checkedList: list
+            },()=>{
+                this.isAllCheck(this.state.checkedList);
+                onChange && onChange(this.state.checkedList,data.key);
+            })
+        }
+        
+        
+        
+
+
     }
-    // 单选框
+    // 全选单选框
     getCheckBox = ()=>{
+        let { data } = this.props;
         let { indeterminate, checkAll } = this.state;
         return <Checkbox onChange={this.checkAllBox} 
-        indeterminate={indeterminate} checked={checkAll} onClick={event => {event.stopPropagation();}}/>
+        indeterminate={indeterminate} name={data.key} checked={checkAll} onClick={event => {event.stopPropagation();}}/>
     }
     render(){
         let { data } = this.props;
@@ -76,19 +111,19 @@ export default class DataItem extends React.Component{
             <div className={styles.publicMenuItem}>
                 <Collapse expandIconPosition='right'>
                     <Panel header={this.createIconHeader(data)} key={data.key} extra={this.getCheckBox()}>
-                        <Checkbox.Group style={{ width: '100%' }} onChange={this.boxChange} value={checkedList}>
+                        {/* <Checkbox.Group style={{ width: '100%' }}  value={checkedList}> */}
                             <Row>
                                 {data.child.length ? 
                                     data.child.map(item => {
                                         return (
                                             <Col span={8} key={item.key} style={{marginBottom:"1rem"}}>
-                                                <Checkbox value={item.key} checked={checkedList.indexOf(item.key) >= 0}>{item.name}</Checkbox>
+                                                <Checkbox value={item.key} name={data.key} onChange={this.boxChange} checked={checkedList.indexOf(item.key) >= 0}>{item.name}</Checkbox>
                                             </Col>
                                         )
                                     }):""
                                 }
                             </Row>
-                        </Checkbox.Group>
+                        {/* </Checkbox.Group> */}
                     </Panel>
                 </Collapse>
             </div>
