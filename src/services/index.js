@@ -16,6 +16,7 @@ instance.interceptors.response.use(config => {
   return config ;
 })
 
+// 公用的ajax请求方法。
 let request = (method, url, data, header)=>{
   return instance({
     method,
@@ -26,6 +27,8 @@ let request = (method, url, data, header)=>{
     }
   })
 }
+
+
 const strParam = data => {
   let url = "";
   for (var k in data) {
@@ -37,6 +40,7 @@ const strParam = data => {
 
 // geoserver wfs服务获取方法
  const getFeature = (url, options) => {
+   console.log(options)
   const myOptions = {
     service: "WFS",
     version: "1.0.0",

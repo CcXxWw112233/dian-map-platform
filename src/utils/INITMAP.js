@@ -6,11 +6,13 @@ import TileLayer from "ol/layer/Tile";
 import XYZ from "ol/source/XYZ";
 
 const initMap = {
+  status: null,
   map : null,
   view: null,
   baseMaps:[],
   operationLayers:[],
   init: function (mapId) {
+    this.status = 'rendering'
     return new Promise((resolve,reject)=>{
       this.map = new Map({
         interactions:defaultInteractions().extend([
@@ -20,6 +22,7 @@ const initMap = {
         target: mapId,
         view: this.initView()
       })
+      this.status = 'renderend'
       window.map = this.map
       // 回调
       resolve({map:this.map,view:this.view});
@@ -35,8 +38,8 @@ const initMap = {
     })
     return this.view ;
   },
-  addLayer: function(layer, layerArr) {
-    const mylayer = this.findLayerById(layer.id, layerArr)
+  addLayer: function(layer, layerArr = this.operationLayers) {
+    const mylayer = this.findLayerById(layer.get('id'), layerArr)
     if (!mylayer) {
       this.map.addLayer(layer)
       layerArr.push(layer)
@@ -46,7 +49,7 @@ const initMap = {
   },
   findLayerById: function (id, layerArr = this.operationLayers) {
     layerArr.filter(layer => {
-      return layer.id === id
+      return layer.get('id') === id
     })
   },
   createTilelayer: function(options) {
