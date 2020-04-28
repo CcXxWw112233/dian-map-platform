@@ -1,15 +1,14 @@
 export default {
-  namespace:"overlay",
-  state:{
+  namespace: "overlay",
+  state: {
     childComponet: null,
-    show:false
+    show: false,
+    // 。。。
   },
-  effects:{
-    
+  effects: {},
+  reducers: {
+    updateDatas(state, { payload }) {
+      return { ...state, ...payload };
+    },
   },
-  reducers:{
-    updateDatas(state,{payload}){
-      return {...state, ...payload}
-    }
-  },
-}
+};
