@@ -40,7 +40,6 @@ const strParam = data => {
 
 // geoserver wfs服务获取方法
  const getFeature = (url, options) => {
-   console.log(options)
   const myOptions = {
     service: "WFS",
     version: "1.0.0",
