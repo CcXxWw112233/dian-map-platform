@@ -3,6 +3,7 @@ import styles from './publicMapData.less'
 import DataItem from './DataItem'
 import  PublicDataActions  from '../../lib/components/PublicData'
 import globalStyle from '../../globalSet/styles/globalStyles.less'
+import publicData from '../../lib/components/PublicData'
 const MenuData = require('./public_data').default
 
 export default class PublicData extends React.Component{
@@ -35,17 +36,25 @@ export default class PublicData extends React.Component{
             let arr = this.getItems(oldVal,newVal);
             // 新增了哪些图层key
             let keys = this.getCheckBoxForDatas(arr);
-            console.log(keys, '新增了这些图层');
+            // console.log(keys, '新增了这些图层');
             // 获取数据，渲染元素
-            if(keys.length)
-            PublicDataActions.getPublicData({url:'',data:{typeName:keys[0]}});
-
+            if(keys.length){
+                keys.forEach(item => {
+                    // 加载所有的矢量图
+                    PublicDataActions.getPublicData({url:'',data:{ ...item }});
+                })
+            }
         }else if(newVal.length < oldVal.length){
             // 删除了需要显示的内容
             let arr = this.getItems(newVal,oldVal);
             // 删除了哪些图层key
             let keys = this.getCheckBoxForDatas(arr);
-            console.log(keys, '删除了这些图层');
+            // console.log(keys, '删除了这些图层');
+            if(keys.length){
+                // 删除勾选的选项-这里只需要传key，剔除其他属性
+                let a = keys.map(item => item.typeName);
+                PublicDataActions.removeFeatures(a)
+            }
         }
     }
     // 查找勾选和取消勾选对应的渲染key
@@ -68,7 +77,7 @@ export default class PublicData extends React.Component{
         }
 
     }
-    // 数据更新
+    // 勾选了复选框
     toggleViewPulicData = (val ,from)=>{
         // let old = val.length ? this.checkedParam[from] : [];
         let old = this.checkedParam[from];

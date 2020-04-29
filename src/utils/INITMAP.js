@@ -61,8 +61,10 @@ const initMap = {
       })
     })
   },
-  removeLayer: function() {
-    
+  removeLayer: function(layer) {
+    this.map.removeLayer(layer);
+    let index = this.operationLayers.findIndex(item => item.get('id') === layer.get('id'));
+    this.operationLayers.splice(index, 1);
   }
 }
 export default initMap;
