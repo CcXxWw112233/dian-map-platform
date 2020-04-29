@@ -14,12 +14,12 @@
     display: flex;
     flex-direction: column;
     margin-bottom: 16px;
-    background: linear-gradient(
-      180deg,
-      rgba(31, 32, 62, 0.53) 0%,
-      rgba(154, 0, 0, 0.51) 99%
-    );
     border-radius: 4px;
+    background: linear-gradient(
+        180deg,
+        rgba(31, 32, 62, 0.53) 0%,
+        rgba(154, 0, 0, 0.51) 99%
+      );
     .name {
       font-size: 24px;
 
@@ -31,6 +31,28 @@
       font-size: 14px;
       color: rgba(255, 255, 255, 1);
       line-height: 20px;
+    }
+    &.brickRed {
+      // 砖红
+      background: linear-gradient(
+        180deg,
+        rgba(31, 32, 62, 0.53) 0%,
+        rgba(154, 0, 0, 0.51) 99%
+      );
+    }
+    &.darkGreen {
+      // 暗绿
+      background: linear-gradient(135deg, #92ffc0 10%, #002661 100%);
+    }
+    &.lightBlue {
+      // 浅蓝
+      background: linear-gradient( 135deg, #52E5E7 10%, #130CB7 100%);
+    }
+    &.lightYellow {
+      background: linear-gradient( 135deg, #FD6E6A 10%, #FFC600 100%);
+    }
+    &.lightGreen {
+      background-image: linear-gradient( 135deg, #FFCF71 10%, #2376DD 100%);
     }
   }
   .scoutingAdd {

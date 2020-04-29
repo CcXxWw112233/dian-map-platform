@@ -5,17 +5,19 @@ import { connect } from "dva";
 import { Collapse, Row, Tabs } from "antd";
 const { TabPane } = Tabs;
 
-const Title = ({ name, date, cb, children }) => {
+const Title = ({ name, date, cb }) => {
   return (
     <div className={styles.title}>
-      <p style={{ marginTop: 20 }}>
+      <p style={{ marginTop: 8 }}>
         <i
-          className={
-            globalStyle.global_icon + ` ${styles.gobackBtn} ${globalStyle.btn}`
-          }
+          className={globalStyle.global_icon + ` ${globalStyle.btn}`}
+          style={{
+            color: "#fff",
+            fontSize: 22,
+          }}
           onClick={cb}
         >
-          &#xe603;
+          &#xe602;
         </i>
       </p>
       <p className={styles.name} style={{ marginTop: 109 }}>
@@ -29,20 +31,19 @@ const Title = ({ name, date, cb, children }) => {
       >
         <span>{date}</span>
       </p>
-      <p
-        style={{
-          marginTop: 8,
-        }}
-      >
-        <i className={globalStyle.global_icon + ` ${globalStyle.btn}`}>
-          &#xe65f;
-        </i>
-        {children}
-      </p>
     </div>
   );
 };
-
+const UploadBtn = () => {
+  return (
+    <i
+      className={globalStyle.global_icon + ` ${globalStyle.btn}`}
+      style={{ fontSize: 30, color: "#0D4FF7" }}
+    >
+      &#xe628;
+    </i>
+  );
+};
 const ScoutingItem = ({ data }) => {
   const header = (
     <div
@@ -62,10 +63,10 @@ const ScoutingItem = ({ data }) => {
     <Collapse expandIconPosition="right" className={styles.scoutingItem}>
       <Collapse.Panel header={header}>
         <div className={styles.itemDetail}>
-          <p>
+          <p className={styles.light}>
             <i className={globalStyle.global_icon}>&#xe616;</i>
             <span>3月15日</span>
-            <i className={globalStyle.global_icon}>&#xe600;</i>
+            <i className={globalStyle.global_icon}>&#xe605;</i>
             <span>沙寮村委</span>
           </p>
           <p>
@@ -82,12 +83,7 @@ const ScoutingItem = ({ data }) => {
         <UploadItem type="annotate" />
         <UploadItem type="plotting" />
         <UploadItem type="video" />
-        <i
-          className={globalStyle.global_icon + ` ${globalStyle.btn}`}
-          style={{ fontSize: 30, color: "#0D4FF7" }}
-        >
-          &#xe628;
-        </i>
+        <UploadBtn />
       </Collapse.Panel>
     </Collapse>
   );
@@ -101,17 +97,11 @@ const ScoutingItem2 = ({ data }) => {
       }}
     >
       <div style={{ textAlign: "left" }}>
-        <i className={globalStyle.global_icon + ` ${globalStyle.btn}`}>
+        <i className={globalStyle.global_icon + ` ${globalStyle.btn} ${styles.icon}`}>
           &#xe6d9;
         </i>
         人口
       </div>
-      <i
-        className={globalStyle.global_icon + ` ${globalStyle.btn}`}
-        style={{ fontSize: 30, color: "#0D4FF7" }}
-      >
-        &#xe628;
-      </i>
     </div>
   );
   return (
@@ -120,6 +110,7 @@ const ScoutingItem2 = ({ data }) => {
         <UploadItem type="paper" />
         <UploadItem type="paper" />
         <UploadItem type="interview" />
+        <UploadBtn />
       </Collapse.Panel>
     </Collapse>
   );
@@ -135,13 +126,13 @@ const UploadItem = ({ type }) => {
     plotting: "标绘",
   };
   return (
-    <div className={styles.uploadItem}>
+    <div className={styles.uploadItem + ` ${globalStyle.btn}`}>
       <div className={styles.uploadIcon + ` ${styles[type]}`}>
         <span>{itemKeyVals[type]}</span>
       </div>
       <div className={styles.uploadDetail}>
         <Row>
-          <span>可以叠加到地图上的资料</span>
+          <span className={styles.firstRow}>可以叠加到地图上的资料</span>
         </Row>
         <Row>
           <span>区珊</span>
@@ -153,14 +144,42 @@ const UploadItem = ({ type }) => {
   );
 };
 
+const areaScouting = () => {
+  return (
+    <div className={globalStyle.autoScrollY} style={{ height: "100%" }}>
+      <ScoutingItem />
+      <ScoutingItem />
+      <ScoutingItem />
+      <ScoutingItem />
+    </div>
+  );
+};
+
+const tagScouting = () => {
+  return (
+    <div className={globalStyle.autoScrollY} style={{ height: "100%" }}>
+      <ScoutingItem2 />
+      <ScoutingItem2 />
+      <ScoutingItem2 />
+    </div>
+  );
+};
+
 @connect(({ controller: { mainVisible } }) => ({ mainVisible }))
 export default class ScoutingDetails extends PureComponent {
   constructor(props) {
     super(props);
+    this.newTabIndex = 0;
+    const panes = [
+      { title: "按区域", content: areaScouting(), key: "1", closable: false },
+      { title: "按标签", content: tagScouting(), key: "2", closable: false },
+    ];
     this.state = {
       name: "阳山县沙寮村踏勘",
       date: "3/15-3/17",
       visible: true,
+      activeKey: panes[0].key,
+      panes,
     };
   }
   handleGoBackClick = () => {
@@ -172,11 +191,44 @@ export default class ScoutingDetails extends PureComponent {
       },
     });
   };
-  handleTogglePanelClick = (index) => {};
+
+  onChange = (activeKey) => {
+    this.setState({ activeKey });
+  };
+
+  onEdit = (targetKey, action) => {
+    this[action](targetKey);
+  };
+
+  add = () => {
+    const { panes } = this.state;
+    const activeKey = `newTab${this.newTabIndex++}`;
+    panes.push({ title: "新建Tab", content: "", key: activeKey });
+  };
+
+  remove = (targetKey) => {
+    let { activeKey } = this.state;
+    let lastIndex;
+    this.state.panes.forEach((pane, i) => {
+      if (pane.key === targetKey) {
+        lastIndex = i - 1;
+      }
+    });
+    const panes = this.state.panes.filter((pane) => pane.key !== targetKey);
+    if (panes.length && activeKey === targetKey) {
+      if (panes.length >= 0) {
+        activeKey = panes[lastIndex].key;
+      } else {
+        activeKey = panes[0].key;
+      }
+    }
+    this.setState({ panes, activeKey });
+  };
+
   render(h) {
     const { name, date } = this.state;
     const panelStyle = {
-      height: "93%",
+      height: "96%",
     };
     return (
       <div className={styles.wrap}>
@@ -186,19 +238,32 @@ export default class ScoutingDetails extends PureComponent {
           cb={this.handleGoBackClick.bind(this)}
         ></Title>
         <Tabs
-          // tabPosition="left"
+          onChange={this.onChange}
+          activeKey={this.state.activeKey}
+          // type="editable-card"
+          onEdit={this.onEdit}
           tabBarGutter={10}
           style={{
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
             position: "absolute",
-            top: 196,
+            top: 207,
             left: 0,
             bottom: 2,
-            width: "100%"
+            width: "100%",
           }}
         >
+          {/* {this.state.panes.map((pane) => (
+            <TabPane
+              tab={<span>{pane.title}</span>}
+              key={pane.key}
+              closable={pane.closable}
+              style={pane.key === "1" ? panelStyle : null}
+            >
+              {pane.content}
+            </TabPane>
+          ))} */}
           <TabPane tab={<span>按区域</span>} key="1" style={panelStyle}>
             <div className={globalStyle.autoScrollY} style={{ height: "100%" }}>
               <ScoutingItem />

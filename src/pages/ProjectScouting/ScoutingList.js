@@ -3,8 +3,18 @@ import styles from "./ScoutingList.less";
 import globalStyle from "../../globalSet/styles/globalStyles.less";
 import { connect } from "dva";
 const ScoutingItem = ({ name, date, cb }) => {
+  const colors = [
+    "brickRed",
+    "darkGreen",
+    "lightBlue",
+    "lightGreen",
+  ];
+  const colorStyle = styles[colors[Math.floor(Math.random() * 4)]];
   return (
-    <div className={`${styles.btn} ${styles.scoutingItem}`} onClick={cb}>
+    <div
+      className={`${styles.btn} ${styles.scoutingItem} ${colorStyle}`}
+      onClick={cb}
+    >
       <p className={styles.name}>
         <span>{name}</span>
       </p>
