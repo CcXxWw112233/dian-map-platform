@@ -6,8 +6,13 @@ import LayerMap from "../components/maps";
 import { ChangeMap } from "../utils/utils";
 
 import { getMyPosition } from "../utils/getMyPosition";
-import PublicData from '../pages/publicMapData/publicMapData'
+import PublicData from "../pages/publicMapData/publicMapData";
+import ProjectScouting from "../pages/ProjectScouting/ScoutingList";
+import ScoutingDetails from "../pages/ProjectScouting/ScoutingDetails";
+// import { PublicData, ProjectScouting } from 'pages/index'
 import { Tabs } from "antd";
+
+import { Main } from "components";
 import {
   ToolBar,
   Location,
@@ -16,8 +21,9 @@ import {
   Search,
   CityPanel,
 } from "components/index";
-import Overlay from 'components/Overlay/Overlay'
+import Overlay from "components/Overlay/Overlay";
 
+@connect(({ controller: { mainVisible } }) => ({ mainVisible }))
 class IndexPage extends React.Component {
   constructor(props) {
     super(...arguments);
@@ -113,26 +119,43 @@ class IndexPage extends React.Component {
         <ToolBar></ToolBar>
         <Location></Location>
         <Sider width={360}>
-          <div style={{flex:"0"}}>
-            <Search></Search>
-          </div>
-          <div style={{overflow:'hidden',height:'100%'}} className="panels">
-            <Tabs defaultActiveKey="2" tabBarGutter={60} 
-            style={{flex:"1",display:'flex',flexDirection:"column",overflow:'hidden',height:"100%"}}>
-              <TabPane tab={<span>项目踏勘</span>} key="1" >
-                项目踏勘
-              </TabPane>
-              <TabPane tab={<span>公共数据</span>} key="2" >
-                <PublicData/>
-              </TabPane>
-              <TabPane tab={<span>远程协作</span>} key="3">
-                远程协作
-              </TabPane>
-            </Tabs>
-          </div>
+          <Main visible={this.props.mainVisible}>
+            <div style={{ flex: "0" }}>
+              <Search onInputChange={this.handleInput}></Search>
+            </div>
+            <div
+              style={{ overflow: "hidden", height: "100%" }}
+              className="panels"
+            >
+              <Tabs
+                defaultActiveKey="2"
+                tabBarGutter={60}
+                style={{
+                  flex: "1",
+                  display: "flex",
+                  flexDirection: "column",
+                  overflow: "hidden",
+                  height: "100%",
+                }}
+              >
+                <TabPane tab={<span>项目踏勘</span>} key="1">
+                  <ProjectScouting></ProjectScouting>
+                </TabPane>
+                <TabPane tab={<span>公共数据</span>} key="2">
+                  <PublicData />
+                </TabPane>
+                <TabPane tab={<span>远程协作</span>} key="3">
+                  远程协作
+                </TabPane>
+              </Tabs>
+            </div>
+          </Main>
+          <Main visible={!this.props.mainVisible}>
+            <ScoutingDetails></ScoutingDetails>
+          </Main>
         </Sider>
         {/* <CityPanel></CityPanel> */}
-        <Overlay/>
+        <Overlay />
       </div>
     );
   }
@@ -140,4 +163,7 @@ class IndexPage extends React.Component {
 
 IndexPage.propTypes = {};
 
-export default connect(({ maps }) => ({ maps }))(IndexPage);
+export default connect(({ maps: { mapMain, mapView } }) => ({
+  mapMain,
+  mapView,
+}))(IndexPage);

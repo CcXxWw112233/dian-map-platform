@@ -20,6 +20,7 @@ export default {
     services: resolve(__dirname, './src/services'),
     themes: resolve(__dirname, './src/themes'),
     utils: resolve(__dirname, './src/utils'),
+    pages: resolve(__dirname, './src/pages'),
     "@": resolve(__dirname, './src'),
 
   },

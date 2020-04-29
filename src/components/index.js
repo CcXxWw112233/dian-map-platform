@@ -5,5 +5,6 @@ import BasemapGallery from './BasemapGallery/BasemapGallery'
 import Sider from './Sider'
 import Search from './Search'
 import CityPanel from './CityPanel'
+import Main from './Main/Main'
 
-export { DropOption, ToolBar, Location, BasemapGallery, Sider, Search, CityPanel }
+export { DropOption, ToolBar, Location, BasemapGallery, Sider, Search, CityPanel,Main }
