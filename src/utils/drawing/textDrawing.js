@@ -16,6 +16,8 @@ export const textDrawing = {
   isActive: false,
   linsteners: {},
   createDrawing({dispatch}) {
+    removeAllEventLinstener()
+    mapApp.drawing["text"] = this
     if (!this.drawing) {
       this.drawing = drawFeature.addDraw(
         false,

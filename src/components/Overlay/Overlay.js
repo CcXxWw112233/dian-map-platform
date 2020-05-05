@@ -15,6 +15,7 @@ export default class Overlay extends React.Component {
           margin: 0,
           padding: 0
         }}
+        className="myoverlay"
       >
         {show && childComponet}
       </div>

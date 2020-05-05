@@ -9,6 +9,7 @@ const initMap = {
   status: null,
   map : null,
   view: null,
+  drawing: {},
   baseMaps:[],
   operationLayers:[],
   init: function (mapId) {

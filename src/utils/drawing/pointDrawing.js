@@ -11,6 +11,7 @@ export const pointDrawing = {
   isActive: false,
   linsteners: {},
   createDrawing(){
+    removeAllEventLinstener()
     if (!this.drawing) {
       this.drawing = drawFeature.addDraw(false, 'Point' , new Style({
         image: new CircleStyle({
@@ -21,12 +22,12 @@ export const pointDrawing = {
         })
       }))
     }
+    mapApp.drawing["point"] = this
     if (!this.isActive) {
       mapApp.map.addInteraction(this.drawing)
       this.addEventLinstener()
       this.isActive = true
     } else {
-      removeAllEventLinstener(this.drawing, this.linsteners)
       mapApp.map.removeInteraction(this.drawing)
       this.isActive = false
     }
@@ -39,14 +40,14 @@ export const pointDrawing = {
     return this.overlays
   },
   addEventLinstener() {
-    const start = this.drawing.on('drawstart', e => {
+    this.linsteners["drawstart"] = this.drawing.on('drawstart', e => {
       let point = e.feature ;
       let coordinate = point.getGeometry().getCoordinates();
       const overlays = this.getOverlays()
       this.overlay = overlays.add( 'drawPointTip');
       this.el = this.overlay.getElement()
       mapApp.map.addOverlay(this.overlay);
-      this.overlay.getElement().innerHTML = String(coordinate);
+      this.overlay.getElement().innerHTML = `${coordinate[0].toFixed(2)},${coordinate[1].toFixed(2)}`;
 
       this.overlay.setPosition(coordinate);
 
@@ -54,12 +55,9 @@ export const pointDrawing = {
 
       this.icon.onclick = closeOverlay.bind(this, this.drawing, overlays, this.overlay, point)
     })
-    this.linsteners['drawstart'] = start
 
-    const end = this.drawing.on('drawend', e => {
+    this.linsteners["drawend"] = this.drawing.on('drawend', e => {
       this.el.appendChild(this.icon)
     })
-
-    this.linsteners['drawend'] = end
   }
 }

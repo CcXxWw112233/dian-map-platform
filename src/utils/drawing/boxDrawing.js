@@ -12,6 +12,8 @@ export const boxDrawing = {
   linsteners: {},
 
   createDrawing() {
+    removeAllEventLinstener()
+    mapApp.drawing["box"] = this
     if (!this.drawing) {
       this.drawing = drawFeature.addDraw(false, 'Circle' , myStyle, createBox())
     }
@@ -20,7 +22,6 @@ export const boxDrawing = {
       this.addEventLinstener()
       this.isActive = true
     } else {
-      removeAllEventLinstener(this.drawing, this.linsteners)
       mapApp.map.removeInteraction(this.drawing)
       this.isActive = false
     }

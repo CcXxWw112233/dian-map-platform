@@ -107,7 +107,7 @@ export const MyOverlay = function(){
     let overlay = new Overlay({
       element: ele,
       positioning: "bottom-center",
-      offset:[6, -11],
+      offset:[1, -12],
       stopEvent: true
     })
     overlay.set('index',this.indexNumber)
@@ -155,10 +155,10 @@ export const formatLength = function(line){
   var length = getLength(line);
   var output;
   if(length>1000){
-      output = (Math.round(length/1000*100)/100)+"km";
+      output = (Math.round(length/1000*100)/100).toFixed(2)+"km";
   }
   else{
-      output = (Math.round(length*100)/100)+"m";
+      output = (Math.round(length*100)/100).toFixed(2)+"m";
   }
   return output;
 }
@@ -167,10 +167,10 @@ export const formatArea = function(polygon){
   var area = getArea(polygon);
   var output;
   if(area > 1000000){
-      output = (Math.round(area/1000000*100)/100)+"km<sup>2</sup>";
+      output = (Math.round(area/1000000*100)/100).toFixed(2)+"km<sup>2</sup>";
   }
   else{
-      output= (Math.round(area*100)/100)+"m<sup>2</sup>";
+      output= (Math.round(area*100)/100).toFixed(2)+"m<sup>2</sup>";
   }
   return output;
 }

@@ -15,7 +15,6 @@ class MarkerStyle extends FTStyle {
     */
     constructor() {
         super();
-        debugger
         this._style = {
             image: {
                 //--ol.Image 的全部属性

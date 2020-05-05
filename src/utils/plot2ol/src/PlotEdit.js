@@ -16,7 +16,7 @@ class PlotEdit extends Observable {
 	 * @constructs
 	 * @param {ol.Map} map 地图对象
 	 */
-	constructor(map) {
+	constructor(map, layer) {
 		if (!map) {
 			return;
 		}
@@ -25,7 +25,8 @@ class PlotEdit extends Observable {
 		this.startPoint = null;
 		this.ghostControlPoints = null;
 		this.controlPoints = null;
-		this.map = map;
+    this.map = map;
+    this.layer = layer;
 		this.mapViewport = this.map.getViewport();
 		this.mouseOver = false;
 		this.elementTable = {};
@@ -41,8 +42,7 @@ class PlotEdit extends Observable {
 		this._is_controlpoint_pointermove = null;
 
 	}
-	initHelperDom() {
-    debugger
+	initHelperDom() {    
 		if (!this.map || !this.activePlot) {
 			return;
 		}
@@ -87,14 +87,39 @@ class PlotEdit extends Observable {
 		if (hiddenDiv && parent) {
 			DomUtils.remove(hiddenDiv, parent);
 		}
-	};
+  };
+
+    // 删除按钮
+    createDelBtn (pt) {
+      const delBtnEle = document.createElement('div')
+      delBtnEle.title = '删除图斑'
+      delBtnEle.classList.add('p-helper-control-feature-del')
+      const delBtnOverlay = new Overlay({
+        id: 'featureDelBtn',
+        element: delBtnEle,
+        position: pt,
+        positioning: 'bottom-center',
+        offset: [20, -10]
+      })
+      this.layer.plotEdit.controlPoints.push(delBtnOverlay);
+      this.map.addOverlay(delBtnOverlay);
+          // debugger;
+      DomUtils.addListener(delBtnEle, 'mousedown', () => {
+        this.layer.removeFeature(window.featureOperator)
+      }, this);
+        //--mobile
+      DomUtils.addListener(delBtnEle, 'touchstart', () => {
+  
+      }, this);
+    }
 
 	initControlPoints() {
 		if (!this.map) {
 			return;
 		}
-		this.controlPoints = [];
-		var cPnts = this.getControlPoints();
+    this.controlPoints = [];
+    var cPnts = this.getControlPoints();
+    // this.createDelBtn(cPnts[cPnts.length -1])
 		for (var i = 0; i < cPnts.length; i++) {
 			var id = Constants.HELPER_CONTROL_POINT_DIV + '-' + i;
 			var element = DomUtils.get(id);
@@ -105,16 +130,16 @@ class PlotEdit extends Observable {
 				element: element,
 			});
 			this.controlPoints.push(pnt);
-			this.map.addOverlay(pnt);
+      this.map.addOverlay(pnt);
 			// debugger;
 			DomUtils.addListener(element, 'mousedown', this.controlPointMouseDownHandler, this);
 			//--mobile
 			DomUtils.addListener(element, 'touchstart', this.controlPointMouseDownHandler, this);
 		}
 		//--fixdyj 赋值
-		this._is_controlpoint_pointermove = (e) => {
-			this.controlPointMouseMoveHandler(e);
-		}
+		// this._is_controlpoint_pointermove = (e) => {
+		// 	this.controlPointMouseMoveHandler(e);
+		// }
 		//--fix dyj 在地图上无论怎么绑都无法触发。
 		//--因为被map屏蔽了
 		this.map.mapBrowserEventHandler_.addEventListener('pointermove', this._is_controlpoint_pointermove);
@@ -229,16 +254,22 @@ class PlotEdit extends Observable {
 		var point = e.coordinate;
 		var dx = point[0] - this.startPoint[0];
 		var dy = point[1] - this.startPoint[1];
-		var newPoints = [];
+    var newPoints = [];
+    let lastPoi;
 		for (var i = 0; i < this.ghostControlPoints.length; i++) {
-			var p = this.ghostControlPoints[i];
-			var coordinate = [p[0] + dx, p[1] + dy];
+      var p = this.ghostControlPoints[i];
+      var coordinate = [p[0] + dx, p[1] + dy];
+      if (i === this.ghostControlPoints.length - 1) {
+        lastPoi = coordinate
+      }
 			newPoints.push(coordinate);
 			var id = Constants.HELPER_CONTROL_POINT_DIV + '-' + i;
 			var overlay = this.map.getOverlayById(id);
 			overlay.setPosition(coordinate);
 			overlay.setPositioning('center-center');
-		}
+    }
+    // const delOverlay = this.map.getOverlayById("featureDelBtn")
+    // delOverlay.setPosition(lastPoi)
 		var plot = this.activePlot.getGeometry();
 		plot.setPoints(newPoints);
 	};

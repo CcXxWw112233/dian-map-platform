@@ -11,6 +11,8 @@ export const lineDrawing = {
   linsteners: {},
 
   createDrawing() {
+    removeAllEventLinstener()
+    mapApp.drawing["line"] = this
     if (!this.drawing) {
       this.drawing = drawFeature.addDraw(false, 'LineString' , myStyle)
     }
@@ -19,7 +21,7 @@ export const lineDrawing = {
       this.addEventLinstener()
       this.isActive = true
     } else {
-      removeAllEventLinstener(this.drawing, this.linsteners)
+      // removeAllEventLinstener()
       mapApp.map.removeInteraction(this.drawing)
       this.isActive = false
     }
@@ -39,7 +41,8 @@ export const lineDrawing = {
       this.el = this.overlay.getElement()
       mapApp.map.addOverlay(this.overlay)
       const line = e.feature
-      line.getGeometry().on('change',(geo) => {
+      this.geometry = line.getGeometry()
+      this.geoChange = this.geometry.on('change',(geo) => {
         let target = geo.target;
         this.el.innerHTML = formatLength(target)
         let lastCoor = target.getLastCoordinate();
@@ -52,6 +55,7 @@ export const lineDrawing = {
 
     const end = this.drawing.on('drawend', e => {
       this.el.appendChild(this.icon)
+      this.geometry.un("change", this.geoChange)
     })
 
     this.linsteners['drawend'] = end

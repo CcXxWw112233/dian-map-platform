@@ -117,7 +117,7 @@ class PlottingLayer extends Observable {
     //--创建layer
     this.showLayer = this._createShowLayer();
     //--创建编辑对象
-    this.plotEdit = new PlotEdit(map);
+    this.plotEdit = new PlotEdit(map, this);
     //--创建绘制对象
     this.plotDraw = new PlotDraw(map);
     //--绑定地图事件

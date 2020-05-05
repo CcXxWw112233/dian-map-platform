@@ -11,6 +11,8 @@ export const polygonDrawing = {
   linsteners: {},
 
   createDrawing() {
+    removeAllEventLinstener()
+    mapApp.drawing["polygon"] = this
     if (!this.drawing) {
       this.drawing = drawFeature.addDraw(false, 'Polygon' , myStyle)
     }
@@ -19,7 +21,6 @@ export const polygonDrawing = {
       this.addEventLinstener()
       this.isActive = true
     } else {
-      removeAllEventLinstener(this.drawing, this.linsteners)
       mapApp.map.removeInteraction(this.drawing)
       this.isActive = false
     }
