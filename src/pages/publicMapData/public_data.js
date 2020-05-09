@@ -1,3 +1,24 @@
+const commonStyleOption = {
+  textFillColor: "#3F48CC",
+  textStrokeColor: "#fff",
+  textStrokeWidth: 3,
+  font: "13px sans-serif",
+  placement: "point",
+  iconScale: 0.6,
+  pointColor: "#fff",
+}
+const commonFeatureKeys =  {
+  typeName: "lingxi:model_statistics_polygon",
+  cql_filter: "areaCode in ('440117','*')",
+  showName: true,
+  style: {
+    strokeWidth: 3,
+    strokeColor: "#ffffff",
+    textStrokeColor: "",
+    textFillColor: "rgba(0,0,0,0.8)",
+    font: "14px sans-serif",
+  },
+}
 const jsons = {
   data: [
     {
@@ -10,18 +31,7 @@ const jsons = {
           icon: "",
           key: "map:population:number",
           loadFeatureKeys: [
-            {
-              typeName: "lingxi:model_statistics_polygon",
-              cql_filter: "areaCode in ('440117','*')",
-              showName: true,
-              style: {
-                strokeWidth: 3,
-                strokeColor: "#ffffff",
-                textStrokeColor: "",
-                textFillColor: "rgba(0,0,0,0.8)",
-                font: "14px sans-serif",
-              },
-            },
+            {...commonFeatureKeys}
           ],
         },
         {
@@ -29,18 +39,7 @@ const jsons = {
           icon: "",
           key: "map:population:density",
           loadFeatureKeys: [
-            {
-              typeName: "lingxi:model_statistics_polygon",
-              cql_filter: "areaCode in ('440117','*')",
-              showName: true,
-              style: {
-                strokeWidth: 3,
-                strokeColor: "#ffffff",
-                textStrokeColor: "",
-                textFillColor: "rgba(0,0,0,0.8)",
-                font: "14px sans-serif",
-              },
-            },
+            {...commonFeatureKeys}
           ],
         },
         {
@@ -48,18 +47,7 @@ const jsons = {
           icon: "",
           key: "map:population:employment",
           loadFeatureKeys: [
-            {
-              typeName: "lingxi:model_statistics_polygon",
-              cql_filter: "areaCode in ('440117','*')",
-              showName: true,
-              style: {
-                strokeWidth: 3,
-                strokeColor: "#ffffff",
-                textStrokeColor: "",
-                textFillColor: "rgba(0,0,0,0.8)",
-                font: "14px sans-serif",
-              },
-            },
+            {...commonFeatureKeys}
           ],
         },
         {
@@ -67,18 +55,7 @@ const jsons = {
           icon: "",
           key: "map:population:resident",
           loadFeatureKeys: [
-            {
-              typeName: "lingxi:model_statistics_polygon",
-              cql_filter: "areaCode in ('440117','*')",
-              showName: true,
-              style: {
-                strokeWidth: 3,
-                strokeColor: "#ffffff",
-                textStrokeColor: "",
-                textFillColor: "rgba(0,0,0,0.8)",
-                font: "14px sans-serif",
-              },
-            },
+            {...commonFeatureKeys}
           ],
         },
       ],
@@ -98,14 +75,8 @@ const jsons = {
               cql_filter: "adcode in ('440117','*') and type='13'",
               showName: true,
               style: {
-                textFillColor: "#3F48CC",
-                textStrokeColor: "#fff",
-                textStrokeWidth: 3,
-                font: "13px sans-serif",
-                placement: "point",
                 iconUrl: require("./img/qiche.png"),
-                iconScale: 0.6,
-                pointColor: "#fff",
+                ...commonStyleOption
               },
             },
           ],
@@ -121,13 +92,7 @@ const jsons = {
               showName: true,
               style: {
                 iconUrl: require("./img/huochezhan.png"),
-                textFillColor: "#3F48CC",
-                textStrokeColor: "#fff",
-                textStrokeWidth: 3,
-                font: "13px sans-serif",
-                placement: "point",
-                iconScale: 0.6,
-                pointColor: "#fff",
+                ...commonStyleOption
               },
             },
           ],
@@ -143,13 +108,7 @@ const jsons = {
               showName: true,
               style: {
                 iconUrl: require("./img/chengshi.png"),
-                textFillColor: "#3F48CC",
-                textStrokeColor: "#fff",
-                textStrokeWidth: 3,
-                font: "13px sans-serif",
-                placement: "point",
-                iconScale: 0.6,
-                pointColor: "#fff",
+                ...commonStyleOption
               },
             },
           ],
@@ -172,13 +131,7 @@ const jsons = {
               showName: true,
               style: {
                 iconUrl: require("./img/icon-drop-shangye.png"),
-                textFillColor: "#3F48CC",
-                textStrokeColor: "#fff",
-                textStrokeWidth: 3,
-                font: "13px sans-serif",
-                placement: "point",
-                iconScale: 0.6,
-                pointColor: "#fff",
+                ...commonStyleOption
               },
             },
           ],
@@ -194,13 +147,7 @@ const jsons = {
               showName: true,
               style: {
                 iconUrl: require("./img/icon-drop-shangye.png"),
-                textFillColor: "#3F48CC",
-                textStrokeColor: "#fff",
-                textStrokeWidth: 3,
-                font: "13px sans-serif",
-                placement: "point",
-                iconScale: 0.6,
-                pointColor: "#fff",
+                ...commonStyleOption
               },
             },
           ],
@@ -216,13 +163,7 @@ const jsons = {
               showName: true,
               style: {
                 iconUrl: require("./img/icon-drop-jiaoyu.png"),
-                textFillColor: "#3F48CC",
-                textStrokeColor: "#fff",
-                textStrokeWidth: 3,
-                font: "13px sans-serif",
-                placement: "point",
-                iconScale: 0.6,
-                pointColor: "#fff",
+                ...commonStyleOption
               },
             },
           ],
@@ -238,13 +179,7 @@ const jsons = {
               showName: true,
               style: {
                 iconUrl: require("./img/icon-drop-wenti.png"),
-                textFillColor: "#3F48CC",
-                textStrokeColor: "#fff",
-                textStrokeWidth: 3,
-                font: "13px sans-serif",
-                placement: "point",
-                iconScale: 0.6,
-                pointColor: "#fff",
+                ...commonStyleOption
               },
             },
           ],
@@ -260,13 +195,7 @@ const jsons = {
               showName: true,
               style: {
                 iconUrl: require("./img/icon-drop-shizhensesi.png"),
-                textFillColor: "#3F48CC",
-                textStrokeColor: "#fff",
-                textStrokeWidth: 3,
-                font: "13px sans-serif",
-                placement: "point",
-                iconScale: 0.6,
-                pointColor: "#fff",
+                ...commonStyleOption
               },
             },
           ],
@@ -289,13 +218,7 @@ const jsons = {
               showName: true,
               style: {
                 iconUrl: require("./img/renwenjingguan.png"),
-                textFillColor: "#3F48CC",
-                textStrokeColor: "#fff",
-                textStrokeWidth: 3,
-                font: "13px sans-serif",
-                placement: "point",
-                iconScale: 0.6,
-                pointColor: "#fff",
+                ...commonStyleOption
               },
             },
           ],
@@ -311,13 +234,7 @@ const jsons = {
               showName: true,
               style: {
                 iconUrl: require("./img/ziranjingguan.png"),
-                textFillColor: "#3F48CC",
-                textStrokeColor: "#fff",
-                textStrokeWidth: 3,
-                font: "13px sans-serif",
-                placement: "point",
-                iconScale: 0.6,
-                pointColor: "#fff",
+                ...commonStyleOption
               },
             },
           ],
@@ -340,13 +257,7 @@ const jsons = {
               showName: true,
               style: {
                 iconUrl: require("./img/diyichanye.png"),
-                textFillColor: "#3F48CC",
-                textStrokeColor: "#fff",
-                textStrokeWidth: 3,
-                font: "13px sans-serif",
-                placement: "point",
-                iconScale: 0.6,
-                pointColor: "#fff",
+                ...commonStyleOption
               },
             },
           ],
@@ -362,13 +273,7 @@ const jsons = {
               showName: true,
               style: {
                 iconUrl: require("./img/dierchanye.png"),
-                textFillColor: "#3F48CC",
-                textStrokeColor: "#fff",
-                textStrokeWidth: 3,
-                font: "13px sans-serif",
-                placement: "point",
-                iconScale: 0.6,
-                pointColor: "#fff",
+                ...commonStyleOption
               },
             },
           ],
@@ -384,13 +289,7 @@ const jsons = {
               showName: true,
               style: {
                 iconUrl: require("./img/disanchanye.png"),
-                textFillColor: "#3F48CC",
-                textStrokeColor: "#fff",
-                textStrokeWidth: 3,
-                font: "13px sans-serif",
-                placement: "point",
-                iconScale: 0.6,
-                pointColor: "#fff",
+                ...commonStyleOption
               },
             },
           ],

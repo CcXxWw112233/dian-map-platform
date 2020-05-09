@@ -97,7 +97,7 @@ export const createStyle = function (type, options, properties) {
   if (type === "MultiPolygon") {
 
   }
-  debugger
+  // debugger
   let defaultColor = "#3399cc";
   // 填充色
   let fill = new Fill({
