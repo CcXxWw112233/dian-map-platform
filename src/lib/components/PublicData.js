@@ -46,10 +46,10 @@ const publicData = {
         // 如果加载完成了，则继续加载
         if(this.status === 'ready'){
             this.status = 'loading';
-            this.activeTypeName = data.typeName;
-            if(this.geomData[data.typeName]){
+            this.activeTypeName = data.typeName + data.cql_filter;
+            if(this.geomData[data.typeName + data.cql_filter]){
                 // 使用缓存的数据
-                this.renderFeatures(this.geomData[data.typeName],data);
+                this.renderFeatures(this.geomData[data.typeName + data.cql_filter],data);
                 this.status = 'ready';
                 // 如果有挂起的请求，则请求
                 if(this.loadKey.length){
@@ -58,9 +58,9 @@ const publicData = {
                 }
             }else{
                 // 使用接口数据
-                getFeature(url ? url : GET_GEO_DATA,{typeName:data.typeName}).then(res => {
+                getFeature(url ? url : GET_GEO_DATA,{typeName:data.typeName, cql_filter:data.cql_filter}).then(res => {
                     // 数据缓存，后期优化成本地缓存
-                    this.geomData[data.typeName] = res;
+                    this.geomData[data.typeName + data.cql_filter] = res;
                     // 渲染，并且删除加载过后的loadkey
                     this.renderFeatures(res,data);
                     this.status = 'ready';
@@ -91,7 +91,7 @@ const publicData = {
                         option.style.text = name ;
                         option.style.showName = option.showName
                         // 创建样式
-                        let style = createStyle(type,option.style);
+                        let style = createStyle(type,option.style, item.properties);
 
                         feature.setStyle(style);
                     }

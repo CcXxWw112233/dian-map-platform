@@ -52,7 +52,7 @@ export default class PublicData extends React.Component{
             // console.log(keys, '删除了这些图层');
             if(keys.length){
                 // 删除勾选的选项-这里只需要传key，剔除其他属性
-                let a = keys.map(item => item.typeName);
+                let a = keys.map(item => item.typeName + item.cql_filter);
                 PublicDataActions.removeFeatures(a)
             }
         }
