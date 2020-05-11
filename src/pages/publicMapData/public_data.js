@@ -327,7 +327,7 @@ const jsons = {
             // 居民点计划图
             {
               typeName: "lingxi:plan_polygon",
-              cql_filter: "adcode in ('440117','*')",
+              // cql_filter: "adcode in ('440117','*')",
               style: {
                 fillColor: "#7030A0",
                 strokeWidth: 2,
