@@ -63,7 +63,7 @@ export const mapOverlay = {
   // 创建overlay
   createOverlayElement: function(className){
     let ele = document.querySelector('#overlayElement_dom');
-    if(ele){
+    if(ele) {
       return ele;
     }
     let div = document.createElement('div');

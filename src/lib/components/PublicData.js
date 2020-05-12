@@ -34,7 +34,7 @@ const publicData = {
     }
   },
   // 获取数据 传入参数为url 和data， data = { @required typeName ,}
-  getPublicData: function ({ url, data }) {
+  getPublicData: function ({ url, data, fillColor }) {
     if (!data.typeName) {
       return new Error('property typeName is required of arguments "data"');
     }
@@ -57,7 +57,8 @@ const publicData = {
         // 使用缓存的数据
         this.renderFeatures(
           this.geomData[data.typeName + (data.cql_filter || "")],
-          data
+          data,
+          fillColor
         );
         this.status = "ready";
         // 如果有挂起的请求，则请求
@@ -67,15 +68,18 @@ const publicData = {
         }
       } else {
         // 使用接口数据
-        getFeature(url ? url : GET_GEO_DATA, {
+        let params = {
           typeName: data.typeName,
-          cql_filter: data.cql_filter || "",
-        })
+        };
+        if (data.cql_filter) {
+          params.cql_filter = data.cql_filter
+        }
+        getFeature(url ? url : GET_GEO_DATA, params)
           .then((res) => {
             // 数据缓存，后期优化成本地缓存
             this.geomData[data.typeName + (data.cql_filter || "")] = res;
             // 渲染，并且删除加载过后的loadkey
-            this.renderFeatures(res, data);
+            this.renderFeatures(res, data, fillColor);
             this.status = "ready";
             // 如果有挂起的请求，则请求
             if (this.loadKey.length) {
@@ -92,7 +96,7 @@ const publicData = {
     }
   },
   // 渲染获取到的数据
-  renderFeatures: function (data, option) {
+  renderFeatures: function (data, option, fillColor) {
     if (data) {
       if (data.features.length) {
         data.features.forEach((item) => {
@@ -107,7 +111,12 @@ const publicData = {
             option.style.text = name;
             option.style.showName = option.showName;
             // 创建样式
-            let style = createStyle(type, option.style, item.properties);
+            let style = createStyle(
+              type,
+              option.style,
+              item.properties,
+              fillColor
+            );
 
             feature.setStyle(style);
           }

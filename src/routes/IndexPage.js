@@ -23,6 +23,8 @@ import {
 } from "components/index";
 import Overlay from "components/Overlay/Overlay";
 
+import LengedList from "components/LengedList/LengedList"
+
 @connect(({ controller: { mainVisible } }) => ({ mainVisible }))
 class IndexPage extends React.Component {
   constructor(props) {
@@ -117,6 +119,7 @@ class IndexPage extends React.Component {
         <BasemapGallery></BasemapGallery>
         {/* 工具栏 */}
         <ToolBar></ToolBar>
+        <LengedList></LengedList>
         <Location></Location>
         <Sider width={360}>
           <Main visible={this.props.mainVisible}>

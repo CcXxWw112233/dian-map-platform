@@ -87,21 +87,44 @@ export const loadFeatureJSON = function (data, type = "WTK") {
   return new GeoJSON().readFeature(data);
 };
 
-const getPolygonFillColor = (properties) => {
-
-}
-
-export const createStyle = function (type, options, properties) {
-
-  // 如果是人口
-  if (type === "MultiPolygon") {
-
+const getPolygonFillColor = (properties, fillColorKeyVals) => {
+  debugger
+  let fillColor;
+  if (fillColorKeyVals) {
+    const proerty = fillColorKeyVals[0].property;
+    let splitScope = [];
+    fillColorKeyVals.forEach((fillColor) => {
+      const tempArr0 = fillColor.scope.split("-");
+      let tempArr1 = [];
+      tempArr0.forEach((item) => {
+        if (item.length > 0) {
+          tempArr1.push(Number(item));
+        }
+      });
+      splitScope.push(tempArr1);
+    });
+    const val = Number(properties[proerty]);
+    for (let i = 0; i < splitScope.length; i++) {
+      const scopeVal = splitScope[i];
+      if (val < scopeVal[scopeVal.length - 1]) {
+        fillColor = fillColorKeyVals[i].fillColor;
+        break;
+      }
+    }
+    if (!fillColor) {
+      fillColor = fillColorKeyVals[fillColorKeyVals.length - 1].fillColor;
+    }
   }
+  return fillColor;
+};
+
+export const createStyle = function (type, options, properties, fillColorKeyVals) {
+  const fillColor = getPolygonFillColor(properties, fillColorKeyVals);
   // debugger
   let defaultColor = "#3399cc";
   // 填充色
   let fill = new Fill({
-    color: options.fillColor || defaultColor,
+    color: fillColor ? fillColor : options.fillColor || defaultColor,
   });
   // 边框色
   let stroke = new Stroke({
@@ -113,7 +136,9 @@ export const createStyle = function (type, options, properties) {
     ? new Text({
         offsetX: 0,
         offsetY: -25,
-        text: options.text,
+        text: fillColorKeyVals
+          ? `${options.text}(${properties[fillColorKeyVals[0].property]})`
+          : options.text,
         fill: new Fill({
           color: options.textFillColor || defaultColor,
         }),

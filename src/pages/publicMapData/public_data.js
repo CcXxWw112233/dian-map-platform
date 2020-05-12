@@ -6,8 +6,8 @@ const commonStyleOption = {
   placement: "point",
   iconScale: 0.6,
   pointColor: "#fff",
-}
-const commonFeatureKeys =  {
+};
+const commonFeatureKeys = {
   typeName: "lingxi:model_statistics_polygon",
   cql_filter: "areaCode in ('440117','*')",
   showName: true,
@@ -18,7 +18,7 @@ const commonFeatureKeys =  {
     textFillColor: "rgba(0,0,0,0.8)",
     font: "14px sans-serif",
   },
-}
+};
 const jsons = {
   data: [
     {
@@ -30,32 +30,112 @@ const jsons = {
           name: "人口分布",
           icon: "",
           key: "map:population:number",
-          loadFeatureKeys: [
-            {...commonFeatureKeys}
+          loadFeatureKeys: [{ ...commonFeatureKeys }],
+          fillColorKeyVals: [
+            {
+              scope: "0-5",
+              fillColor: "rgba(231,185,192,0.8)",
+              property: "population",
+            },
+            {
+              scope: "5-10",
+              fillColor: "rgba(184,74,91,0.8)",
+              property: "population",
+            },
+            {
+              scope: "10-15",
+              fillColor: "rgba(68,0,10,0.8)",
+              property: "population",
+            },
           ],
         },
         {
           name: "人口密度",
           icon: "",
           key: "map:population:density",
-          loadFeatureKeys: [
-            {...commonFeatureKeys}
+          loadFeatureKeys: [{ ...commonFeatureKeys }],
+          fillColorKeyVals: [
+            {
+              scope: "0-200",
+              fillColor: "rgba(251,207,208,0.8)",
+              property: "density",
+            },
+            {
+              scope: "200-400",
+              fillColor: "rgba(248,161,164,0.8)",
+              property: "density",
+            },
+            {
+              scope: "200-400",
+              fillColor: "rgba(248,161,164,0.8)",
+              property: "density",
+            },
+            {
+              scope: "600-800",
+              fillColor: "rgba(178,16,22,0.8)",
+              property: "density",
+            },
+            {
+              scope: "-800",
+              fillColor: "rgba(119,7,11,0.8)",
+              property: "density",
+            },
           ],
         },
         {
           name: "就业岗位",
           icon: "",
           key: "map:population:employment",
-          loadFeatureKeys: [
-            {...commonFeatureKeys}
+          loadFeatureKeys: [{ ...commonFeatureKeys }],
+          fillColorKeyVals: [
+            {
+              scope: "0-1",
+              fillColor: "rgba(211,213,245,0.8)",
+              property: "empolyment",
+            },
+            {
+              scope: "1-2",
+              fillColor: "rgba(131,137,224,0.8)",
+              property: "empolyment",
+            },
+            {
+              scope: "2-3",
+              fillColor: "rgba(16,21,102,0.8)",
+              property: "empolyment",
+            },
           ],
         },
         {
           name: "居民用地",
           icon: "",
           key: "map:population:resident",
-          loadFeatureKeys: [
-            {...commonFeatureKeys}
+          loadFeatureKeys: [{ ...commonFeatureKeys }],
+          fillColorKeyVals: [
+            {
+              scope: "0-100",
+              fillColor: "rgba(237,211,237,0.8)",
+              property: "landuse",
+            },
+            {
+              scope: "100-200",
+              fillColor: "rgba(131,137,224,0.8)",
+              property: "landuse",
+            },
+            {
+              scope: "200-300",
+              fillColor: "rgba(218,170,219,0.8)",
+              property: "landuse",
+            },
+            {
+              scope: "300-400",
+              fillColor: "rgba(122,41,123,0.8)",
+              property: "landuse",
+            },
+            {
+              scope: "-400",
+              fillColor: "rgba(81,18,82,0.8)",
+              property: "landuse",
+            },
           ],
         },
       ],
@@ -75,8 +155,8 @@ const jsons = {
               cql_filter: "adcode in ('440117','*') and type='13'",
               showName: true,
               style: {
-                iconUrl: require("./img/qiche.png"),
-                ...commonStyleOption
+                iconUrl: require("../../assets/img/qiche.png"),
+                ...commonStyleOption,
               },
             },
           ],
@@ -91,8 +171,8 @@ const jsons = {
               cql_filter: "adcode in ('440117','*') and type='2'",
               showName: true,
               style: {
-                iconUrl: require("./img/huochezhan.png"),
-                ...commonStyleOption
+                iconUrl: require("../../assets/img/huochezhan.png"),
+                ...commonStyleOption,
               },
             },
           ],
@@ -107,8 +187,8 @@ const jsons = {
               cql_filter: "adcode in ('440117','*') and type='1'",
               showName: true,
               style: {
-                iconUrl: require("./img/chengshi.png"),
-                ...commonStyleOption
+                iconUrl: require("../../assets/img/chengshi.png"),
+                ...commonStyleOption,
               },
             },
           ],
@@ -130,8 +210,8 @@ const jsons = {
               cql_filter: "adcode in ('440117','*') and type='3'",
               showName: true,
               style: {
-                iconUrl: require("./img/icon-drop-shangye.png"),
-                ...commonStyleOption
+                iconUrl: require("../../assets/img/icon-drop-shangye.png"),
+                ...commonStyleOption,
               },
             },
           ],
@@ -146,8 +226,8 @@ const jsons = {
               cql_filter: "adcode in ('440117','*') and type='4'",
               showName: true,
               style: {
-                iconUrl: require("./img/icon-drop-shangye.png"),
-                ...commonStyleOption
+                iconUrl: require("../../assets/img/icon-drop-shangye.png"),
+                ...commonStyleOption,
               },
             },
           ],
@@ -162,8 +242,8 @@ const jsons = {
               cql_filter: "adcode in ('440117','*') and type='5'",
               showName: true,
               style: {
-                iconUrl: require("./img/icon-drop-jiaoyu.png"),
-                ...commonStyleOption
+                iconUrl: require("../../assets/img/icon-drop-jiaoyu.png"),
+                ...commonStyleOption,
               },
             },
           ],
@@ -178,8 +258,8 @@ const jsons = {
               cql_filter: "adcode in ('440117','*') and type='6'",
               showName: true,
               style: {
-                iconUrl: require("./img/icon-drop-wenti.png"),
-                ...commonStyleOption
+                iconUrl: require("../../assets/img/icon-drop-wenti.png"),
+                ...commonStyleOption,
               },
             },
           ],
@@ -194,8 +274,8 @@ const jsons = {
               cql_filter: "adcode in ('440117','*') and type='7'",
               showName: true,
               style: {
-                iconUrl: require("./img/icon-drop-shizhensesi.png"),
-                ...commonStyleOption
+                iconUrl: require("../../assets/img/icon-drop-shizhensesi.png"),
+                ...commonStyleOption,
               },
             },
           ],
@@ -217,8 +297,8 @@ const jsons = {
               cql_filter: "adcode in ('440117','*') and type='9'",
               showName: true,
               style: {
-                iconUrl: require("./img/renwenjingguan.png"),
-                ...commonStyleOption
+                iconUrl: require("../../assets/img/renwenjingguan.png"),
+                ...commonStyleOption,
               },
             },
           ],
@@ -233,8 +313,8 @@ const jsons = {
               cql_filter: "adcode in ('440117','*') and type='8'",
               showName: true,
               style: {
-                iconUrl: require("./img/ziranjingguan.png"),
-                ...commonStyleOption
+                iconUrl: require("../../assets/img/ziranjingguan.png"),
+                ...commonStyleOption,
               },
             },
           ],
@@ -256,8 +336,8 @@ const jsons = {
               cql_filter: "adcode in ('440117','*') and type='10'",
               showName: true,
               style: {
-                iconUrl: require("./img/diyichanye.png"),
-                ...commonStyleOption
+                iconUrl: require("../../assets/img/diyichanye.png"),
+                ...commonStyleOption,
               },
             },
           ],
@@ -272,8 +352,8 @@ const jsons = {
               cql_filter: "adcode in ('440117','*') and type='11'",
               showName: true,
               style: {
-                iconUrl: require("./img/dierchanye.png"),
-                ...commonStyleOption
+                iconUrl: require("../../assets/img/dierchanye.png"),
+                ...commonStyleOption,
               },
             },
           ],
@@ -288,8 +368,8 @@ const jsons = {
               cql_filter: "adcode in ('440117','*') and type='12'",
               showName: true,
               style: {
-                iconUrl: require("./img/disanchanye.png"),
-                ...commonStyleOption
+                iconUrl: require("../../assets/img/disanchanye.png"),
+                ...commonStyleOption,
               },
             },
           ],

@@ -12,6 +12,7 @@ export default class PublicData extends React.Component {
     this.state = {};
     this.checkedParam = {};
     this.AllCheckData = MenuData.data;
+    this.populationSelect = {};
   }
   componentDidMount() {
     // console.log(m)
@@ -29,20 +30,33 @@ export default class PublicData extends React.Component {
     return arraynew.length > 0 ? arraynew : arr2;
   };
   getItems2 = (arr1, arr2) => {
-    return arr1.concat(arr2).filter(function(v, i, arr) {
+    return arr1.concat(arr2).filter(function (v, i, arr) {
       return arr.indexOf(v) === arr.lastIndexOf(v);
-  }); 
-  }
+    });
+  };
   // 选项更新，获取更新的那些数据
-  changeData = (oldVal = [], newVal = []) => {
+  changeData = (oldVal = [], newVal = [], fillColor) => {
     // 新增了选项需要显示
-    if (newVal.length > oldVal.length) {
+    if (newVal.length > oldVal.length || newVal.length === oldVal.length) {
       let arr = this.getItems(oldVal, newVal);
       // 新增了哪些图层key
       let keys = this.getCheckBoxForDatas(arr);
-      keys.forEach(item => {
-        PublicDataActions.getPublicData({ url: "", data: { ...item } })
-      })
+      keys.forEach((item) => {
+        let data = { ...item };
+        if (newVal.length === oldVal.length) {
+          data.key = 1;
+          if (keys.length) {
+            // 删除勾选的选项-这里只需要传key，剔除其他属性
+            let a = keys.map((item) => item.typeName + (item.cql_filter || ""));
+            PublicDataActions.removeFeatures(a);
+          }
+        }
+        PublicDataActions.getPublicData({
+          url: "",
+          data: data,
+          fillColor: fillColor,
+        });
+      });
     } else if (newVal.length < oldVal.length) {
       // 删除了需要显示的内容
       let arr = this.getItems(newVal, oldVal);
@@ -77,11 +91,11 @@ export default class PublicData extends React.Component {
     }
   };
   // 勾选了复选框
-  toggleViewPulicData = (val, from) => {
+  toggleViewPulicData = (val, from, fillColor) => {
     // let old = val.length ? this.checkedParam[from] : [];
     let old = this.checkedParam[from];
     // 根据切换的checkbox，进行增删操作
-    this.changeData(old, val);
+    this.changeData(old, val, fillColor);
     // 更新保存的列表
     this.checkedParam[from] = val;
 

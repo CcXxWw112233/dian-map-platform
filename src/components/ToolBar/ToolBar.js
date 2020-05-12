@@ -14,95 +14,94 @@ import {connect} from 'dva'
 @connect(({ overlay: { childComponet, show } }) => ({  childComponet, show  }))
 export default class ToolBar extends PureComponent {
   render() {
-    let { dispatch, childComponet, show } = this.props;
     const tools = [{
       name: '对比',
       key: 'contrast',
-      icon: 'icon-icon-cemian',
+      icon: '&#xe724;',
       children: [
         {
         name: '存为对照组',
         key: 'save',
-        icon: 'icon-icon-cemian',
+        icon: '&#xe722;',
         cb: (()=>{})
       },{
         name: '读取对照组',
         key: 'read',
-        icon: 'icon-icon-cemian',
+        icon: '&#xe725;',
         cb: (()=>{})
       }
     ]},{
       name: '标绘',
       key: 'plotting',
-      icon: 'icon-icon-cemian',
+      icon: '&#xe726;',
       children: [
         {
         name: '标记点',
         key: 'point',
-        icon: 'icon-icon-cemian',
+        icon: '&#xe715;',
         cb: pointDrawing.createDrawing.bind(pointDrawing)
       },{
         name: '标记线',
         key: 'line',
-        icon: 'icon-icon-cemian',
+        icon: '&#xe716;',
         cb: lineDrawing.createDrawing.bind(lineDrawing)
       },{
         name: '标记面',
         key: 'polygon',
-        icon: 'icon-icon-cemian',
+        icon: '&#xe718;',
         cb: polygonDrawing.createDrawing.bind(polygonDrawing)
       }
     ]},{
       name: '批注',
       key: 'annotation',
-      icon: 'icon-icon-cemian',
+      icon: '&#xe943;',
       children:[
         {
         name: '文字',
         key: 'word',
-        icon: 'icon-icon-cemian',
+        icon: '&#xe719;',
         cb: textDrawing.createDrawing.bind(textDrawing)
       },{
         name: '箭头',
         key: 'arrow',
-        icon: 'icon-icon-cemian',
+        icon: '&#xe71a;',
         cb: arrowDrawing.createDrawing.bind(arrowDrawing)
       },{
         name: '矩形',
         key: 'rect',
-        icon: 'icon-icon-cemian',
+        icon: '&#xe71b;',
         cb: boxDrawing.createDrawing.bind(boxDrawing)
       },{
         name: '圆形',
         key: 'circle',
-        icon: 'icon-icon-cemian',
+        icon: '&#xe71c;',
         cb: circleDrawing.createDrawing.bind(circleDrawing)
       }]
     },{
       name: '缩放',
       key: 'zoom',
-      icon: 'icon-icon-cemian',
+      icon: '&#xe65c;',
       children: [
         {
         name: '放大',
         key: 'zoomIn',
-        icon: 'icon-icon-cemian',
+        icon: '&#xe65d;',
         cb: myZoomIn.bind(myZoomIn)
       },{
         name: '缩小',
         key: 'zoomOut',
-        icon: 'icon-icon-cemian',
+        icon: '&#xe65e;',
         cb: myZoomOut.bind(myZoomOut)
       },{
         name: '框选区域放大',
         key: 'zoomIn2',
-        icon: 'icon-icon-cemian',
+        icon: '&#xe65e;',
         cb: myDragZoom.setVal.bind(myDragZoom)
       }]
     },{
       name: '全屏',
       key: 'fullscreen',
-      icon: 'icon-icon-cemian',
+      icon: '&#xe66e;',
       children: [],
       cb: myFullScreen.change.bind(myFullScreen)
     }]
