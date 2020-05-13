@@ -123,7 +123,7 @@ class IndexPage extends React.Component {
         <ToolBar></ToolBar>
         <BottomToolBar></BottomToolBar>
         <LengedList></LengedList>
-        <Location></Location>
+        {/* <Location></Location> */}
         <Sider width={360}>
           <Main visible={this.props.mainVisible}>
             <div style={{ flex: "0" }}>
