@@ -4,8 +4,11 @@ import DataItem from "./DataItem";
 import PublicDataActions from "../../lib/components/PublicData";
 import globalStyle from "../../globalSet/styles/globalStyles.less";
 import publicData from "../../lib/components/PublicData";
+import lengedListConf from "components/LengedList/config";
+import { connect } from "dva";
 const MenuData = require("./public_data").default;
 
+@connect(({ lengedList: { config } }) => ({ config }))
 export default class PublicData extends React.Component {
   constructor(props) {
     super(props);
@@ -92,12 +95,34 @@ export default class PublicData extends React.Component {
   };
   // 勾选了复选框
   toggleViewPulicData = (val, from, fillColor) => {
+    const { dispatch } = this.props;
     // let old = val.length ? this.checkedParam[from] : [];
     let old = this.checkedParam[from];
     // 根据切换的checkbox，进行增删操作
     this.changeData(old, val, fillColor);
     // 更新保存的列表
+    debugger;
     this.checkedParam[from] = val;
+    console.log(this.checkedParam);
+    let currentLegedList = [];
+    const paramKeys = Object.keys(this.checkedParam);
+    for (let i = 0; i < lengedListConf.length; i++) {
+      for (let j = 0; j < paramKeys.length; j++) {
+        const param = this.checkedParam[paramKeys[j]];
+        for (let k = 0; k < param.length; k++) {
+          const lenged = lengedListConf[i];
+          if (lenged && lenged.key && lenged.key.indexOf(param[k]) > -1) {
+            currentLegedList.push(lengedListConf[i]);
+          }
+        }
+      }
+    }
+    dispatch({
+      type: "lengedList/updateLengedList",
+      payload: {
+        config: currentLegedList,
+      },
+    });
 
     // PublicDataActions.getPublicData()
   };

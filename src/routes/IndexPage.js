@@ -25,6 +25,8 @@ import Overlay from "components/Overlay/Overlay";
 
 import LengedList from "components/LengedList/LengedList"
 
+import BottomToolBar from "components/BottomToolBar/BottomToolBar"
+
 @connect(({ controller: { mainVisible } }) => ({ mainVisible }))
 class IndexPage extends React.Component {
   constructor(props) {
@@ -116,9 +118,10 @@ class IndexPage extends React.Component {
         <LayerMap onLoad={this.MapOnload} />
         {/* 切换底图组件 */}
         {/* <ChangeBaseMap onChange={this.changeMap}/> */}
-        <BasemapGallery></BasemapGallery>
+        {/* <BasemapGallery></BasemapGallery> */}
         {/* 工具栏 */}
         <ToolBar></ToolBar>
+        <BottomToolBar></BottomToolBar>
         <LengedList></LengedList>
         <Location></Location>
         <Sider width={360}>

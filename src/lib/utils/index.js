@@ -88,7 +88,6 @@ export const loadFeatureJSON = function (data, type = "WTK") {
 };
 
 const getPolygonFillColor = (properties, fillColorKeyVals) => {
-  debugger
   let fillColor;
   if (fillColorKeyVals) {
     const proerty = fillColorKeyVals[0].property;

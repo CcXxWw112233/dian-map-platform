@@ -1,7 +1,8 @@
 .wrap {
   padding: 0;
-  height: 300px;
+  height: 400px;
   z-index: 99;
+  background-color: #fff;
   font-family: PingFangSC-Semibold, PingFang SC;
   p {
     width: 100%;
@@ -15,11 +16,49 @@
       font-size: 14px;
     }
   }
+  .layerItems {
+    height: 108px;
+    margin: 0 16px;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    white-space: nowrap;
+    overflow-y: hidden;
+    align-items: center;
+    // border-bottom: 1px solid #000;
+  }
+  .layerItem {
+    width: 60px;
+    height: 60px;
+    background: #EFF0EF;
+    border-radius: 4px;
+    margin: 0 16px 0 0;
+    cursor: pointer;
+    &.active {
+      border:2px solid rgba(23,105,255,1);
+    }
+  }
+  .layerName {
+    position: relative;
+    top: 36px;
+    text-align: center;
+    margin: 0;
+    font-size:12px;
+    font-family:PingFangSC-Semibold,PingFang SC;
+    font-weight:600;
+    color:rgba(0,0,0,0.65);
+    line-height:17px;
+  }
+  .myDirection {
+    zoom: 0.8;
+    margin: 5px 0;
+  }
   .controller {
     position: absolute;
     bottom: 10px;
     right: 100%;
-    width: 28px;
+    width: 30px;
     height: 54px;
     background: #ffffff;
     -webkit-box-shadow: 0px 2px 16px 0px rgba(0, 0, 0, 0.09);
