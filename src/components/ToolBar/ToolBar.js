@@ -77,33 +77,6 @@ export default class ToolBar extends PureComponent {
         icon: '&#xe71c;',
         cb: circleDrawing.createDrawing.bind(circleDrawing)
       }]
-    },{
-      name: '缩放',
-      key: 'zoom',
-      icon: '&#xe65c;',
-      children: [
-        {
-        name: '放大',
-        key: 'zoomIn',
-        icon: '&#xe65d;',
-        cb: myZoomIn.bind(myZoomIn)
-      },{
-        name: '缩小',
-        key: 'zoomOut',
-        icon: '&#xe65e;',
-        cb: myZoomOut.bind(myZoomOut)
-      },{
-        name: '框选区域放大',
-        key: 'zoomIn2',
-        icon: '&#xe65e;',
-        cb: myDragZoom.setVal.bind(myDragZoom)
-      }]
-    },{
-      name: '全屏',
-      key: 'fullscreen',
-      icon: '&#xe66e;',
-      children: [],
-      cb: myFullScreen.change.bind(myFullScreen)
     }]
     // const tools = [
     //   {
