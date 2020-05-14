@@ -1,4 +1,4 @@
-import React, { PureComponent } from "react";
+import React, { useState, PureComponent } from "react";
 import styles from "./LengedList.less";
 import mapSource from "utils/mapSource";
 import mapApp from "utils/INITMAP";
@@ -9,12 +9,15 @@ import { connect } from "dva";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import { Row } from "antd";
 const Lenged = ({ data }) => {
-  let activeKey = [];
-  data.forEach((item) => {
-    activeKey.push(item.key);
-  });
+  let activeKeys = []
+  data.forEach(item => {
+    activeKeys.push(item.key)
+  })
   return (
-    <Collapse expandIconPosition="right" activeKey={[...activeKey]}>
+    <Collapse
+      expandIconPosition="right"
+      activeKey={activeKeys}
+    >
       {data.map((item) => {
         const header = <span>{item.title || ""}</span>;
         return (
@@ -71,15 +74,6 @@ export default class LengedList extends PureComponent {
     this.lastConfig = [];
   }
   handleLengedListClick = () => {
-    // if (this.state.width === 0) {
-    //   this.setState({
-    //     width: 322,
-    //   });
-    // } else {
-    //   this.setState({
-    //     width: 0,
-    //   });
-    // }
     this.setState({
       open: !this.state.open,
     });
@@ -164,7 +158,7 @@ export default class LengedList extends PureComponent {
           onClick={this.handleLengedListClick}
           style={{ height: 120 }}
         >
-          {this.state.width === 0 ? (
+          {this.state.open === false ? (
             <LeftOutlined className={styles.myDirection} />
           ) : (
             <RightOutlined className={styles.myDirection} />
