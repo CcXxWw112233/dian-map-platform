@@ -43,7 +43,6 @@ class PlotEdit extends Observable {
 
 	}
 	initHelperDom() {    
-    debugger
 		if (!this.map || !this.activePlot) {
 			return;
 		}
@@ -269,8 +268,8 @@ class PlotEdit extends Observable {
 			overlay.setPosition(coordinate);
 			overlay.setPositioning('center-center');
     }
-    // const delOverlay = this.map.getOverlayById("featureDelBtn")
-    // delOverlay.setPosition(lastPoi)
+    const delOverlay = this.map.getOverlayById("featureDelBtn")
+    delOverlay.setPosition(lastPoi)
 		var plot = this.activePlot.getGeometry();
 		plot.setPoints(newPoints);
 	};
