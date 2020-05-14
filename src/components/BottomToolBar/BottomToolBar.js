@@ -29,7 +29,7 @@ export default class BottomTollBar extends React.Component {
         cb: myZoomOut.bind(myZoomOut),
       },
       {
-        name: "框选区域放大",
+        name: "拉框放大",
         key: "zoomIn2",
         icon: "&#xe664;",
         cb: myDragZoom.setVal.bind(myDragZoom),
@@ -38,7 +38,7 @@ export default class BottomTollBar extends React.Component {
         name: "全屏",
         key: "fullscreen",
         icon: "&#xe7f3;",
-        type: 2,
+        toggleIcon: true,
         cb: this.toggleFullscreen,
       },
       {
@@ -60,26 +60,29 @@ export default class BottomTollBar extends React.Component {
     });
   };
   toggleFullscreen = () => {
-    myFullScreen.change()
-    this.setState({
-      isFull: !this.state.isFull,
-    },() => {
-      if (this.state.isFull) {
-        this.setState({
-          fullcreenIcon: "&#xe7f7;"
-        })
-      } else {
-        this.setState({
-          fullcreenIcon: "&#xe7f3;"
-        })
+    myFullScreen.change();
+    this.setState(
+      {
+        isFull: !this.state.isFull,
+      },
+      () => {
+        if (this.state.isFull) {
+          this.setState({
+            fullcreenIcon: "&#xe7f7;",
+          });
+        } else {
+          this.setState({
+            fullcreenIcon: "&#xe7f3;",
+          });
+        }
       }
-    })
-  }
+    );
+  };
   render() {
     return (
       <div style={{ position: "absolute", left: "45%", bottom: 0 }}>
         {this.config.map((item) => {
-          const icon = item.type ? this.state.fullcreenIcon : item.icon
+          const icon = item.toggleIcon ? this.state.fullcreenIcon : item.icon;
           return (
             <Button title={item.name} onClick={item.cb}>
               <i

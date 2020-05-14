@@ -43,6 +43,7 @@ class PlotEdit extends Observable {
 
 	}
 	initHelperDom() {    
+    debugger
 		if (!this.map || !this.activePlot) {
 			return;
 		}
@@ -119,7 +120,7 @@ class PlotEdit extends Observable {
 		}
     this.controlPoints = [];
     var cPnts = this.getControlPoints();
-    // this.createDelBtn(cPnts[cPnts.length -1])
+    this.createDelBtn(cPnts[cPnts.length -1])
 		for (var i = 0; i < cPnts.length; i++) {
 			var id = Constants.HELPER_CONTROL_POINT_DIV + '-' + i;
 			var element = DomUtils.get(id);
