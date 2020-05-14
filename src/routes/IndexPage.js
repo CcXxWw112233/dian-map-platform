@@ -110,6 +110,13 @@ class IndexPage extends React.Component {
     // 进行切换
     ChangeMap(val, layers, map, showkeys);
   };
+  tabChange = (val) => {
+    if(val === '1'){
+      let Scout = require('../lib/components/ProjectScouting/ScoutingList').default;
+      Scout.fitToCenter();
+    }
+  }
+
   render() {
     const { TabPane } = Tabs;
     return (
@@ -134,8 +141,9 @@ class IndexPage extends React.Component {
               className="panels"
             >
               <Tabs
-                defaultActiveKey="2"
+                defaultActiveKey="1"
                 tabBarGutter={60}
+                onChange={this.tabChange}
                 style={{
                   flex: "1",
                   display: "flex",

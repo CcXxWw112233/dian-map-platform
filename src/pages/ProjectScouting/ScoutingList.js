@@ -2,6 +2,7 @@ import React, { PureComponent } from "react";
 import styles from "./ScoutingList.less";
 import globalStyle from "../../globalSet/styles/globalStyles.less";
 import { connect } from "dva";
+import Action from '../../lib/components/ProjectScouting/ScoutingList'
 const ScoutingItem = ({ name, date, cb }) => {
   const colors = [
     "brickRed",
@@ -39,10 +40,32 @@ export default class ScoutingList extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
+      projects:[],
       name: "阳山县沙寮村踏勘",
       date: "3/15-3/17",
     };
   }
+
+  componentDidMount(){
+    this.getProjectList();
+  }
+
+  getProjectList = () => {
+    Action.getList().then(res => {
+      // 渲染数据
+      Action.init().then( _ => {
+        Action.renderProjectPoint(res.data || []);
+      })
+
+      this.setState({
+        projects: res.data
+      })
+      // console.log(res)
+    }).catch(err => {
+      console.log(err)
+    })
+  }
+
   handleClick = () => {
     const { dispatch } = this.props;
     dispatch({
@@ -53,24 +76,19 @@ export default class ScoutingList extends PureComponent {
     });
   };
   render() {
-    const { name, date } = this.state;
+    const { projects} = this.state;
     return (
       <div className={styles.wrap + ` ${globalStyle.autoScrollY}`}>
-        <ScoutingItem
-          name={name}
-          date={date}
-          cb={this.handleClick.bind(this)}
-        ></ScoutingItem>
-        <ScoutingItem
-          name={name}
-          date={date}
-          cb={this.handleClick.bind(this)}
-        ></ScoutingItem>
-        <ScoutingItem
-          name={name}
-          date={date}
-          cb={this.handleClick.bind(this)}
-        ></ScoutingItem>
+        { projects.map(item => {
+          return (
+            <ScoutingItem
+            key={item.board_id}
+            name={item.board_name}
+            date={""}
+            cb={this.handleClick.bind(this)}
+            ></ScoutingItem>
+          )
+        })}
         <ScoutingAddBtn cb={this.handleClick.bind(this)} />
       </div>
     );
