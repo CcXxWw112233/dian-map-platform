@@ -101,7 +101,7 @@ export default class PublicData extends React.Component {
     // 根据切换的checkbox，进行增删操作
     this.changeData(old, val, fillColor);
     // 更新保存的列表
-    debugger;
+    // debugger;
     this.checkedParam[from] = val;
     console.log(this.checkedParam);
     let currentLegedList = [];

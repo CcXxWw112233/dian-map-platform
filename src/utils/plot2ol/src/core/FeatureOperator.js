@@ -161,7 +161,7 @@ class FeatureOperator{
    */
     iteratorAttribute(fn, scope) {
         for (let sKey in this.attrs) {
-            if (fn && typeof fn == 'function')
+            if (fn && typeof fn === 'function')
                 fn.call(scope, sKey)
         }
     }

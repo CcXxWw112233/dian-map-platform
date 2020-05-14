@@ -1,14 +1,25 @@
 import axios from 'axios'
 import originJsonp from "jsonp"
-import { getBaseUrl } from './config'
+import { BASIC } from './config'
+import { message } from 'antd'
 
 const instance = axios.create({
   method:"GET",
-  baseURL: getBaseUrl().API_URL
+  baseURL: BASIC.API_URL
 })
-
+let requestTimer = null ;
 instance.interceptors.request.use(config => {
-  console.log(config)
+  let token = BASIC.getUrlParam.token;
+  if(token){
+    config.headers['Authorization'] = token;
+  }
+  else {
+    clearTimeout(requestTimer);
+    requestTimer = setTimeout(()=>{
+      message.error('缺少权限，无法试用地图');
+    },1000)
+    return {}
+  };
   return config ;
 })
 
