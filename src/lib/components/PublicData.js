@@ -2,10 +2,11 @@ import {
   addFeature,
   Source,
   Layer,
-  loadFeatureJSON,
-  getExtent,
-  getPoint,
+  // loadFeatureJSON,
+  // getExtent,
+  // getPoint,
   createStyle,
+  Fit
 } from "../../lib/utils";
 import { publicDataUrl } from "../../services/publicData";
 import mapApp from "../../utils/INITMAP";
@@ -152,11 +153,12 @@ const publicData = {
   // 通过元素的范围 (extent)来进行视图移动
   areaForExtent: function (extent, duration = 1000) {
     if (extent) {
-      mapApp.view.fit(extent, {
+      // 动画
+      Fit(mapApp.view,extent,{
         size: mapApp.map.getSize(),
         maxZoom: mapApp.view.getMaxZoom(),
         duration,
-      });
+      })
     }
   },
   clear: function ({ removeLayer }) {

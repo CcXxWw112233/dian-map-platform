@@ -1,4 +1,4 @@
-import { Feature } from "ol";
+import { Feature ,Overlay} from "ol";
 import {
   LineString,
   Point,
@@ -10,22 +10,23 @@ import {
 import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
 import { GeoJSON, WKT } from "ol/format";
+import { transform } from 'ol/proj'
 import {
   getCenter,
-  getBottomLeft,
-  getBottomRight,
+  // getBottomLeft,
+  // getBottomRight,
   getTopLeft,
-  getTopRight,
+  // getTopRight,
 } from "ol/extent";
 import {
   Fill,
   Text,
   Stroke,
   Style,
-  MultiLineString as MultiLineStyle,
-  LineString as LineStyle,
-  MultiPoint as MultiPointStyle,
-  MultiPolygon as MultiPolygonStyle,
+  // MultiLineString as MultiLineStyle,
+  // LineString as LineStyle,
+  // MultiPoint as MultiPointStyle,
+  // MultiPolygon as MultiPolygonStyle,
   Icon,
 } from "ol/style";
 
@@ -87,7 +88,7 @@ export const loadFeatureJSON = function (data, type = "WTK") {
   return new GeoJSON().readFeature(data);
 };
 
-const getPolygonFillColor = (properties, fillColorKeyVals) => {
+const getPolygonFillColor = (properties = {}, fillColorKeyVals = []) => {
   let fillColor;
   if (fillColorKeyVals) {
     const proerty = fillColorKeyVals[0].property;
@@ -117,8 +118,12 @@ const getPolygonFillColor = (properties, fillColorKeyVals) => {
   return fillColor;
 };
 
-export const createStyle = function (type, options, properties, fillColorKeyVals) {
-  const fillColor = getPolygonFillColor(properties, fillColorKeyVals);
+export const createStyle = function (type, options = {}, properties = {}, fillColorKeyVals = []) {
+  let fillColor = null;
+  if(properties && Object.keys(properties).length && fillColorKeyVals && fillColorKeyVals.length){
+    fillColor = getPolygonFillColor(properties, fillColorKeyVals);
+  }
+  
   // debugger
   let defaultColor = "#3399cc";
   // 填充色
@@ -135,7 +140,7 @@ export const createStyle = function (type, options, properties, fillColorKeyVals
     ? new Text({
         offsetX: 0,
         offsetY: -25,
-        text: fillColorKeyVals
+        text: fillColorKeyVals && fillColorKeyVals.length
           ? `${options.text}(${properties[fillColorKeyVals[0].property]})`
           : options.text,
         fill: new Fill({
@@ -188,6 +193,24 @@ export const createStyle = function (type, options, properties, fillColorKeyVals
     });
   }
 };
+
+export const TransformCoordinate = (coor,from = 'EPSG:4326',to = 'EPSG:3857') => {
+  return transform(coor,from,to);
+}
+
+export const Fit = (view,extent,option,duration = 1000) => {
+  if(view){
+    view.cancelAnimations();
+    view.fit(extent,{duration,...option,})
+  }
+}
+
+export const createOverlay = (ele ,data ) => {
+  return new Overlay({
+    element: ele,
+    ...data
+  })
+}
 
 // 添加source
 export const Source = function (data) {
