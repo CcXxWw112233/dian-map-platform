@@ -103,7 +103,6 @@ export default class PublicData extends React.Component {
     // 更新保存的列表
     // debugger;
     this.checkedParam[from] = val;
-    console.log(this.checkedParam);
     let currentLegedList = [];
     const paramKeys = Object.keys(this.checkedParam);
     for (let i = 0; i < lengedListConf.length; i++) {

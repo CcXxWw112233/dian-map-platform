@@ -84,7 +84,7 @@ export default class BottomTollBar extends React.Component {
         {this.config.map((item) => {
           const icon = item.toggleIcon ? this.state.fullcreenIcon : item.icon;
           return (
-            <Button title={item.name} onClick={item.cb}>
+            <Button key={item.key} title={item.name} onClick={item.cb}>
               <i
                 className={globalStyle.global_icon}
                 dangerouslySetInnerHTML={{ __html: icon }}

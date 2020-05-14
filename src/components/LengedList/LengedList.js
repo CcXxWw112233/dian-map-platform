@@ -1,4 +1,4 @@
-import React, { PureComponent } from "react";
+import React, { useState, PureComponent } from "react";
 import styles from "./LengedList.less";
 import mapSource from "utils/mapSource";
 import mapApp from "utils/INITMAP";
@@ -7,18 +7,22 @@ import { Collapse } from "antd";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import { connect } from "dva";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
+import { Row } from "antd";
 const Lenged = ({ data }) => {
-  let activeKey = [];
-  data.forEach((item) => {
-    activeKey.push(item.key);
-  });
+  let activeKeys = []
+  data.forEach(item => {
+    activeKeys.push(item.key)
+  })
   return (
-    <Collapse expandIconPosition="right" activeKey={[...activeKey]}>
+    <Collapse
+      expandIconPosition="right"
+      activeKey={activeKeys}
+    >
       {data.map((item) => {
         const header = <span>{item.title || ""}</span>;
         return (
           <Collapse.Panel header={header} key={item.key}>
-            {item.content.map((itemContent) => {
+            {item.content.map((itemContent, index) => {
               let style = {
                 marginRight: 10,
               };
@@ -46,10 +50,10 @@ const Lenged = ({ data }) => {
                 style = { ...style, ...itemContent.style };
               }
               return (
-                <p>
+                <Row className={styles.row} key={item.key + index}>
                   <div style={style}></div>
                   <span>{itemContent.font}</span>
-                </p>
+                </Row>
               );
             })}
           </Collapse.Panel>
@@ -63,23 +67,16 @@ export default class LengedList extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      width: 0,
-      transform: "",
+      width: 322,
+      open: false,
       selectedBaseMapId: mapSource[0].id,
     };
     this.lastConfig = [];
   }
   handleLengedListClick = () => {
-    if (this.state.width === 0) {
-      this.setState({
-        width: 322,
-      });
-    } else {
-      this.setState({
-        transform: "",
-        width: 0,
-      });
-    }
+    this.setState({
+      open: !this.state.open,
+    });
   };
   createNULL = () => {
     return (
@@ -113,12 +110,13 @@ export default class LengedList extends PureComponent {
     const { config } = this.props;
     const newConfig = Array.from(new Set(config));
     this.lastConfig = config;
-    const baseStyle = { position: "absolute", bottom: 0, right: 0 };
+    const baseStyle = { position: "absolute", bottom: 0, right: 0, width: 322 };
+    let style = baseStyle;
+    if (!this.state.open) {
+      style = { ...baseStyle, ...{ transform: "translateX(100%)" } };
+    }
     return (
-      <div
-        style={{ ...baseStyle, ...this.state }}
-        className={styles.wrap + " transform"}
-      >
+      <div style={style} className={styles.wrap + " transform"}>
         <div
           style={{
             width: "100%",
@@ -160,7 +158,7 @@ export default class LengedList extends PureComponent {
           onClick={this.handleLengedListClick}
           style={{ height: 120 }}
         >
-          {this.state.width === 0 ? (
+          {this.state.open === false ? (
             <LeftOutlined className={styles.myDirection} />
           ) : (
             <RightOutlined className={styles.myDirection} />

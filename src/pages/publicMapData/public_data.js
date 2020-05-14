@@ -118,12 +118,12 @@ const jsons = {
             },
             {
               scope: "100-200",
-              fillColor: "rgba(131,137,224,0.8)",
+              fillColor: "rgba(218,170,219,0.8)",
               property: "landuse",
             },
             {
               scope: "200-300",
-              fillColor: "rgba(218,170,219,0.8)",
+              fillColor: "rgba(199,133,200,0.8)",
               property: "landuse",
             },
             {
