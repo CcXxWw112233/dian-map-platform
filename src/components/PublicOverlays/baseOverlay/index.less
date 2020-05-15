@@ -1,0 +1,32 @@
+.baseOverlay{
+    position: relative;
+    border-radius: 5px;
+    border: 1px solid rgba(0,0,0,0.15);
+    padding: 8px 6px;
+    .baseOverlayAngle{
+        position: absolute;
+        border: 10px solid transparent;
+        &.bottomCenter{
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: -20px;
+            border-bottom-color:transparent !important ;
+            border-left-color:transparent !important ;
+            border-right-color: transparent !important;
+        }
+        &.bottomLeft{
+            left: 0;
+            bottom: -20px;
+            border-bottom-color:transparent !important ;
+            border-left-color:transparent !important ;
+            border-right-color: transparent !important;
+        }
+        &.bottomRight{
+            right: 0;
+            bottom: -20px;
+            border-bottom-color:transparent !important ;
+            border-left-color:transparent !important ;
+            border-right-color: transparent !important;
+        }
+    }
+}

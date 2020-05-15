@@ -10,5 +10,20 @@ export default {
         }
 
         return Promise.reject(response);
+    },
+    REMOVE_BOARD: async (id,data) => {
+        let response = await request('DELETE',`/map/board/${id}`,data);
+        if(BASIC.checkResponse(response)){
+            return response.data;
+        }
+
+        return Promise.reject(response);
+    },
+    EDIT_BOARD_NAME: async (id ,data)=>{
+        let response = await request('PUT',`/map/board/${id}`,data);
+        if(BASIC.checkResponse(response)){
+            return response.data;
+        }
+        return Promise.reject(response);
     }
 }

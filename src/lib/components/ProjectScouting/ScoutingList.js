@@ -1,6 +1,7 @@
 import config from '../../../services/scouting'
 import InitMap from '../../../utils/INITMAP'
 import { project } from '../../../components/PublicOverlays/index'
+import addProjectOverlay from '../../../components/PublicOverlays/addProjectOverlay'
 import { 
     Layer, 
     Source ,
@@ -8,14 +9,16 @@ import {
     addFeature,
     createStyle,
     Fit,
-    createOverlay
+    createOverlay,
+    drawPoint,
 } from '../../utils'
 
 const action = function(){
-    const { GET_SCOUTING_LIST } = config;
+    const { GET_SCOUTING_LIST ,REMOVE_BOARD ,EDIT_BOARD_NAME} = config;
     
     this.state = {
-        overlays: []
+        overlays: [],
+        draw:null
     };
     this.init = async ()=>{
         this.Layer = Layer({id:'project_point_layer',zIndex:11});
@@ -32,6 +35,7 @@ const action = function(){
     }
 
     this.renderProjectPoint = (data)=>{
+        this.Source.clear();
         data && data.forEach(item => {
             let styleOption = {
                 text:item.board_name,
@@ -46,8 +50,9 @@ const action = function(){
             this.Source.addFeature(feature);
         })
         // 视图位移
-        setTimeout(()=>{
-            this.fitToCenter()
+        data && setTimeout(()=>{
+            if(this.Source)
+            this.fitToCenter();
         },500)
         
     }
@@ -61,6 +66,58 @@ const action = function(){
         let overlay = createOverlay(ele.element,{offset:[0, -53]});
         InitMap.map.addOverlay(overlay);
         overlay.setPosition(data.coordinates);
+    }
+
+    // 删除项目
+    this.removeBoard = async (id)=>{
+        return await REMOVE_BOARD(id,{});
+    }
+
+    // 修改项目名称
+    this.editBoardName = async (id,data)=>{
+        return await EDIT_BOARD_NAME(id,data);
+    }
+
+    this.addBoardOverlay = (position) => {
+        return new Promise((resolve, reject) => {
+            let ele = new addProjectOverlay({title:"新建踏勘计划",width:300,style:{zIndex:20}});
+            let overlay = createOverlay(ele.element,{positioning:"bottom-center",offset:[0,-15]});
+            InitMap.map.addOverlay(overlay);
+            overlay.setPosition(position);
+            
+            ele.on = {
+                sure: (val)=>{
+                    // console.log(val)
+                    overlay.setPosition(null);
+                    InitMap.map.removeOverlay(overlay);
+                    resolve(val);
+                },
+                cancel:() => {
+                    overlay.setPosition(null);
+                    InitMap.map.removeOverlay(overlay);
+                    reject({code:"-1"})
+                }
+            }
+        })
+        
+    }
+
+    this.addDrawBoard = ()=>{
+        return new Promise((resolve, reject) => {
+            this.draw = drawPoint(this.Source);
+            this.draw.on('drawend',(evt)=>{
+                InitMap.map.removeInteraction(this.draw);
+                resolve(evt);
+            })
+            this.draw.on('drawabort',(e)=>{
+                reject(e)
+            })
+            InitMap.map.addInteraction(this.draw);
+        })
+    }
+    // 添加项目
+    this.addBoard = () => {
+
     }
 }
 
