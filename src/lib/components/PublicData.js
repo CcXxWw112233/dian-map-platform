@@ -108,7 +108,7 @@ const publicData = {
             ...item.properties,
           });
           if (option.style) {
-            let name = feature.get("name");
+            let name = feature.get("name") || feature.get("text");
             option.style.text = name;
             option.style.showName = option.showName;
             // 创建样式

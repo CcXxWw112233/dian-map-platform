@@ -140,7 +140,7 @@ const config = [
       },
       {
         imgSrc: require("../../assets/img/legend-farm.png"),
-        font: "水系设施(河流、水渠等)",
+        font: "农田用地",
       },
     ],
   },

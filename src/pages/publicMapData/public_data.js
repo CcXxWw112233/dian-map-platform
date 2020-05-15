@@ -395,7 +395,7 @@ const jsons = {
                 strokeWidth: 4,
               },
             },
-            // 水系设施图
+            //水系设施图
             {
               typeName: "lingxi:diji_sxss_polygon",
               cql_filter: "adcode in ('440117','*')",
@@ -420,7 +420,7 @@ const jsons = {
           icon: "",
           key: "map:landforms:forestry",
           loadFeatureKeys: [
-            // 农林耕种图
+            // 农业用地
             {
               typeName: "lingxi:diji_zbtz_polyline",
               cql_filter: "adcode in ('440117','*')",
@@ -428,6 +428,21 @@ const jsons = {
                 strokeColor: "#92D050",
                 strokeWidth: 2,
                 fillColor: "#92D050",
+              },
+            },
+            // 林业用地
+            {
+              typeName: "lingxi:diji_zbtz_point",
+              cql_filter: "adcode in ('440117','*')",
+              showName: true,
+              style: {
+                fillColor: "#803a0a",
+                strokeColor: "#92D050",
+                offsetY: 0,
+                textFillColor: "#000",
+                textStrokeColor: "#92D050",
+                textStrokeWidth: 3,
+                font: "13px sans-serif",
               },
             },
           ],

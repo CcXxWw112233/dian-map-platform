@@ -1,4 +1,4 @@
-import { Feature ,Overlay} from "ol";
+import { Feature, Overlay } from "ol";
 import {
   LineString,
   Point,
@@ -10,7 +10,7 @@ import {
 import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
 import { GeoJSON, WKT } from "ol/format";
-import { transform } from 'ol/proj'
+import { transform } from "ol/proj";
 import {
   getCenter,
   // getBottomLeft,
@@ -23,6 +23,7 @@ import {
   Text,
   Stroke,
   Style,
+  Circle,
   // MultiLineString as MultiLineStyle,
   // LineString as LineStyle,
   // MultiPoint as MultiPointStyle,
@@ -118,13 +119,22 @@ const getPolygonFillColor = (properties = {}, fillColorKeyVals = []) => {
   return fillColor;
 };
 
-export const createStyle = function (type, options = {}, properties = {}, fillColorKeyVals = []) {
+export const createStyle = function (
+  type,
+  options = {},
+  properties = {},
+  fillColorKeyVals = []
+) {
   let fillColor = null;
-  if(properties && Object.keys(properties).length && fillColorKeyVals && fillColorKeyVals.length){
+  if (
+    properties &&
+    Object.keys(properties).length &&
+    fillColorKeyVals &&
+    fillColorKeyVals.length
+  ) {
     fillColor = getPolygonFillColor(properties, fillColorKeyVals);
   }
-  
-  // debugger
+
   let defaultColor = "#3399cc";
   // 填充色
   let fill = new Fill({
@@ -139,10 +149,11 @@ export const createStyle = function (type, options = {}, properties = {}, fillCo
   let text = options.showName
     ? new Text({
         offsetX: 0,
-        offsetY: -25,
-        text: fillColorKeyVals && fillColorKeyVals.length
-          ? `${options.text}(${properties[fillColorKeyVals[0].property]})`
-          : options.text,
+        offsetY: options.offsetY || -25,
+        text:
+          fillColorKeyVals && fillColorKeyVals.length
+            ? `${options.text}(${properties[fillColorKeyVals[0].property]})`
+            : options.text,
         fill: new Fill({
           color: options.textFillColor || defaultColor,
         }),
@@ -155,11 +166,17 @@ export const createStyle = function (type, options = {}, properties = {}, fillCo
     : null;
   if (type === "Point") {
     return new Style({
-      image: new Icon({
-        src: options.iconUrl,
-        color: options.pointColor || defaultColor,
-        scale: options.iconScale || 0.6,
-      }),
+      image: options.iconUrl
+        ? new Icon({
+            src: options.iconUrl,
+            color: options.pointColor || defaultColor,
+            scale: options.iconScale || 0.6,
+          })
+        : new Circle({
+            radius: 5,
+            fill: fill,
+            stroke: stroke,
+          }),
       text: text,
     });
   }
@@ -194,23 +211,27 @@ export const createStyle = function (type, options = {}, properties = {}, fillCo
   }
 };
 
-export const TransformCoordinate = (coor,from = 'EPSG:4326',to = 'EPSG:3857') => {
-  return transform(coor,from,to);
-}
+export const TransformCoordinate = (
+  coor,
+  from = "EPSG:4326",
+  to = "EPSG:3857"
+) => {
+  return transform(coor, from, to);
+};
 
-export const Fit = (view,extent,option,duration = 1000) => {
-  if(view){
+export const Fit = (view, extent, option, duration = 1000) => {
+  if (view) {
     view.cancelAnimations();
-    view.fit(extent,{duration,...option,})
+    view.fit(extent, { duration, ...option });
   }
-}
+};
 
-export const createOverlay = (ele ,data ) => {
+export const createOverlay = (ele, data) => {
   return new Overlay({
     element: ele,
-    ...data
-  })
-}
+    ...data,
+  });
+};
 
 // 添加source
 export const Source = function (data) {
