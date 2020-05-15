@@ -9,7 +9,7 @@ export const draw = {
   plottingLayer: null,
   delBtnOverlay: null,
   delBtnOverlayEl: null,
-  create(type, props) {
+  create(type, dispatch) {
     if (!this.map) {
       this.map = mapApp.map
     }
@@ -17,15 +17,21 @@ export const draw = {
       this.plottingLayer = new PlottingLayer(this.map)
       this.plottingLayer.on(FeatureOperatorEvent.ACTIVATE, e => {
         window.featureOperator = e.feature_operator
-        switch (type) {
-          case "POLYLINE":
-            e.feature_operator.feature.getGeometry().on("change", geo => {
-              console.log(geo)
-            })
-            break;
-          default: 
-          break;
-        }
+        // switch (type) {
+        //   case "POLYLINE":
+        //     e.feature_operator.feature.getGeometry().on("change", geo => {
+        //       console.log(geo)
+        //     })
+        //     break;
+        //   default: 
+        //   break;
+        // }
+        dispatch({
+          type: "modal/setVisible",
+          payload: {
+            visible: true
+          }
+        })
       })
       this.plottingLayer.on(FeatureOperatorEvent.DEACTIVATE, e => {
 

@@ -11,7 +11,7 @@ import { draw } from "utils/draw";
 import { boxDrawing, circleDrawing, lineDrawing, pointDrawing, polygonDrawing,arrowDrawing,textDrawing } from 'utils/drawing/index'
 import {connect} from 'dva'
 
-@connect(({ overlay: { childComponet, show } }) => ({  childComponet, show  }))
+@connect(({ modal: { visible, data } }) => ({ visible, data }))
 export default class ToolBar extends PureComponent {
   render() {
     // const tools = [{
@@ -78,6 +78,7 @@ export default class ToolBar extends PureComponent {
     //     cb: circleDrawing.createDrawing.bind(circleDrawing)
     //   }]
     // }]
+    const {dispatch} = this.props
     const tools = [
       {
         name: "对比",
@@ -107,19 +108,19 @@ export default class ToolBar extends PureComponent {
             name: "标记点",
             key: "point",
             icon: "&#xe715;",
-            cb: () => draw.create('MARKER'),
+            cb: () => draw.create('MARKER', dispatch),
           },
           {
             name: "标记线",
             key: "line",
             icon: "&#xe716;",
-            cb: () => draw.create('POLYLINE'),
+            cb: () => draw.create('POLYLINE', dispatch),
           },
           {
             name: "标记面",
             key: "polygon",
             icon: "&#xe718;",
-            cb: () => draw.create('POLYGON'),
+            cb: () => draw.create('POLYGON', dispatch),
           },
         ],
       },
@@ -138,19 +139,19 @@ export default class ToolBar extends PureComponent {
             name: "箭头",
             key: "arrow",
             icon: "&#xe71a;",
-            cb: () => draw.create('FINE_ARROW'),
+            cb: () => draw.create('FINE_ARROW', dispatch),
           },
           {
             name: "矩形",
             key: "rect",
             icon: "&#xe71b;",
-            cb: () => draw.create('RECTANGLE'),
+            cb: () => draw.create('RECTANGLE', dispatch),
           },
           {
             name: "圆形",
             key: "circle",
             icon: "&#xe71c;",
-            cb: () => draw.create('CIRCLE'),
+            cb: () => draw.create('CIRCLE', dispatch),
           },
         ],
       },
