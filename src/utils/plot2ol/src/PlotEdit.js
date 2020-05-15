@@ -137,9 +137,9 @@ class PlotEdit extends Observable {
 			DomUtils.addListener(element, 'touchstart', this.controlPointMouseDownHandler, this);
 		}
 		//--fixdyj 赋值
-		// this._is_controlpoint_pointermove = (e) => {
-		// 	this.controlPointMouseMoveHandler(e);
-		// }
+		this._is_controlpoint_pointermove = (e) => {
+			this.controlPointMouseMoveHandler(e);
+		}
 		//--fix dyj 在地图上无论怎么绑都无法触发。
 		//--因为被map屏蔽了
 		this.map.mapBrowserEventHandler_.addEventListener('pointermove', this._is_controlpoint_pointermove);
