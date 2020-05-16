@@ -1,8 +1,10 @@
 import React,{ Fragment} from 'react'
 import { Menu, Dropdown ,Popconfirm ,Input ,Button ,Space} from 'antd';
-import { SettingOutlined ,CheckCircleOutlined ,CloseCircleOutlined} from '@ant-design/icons'
+import { SettingOutlined ,
+    // CheckCircleOutlined ,CloseCircleOutlined
+} from '@ant-design/icons'
 import styles from '../ScoutingList.less'
-
+import animateCss from '../../../assets/css/animate.min.css'
 export default class ScoutingItem extends React.PureComponent {
     constructor(props){
         super(props);
@@ -76,8 +78,16 @@ export default class ScoutingItem extends React.PureComponent {
         );
         return (
             <div
-                className={`${styles.btn} ${styles.scoutingItem} ${this.colorStyle}`}
+                className={
+                    [
+                        animateCss.animated ,
+                        animateCss.slideInRight,
+                        styles.btn,
+                        styles.scoutingItem,
+                        this.colorStyle
+                    ].join(" ")}
                 onClick={cb}
+                style={{...this.props.style}}
             >
                 <div className={styles.settings} onClick={e => e.stopPropagation()}>
                     <Dropdown overlay={menu} 

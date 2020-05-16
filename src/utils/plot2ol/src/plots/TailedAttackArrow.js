@@ -1,7 +1,7 @@
 import PlotTypes from '../PlotTypes'
 import AttackArrow from './AttackArrow'
 import * as PlotUtils from '../utils/plot_util'
-import Constants from '../Constants'
+// import Constants from '../Constants'
 export default class TailedAttackArrow extends AttackArrow {
 
     constructor(points) {

@@ -30,7 +30,7 @@ export default function initOverlay(data = {}){
     `
 
     okBtn.onclick = ()=>{
-        let inputval = div.querySelector('#addProjectInput').val;
+        let inputval = div.querySelector('#addProjectInput').value;
         if(!inputval) return ;
         this.on['sure'] && this.on['sure'].call(this, {name: inputval})
     }

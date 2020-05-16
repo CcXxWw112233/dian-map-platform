@@ -3,7 +3,7 @@ import styles from "./publicMapData.less";
 import DataItem from "./DataItem";
 import PublicDataActions from "../../lib/components/PublicData";
 import globalStyle from "../../globalSet/styles/globalStyles.less";
-import publicData from "../../lib/components/PublicData";
+// import publicData from "../../lib/components/PublicData";
 import lengedListConf from "components/LengedList/config";
 import { connect } from "dva";
 const MenuData = require("./public_data").default;

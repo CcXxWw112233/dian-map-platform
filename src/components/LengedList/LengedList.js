@@ -62,21 +62,24 @@ const Lenged = ({ data }) => {
     </Collapse>
   );
 };
-@connect(({ lengedList: { config } }) => ({ config }))
+@connect(({ lengedList: { config } ,openswitch: {lengedSwitch, showLengedButton }}) => ({ config ,lengedSwitch ,showLengedButton}))
 export default class LengedList extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
       width: 322,
-      open: false,
       selectedBaseMapId: mapSource[0].id,
     };
     this.lastConfig = [];
   }
   handleLengedListClick = () => {
-    this.setState({
-      open: !this.state.open,
-    });
+    let { lengedSwitch, dispatch } = this.props;
+    dispatch({
+      type:"openswitch/updateDatas",
+      payload:{
+        lengedSwitch: !lengedSwitch
+      }
+    })
   };
   createNULL = () => {
     return (
@@ -107,12 +110,12 @@ export default class LengedList extends PureComponent {
     });
   };
   render() {
-    const { config } = this.props;
+    const { config ,lengedSwitch, showLengedButton} = this.props;
     const newConfig = Array.from(new Set(config));
     this.lastConfig = config;
     const baseStyle = { position: "absolute", bottom: 0, right: 0, width: 322 };
     let style = baseStyle;
-    if (!this.state.open) {
+    if (!lengedSwitch) {
       style = { ...baseStyle, ...{ transform: "translateX(100%)" } };
     }
     return (
@@ -153,19 +156,22 @@ export default class LengedList extends PureComponent {
             )}
           </div>
         </div>
-        <div
-          className={styles.controller}
-          onClick={this.handleLengedListClick}
-          style={{ height: 120 }}
-        >
-          {this.state.open === false ? (
-            <LeftOutlined className={styles.myDirection} />
-          ) : (
-            <RightOutlined className={styles.myDirection} />
-          )}
-          <span style={{ borderBottom: "1px solid" }}>底图</span>
-          <span>图例</span>
-        </div>
+        { showLengedButton ? 
+          <div
+            className={styles.controller}
+            onClick={this.handleLengedListClick}
+            style={{ height: 120 }}
+          >
+            {lengedSwitch === false ? (
+              <LeftOutlined className={styles.myDirection} />
+            ) : (
+              <RightOutlined className={styles.myDirection} />
+            )}
+            <span style={{ borderBottom: "1px solid" }}>底图</span>
+            <span>图例</span>
+          </div>
+        :"" }
+        
       </div>
     );
   }

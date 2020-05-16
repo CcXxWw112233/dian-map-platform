@@ -1,8 +1,8 @@
 
 import FTStyle from "./Style";
 import Style from 'ol/style/Style'
-import Stroke from 'ol/style/Stroke'
-import Fill from 'ol/style/Fill'
+// import Stroke from 'ol/style/Stroke'
+// import Fill from 'ol/style/Fill'
 import Icon from 'ol/style/Icon'
 class MarkerStyle extends FTStyle {
 

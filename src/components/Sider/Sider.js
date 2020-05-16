@@ -3,7 +3,7 @@ import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import styles from "./Sider.less";
 import { connect } from 'dva'
 
-@connect(({openswitch:{ slideSwitch }})=>({ slideSwitch }))
+@connect(({openswitch:{ slideSwitch ,showSlideButton}})=>({ slideSwitch ,showSlideButton}))
 export default class Sider extends PureComponent {
   constructor(props) {
     super(props);
@@ -24,7 +24,7 @@ export default class Sider extends PureComponent {
   }
 
   render() {
-    const { width, children , slideSwitch} = this.props;
+    const { width, children , slideSwitch ,showSlideButton } = this.props;
     let style = {
       width: width,
     };
@@ -34,14 +34,19 @@ export default class Sider extends PureComponent {
     return (
       <div className={styles.wrap} style={style}>
         <div className={styles.main}>{children}</div>
-        <div className={styles.conttroller} onClick={this.showDrawer}>
-          {slideSwitch ? (
-            <LeftOutlined className={styles.myDirection} />
-          ) : (
-            <RightOutlined className={styles.myDirection} />
-          )}
-          <span className={styles.txt}>{slideSwitch ? '收起':'展开'}</span>
-        </div>
+        {
+          showSlideButton ?
+            <div className={styles.conttroller} onClick={this.showDrawer}>
+            {slideSwitch ? (
+              <LeftOutlined className={styles.myDirection} />
+            ) : (
+              <RightOutlined className={styles.myDirection} />
+            )}
+            <span className={styles.txt}>{slideSwitch ? '收起':'展开'}</span> 
+          </div>
+          : ""
+        }
+        
       </div>
     );
   }
