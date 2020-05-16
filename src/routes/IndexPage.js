@@ -9,6 +9,7 @@ import { getMyPosition } from "../utils/getMyPosition";
 import PublicData from "../pages/publicMapData/publicMapData";
 import ProjectScouting from "../pages/ProjectScouting/ScoutingList";
 import ScoutingDetails from "../pages/ProjectScouting/ScoutingDetails";
+import ProjectModal from "../pages/projectModal/Modal"
 // import { PublicData, ProjectScouting } from 'pages/index'
 import { Tabs } from "antd";
 
@@ -127,6 +128,7 @@ class IndexPage extends React.Component {
         {/* <ChangeBaseMap onChange={this.changeMap}/> */}
         {/* <BasemapGallery></BasemapGallery> */}
         {/* 工具栏 */}
+        <ProjectModal></ProjectModal>
         <ToolBar></ToolBar>
         <BottomToolBar></BottomToolBar>
         <LengedList></LengedList>
