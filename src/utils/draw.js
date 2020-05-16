@@ -1,9 +1,9 @@
 import PlottingLayer from './plot2ol/src/PlottingLayer'
 import FeatureOperatorEvent from './plot2ol/src/events/FeatureOperatorEvent'
 import mapApp from './INITMAP'
-import Overlay from 'ol/Overlay'
-import * as DomUtils from './plot2ol/util/dom_util'
-import { connectEvent, disconnectEvent } from './plot2ol/util/core'
+// import Overlay from 'ol/Overlay'
+// import * as DomUtils from './plot2ol/util/dom_util'
+// import { connectEvent, disconnectEvent } from './plot2ol/util/core'
 export const draw = {
   map: null,
   plottingLayer: null,

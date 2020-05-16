@@ -1,14 +1,14 @@
 import React, { PureComponent } from "react";
 import { DropOption } from "components";
 import styles from "./ToolBar.less";
-import {
-  myZoomIn,
-  myZoomOut,
-  myFullScreen,
-  myDragZoom,
-} from "utils/drawing/public";
+// import {
+//   myZoomIn,
+//   myZoomOut,
+//   myFullScreen,
+//   myDragZoom,
+// } from "utils/drawing/public";
 import { draw } from "utils/draw";
-import { boxDrawing, circleDrawing, lineDrawing, pointDrawing, polygonDrawing,arrowDrawing,textDrawing } from 'utils/drawing/index'
+// import { boxDrawing, circleDrawing, lineDrawing, pointDrawing, polygonDrawing,arrowDrawing,textDrawing } from 'utils/drawing/index'
 import {connect} from 'dva'
 
 @connect(({ modal: { visible, data } }) => ({ visible, data }))

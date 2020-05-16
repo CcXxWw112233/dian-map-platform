@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { DownOutlined } from "@ant-design/icons";
 import { Dropdown, Button, Menu } from "antd";
-import { MyIcon } from "components/utils";
+// import { MyIcon } from "components/utils";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 
 const DropOption = ({ options }) => {

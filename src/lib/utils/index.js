@@ -11,6 +11,7 @@ import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
 import { GeoJSON, WKT } from "ol/format";
 import { transform } from "ol/proj";
+import { Draw } from 'ol/interaction'
 import {
   getCenter,
   // getBottomLeft,
@@ -232,6 +233,13 @@ export const createOverlay = (ele, data) => {
     ...data,
   });
 };
+
+export const drawPoint = (source)=>{
+  return new Draw({
+    source:source,
+    type:"Point"
+  })
+}
 
 // 添加source
 export const Source = function (data) {

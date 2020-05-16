@@ -1,7 +1,7 @@
 import FTStyle from "./Style";
 import Style from 'ol/style/Style'
 import Stroke from 'ol/style/Stroke'
-import Fill from 'ol/style/Fill'
+// import Fill from 'ol/style/Fill'
 
 class PolyLineStyle extends FTStyle {
 

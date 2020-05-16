@@ -16,11 +16,11 @@ import { Tabs } from "antd";
 import { Main } from "components";
 import {
   ToolBar,
-  Location,
-  BasemapGallery,
+  // Location,
+  // BasemapGallery,
   Sider,
   Search,
-  CityPanel,
+  // CityPanel,
 } from "components/index";
 import Overlay from "components/Overlay/Overlay";
 

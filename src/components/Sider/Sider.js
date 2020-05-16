@@ -1,43 +1,52 @@
 import React, { PureComponent } from "react";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import styles from "./Sider.less";
+import { connect } from 'dva'
 
+@connect(({openswitch:{ slideSwitch ,showSlideButton}})=>({ slideSwitch ,showSlideButton}))
 export default class Sider extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      open: true,
-      txt: "收起",
+
     };
   }
 
   showDrawer = () => {
-    if (this.state.open) {
-      this.setState({ open: false, txt: "展开" });
-    } else {
-      this.setState({ open: true, txt: "收起" });
-    }
+    let { dispatch ,slideSwitch } = this.props;
+    // 开关slide
+    dispatch({
+      type:"openswitch/updateDatas",
+      payload:{
+        slideSwitch: !slideSwitch
+      }
+    })
   }
 
   render() {
-    const { width, children } = this.props;
+    const { width, children , slideSwitch ,showSlideButton } = this.props;
     let style = {
       width: width,
     };
-    if (!this.state.open) {
+    if (!slideSwitch) {
       style = { ...style, ...{ transform: "translateX(-100%)" } };
     }
     return (
       <div className={styles.wrap} style={style}>
         <div className={styles.main}>{children}</div>
-        <div className={styles.conttroller} onClick={this.showDrawer}>
-          {this.state.open ? (
-            <LeftOutlined className={styles.myDirection} />
-          ) : (
-            <RightOutlined className={styles.myDirection} />
-          )}
-          <span className={styles.txt}>{this.state.txt}</span>
-        </div>
+        {
+          showSlideButton ?
+            <div className={styles.conttroller} onClick={this.showDrawer}>
+            {slideSwitch ? (
+              <LeftOutlined className={styles.myDirection} />
+            ) : (
+              <RightOutlined className={styles.myDirection} />
+            )}
+            <span className={styles.txt}>{slideSwitch ? '收起':'展开'}</span> 
+          </div>
+          : ""
+        }
+        
       </div>
     );
   }

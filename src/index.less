@@ -4,6 +4,10 @@ html, body, :global(#root) {
   padding: 0;
   margin: 0;
 }
+:global(*){
+  outline: none;
+  box-sizing: border-box;
+}
 :global(.ol-zoom){
   display: none;
 }
@@ -70,4 +74,29 @@ html, body, :global(#root) {
   border: 5px solid transparent;
   border-top-color: rgba(0 ,0 ,0, 0.5);
   bottom: -10px;
+}
+
+:global{
+  .slideRight-enter {
+      transform: translateX(100%);
+      opacity: 0;
+      height: 0;
+  }
+  .slideRight-enter-active {
+      opacity: 1;
+      transform: translateX(0);
+      height: 85px;
+      transition: all 500ms ease-in;
+  }
+  .slideRight-exit {
+      transform: translateX(0);
+      opacity: 1;
+      height: 85px;
+  }
+  .slideRight-exit-active {
+      opacity: 0;
+      height: 0;
+      transform: translateX(-100%);
+      transition: all 500ms ease-in;
+  }
 }
