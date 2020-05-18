@@ -1,6 +1,7 @@
 import React from "react";
 import styles from "./Main.less";
 
+
 export default class Main extends React.Component {
   constructor(props) {
     super(props)
@@ -23,7 +24,8 @@ export default class Main extends React.Component {
       visibleStyle.display = 'none'
     }
     return ( 
-    <div className={styles.wrap} style={{...mainStyle, ...visibleStyle}}>
+    <div className={[styles.wrap].join(" ")} 
+    style={{...mainStyle}}>
       {children}
     </div>
     )

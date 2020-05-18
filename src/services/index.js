@@ -1,4 +1,5 @@
 import axios from 'axios'
+import qs from 'qs'
 import originJsonp from "jsonp"
 import { BASIC } from './config'
 import { message } from 'antd'
@@ -29,10 +30,12 @@ instance.interceptors.response.use(config => {
 
 // 公用的ajax请求方法。
 let request = (method, url, data, header)=>{
+  let obj = {};
+  method === "GET" ? obj.params = data: obj.data = data;
   return instance({
     method,
     url,
-    data,
+    ...obj,
     headers:{
       ...header
     }

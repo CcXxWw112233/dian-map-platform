@@ -1,6 +1,7 @@
-import React from "react";
+import React, { Fragment } from "react";
 import { connect } from "dva";
 import styles from "./IndexPage.css";
+import animateCss from '../assets/css/animate.min.css'
 import "antd/dist/antd.css";
 import LayerMap from "../components/maps";
 import { ChangeMap } from "../utils/utils";
@@ -10,8 +11,9 @@ import PublicData from "../pages/publicMapData/publicMapData";
 import ProjectScouting from "../pages/ProjectScouting/ScoutingList";
 import ScoutingDetails from "../pages/ProjectScouting/ScoutingDetails";
 import ProjectModal from "../pages/projectModal/Modal"
+import ScoutAction from '../lib/components/ProjectScouting/ScoutingList';
 // import { PublicData, ProjectScouting } from 'pages/index'
-import { Tabs } from "antd";
+import { Tabs ,Spin} from "antd";
 
 import { Main } from "components";
 import {
@@ -46,7 +48,29 @@ class IndexPage extends React.Component {
     left: "0px",
     draw_visible: false,
   };
+  componentDidMount(){
+    this.checkListCach();
+  }
 
+  // 检查缓存中是否存在id，进行判断渲染
+  checkListCach = ()=>{
+    let { dispatch } = this.props;
+    ScoutAction.checkItem().then(res => {
+      dispatch({
+        type: "controller/updateMainVisible",
+        payload: {
+          mainVisible: res.code === 0 ? 'detail' : 'list',
+        },
+      })
+    }).catch(err => {
+      dispatch({
+        type: "controller/updateMainVisible",
+        payload: {
+          mainVisible: 'list',
+        },
+      })
+    })
+  }
   showDrawer = () => {
     const { draw_visible } = this.state;
     this.setState({
@@ -58,7 +82,6 @@ class IndexPage extends React.Component {
       visible: false,
     });
   };
-  componentDidMount() {}
   // 地图加载完成
   MapOnload = ({ map, view }) => {
     this.map = map;
@@ -113,8 +136,7 @@ class IndexPage extends React.Component {
   };
   tabChange = (val) => {
     if(val === '1'){
-      let Scout = require('../lib/components/ProjectScouting/ScoutingList').default;
-      Scout.fitToCenter();
+      ScoutAction.fitToCenter();
     }
   }
 
@@ -134,41 +156,49 @@ class IndexPage extends React.Component {
         <LengedList></LengedList>
         {/* <Location></Location> */}
         <Sider width={360}>
-          <Main visible={this.props.mainVisible}>
-            <div style={{ flex: "0" }}>
-              <Search onInputChange={this.handleInput}></Search>
+          {
+            this.props.mainVisible === 'list' ? 
+            <div className={`${animateCss.animated} ${animateCss.slideInLeft}`}
+            style={{animationDuration:'0.3s',height:'100%'}}>
+              <Main>
+                  <div style={{ flex: "0" }}>
+                    <Search onInputChange={this.handleInput}></Search>
+                  </div>
+                  <div style={{ overflow: "hidden", height: "100%" }} className="panels">
+                    <Tabs
+                      defaultActiveKey="1"
+                      tabBarGutter={60}
+                      onChange={this.tabChange}
+                      style={{
+                        flex: "1",
+                        display: "flex",
+                        flexDirection: "column",
+                        overflow: "hidden",
+                        height: "100%",
+                      }}>
+                      <TabPane tab={<span>项目踏勘</span>} key="1">
+                        <ProjectScouting></ProjectScouting>
+                      </TabPane>
+                      <TabPane tab={<span>公共数据</span>} key="2">
+                        <PublicData />
+                      </TabPane>
+                      <TabPane tab={<span>远程协作</span>} key="3">
+                        远程协作
+                      </TabPane>
+                    </Tabs>
+                  </div>
+              </Main>
             </div>
-            <div
-              style={{ overflow: "hidden", height: "100%" }}
-              className="panels"
-            >
-              <Tabs
-                defaultActiveKey="1"
-                tabBarGutter={60}
-                onChange={this.tabChange}
-                style={{
-                  flex: "1",
-                  display: "flex",
-                  flexDirection: "column",
-                  overflow: "hidden",
-                  height: "100%",
-                }}
-              >
-                <TabPane tab={<span>项目踏勘</span>} key="1">
-                  <ProjectScouting></ProjectScouting>
-                </TabPane>
-                <TabPane tab={<span>公共数据</span>} key="2">
-                  <PublicData />
-                </TabPane>
-                <TabPane tab={<span>远程协作</span>} key="3">
-                  远程协作
-                </TabPane>
-              </Tabs>
-            </div>
-          </Main>
-          <Main visible={!this.props.mainVisible}>
-            <ScoutingDetails></ScoutingDetails>
-          </Main>
+          :
+          this.props.mainVisible === 'loading' ? 
+          <div className={styles.loadingPage}>
+            <Spin/>
+          </div>
+          :
+            <Main>
+              <ScoutingDetails></ScoutingDetails>
+            </Main>
+          }
         </Sider>
         {/* <CityPanel></CityPanel> */}
         <Overlay />

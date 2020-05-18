@@ -27,40 +27,73 @@ export default class ScoutingList extends PureComponent {
   }
 
   componentDidMount(){
-    this.getProjectList();
+    // 检查数据
+    this.renderBoardList();
   }
 
-  getProjectList = () => {
-    Action.getList().then(res => {
-      // 渲染数据
-      Action.init().then( _ => {
-        Action.renderProjectPoint(res.data || []);
-      })
+  renderBoardList = ()=>{
+    // 获取列表
+    this.getProjectList().then(val => {
+      // 没有列表的时候，不进行任何操作
+      if(!val.length) return ;
+      this.renderPoint(val)
+    });
+  }
 
-      this.setState({
-        projects: res.data
-      })
-      // console.log(res)
-    }).catch(err => {
-      console.log(err)
+  renderPoint = (data) => {
+    // 渲染数据
+    Action.init().then( _ => {
+      Action.renderProjectPoint(data || []);
     })
   }
 
-  handleClick = () => {
-    const { dispatch } = this.props;
+  getProjectList = () => {
+    return new Promise((resolve,reject) => {
+      Action.getList().then(res => {
+        this.setState({
+          projects: res.data
+        })
+        resolve(res.data)
+        // console.log(res)
+      }).catch(err => {
+        console.log(err)
+        reject(err);
+      })
+    })
+    
+  }
+
+  // 检查输入的id存不存在与列表中
+  checkData = (data,id) => {
+    for(let i = 0; i< data.length; i++){
+      let item = data[i];
+      // 有存在的数据，可以跳转页面
+      if(item.board_id.toString() === id.toString()){
+        return item;
+      }
+    }
+  }
+
+  // 点击项目
+  handleClick = (val) => {
+    let { dispatch } = this.props;
+    this.checkData(this.state.projects, val.board_id);
+    // 触发本地缓存
+    Action.handleClickBoard(val);
+    // 切换到详情页
     dispatch({
       type: "controller/updateMainVisible",
       payload: {
-        mainVisible: false,
+        mainVisible: 'detail',
       },
-    });
+    })
   };
 
+  // 删除项目
   removeBoard = (val) =>{
     // console.log(val.board_id)
     let id = val.board_id ;
     Action.removeBoard(id).then(res => {
-      console.log(res);
       let list = [...this.state.projects];
       this.setState({
         projects: list.filter(item => item.board_id !== id)
@@ -71,6 +104,7 @@ export default class ScoutingList extends PureComponent {
     })
   }
 
+  // 编辑项目名称
   handleEditBoard = (val,name)=>{
     if(val.board_name === name){
       return ;
@@ -91,6 +125,7 @@ export default class ScoutingList extends PureComponent {
     })
   }
 
+  // 添加项目请求
   addBoard = (val)=>{
     let { name } = val;
     message.destroy();
@@ -112,6 +147,7 @@ export default class ScoutingList extends PureComponent {
       message.error('新增计划失败，请稍后重试')
     })
   }
+  // 显示被隐藏的页面
   showOtherSlide = ()=>{
     let { dispatch } = this.props;
     // 显示已关闭其他不需要的元素
@@ -126,6 +162,7 @@ export default class ScoutingList extends PureComponent {
     })
   }
 
+  // 隐藏不需要的页面
   hideOtherSlide = ()=>{
     let { dispatch } = this.props;
     // 关闭其他不需要的元素
@@ -140,6 +177,7 @@ export default class ScoutingList extends PureComponent {
     })
   }
 
+  // 取消新增
   cancelAdd = (e)=>{
     e && e.preventDefault();
     Action.removeDraw();
@@ -147,6 +185,7 @@ export default class ScoutingList extends PureComponent {
     message.destroy();
   }
 
+  // 添加按钮点击事件
   handleAddClick = () => {
     // 隐藏其他不需要的窗体
     this.hideOtherSlide();

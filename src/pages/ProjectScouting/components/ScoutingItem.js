@@ -97,7 +97,7 @@ export default class ScoutingItem extends React.PureComponent {
                         <SettingOutlined onClick={e => { e.preventDefault();this.setState({visible: !visible})}}/>
                     </Dropdown>
                 </div>
-                <div className={styles.name} onClick={e => e.stopPropagation()}>
+                <div className={styles.name} onClick={e => e.stopPropagation()} onDoubleClick={() => this.setState({editName: true})}>
                     { editName ? 
                         <Fragment>
                             <Input defaultValue={name} placeholder='请输入项目名称' 

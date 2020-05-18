@@ -2,6 +2,7 @@ import config from '../../../services/scouting'
 import InitMap from '../../../utils/INITMAP'
 import { project } from '../../../components/PublicOverlays/index'
 import addProjectOverlay from '../../../components/PublicOverlays/addProjectOverlay'
+import { setSession ,getSession} from '../../../utils/sessionManage'
 import { 
     Layer, 
     Source ,
@@ -20,6 +21,8 @@ const action = function(){
     this.draw = null ;
     this.addProjectFeature = {} ;
     this.addProjectOverlay = {};
+    this.sesstionSaveKey = "ScoutingItemId";
+    this.projects = [];
 
     this.init = async ()=>{
         this.Layer = Layer({id:'project_point_layer',zIndex:11});
@@ -32,7 +35,9 @@ const action = function(){
     // 获取项目列表
     this.getList = async (data = {}) => {
         let id = config.getUrlParam.orgId;
-        return await GET_SCOUTING_LIST(id,data);
+        let obj = await GET_SCOUTING_LIST(id,data);
+        this.projects = obj.data;
+        return obj;
     }
     // 
     this.clearOverlay = ()=>{
@@ -60,7 +65,7 @@ const action = function(){
             this.Source.addFeature(feature);
         })
         // 视图位移
-        data && setTimeout(()=>{
+        data && !!data.length && setTimeout(()=>{
             if(this.Source)
             this.fitToCenter();
         },500)
@@ -89,10 +94,11 @@ const action = function(){
         return await EDIT_BOARD_NAME(id,data);
     }
 
+    // 添加新增项目的弹窗
     this.addBoardOverlay = (position,data = {}) => {
         return new Promise((resolve, reject) => {
-            let ele = new addProjectOverlay({title:"新建踏勘计划",width:300,style:{zIndex:20}});
-            let overlay = createOverlay(ele.element,{positioning:"bottom-center",offset:[0,-15]});
+            let ele = new addProjectOverlay({title:"新建踏勘计划",width:300,style:{zIndex:20},placement:"bottomLeft"});
+            let overlay = createOverlay(ele.element,{positioning:"bottom-left",offset:[-10,-15]});
             this.addProjectOverlay = overlay;
             InitMap.map.addOverlay(overlay);
             overlay.setPosition(position);
@@ -120,6 +126,7 @@ const action = function(){
         
     }
 
+    // 退出了添加项目的交互
     this.removeDraw = ()=>{
         InitMap.map.removeInteraction(this.draw);
         InitMap.map.removeOverlay(this.addProjectOverlay);
@@ -128,6 +135,7 @@ const action = function(){
         }
     }
 
+    // 添加项目的交互
     this.addDrawBoard = ()=>{
         return new Promise((resolve, reject) => {
             this.draw = drawPoint(this.Source);
@@ -145,11 +153,60 @@ const action = function(){
     }
     // 添加项目
     this.addBoard = async (data) => {
-        console.log(data)
         let coor = TransformCoordinate([data.lng,data.lat],"EPSG:3857",'EPSG:4326' );
         
         data.lng = coor[0];data.lat = coor[1];
         return await ADD_BOARD(data);
+    }
+
+    // 进入项目详情
+    this.handleClickBoard = (data)=>{
+        // 保存选中数据到本地
+        setSession(this.sesstionSaveKey ,data.board_id);
+    }
+
+    // 获取保存的本地缓存
+    this.getCacheId = async () => {
+        return await getSession(this.sesstionSaveKey)
+    }
+
+    let getItemData = (data,id)=>{
+        for(let i = 0; i< data.length; i++){
+            if(data[i].board_id == id){
+                return data[i];
+            }
+        }
+    }
+    // 检查是不是有缓存数据
+    this.checkItem = () => {
+        return new Promise((resolve,reject) => {
+            this.getCacheId().then(({data})=>{
+                if(!data){
+                    reject({code: -1,message:"无缓存",data: null})
+                }
+                else{
+                    if(this.projects.length){
+                        let obj = getItemData(this.projects,data);
+                        obj ? resolve({code:0,message:"获取完成",data:obj}) : resolve({code:-1 ,data,message:"数据不存在"});
+                    }else
+                    this.getList().then(res => {
+                        let obj = getItemData(res.data, data);
+                        obj ? resolve({code:0,message:"获取完成",data:obj}) : resolve({code:-1 ,data,message:"数据不存在"});
+                    }).catch(err => {
+                        reject({code:-1,data});
+                    })
+                    
+                }
+            })
+        })
+        
+    }
+    this.clear = () => {
+        if(this.Source){
+            this.Source.clear();
+            this.clearOverlay();
+            this.removeDraw();
+        }
     }
 }
 
