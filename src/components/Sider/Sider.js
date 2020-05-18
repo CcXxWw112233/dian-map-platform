@@ -33,7 +33,7 @@ export default class Sider extends PureComponent {
     }
     return (
       <div className={styles.wrap} style={style}>
-        <div className={styles.main}>{children}</div>
+        <div className={styles.main}>{children && children}</div>
         {
           showSlideButton ?
             <div className={styles.conttroller} onClick={this.showDrawer}>

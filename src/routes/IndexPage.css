@@ -41,6 +41,14 @@
   font-size: 12px;
   box-shadow: 1px 1px 5px #ddd,-1px -1px 5px #ddd;
 }
+.loadingPage{
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+}
 :global(.panels .ant-tabs-content){
   max-height: 100%;
   flex: 1;

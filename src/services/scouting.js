@@ -37,5 +37,22 @@ export default {
         }
         
         return Promise.reject(response);
+    },
+    // 获取项目详情中的区域列表
+    GET_AREA_LIST: async (data) => {
+        let response = await request('GET','/map/area_type/list',data);
+        if(BASIC.checkResponse(response)){
+            return response.data;
+        }
+        return Promise.reject(response);
+    },
+    // 新增区域分类
+    ADD_AREA_BOARD: async (data) => {
+        let response = await request('POST','/map/area_type',data);
+        if(BASIC.checkResponse(response)){
+            return response.data;
+        }
+
+        return Promise.reject(response);
     }
 }

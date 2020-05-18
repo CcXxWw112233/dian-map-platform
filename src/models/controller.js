@@ -1,7 +1,8 @@
 export default {
   namespace:"controller",
   state:{
-    mainVisible: true
+    // list 列表页， loading 加载详情页 detail 详情页
+    mainVisible: 'loading'
   },
   effects:{
 
