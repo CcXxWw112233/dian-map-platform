@@ -181,8 +181,9 @@ export const createStyle = function (
       text: text,
     });
   }
-  if (type === "MultiLineString") {
+  if (type === "MultiLineString" || type === "Polyline") {
     return new Style({
+      text: text,
       stroke: stroke,
     });
   }
