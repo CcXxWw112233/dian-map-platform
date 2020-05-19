@@ -14,7 +14,7 @@ class PlotEdit extends Observable {
    * @constructs
    * @param {ol.Map} map 地图对象
    */
-  constructor(map, layer) {
+  constructor(map, layer, cb) {
     if (!map) {
       return;
     }
@@ -38,6 +38,8 @@ class PlotEdit extends Observable {
     this._ls_pointup = null;
     //--这个比较特殊。绑定在map.mapBrowserEventHandler_上
     this._is_controlpoint_pointermove = null;
+
+    this.cb = cb
   }
   initHelperDom() {
     if (!this.map || !this.activePlot) {
@@ -97,6 +99,10 @@ class PlotEdit extends Observable {
     }
   }
 
+  setCallback(cb) {
+    this.cb = cb
+  }
+
   // 删除按钮
   createDelBtn(pt) {
     const delBtnEle = document.createElement("div");
@@ -116,7 +122,8 @@ class PlotEdit extends Observable {
       delBtnEle,
       "mousedown",
       () => {
-        this.layer.removeFeature(window.featureOperator);
+        // this.layer.removeFeature(window.featureOperator);
+        this.cb()
       },
       this
     );

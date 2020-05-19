@@ -174,15 +174,16 @@ export const createStyle = function (
             scale: options.iconScale || 0.6,
           })
         : new Circle({
-            radius: 5,
+            radius: options.radius || 5,
             fill: fill,
             stroke: stroke,
           }),
       text: text,
     });
   }
-  if (type === "MultiLineString") {
+  if (type === "MultiLineString" || type === "Polyline") {
     return new Style({
+      text: text,
       stroke: stroke,
     });
   }
