@@ -19,7 +19,7 @@ const getBaseUrl = () => {
     // 状态码
     ...code,
     checkResponse: function(res){
-      let data = res.data || res;
+      let data = res.code !== undefined ? res : (res.data || res);
       if(data.code === code.SUCCESS){
         return true;
       }else{

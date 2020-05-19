@@ -54,5 +54,50 @@ export default {
         }
 
         return Promise.reject(response);
+    },
+    // 文件上传
+    UPLOAD_FILE: async (data) => {
+        let response = await request('POST','/map/file/upload',data);
+        if(BASIC.checkResponse(response)){
+            return response.data;
+        }
+
+        return Promise.reject(response)
+    },
+    // 新增一条采集数据
+    ADD_COLLECTION: async (data) => {
+        let response = await request("POST",'/map/collection',data);
+        if(BASIC.checkResponse(response)){
+            return response.data;
+        }
+
+        return Promise.reject(response);
+    },
+    // 获取采集列表
+    GET_COLLECTION_LIST: async (data) => {
+        let response = await request('GET','/map/collection/list',data);
+        if(BASIC.checkResponse(response)){
+            return response.data;
+        }
+        
+        return Promise.reject(response);
+    },
+    // 删除一条采集数据
+    DELETE_COLLECTION: async (id) => {
+        let response = await request('DELETE',`/map/collection/${id}`,{});
+        if(BASIC.checkResponse(response)){
+            return response.data;
+        }
+
+        return Promise.reject(response);
+    },
+    // 修改一条采集数据
+    EDIT_COLLECTION: async (data) => {
+        let response = await request('PUT','/map/collection',data)
+        if(BASIC.checkResponse(response)){
+            return response.data;
+        }
+
+        return Promise.reject(response);
     }
 }

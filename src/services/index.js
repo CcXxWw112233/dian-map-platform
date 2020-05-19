@@ -1,5 +1,4 @@
 import axios from 'axios'
-import qs from 'qs'
 import originJsonp from "jsonp"
 import { BASIC } from './config'
 import { message } from 'antd'

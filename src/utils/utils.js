@@ -141,5 +141,36 @@ export function exitScreen(){
   }
 }
 
+export function dateFormat (val ,format){
+  val = +val;
+  function Zero(number){
+    return number < 10 ? '0'+ number: number;
+  }
+  let date = new Date(val);
+  let year = date.getFullYear();
+  let month = date.getMonth() + 1;
+  let day = date.getDate();
+  let hour = date.getHours();
+  let minut = date.getMinutes();
+  let secon = date.getSeconds();
+  
+  let obj = {
+    "yyyy": year,
+    "MM": Zero(month),
+    "dd": Zero(day),
+    "HH": Zero(hour),
+    "mm": Zero(minut),
+    "ss": Zero(secon)
+  }
+
+  let keys = Object.keys(obj);
+  keys.forEach(item => {
+    format = format.replace(item, obj[item]);
+  })
+
+  return format;
+
+}
+
 
 

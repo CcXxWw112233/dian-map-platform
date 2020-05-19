@@ -16,6 +16,7 @@ app.model(require("./models/controller").default);
 app.model(require("./models/lengedList").default);
 app.model(require("./models/openSwitch").default);
 app.model(require("./models/modal").default);
+app.model(require('./models/uploadNormal').default)
 app.model(require("./models/plotting").default);
 app.model(require("./models/featureOperatorList").default);
 // 4. Router
