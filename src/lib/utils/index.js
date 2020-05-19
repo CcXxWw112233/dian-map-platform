@@ -171,10 +171,10 @@ export const createStyle = function (
         ? new Icon({
             src: options.iconUrl,
             color: options.pointColor || defaultColor,
-            scale: options.iconScale || 0.6,
+            scale: options.iconScale || 0.8,
           })
         : new Circle({
-            radius: 5,
+            radius: options.radius || 5,
             fill: fill,
             stroke: stroke,
           }),
@@ -227,17 +227,18 @@ export const Fit = (view, extent, option, duration = 1000) => {
   }
 };
 
-export const createOverlay = (ele, data) => {
+export const createOverlay = (ele, data = {}) => {
   return new Overlay({
     element: ele,
     ...data,
   });
 };
 
-export const drawPoint = (source)=>{
+export const drawPoint = (source,data = {})=>{
   return new Draw({
     source:source,
-    type:"Point"
+    type:"Point",
+    ...data
   })
 }
 

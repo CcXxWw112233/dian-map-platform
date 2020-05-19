@@ -23,6 +23,9 @@ const action = function(){
     this.addProjectOverlay = {};
     this.sesstionSaveKey = "ScoutingItemId";
     this.projects = [];
+    this.addProjecStyle = createStyle('Point',{
+        iconUrl: require('../../../assets/addPointLocation.png'),
+    })
 
     this.init = async ()=>{
         this.Layer = Layer({id:'project_point_layer',zIndex:11});
@@ -72,7 +75,7 @@ const action = function(){
         
     }
     this.fitToCenter = () => {
-        Fit(InitMap.view, this.Source.getExtent(),{size: InitMap.map.getSize(),padding:[200,50,80,50]})
+        Fit(InitMap.view, this.Source.getExtent(),{size: InitMap.map.getSize(),padding:[200,150,80,400]})
     }
     // 添加overlay
     this.addOverlay = (data = {})=>{
@@ -138,9 +141,10 @@ const action = function(){
     // 添加项目的交互
     this.addDrawBoard = ()=>{
         return new Promise((resolve, reject) => {
-            this.draw = drawPoint(this.Source);
+            this.draw = drawPoint(this.Source,{style:this.addProjecStyle});
             this.draw.on('drawend',(evt)=>{
                 let {feature} = evt;
+                feature.setStyle(this.addProjecStyle);
                 this.addProjectFeature = feature ;
                 InitMap.map.removeInteraction(this.draw);
                 resolve(evt,this);

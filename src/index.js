@@ -16,6 +16,7 @@ app.model(require('./models/controller').default)
 app.model(require('./models/lengedList').default)
 app.model(require('./models/openSwitch').default)
 app.model(require('./models/modal').default)
+app.model(require('./models/uploadNormal').default)
 // 4. Router
 app.router(require('./router').default);
 
