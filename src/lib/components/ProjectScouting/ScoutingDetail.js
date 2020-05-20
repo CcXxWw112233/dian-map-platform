@@ -178,8 +178,8 @@ function Action (){
     this.RemoveArea = async (id) => {
         return await DELETE_AREA(id)
     }
-    this.editAreaName = async (data) => {
-        return await EDIT_AREA_NAME(data)
+    this.editAreaName = async (id,data) => {
+        return await EDIT_AREA_NAME(id,data)
     }
 }
 

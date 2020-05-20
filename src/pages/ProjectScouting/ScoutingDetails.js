@@ -74,9 +74,8 @@ const UploadBtn = ({onChange}) => {
 
 const ScoutingHeader = (props) => {
   let { edit,onCancel,onSave,data,index ,onDragEnter} = props;
-  let [ areaName, setAreaName ] = useState("");
+  let [ areaName, setAreaName ] = useState(data.name);
   let [ isEdit, setIsEdit ] = useState(edit);
-  
   // 保存事件
   const saveItem = ()=>{
     onSave && onSave(areaName);
@@ -100,6 +99,7 @@ const ScoutingHeader = (props) => {
             <Fragment>
               <Input placeholder="请输入名称" value={areaName} 
               style={{width:"70%",marginRight:'2%'}} 
+              allowClear
               onPressEnter={e => {e.stopPropagation();saveItem()}} 
               onClick={(e) => e.stopPropagation()}
               onChange={(e)=>{setAreaName(e.target.value)}}/>
@@ -492,8 +492,20 @@ export default class ScoutingDetails extends PureComponent {
 
   // 保存新增的区域
   saveArea = (data,name)=>{
+    // 编辑状态
     if(data.board_id){
-      
+      Action.editAreaName(data.id,{name}).then(res => {
+        this.onAreaEdit(false,data);
+        this.setState({
+          area_list: this.state.area_list.map(item => {
+            if(item.id === data.id){
+              item.name = name;
+            }
+            return item;
+          })
+        })
+      })
+      message.success('修改成功');
       return ;
     }
     let { current_board } = this.state;
