@@ -3,6 +3,7 @@ import { Checkbox, Row, Button } from "antd";
 import { connect } from "dva";
 import styles from "./TempPlottingPanel.less";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
+import event from '../../lib/utils/event'
 @connect(
   ({
     tempPlotting: { panelVisible, iconVisible },
@@ -113,13 +114,51 @@ export default class TempPlottingPanel extends React.Component {
     }
     return style;
   };
+
+  getSelectedData = () => {
+    let { featureOperatorList } = this.props;
+    let { checkedList } = this.state;
+
+    let list = checkedList.map(item => {
+      let obj = featureOperatorList.find(feature => feature.guid === item);
+      return obj ;
+    })
+    return list;
+  }
+
+  // 转存到项目
+  saveToProject = () => {
+    let { dispatch ,featureOperatorList} = this.props;
+    let arr = this.getSelectedData();
+    // 转存
+    event.Evt.firEvent('hasFeatureToProject',arr);
+    // 转存之后的回调
+    event.Evt.on('appendToProjectSuccess',(val)=>{
+      // console.log(val);
+      let array = [...featureOperatorList];
+      val.forEach(item => {
+        let index = array.findIndex(feature => feature.guid === item.guid);
+        if(index >= 0){
+          // 删除转存成功的数据
+          array.splice(index,1);
+        }
+      })
+      dispatch({
+        type:"featureOperatorList/updateList",
+        payload:{
+          featureOperatorList: array
+        }
+      })
+    })
+  }
+
   render() {
     const { panelVisible, featureOperatorList } = this.props;
     let style = panelVisible ? { display: "" } : { display: "none" };
     return (
       <div className={styles.wrap} style={style}>
         <div className={styles.header}>
-          <span>临时标绘</span>
+          <span>标绘记录</span>
           <i
             className={`${globalStyle.global_icon} ${globalStyle.btn}`}
             style={{ fontSize: 14, float: "right" }}
@@ -162,7 +201,7 @@ export default class TempPlottingPanel extends React.Component {
           </div>
         </div>
         <div className={styles.footer}>
-          <Button type="primary" block>
+          <Button type="primary" block onClick={this.saveToProject}>
             转存到项目
           </Button>
         </div>
