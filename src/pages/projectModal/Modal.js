@@ -7,36 +7,51 @@ import { createStyle } from "@/lib/utils/index";
 const { Option, OptGroup } = Select;
 const { TextArea } = Input;
 
-@connect(({ plotting: { type, layer, operator } }) => ({
-  type,
-  layer,
-  operator,
-}))
-@connect(({ modal: { visible, responseData } }) => ({ visible, responseData }))
-@connect(({ featureOperatorList: { featureOperatorList } }) => ({
-  featureOperatorList,
-}))
+@connect(
+  ({
+    plotting: { type, layer, operator },
+    modal: {
+      visible,
+      responseData,
+      isEdit,
+      featureName,
+      selectName,
+      featureType,
+      remarks,
+    },
+    featureOperatorList: { featureOperatorList },
+  }) => ({
+    type,
+    layer,
+    operator,
+    visible,
+    responseData,
+    featureOperatorList,
+    isEdit,
+    featureName,
+    selectName,
+    featureType,
+    remarks,
+  })
+)
 export default class ProjectModal extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
+    this.props = {
       isEdit: false,
       featureName: "", // 名称
       selectName: "",
       featureType: "", // 类型
       remarks: "", // 备注
-      pointTypes: [], // 点的类型
-      polylineTypes: [], // 线的类型
-      polygonTypes: [], // 面的类型
     };
   }
 
   checkStateChange = (state, attr) => {
     if (state !== attr) {
-      return state
+      return state;
     }
-    return attr
-  }
+    return attr;
+  };
 
   // 大写转换
   toChangedataType = (plottingType) => {
@@ -46,17 +61,17 @@ export default class ProjectModal extends React.Component {
   };
   handleOKClick = () => {
     const state = this.checkInputState();
-    const { dispatch } = this.props
+    const { dispatch } = this.props;
     if (state) {
-      if (this.state.isEdit) {
+      if (this.props.isEdit) {
         // message.success("保存成功");
         let plottingType = this.props.type;
         const tempType = this.toChangedataType(plottingType);
         const defaultOptions = {
           radius: 8,
-          fillColor: "#a8090a",
-          strokeColor: "#000000",
-          text: this.state.featureName,
+          fillColor: "rgba(168,9,10,0.7)",
+          strokeColor: "rgba(168,9,10,1)",
+          text: this.props.featureName,
         };
         const commonStyleOption = {
           textFillColor: "rgba(255,0,0,1)",
@@ -69,33 +84,40 @@ export default class ProjectModal extends React.Component {
           showName: true,
         };
         let options = {};
-        const featureType = this.state.featureType;
-        const operator = this.props.operator
-        const featureTypeState = this.checkStateChange(this.state.featureType, operator.attrs.featureType)
-        const featureNameState = this.checkStateChange(this.state.featureName, operator.attrs.name)
-        const plottingLayer = draw.plottingLayer
-        const me = this
-        const cb = function() {
-          let featureOperatorList = me.props.featureOperatorList
-          plottingLayer.removeFeature(me.props.operator)
-          for (let i = 0; i< featureOperatorList.length;i++) {
+        const featureType = this.props.featureType;
+        const operator = this.props.operator;
+        const featureTypeState = this.checkStateChange(
+          this.props.featureType,
+          operator.attrs.featureType
+        );
+        const featureNameState = this.checkStateChange(
+          this.props.featureName,
+          operator.attrs.name
+        );
+        const plottingLayer = draw.plottingLayer;
+        const me = this;
+        const cb = function () {
+          let featureOperatorList = me.props.featureOperatorList;
+          plottingLayer.removeFeature(me.props.operator);
+          for (let i = 0; i < featureOperatorList.length; i++) {
             if (featureOperatorList[i].guid === me.props.operator.guid) {
-              featureOperatorList.splice(i, 1)
-              break
+              featureOperatorList.splice(i, 1);
+              break;
             }
           }
           dispatch({
             type: "featureOperatorList/updateList",
             payload: {
-              featureOperatorList: featureOperatorList,
+              featureOperatorList: [...featureOperatorList],
             },
           });
-        }
-        plottingLayer.plotEdit.setCallback(cb)
+        };
+        plottingLayer.plotEdit.setCallback(cb);
         if (tempType === "Point") {
           // 如果没有选择类型
           if (!featureTypeState) {
             options = { ...defaultOptions, ...commonStyleOption };
+            this.updateFeatureType(defaultOptions.fillColor);
           } else {
             let tempIconUrl = featureTypeState;
             tempIconUrl = tempIconUrl.replace("img", "");
@@ -122,7 +144,7 @@ export default class ProjectModal extends React.Component {
           if (!featureType) {
             options = {
               ...commonStyleOption,
-              ...{ fillColor: "#a8090a", text: featureNameState },
+              ...{ fillColor: "rgba(168,9,10,0.7)", text: featureNameState },
             };
           } else {
             let tempIconUrl = featureType;
@@ -140,7 +162,7 @@ export default class ProjectModal extends React.Component {
                   ...commonStyleOption,
                   ...{
                     fillColor: pat,
-                    text: me.state.featureName,
+                    text: me.props.featureName,
                   },
                 };
                 const style = createStyle(tempType, options);
@@ -172,21 +194,28 @@ export default class ProjectModal extends React.Component {
     }
   };
 
+  updateFeatureType = (val) => {
+    this.setState({
+      featureType: val,
+    });
+  };
+
   updateOperatorToList = (featureOperator) => {
-    const { dispatch, featureOperatorList } = this.props;
-    console.log(featureOperatorList);
-    featureOperatorList.push(featureOperator);
+    let { dispatch, featureOperatorList } = this.props;
+    let arr = [...featureOperatorList];
+    arr.push(featureOperator);
     dispatch({
       type: "featureOperatorList/updateList",
       payload: {
-        featureOperatorList: featureOperatorList,
+        featureOperatorList: arr,
       },
     });
+    console.log(featureOperator);
   };
 
   // 给featureOperator设置attribute
   setAttribute = () => {
-    const featureOperator = window.featureOperator
+    const featureOperator = window.featureOperator;
     const feature = featureOperator.feature.clone();
     const geometry = feature.getGeometry();
     geometry.transform("EPSG:3857", "EPSG:4326");
@@ -194,10 +223,22 @@ export default class ProjectModal extends React.Component {
     const featureType = this.props.type;
     let newGeom = this.getPointStr(points);
     let attr = {};
-    const featureTypeState = this.checkStateChange(this.state.featureType, featureOperator.attrs.featureType)
-    const featureNameState = this.checkStateChange(this.state.featureName, featureOperator.attrs.featureName)
-    const remarksState = this.checkStateChange(this.state.remarks, featureOperator.attrs.remarks)
-    const selectNameState = this.checkStateChange(this.state.selectName, featureOperator.attrs.selectName)
+    const featureTypeState = this.checkStateChange(
+      this.props.featureType,
+      featureOperator.attrs.featureType
+    );
+    const featureNameState = this.checkStateChange(
+      this.props.featureName,
+      featureOperator.attrs.featureName
+    );
+    const remarksState = this.checkStateChange(
+      this.props.remarks,
+      featureOperator.attrs.remarks
+    );
+    const selectNameState = this.checkStateChange(
+      this.props.selectName,
+      featureOperator.attrs.selectName
+    );
     switch (featureType) {
       case "POINT":
         attr = {
@@ -241,7 +282,7 @@ export default class ProjectModal extends React.Component {
           style: style,
           featureType: featureTypeState,
           main_id: "",
-          name: selectNameState,
+          name: featureNameState,
           remark: remarksState,
           selectName: selectNameState,
         };
@@ -259,17 +300,20 @@ export default class ProjectModal extends React.Component {
   getPointStr = (points) => {
     let pointStr = "";
     if (points && points.length) {
-      points.forEach((point, index) => {
-        pointStr += `${point[0]} ${point[1]},`;
-        if (index === points.length - 1) {
-          pointStr = pointStr.slice(0, pointStr.length - 1);
-        }
-      });
+      if (typeof points[0] === "number") {
+        points.forEach((item, index) => {
+          pointStr += `${item},`;
+        });
+      } else {
+        points.forEach((point, index) => {
+          pointStr += `${point[0]} ${point[1]},`;
+        });
+      }
     }
-    return pointStr;
+    return pointStr.substr(0, pointStr.length - 1);
   };
   checkInputState = () => {
-    if (this.state.featureName.length === 0) {
+    if (this.props.featureName.length === 0) {
       return false;
     }
     return true;
@@ -294,6 +338,13 @@ export default class ProjectModal extends React.Component {
       featureName: value,
       isEdit: true,
     });
+    const { dispatch } = this.props;
+    dispatch({
+      type: "modal/updateData",
+      payload: {
+        featureName: value,
+      },
+    });
   };
   handleTypeSelectChange = (val) => {
     const { responseData } = this.props;
@@ -306,15 +357,27 @@ export default class ProjectModal extends React.Component {
       selectName: value.name,
       featureType: value.value1,
     });
+    const { dispatch } = this.props;
+    dispatch({
+      type: "modal/updateData",
+      payload: {
+        selectName: value.name,
+        featureType: value.value1,
+      },
+    });
   };
   handleRemarksInputChange = (value) => {
     this.setState({
       remarks: value,
       isEdit: true,
     });
-  };
-  clearState = () => {
-    this.setState({});
+    const { dispatch } = this.props
+    dispatch({
+      type: "modal/updateData",
+      payload: {
+        remarks: value,
+      }
+    })
   };
   render() {
     const { visible, responseData, operator } = this.props;
@@ -336,7 +399,6 @@ export default class ProjectModal extends React.Component {
     if (responseData && responseData.data) {
       dataArray = responseData.data;
     }
-    console.log(dataArray);
     return (
       <Modal
         destroyOnClose

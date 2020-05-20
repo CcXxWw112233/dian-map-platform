@@ -30,6 +30,9 @@ import LengedList from "components/LengedList/LengedList"
 
 import BottomToolBar from "components/BottomToolBar/BottomToolBar"
 
+import TempPlottingIcon from "components/TempPlotting/TempPlottingIcon"
+import TempPlottingPanel from "components/TempPlotting/TempPlottingPanel"
+
 @connect(({ controller: { mainVisible } }) => ({ mainVisible }))
 class IndexPage extends React.Component {
   constructor(props) {
@@ -153,6 +156,8 @@ class IndexPage extends React.Component {
         <ProjectModal></ProjectModal>
         <ToolBar></ToolBar>
         <BottomToolBar></BottomToolBar>
+        <TempPlottingIcon></TempPlottingIcon>
+        <TempPlottingPanel></TempPlottingPanel>
         <LengedList></LengedList>
         {/* <Location></Location> */}
         <Sider width={360}>
