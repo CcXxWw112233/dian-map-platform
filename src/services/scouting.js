@@ -99,5 +99,23 @@ export default {
         }
 
         return Promise.reject(response);
+    },
+    // 删除一条分组数据
+    DELETE_AREA: async (id) => {
+        let response = await request('DELETE',`/map/area_type/${id}`);
+        if(BASIC.checkResponse(response)){
+            return response.data;
+        }
+        
+        return Promise.reject(response);
+    } ,
+    // 修改分组名称
+    EDIT_AREA_NAME: async (data) => {
+        let response = await request('PUT',``,data);
+        if(BASIC.checkResponse(response)){
+            return response.data;
+        }
+
+        return Promise.reject(response);
     }
 }

@@ -1,8 +1,8 @@
 import config from '../../../services/scouting'
 import InitMap from '../../../utils/INITMAP'
-import { project } from '../../../components/PublicOverlays/index'
-import addProjectOverlay from '../../../components/PublicOverlays/addProjectOverlay'
+import { project ,addProjectOverlay} from '../../../components/PublicOverlays/index'
 import { setSession ,getSession} from '../../../utils/sessionManage'
+import event from '../../utils/event'
 import { 
     Layer, 
     Source ,
@@ -64,7 +64,7 @@ const action = function(){
             // 创建point
             let feature = addFeature(styleOption.type,{coordinates : styleOption.coordinates});
             feature.setStyle(createStyle(styleOption.type, styleOption));
-            this.addOverlay(styleOption)
+            this.addOverlay(styleOption,item)
             this.Source.addFeature(feature);
         })
         // 视图位移
@@ -78,10 +78,18 @@ const action = function(){
         Fit(InitMap.view, this.Source.getExtent(),{size: InitMap.map.getSize(),padding:[200,150,80,400]})
     }
     // 添加overlay
-    this.addOverlay = (data = {})=>{
+    this.addOverlay = (data = {} ,source)=>{
         let ele = new project(data);
         // console.log(overlay)
         let overlay = createOverlay(ele.element,{offset:[0, -53]});
+
+        ele.on = {
+            click: (e)=>{
+                // console.log(data)
+                // 触发外部更新
+                this.firEvent('projectClick',source)
+            }
+        }
         InitMap.map.addOverlay(overlay);
         this.overlays.push(overlay);
         overlay.setPosition(data.coordinates);
@@ -100,7 +108,13 @@ const action = function(){
     // 添加新增项目的弹窗
     this.addBoardOverlay = (position,data = {}) => {
         return new Promise((resolve, reject) => {
-            let ele = new addProjectOverlay({title:"新建踏勘计划",width:300,style:{zIndex:20},placement:"bottomLeft"});
+            let ele = new addProjectOverlay({
+                title:"新建踏勘计划",
+                width:300,
+                style:{zIndex:20},
+                placement:"bottomLeft",
+                angleColor:"#fff"
+            });
             let overlay = createOverlay(ele.element,{positioning:"bottom-left",offset:[-10,-15]});
             this.addProjectOverlay = overlay;
             InitMap.map.addOverlay(overlay);
@@ -128,6 +142,7 @@ const action = function(){
         })
         
     }
+    
 
     // 退出了添加项目的交互
     this.removeDraw = ()=>{
@@ -213,7 +228,10 @@ const action = function(){
         }
     }
 }
+action.prototype.on = event.Evt.on;
+action.prototype.firEvent = event.Evt.firEvent;
 
 const exportAction = new action();
+// exportAction.prototype.on = new event();
 
 export default exportAction;

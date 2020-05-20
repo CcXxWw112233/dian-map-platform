@@ -7,7 +7,7 @@ const instance = axios.create({
   method:"GET",
   baseURL: BASIC.API_URL
 })
-let requestTimer = null ;
+let requestTimer = null ,responseTimer = null;
 instance.interceptors.request.use(config => {
   let token = BASIC.getUrlParam.token;
   if(token){
@@ -24,6 +24,14 @@ instance.interceptors.request.use(config => {
 })
 
 instance.interceptors.response.use(config => {
+  let { data } = config;
+  if(data.code === BASIC.TOKEN_AUTH_ERROR){
+    clearTimeout(responseTimer);
+    responseTimer = setTimeout(()=>{
+      message.error('权限不足，请重新登录');
+    }, 1000)
+    return config;
+  }
   return config ;
 })
 

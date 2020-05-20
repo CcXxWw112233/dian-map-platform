@@ -5,8 +5,17 @@ import styles from "./ScoutingDetails.less";
 import Action from '../../lib/components/ProjectScouting/ScoutingDetail'
 import ScouListAction from '../../lib/components/ProjectScouting/ScoutingList'
 import { connect } from "dva";
-import { Collapse, Row, Tabs ,Input ,Button, message ,Upload ,Space ,Dropdown ,Menu ,Popconfirm} from "antd";
-import { PlusCircleOutlined ,CheckCircleOutlined, CloseCircleOutlined , SettingTwoTone } from '@ant-design/icons'
+import { Collapse, Row, Tabs ,Input ,
+  Button, message ,Upload ,Space ,
+  Dropdown ,Menu ,Popconfirm ,Popover} from "antd";
+import { 
+  PlusCircleOutlined ,
+  CheckCircleOutlined, 
+  CloseCircleOutlined , 
+  SettingTwoTone ,
+  DeleteOutlined,
+  EditOutlined
+} from '@ant-design/icons'
 import { BASIC } from '../../services/config'
 const { TabPane } = Tabs;
 
@@ -41,44 +50,53 @@ const Title = ({ name, date, cb }) => {
 };
 const UploadBtn = ({onChange}) => {
   return (
+    
     <Upload 
     action='/api/map/file/upload'
     headers={{"Authorization":BASIC.getUrlParam.token}}
     onChange={(e)=> onChange(e)}
     showUploadList={false}
     >
-      <i
-        className={globalStyle.global_icon + ` ${globalStyle.btn} ${styles.uploadBtn}`}
-        style={{ color: "#0D4FF7" }}>
-        &#xe628;
-      </i>
+      <Button 
+      shape='circle'
+      type='primary'
+      ghost 
+      size='large'>
+        <i
+          className={globalStyle.global_icon }
+          style={{ color: "#0D4FF7" }}>
+          &#xe628;
+        </i>
+      </Button>
     </Upload>
   );
 };
-const ScoutingItem = ({ 
-  data ,index ,
-  edit = false ,onCancel ,
-  onError ,onSave,
-  onUpload ,onChange ,
-  dataSource = [],
-  onCollectionRemove,
-  onEditCollection
-}) => {
+
+const ScoutingHeader = (props) => {
+  let { edit,onCancel,onSave,data,index ,onDragEnter} = props;
   let [ areaName, setAreaName ] = useState("");
   let [ isEdit, setIsEdit ] = useState(edit);
-  const header = (
+  
+  // 保存事件
+  const saveItem = ()=>{
+    onSave && onSave(areaName);
+    setIsEdit(false);
+  }
+
+  return (
     <div
       style={{
         display: "flex",
       }}
       onClick={e => {edit ? e.stopPropagation():""}}
+      onDragEnter={onDragEnter}
       > 
       <Fragment>
         <div className={styles.numberIcon}>
           <span>{index}</span>
         </div>
         <div className={styles.text}>
-          { isEdit ? 
+          { isEdit || edit ? 
             <Fragment>
               <Input placeholder="请输入名称" value={areaName} 
               style={{width:"70%",marginRight:'2%'}} 
@@ -86,9 +104,10 @@ const ScoutingItem = ({
               onClick={(e) => e.stopPropagation()}
               onChange={(e)=>{setAreaName(e.target.value)}}/>
               <Button onClick={()=> saveItem()} size='middle' type='primary' icon={<CheckCircleOutlined />}></Button>
-              <Button onClick={() => {setIsEdit(false); onCancel && onCancel()}} size='middle' icon={<CloseCircleOutlined/>}></Button>
+              <Button onClick={() => {setIsEdit(false); onCancel && onCancel(data)}} size='middle' icon={<CloseCircleOutlined/>}></Button>
             </Fragment>
-          : <span>{data.name}</span>
+          : <div className={styles.groupTitle}>{data.name} 
+          </div>
           }
           
         </div>
@@ -96,11 +115,21 @@ const ScoutingItem = ({
     </div>
   );
 
-  // 保存事件
-  const saveItem = ()=>{
-    onSave && onSave(areaName);
-    setIsEdit(false);
-  }
+}
+
+const ScoutingItem = ({ 
+  data,
+  onError ,
+  onUpload ,onChange ,
+  dataSource = [],
+  onCollectionRemove,
+  onEditCollection,
+  onDrop,
+  areaList,onSelectGroup,
+  onAreaEdit = ()=>{},
+  onAreaDelete = ()=>{}
+}) => {
+  
 
   // 开始上传
   const startUpload = ({file , fileList}) => {
@@ -114,9 +143,9 @@ const ScoutingItem = ({
   }
 
   return (
-    <Collapse expandIconPosition="right" className={styles.scoutingItem}>
-      <Collapse.Panel header={header} style={{backgroundColor:"#fff"}}>
-        {/* <div className={styles.itemDetail}>
+        <div onDrop={onDrop}
+        onDragOver={e => {e.preventDefault();}}>
+          {/* <div className={styles.itemDetail}>
           <p className={styles.light}>
             <i className={globalStyle.global_icon}>&#xe616;</i>
             <span>3月15日</span>
@@ -134,24 +163,41 @@ const ScoutingItem = ({
               <div className={`${animateCss.animated} ${animateCss.slideInRight}`}
               style={{animationDuration:"0.3s",animationDelay:index * 0.05 +'s' }}
               key={item.id}>
-                <UploadItem type="paper" data={item} onRemove={onCollectionRemove}
+                <UploadItem 
+                areaList={areaList}
+                onSelectGroup={onSelectGroup}
+                type={Action.checkCollectionType(item.target)}  data={item} onRemove={onCollectionRemove}
                 onEditCollection={onEditCollection}/>
               </div>
             )
           })
         }
-        {/* <UploadItem type="paper" />
-        <UploadItem type="paper" />
-        <UploadItem type="interview" />
-        <UploadItem type="pic" />
-        <UploadItem type="video" />
-        <UploadItem type="word" />
-        <UploadItem type="annotate" />
-        <UploadItem type="plotting" />
-        <UploadItem type="video" /> */}
-        <UploadBtn onChange={startUpload} />
-      </Collapse.Panel>
-    </Collapse>
+        <div style={{width:'100%',margin:'5px 0' ,padding: '10px 0' ,borderTop:'1px solid rgba(0,0,0,0.15)'}}>
+          <Space size={8}>
+            <UploadBtn onChange={startUpload} />
+            {/* 编辑按钮 */}
+            <Button onClick={onAreaEdit.bind(this,data)} 
+            type='primary' shape="circle" size='large' ghost>
+              <EditOutlined/>
+            </Button>
+            {/* 删除按钮 */}
+            <Popconfirm
+            title={<span>
+              确定删除分组[{data.name}]吗？<br/>
+              此操作不可逆(请确认分组内无任何资料)
+            </span>}
+            okText="确定"
+            cancelText="取消"
+            onConfirm={onAreaDelete.bind(this, data)}>
+              <Button
+              type='danger' shape="circle" size='large' ghost>
+                <DeleteOutlined />
+              </Button>
+            </Popconfirm>
+            
+          </Space>
+        </div>
+        </div>
   );
 };
 const ScoutingItem2 = ({ data }) => {
@@ -163,7 +209,8 @@ const ScoutingItem2 = ({ data }) => {
       }}
     >
       <div style={{ textAlign: "left" }}>
-        <i className={globalStyle.global_icon + ` ${globalStyle.btn} ${styles.icon}`}>
+        <i className={globalStyle.global_icon + ` ${globalStyle.btn} ${styles.icon}`}
+        style={{margin:'0'}}>
           &#xe6d9;
         </i>
         人口
@@ -181,8 +228,9 @@ const ScoutingItem2 = ({ data }) => {
     </Collapse>
   );
 };
-const UploadItem = ({ type ,data ,onRemove ,onEditCollection}) => {
-  let [ visible ,setVisible ] = useState(false);
+const UploadItem = ({ type ,data ,onRemove ,onEditCollection ,areaList ,onSelectGroup}) => {
+  let [ visible  ,setVisible ] = useState(false);
+  let [groupVisible , setGroupVisible ] = useState(false)
   const itemKeyVals = {
     paper: "图纸",
     interview: "访谈",
@@ -191,8 +239,9 @@ const UploadItem = ({ type ,data ,onRemove ,onEditCollection}) => {
     word: "文档",
     annotate: "批注",
     plotting: "标绘",
+    unknow:"未知"
   };
-  let { create_by ,title , create_time, target} = data;
+  let { create_by ,title , create_time} = data;
   let time = Action.dateFormat(create_time, 'yyyy/MM/dd');
   let hours = Action.dateFormat(create_time, 'HH:mm')
 
@@ -202,6 +251,29 @@ const UploadItem = ({ type ,data ,onRemove ,onEditCollection}) => {
       setVisible(false);
       onEditCollection && onEditCollection(data)
     }
+    if(key === 'selectGroup'){
+
+    }
+  }
+  // 分组列表
+  const AreaItem = () => {
+    const setGroup = (item) => {
+      setGroupVisible(false);
+      setVisible(false);
+      onSelectGroup && onSelectGroup(item , data )
+    }
+    let list = areaList.map(item => {
+      if(item.id !== data.area_type_id){
+        let dom = (
+          <div className={styles.areaItem} key={item.id} 
+          onClick={setGroup.bind(this,item)}>
+            {item.name}
+          </div>
+        )
+        return dom
+      }
+    })
+    return list;
   }
 
   const menu = (
@@ -210,7 +282,16 @@ const UploadItem = ({ type ,data ,onRemove ,onEditCollection}) => {
         关联坐标
       </Menu.Item>
       <Menu.Item key="selectGroup">
-        关联分组
+        <Popover
+        overlayStyle={{zIndex:10000}}
+        trigger='click'
+        placement="rightTop"
+        visible={groupVisible}
+        onVisibleChange={(val)=> setGroupVisible(val)}
+        title={data.title}
+        content={<AreaItem/>}>
+          <div style={{width:"100%"}}>移动到分组</div>
+        </Popover>
       </Menu.Item>
       <Menu.Item key="removeBoard">
         <Popconfirm title='确定删除此资料吗?'
@@ -223,11 +304,13 @@ const UploadItem = ({ type ,data ,onRemove ,onEditCollection}) => {
         </Popconfirm>
       </Menu.Item>
     </Menu>
-);
+  );
 
 
   return (
-    <div className={styles.uploadItem + ` ${globalStyle.btn}`}>
+    <div className={styles.uploadItem + ` ${globalStyle.btn}`} draggable={true} 
+    // onDragStart={e => console.log(e)}
+    >
       <div className={styles.uploadIcon + ` ${styles[type]}`}>
         <span>{itemKeyVals[type]}</span>
       </div>
@@ -292,7 +375,7 @@ export default class ScoutingDetails extends PureComponent {
       area_list:[],
       all_collection:[],
       not_area_id_collection:[],
-
+      area_active_key:[],
       
       name: "阳山县沙寮村踏勘",
       date: "3/15-3/17",
@@ -307,15 +390,17 @@ export default class ScoutingDetails extends PureComponent {
     Action.removeListPoint();
     // 构建地图组件
     Action.init();
+
   }
 
   // 获取缓存中选定的项目
-  getDetails = () => {
+  getDetails = (flag) => {
     ScouListAction.checkItem().then(res => {
       let { data } = res;
       this.setState({
         current_board: data
       },() => {
+        if(!flag)
         this.renderAreaList();
       })
     })
@@ -327,7 +412,7 @@ export default class ScoutingDetails extends PureComponent {
       // console.log(resp)
       let respData = resp.data;
       this.setState({
-        area_list: respData,
+        area_list: respData.map(item => Object.assign(item, {_edit:false})),
       })
       // 获取区域分类的数据列表
       this.fetchCollection();
@@ -395,6 +480,11 @@ export default class ScoutingDetails extends PureComponent {
 
   // 取消新增区域
   addCancel = (item) => {
+    if(item.board_id){
+      // 取消编辑状态
+      this.onAreaEdit(false,item);
+      return ;
+    }
     this.setState({
       area_list: this.state.area_list.filter(val => val.id !== item.id)
     })
@@ -402,6 +492,10 @@ export default class ScoutingDetails extends PureComponent {
 
   // 保存新增的区域
   saveArea = (data,name)=>{
+    if(data.board_id){
+      
+      return ;
+    }
     let { current_board } = this.state;
     Action.addArea({board_id: current_board.board_id, name: name}).then(res => {
       message.success('新增操作成功');
@@ -575,6 +669,52 @@ export default class ScoutingDetails extends PureComponent {
       })
     })
   }
+  // 选中了分组
+  onSelectGroup = (group ,data) => {
+    // console.log(group,data)
+    let params = {
+      id: data.id,
+      area_type_id: group.id
+    }
+    Action.editCollection(params).then(res => {
+      // console.log(res)
+      message.success(<span>
+        已将<a>{data.title}</a>
+        移动到<a>{group.name}</a>
+        分组
+        </span>)
+      this.fetchCollection();
+    })
+  }
+
+  onAreaDelete = (val) => {
+    if(val.collection && val.collection.length){
+      return message.error('分组中存在数据，无法删除')
+    }
+    Action.RemoveArea(val.id).then(res => {
+      message.success('删除成功');
+      this.setState({
+        area_list: this.state.area_list.filter(item => item.id !== val.id)
+      })
+    }).catch(err => {
+      console.log(err)
+    })
+  }
+  // 编辑名称
+  onAreaEdit = (flag,val) => {
+    let data = {...val,_edit:flag};
+    let list = [...this.state.area_list];
+
+    let arr = list.map(item => {
+      if(item.id === val.id){
+        item = data;
+      }
+      return item ;
+    })
+    this.setState({
+      area_list: arr
+    })
+  }
 
   render(h) {
     const { current_board ,area_list ,not_area_id_collection} = this.state;
@@ -619,22 +759,43 @@ export default class ScoutingDetails extends PureComponent {
           ))} */}
           <TabPane tab={<span>按区域</span>} key="1" style={panelStyle}>
             <div className={globalStyle.autoScrollY} style={{ height: "100%" ,paddingBottom:'40px'}}>
+            <Collapse expandIconPosition="right" 
+              onChange={e => this.setState({area_active_key:e})} 
+              className={styles.scoutingItem} accordion={true} 
+              activeKey={this.state.area_active_key}>
               {
                 area_list.map((item,index) => {
                   return (
-                    <ScoutingItem key={item.id} data={item} 
-                    index={index + 1} edit={item._edit} 
-                    onSave={this.saveArea.bind(this, item)}
-                    onCancel={this.addCancel.bind(this, item)}
-                    onChange={this.filesChange.bind(this, item)}
-                    onUpload={this.fileUpload.bind(this,item)}
-                    dataSource={item.collection}
-                    onError={this.onAddError}
-                    onCollectionRemove={this.onCollectionRemove.bind(this, item)}
-                    onEditCollection={this.onEditCollection}/>
+                    <Collapse.Panel
+                      header={
+                        <ScoutingHeader data={item} 
+                        index={index + 1} 
+                        edit={item._edit} 
+                        onCancel={this.addCancel.bind(this, item)} 
+                        onSave={this.saveArea.bind(this, item)}
+                        // onDragEnter={e => {this.setState({area_active_key: item.id})}}
+                        />
+                      } 
+                    key={item.id}
+                    style={{backgroundColor:"#fff",marginBottom:'10px'}} >
+                      <ScoutingItem 
+                      // onDrop={()=> console.log(item)}
+                      data={item}
+                      onAreaEdit={this.onAreaEdit.bind(this,true)}
+                      onAreaDelete={this.onAreaDelete}
+                      onSelectGroup={this.onSelectGroup}
+                      onChange={this.filesChange.bind(this, item)}
+                      onUpload={this.fileUpload.bind(this,item)}
+                      dataSource={item.collection}
+                      onError={this.onAddError}
+                      areaList={area_list}
+                      onCollectionRemove={this.onCollectionRemove.bind(this, item)}
+                      onEditCollection={this.onEditCollection}/>
+                    </Collapse.Panel>
                   )
                 })
               }
+              </Collapse>
               {
                 !!not_area_id_collection.length && 
                 <div className={styles.norAreaIdsData}>
@@ -643,7 +804,9 @@ export default class ScoutingDetails extends PureComponent {
                       return (
                         <div key={item.id} className={`${animateCss.animated} ${animateCss.slideInRight}`}
                         style={{animationDuration:"0.3s",animationDelay: index * 0.05 +'s'}}>
-                          <UploadItem data={item} type='pic' 
+                          <UploadItem data={item} type={Action.checkCollectionType(item.target)} 
+                          areaList={area_list}
+                          onSelectGroup={this.onSelectGroup}
                           onRemove={this.onCollectionRemove.bind(this,item)}
                           onEditCollection={this.onEditCollection}/>
                         </div>
