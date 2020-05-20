@@ -110,8 +110,8 @@ export default {
         return Promise.reject(response);
     } ,
     // 修改分组名称
-    EDIT_AREA_NAME: async (data) => {
-        let response = await request('PUT',``,data);
+    EDIT_AREA_NAME: async (id,data) => {
+        let response = await request('PUT',`/map/area_type/${id}`,data);
         if(BASIC.checkResponse(response)){
             return response.data;
         }
