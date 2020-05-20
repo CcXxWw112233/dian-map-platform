@@ -4,7 +4,7 @@ import config from '../../../services/scouting'
 import { dateFormat } from '../../../utils/utils'
 import InitMap from '../../../utils/INITMAP'
 import { drawPoint, createStyle , Source, Layer ,TransformCoordinate ,addFeature ,createOverlay} from '../../utils/index'
-import CollectionOverlay from '../../../components/PublicOverlays/CollectionOverlay'
+import { CollectionOverlay } from '../../../components/PublicOverlays'
 function Action (){
     const { 
         GET_AREA_LIST,
@@ -12,7 +12,9 @@ function Action (){
         ADD_COLLECTION ,
         GET_COLLECTION_LIST ,
         DELETE_COLLECTION,
-        EDIT_COLLECTION 
+        EDIT_COLLECTION ,
+        DELETE_AREA,
+        EDIT_AREA_NAME
     } = config;
     this.activeFeature = {} ;
     this.Layer = Layer({id:"scoutingDetailLayer",zIndex:11});
@@ -29,6 +31,33 @@ function Action (){
         // 删除已经存在的项目列表
         listAction.clear();
     }
+    this.checkCollectionType = (suffix = "") =>{
+        if(!suffix) return "unknow";
+        const itemKeyVals = {
+            paper: [],// 图纸
+            interview: ['aac','mp3'], // 访谈
+            pic: ['jpg','PNG','gif','jpeg'].map( item => item.toLocaleLowerCase()),
+            video: ['MP4','WebM','Ogg','avi'].map( item => item.toLocaleLowerCase()),
+            word: ['ppt','pptx','xls','xlsx','doc','docx','zip','rar','xmind'].map( item => item.toLocaleLowerCase()),
+            annotate: [],// 批注
+            plotting: [],// 标绘
+        };
+
+        let keys = Object.keys(itemKeyVals);
+        for(let i = 0 ; i< keys.length; i++){
+            let item = keys[i];
+            let data = itemKeyVals[item];
+            if(data.indexOf(suffix.toLocaleLowerCase()) !== -1){
+                return item;
+            }
+        }
+
+        return 'unknow'
+        // let arr = ["paper", "interview" , "pic" , "video" , "word" , "annotate" , "plotting", ];
+
+
+    }
+
     this.dateFormat = dateFormat;
     this.onBack = () => {
         setSession(listAction.sesstionSaveKey,"");
@@ -104,7 +133,6 @@ function Action (){
     this.removeFeatures = ()=>{
         this.removeOverlay();
         // 删除元素
-        console.log('removeOverlay')
         this.features.forEach(item => {
             if(this.Source.getFeatureByUid(item.ol_uid)){
                 this.Source.removeFeature(item);
@@ -136,7 +164,7 @@ function Action (){
     }
     this.addOverlay = (coor,data)=>{
         let ele = new CollectionOverlay(data);
-        let overlay = createOverlay(ele.element, {positioning:'bottom-left',offset:[-10, -20]});
+        let overlay = createOverlay(ele.element, {positioning:'bottom-left',offset:[-12, -10]});
         InitMap.map.addOverlay(overlay);
         this.overlays.push(overlay);
         overlay.setPosition(coor);
@@ -146,6 +174,12 @@ function Action (){
         this.removeOverlay();
         this.removeFeatures();
         InitMap.map.removeLayer(this.Layer)
+    }
+    this.RemoveArea = async (id) => {
+        return await DELETE_AREA(id)
+    }
+    this.editAreaName = async (data) => {
+        return await EDIT_AREA_NAME(data)
     }
 }
 
