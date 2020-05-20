@@ -93,7 +93,6 @@ export default class TempPlottingPanel extends React.Component {
   };
 
   getStyle = (attrs) => {
-    debugger
     let style = {};
     if (attrs.featureType.indexOf("/") > -1) {
       const tempIconUrl = attrs.featureType.replace("img", "");

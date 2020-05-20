@@ -3,6 +3,11 @@ export default {
   state: {
     visible: false,
     responseData: null,
+    isEdit: false,
+    featureName: "", // 名称
+    selectName: "",
+    featureType: "", // 类型
+    remarks: "", // 备注
   },
   effects: {},
   reducers: {

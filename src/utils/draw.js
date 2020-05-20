@@ -22,9 +22,9 @@ export const draw = {
     if (!this.map) {
       this.map = mapApp.map;
     }
-    this.type = type
+    this.type = type;
     if (type === "MARKER") {
-      this.type = "POINT"
+      this.type = "POINT";
     }
     this.currentId = this.typeIdKeys[type];
     if (!this.plottingLayer) {
@@ -38,13 +38,24 @@ export const draw = {
       const me = this;
       this.plottingLayer.on(FeatureOperatorEvent.ACTIVATE, (e) => {
         window.featureOperator = e.feature_operator;
+        const featureOperator = window.featureOperator
         dispatch({
           type: "plotting/setPotting",
           payload: {
             type: this.type,
             operator: e.feature_operator,
-          }
-        })
+          },
+        });
+        dispatch({
+          type: "modal/updateData",
+          payload: {
+            isEdit: true,
+            featureName: featureOperator.attrs.name || "", // 名称
+            selectName: featureOperator.attrs.selectName || "",
+            featureType: featureOperator.attrs.featureType || "", // 类型
+            remarks: featureOperator.attrs.remark || "", // 备注
+          },
+        });
         const url = `${me.baseUrl}/api/map/dict/${me.currentId}/mark`;
         request("GET", url).then((res) => {
           dispatch({
@@ -56,7 +67,18 @@ export const draw = {
           });
         });
       });
-      this.plottingLayer.on(FeatureOperatorEvent.DEACTIVATE, (e) => {});
+      this.plottingLayer.on(FeatureOperatorEvent.DEACTIVATE, (e) => {
+        dispatch({
+          type: "modal/updateData",
+          payload: {
+            isEdit: false,
+            featureName: "", // 名称
+            selectName: "",
+            featureType: "", // 类型
+            remarks: "", // 备注
+          },
+        });
+      });
     }
     const PlotTypes = {
       MARKER: "marker",

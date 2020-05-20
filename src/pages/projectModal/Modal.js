@@ -10,7 +10,15 @@ const { TextArea } = Input;
 @connect(
   ({
     plotting: { type, layer, operator },
-    modal: { visible, responseData },
+    modal: {
+      visible,
+      responseData,
+      isEdit,
+      featureName,
+      selectName,
+      featureType,
+      remarks,
+    },
     featureOperatorList: { featureOperatorList },
   }) => ({
     type,
@@ -19,20 +27,22 @@ const { TextArea } = Input;
     visible,
     responseData,
     featureOperatorList,
+    isEdit,
+    featureName,
+    selectName,
+    featureType,
+    remarks,
   })
 )
 export default class ProjectModal extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
+    this.props = {
       isEdit: false,
       featureName: "", // 名称
       selectName: "",
       featureType: "", // 类型
       remarks: "", // 备注
-      pointTypes: [], // 点的类型
-      polylineTypes: [], // 线的类型
-      polygonTypes: [], // 面的类型
     };
   }
 
@@ -53,7 +63,7 @@ export default class ProjectModal extends React.Component {
     const state = this.checkInputState();
     const { dispatch } = this.props;
     if (state) {
-      if (this.state.isEdit) {
+      if (this.props.isEdit) {
         // message.success("保存成功");
         let plottingType = this.props.type;
         const tempType = this.toChangedataType(plottingType);
@@ -61,7 +71,7 @@ export default class ProjectModal extends React.Component {
           radius: 8,
           fillColor: "rgba(168,9,10,0.7)",
           strokeColor: "rgba(168,9,10,1)",
-          text: this.state.featureName,
+          text: this.props.featureName,
         };
         const commonStyleOption = {
           textFillColor: "rgba(255,0,0,1)",
@@ -74,14 +84,14 @@ export default class ProjectModal extends React.Component {
           showName: true,
         };
         let options = {};
-        const featureType = this.state.featureType;
+        const featureType = this.props.featureType;
         const operator = this.props.operator;
         const featureTypeState = this.checkStateChange(
-          this.state.featureType,
+          this.props.featureType,
           operator.attrs.featureType
         );
         const featureNameState = this.checkStateChange(
-          this.state.featureName,
+          this.props.featureName,
           operator.attrs.name
         );
         const plottingLayer = draw.plottingLayer;
@@ -107,7 +117,7 @@ export default class ProjectModal extends React.Component {
           // 如果没有选择类型
           if (!featureTypeState) {
             options = { ...defaultOptions, ...commonStyleOption };
-            this.updateFeatureType(defaultOptions.fillColor)
+            this.updateFeatureType(defaultOptions.fillColor);
           } else {
             let tempIconUrl = featureTypeState;
             tempIconUrl = tempIconUrl.replace("img", "");
@@ -152,7 +162,7 @@ export default class ProjectModal extends React.Component {
                   ...commonStyleOption,
                   ...{
                     fillColor: pat,
-                    text: me.state.featureName,
+                    text: me.props.featureName,
                   },
                 };
                 const style = createStyle(tempType, options);
@@ -186,9 +196,9 @@ export default class ProjectModal extends React.Component {
 
   updateFeatureType = (val) => {
     this.setState({
-      featureType: val
-    })
-  }
+      featureType: val,
+    });
+  };
 
   updateOperatorToList = (featureOperator) => {
     let { dispatch, featureOperatorList } = this.props;
@@ -214,19 +224,19 @@ export default class ProjectModal extends React.Component {
     let newGeom = this.getPointStr(points);
     let attr = {};
     const featureTypeState = this.checkStateChange(
-      this.state.featureType,
+      this.props.featureType,
       featureOperator.attrs.featureType
     );
     const featureNameState = this.checkStateChange(
-      this.state.featureName,
+      this.props.featureName,
       featureOperator.attrs.featureName
     );
     const remarksState = this.checkStateChange(
-      this.state.remarks,
+      this.props.remarks,
       featureOperator.attrs.remarks
     );
     const selectNameState = this.checkStateChange(
-      this.state.selectName,
+      this.props.selectName,
       featureOperator.attrs.selectName
     );
     switch (featureType) {
@@ -272,7 +282,7 @@ export default class ProjectModal extends React.Component {
           style: style,
           featureType: featureTypeState,
           main_id: "",
-          name: selectNameState,
+          name: featureNameState,
           remark: remarksState,
           selectName: selectNameState,
         };
@@ -303,7 +313,7 @@ export default class ProjectModal extends React.Component {
     return pointStr.substr(0, pointStr.length - 1);
   };
   checkInputState = () => {
-    if (this.state.featureName.length === 0) {
+    if (this.props.featureName.length === 0) {
       return false;
     }
     return true;
@@ -328,6 +338,13 @@ export default class ProjectModal extends React.Component {
       featureName: value,
       isEdit: true,
     });
+    const { dispatch } = this.props;
+    dispatch({
+      type: "modal/updateData",
+      payload: {
+        featureName: value,
+      },
+    });
   };
   handleTypeSelectChange = (val) => {
     const { responseData } = this.props;
@@ -340,15 +357,27 @@ export default class ProjectModal extends React.Component {
       selectName: value.name,
       featureType: value.value1,
     });
+    const { dispatch } = this.props;
+    dispatch({
+      type: "modal/updateData",
+      payload: {
+        selectName: value.name,
+        featureType: value.value1,
+      },
+    });
   };
   handleRemarksInputChange = (value) => {
     this.setState({
       remarks: value,
       isEdit: true,
     });
-  };
-  clearState = () => {
-    this.setState({});
+    const { dispatch } = this.props
+    dispatch({
+      type: "modal/updateData",
+      payload: {
+        remarks: value,
+      }
+    })
   };
   render() {
     const { visible, responseData, operator } = this.props;
