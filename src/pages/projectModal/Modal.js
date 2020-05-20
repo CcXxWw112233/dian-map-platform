@@ -37,7 +37,7 @@ const { TextArea } = Input;
 export default class ProjectModal extends React.Component {
   constructor(props) {
     super(props);
-    this.props = {
+    this.state = {
       isEdit: false,
       featureName: "", // 名称
       selectName: "",

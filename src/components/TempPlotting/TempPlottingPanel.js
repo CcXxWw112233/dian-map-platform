@@ -99,7 +99,7 @@ export default class TempPlottingPanel extends React.Component {
       const image = require("../../assets" + tempIconUrl);
       style = {
         ...style,
-        backgroundImage: image,
+        backgroundImage: `url(${image})`,
         backgroundColor: "rgba(255,255,255,1)",
         backgroundRepeat: "no-repeat",
         backgroundPosition: "center center",
