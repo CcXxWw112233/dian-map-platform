@@ -3,8 +3,18 @@ import listAction from './ScoutingList'
 import config from '../../../services/scouting'
 import { dateFormat } from '../../../utils/utils'
 import InitMap from '../../../utils/INITMAP'
-import { drawPoint, createStyle , Source, Layer ,TransformCoordinate ,addFeature ,createOverlay} from '../../utils/index'
+import { drawPoint, 
+    createStyle , 
+    Source, 
+    Layer ,
+    TransformCoordinate ,
+    addFeature ,
+    createOverlay,
+    getPoint,getExtent,
+    Fit
+} from '../../utils/index'
 import { CollectionOverlay } from '../../../components/PublicOverlays'
+
 function Action (){
     const { 
         GET_AREA_LIST,
@@ -31,6 +41,7 @@ function Action (){
         // 删除已经存在的项目列表
         listAction.clear();
     }
+    
     this.checkCollectionType = (suffix = "") =>{
         if(!suffix) return "unknow";
         const itemKeyVals = {
@@ -40,7 +51,7 @@ function Action (){
             video: ['MP4','WebM','Ogg','avi'].map( item => item.toLocaleLowerCase()),
             word: ['ppt','pptx','xls','xlsx','doc','docx','zip','rar','xmind'].map( item => item.toLocaleLowerCase()),
             annotate: [],// 批注
-            plotting: [],// 标绘
+            plotting: ['feature'],// 标绘
         };
 
         let keys = Object.keys(itemKeyVals);
@@ -142,10 +153,7 @@ function Action (){
         this.features = [];
     }
 
-    // 渲染feature
-    this.renderCollection = (data) => {
-        // 删除元素
-        this.removeFeatures();
+    this.renderPointCollection = (data) => {
         let array = findHasLocationData(data);
         // console.log(array)
         array.forEach(item => {
@@ -162,6 +170,68 @@ function Action (){
             this.Source.addFeature(feature);
         })
     }
+
+    // 渲染标绘数据
+    this.renderFeaturesCollection = (data) => {
+        data.forEach((item)=>{
+            let content = item.content;
+            content = content && JSON.parse(content);
+            let feature = addFeature(content.geoType , {coordinates:content.coordinates});
+            let style = {
+                "Point":createStyle(content.geoType,{
+                    radius:8,
+                    fillColor:"#F4511E",
+                    strokeWidth:2,
+                    strokeColor:"#ffffff"
+                }),
+                "LineString":createStyle(content.geoType,{
+                    strokeWidth:4,
+                    strokeColor:"#F4511E"
+                }),
+                "Polygon":createStyle(content.geoType,{
+                    strokeWidth:2,
+                    strokeColor:"#ffffff",
+                    fillColor:'rgba(255 ,0 ,0, 0.3)',
+                    text: content.name,
+                    textFillColor:"rgba(255,0 ,0 ,0.6)",
+                    textStrokeColor:"#ffffff"
+                })
+            }
+            
+            
+            feature.setStyle(style[content.geoType]);
+            this.Source.addFeature(feature);
+            if(content.geoType !== 'Point'){
+                let extent = getExtent(feature);
+                let center = getPoint(extent);
+                this.addOverlay(center,item);
+            }else
+            this.addOverlay(content.coordinates, item);
+
+            this.features.push(feature)
+        })
+    }
+    // 渲染feature
+    this.renderCollection = (data) => {
+        // 删除元素
+        this.removeFeatures();
+        let ponts = data.filter(item => item.collect_type !== "4");
+        let features = data.filter(item => item.collect_type === '4');
+        // 渲染点的数据
+        this.renderPointCollection(ponts);
+        // 渲染标绘数据
+        this.renderFeaturesCollection(features);
+
+        data && data.length && setTimeout(()=>{
+            Fit(InitMap.view, this.Source.getExtent(),{
+                size: InitMap.map.getSize(),
+                padding:[200,150,80,400],
+            },500)
+        })
+    }
+
+
+
     this.addOverlay = (coor,data)=>{
         let ele = new CollectionOverlay(data);
         let overlay = createOverlay(ele.element, {positioning:'bottom-left',offset:[-12, -10]});

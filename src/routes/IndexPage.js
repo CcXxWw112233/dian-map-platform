@@ -12,8 +12,10 @@ import ProjectScouting from "../pages/ProjectScouting/ScoutingList";
 import ScoutingDetails from "../pages/ProjectScouting/ScoutingDetails";
 import ProjectModal from "../pages/projectModal/Modal"
 import ScoutAction from '../lib/components/ProjectScouting/ScoutingList';
+import ScoutDetail from '../lib/components/ProjectScouting/ScoutingDetail'
+import Event from '../lib/utils/event'
 // import { PublicData, ProjectScouting } from 'pages/index'
-import { Tabs ,Spin} from "antd";
+import { Tabs ,Spin ,message} from "antd";
 
 import { Main } from "components";
 import {
@@ -53,8 +55,47 @@ class IndexPage extends React.Component {
   };
   componentDidMount(){
     this.checkListCach();
+    Event.Evt.on('hasFeatureToProject',(data)=>{
+      this.addFeatureForProject(data);
+    })
   }
 
+  addFeatureForProject = (val)=>{
+    ScoutAction.checkItem().then(res =>{
+      if(res.code == 0){
+        let promise = val.map(item => {
+          let { feature } = item;
+          let param = {
+            coordinates: feature.getGeometry().getCoordinates(),
+            geoType:feature.getGeometry().getType(),
+            name:item.name,
+          }
+          let obj = {
+            collect_type: 4,
+            title: item.name,
+            target:"feature",
+            area_type_id:"",
+            board_id:res.data.board_id,
+            content: JSON.stringify(param),
+          }
+          return ScoutDetail.addCollection(obj);
+        });
+        Promise.all(promise).then(resp => {
+          // console.log(resp);
+          Event.Evt.firEvent('addCollectionForFeature',resp);
+          message.success(`添加到${res.data.board_name}项目成功`);
+          Event.Evt.firEvent('appendToProjectSuccess',val);
+        }).catch(err => {
+          console.log(err)
+        })
+      }else{
+        message.warning('未选择项目，无法保存标绘数据到项目')
+      }
+    }).catch(err => {
+      console.log(err);
+      message.warning('未选择项目，无法保存标绘数据到项目')
+    })
+  }
   // 检查缓存中是否存在id，进行判断渲染
   checkListCach = ()=>{
     let { dispatch } = this.props;

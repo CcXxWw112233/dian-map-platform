@@ -17,6 +17,7 @@ import {
   EditOutlined
 } from '@ant-design/icons'
 import { BASIC } from '../../services/config'
+import Event from '../../lib/utils/event'
 const { TabPane } = Tabs;
 
 const Title = ({ name, date, cb }) => {
@@ -390,7 +391,10 @@ export default class ScoutingDetails extends PureComponent {
     Action.removeListPoint();
     // 构建地图组件
     Action.init();
-
+    // 当外部的数据保存成功后的回调
+    Event.Evt.on('addCollectionForFeature',(data) =>{
+      this.fetchCollection();
+    })
   }
 
   // 获取缓存中选定的项目
@@ -531,13 +535,19 @@ export default class ScoutingDetails extends PureComponent {
       board_id: this.state.current_board.board_id
     }
     Action.getCollectionList(params).then(res => {
-      let data = res.data || [];
+      let data = res.data;
+      // 将重组后的数据更新,保存没有关联区域的数据
+      this.reSetCollection(data);
+    })
+  }
+  // 更新数据
+  reSetCollection = (val) => {
+      let data = val || [];
       let list = this.state.area_list.map(item => {
         let f_list = data.filter(v => v.area_type_id === item.id);
         item.collection = f_list;
         return item;
       })
-      // 将重组后的数据更新,保存没有关联区域的数据
       this.setState({
         all_collection: data,
         area_list: list,
@@ -545,7 +555,6 @@ export default class ScoutingDetails extends PureComponent {
       },()=>{
         this.renderCollection();
       })
-    })
   }
 
   // 上传中
@@ -587,22 +596,15 @@ export default class ScoutingDetails extends PureComponent {
   // 删除采集的资料
   onCollectionRemove = (item,collection) => {
     let { id } = collection;
-    let { area_list } = this.state;
-
-    item.collection = item.collection.filter(cols => cols.id !== id);
-
-    let list = area_list.map(area => {
-      if(area.id === item.id){
-        area = item;
-      }
-      return area;
-    })
 
     Action.removeCollection(id).then(res => {
       message.success('删除成功');
       this.setState({
-        area_list: list,
         all_collection: this.state.all_collection.filter(i => i.id !== id)
+      },()=>{
+        // 重新渲染
+        this.reSetCollection(this.state.all_collection);
+        // this.renderCollection();
       })
     }).catch(err => {
       message.err('删除失败,请稍后重试');
