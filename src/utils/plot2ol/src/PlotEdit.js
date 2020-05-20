@@ -14,7 +14,7 @@ class PlotEdit extends Observable {
    * @constructs
    * @param {ol.Map} map 地图对象
    */
-  constructor(map, layer, cb) {
+  constructor(map, layer) {
     if (!map) {
       return;
     }
@@ -39,7 +39,8 @@ class PlotEdit extends Observable {
     //--这个比较特殊。绑定在map.mapBrowserEventHandler_上
     this._is_controlpoint_pointermove = null;
 
-    this.cb = cb
+    this.delCb = null;
+    this.updateCb = null;
   }
   initHelperDom() {
     if (!this.map || !this.activePlot) {
@@ -99,8 +100,11 @@ class PlotEdit extends Observable {
     }
   }
 
-  setCallback(cb) {
-    this.cb = cb
+  setDelCallback(cb) {
+    this.delCb = cb;
+  }
+  setUpdateCallback(cb) {
+    this.updateCb = cb;
   }
 
   // 删除按钮
@@ -122,8 +126,7 @@ class PlotEdit extends Observable {
       delBtnEle,
       "mousedown",
       () => {
-        // this.layer.removeFeature(window.featureOperator);
-        this.cb()
+        this.delCb && this.delCb();
       },
       this
     );
@@ -212,6 +215,7 @@ class PlotEdit extends Observable {
       }
       var overlay = this.map.getOverlayById(this.activeControlPointId);
       overlay.setPosition(coordinate);
+      this.updateCb && this.updateCb(window.featureOperator);
     }
   }
 

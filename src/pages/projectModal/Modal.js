@@ -61,7 +61,7 @@ export default class ProjectModal extends React.Component {
     return tempType;
   };
 
-  cb = () => {
+  delCallBack = () => {
     const { plottingLayer } = draw;
     const { dispatch } = this.props;
     let featureOperatorList = this.props.featureOperatorList;
@@ -116,7 +116,10 @@ export default class ProjectModal extends React.Component {
           operator.attrs.name
         );
         const plottingLayer = draw.plottingLayer;
-        plottingLayer.plotEdit.setCallback(this.cb.bind(this));
+        plottingLayer.plotEdit.setDelCallback(this.delCallBack.bind(this));
+        plottingLayer.plotEdit.setUpdateCallback(
+          this.updateOperatorToList.bind(this)
+        );
         if (tempType === "Point") {
           this.updateFeatureType(defaultOptions.fillColor);
           options = { ...defaultOptions, ...commonStyleOption };
@@ -233,12 +236,10 @@ export default class ProjectModal extends React.Component {
         featureOperatorList: arr,
       },
     });
-    console.log(featureOperator);
   };
 
   // 给featureOperator设置attribute
   setAttribute = () => {
-    debugger;
     const featureOperator = window.featureOperator;
     const feature = featureOperator.feature.clone();
     const geometry = feature.getGeometry();
@@ -356,7 +357,7 @@ export default class ProjectModal extends React.Component {
       },
     });
     if (!this.isOk && !this.props.featureName) {
-      this.cb();
+      this.delCallBack();
     } else {
       this.isOk = false;
     }
