@@ -7,15 +7,20 @@ import { createStyle } from "@/lib/utils/index";
 const { Option, OptGroup } = Select;
 const { TextArea } = Input;
 
-@connect(({ plotting: { type, layer, operator } }) => ({
-  type,
-  layer,
-  operator,
-}))
-@connect(({ modal: { visible, responseData } }) => ({ visible, responseData }))
-@connect(({ featureOperatorList: { featureOperatorList } }) => ({
-  featureOperatorList,
-}))
+@connect(
+  ({
+    plotting: { type, layer, operator },
+    modal: { visible, responseData },
+    featureOperatorList: { featureOperatorList },
+  }) => ({
+    type,
+    layer,
+    operator,
+    visible,
+    responseData,
+    featureOperatorList,
+  })
+)
 export default class ProjectModal extends React.Component {
   constructor(props) {
     super(props);
@@ -33,10 +38,10 @@ export default class ProjectModal extends React.Component {
 
   checkStateChange = (state, attr) => {
     if (state !== attr) {
-      return state
+      return state;
     }
-    return attr
-  }
+    return attr;
+  };
 
   // 大写转换
   toChangedataType = (plottingType) => {
@@ -46,7 +51,7 @@ export default class ProjectModal extends React.Component {
   };
   handleOKClick = () => {
     const state = this.checkInputState();
-    const { dispatch } = this.props
+    const { dispatch } = this.props;
     if (state) {
       if (this.state.isEdit) {
         // message.success("保存成功");
@@ -54,8 +59,8 @@ export default class ProjectModal extends React.Component {
         const tempType = this.toChangedataType(plottingType);
         const defaultOptions = {
           radius: 8,
-          fillColor: "#a8090a",
-          strokeColor: "#000000",
+          fillColor: "rgba(168,9,10,0.7)",
+          strokeColor: "rgba(168,9,10,1)",
           text: this.state.featureName,
         };
         const commonStyleOption = {
@@ -70,32 +75,39 @@ export default class ProjectModal extends React.Component {
         };
         let options = {};
         const featureType = this.state.featureType;
-        const operator = this.props.operator
-        const featureTypeState = this.checkStateChange(this.state.featureType, operator.attrs.featureType)
-        const featureNameState = this.checkStateChange(this.state.featureName, operator.attrs.name)
-        const plottingLayer = draw.plottingLayer
-        const me = this
-        const cb = function() {
-          let featureOperatorList = me.props.featureOperatorList
-          plottingLayer.removeFeature(me.props.operator)
-          for (let i = 0; i< featureOperatorList.length;i++) {
+        const operator = this.props.operator;
+        const featureTypeState = this.checkStateChange(
+          this.state.featureType,
+          operator.attrs.featureType
+        );
+        const featureNameState = this.checkStateChange(
+          this.state.featureName,
+          operator.attrs.name
+        );
+        const plottingLayer = draw.plottingLayer;
+        const me = this;
+        const cb = function () {
+          let featureOperatorList = me.props.featureOperatorList;
+          plottingLayer.removeFeature(me.props.operator);
+          for (let i = 0; i < featureOperatorList.length; i++) {
             if (featureOperatorList[i].guid === me.props.operator.guid) {
-              featureOperatorList.splice(i, 1)
-              break
+              featureOperatorList.splice(i, 1);
+              break;
             }
           }
           dispatch({
             type: "featureOperatorList/updateList",
             payload: {
-              featureOperatorList: featureOperatorList,
+              featureOperatorList: [...featureOperatorList],
             },
           });
-        }
-        plottingLayer.plotEdit.setCallback(cb)
+        };
+        plottingLayer.plotEdit.setCallback(cb);
         if (tempType === "Point") {
           // 如果没有选择类型
           if (!featureTypeState) {
             options = { ...defaultOptions, ...commonStyleOption };
+            this.updateFeatureType(defaultOptions.fillColor)
           } else {
             let tempIconUrl = featureTypeState;
             tempIconUrl = tempIconUrl.replace("img", "");
@@ -122,7 +134,7 @@ export default class ProjectModal extends React.Component {
           if (!featureType) {
             options = {
               ...commonStyleOption,
-              ...{ fillColor: "#a8090a", text: featureNameState },
+              ...{ fillColor: "rgba(168,9,10,0.7)", text: featureNameState },
             };
           } else {
             let tempIconUrl = featureType;
@@ -172,21 +184,28 @@ export default class ProjectModal extends React.Component {
     }
   };
 
+  updateFeatureType = (val) => {
+    this.setState({
+      featureType: val
+    })
+  }
+
   updateOperatorToList = (featureOperator) => {
-    const { dispatch, featureOperatorList } = this.props;
-    console.log(featureOperatorList);
-    featureOperatorList.push(featureOperator);
+    let { dispatch, featureOperatorList } = this.props;
+    let arr = [...featureOperatorList];
+    arr.push(featureOperator);
     dispatch({
       type: "featureOperatorList/updateList",
       payload: {
-        featureOperatorList: featureOperatorList,
+        featureOperatorList: arr,
       },
     });
+    console.log(featureOperator);
   };
 
   // 给featureOperator设置attribute
   setAttribute = () => {
-    const featureOperator = window.featureOperator
+    const featureOperator = window.featureOperator;
     const feature = featureOperator.feature.clone();
     const geometry = feature.getGeometry();
     geometry.transform("EPSG:3857", "EPSG:4326");
@@ -194,10 +213,22 @@ export default class ProjectModal extends React.Component {
     const featureType = this.props.type;
     let newGeom = this.getPointStr(points);
     let attr = {};
-    const featureTypeState = this.checkStateChange(this.state.featureType, featureOperator.attrs.featureType)
-    const featureNameState = this.checkStateChange(this.state.featureName, featureOperator.attrs.featureName)
-    const remarksState = this.checkStateChange(this.state.remarks, featureOperator.attrs.remarks)
-    const selectNameState = this.checkStateChange(this.state.selectName, featureOperator.attrs.selectName)
+    const featureTypeState = this.checkStateChange(
+      this.state.featureType,
+      featureOperator.attrs.featureType
+    );
+    const featureNameState = this.checkStateChange(
+      this.state.featureName,
+      featureOperator.attrs.featureName
+    );
+    const remarksState = this.checkStateChange(
+      this.state.remarks,
+      featureOperator.attrs.remarks
+    );
+    const selectNameState = this.checkStateChange(
+      this.state.selectName,
+      featureOperator.attrs.selectName
+    );
     switch (featureType) {
       case "POINT":
         attr = {
@@ -259,14 +290,17 @@ export default class ProjectModal extends React.Component {
   getPointStr = (points) => {
     let pointStr = "";
     if (points && points.length) {
-      points.forEach((point, index) => {
-        pointStr += `${point[0]} ${point[1]},`;
-        if (index === points.length - 1) {
-          pointStr = pointStr.slice(0, pointStr.length - 1);
-        }
-      });
+      if (typeof points[0] === "number") {
+        points.forEach((item, index) => {
+          pointStr += `${item},`;
+        });
+      } else {
+        points.forEach((point, index) => {
+          pointStr += `${point[0]} ${point[1]},`;
+        });
+      }
     }
-    return pointStr;
+    return pointStr.substr(0, pointStr.length - 1);
   };
   checkInputState = () => {
     if (this.state.featureName.length === 0) {
@@ -336,7 +370,6 @@ export default class ProjectModal extends React.Component {
     if (responseData && responseData.data) {
       dataArray = responseData.data;
     }
-    console.log(dataArray);
     return (
       <Modal
         destroyOnClose

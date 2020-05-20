@@ -8,9 +8,6 @@ export default {
   reducers: {
     updateList(state, { payload }) {
       return { ...state, ...payload };
-    },
-    deleteItem(state, { payload }) {
-
     }
   },
 };
