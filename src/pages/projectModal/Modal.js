@@ -41,9 +41,10 @@ export default class ProjectModal extends React.Component {
       isEdit: false,
       featureName: "", // 名称
       selectName: "",
-      featureType: "", // 类型
+      featureType: "rgba(168,9,10,0.7)", // 类型
       remarks: "", // 备注
     };
+    this.isOk = false;
   }
 
   checkStateChange = (state, attr) => {
@@ -59,9 +60,28 @@ export default class ProjectModal extends React.Component {
     tempType = tempType[0].toUpperCase() + tempType.slice(1);
     return tempType;
   };
-  handleOKClick = () => {
-    const state = this.checkInputState();
+
+  cb = () => {
+    const { plottingLayer } = draw;
     const { dispatch } = this.props;
+    let featureOperatorList = this.props.featureOperatorList;
+    plottingLayer.removeFeature(this.props.operator);
+    for (let i = 0; i < featureOperatorList.length; i++) {
+      if (featureOperatorList[i].guid === this.props.operator.guid) {
+        featureOperatorList.splice(i, 1);
+        break;
+      }
+    }
+    dispatch({
+      type: "featureOperatorList/updateList",
+      payload: {
+        featureOperatorList: [...featureOperatorList],
+      },
+    });
+  };
+  handleOKClick = () => {
+    this.isOk = true;
+    const state = this.checkInputState();
     if (state) {
       if (this.props.isEdit) {
         // message.success("保存成功");
@@ -84,42 +104,24 @@ export default class ProjectModal extends React.Component {
           showName: true,
         };
         let options = {};
-        const featureType = this.props.featureType;
+        const featureType = this.props.featureType || defaultOptions.fillColor;
         const operator = this.props.operator;
-        const featureTypeState = this.checkStateChange(
-          this.props.featureType,
-          operator.attrs.featureType
-        );
+        const featureTypeState =
+          this.checkStateChange(
+            this.props.featureType,
+            operator.attrs.featureType
+          ) || defaultOptions.fillColor;
         const featureNameState = this.checkStateChange(
           this.props.featureName,
           operator.attrs.name
         );
         const plottingLayer = draw.plottingLayer;
-        const me = this;
-        const cb = function () {
-          let featureOperatorList = me.props.featureOperatorList;
-          plottingLayer.removeFeature(me.props.operator);
-          for (let i = 0; i < featureOperatorList.length; i++) {
-            if (featureOperatorList[i].guid === me.props.operator.guid) {
-              featureOperatorList.splice(i, 1);
-              break;
-            }
-          }
-          dispatch({
-            type: "featureOperatorList/updateList",
-            payload: {
-              featureOperatorList: [...featureOperatorList],
-            },
-          });
-        };
-        plottingLayer.plotEdit.setCallback(cb);
+        plottingLayer.plotEdit.setCallback(this.cb.bind(this));
         if (tempType === "Point") {
-          // 如果没有选择类型
-          if (!featureTypeState) {
-            options = { ...defaultOptions, ...commonStyleOption };
-            this.updateFeatureType(defaultOptions.fillColor);
-          } else {
-            let tempIconUrl = featureTypeState;
+          this.updateFeatureType(defaultOptions.fillColor);
+          options = { ...defaultOptions, ...commonStyleOption };
+          let tempIconUrl = featureTypeState;
+          if (tempIconUrl.indexOf("/") > -1) {
             tempIconUrl = tempIconUrl.replace("img", "");
             const iconUrl = require("../../assets" + tempIconUrl);
             options = {
@@ -141,45 +143,42 @@ export default class ProjectModal extends React.Component {
           };
         }
         if (tempType === "Polygon") {
-          if (!featureType) {
-            options = {
-              ...commonStyleOption,
-              ...{ fillColor: "rgba(168,9,10,0.7)", text: featureNameState },
-            };
-          } else {
-            let tempIconUrl = featureType;
-            if (tempIconUrl.indexOf("/") > -1) {
-              tempIconUrl = tempIconUrl.replace("img", "");
-              const iconUrl = require("../../assets" + tempIconUrl);
-              let canvas = document.createElement("canvas");
-              let context = canvas.getContext("2d");
-              let img = new Image();
-              img.src = iconUrl;
-              const me = this;
-              img.onload = function () {
-                const pat = context.createPattern(img, "repeat");
-                options = {
-                  ...commonStyleOption,
-                  ...{
-                    fillColor: pat,
-                    text: me.props.featureName,
-                  },
-                };
-                const style = createStyle(tempType, options);
-                window.featureOperator.feature.setStyle(style);
-                return;
-              };
-            } else {
-              let strokeColor = featureType.replace("0.7", 1);
+          options = {
+            ...commonStyleOption,
+            ...{ fillColor: "rgba(168,9,10,0.7)", text: featureNameState },
+          };
+          let tempIconUrl = featureType;
+          if (tempIconUrl.indexOf("/") > -1) {
+            tempIconUrl = tempIconUrl.replace("img", "");
+            const iconUrl = require("../../assets" + tempIconUrl);
+            let canvas = document.createElement("canvas");
+            let context = canvas.getContext("2d");
+            let img = new Image();
+            img.src = iconUrl;
+            const me = this;
+            img.onload = function () {
+              const pat = context.createPattern(img, "repeat");
               options = {
                 ...commonStyleOption,
                 ...{
-                  fillColor: featureType,
-                  strokeColor: strokeColor,
-                  text: featureNameState,
+                  fillColor: pat,
+                  text: me.props.featureName,
                 },
               };
-            }
+              const style = createStyle(tempType, options);
+              window.featureOperator.feature.setStyle(style);
+              return;
+            };
+          } else {
+            let strokeColor = featureType.replace("0.7", 1);
+            options = {
+              ...commonStyleOption,
+              ...{
+                fillColor: featureType,
+                strokeColor: strokeColor,
+                text: featureNameState,
+              },
+            };
           }
         }
         const style = createStyle(tempType, options);
@@ -195,15 +194,39 @@ export default class ProjectModal extends React.Component {
   };
 
   updateFeatureType = (val) => {
-    this.setState({
-      featureType: val,
-    });
+    const { dispatch } = this.props;
+    this.setState(
+      {
+        featureType: val,
+      },
+      () => {
+        dispatch({
+          type: "modal/updateData",
+          payload: {
+            featureType: val,
+          },
+        });
+      }
+    );
   };
 
   updateOperatorToList = (featureOperator) => {
     let { dispatch, featureOperatorList } = this.props;
     let arr = [...featureOperatorList];
-    arr.push(featureOperator);
+    let isExist = false,
+      index = -1;
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i].guid === featureOperator.guid) {
+        isExist = true;
+        index = i;
+        break;
+      }
+    }
+    if (!isExist) {
+      arr.push(featureOperator);
+    } else {
+      arr[index] = featureOperator;
+    }
     dispatch({
       type: "featureOperatorList/updateList",
       payload: {
@@ -215,6 +238,7 @@ export default class ProjectModal extends React.Component {
 
   // 给featureOperator设置attribute
   setAttribute = () => {
+    debugger;
     const featureOperator = window.featureOperator;
     const feature = featureOperator.feature.clone();
     const geometry = feature.getGeometry();
@@ -223,18 +247,20 @@ export default class ProjectModal extends React.Component {
     const featureType = this.props.type;
     let newGeom = this.getPointStr(points);
     let attr = {};
-    const featureTypeState = this.checkStateChange(
-      this.props.featureType,
-      featureOperator.attrs.featureType
-    );
+    const featureTypeState =
+      this.checkStateChange(
+        this.props.featureType || this.state.featureType,
+        featureOperator.attrs.featureType
+      ) || this.state.featureType;
     const featureNameState = this.checkStateChange(
       this.props.featureName,
       featureOperator.attrs.featureName
     );
-    const remarksState = this.checkStateChange(
-      this.props.remarks,
-      featureOperator.attrs.remarks
-    );
+    const remarksState =
+      this.checkStateChange(
+        this.props.remarks || this.state.remarks,
+        featureOperator.attrs.remarks
+      ) || this.state.remarks;
     const selectNameState = this.checkStateChange(
       this.props.selectName,
       featureOperator.attrs.selectName
@@ -323,21 +349,19 @@ export default class ProjectModal extends React.Component {
   };
   hideModal = () => {
     const { dispatch } = this.props;
-    this.setState({
-      isEdit: false,
-    });
     dispatch({
       type: "modal/setVisible",
       payload: {
         visible: false,
       },
     });
+    if (!this.isOk && !this.props.featureName) {
+      this.cb();
+    } else {
+      this.isOk = false;
+    }
   };
   handleNameInputChange = (value) => {
-    this.setState({
-      featureName: value,
-      isEdit: true,
-    });
     const { dispatch } = this.props;
     dispatch({
       type: "modal/updateData",
@@ -352,11 +376,6 @@ export default class ProjectModal extends React.Component {
     const index0 = Number(arr[0]);
     const index1 = Number(arr[1]);
     const value = responseData.data[index0].items[index1];
-    this.setState({
-      isEdit: true,
-      selectName: value.name,
-      featureType: value.value1,
-    });
     const { dispatch } = this.props;
     dispatch({
       type: "modal/updateData",
@@ -367,17 +386,20 @@ export default class ProjectModal extends React.Component {
     });
   };
   handleRemarksInputChange = (value) => {
-    this.setState({
-      remarks: value,
-      isEdit: true,
-    });
-    const { dispatch } = this.props
-    dispatch({
-      type: "modal/updateData",
-      payload: {
+    const { dispatch } = this.props;
+    this.setState(
+      {
         remarks: value,
+      },
+      () => {
+        dispatch({
+          type: "modal/updateData",
+          payload: {
+            remarks: value,
+          },
+        });
       }
-    })
+    );
   };
   render() {
     const { visible, responseData, operator } = this.props;
@@ -411,7 +433,6 @@ export default class ProjectModal extends React.Component {
         okText="确定"
         cancelText="取消"
         centered={true}
-        afterClose={this.clearState}
       >
         <Row className={styles.row}>
           <Col className={styles.firstCol}>
