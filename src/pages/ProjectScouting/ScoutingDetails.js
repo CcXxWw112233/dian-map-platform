@@ -7,7 +7,7 @@ import ScouListAction from '../../lib/components/ProjectScouting/ScoutingList'
 import { connect } from "dva";
 import { Collapse, Row, Tabs ,Input ,
   Button, message ,Upload ,Space ,
-  Dropdown ,Menu ,Popconfirm ,Popover} from "antd";
+  Dropdown ,Menu ,Popconfirm ,Popover, Col} from "antd";
 import { 
   PlusCircleOutlined ,
   CheckCircleOutlined, 
@@ -175,26 +175,35 @@ const ScoutingItem = ({
         }
         <div style={{width:'100%',margin:'5px 0' ,padding: '10px 0' ,borderTop:'1px solid rgba(0,0,0,0.15)'}}>
           <Space size={8}>
-            <UploadBtn onChange={startUpload} />
+            {
+              !!onUpload && <UploadBtn onChange={startUpload} />
+            }
             {/* 编辑按钮 */}
-            <Button onClick={onAreaEdit.bind(this,data)} 
-            type='primary' shape="circle" size='large' ghost>
-              <EditOutlined/>
-            </Button>
-            {/* 删除按钮 */}
-            <Popconfirm
-            title={<span>
-              确定删除分组[{data.name}]吗？<br/>
-              此操作不可逆(请确认分组内无任何资料)
-            </span>}
-            okText="确定"
-            cancelText="取消"
-            onConfirm={onAreaDelete.bind(this, data)}>
-              <Button
-              type='danger' shape="circle" size='large' ghost>
-                <DeleteOutlined />
+            {
+              !!onAreaEdit && 
+              <Button onClick={onAreaEdit.bind(this,data)} 
+              type='primary' shape="circle" size='large' ghost>
+                <EditOutlined/>
               </Button>
-            </Popconfirm>
+            }
+            
+            {/* 删除按钮 */}
+            {
+              !!onAreaDelete && 
+              <Popconfirm
+              title={<span>
+                确定删除分组[{data.name}]吗？<br/>
+                此操作不可逆(请确认分组内无任何资料)
+              </span>}
+              okText="确定"
+              cancelText="取消"
+              onConfirm={onAreaDelete.bind(this, data)}>
+                <Button
+                type='danger' shape="circle" size='large' ghost>
+                  <DeleteOutlined />
+                </Button>
+              </Popconfirm>
+            }
             
           </Space>
         </div>
@@ -417,6 +426,7 @@ export default class ScoutingDetails extends PureComponent {
       let respData = resp.data;
       this.setState({
         area_list: respData.map(item => Object.assign(item, {_edit:false})),
+        area_active_key: respData[0] && respData[0].id
       })
       // 获取区域分类的数据列表
       this.fetchCollection();
@@ -524,9 +534,8 @@ export default class ScoutingDetails extends PureComponent {
     Action.removeLayer();
   }
   // 渲染带坐标的数据
-  renderCollection = () =>{ 
-    let { all_collection } = this.state;
-    all_collection.length && Action.renderCollection(all_collection)
+  renderCollection = (data) =>{ 
+    data.length && Action.renderCollection(data)
   }
 
   // 获取资源列表，动态分类
@@ -553,7 +562,10 @@ export default class ScoutingDetails extends PureComponent {
         area_list: list,
         not_area_id_collection: data.filter( i => !i.area_type_id),
       },()=>{
-        this.renderCollection();
+        // 之渲染选中的区域数据
+        let obj = this.state.area_list.find(item => item.id === this.state.area_active_key)||{};
+        let arr = obj. collection;
+        this.renderCollection(arr || []);
       })
   }
 
@@ -730,6 +742,20 @@ export default class ScoutingDetails extends PureComponent {
     })
   }
 
+  // 点击panel时的回调
+  setActiveCollapse = (key) =>{
+    this.setState({area_active_key:key});
+    if(key){
+      let obj = this.state.area_list.find(item => item.id === key);
+      if(obj){
+        obj.collection && this.renderCollection(obj.collection)
+      }else{
+        this.renderCollection(this.state.not_area_id_collection || [])
+      }
+
+    }
+  }
+
   render(h) {
     const { current_board ,area_list ,not_area_id_collection} = this.state;
     const panelStyle = {
@@ -774,9 +800,10 @@ export default class ScoutingDetails extends PureComponent {
           <TabPane tab={<span>按区域</span>} key="1" style={panelStyle}>
             <div className={globalStyle.autoScrollY} style={{ height: "100%" ,paddingBottom:'40px'}}>
             <Collapse expandIconPosition="right" 
-              onChange={e => this.setState({area_active_key:e})} 
+              onChange={e => {this.setActiveCollapse(e)}} 
               className={styles.scoutingItem} accordion={true} 
-              activeKey={this.state.area_active_key}>
+              activeKey={this.state.area_active_key}
+              >
               {
                 area_list.map((item,index) => {
                   return (
@@ -809,27 +836,40 @@ export default class ScoutingDetails extends PureComponent {
                   )
                 })
               }
-              </Collapse>
-              {
-                !!not_area_id_collection.length && 
-                <div className={styles.norAreaIdsData}>
+                <Collapse.Panel key='other'
+                style={{backgroundColor:"#fff",marginBottom:'10px'}}
+                header={
+                  <ScoutingHeader data={
+                    {name:"未分组",}
+                  } 
+                  edit={false}
+                  index={area_list.length + 1} 
+                  onCancel={()=>{}} 
+                  onSave={()=>{}}
+                  // onDragEnter={e => {this.setState({area_active_key: item.id})}}
+                  />
+                }>  
                   {
-                    not_area_id_collection.map((item,index) => {
-                      return (
-                        <div key={item.id} className={`${animateCss.animated} ${animateCss.slideInRight}`}
-                        style={{animationDuration:"0.3s",animationDelay: index * 0.05 +'s'}}>
-                          <UploadItem data={item} type={Action.checkCollectionType(item.target)} 
-                          areaList={area_list}
-                          onSelectGroup={this.onSelectGroup}
-                          onRemove={this.onCollectionRemove.bind(this,item)}
-                          onEditCollection={this.onEditCollection}/>
-                        </div>
-                      )
-                    })
+                    !!not_area_id_collection.length && 
+                    <div className={styles.norAreaIdsData}>
+                      {
+                        not_area_id_collection.map((item,index) => {
+                          return (
+                            <div key={item.id} className={`${animateCss.animated} ${animateCss.slideInRight}`}
+                            style={{animationDuration:"0.3s",animationDelay: index * 0.05 +'s'}}>
+                              <UploadItem data={item} type={Action.checkCollectionType(item.target)} 
+                              areaList={area_list}
+                              onSelectGroup={this.onSelectGroup}
+                              onRemove={this.onCollectionRemove.bind(this,item)}
+                              onEditCollection={this.onEditCollection}/>
+                            </div>
+                          )
+                        })
+                      }
+                    </div>
                   }
-                </div>
-              }
-              
+                </Collapse.Panel>
+              </Collapse>
             </div>
             <div className={styles.addAreaBtn}>
               <Button type="primary" ghost icon={<PlusCircleOutlined/>} onClick={this.pushAreaItem}>新增</Button>
