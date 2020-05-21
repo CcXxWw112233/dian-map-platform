@@ -41,7 +41,6 @@ export const draw = {
       const me = this;
       // 标绘激活事件
       this.plottingLayer.on(FeatureOperatorEvent.ACTIVATE, (e) => {
-        debugger
         window.featureOperator = e.feature_operator;
         const featureOperator = window.featureOperator;
         // 讲标绘存到redux

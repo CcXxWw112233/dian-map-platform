@@ -411,7 +411,6 @@ export default class ProjectModal extends React.Component {
     );
   };
   render() {
-    debugger
     const { visible, responseData, operator } = this.props;
     let title = "添加备注";
     let remark = "";
