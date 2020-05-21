@@ -223,10 +223,12 @@ function Action (){
         this.renderFeaturesCollection(features);
 
         data && data.length && setTimeout(()=>{
+            // 当存在feature的时候，才可以缩放
+            if(this.features.length)
             Fit(InitMap.view, this.Source.getExtent(),{
                 size: InitMap.map.getSize(),
                 padding:[200,150,80,400],
-            },500)
+            },800);
         })
     }
 
