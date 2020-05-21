@@ -12,6 +12,7 @@ import VectorLayer from "ol/layer/Vector";
 import { GeoJSON, WKT } from "ol/format";
 import { transform } from "ol/proj";
 import { Draw } from 'ol/interaction'
+import { createBox } from 'ol/interaction/Draw'
 import {
   getCenter,
   // getBottomLeft,
@@ -239,6 +240,16 @@ export const drawPoint = (source,data = {})=>{
   return new Draw({
     source:source,
     type:"Point",
+    ...data
+  })
+}
+
+// 
+export const drawBox = (source,data) => {
+  return new Draw({
+    source:source,
+    type:"Circle",
+    geometryFunction: createBox(),
     ...data
   })
 }

@@ -42,7 +42,7 @@ export default function baseOverlay(content, data = {}){
     typeof content === 'string' ? div.innerHTML = content : content instanceof HTMLElement ? div.appendChild(content) : "";
     div.appendChild(span);
     div.style.backgroundColor = this.bgColor;
-    div.style.width = typeof this.width === 'number' ? this.width +'px' : this.width;
+    div.style.minWidth = typeof this.width === 'number' ? this.width +'px' : this.width;
     this.element = div;
 
     return this.element ;

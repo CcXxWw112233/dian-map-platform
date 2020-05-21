@@ -59,6 +59,7 @@ const UploadBtn = ({onChange}) => {
     showUploadList={false}
     >
       <Button 
+      title="上传采集数据"
       shape='circle'
       type='primary'
       ghost 
@@ -128,9 +129,11 @@ const ScoutingItem = ({
   onDrop,
   areaList,onSelectGroup,
   onAreaEdit = ()=>{},
-  onAreaDelete = ()=>{}
+  onAreaDelete = ()=>{},
+  onUploadPlan = () => {},
 }) => {
   
+  let [ planExtent, setPlanExtent ] = useState("")
 
   // 开始上传
   const startUpload = ({file , fileList}) => {
@@ -142,6 +145,24 @@ const ScoutingItem = ({
       // onError && onError(file)
     }
   }
+
+  const beforeUploadPlan = (val)=>{
+    // console.log(val);
+    return new Promise((resolve,reject)=>{
+      Action.addPlanPictureDraw().then(res => {
+        let { feature } = res;
+        let extent = feature.getGeometry().getExtent();
+        // console.log(val)
+        // 设置data
+        setPlanExtent(extent.join(','));
+        resolve({...val});
+      }).catch(err =>{
+        reject(err)
+      })
+    })
+  }
+
+
 
   return (
         <div onDrop={onDrop}
@@ -176,12 +197,28 @@ const ScoutingItem = ({
         <div style={{width:'100%',margin:'5px 0' ,padding: '10px 0' ,borderTop:'1px solid rgba(0,0,0,0.15)'}}>
           <Space size={8}>
             {
-              !!onUpload && <UploadBtn onChange={startUpload} />
+              !!onUpload && <UploadBtn onChange={startUpload}/>
+            }
+            {
+              !!onUploadPlan && <Upload
+              action={`/api/map/ght/${data.id}`}
+              headers={{"Authorization":BASIC.getUrlParam.token}}
+              beforeUpload={beforeUploadPlan}
+              data={{extent: planExtent}}
+              showUploadList={false}>
+                <Button
+                title="上传规划图"
+                type='primary' shape="circle" size='large' ghost
+                className={globalStyle.global_icon}>
+                  &#xe6ee;
+                </Button>
+              </Upload>
             }
             {/* 编辑按钮 */}
             {
               !!onAreaEdit && 
               <Button onClick={onAreaEdit.bind(this,data)} 
+              title="编辑分组名称"
               type='primary' shape="circle" size='large' ghost>
                 <EditOutlined/>
               </Button>
@@ -199,6 +236,7 @@ const ScoutingItem = ({
               cancelText="取消"
               onConfirm={onAreaDelete.bind(this, data)}>
                 <Button
+                title="删除分组"
                 type='danger' shape="circle" size='large' ghost>
                   <DeleteOutlined />
                 </Button>
@@ -756,6 +794,10 @@ export default class ScoutingDetails extends PureComponent {
     }
   }
 
+  onUploadPlan = (resp)=>{
+
+  }
+
   render(h) {
     const { current_board ,area_list ,not_area_id_collection} = this.state;
     const panelStyle = {
@@ -830,6 +872,7 @@ export default class ScoutingDetails extends PureComponent {
                       dataSource={item.collection}
                       onError={this.onAddError}
                       areaList={area_list}
+                      onUploadPlan={this.onUploadPlan}
                       onCollectionRemove={this.onCollectionRemove.bind(this, item)}
                       onEditCollection={this.onEditCollection}/>
                     </Collapse.Panel>

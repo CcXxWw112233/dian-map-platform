@@ -11,7 +11,7 @@ import { drawPoint,
     addFeature ,
     createOverlay,
     getPoint,getExtent,
-    Fit
+    Fit,drawBox
 } from '../../utils/index'
 import { CollectionOverlay } from '../../../components/PublicOverlays'
 
@@ -31,10 +31,12 @@ function Action (){
     this.Source = Source();
     this.features = [];
     this.overlays = [];
+    this.drawBox = null ;
     this.init = () => {
         this.Layer.setSource(this.Source);
         InitMap.map.addLayer(this.Layer); 
     }
+    this.boxFeature = {};
     this.draw = null ;
 
     this.removeListPoint = () => {
@@ -164,6 +166,8 @@ function Action (){
                 strokeColor:"#fff"
             });
 
+            let pointType = this.checkCollectionType(item.target);
+            item.pointType = pointType;
             feature.setStyle(style);
             this.addOverlay(coor, item);
             this.features.push(feature);
@@ -252,6 +256,32 @@ function Action (){
     }
     this.editAreaName = async (id,data) => {
         return await EDIT_AREA_NAME(id,data)
+    }
+    
+    // 中断绘制
+    this.stopDrawBox = ()=>{
+        this.drawBox && this.drawBox.abortDrawing && this.drawBox.abortDrawing();
+        InitMap.map.removeInteraction(this.drawBox);
+        if(this.Source && this.Source.getFeatureByUid(this.boxFeature.ol_uid)){
+            this.Source.removeFeature(this.boxFeature);
+        }
+    }
+
+    // 添加规划图范围
+    this.addPlanPictureDraw = (data) => {
+        return new Promise((resolve, reject) => {
+            this.drawBox = drawBox(this.Source, data = {});
+            this.drawBox.on('drawend',(e)=>{
+                resolve(e);
+                this.boxFeature = e.feature;
+                InitMap.map.removeInteraction(this.drawBox);
+            });
+            this.drawBox.on('drawabort',()=>{
+                reject({code:-1,message:"操作中止"})
+            })
+            InitMap.map.addInteraction(this.drawBox);
+        })
+        
     }
 }
 
