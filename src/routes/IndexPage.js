@@ -69,6 +69,7 @@ class IndexPage extends React.Component {
             coordinates: feature.getGeometry().getCoordinates(),
             geoType:feature.getGeometry().getType(),
             name:item.name,
+            featureType: item.attrs.featureType
           }
           let obj = {
             collect_type: 4,

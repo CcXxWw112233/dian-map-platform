@@ -95,6 +95,7 @@ export default class TempPlottingPanel extends React.Component {
   };
 
   handleEditClick = (featureOperator) => {
+    window.featureOperator = featureOperator;
     const { dispatch } = this.props;
     // 更新模态框数据
     dispatch({
@@ -105,6 +106,7 @@ export default class TempPlottingPanel extends React.Component {
         selectName: featureOperator.attrs.selectName || "",
         featureType: featureOperator.attrs.featureType || "", // 类型
         remarks: featureOperator.attrs.remark || "", // 备注
+        responseData: featureOperator.responseData,
       },
     });
     dispatch({
@@ -116,34 +118,42 @@ export default class TempPlottingPanel extends React.Component {
     dispatch({
       type: "plotting/setPotting",
       payload: {
-        operator: featureOperator
-      }
-    })
+        operator: featureOperator,
+        type: featureOperator.attrs.plottingType,
+      },
+    });
   };
 
   getStyle = (attrs) => {
-    let style = {};
-    if (attrs.featureType.indexOf("/") > -1) {
-      const tempIconUrl = attrs.featureType.replace("img", "");
-      const image = require("../../assets" + tempIconUrl);
-      style = {
-        ...style,
-        backgroundImage: `url(${image})`,
-        backgroundColor: "rgba(255,255,255,1)",
-        backgroundRepeat: "no-repeat",
-        backgroundPosition: "center center",
-      };
+    if (attrs && attrs.featureType) {
+      let style = {};
+      if (attrs.featureType.indexOf("/") > -1) {
+        const tempIconUrl = attrs.featureType.replace("img", "");
+        const image = require("../../assets" + tempIconUrl);
+        style = {
+          ...style,
+          backgroundImage: `url(${image})`,
+          backgroundColor: "rgba(255,255,255,1)",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center center",
+        };
+      }
+      if (attrs.featureType.indexOf("rgb") > -1) {
+        style = { ...style, backgroundColor: attrs.featureType };
+      }
+      if (attrs.geom.indexOf("POINT") > -1) {
+        style = { ...style, borderRadius: 8 };
+      }
+      if (attrs.geom.indexOf("LINESTRING") > -1) {
+        style = {
+          ...style,
+          height: 0,
+          border: `1px solid ${attrs.featureType}`,
+        };
+      }
+      return style;
     }
-    if (attrs.featureType.indexOf("rgb") > -1) {
-      style = { ...style, backgroundColor: attrs.featureType };
-    }
-    if (attrs.geom.indexOf("POINT") > -1) {
-      style = { ...style, borderRadius: 8 };
-    }
-    if (attrs.geom.indexOf("LINESTRING") > -1) {
-      style = { ...style, height: 0, border: `1px solid ${attrs.featureType}` };
-    }
-    return style;
+    return null;
   };
 
   getSelectedData = () => {
@@ -159,6 +169,7 @@ export default class TempPlottingPanel extends React.Component {
 
   // 转存到项目
   saveToProject = () => {
+    const me = this;
     const { plottingLayer } = draw;
     let { dispatch, featureOperatorList } = this.props;
     let arr = this.getSelectedData();
@@ -171,10 +182,17 @@ export default class TempPlottingPanel extends React.Component {
       val.forEach((item) => {
         let index = array.findIndex((feature) => feature.guid === item.guid);
         if (index >= 0) {
+          plottingLayer.removeFeature(array[index]);
           // 删除转存成功的数据
           array.splice(index, 1);
-          plottingLayer.removeFeature(array[index]);
         }
+      });
+      me.setState({
+        checkedList: [],
+      });
+      me.setState({
+        indeterminate: false,
+        checkAll: false,
       });
       dispatch({
         type: "featureOperatorList/updateList",

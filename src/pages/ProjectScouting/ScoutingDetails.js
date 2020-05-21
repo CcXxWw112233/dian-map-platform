@@ -602,7 +602,7 @@ export default class ScoutingDetails extends PureComponent {
       },()=>{
         // 之渲染选中的区域数据
         let obj = this.state.area_list.find(item => item.id === this.state.area_active_key)||{};
-        let arr = obj. collection;
+        let arr = obj.collection;
         this.renderCollection(arr || []);
       })
   }

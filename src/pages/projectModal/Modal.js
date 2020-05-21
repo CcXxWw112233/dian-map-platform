@@ -236,7 +236,7 @@ export default class ProjectModal extends React.Component {
     } else {
       arr[index] = featureOperator;
     }
-    draw.featureOperatorList = arr
+    draw.featureOperatorList = arr;
     dispatch({
       type: "featureOperatorList/updateList",
       payload: {
@@ -281,6 +281,7 @@ export default class ProjectModal extends React.Component {
           name: featureNameState,
           remark: remarksState,
           selectName: selectNameState,
+          plottingType: featureType,
         };
         break;
       case "POLYLINE":
@@ -292,6 +293,7 @@ export default class ProjectModal extends React.Component {
           name: featureNameState,
           remark: remarksState,
           selectName: selectNameState,
+          plottingType: featureType,
         };
         break;
       case "POLYGON":
@@ -320,10 +322,14 @@ export default class ProjectModal extends React.Component {
           name: featureNameState,
           remark: remarksState,
           selectName: selectNameState,
+          plottingType: featureType,
         };
         break;
       default:
         break;
+    }
+    if (window.featureOperator && !window.featureOperator.responseData) {
+      window.featureOperator.responseData = this.props.responseData;
     }
     const keyArray = Object.keys(attr);
     keyArray.forEach((key) => {
