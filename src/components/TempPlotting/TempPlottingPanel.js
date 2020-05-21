@@ -158,6 +158,9 @@ export default class TempPlottingPanel extends React.Component {
   render() {
     const { panelVisible, featureOperatorList } = this.props;
     let style = panelVisible ? { display: "" } : { display: "none" };
+    if (featureOperatorList.length === 0) {
+      style = { display: "none" };
+    }
     return (
       <div className={styles.wrap} style={style}>
         <div className={styles.header}>

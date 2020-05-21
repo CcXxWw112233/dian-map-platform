@@ -28,7 +28,7 @@ export default class TempPlottingIcon extends React.Component {
   };
   render() {
     const { iconVisible,featureOperatorList } = this.props;
-    let style = iconVisible ? { display: "" } : { display: "none" };
+    let style = (featureOperatorList.length > 0 || iconVisible) ? { display: "" } : { display: "none" };
     if (featureOperatorList.length > 0) {
       style = { display: "" }
     }
@@ -38,7 +38,7 @@ export default class TempPlottingIcon extends React.Component {
         className={styles.wrap}
         onClick={this.handleClick}
         style={{ ...style }}
-        title="临时标绘"
+        title="标绘记录"
       >
         <i className={globalStyle.global_icon}>&#xe7b0;</i>
       </Button>
