@@ -29,6 +29,7 @@ export default class ScoutingList extends PureComponent {
   componentDidMount(){
     // 检查数据
     this.renderBoardList();
+    Action.init();
     Action.on('projectClick',(val)=>{
       // console.log(val)
       this.handleClick(val)
@@ -46,9 +47,7 @@ export default class ScoutingList extends PureComponent {
 
   renderPoint = (data) => {
     // 渲染数据
-    Action.init().then( _ => {
-      Action.renderProjectPoint(data || []);
-    })
+    Action.renderProjectPoint(data || []);
   }
 
   getProjectList = () => {
