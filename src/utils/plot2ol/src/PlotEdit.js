@@ -121,7 +121,6 @@ class PlotEdit extends Observable {
     });
     this.layer.plotEdit.controlPoints.push(delBtnOverlay);
     this.map.addOverlay(delBtnOverlay);
-    // debugger;
     DomUtils.addListener(
       delBtnEle,
       "mousedown",
@@ -157,7 +156,6 @@ class PlotEdit extends Observable {
       });
       this.controlPoints.push(pnt);
       this.map.addOverlay(pnt);
-      // debugger;
       DomUtils.addListener(
         element,
         "mousedown",

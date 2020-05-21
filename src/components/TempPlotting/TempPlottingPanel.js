@@ -3,7 +3,7 @@ import { Checkbox, Row, Button } from "antd";
 import { connect } from "dva";
 import styles from "./TempPlottingPanel.less";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
-import event from '../../lib/utils/event'
+import event from "../../lib/utils/event";
 @connect(
   ({
     tempPlotting: { panelVisible, iconVisible },
@@ -109,6 +109,9 @@ export default class TempPlottingPanel extends React.Component {
     if (attrs.featureType.indexOf("rgb") > -1) {
       style = { ...style, backgroundColor: attrs.featureType };
     }
+    if (attrs.geom.indexOf("POINT") > -1) {
+      style = { ...style, borderRadius: 8 };
+    }
     if (attrs.geom.indexOf("LINESTRING") > -1) {
       style = { ...style, height: 0, border: `1px solid ${attrs.featureType}` };
     }
@@ -119,38 +122,38 @@ export default class TempPlottingPanel extends React.Component {
     let { featureOperatorList } = this.props;
     let { checkedList } = this.state;
 
-    let list = checkedList.map(item => {
-      let obj = featureOperatorList.find(feature => feature.guid === item);
-      return obj ;
-    })
+    let list = checkedList.map((item) => {
+      let obj = featureOperatorList.find((feature) => feature.guid === item);
+      return obj;
+    });
     return list;
-  }
+  };
 
   // 转存到项目
   saveToProject = () => {
-    let { dispatch ,featureOperatorList} = this.props;
+    let { dispatch, featureOperatorList } = this.props;
     let arr = this.getSelectedData();
     // 转存
-    event.Evt.firEvent('hasFeatureToProject',arr);
+    event.Evt.firEvent("hasFeatureToProject", arr);
     // 转存之后的回调
-    event.Evt.on('appendToProjectSuccess',(val)=>{
+    event.Evt.on("appendToProjectSuccess", (val) => {
       // console.log(val);
       let array = [...featureOperatorList];
-      val.forEach(item => {
-        let index = array.findIndex(feature => feature.guid === item.guid);
-        if(index >= 0){
+      val.forEach((item) => {
+        let index = array.findIndex((feature) => feature.guid === item.guid);
+        if (index >= 0) {
           // 删除转存成功的数据
-          array.splice(index,1);
+          array.splice(index, 1);
         }
-      })
+      });
       dispatch({
-        type:"featureOperatorList/updateList",
-        payload:{
-          featureOperatorList: array
-        }
-      })
-    })
-  }
+        type: "featureOperatorList/updateList",
+        payload: {
+          featureOperatorList: array,
+        },
+      });
+    });
+  };
 
   render() {
     const { panelVisible, featureOperatorList } = this.props;
