@@ -18,7 +18,10 @@ export const draw = {
   },
   currentId: null,
   currentType: null,
+  drawDispatch: null,
+  featureOperatorList: [],
   create(type, dispatch) {
+    this.drawDispatch = dispatch;
     if (!this.map) {
       this.map = mapApp.map;
     }
@@ -36,9 +39,12 @@ export const draw = {
         },
       });
       const me = this;
+      // 标绘激活事件
       this.plottingLayer.on(FeatureOperatorEvent.ACTIVATE, (e) => {
+        debugger
         window.featureOperator = e.feature_operator;
-        const featureOperator = window.featureOperator
+        const featureOperator = window.featureOperator;
+        // 讲标绘存到redux
         dispatch({
           type: "plotting/setPotting",
           payload: {
@@ -46,6 +52,8 @@ export const draw = {
             operator: e.feature_operator,
           },
         });
+
+        // 更新模态框数据
         dispatch({
           type: "modal/updateData",
           payload: {
@@ -56,16 +64,23 @@ export const draw = {
             remarks: featureOperator.attrs.remark || "", // 备注
           },
         });
-        const url = `${me.baseUrl}/api/map/dict/${me.currentId}/mark`;
-        request("GET", url).then((res) => {
-          dispatch({
-            type: "modal/setVisible",
-            payload: {
-              visible: true,
-              responseData: res.data || {},
-            },
+        
+        // 查询数据，弹出模态框
+        const currentOperator = me.featureOperatorList.filter(operator => {
+          return operator.guid === featureOperator.guid
+        })
+        if (!currentOperator.length) {
+          const url = `${me.baseUrl}/api/map/dict/${me.currentId}/mark`;
+          request("GET", url).then((res) => {
+            dispatch({
+              type: "modal/setVisible",
+              payload: {
+                visible: true,
+                responseData: res.data || {},
+              },
+            });
           });
-        });
+        }
       });
       this.plottingLayer.on(FeatureOperatorEvent.DEACTIVATE, (e) => {
         dispatch({

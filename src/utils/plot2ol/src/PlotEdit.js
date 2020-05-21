@@ -41,6 +41,7 @@ class PlotEdit extends Observable {
 
     this.delCb = null;
     this.updateCb = null;
+    this.openCb = null;
   }
   initHelperDom() {
     if (!this.map || !this.activePlot) {
@@ -59,7 +60,20 @@ class PlotEdit extends Observable {
     var cPnts = this.getControlPoints();
     for (var i = 0; i < cPnts.length; i++) {
       var id = Constants.HELPER_CONTROL_POINT_DIV + "-" + i;
-      DomUtils.create("div", Constants.HELPER_CONTROL_POINT_DIV, hiddenDiv, id);
+      const dom = DomUtils.create(
+        "div",
+        Constants.HELPER_CONTROL_POINT_DIV,
+        hiddenDiv,
+        id
+      );
+      DomUtils.addListener(
+        dom,
+        "mousedown",
+        () => {
+          this.openCb && this.openCb();
+        },
+        this
+      );
       this.elementTable[id] = i;
     }
   }
@@ -105,6 +119,10 @@ class PlotEdit extends Observable {
   }
   setUpdateCallback(cb) {
     this.updateCb = cb;
+  }
+
+  setOpenCallback(cb) {
+    this.openCb = cb
   }
 
   // 删除按钮

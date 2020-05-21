@@ -4,6 +4,7 @@ import { connect } from "dva";
 import styles from "./TempPlottingPanel.less";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import event from "../../lib/utils/event";
+import { draw } from "../../utils/draw";
 @connect(
   ({
     tempPlotting: { panelVisible, iconVisible },
@@ -93,6 +94,33 @@ export default class TempPlottingPanel extends React.Component {
     });
   };
 
+  handleEditClick = (featureOperator) => {
+    const { dispatch } = this.props;
+    // 更新模态框数据
+    dispatch({
+      type: "modal/updateData",
+      payload: {
+        isEdit: true,
+        featureName: featureOperator.attrs.name || "", // 名称
+        selectName: featureOperator.attrs.selectName || "",
+        featureType: featureOperator.attrs.featureType || "", // 类型
+        remarks: featureOperator.attrs.remark || "", // 备注
+      },
+    });
+    dispatch({
+      type: "modal/setVisible",
+      payload: {
+        visible: true,
+      },
+    });
+    dispatch({
+      type: "plotting/setPotting",
+      payload: {
+        operator: featureOperator
+      }
+    })
+  };
+
   getStyle = (attrs) => {
     let style = {};
     if (attrs.featureType.indexOf("/") > -1) {
@@ -131,6 +159,7 @@ export default class TempPlottingPanel extends React.Component {
 
   // 转存到项目
   saveToProject = () => {
+    const { plottingLayer } = draw;
     let { dispatch, featureOperatorList } = this.props;
     let arr = this.getSelectedData();
     // 转存
@@ -144,6 +173,7 @@ export default class TempPlottingPanel extends React.Component {
         if (index >= 0) {
           // 删除转存成功的数据
           array.splice(index, 1);
+          plottingLayer.removeFeature(array[index]);
         }
       });
       dispatch({
@@ -200,7 +230,15 @@ export default class TempPlottingPanel extends React.Component {
                     className={styles.icon}
                     style={this.getStyle(featureOperator.attrs)}
                   ></div>
-                  {featureOperator.name}
+                  <div className={styles.text}>
+                    <span>{featureOperator.name}</span>
+                  </div>
+                  <div
+                    className={styles.edit}
+                    onClick={() => this.handleEditClick(featureOperator)}
+                  >
+                    <span>编辑</span>
+                  </div>
                 </Row>
               );
             })}

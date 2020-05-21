@@ -151,7 +151,7 @@ export default class ProjectModal extends React.Component {
           tempType === "Rectangle" ||
           tempType === "Circle"
         ) {
-          tempType = "Polygon"
+          tempType = "Polygon";
           options = {
             ...commonStyleOption,
             ...{ fillColor: "rgba(168,9,10,0.7)", text: featureNameState },
@@ -236,6 +236,7 @@ export default class ProjectModal extends React.Component {
     } else {
       arr[index] = featureOperator;
     }
+    draw.featureOperatorList = arr
     dispatch({
       type: "featureOperatorList/updateList",
       payload: {
@@ -410,6 +411,7 @@ export default class ProjectModal extends React.Component {
     );
   };
   render() {
+    debugger
     const { visible, responseData, operator } = this.props;
     let title = "添加备注";
     let remark = "";
