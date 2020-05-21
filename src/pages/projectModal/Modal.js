@@ -86,7 +86,7 @@ export default class ProjectModal extends React.Component {
       if (this.props.isEdit) {
         // message.success("保存成功");
         let plottingType = this.props.type;
-        const tempType = this.toChangedataType(plottingType);
+        let tempType = this.toChangedataType(plottingType);
         const defaultOptions = {
           radius: 8,
           fillColor: "rgba(168,9,10,0.7)",
@@ -145,7 +145,13 @@ export default class ProjectModal extends React.Component {
             },
           };
         }
-        if (tempType === "Polygon") {
+        if (
+          tempType === "Polygon" ||
+          tempType === "Fine_arrow" ||
+          tempType === "Rectangle" ||
+          tempType === "Circle"
+        ) {
+          tempType = "Polygon"
           options = {
             ...commonStyleOption,
             ...{ fillColor: "rgba(168,9,10,0.7)", text: featureNameState },
@@ -248,20 +254,18 @@ export default class ProjectModal extends React.Component {
     const featureType = this.props.type;
     let newGeom = this.getPointStr(points);
     let attr = {};
-    const featureTypeState =
-      this.checkStateChange(
-        this.props.featureType || this.state.featureType,
-        featureOperator.attrs.featureType
-      ) || this.state.featureType;
+    const featureTypeState = this.checkStateChange(
+      this.props.featureType || this.state.featureType,
+      featureOperator.attrs.featureType
+    );
     const featureNameState = this.checkStateChange(
       this.props.featureName,
       featureOperator.attrs.featureName
     );
-    const remarksState =
-      this.checkStateChange(
-        this.props.remarks || this.state.remarks,
-        featureOperator.attrs.remarks
-      ) || this.state.remarks;
+    const remarksState = this.checkStateChange(
+      this.props.remarks || this.state.remarks,
+      featureOperator.attrs.remarks
+    );
     const selectNameState = this.checkStateChange(
       this.props.selectName,
       featureOperator.attrs.selectName
@@ -290,6 +294,9 @@ export default class ProjectModal extends React.Component {
         };
         break;
       case "POLYGON":
+      case "FINE_ARROW":
+      case "RECTANGLE":
+      case "CIRCLE":
         let style = null;
         if (featureTypeState.indexOf("/") > -1) {
           style = `${featureTypeState};icon`;
