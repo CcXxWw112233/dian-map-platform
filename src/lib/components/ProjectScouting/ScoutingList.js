@@ -148,7 +148,7 @@ const action = function(){
     this.removeDraw = ()=>{
         InitMap.map.removeInteraction(this.draw);
         InitMap.map.removeOverlay(this.addProjectOverlay);
-        if(this.Source.getFeatureByUid(this.addProjectFeature.ol_uid)){
+        if(this.Source && this.Source.getFeatureByUid(this.addProjectFeature.ol_uid)){
             this.Source.removeFeature(this.addProjectFeature);
         }
     }
