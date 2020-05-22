@@ -232,7 +232,7 @@ function Action() {
       let iconUrl = "";
       let obj = null;
       const hasIndex = projectScouting.content.findIndex(
-        (item0) => item0.font === content.selectName
+        (item0) => item0.font === (content.selectName || content.name)
       );
       const featureLowerType = content.geoType.toLowerCase();
       if (featureType.indexOf("/") > -1) {
@@ -242,7 +242,7 @@ function Action() {
         if (hasIndex < 0) {
           obj = {
             imgSrc: iconUrl,
-            font: content.selectName,
+            font: content.selectName || content.name,
             type: featureLowerType,
           };
           projectScouting.content.push(obj);
@@ -251,7 +251,7 @@ function Action() {
         if (hasIndex < 0) {
           obj = {
             bgColor: featureType,
-            font: content.selectName,
+            font: content.selectName || content.name,
             type: featureLowerType,
           };
           projectScouting.content.push(obj);
