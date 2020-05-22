@@ -56,7 +56,7 @@ function Action() {
     if (!suffix) return "unknow";
     const itemKeyVals = {
       paper: [], // 图纸
-      interview: ["aac", "mp3"], // 访谈
+      interview: ["aac", "mp3",'语音'], // 访谈
       pic: ["jpg", "PNG", "gif", "jpeg"].map((item) =>
         item.toLocaleLowerCase()
       ),
