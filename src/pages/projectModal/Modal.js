@@ -149,7 +149,8 @@ export default class ProjectModal extends React.Component {
           tempType === "Polygon" ||
           tempType === "Fine_arrow" ||
           tempType === "Rectangle" ||
-          tempType === "Circle"
+          tempType === "Circle" ||
+          tempType === "Freehandpolygon"
         ) {
           tempType = "Polygon";
           options = {
@@ -300,6 +301,7 @@ export default class ProjectModal extends React.Component {
       case "FINE_ARROW":
       case "RECTANGLE":
       case "CIRCLE":
+      case "FREEHANDPOLYGON":
         let style = null;
         if (featureTypeState.indexOf("/") > -1) {
           style = `${featureTypeState};icon`;

@@ -15,6 +15,7 @@ export const draw = {
     MARKER: "afa356c6c577452db715583453e6de6d",
     POLYLINE: "ae60a1157a734d8ebb864b90858abeb1",
     POLYGON: "9f9bc44de1884bedbfb59fe8440edceb",
+    FREEHAND_POLYGON: "9f9bc44de1884bedbfb59fe8440edceb",
   },
   currentId: null,
   currentType: null,
@@ -28,6 +29,9 @@ export const draw = {
     this.type = type;
     if (type === "MARKER") {
       this.type = "POINT";
+    }
+    if (type === "FREEHAND_POLYGON") {
+      this.type = 'FREEHANDPOLYGON'
     }
     this.currentId = this.typeIdKeys[type];
     if (!this.plottingLayer) {
@@ -63,7 +67,6 @@ export const draw = {
             remarks: featureOperator.attrs.remark || "", // 备注
           },
         });
-        
         // 查询数据，弹出模态框
         const currentOperator = me.featureOperatorList.filter(operator => {
           return operator.guid === featureOperator.guid

@@ -210,7 +210,7 @@ function Action() {
     data.forEach((item) => {
       let content = item.content;
       content = content && JSON.parse(content);
-      let featureType = content.featureType;
+      let featureType = content.featureType || "";
       let isImage = false;
       let iconUrl = "";
       if (featureType.indexOf("/") > -1) {
@@ -221,8 +221,43 @@ function Action() {
       let feature = addFeature(content.geoType, {
         coordinates: content.coordinates,
       });
-      let style = {
-        Point: createStyle(content.geoType, {
+      // let style = {
+      //   Point: createStyle(content.geoType, {
+      //     radius: 8,
+      //     fillColor: "rgba(168,9,10,0.7)",
+      //     strokeWidth: 2,
+      //     strokeColor: "rgba(168,9,10,1)",
+      //     iconUrl: iconUrl,
+      //     text: content.name,
+      //     ...commonStyleOption,
+      //   }),
+      //   LineString: createStyle(content.geoType, {
+      //     strokeWidth: 4,
+      //     strokeColor: featureType,
+      //     text: content.name,
+      //     ...commonStyleOption,
+      //   }),
+      //   Polygon: createStyle(content.geoType, {
+      //     strokeWidth: 2,
+      //     strokeColor: isImage ? "" : featureType.replace("0.7", 1),
+      //     fillColor: isImage ? this.getPolygonFill(iconUrl) : featureType,
+      //     text: content.name,
+      //     ...commonStyleOption,
+      //   }),
+      // };
+
+      // feature.setStyle(style[content.geoType]);
+      // this.Source.addFeature(feature);
+      // if (content.geoType !== "Point") {
+      //   let extent = getExtent(feature);
+      //   let center = getPoint(extent);
+      //   this.addOverlay(center, item);
+      // } else this.addOverlay(content.coordinates, item);
+
+      // liulaian
+      let myStyle = null;
+      if (content.geoType === "Point") {
+        myStyle = createStyle(content.geoType, {
           radius: 8,
           fillColor: "rgba(168,9,10,0.7)",
           strokeWidth: 2,
@@ -230,30 +265,50 @@ function Action() {
           iconUrl: iconUrl,
           text: content.name,
           ...commonStyleOption,
-        }),
-        LineString: createStyle(content.geoType, {
+        });
+      }
+      if (content.geoType === "LineString") {
+        myStyle = createStyle(content.geoType, {
           strokeWidth: 4,
           strokeColor: featureType,
           text: content.name,
           ...commonStyleOption,
-        }),
-        Polygon: createStyle(content.geoType, {
+        });
+      }
+      if (content.geoType === "Polygon") {
+        if (isImage) {
+          let canvas = document.createElement("canvas");
+          let context = canvas.getContext("2d");
+          let img = new Image();
+          img.src = iconUrl;
+          const me = this;
+          img.onload = function () {
+            const pat = context.createPattern(img, "repeat");
+            let options = {
+              strokeWidth: 2,
+              strokeColor: isImage ? "" : featureType.replace("0.7", 1),
+              fillColor: pat,
+              text: content.name,
+              ...commonStyleOption,
+            };
+            myStyle = createStyle(content.geoType, options);
+            feature.setStyle(myStyle);
+            me.Source.addFeature(feature);
+            me.features.push(feature);
+            return;
+          };
+          return;
+        }
+        myStyle = createStyle(content.geoType, {
           strokeWidth: 2,
           strokeColor: isImage ? "" : featureType.replace("0.7", 1),
-          fillColor: isImage ? this.getPolygonFill(iconUrl) : featureType,
+          fillColor: featureType,
           text: content.name,
           ...commonStyleOption,
-        }),
-      };
-
-      feature.setStyle(style[content.geoType]);
+        });
+      }
+      feature.setStyle(myStyle);
       this.Source.addFeature(feature);
-      // if (content.geoType !== "Point") {
-      //   let extent = getExtent(feature);
-      //   let center = getPoint(extent);
-      //   this.addOverlay(center, item);
-      // } else this.addOverlay(content.coordinates, item);
-
       this.features.push(feature);
     });
   };
@@ -262,6 +317,10 @@ function Action() {
     let context = canvas.getContext("2d");
     let img = new Image();
     img.src = iconUrl;
+    img.onload = function () {
+      const pat = context.createPattern(img, "repeat");
+      return pat;
+    };
     const pat = context.createPattern(img, "repeat");
     return pat;
   };

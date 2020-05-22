@@ -11,8 +11,8 @@ import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
 import { GeoJSON, WKT } from "ol/format";
 import { transform } from "ol/proj";
-import { Draw } from 'ol/interaction'
-import { createBox } from 'ol/interaction/Draw'
+import { Draw } from "ol/interaction";
+import { createBox } from "ol/interaction/Draw";
 import {
   getCenter,
   // getBottomLeft,
@@ -137,7 +137,7 @@ export const createStyle = function (
     fillColor = getPolygonFillColor(properties, fillColorKeyVals);
   }
 
-  let defaultColor = "#3399cc";
+  let defaultColor = "rgba(255,255,255,0.8)";
   // 填充色
   let fill = new Fill({
     color: fillColor ? fillColor : options.fillColor || defaultColor,
@@ -182,7 +182,11 @@ export const createStyle = function (
       text: text,
     });
   }
-  if (type === "MultiLineString" || type === "LineString" || type === 'Polyline') {
+  if (
+    type === "MultiLineString" ||
+    type === "LineString" ||
+    type === "Polyline"
+  ) {
     return new Style({
       text: text,
       stroke: stroke,
@@ -236,23 +240,23 @@ export const createOverlay = (ele, data = {}) => {
   });
 };
 
-export const drawPoint = (source,data = {})=>{
+export const drawPoint = (source, data = {}) => {
   return new Draw({
-    source:source,
-    type:"Point",
-    ...data
-  })
-}
+    source: source,
+    type: "Point",
+    ...data,
+  });
+};
 
-// 
-export const drawBox = (source,data) => {
+//
+export const drawBox = (source, data) => {
   return new Draw({
-    source:source,
-    type:"Circle",
+    source: source,
+    type: "Circle",
     geometryFunction: createBox(),
-    ...data
-  })
-}
+    ...data,
+  });
+};
 
 // 添加source
 export const Source = function (data) {
