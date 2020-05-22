@@ -220,6 +220,7 @@ const ScoutingItem = ({
             {
               !!onUploadPlan && <Upload
               action={`/api/map/ght/${data.id}`}
+              accept=".jpg, .jpeg, .png, .bmp"
               headers={{"Authorization":BASIC.getUrlParam.token}}
               beforeUpload={beforeUploadPlan}
               data={{extent: planExtent,transparency}}
