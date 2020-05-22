@@ -131,9 +131,12 @@ const ScoutingItem = ({
   onAreaEdit = ()=>{},
   onAreaDelete = ()=>{},
   onUploadPlan = () => {},
+  onUploadPlanStart = ()=>{},
+  onUploadPlanCancel = () => {},
 }) => {
   
-  let [ planExtent, setPlanExtent ] = useState("")
+  let [ planExtent, setPlanExtent ] = useState("");
+  let [ transparency , setTransparency ] = useState('1');
 
   // 开始上传
   const startUpload = ({file , fileList}) => {
@@ -146,18 +149,31 @@ const ScoutingItem = ({
     }
   }
 
+  const onStartUploadPlan = ({file, fileList})=>{
+    let { response } = file;
+    // onChange && onChange(file,fileList)
+    if(response){
+      BASIC.checkResponse(response) ? (onUploadPlan && onUploadPlan(response.data,fileList)) : (onError && onError(response))
+    }else{
+      // onError && onError(file)
+    }
+  }
+  // 上传规划图
   const beforeUploadPlan = (val)=>{
-    // console.log(val);
+    onUploadPlanStart && onUploadPlanStart(val);
     return new Promise((resolve,reject)=>{
-      Action.addPlanPictureDraw().then(res => {
+      let url = window.URL.createObjectURL(val);
+      Action.addPlanPictureDraw(url).then(res => {
         let { feature } = res;
         let extent = feature.getGeometry().getExtent();
-        // console.log(val)
         // 设置data
+        setTransparency(res.opacity);
         setPlanExtent(extent.join(','));
         resolve({...val});
+        // resolve({})
       }).catch(err =>{
         reject(err)
+        onUploadPlanCancel && onUploadPlanCancel(err);
       })
     })
   }
@@ -204,7 +220,8 @@ const ScoutingItem = ({
               action={`/api/map/ght/${data.id}`}
               headers={{"Authorization":BASIC.getUrlParam.token}}
               beforeUpload={beforeUploadPlan}
-              data={{extent: planExtent}}
+              data={{extent: planExtent,transparency}}
+              onChange={onStartUploadPlan}
               showUploadList={false}>
                 <Button
                 title="上传规划图"
@@ -613,7 +630,7 @@ export default class ScoutingDetails extends PureComponent {
   }
   // 上传完成
   fileUpload = (val, resp) => {
-    if(resp){
+    if(BASIC.checkResponse(resp)){
       message.success('上传成功')
       let { file_resource_id ,suffix ,original_file_name} = resp;
 
@@ -632,7 +649,7 @@ export default class ScoutingDetails extends PureComponent {
         this.fetchCollection();
       }).catch(err => {
         // 添加失败
-        console.log(err)
+        console.log(err.message)
       })
       
 
@@ -794,8 +811,41 @@ export default class ScoutingDetails extends PureComponent {
     }
   }
 
-  onUploadPlan = (resp)=>{
+  onUploadPlanStart = ()=>{
+    this.hideOtherSlide();
+  }
 
+  onUploadPlanCancel = ()=>{
+    this.showOtherSlide();
+  }
+
+  onUploadPlan = (val,resp)=>{
+    this.showOtherSlide();
+    // console.log(resp);
+    if(resp){
+      message.success('上传成功')
+      let { id, name } = resp;
+
+      let params = {
+        board_id: this.state.current_board.board_id,
+        area_type_id: val.id,
+        collect_type: 5,
+        resource_id: id,
+        target: 'plan',
+        title: name ,
+
+      }
+      Action.addCollection(params).then(res => {
+        // console.log(res);
+        // 更新上传的列表
+        this.fetchCollection();
+      }).catch(err => {
+        // 添加失败
+        console.log(err.message)
+      })
+      
+
+    }
   }
 
   render(h) {
@@ -872,9 +922,11 @@ export default class ScoutingDetails extends PureComponent {
                       dataSource={item.collection}
                       onError={this.onAddError}
                       areaList={area_list}
-                      onUploadPlan={this.onUploadPlan}
+                      onUploadPlan={this.onUploadPlan.bind(this,item)}
                       onCollectionRemove={this.onCollectionRemove.bind(this, item)}
-                      onEditCollection={this.onEditCollection}/>
+                      onEditCollection={this.onEditCollection}
+                      onUploadPlanStart={this.onUploadPlanStart.bind(this,item)}
+                      onUploadPlanCancel={this.onUploadPlanCancel}/>
                     </Collapse.Panel>
                   )
                 })

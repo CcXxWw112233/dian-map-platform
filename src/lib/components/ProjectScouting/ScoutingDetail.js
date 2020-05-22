@@ -11,9 +11,13 @@ import { drawPoint,
     addFeature ,
     createOverlay,
     getPoint,getExtent,
-    Fit,drawBox
+    Fit,drawBox,
+    ImageStatic,
+    setSelectInteraction
 } from '../../utils/index'
-import { CollectionOverlay } from '../../../components/PublicOverlays'
+import { CollectionOverlay, settingsOverlay } from '../../../components/PublicOverlays'
+import { Modify,Snap } from 'ol/interaction'
+import { always ,singleClick,touchOnly} from 'ol/events/condition'
 
 function Action (){
     const { 
@@ -38,6 +42,7 @@ function Action (){
     }
     this.boxFeature = {};
     this.draw = null ;
+    this.staticimg = null ;
 
     this.removeListPoint = () => {
         // 删除已经存在的项目列表
@@ -51,7 +56,7 @@ function Action (){
             interview: ['aac','mp3'], // 访谈
             pic: ['jpg','PNG','gif','jpeg'].map( item => item.toLocaleLowerCase()),
             video: ['MP4','WebM','Ogg','avi'].map( item => item.toLocaleLowerCase()),
-            word: ['ppt','pptx','xls','xlsx','doc','docx','zip','rar','xmind'].map( item => item.toLocaleLowerCase()),
+            word: ['ppt','pptx','xls','xlsx','doc','docx','zip','rar','xmind','pdf'].map( item => item.toLocaleLowerCase()),
             annotate: [],// 批注
             plotting: ['feature'],// 标绘
         };
@@ -267,14 +272,83 @@ function Action (){
         }
     }
 
+    this.createImg = (url,extent, data = {}) => {
+        this.staticimg && InitMap.map.removeLayer(this.staticimg);
+
+        this.staticimg = ImageStatic(url,extent,data);
+        InitMap.map.addLayer(this.staticimg);
+    }
+
+    let removeSelect = ()=>{
+        InitMap.map.removeInteraction(this.select);
+        InitMap.map.removeInteraction(this.modify);
+        this.stopDrawBox();
+        InitMap.map.removeLayer(this.staticimg);
+    }
+
+    // 编辑功能
+    this.setSelect = () => {
+       this.modify = "" ;let snap = "";
+        this.select = setSelectInteraction({layers:[this.Layer]});
+
+        this.modify = new Modify({features:this.select.getFeatures(),condition: always});
+        // snap = new Snap({features:this.select.getFeatures()});
+        InitMap.map.addInteraction(this.modify);
+        // InitMap.map.addInteraction(snap);
+        InitMap.map.addInteraction(this.select);
+        return { modify: this.modify , snap}
+    }
+
     // 添加规划图范围
-    this.addPlanPictureDraw = (data) => {
+    this.addPlanPictureDraw = (url,data) => {
         return new Promise((resolve, reject) => {
             this.drawBox = drawBox(this.Source, data = {});
+            
             this.drawBox.on('drawend',(e)=>{
-                resolve(e);
                 this.boxFeature = e.feature;
+                let extent = this.boxFeature.getGeometry().getExtent();
+                let ele = new settingsOverlay();
+                let drawImgOpacity = ele.opacityValue;
+                let overlay = createOverlay(ele.element);
+                let center = getPoint(this.boxFeature.getGeometry().getExtent(),'topRight')
+                InitMap.map.addOverlay(overlay);
+                overlay.setPosition(center);
                 InitMap.map.removeInteraction(this.drawBox);
+                this.createImg(url ,extent,{opacity:drawImgOpacity});
+
+                let {modify} = this.setSelect();
+                
+                modify.on('modifyend',(e)=>{
+                    let features = e.features;
+                    let f = features.getArray()[0];
+                    let ext = f.getGeometry().getExtent();
+                    let point = getPoint(ext,'topRight');
+                    overlay.setPosition(point);
+                    this.createImg(url, ext,{opacity:drawImgOpacity});
+                })
+                // 
+                ele.on = {
+                    'change': (val)=>{
+                        // console.log(val)
+                        drawImgOpacity = val;
+                        this.staticimg && this.staticimg.setOpacity(val);
+                    },
+                    'enter': (val)=>{
+                        // console.log(val)
+                        resolve({feature:e.feature,...val,extent: e.feature.getGeometry().getExtent()});
+                        overlay.setPosition(null);
+                        InitMap.map.removeOverlay(overlay);
+                        removeSelect();
+                    },
+                    'cancel': ()=>{
+                        // console.log('取消规划图')
+                        reject({message:"您已取消上传规划图"});
+                        overlay.setPosition(null);
+                        InitMap.map.removeOverlay(overlay);
+                        removeSelect();
+                        
+                    }
+                }
             });
             this.drawBox.on('drawabort',()=>{
                 reject({code:-1,message:"操作中止"})

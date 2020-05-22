@@ -31,8 +31,18 @@ instance.interceptors.response.use(config => {
       message.error('权限不足，请重新登录');
     }, 1000)
     return config;
-  }
+  }else
+  
   return config ;
+},err => {
+  if(err && err.response && err.response.status == BASIC.SERVER_ERROR){
+    clearTimeout(responseTimer);
+    responseTimer = setTimeout(()=>{
+      message.error('系统繁忙,请稍后再试')
+    },1000)
+    return err.response;
+  }
+  return err && err.response;
 })
 
 // 公用的ajax请求方法。

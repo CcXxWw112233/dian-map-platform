@@ -7,18 +7,20 @@ import {
   MultiPoint,
   MultiPolygon,
 } from "ol/geom";
+import { Image } from 'ol/layer'
+import Static from 'ol/source/ImageStatic';
 import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
 import { GeoJSON, WKT } from "ol/format";
-import { transform } from "ol/proj";
-import { Draw } from 'ol/interaction'
+import { transform ,Projection } from "ol/proj";
+import { Draw ,Select} from 'ol/interaction'
 import { createBox } from 'ol/interaction/Draw'
 import {
   getCenter,
   // getBottomLeft,
   // getBottomRight,
   getTopLeft,
-  // getTopRight,
+  getTopRight,
 } from "ol/extent";
 import {
   Fill,
@@ -79,6 +81,8 @@ export const getPoint = function (extent, type = "center") {
       return getCenter(extent);
     case "topLeft":
       return getTopLeft(extent);
+    case "topRight":
+      return getTopRight(extent) ;
     default:
       return getCenter(extent);
   }
@@ -262,3 +266,27 @@ export const Source = function (data) {
 export const Layer = function (data) {
   return new VectorLayer({ ...data });
 };
+
+export const ImageStatic = function(url,extent,data){
+  let projection = new Projection({
+    code: 'xkcd-image',
+    units: 'pixels',
+    extent: extent
+  });
+  return new Image({
+    source: new Static({  
+      url,
+      imageExtent: extent,
+      projection,
+      ...data,
+    }),
+    ...data
+  })
+}
+
+export const setSelectInteraction = function(data){
+  let select = new Select({
+    ...data
+  })
+  return select;
+}
