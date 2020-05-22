@@ -85,11 +85,15 @@ export default class ProjectModal extends React.Component {
     if (state) {
       if (this.props.isEdit) {
         // message.success("保存成功");
+        const r = Math.ceil(Math.random() * 255)
+        const g = Math.ceil(Math.random() * 255)
+        const b = Math.ceil(Math.random() * 255)
         let plottingType = this.props.type;
         let tempType = this.toChangedataType(plottingType);
         const defaultOptions = {
           radius: 8,
-          fillColor: "rgba(168,9,10,0.7)",
+          // fillColor: "rgba(168,9,10,0.7)",
+          fillColor: `rgba(${r},${g},${b},0.7)`,
           strokeColor: "rgba(168,9,10,1)",
           text: this.props.featureName,
         };

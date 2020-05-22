@@ -212,7 +212,7 @@ class PlottingLayer extends Observable {
       offset: [15, 0],
       positioning: "center-left",
     });
-    this.map.addOverlay(this.help_overlay);
+    // this.map.addOverlay(this.help_overlay);
   }
   /**
    * @ignore

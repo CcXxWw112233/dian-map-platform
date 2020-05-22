@@ -29,7 +29,7 @@ export const getMyPosition = {
         _this.geolacation = geo ;
         geo.getCurrentPosition(function(status,obj){
           console.log(status,obj);
-          if(status.trim() == 'complete'){
+          if(status.trim() === 'complete'){
             resolve(obj)
           }
           else{
@@ -48,7 +48,7 @@ export const getMyPosition = {
     if(Array.isArray(val)){
       return transform(val, 'EPSG:4326', 'EPSG:3857')
     }
-    if(arguments.length == 2){
+    if(arguments.length === 2){
       return transform([arguments[0],arguments[1]], 'EPSG:4326', 'EPSG:3857');
     }
 
