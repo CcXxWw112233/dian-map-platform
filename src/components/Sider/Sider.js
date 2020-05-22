@@ -33,6 +33,9 @@ export default class Sider extends PureComponent {
     }
     return (
       <div className={styles.wrap} style={style}>
+        <a className={styles.changePackage} href="../dian_map/index.html">
+          切换旧版
+        </a>
         <div className={styles.main}>{children && children}</div>
         {
           showSlideButton ?
