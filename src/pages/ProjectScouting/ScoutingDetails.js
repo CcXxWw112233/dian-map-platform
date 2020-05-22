@@ -104,7 +104,7 @@ const ScoutingHeader = (props) => {
               allowClear
               onPressEnter={e => {e.stopPropagation();saveItem()}} 
               onClick={(e) => e.stopPropagation()}
-              onChange={(e)=>{setAreaName(e.target.value)}}/>
+              onChange={(e)=>{setAreaName(e.target.value.trim())}}/>
               <Button onClick={()=> saveItem()} size='middle' type='primary' icon={<CheckCircleOutlined />}></Button>
               <Button onClick={() => {setIsEdit(false); onCancel && onCancel(data)}} size='middle' icon={<CloseCircleOutlined/>}></Button>
             </Fragment>
@@ -131,9 +131,13 @@ const ScoutingItem = ({
   onAreaEdit = ()=>{},
   onAreaDelete = ()=>{},
   onUploadPlan = () => {},
+  onUploadPlanStart = ()=>{},
+  onUploadPlanCancel = () => {},
+  onChangeDisplay = ()=>{},
 }) => {
   
-  let [ planExtent, setPlanExtent ] = useState("")
+  let [ planExtent, setPlanExtent ] = useState("");
+  let [ transparency , setTransparency ] = useState('1');
 
   // 开始上传
   const startUpload = ({file , fileList}) => {
@@ -146,18 +150,31 @@ const ScoutingItem = ({
     }
   }
 
+  const onStartUploadPlan = ({file, fileList})=>{
+    let { response } = file;
+    onUploadPlan && onUploadPlan(null,fileList)
+    if(response){
+      BASIC.checkResponse(response) ? (onUploadPlan && onUploadPlan(response.data,fileList)) : (onError && onError(response))
+    }else{
+      // onError && onError(file)
+    }
+  }
+  // 上传规划图
   const beforeUploadPlan = (val)=>{
-    // console.log(val);
+    onUploadPlanStart && onUploadPlanStart(val);
     return new Promise((resolve,reject)=>{
-      Action.addPlanPictureDraw().then(res => {
+      let url = window.URL.createObjectURL(val);
+      Action.addPlanPictureDraw(url).then(res => {
         let { feature } = res;
         let extent = feature.getGeometry().getExtent();
-        // console.log(val)
         // 设置data
+        setTransparency(res.opacity);
         setPlanExtent(extent.join(','));
         resolve({...val});
+        // resolve({})
       }).catch(err =>{
         reject(err)
+        onUploadPlanCancel && onUploadPlanCancel(err);
       })
     })
   }
@@ -186,6 +203,7 @@ const ScoutingItem = ({
               style={{animationDuration:"0.3s",animationDelay:index * 0.05 +'s' }}
               key={item.id}>
                 <UploadItem 
+                onChangeDisplay={onChangeDisplay}
                 areaList={areaList}
                 onSelectGroup={onSelectGroup}
                 type={Action.checkCollectionType(item.target)}  data={item} onRemove={onCollectionRemove}
@@ -204,7 +222,8 @@ const ScoutingItem = ({
               action={`/api/map/ght/${data.id}`}
               headers={{"Authorization":BASIC.getUrlParam.token}}
               beforeUpload={beforeUploadPlan}
-              data={{extent: planExtent}}
+              data={{extent: planExtent,transparency}}
+              onChange={onStartUploadPlan}
               showUploadList={false}>
                 <Button
                 title="上传规划图"
@@ -276,7 +295,7 @@ const ScoutingItem2 = ({ data }) => {
     </Collapse>
   );
 };
-const UploadItem = ({ type ,data ,onRemove ,onEditCollection ,areaList ,onSelectGroup}) => {
+const UploadItem = ({ type ,data ,onRemove ,onEditCollection ,areaList ,onSelectGroup, onChangeDisplay}) => {
   let [ visible  ,setVisible ] = useState(false);
   let [groupVisible , setGroupVisible ] = useState(false)
   const itemKeyVals = {
@@ -287,7 +306,8 @@ const UploadItem = ({ type ,data ,onRemove ,onEditCollection ,areaList ,onSelect
     word: "文档",
     annotate: "批注",
     plotting: "标绘",
-    unknow:"未知"
+    unknow:"未知",
+    planPic:"规划"
   };
   let { create_by ,title , create_time} = data;
   let time = Action.dateFormat(create_time, 'yyyy/MM/dd');
@@ -301,6 +321,11 @@ const UploadItem = ({ type ,data ,onRemove ,onEditCollection ,areaList ,onSelect
     }
     if(key === 'selectGroup'){
 
+    }
+
+    if(key === 'display'){
+      onChangeDisplay && onChangeDisplay(data);
+      setVisible(false);
     }
   }
   // 分组列表
@@ -326,9 +351,13 @@ const UploadItem = ({ type ,data ,onRemove ,onEditCollection ,areaList ,onSelect
 
   const menu = (
     <Menu onClick={ onHandleMenu}>
-      <Menu.Item key="editCollection">
-        关联坐标
-      </Menu.Item>
+      {
+        (data.collect_type !== "4" && data.collect_type != "5")
+        &&
+        <Menu.Item key="editCollection">
+          关联坐标
+        </Menu.Item>
+      }
       <Menu.Item key="selectGroup">
         <Popover
         overlayStyle={{zIndex:10000}}
@@ -340,6 +369,9 @@ const UploadItem = ({ type ,data ,onRemove ,onEditCollection ,areaList ,onSelect
         content={<AreaItem/>}>
           <div style={{width:"100%"}}>移动到分组</div>
         </Popover>
+      </Menu.Item>
+      <Menu.Item key='display'>
+          {data.is_display === "0" ? '显示':'隐藏' }
       </Menu.Item>
       <Menu.Item key="removeBoard">
         <Popconfirm title='确定删除此资料吗?'
@@ -375,7 +407,12 @@ const UploadItem = ({ type ,data ,onRemove ,onEditCollection ,areaList ,onSelect
           </Space>
         </Row>
       </div>
-      <div style={{display:'flex',justifyContent:"center",alignItems:"center",paddingRight:'5px'}}>
+      <div style={{display:'flex',justifyContent:"center",alignItems:"center",paddingRight:'5px',flexDirection:"column"}}>
+        <span className={`${styles.eyes} ${globalStyle.global_icon}`} 
+        dangerouslySetInnerHTML={{__html: data.is_display === '0' ? '&#xe6cb;':"&#xe615;"}}
+        onClick={()=>{onChangeDisplay && onChangeDisplay(data);}}>
+          
+        </span>
         <Dropdown overlay={menu} 
           trigger="click"
           onVisibleChange={(val)=> setVisible(val)}
@@ -439,6 +476,7 @@ export default class ScoutingDetails extends PureComponent {
     // 构建地图组件
     Action.init();
     // 当外部的数据保存成功后的回调
+    console.log(Event.Evt)
     Event.Evt.on('addCollectionForFeature',(data) =>{
       this.fetchCollection();
     })
@@ -604,6 +642,7 @@ export default class ScoutingDetails extends PureComponent {
         // 之渲染选中的区域数据
         let obj = this.state.area_list.find(item => item.id === this.state.area_active_key)||{};
         let arr = obj.collection;
+        this.state.area_active_key === 'other' && (arr = this.state.not_area_id_collection);
         this.renderCollection(arr || []);
       })
   }
@@ -633,7 +672,7 @@ export default class ScoutingDetails extends PureComponent {
         this.fetchCollection();
       }).catch(err => {
         // 添加失败
-        console.log(err)
+        console.log(err.message)
       })
       
 
@@ -795,8 +834,66 @@ export default class ScoutingDetails extends PureComponent {
     }
   }
 
-  onUploadPlan = (resp)=>{
+  // 计划图开始上传
+  onUploadPlanStart = ()=>{
+    this.hideOtherSlide();
+  }
 
+  // 计划图取消上传
+  onUploadPlanCancel = ()=>{
+    this.showOtherSlide();
+  }
+
+  // 上传规划图
+  onUploadPlan = (val,resp)=>{
+    this.showOtherSlide();
+    // console.log(resp);
+    if(resp){
+      message.success('上传成功')
+      let { id, name } = resp;
+
+      let params = {
+        board_id: this.state.current_board.board_id,
+        area_type_id: val.id,
+        collect_type: 5,
+        resource_id: id,
+        target: 'plan',
+        title: name ,
+
+      }
+      Action.addCollection(params).then(res => {
+        // console.log(res);
+        // 更新上传的列表
+        this.fetchCollection();
+      }).catch(err => {
+        // 添加失败
+        console.log(err.message)
+      })
+      
+
+    }
+  }
+
+  onChangeDisplay = (val, collection) => {
+    // console.log(val, collection)
+    let is_display = collection.is_display;
+    let param = {
+      id: collection.id,
+      is_display: is_display === "1" ? "0" : "1"
+    }
+    Action.editCollection(param).then(res => {
+      // console.log(res);
+      let { all_collection } = this.state;
+      // 更新状态重新渲染
+      let arr = all_collection.map(item => {
+        if(item.id === collection.id){
+          collection.is_display = param.is_display ;
+          item = collection;
+        }
+        return item;
+      })
+      this.reSetCollection(arr);
+    })
   }
 
   render(h) {
@@ -873,9 +970,12 @@ export default class ScoutingDetails extends PureComponent {
                       dataSource={item.collection}
                       onError={this.onAddError}
                       areaList={area_list}
-                      onUploadPlan={this.onUploadPlan}
+                      onUploadPlan={this.onUploadPlan.bind(this,item)}
                       onCollectionRemove={this.onCollectionRemove.bind(this, item)}
-                      onEditCollection={this.onEditCollection}/>
+                      onEditCollection={this.onEditCollection}
+                      onUploadPlanStart={this.onUploadPlanStart.bind(this,item)}
+                      onUploadPlanCancel={this.onUploadPlanCancel}
+                      onChangeDisplay={this.onChangeDisplay.bind(this,item)}/>
                     </Collapse.Panel>
                   )
                 })
@@ -905,7 +1005,8 @@ export default class ScoutingDetails extends PureComponent {
                               areaList={area_list}
                               onSelectGroup={this.onSelectGroup}
                               onRemove={this.onCollectionRemove.bind(this,item)}
-                              onEditCollection={this.onEditCollection}/>
+                              onEditCollection={this.onEditCollection}
+                              onChangeDisplay={this.onChangeDisplay.bind(this,item)}/>
                             </div>
                           )
                         })

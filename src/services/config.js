@@ -19,8 +19,9 @@ const getBaseUrl = () => {
     // 状态码
     ...code,
     checkResponse: function(res){
-      let data = res.code !== undefined ? res : (res.data || res);
-      if(data.code === code.SUCCESS){
+      // console.log(res)
+      let data = res && res.code !== undefined ? res : (res.data || res);
+      if(data && data.code === code.SUCCESS){
         return true;
       }else{
         return false;
@@ -29,6 +30,7 @@ const getBaseUrl = () => {
   }
 
   let NODE_ENV = process.env.NODE_ENV ;
+  console.log(process.env);
   if(NODE_ENV === 'development'){
     return {
       API_URL: '/api',

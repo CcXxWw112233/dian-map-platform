@@ -10,7 +10,7 @@ export default {
             return response.data;
         }
 
-        return Promise.reject(response);
+        return Promise.reject(response && response.data);
     },
     // 删除踏勘项目
     REMOVE_BOARD: async (id,data) => {
@@ -19,7 +19,7 @@ export default {
             return response.data;
         }
 
-        return Promise.reject(response);
+        return Promise.reject(response && response.data);
     },
     // 修改踏勘项目名称
     EDIT_BOARD_NAME: async (id ,data)=>{
@@ -27,7 +27,7 @@ export default {
         if(BASIC.checkResponse(response)){
             return response.data;
         }
-        return Promise.reject(response);
+        return Promise.reject(response && response.data);
     },
     // 添加踏勘项目
     ADD_BOARD: async (data) => {
@@ -36,7 +36,7 @@ export default {
             return response.data;
         }
         
-        return Promise.reject(response);
+        return Promise.reject(response && response.data);
     },
     // 获取项目详情中的区域列表
     GET_AREA_LIST: async (data) => {
@@ -44,7 +44,7 @@ export default {
         if(BASIC.checkResponse(response)){
             return response.data;
         }
-        return Promise.reject(response);
+        return Promise.reject(response && response.data);
     },
     // 新增区域分类
     ADD_AREA_BOARD: async (data) => {
@@ -53,7 +53,7 @@ export default {
             return response.data;
         }
 
-        return Promise.reject(response);
+        return Promise.reject(response && response.data);
     },
     // 文件上传
     UPLOAD_FILE: async (data) => {
@@ -62,7 +62,7 @@ export default {
             return response.data;
         }
 
-        return Promise.reject(response)
+        return Promise.reject(response && response.data)
     },
     // 新增一条采集数据
     ADD_COLLECTION: async (data) => {
@@ -71,7 +71,7 @@ export default {
             return response.data;
         }
 
-        return Promise.reject(response);
+        return Promise.reject(response && response.data);
     },
     // 获取采集列表
     GET_COLLECTION_LIST: async (data) => {
@@ -80,7 +80,7 @@ export default {
             return response.data;
         }
         
-        return Promise.reject(response);
+        return Promise.reject(response && response.data);
     },
     // 删除一条采集数据
     DELETE_COLLECTION: async (id) => {
@@ -89,7 +89,7 @@ export default {
             return response.data;
         }
 
-        return Promise.reject(response);
+        return Promise.reject(response && response.data);
     },
     // 修改一条采集数据
     EDIT_COLLECTION: async (data) => {
@@ -98,7 +98,7 @@ export default {
             return response.data;
         }
 
-        return Promise.reject(response);
+        return Promise.reject(response && response.data);
     },
     // 删除一条分组数据
     DELETE_AREA: async (id) => {
@@ -107,7 +107,7 @@ export default {
             return response.data;
         }
         
-        return Promise.reject(response);
+        return Promise.reject(response && response.data);
     } ,
     // 修改分组名称
     EDIT_AREA_NAME: async (id,data) => {
@@ -116,6 +116,19 @@ export default {
             return response.data;
         }
 
-        return Promise.reject(response);
+        return Promise.reject(response && response.data);
+    },
+    // 获取规划图数据
+    GET_PLAN_PIC: async (id) => {
+        let response = await request('GET',`/map/ght/${id}`,{});
+        if(BASIC.checkResponse(response)){
+            return response.data;
+        }
+
+        return Promise.reject(response && response.data);
+    },
+    // 规划图接口
+    PLAN_IMG_URL: (id)=>{
+        return `/api/map/ght/${id}/image`
     }
 }

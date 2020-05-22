@@ -125,6 +125,8 @@ export default class ScoutingList extends PureComponent {
       },()=>{
         Action.renderProjectPoint(projects)
       })
+    }).catch(err => {
+      message.error(err && err.message)
     })
   }
 
@@ -147,7 +149,7 @@ export default class ScoutingList extends PureComponent {
       console.log(err)
       this.showOtherSlide();
       Action.removeDraw();
-      message.error('新增计划失败，请稍后重试')
+      message.error(err && err.message)
     })
   }
   // 显示被隐藏的页面
