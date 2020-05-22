@@ -31,6 +31,8 @@ function Action() {
     EDIT_COLLECTION,
     DELETE_AREA,
     EDIT_AREA_NAME,
+    GET_PLAN_PIC,
+    PLAN_IMG_URL
   } = config;
   this.activeFeature = {};
   this.Layer = Layer({ id: "scoutingDetailLayer", zIndex: 11 });
@@ -74,6 +76,7 @@ function Action() {
       ].map((item) => item.toLocaleLowerCase()),
       annotate: [], // 批注
       plotting: ["feature"], // 标绘
+      planPic:['plan'],// 规划图
     };
 
     let keys = Object.keys(itemKeyVals);
@@ -165,6 +168,7 @@ function Action() {
 
   this.removeFeatures = () => {
     this.removeOverlay();
+    this.removePlanPicCollection();
     // 删除元素
     this.features.forEach((item) => {
       if (this.Source.getFeatureByUid(item.ol_uid)) {
@@ -368,14 +372,19 @@ function Action() {
   };
   // 渲染feature
   this.renderCollection = (data, { lenged, dispatch }) => {
+    // 过滤不显示的数据
+      data = data.filter(item => item.is_display === '1');
     // 删除元素
     this.removeFeatures();
-    let ponts = data.filter((item) => item.collect_type !== "4");
+    let ponts = data.filter((item) => item.collect_type !== "4" && item.collect_type !== "5");
     let features = data.filter((item) => item.collect_type === "4");
+    let planPic = data.filter(item => item.collect_type === "5");
     // 渲染点的数据
     this.renderPointCollection(ponts);
     // 渲染标绘数据
     this.renderFeaturesCollection(features, { lenged, dispatch });
+    // 渲染规划图
+    this.renderPlanPicCollection(planPic)
 
     data &&
       data.length &&
@@ -394,6 +403,38 @@ function Action() {
       });
   };
 
+//   删除已存在的规划图
+  this.removePlanPicCollection = ()=>{
+      this.imgs && this.imgs.forEach(item => InitMap.map.removeLayer(item));
+      this.imgs = [];
+  }
+
+//   渲染规划图
+  this.renderPlanPicCollection = (data)=>{
+    //   console.log(data);
+      let promise = data.map(item => {
+          if(item.resource_id){
+              return GET_PLAN_PIC(item.resource_id)
+          }
+      })
+      this.imgs = [];
+      Promise.all(promise).then(res => {
+          this.imgs = [];
+          res.forEach(item => {
+            let resp = item.data;
+            let extent = resp.extent ? resp.extent.split(',').map(e => parseFloat(e)) :[];
+            let img = ImageStatic(PLAN_IMG_URL(resp.id),extent,{opacity:+resp.transparency});
+            this.imgs.push(img);
+          })
+
+          this.imgs.forEach(item => {
+            //   console.log(item)
+              InitMap.map.addLayer(item);
+          })
+      })
+  }
+
+//   添加元素坐标的overlay
   this.addOverlay = (coor, data) => {
     let ele = new CollectionOverlay(data);
     let overlay = createOverlay(ele.element, {
@@ -405,6 +446,7 @@ function Action() {
     overlay.setPosition(coor);
   };
 
+//   删除元素坐标的overlay
   this.removeLayer = () => {
     this.removeOverlay();
     this.removeFeatures();
@@ -442,7 +484,7 @@ function Action() {
 
     // 编辑功能
     this.setSelect = () => {
-       this.modify = "" ;let snap = "";
+        this.modify = "" ;let snap = "";
         this.select = setSelectInteraction({layers:[this.Layer]});
 
         this.modify = new Modify({features:this.select.getFeatures(),condition: always});

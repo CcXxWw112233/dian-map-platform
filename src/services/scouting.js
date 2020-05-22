@@ -117,5 +117,18 @@ export default {
         }
 
         return Promise.reject(response && response.data);
+    },
+    // 获取规划图数据
+    GET_PLAN_PIC: async (id) => {
+        let response = await request('GET',`/map/ght/${id}`,{});
+        if(BASIC.checkResponse(response)){
+            return response.data;
+        }
+
+        return Promise.reject(response && response.data);
+    },
+    // 规划图接口
+    PLAN_IMG_URL: (id)=>{
+        return `/api/map/ght/${id}/image`
     }
 }
