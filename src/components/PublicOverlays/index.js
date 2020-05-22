@@ -23,3 +23,10 @@ Object.defineProperty(exports, "CollectionOverlay", {
     return require('./CollectionOverlay/index').default;
   }
 });
+
+Object.defineProperty(exports, "settingsOverlay", {
+  enumerable: true,
+  get: function get() {
+    return require('./settingsOverlay/index').default;
+  }
+});

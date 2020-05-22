@@ -2,7 +2,7 @@
   "private": true,
   "scripts": {
     "start": "cross-env NODE_ENVI=development roadhog server",
-    "test": "cross-env NODE_ENVI=testing roadhog server",
+    "test": "cross-env NODE_ENVI=testing roadhog build",
     "build": "cross-env NODE_ENVI=production roadhog build",
     "lint": "eslint --ext .js src test"
   },
@@ -14,6 +14,7 @@
     "dva": "^2.1.0",
     "dva-cli": "^0.10.1",
     "global": "^4.4.0",
+    "history": "^4.10.1",
     "jsonp": "^0.2.1",
     "ol": "^6.2.1",
     "prop-types": "^15.7.2",

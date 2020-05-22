@@ -86,9 +86,9 @@ class IndexPage extends React.Component {
           Promise.all(promise)
             .then((resp) => {
               // console.log(resp);
-              Event.Evt.firEvent("addCollectionForFeature", resp);
               message.success(`添加到${res.data.board_name}项目成功`);
               Event.Evt.firEvent("appendToProjectSuccess", val);
+              Event.Evt.firEvent("addCollectionForFeature", resp);
             })
             .catch((err) => {
               console.log(err);
