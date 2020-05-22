@@ -23,6 +23,15 @@ export default class Sider extends PureComponent {
     })
   }
 
+  toOld = ()=>{
+    let search = window.location.search || window.location.hash;
+    let href = '/'+search.replace('#/','');
+    setTimeout(()=>{
+      window.open(href,'_self');
+    },500)
+    
+  }
+
   render() {
     const { width, children , slideSwitch ,showSlideButton } = this.props;
     let style = {
@@ -33,7 +42,7 @@ export default class Sider extends PureComponent {
     }
     return (
       <div className={styles.wrap} style={style}>
-        <a className={styles.changePackage} href="../dian_map/index.html">
+        <a className={styles.changePackage} onClick={this.toOld} target='_self'>
           切换旧版
         </a>
         <div className={styles.main}>{children && children}</div>
