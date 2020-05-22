@@ -20,7 +20,7 @@ const getBaseUrl = () => {
     ...code,
     checkResponse: function(res){
       // console.log(res)
-      let data = res && res.code !== undefined ? res : (res.data || res);
+      let data = res && res.code !== undefined ? res : (res && res.data || res);
       if(data && data.code === code.SUCCESS){
         return true;
       }else{
