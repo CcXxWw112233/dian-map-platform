@@ -2,17 +2,14 @@ import React from "react";
 import styles from "./DataItem.less";
 import { Collapse, Checkbox, Row, Col } from "antd";
 import { MyIcon } from "../../components/utils";
+import { connect } from "dva";
 
 const { Panel } = Collapse;
 
+@connect(({publicMapData: dataItemStateList})=>({dataItemStateList}))
 export default class DataItem extends React.Component {
   constructor() {
     super(...arguments);
-    this.state = {
-      indeterminate: false,
-      checkAll: false,
-      checkedList: [],
-    };
   }
   // 创建折叠窗的header
   createIconHeader = (item) => {
@@ -37,7 +34,7 @@ export default class DataItem extends React.Component {
   };
   // 全选
   checkAllBox = (e) => {
-    let { onChange, data } = this.props;
+    let { onChange, data, state, stateIndex, dispatch } = this.props;
     let checked = e.target.checked;
     let allKey = [];
     if (checked) {
@@ -45,10 +42,17 @@ export default class DataItem extends React.Component {
     } else {
       allKey = [];
     }
-    this.setState({
+    state = {
       checkAll: checked,
       checkedList: allKey,
       indeterminate: false,
+    };
+    dispatch({
+      type: "publicMapData/updateSateByIndex",
+      payload: {
+        state: state,
+        index: stateIndex,
+      },
     });
     onChange && onChange(allKey, data.key);
   };
@@ -61,49 +65,58 @@ export default class DataItem extends React.Component {
     } else {
       flag = false;
     }
-    this.setState({
-      checkAll: flag,
-      indeterminate: list.length !== 0 ? !flag : false,
+    const { dataItemStateList: stateListData, stateIndex, dispatch } = this.props;
+    let newDataItemStateList = stateListData.dataItemStateList
+    newDataItemStateList[stateIndex].checkAll = flag;
+    newDataItemStateList[stateIndex].indeterminate = list.length !== 0 ? !flag : false;
+    dispatch({
+      type: "publicMapData/updateDataItemStateList",
+      payload: {
+        dataItemStateList: newDataItemStateList
+      },
     });
   };
 
   // 单个复选框选择状态
   boxChange = (check) => {
-    let { data = {}, onChange } = this.props;
+    let {
+      data = {},
+      onChange,
+      dataItemStateList: newStateListData,
+      stateIndex,
+      dispatch,
+    } = this.props;
+    let newDataItemStateList = newStateListData.dataItemStateList;
     let checked = check.target.checked;
     let value = check.target.value;
-    const fillColor = check.target.fillColor 
+    const fillColor = check.target.fillColor;
+
     if (checked) {
-      this.setState(
-        {
-          checkedList:
-            data.key === "1" ? [value] : this.state.checkedList.concat([value]),
-        },
-        () => {
-          // 更新全选
-          this.isAllCheck(this.state.checkedList);
-          onChange && onChange(this.state.checkedList, data.key, fillColor);
-        }
-      );
+      newDataItemStateList[stateIndex].checkedList =
+        data.key === "1" ? [value] : newDataItemStateList[stateIndex].checkedList.concat([value]);
     } else {
-      let index = this.state.checkedList.findIndex((item) => item === value);
-      let list = [...this.state.checkedList];
+      let index = newDataItemStateList[stateIndex].checkedList.findIndex((item) => item === value);
+
+      let list = [...newDataItemStateList[stateIndex].checkedList];
       list.splice(index, 1);
-      this.setState(
-        {
-          checkedList: data.key === "1" ? [] : list,
-        },
-        () => {
-          this.isAllCheck(this.state.checkedList);
-          onChange && onChange(this.state.checkedList, data.key, fillColor);
-        }
-      );
+      newDataItemStateList[stateIndex].checkedList = data.key === "1" ? [] : list;
     }
+    this.isAllCheck(newDataItemStateList[stateIndex].checkedList);
+    onChange && onChange(newDataItemStateList[stateIndex].checkedList, data.key, fillColor);
+    dispatch({
+      type: "publicMapData/updateDataItemStateList",
+      payload: {
+        dataItemStateList: newDataItemStateList
+      },
+    });
   };
   // 全选单选框
   getCheckBox = () => {
-    let { data } = this.props;
-    let { indeterminate, checkAll } = this.state;
+    let { data, dataItemStateList: stateListData, stateIndex } = this.props;
+    const newDataItemStateList = [...stateListData.dataItemStateList]
+    const newStateIndex = stateIndex
+    const indeterminate = newDataItemStateList[newStateIndex].indeterminate || false
+    const checkAll = newDataItemStateList[newStateIndex].checkAll || false
     return (
       <Checkbox
         onChange={this.checkAllBox}
@@ -118,8 +131,9 @@ export default class DataItem extends React.Component {
     );
   };
   render() {
-    let { data } = this.props;
-    let { checkedList } = this.state;
+    let { data, dataItemStateList: stateListData, stateIndex } = this.props;
+    // let { checkedList } = this.state;
+    const newDataItemStateList = stateListData.dataItemStateList
     return (
       <div className={styles.publicMenuItem}>
         <Collapse expandIconPosition="right">
@@ -143,7 +157,7 @@ export default class DataItem extends React.Component {
                           name={data.key}
                           fillColor={item.fillColorKeyVals || null}
                           onChange={this.boxChange}
-                          checked={checkedList.indexOf(item.key) >= 0}
+                          checked={newDataItemStateList[stateIndex].checkedList.indexOf(item.key) >= 0}
                         >
                           {item.name}
                         </Checkbox>

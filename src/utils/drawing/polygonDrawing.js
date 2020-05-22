@@ -34,27 +34,28 @@ export const polygonDrawing = {
   },
 
   addEventLinstener() {
+    const me = this
     const start = this.drawing.on('drawstart', e => {
-      const overlays = this.getOverlays()
-      this.overlay = overlays.add('drawPolygonArea')
-      this.el = this.overlay.getElement()
-      mapApp.map.addOverlay(this.overlay)
+      const overlays = me.getOverlays()
+      me.overlay = overlays.add('drawPolygonArea')
+      me.el = me.overlay.getElement()
+      mapApp.map.addOverlay(me.overlay)
       const feature = e.feature
       feature.getGeometry().on('change',(geo) => {
         let target = geo.target;
-        this.el.innerHTML = formatLength(target)
+        me.el.innerHTML = formatLength(target)
         let lastCoor = target.getInteriorPoint().getCoordinates()
-        this.overlay.setPosition(lastCoor);
+        me.overlay.setPosition(lastCoor);
       })
-      this.icon = createIconElement()
-      this.icon.onclick = closeOverlay.bind(this, this.drawing, overlays, this.overlay, feature)
+      me.icon = createIconElement()
+      me.icon.onclick = closeOverlay.bind(me, me.drawing, overlays, me.overlay, feature)
     })
     this.linsteners['drawstart'] = start
 
     const end = this.drawing.on('drawend', e => {
-      this.el.appendChild(this.icon)
-      mapApp.map.removeInteraction(this.drawing)
-      this.isActive = false
+      me.el.appendChild(this.icon)
+      mapApp.map.removeInteraction(me.drawing)
+      me.isActive = false
     })
 
     this.linsteners['drawend'] = end

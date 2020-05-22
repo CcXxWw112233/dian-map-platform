@@ -18,6 +18,8 @@ import {
 } from "../../utils/index";
 import { CollectionOverlay } from "../../../components/PublicOverlays";
 
+import { draw } from "utils/draw"
+
 function Action() {
   const {
     GET_AREA_LIST,
@@ -328,6 +330,9 @@ function Action() {
       feature.setStyle(myStyle);
       this.Source.addFeature(feature);
       this.features.push(feature);
+      // let plottingLayer = draw.getPlottingLayer()
+      // let featureOperator = plottingLayer._addFeature(feature)
+      // featureOperator.setName(content.name)
     });
     let newConfig = [];
     if (!lengedConfig) {
