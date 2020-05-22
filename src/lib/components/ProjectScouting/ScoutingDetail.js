@@ -15,13 +15,16 @@ import {
   Fit,
   drawBox,
   ImageStatic,
-  setSelectInteraction
+  setSelectInteraction,
 } from "../../utils/index";
-import { CollectionOverlay, settingsOverlay } from '../../../components/PublicOverlays'
-import { Modify } from 'ol/interaction'
-import { always } from 'ol/events/condition'
+import {
+  CollectionOverlay,
+  settingsOverlay,
+} from "../../../components/PublicOverlays";
+import { Modify } from "ol/interaction";
+import { always } from "ol/events/condition";
 
-import { draw } from "utils/draw"
+import { draw } from "utils/draw";
 
 function Action() {
   const {
@@ -34,7 +37,7 @@ function Action() {
     DELETE_AREA,
     EDIT_AREA_NAME,
     GET_PLAN_PIC,
-    PLAN_IMG_URL
+    PLAN_IMG_URL,
   } = config;
   this.activeFeature = {};
   this.Layer = Layer({ id: "scoutingDetailLayer", zIndex: 11 });
@@ -78,7 +81,7 @@ function Action() {
       ].map((item) => item.toLocaleLowerCase()),
       annotate: [], // 批注
       plotting: ["feature"], // 标绘
-      planPic:['plan'],// 规划图
+      planPic: ["plan"], // 规划图
     };
 
     let keys = Object.keys(itemKeyVals);
@@ -229,57 +232,34 @@ function Action() {
       let iconUrl = "";
       let obj = null;
       const hasIndex = projectScouting.content.findIndex(
-        (item0) => item0.selectName === content.selectName
+        (item0) => item0.font === content.selectName
       );
+      const featureLowerType = content.geoType.toLowerCase();
       if (featureType.indexOf("/") > -1) {
         isImage = true;
         featureType = featureType.replace("img", "");
         iconUrl = require("../../../assets" + featureType);
         if (hasIndex < 0) {
-          obj = { imgSrc: iconUrl, font: content.selectName };
+          obj = {
+            imgSrc: iconUrl,
+            font: content.selectName,
+            type: featureLowerType,
+          };
           projectScouting.content.push(obj);
         }
       } else {
         if (hasIndex < 0) {
-          obj = { bgColor: featureType, font: content.selectName };
+          obj = {
+            bgColor: featureType,
+            font: content.selectName,
+            type: featureLowerType,
+          };
           projectScouting.content.push(obj);
         }
       }
       let feature = addFeature(content.geoType, {
         coordinates: content.coordinates,
       });
-      // let style = {
-      //   Point: createStyle(content.geoType, {
-      //     radius: 8,
-      //     fillColor: "rgba(168,9,10,0.7)",
-      //     strokeWidth: 2,
-      //     strokeColor: "rgba(168,9,10,1)",
-      //     iconUrl: iconUrl,
-      //     text: content.name,
-      //     ...commonStyleOption,
-      //   }),
-      //   LineString: createStyle(content.geoType, {
-      //     strokeWidth: 4,
-      //     strokeColor: featureType,
-      //     text: content.name,
-      //     ...commonStyleOption,
-      //   }),
-      //   Polygon: createStyle(content.geoType, {
-      //     strokeWidth: 2,
-      //     strokeColor: isImage ? "" : featureType.replace("0.7", 1),
-      //     fillColor: isImage ? this.getPolygonFill(iconUrl) : featureType,
-      //     text: content.name,
-      //     ...commonStyleOption,
-      //   }),
-      // };
-
-      // feature.setStyle(style[content.geoType]);
-      // this.Source.addFeature(feature);
-      // if (content.geoType !== "Point") {
-      //   let extent = getExtent(feature);
-      //   let center = getPoint(extent);
-      //   this.addOverlay(center, item);
-      // } else this.addOverlay(content.coordinates, item);
 
       // code by liulaian
       let myStyle = null;
@@ -378,18 +358,20 @@ function Action() {
   // 渲染feature
   this.renderCollection = (data, { lenged, dispatch }) => {
     // 过滤不显示的数据
-      data = data.filter(item => item.is_display === '1');
+    data = data.filter((item) => item.is_display === "1");
     // 删除元素
     this.removeFeatures();
-    let ponts = data.filter((item) => item.collect_type !== "4" && item.collect_type !== "5");
+    let ponts = data.filter(
+      (item) => item.collect_type !== "4" && item.collect_type !== "5"
+    );
     let features = data.filter((item) => item.collect_type === "4");
-    let planPic = data.filter(item => item.collect_type === "5");
+    let planPic = data.filter((item) => item.collect_type === "5");
     // 渲染点的数据
     this.renderPointCollection(ponts);
     // 渲染标绘数据
     this.renderFeaturesCollection(features, { lenged, dispatch });
     // 渲染规划图
-    this.renderPlanPicCollection(planPic)
+    this.renderPlanPicCollection(planPic);
 
     data &&
       data.length &&
@@ -408,38 +390,42 @@ function Action() {
       });
   };
 
-//   删除已存在的规划图
-  this.removePlanPicCollection = ()=>{
-      this.imgs && this.imgs.forEach(item => InitMap.map.removeLayer(item));
-      this.imgs = [];
-  }
+  //   删除已存在的规划图
+  this.removePlanPicCollection = () => {
+    this.imgs && this.imgs.forEach((item) => InitMap.map.removeLayer(item));
+    this.imgs = [];
+  };
 
-//   渲染规划图
-  this.renderPlanPicCollection = (data)=>{
+  //   渲染规划图
+  this.renderPlanPicCollection = (data) => {
     //   console.log(data);
-      let promise = data.map(item => {
-          if(item.resource_id){
-              return GET_PLAN_PIC(item.resource_id)
-          }
-      })
+    let promise = data.map((item) => {
+      if (item.resource_id) {
+        return GET_PLAN_PIC(item.resource_id);
+      }
+    });
+    this.imgs = [];
+    Promise.all(promise).then((res) => {
       this.imgs = [];
-      Promise.all(promise).then(res => {
-          this.imgs = [];
-          res.forEach(item => {
-            let resp = item.data;
-            let extent = resp.extent ? resp.extent.split(',').map(e => parseFloat(e)) :[];
-            let img = ImageStatic(PLAN_IMG_URL(resp.id),extent,{opacity:+resp.transparency});
-            this.imgs.push(img);
-          })
+      res.forEach((item) => {
+        let resp = item.data;
+        let extent = resp.extent
+          ? resp.extent.split(",").map((e) => parseFloat(e))
+          : [];
+        let img = ImageStatic(PLAN_IMG_URL(resp.id), extent, {
+          opacity: +resp.transparency,
+        });
+        this.imgs.push(img);
+      });
 
-          this.imgs.forEach(item => {
-            //   console.log(item)
-              InitMap.map.addLayer(item);
-          })
-      })
-  }
+      this.imgs.forEach((item) => {
+        //   console.log(item)
+        InitMap.map.addLayer(item);
+      });
+    });
+  };
 
-//   添加元素坐标的overlay
+  //   添加元素坐标的overlay
   this.addOverlay = (coor, data) => {
     let ele = new CollectionOverlay(data);
     let overlay = createOverlay(ele.element, {
@@ -451,7 +437,7 @@ function Action() {
     overlay.setPosition(coor);
   };
 
-//   删除元素坐标的overlay
+  //   删除元素坐标的overlay
   this.removeLayer = () => {
     this.removeOverlay();
     this.removeFeatures();
@@ -473,91 +459,100 @@ function Action() {
     }
   };
 
-    this.createImg = (url,extent, data = {}) => {
-        this.staticimg && InitMap.map.removeLayer(this.staticimg);
+  this.createImg = (url, extent, data = {}) => {
+    this.staticimg && InitMap.map.removeLayer(this.staticimg);
 
-        this.staticimg = ImageStatic(url,extent,data);
-        InitMap.map.addLayer(this.staticimg);
-    }
+    this.staticimg = ImageStatic(url, extent, data);
+    InitMap.map.addLayer(this.staticimg);
+  };
 
-    let removeSelect = ()=>{
-        InitMap.map.removeInteraction(this.select);
-        InitMap.map.removeInteraction(this.modify);
-        this.stopDrawBox();
-        InitMap.map.removeLayer(this.staticimg);
-    }
+  let removeSelect = () => {
+    InitMap.map.removeInteraction(this.select);
+    InitMap.map.removeInteraction(this.modify);
+    this.stopDrawBox();
+    InitMap.map.removeLayer(this.staticimg);
+  };
 
-    // 编辑功能
-    this.setSelect = () => {
-        this.modify = "" ;let snap = "";
-        this.select = setSelectInteraction({layers:[this.Layer]});
+  // 编辑功能
+  this.setSelect = () => {
+    this.modify = "";
+    let snap = "";
+    this.select = setSelectInteraction({ layers: [this.Layer] });
 
-        this.modify = new Modify({features:this.select.getFeatures(),condition: always});
-        // snap = new Snap({features:this.select.getFeatures()});
-        InitMap.map.addInteraction(this.modify);
-        // InitMap.map.addInteraction(snap);
-        InitMap.map.addInteraction(this.select);
-        return { modify: this.modify , snap}
-    }
+    this.modify = new Modify({
+      features: this.select.getFeatures(),
+      condition: always,
+    });
+    // snap = new Snap({features:this.select.getFeatures()});
+    InitMap.map.addInteraction(this.modify);
+    // InitMap.map.addInteraction(snap);
+    InitMap.map.addInteraction(this.select);
+    return { modify: this.modify, snap };
+  };
 
-    // 添加规划图范围
-    this.addPlanPictureDraw = (url,data) => {
-        return new Promise((resolve, reject) => {
-            this.drawBox = drawBox(this.Source, data = {});
-            
-            this.drawBox.on('drawend',(e)=>{
-                this.boxFeature = e.feature;
-                let extent = this.boxFeature.getGeometry().getExtent();
-                let ele = new settingsOverlay();
-                let drawImgOpacity = ele.opacityValue;
-                let overlay = createOverlay(ele.element);
-                let center = getPoint(this.boxFeature.getGeometry().getExtent(),'topRight')
-                InitMap.map.addOverlay(overlay);
-                overlay.setPosition(center);
-                InitMap.map.removeInteraction(this.drawBox);
-                this.createImg(url ,extent,{opacity:drawImgOpacity});
+  // 添加规划图范围
+  this.addPlanPictureDraw = (url, data) => {
+    return new Promise((resolve, reject) => {
+      this.drawBox = drawBox(this.Source, (data = {}));
 
-                let {modify} = this.setSelect();
-                
-                modify.on('modifyend',(e)=>{
-                    let features = e.features;
-                    let f = features.getArray()[0];
-                    let ext = f.getGeometry().getExtent();
-                    let point = getPoint(ext,'topRight');
-                    overlay.setPosition(point);
-                    this.createImg(url, ext,{opacity:drawImgOpacity});
-                })
-                // 
-                ele.on = {
-                    'change': (val)=>{
-                        // console.log(val)
-                        drawImgOpacity = val;
-                        this.staticimg && this.staticimg.setOpacity(val);
-                    },
-                    'enter': (val)=>{
-                        // console.log(val)
-                        resolve({feature:e.feature,...val,extent: e.feature.getGeometry().getExtent()});
-                        overlay.setPosition(null);
-                        InitMap.map.removeOverlay(overlay);
-                        removeSelect();
-                    },
-                    'cancel': ()=>{
-                        // console.log('取消规划图')
-                        reject({message:"您已取消上传规划图"});
-                        overlay.setPosition(null);
-                        InitMap.map.removeOverlay(overlay);
-                        removeSelect();
-                        
-                    }
-                }
+      this.drawBox.on("drawend", (e) => {
+        this.boxFeature = e.feature;
+        let extent = this.boxFeature.getGeometry().getExtent();
+        let ele = new settingsOverlay();
+        let drawImgOpacity = ele.opacityValue;
+        let overlay = createOverlay(ele.element);
+        let center = getPoint(
+          this.boxFeature.getGeometry().getExtent(),
+          "topRight"
+        );
+        InitMap.map.addOverlay(overlay);
+        overlay.setPosition(center);
+        InitMap.map.removeInteraction(this.drawBox);
+        this.createImg(url, extent, { opacity: drawImgOpacity });
+
+        let { modify } = this.setSelect();
+
+        modify.on("modifyend", (e) => {
+          let features = e.features;
+          let f = features.getArray()[0];
+          let ext = f.getGeometry().getExtent();
+          let point = getPoint(ext, "topRight");
+          overlay.setPosition(point);
+          this.createImg(url, ext, { opacity: drawImgOpacity });
+        });
+        //
+        ele.on = {
+          change: (val) => {
+            // console.log(val)
+            drawImgOpacity = val;
+            this.staticimg && this.staticimg.setOpacity(val);
+          },
+          enter: (val) => {
+            // console.log(val)
+            resolve({
+              feature: e.feature,
+              ...val,
+              extent: e.feature.getGeometry().getExtent(),
             });
-            this.drawBox.on('drawabort',()=>{
-                reject({code:-1,message:"操作中止"})
-            })
-            InitMap.map.addInteraction(this.drawBox);
-        })
-        
-    }
+            overlay.setPosition(null);
+            InitMap.map.removeOverlay(overlay);
+            removeSelect();
+          },
+          cancel: () => {
+            // console.log('取消规划图')
+            reject({ message: "您已取消上传规划图" });
+            overlay.setPosition(null);
+            InitMap.map.removeOverlay(overlay);
+            removeSelect();
+          },
+        };
+      });
+      this.drawBox.on("drawabort", () => {
+        reject({ code: -1, message: "操作中止" });
+      });
+      InitMap.map.addInteraction(this.drawBox);
+    });
+  };
 }
 
 let action = new Action();

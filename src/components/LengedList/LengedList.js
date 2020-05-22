@@ -39,10 +39,11 @@ const Lenged = ({ data }) => {
                 style.border = `1px solid ${itemContent.borderColor}`;
               }
               if (itemContent.type) {
-                if (itemContent.type === "line") {
+                if (itemContent.type.indexOf("line") > -1) {
                   style.height = 0;
+                  style.border = `1px solid ${itemContent.bgColor}`
                 }
-                if (itemContent.type === "point") {
+                if (itemContent.type.indexOf("point") > -1) {
                   style.borderRadius = 7;
                 }
               }
