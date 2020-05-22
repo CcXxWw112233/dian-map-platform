@@ -1,7 +1,7 @@
 import React, { Fragment } from "react";
 import { connect } from "dva";
 import styles from "./IndexPage.css";
-import animateCss from '../assets/css/animate.min.css'
+import animateCss from "../assets/css/animate.min.css";
 import "antd/dist/antd.css";
 import LayerMap from "../components/maps";
 import { ChangeMap } from "../utils/utils";
@@ -10,12 +10,12 @@ import { getMyPosition } from "../utils/getMyPosition";
 import PublicData from "../pages/publicMapData/publicMapData";
 import ProjectScouting from "../pages/ProjectScouting/ScoutingList";
 import ScoutingDetails from "../pages/ProjectScouting/ScoutingDetails";
-import ProjectModal from "../pages/projectModal/Modal"
-import ScoutAction from '../lib/components/ProjectScouting/ScoutingList';
-import ScoutDetail from '../lib/components/ProjectScouting/ScoutingDetail'
-import Event from '../lib/utils/event'
+import ProjectModal from "../pages/projectModal/Modal";
+import ScoutAction from "../lib/components/ProjectScouting/ScoutingList";
+import ScoutDetail from "../lib/components/ProjectScouting/ScoutingDetail";
+import Event from "../lib/utils/event";
 // import { PublicData, ProjectScouting } from 'pages/index'
-import { Tabs ,Spin ,message} from "antd";
+import { Tabs, Spin, message } from "antd";
 
 import { Main } from "components";
 import {
@@ -28,12 +28,12 @@ import {
 } from "components/index";
 import Overlay from "components/Overlay/Overlay";
 
-import LengedList from "components/LengedList/LengedList"
+import LengedList from "components/LengedList/LengedList";
 
-import BottomToolBar from "components/BottomToolBar/BottomToolBar"
+import BottomToolBar from "components/BottomToolBar/BottomToolBar";
 
-import TempPlottingIcon from "components/TempPlotting/TempPlottingIcon"
-import TempPlottingPanel from "components/TempPlotting/TempPlottingPanel"
+import TempPlottingIcon from "components/TempPlotting/TempPlottingIcon";
+import TempPlottingPanel from "components/TempPlotting/TempPlottingPanel";
 
 @connect(({ controller: { mainVisible } }) => ({ mainVisible }))
 class IndexPage extends React.Component {
@@ -53,68 +53,76 @@ class IndexPage extends React.Component {
     left: "0px",
     draw_visible: false,
   };
-  componentDidMount(){
+  componentDidMount() {
     this.checkListCach();
-    Event.Evt.on('hasFeatureToProject',(data)=>{
+    Event.Evt.on("hasFeatureToProject", (data) => {
       this.addFeatureForProject(data);
-    })
+    });
   }
 
-  addFeatureForProject = (val)=>{
-    ScoutAction.checkItem().then(res =>{
-      if(res.code == 0){
-        let promise = val.map(item => {
-          let { feature } = item;
-          let param = {
-            coordinates: feature.getGeometry().getCoordinates(),
-            geoType:feature.getGeometry().getType(),
-            name:item.name,
-          }
-          let obj = {
-            collect_type: 4,
-            title: item.name,
-            target:"feature",
-            area_type_id:"",
-            board_id:res.data.board_id,
-            content: JSON.stringify(param),
-          }
-          return ScoutDetail.addCollection(obj);
-        });
-        Promise.all(promise).then(resp => {
-          // console.log(resp);
-          Event.Evt.firEvent('addCollectionForFeature',resp);
-          message.success(`添加到${res.data.board_name}项目成功`);
-          Event.Evt.firEvent('appendToProjectSuccess',val);
-        }).catch(err => {
-          console.log(err)
-        })
-      }else{
-        message.warning('未选择项目，无法保存标绘数据到项目')
-      }
-    }).catch(err => {
-      console.log(err);
-      message.warning('未选择项目，无法保存标绘数据到项目')
-    })
-  }
+  addFeatureForProject = (val) => {
+    ScoutAction.checkItem()
+      .then((res) => {
+        if (res.code === 0) {
+          let promise = val.map((item) => {
+            let { feature } = item;
+            let param = {
+              coordinates: feature.getGeometry().getCoordinates(),
+              geoType: feature.getGeometry().getType(),
+              name: item.name,
+              featureType: item.attrs.featureType,
+              selectName: item.attrs.selectName,
+            };
+            let obj = {
+              collect_type: 4,
+              title: item.name,
+              target: "feature",
+              area_type_id: "",
+              board_id: res.data.board_id,
+              content: JSON.stringify(param),
+            };
+            return ScoutDetail.addCollection(obj);
+          });
+          Promise.all(promise)
+            .then((resp) => {
+              // console.log(resp);
+              Event.Evt.firEvent("addCollectionForFeature", resp);
+              message.success(`添加到${res.data.board_name}项目成功`);
+              Event.Evt.firEvent("appendToProjectSuccess", val);
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+        } else {
+          message.warning("未选择项目，无法保存标绘数据到项目");
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        message.warning("未选择项目，无法保存标绘数据到项目");
+      });
+  };
   // 检查缓存中是否存在id，进行判断渲染
-  checkListCach = ()=>{
+  checkListCach = () => {
     let { dispatch } = this.props;
-    ScoutAction.checkItem().then(res => {
-      dispatch({
-        type: "controller/updateMainVisible",
-        payload: {
-          mainVisible: res.code === 0 ? 'detail' : 'list',
-        },
+    ScoutAction.checkItem()
+      .then((res) => {
+        dispatch({
+          type: "controller/updateMainVisible",
+          payload: {
+            mainVisible: res.code === 0 ? "detail" : "list",
+          },
+        });
       })
-    }).catch(err => {
-      dispatch({
-        type: "controller/updateMainVisible",
-        payload: {
-          mainVisible: 'list',
-        },
-      })
-    })
-  }
+      .catch((err) => {
+        dispatch({
+          type: "controller/updateMainVisible",
+          payload: {
+            mainVisible: "list",
+          },
+        });
+      });
+  };
   showDrawer = () => {
     const { draw_visible } = this.state;
     this.setState({
@@ -179,10 +187,10 @@ class IndexPage extends React.Component {
     ChangeMap(val, layers, map, showkeys);
   };
   tabChange = (val) => {
-    if(val === '1'){
+    if (val === "1") {
       ScoutAction.fitToCenter();
     }
-  }
+  };
 
   render() {
     const { TabPane } = Tabs;
@@ -202,49 +210,53 @@ class IndexPage extends React.Component {
         <LengedList></LengedList>
         {/* <Location></Location> */}
         <Sider width={360}>
-          {
-            this.props.mainVisible === 'list' ? 
-            <div className={`${animateCss.animated} ${animateCss.slideInLeft}`}
-            style={{animationDuration:'0.3s',height:'100%'}}>
+          {this.props.mainVisible === "list" ? (
+            <div
+              className={`${animateCss.animated} ${animateCss.slideInLeft}`}
+              style={{ animationDuration: "0.3s", height: "100%" }}
+            >
               <Main>
-                  <div style={{ flex: "0" }}>
-                    <Search onInputChange={this.handleInput}></Search>
-                  </div>
-                  <div style={{ overflow: "hidden", height: "100%" }} className="panels">
-                    <Tabs
-                      defaultActiveKey="1"
-                      tabBarGutter={60}
-                      onChange={this.tabChange}
-                      style={{
-                        flex: "1",
-                        display: "flex",
-                        flexDirection: "column",
-                        overflow: "hidden",
-                        height: "100%",
-                      }}>
-                      <TabPane tab={<span>项目踏勘</span>} key="1">
-                        <ProjectScouting></ProjectScouting>
-                      </TabPane>
-                      <TabPane tab={<span>公共数据</span>} key="2">
-                        <PublicData />
-                      </TabPane>
-                      <TabPane tab={<span>远程协作</span>} key="3">
-                        远程协作
-                      </TabPane>
-                    </Tabs>
-                  </div>
+                <div style={{ flex: "0" }}>
+                  <Search onInputChange={this.handleInput}></Search>
+                </div>
+                <div
+                  style={{ overflow: "hidden", height: "100%" }}
+                  className="panels"
+                >
+                  <Tabs
+                    defaultActiveKey="1"
+                    tabBarGutter={60}
+                    onChange={this.tabChange}
+                    style={{
+                      flex: "1",
+                      display: "flex",
+                      flexDirection: "column",
+                      overflow: "hidden",
+                      height: "100%",
+                    }}
+                  >
+                    <TabPane tab={<span>项目踏勘</span>} key="1">
+                      <ProjectScouting></ProjectScouting>
+                    </TabPane>
+                    <TabPane tab={<span>公共数据</span>} key="2">
+                      <PublicData />
+                    </TabPane>
+                    <TabPane tab={<span>远程协作</span>} key="3">
+                      远程协作
+                    </TabPane>
+                  </Tabs>
+                </div>
               </Main>
             </div>
-          :
-          this.props.mainVisible === 'loading' ? 
-          <div className={styles.loadingPage}>
-            <Spin/>
-          </div>
-          :
+          ) : this.props.mainVisible === "loading" ? (
+            <div className={styles.loadingPage}>
+              <Spin />
+            </div>
+          ) : (
             <Main>
               <ScoutingDetails></ScoutingDetails>
             </Main>
-          }
+          )}
         </Sider>
         {/* <CityPanel></CityPanel> */}
         <Overlay />

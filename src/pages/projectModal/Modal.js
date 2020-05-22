@@ -61,7 +61,7 @@ export default class ProjectModal extends React.Component {
     return tempType;
   };
 
-  cb = () => {
+  delCallBack = () => {
     const { plottingLayer } = draw;
     const { dispatch } = this.props;
     let featureOperatorList = this.props.featureOperatorList;
@@ -86,7 +86,7 @@ export default class ProjectModal extends React.Component {
       if (this.props.isEdit) {
         // message.success("保存成功");
         let plottingType = this.props.type;
-        const tempType = this.toChangedataType(plottingType);
+        let tempType = this.toChangedataType(plottingType);
         const defaultOptions = {
           radius: 8,
           fillColor: "rgba(168,9,10,0.7)",
@@ -116,7 +116,10 @@ export default class ProjectModal extends React.Component {
           operator.attrs.name
         );
         const plottingLayer = draw.plottingLayer;
-        plottingLayer.plotEdit.setCallback(this.cb.bind(this));
+        plottingLayer.plotEdit.setDelCallback(this.delCallBack.bind(this));
+        plottingLayer.plotEdit.setUpdateCallback(
+          this.updateOperatorToList.bind(this)
+        );
         if (tempType === "Point") {
           this.updateFeatureType(defaultOptions.fillColor);
           options = { ...defaultOptions, ...commonStyleOption };
@@ -142,7 +145,14 @@ export default class ProjectModal extends React.Component {
             },
           };
         }
-        if (tempType === "Polygon") {
+        if (
+          tempType === "Polygon" ||
+          tempType === "Fine_arrow" ||
+          tempType === "Rectangle" ||
+          tempType === "Circle" ||
+          tempType === "Freehandpolygon"
+        ) {
+          tempType = "Polygon";
           options = {
             ...commonStyleOption,
             ...{ fillColor: "rgba(168,9,10,0.7)", text: featureNameState },
@@ -227,18 +237,17 @@ export default class ProjectModal extends React.Component {
     } else {
       arr[index] = featureOperator;
     }
+    draw.featureOperatorList = arr;
     dispatch({
       type: "featureOperatorList/updateList",
       payload: {
         featureOperatorList: arr,
       },
     });
-    console.log(featureOperator);
   };
 
   // 给featureOperator设置attribute
   setAttribute = () => {
-    debugger;
     const featureOperator = window.featureOperator;
     const feature = featureOperator.feature.clone();
     const geometry = feature.getGeometry();
@@ -247,20 +256,18 @@ export default class ProjectModal extends React.Component {
     const featureType = this.props.type;
     let newGeom = this.getPointStr(points);
     let attr = {};
-    const featureTypeState =
-      this.checkStateChange(
-        this.props.featureType || this.state.featureType,
-        featureOperator.attrs.featureType
-      ) || this.state.featureType;
+    const featureTypeState = this.checkStateChange(
+      this.props.featureType || this.state.featureType,
+      featureOperator.attrs.featureType
+    );
     const featureNameState = this.checkStateChange(
       this.props.featureName,
       featureOperator.attrs.featureName
     );
-    const remarksState =
-      this.checkStateChange(
-        this.props.remarks || this.state.remarks,
-        featureOperator.attrs.remarks
-      ) || this.state.remarks;
+    const remarksState = this.checkStateChange(
+      this.props.remarks || this.state.remarks,
+      featureOperator.attrs.remarks
+    );
     const selectNameState = this.checkStateChange(
       this.props.selectName,
       featureOperator.attrs.selectName
@@ -275,6 +282,7 @@ export default class ProjectModal extends React.Component {
           name: featureNameState,
           remark: remarksState,
           selectName: selectNameState,
+          plottingType: featureType,
         };
         break;
       case "POLYLINE":
@@ -286,9 +294,14 @@ export default class ProjectModal extends React.Component {
           name: featureNameState,
           remark: remarksState,
           selectName: selectNameState,
+          plottingType: featureType,
         };
         break;
       case "POLYGON":
+      case "FINE_ARROW":
+      case "RECTANGLE":
+      case "CIRCLE":
+      case "FREEHANDPOLYGON":
         let style = null;
         if (featureTypeState.indexOf("/") > -1) {
           style = `${featureTypeState};icon`;
@@ -311,10 +324,14 @@ export default class ProjectModal extends React.Component {
           name: featureNameState,
           remark: remarksState,
           selectName: selectNameState,
+          plottingType: featureType,
         };
         break;
       default:
         break;
+    }
+    if (window.featureOperator && !window.featureOperator.responseData) {
+      window.featureOperator.responseData = this.props.responseData;
     }
     const keyArray = Object.keys(attr);
     keyArray.forEach((key) => {
@@ -356,7 +373,7 @@ export default class ProjectModal extends React.Component {
       },
     });
     if (!this.isOk && !this.props.featureName) {
-      this.cb();
+      this.delCallBack();
     } else {
       this.isOk = false;
     }

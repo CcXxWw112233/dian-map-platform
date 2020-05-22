@@ -3,7 +3,8 @@ import { Checkbox, Row, Button } from "antd";
 import { connect } from "dva";
 import styles from "./TempPlottingPanel.less";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
-import event from '../../lib/utils/event'
+import event from "../../lib/utils/event";
+import { draw } from "../../utils/draw";
 @connect(
   ({
     tempPlotting: { panelVisible, iconVisible },
@@ -93,68 +94,121 @@ export default class TempPlottingPanel extends React.Component {
     });
   };
 
+  handleEditClick = (featureOperator) => {
+    window.featureOperator = featureOperator;
+    const { dispatch } = this.props;
+    // 更新模态框数据
+    dispatch({
+      type: "modal/updateData",
+      payload: {
+        isEdit: true,
+        featureName: featureOperator.attrs.name || "", // 名称
+        selectName: featureOperator.attrs.selectName || "",
+        featureType: featureOperator.attrs.featureType || "", // 类型
+        remarks: featureOperator.attrs.remark || "", // 备注
+        responseData: featureOperator.responseData,
+      },
+    });
+    dispatch({
+      type: "modal/setVisible",
+      payload: {
+        visible: true,
+      },
+    });
+    dispatch({
+      type: "plotting/setPotting",
+      payload: {
+        operator: featureOperator,
+        type: featureOperator.attrs.plottingType,
+      },
+    });
+  };
+
   getStyle = (attrs) => {
-    let style = {};
-    if (attrs.featureType.indexOf("/") > -1) {
-      const tempIconUrl = attrs.featureType.replace("img", "");
-      const image = require("../../assets" + tempIconUrl);
-      style = {
-        ...style,
-        backgroundImage: `url(${image})`,
-        backgroundColor: "rgba(255,255,255,1)",
-        backgroundRepeat: "no-repeat",
-        backgroundPosition: "center center",
-      };
+    if (attrs && attrs.featureType) {
+      let style = {};
+      if (attrs.featureType.indexOf("/") > -1) {
+        const tempIconUrl = attrs.featureType.replace("img", "");
+        const image = require("../../assets" + tempIconUrl);
+        style = {
+          ...style,
+          backgroundImage: `url(${image})`,
+          backgroundColor: "rgba(255,255,255,1)",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center center",
+        };
+      }
+      if (attrs.featureType.indexOf("rgb") > -1) {
+        style = { ...style, backgroundColor: attrs.featureType };
+      }
+      if (attrs.geom.indexOf("POINT") > -1) {
+        style = { ...style, borderRadius: 8 };
+      }
+      if (attrs.geom.indexOf("LINESTRING") > -1) {
+        style = {
+          ...style,
+          height: 0,
+          border: `1px solid ${attrs.featureType}`,
+        };
+      }
+      return style;
     }
-    if (attrs.featureType.indexOf("rgb") > -1) {
-      style = { ...style, backgroundColor: attrs.featureType };
-    }
-    if (attrs.geom.indexOf("LINESTRING") > -1) {
-      style = { ...style, height: 0, border: `1px solid ${attrs.featureType}` };
-    }
-    return style;
+    return null;
   };
 
   getSelectedData = () => {
     let { featureOperatorList } = this.props;
     let { checkedList } = this.state;
 
-    let list = checkedList.map(item => {
-      let obj = featureOperatorList.find(feature => feature.guid === item);
-      return obj ;
-    })
+    let list = checkedList.map((item) => {
+      let obj = featureOperatorList.find((feature) => feature.guid === item);
+      return obj;
+    });
     return list;
-  }
+  };
 
   // 转存到项目
   saveToProject = () => {
-    let { dispatch ,featureOperatorList} = this.props;
+    const me = this;
+    const { plottingLayer } = draw;
+    let { dispatch, featureOperatorList } = this.props;
     let arr = this.getSelectedData();
     // 转存
-    event.Evt.firEvent('hasFeatureToProject',arr);
+    event.Evt.firEvent("hasFeatureToProject", arr);
     // 转存之后的回调
-    event.Evt.on('appendToProjectSuccess',(val)=>{
+    event.Evt.on("appendToProjectSuccess", (val) => {
       // console.log(val);
       let array = [...featureOperatorList];
-      val.forEach(item => {
-        let index = array.findIndex(feature => feature.guid === item.guid);
-        if(index >= 0){
+      val.forEach((item) => {
+        let index = array.findIndex((feature) => feature.guid === item.guid);
+        if (index >= 0) {
+          plottingLayer.removeFeature(array[index]);
           // 删除转存成功的数据
-          array.splice(index,1);
+          array.splice(index, 1);
         }
-      })
+      });
+      me.setState({
+        checkedList: [],
+      });
+      me.setState({
+        indeterminate: false,
+        checkAll: false,
+      });
       dispatch({
-        type:"featureOperatorList/updateList",
-        payload:{
-          featureOperatorList: array
-        }
-      })
-    })
-  }
+        type: "featureOperatorList/updateList",
+        payload: {
+          featureOperatorList: array,
+        },
+      });
+    });
+  };
 
   render() {
     const { panelVisible, featureOperatorList } = this.props;
     let style = panelVisible ? { display: "" } : { display: "none" };
+    if (featureOperatorList.length === 0) {
+      style = { display: "none" };
+    }
     return (
       <div className={styles.wrap} style={style}>
         <div className={styles.header}>
@@ -194,7 +248,15 @@ export default class TempPlottingPanel extends React.Component {
                     className={styles.icon}
                     style={this.getStyle(featureOperator.attrs)}
                   ></div>
-                  {featureOperator.name}
+                  <div className={styles.text}>
+                    <span>{featureOperator.name}</span>
+                  </div>
+                  <div
+                    className={styles.edit}
+                    onClick={() => this.handleEditClick(featureOperator)}
+                  >
+                    <span>编辑</span>
+                  </div>
                 </Row>
               );
             })}

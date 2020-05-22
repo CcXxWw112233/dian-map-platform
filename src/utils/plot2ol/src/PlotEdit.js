@@ -14,7 +14,7 @@ class PlotEdit extends Observable {
    * @constructs
    * @param {ol.Map} map 地图对象
    */
-  constructor(map, layer, cb) {
+  constructor(map, layer) {
     if (!map) {
       return;
     }
@@ -39,7 +39,9 @@ class PlotEdit extends Observable {
     //--这个比较特殊。绑定在map.mapBrowserEventHandler_上
     this._is_controlpoint_pointermove = null;
 
-    this.cb = cb
+    this.delCb = null;
+    this.updateCb = null;
+    this.openCb = null;
   }
   initHelperDom() {
     if (!this.map || !this.activePlot) {
@@ -58,7 +60,20 @@ class PlotEdit extends Observable {
     var cPnts = this.getControlPoints();
     for (var i = 0; i < cPnts.length; i++) {
       var id = Constants.HELPER_CONTROL_POINT_DIV + "-" + i;
-      DomUtils.create("div", Constants.HELPER_CONTROL_POINT_DIV, hiddenDiv, id);
+      const dom = DomUtils.create(
+        "div",
+        Constants.HELPER_CONTROL_POINT_DIV,
+        hiddenDiv,
+        id
+      );
+      DomUtils.addListener(
+        dom,
+        "mousedown",
+        () => {
+          this.openCb && this.openCb();
+        },
+        this
+      );
       this.elementTable[id] = i;
     }
   }
@@ -99,8 +114,15 @@ class PlotEdit extends Observable {
     }
   }
 
-  setCallback(cb) {
-    this.cb = cb
+  setDelCallback(cb) {
+    this.delCb = cb;
+  }
+  setUpdateCallback(cb) {
+    this.updateCb = cb;
+  }
+
+  setOpenCallback(cb) {
+    this.openCb = cb
   }
 
   // 删除按钮
@@ -117,13 +139,11 @@ class PlotEdit extends Observable {
     });
     this.layer.plotEdit.controlPoints.push(delBtnOverlay);
     this.map.addOverlay(delBtnOverlay);
-    // debugger;
     DomUtils.addListener(
       delBtnEle,
       "mousedown",
       () => {
-        // this.layer.removeFeature(window.featureOperator);
-        this.cb()
+        this.delCb && this.delCb();
       },
       this
     );
@@ -154,7 +174,6 @@ class PlotEdit extends Observable {
       });
       this.controlPoints.push(pnt);
       this.map.addOverlay(pnt);
-      // debugger;
       DomUtils.addListener(
         element,
         "mousedown",
@@ -212,6 +231,7 @@ class PlotEdit extends Observable {
       }
       var overlay = this.map.getOverlayById(this.activeControlPointId);
       overlay.setPosition(coordinate);
+      this.updateCb && this.updateCb(window.featureOperator);
     }
   }
 

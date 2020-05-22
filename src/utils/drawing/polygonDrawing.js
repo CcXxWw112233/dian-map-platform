@@ -53,6 +53,8 @@ export const polygonDrawing = {
 
     const end = this.drawing.on('drawend', e => {
       this.el.appendChild(this.icon)
+      mapApp.map.removeInteraction(this.drawing)
+      this.isActive = false
     })
 
     this.linsteners['drawend'] = end

@@ -426,7 +426,7 @@ const tagScouting = () => {
   );
 };
 
-@connect(({ controller: { mainVisible } }) => ({ mainVisible }))
+@connect(({ controller: { mainVisible }, lengedList: { config }}) => ({ mainVisible, config }))
 export default class ScoutingDetails extends PureComponent {
   constructor(props) {
     super(props);
@@ -590,7 +590,8 @@ export default class ScoutingDetails extends PureComponent {
   }
   // 渲染带坐标的数据
   renderCollection = (data) =>{ 
-    data.length && Action.renderCollection(data)
+    const { config, dispatch } = this.props
+    data.length && Action.renderCollection(data, { config, dispatch })
   }
 
   // 获取资源列表，动态分类
@@ -619,7 +620,7 @@ export default class ScoutingDetails extends PureComponent {
       },()=>{
         // 之渲染选中的区域数据
         let obj = this.state.area_list.find(item => item.id === this.state.area_active_key)||{};
-        let arr = obj. collection;
+        let arr = obj.collection;
         this.renderCollection(arr || []);
       })
   }

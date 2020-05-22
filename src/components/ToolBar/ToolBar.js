@@ -1,14 +1,14 @@
 import React, { PureComponent } from "react";
 import { DropOption } from "components";
 import styles from "./ToolBar.less";
-// import {
-//   myZoomIn,
-//   myZoomOut,
-//   myFullScreen,
-//   myDragZoom,
-// } from "utils/drawing/public";
+import {
+  myZoomIn,
+  myZoomOut,
+  myFullScreen,
+  myDragZoom,
+} from "utils/drawing/public";
 import { draw } from "utils/draw";
-// import { boxDrawing, circleDrawing, lineDrawing, pointDrawing, polygonDrawing,arrowDrawing,textDrawing } from 'utils/drawing/index'
+import { boxDrawing, circleDrawing, lineDrawing, pointDrawing, polygonDrawing,arrowDrawing,textDrawing } from 'utils/drawing/index'
 import {connect} from 'dva'
 
 @connect(({ modal: { visible, data } }) => ({ visible, data }))
@@ -80,25 +80,47 @@ export default class ToolBar extends PureComponent {
     // }]
     const {dispatch} = this.props
     const tools = [
+      // {
+      //   name: "对比",
+      //   key: "contrast",
+      //   icon: "&#xe724;",
+      //   children: [
+      //     {
+      //       name: "存为对照组",
+      //       key: "save",
+      //       icon: "&#xe722;",
+      //       cb: (() => {}),
+      //     },
+      //     {
+      //       name: "读取对照组",
+      //       key: "read",
+      //       icon: "&#xe725;",
+      //       cb: (() => {}),
+      //     },
+      //   ],
+      // },
       {
-        name: "对比",
-        key: "contrast",
-        icon: "&#xe724;",
-        children: [
-          {
-            name: "存为对照组",
-            key: "save",
-            icon: "&#xe722;",
-            cb: (() => {}),
-          },
-          {
-            name: "读取对照组",
-            key: "read",
-            icon: "&#xe725;",
-            cb: (() => {}),
-          },
-        ],
-      },
+          name: '量测',
+          key: 'measuration',
+          icon: '&#xe726;',
+          children: [
+            {
+            name: '量测坐标',
+            key: 'coordinate',
+            icon: '&#xe715;',
+            cb: pointDrawing.createDrawing.bind(pointDrawing)
+          },{
+            name: '量测距离',
+            key: 'distance',
+            icon: '&#xe716;',
+            cb: lineDrawing.createDrawing.bind(lineDrawing)
+          },{
+            name: '量测面积',
+            key: 'area',
+            icon: '&#xe718;',
+            cb: polygonDrawing.createDrawing.bind(polygonDrawing)
+          }
+        ]},
       {
         name: "标绘",
         key: "plotting",
@@ -121,6 +143,12 @@ export default class ToolBar extends PureComponent {
             key: "polygon",
             icon: "&#xe718;",
             cb: () => draw.create('POLYGON', dispatch),
+          },
+          {
+            name: "标记自由面",
+            key: "polygon",
+            icon: "&#xe718;",
+            cb: () => draw.create('FREEHAND_POLYGON', dispatch),
           },
         ],
       },
