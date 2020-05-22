@@ -2,7 +2,7 @@ import dva from "dva";
 import "./index.less";
 import "./utils/publicFuncForFlutter";
 
-import { createBrowserHistory as createHistory } from 'history';
+// import { createBrowserHistory as createHistory } from 'history';
 
 // 1. Initialize
 const app = dva({
