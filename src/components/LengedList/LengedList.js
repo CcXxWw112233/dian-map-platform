@@ -1,4 +1,4 @@
-import React, { useState, PureComponent } from "react";
+import React, { PureComponent } from "react";
 import styles from "./LengedList.less";
 import mapSource from "utils/mapSource";
 import mapApp from "utils/INITMAP";

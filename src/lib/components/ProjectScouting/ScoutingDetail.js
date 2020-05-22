@@ -196,7 +196,7 @@ function Action() {
   };
 
   // 渲染标绘数据
-  this.renderFeaturesCollection = (data) => {
+  this.renderFeaturesCollection = (data, { lengedConfig, dispatch }) => {
     const commonStyleOption = {
       textFillColor: "rgba(255,0,0,1)",
       textStrokeColor: "#fff",
@@ -207,16 +207,34 @@ function Action() {
       pointColor: "#fff",
       showName: true,
     };
+    let projectScouting = {
+      title: "项目踏勘",
+      key: "map:projectScouting",
+      content: [],
+    };
     data.forEach((item) => {
       let content = item.content;
       content = content && JSON.parse(content);
       let featureType = content.featureType || "";
       let isImage = false;
       let iconUrl = "";
+      let obj = null;
+      const hasIndex = projectScouting.content.findIndex(
+        (item0) => item0.selectName === content.selectName
+      );
       if (featureType.indexOf("/") > -1) {
         isImage = true;
         featureType = featureType.replace("img", "");
         iconUrl = require("../../../assets" + featureType);
+        if (hasIndex < 0) {
+          obj = { imgSrc: iconUrl, font: content.selectName };
+          projectScouting.content.push(obj);
+        }
+      } else {
+        if (hasIndex < 0) {
+          obj = { bgColor: featureType, font: content.selectName };
+          projectScouting.content.push(obj);
+        }
       }
       let feature = addFeature(content.geoType, {
         coordinates: content.coordinates,
@@ -254,7 +272,7 @@ function Action() {
       //   this.addOverlay(center, item);
       // } else this.addOverlay(content.coordinates, item);
 
-      // liulaian
+      // code by liulaian
       let myStyle = null;
       if (content.geoType === "Point") {
         myStyle = createStyle(content.geoType, {
@@ -311,6 +329,27 @@ function Action() {
       this.Source.addFeature(feature);
       this.features.push(feature);
     });
+    let newConfig = [];
+    if (!lengedConfig) {
+      lengedConfig = [];
+    }
+    const lengedIndex = lengedConfig.findIndex(
+      (lenged) => lenged.key === projectScouting.key
+    );
+    if (lengedIndex > -1) {
+      lengedConfig[lengedIndex] = projectScouting;
+      newConfig = lengedConfig[lengedIndex];
+    } else {
+      newConfig = lengedConfig.concat(projectScouting);
+    }
+    if (projectScouting.content.length > 0) {
+      dispatch({
+        type: "lengedList/updateLengedList",
+        payload: {
+          config: newConfig,
+        },
+      });
+    }
   };
   this.getPolygonFill = (iconUrl) => {
     let canvas = document.createElement("canvas");
@@ -325,7 +364,7 @@ function Action() {
     return pat;
   };
   // 渲染feature
-  this.renderCollection = (data) => {
+  this.renderCollection = (data, { lenged, dispatch }) => {
     // 删除元素
     this.removeFeatures();
     let ponts = data.filter((item) => item.collect_type !== "4");
@@ -333,7 +372,7 @@ function Action() {
     // 渲染点的数据
     this.renderPointCollection(ponts);
     // 渲染标绘数据
-    this.renderFeaturesCollection(features);
+    this.renderFeaturesCollection(features, { lenged, dispatch });
 
     data &&
       data.length &&
