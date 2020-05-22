@@ -1,4 +1,4 @@
-import { MyOverlay, drawFeature, formatLength } from '../mapUtils'
+import { MyOverlay, drawFeature, formatArea } from '../mapUtils'
 import mapApp from '../INITMAP'
 import { createIconElement, closeOverlay, myStyle, removeAllEventLinstener } from './public'
 
@@ -43,7 +43,7 @@ export const polygonDrawing = {
       const feature = e.feature
       feature.getGeometry().on('change',(geo) => {
         let target = geo.target;
-        me.el.innerHTML = formatLength(target)
+        me.el.innerHTML = formatArea(target)
         let lastCoor = target.getInteriorPoint().getCoordinates()
         me.overlay.setPosition(lastCoor);
       })
