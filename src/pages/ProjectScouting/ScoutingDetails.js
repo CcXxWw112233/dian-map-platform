@@ -477,7 +477,7 @@ export default class ScoutingDetails extends PureComponent {
     // 构建地图组件
     Action.init();
     // 当外部的数据保存成功后的回调
-    console.log(Event.Evt)
+    // console.log(Event.Evt)
     Event.Evt.on('addCollectionForFeature',(data) =>{
       this.fetchCollection();
     })
@@ -486,6 +486,7 @@ export default class ScoutingDetails extends PureComponent {
   // 获取缓存中选定的项目
   getDetails = (flag) => {
     ScouListAction.checkItem().then(res => {
+      // console.log(res)
       let { data } = res;
       this.setState({
         current_board: data

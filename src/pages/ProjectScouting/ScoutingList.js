@@ -140,6 +140,7 @@ export default class ScoutingList extends PureComponent {
       this.setState({
         projects: this.state.projects.concat([data])
       },()=>{
+        Action.projects = this.state.projects;
         // 更新点的数据
         Action.renderProjectPoint(this.state.projects);
       })
