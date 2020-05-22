@@ -393,7 +393,7 @@ const UploadItem = ({ type ,data ,onRemove ,onEditCollection ,areaList ,onSelect
     // onDragStart={e => console.log(e)}
     >
       <div className={styles.uploadIcon + ` ${styles[type]}`}>
-        <span>{itemKeyVals[type]}</span>
+        <span>{type === 'pic' ? <img src={data.resource_url} width='48px' alt='图片'/>: itemKeyVals[type]}</span>
       </div>
       <div className={styles.uploadDetail}>
         <Row style={{width:'100%',textAlign:"left"}}>
