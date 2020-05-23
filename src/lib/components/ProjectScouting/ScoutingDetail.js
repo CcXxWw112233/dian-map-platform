@@ -272,7 +272,7 @@ function Action() {
           strokeWidth: 2,
           strokeColor: "rgba(168,9,10,1)",
           iconUrl: iconUrl,
-          text: content.name,
+          text: item.title,
           ...commonStyleOption,
         });
       }
@@ -280,7 +280,7 @@ function Action() {
         myStyle = createStyle(content.geoType, {
           strokeWidth: 4,
           strokeColor: featureType,
-          text: content.name,
+          text: item.title,
           ...commonStyleOption,
         });
       }
@@ -297,7 +297,7 @@ function Action() {
               strokeWidth: 2,
               strokeColor: isImage ? "" : featureType.replace("0.7", 1),
               fillColor: pat,
-              text: content.name,
+              text: item.title,
               ...commonStyleOption,
             };
             myStyle = createStyle(content.geoType, options);
@@ -309,11 +309,11 @@ function Action() {
           return;
         }
         myStyle = createStyle(content.geoType, {
+          ...commonStyleOption,
           strokeWidth: 2,
           strokeColor: isImage ? "" : featureType.replace("0.7", 1),
           fillColor: featureType,
-          text: content.name,
-          ...commonStyleOption,
+          text: item.title,
         });
       }
       feature.setStyle(myStyle);
