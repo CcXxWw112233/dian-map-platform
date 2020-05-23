@@ -24,13 +24,13 @@ export const draw = {
   featureOperatorList: [],
   responseData: {},
   getPlottingLayer(dispatch) {
-    this.drawDispatch = dispatch
+    this.drawDispatch = dispatch;
     if (!this.map) {
       this.map = mapApp.map;
     }
     if (!this.plottingLayer) {
       this.plottingLayer = new PlottingLayer(this.map);
-      this.bindEventListener()
+      this.bindEventListener();
     }
     return this.plottingLayer;
   },
@@ -47,7 +47,7 @@ export const draw = {
       this.type = "FREEHANDPOLYGON";
     }
     this.currentId = this.typeIdKeys[type];
-    this.getPlottingLayer(dispatch)
+    this.getPlottingLayer(dispatch);
     const PlotTypes = {
       MARKER: "marker",
       POLYLINE: "polyline",
@@ -120,7 +120,8 @@ export const draw = {
           request("GET", url).then((res) => {
             // 葛根
             if (this.type === "POLYGON" || this.type === "FREEHANDPOLYGON") {
-              res.data.data[2].items.push(...config);
+              const items = [...res.data.data[2].items, ...config];
+              res.data.data[2].items = items;
             }
             me.responseData[me.currentId] = res;
             me.drawDispatch({
@@ -132,7 +133,6 @@ export const draw = {
             });
           });
         }
-
       }
     });
     this.plottingLayer.on(FeatureOperatorEvent.DEACTIVATE, (e) => {
@@ -147,5 +147,5 @@ export const draw = {
         },
       });
     });
-  }
+  },
 };

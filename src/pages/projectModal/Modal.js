@@ -159,7 +159,7 @@ export default class ProjectModal extends React.Component {
           tempType = "Polygon";
           options = {
             ...commonStyleOption,
-            ...{ fillColor: "rgba(168,9,10,0.7)", text: featureNameState },
+            ...{ fillColor: featureType, text: featureNameState },
           };
           let tempIconUrl = featureType;
           if (tempIconUrl.indexOf("/") > -1) {
@@ -260,19 +260,19 @@ export default class ProjectModal extends React.Component {
     const featureType = this.props.type;
     let newGeom = this.getPointStr(points);
     let attr = {};
-    const featureTypeState = this.checkStateChange(
+    let featureTypeState = this.checkStateChange(
       this.props.featureType || this.state.featureType,
       featureOperator.attrs.featureType
     );
-    const featureNameState = this.checkStateChange(
+    let featureNameState = this.checkStateChange(
       this.props.featureName,
       featureOperator.attrs.featureName
     );
-    const remarksState = this.checkStateChange(
+    let remarksState = this.checkStateChange(
       this.props.remarks || this.state.remarks,
       featureOperator.attrs.remarks
     );
-    const selectNameState = this.checkStateChange(
+    let selectNameState = this.checkStateChange(
       this.props.selectName,
       featureOperator.attrs.selectName
     );
@@ -319,6 +319,7 @@ export default class ProjectModal extends React.Component {
             .getStroke()
             .getColor();
           style = `${fillColor};${strokeColor}`;
+          featureTypeState = fillColor
         }
         attr = {
           geom: `POLYGON((${newGeom}))`,

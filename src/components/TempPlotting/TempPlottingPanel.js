@@ -182,7 +182,7 @@ export default class TempPlottingPanel extends React.Component {
       val.forEach((item) => {
         let index = array.findIndex((feature) => feature.guid === item.guid);
         if (index >= 0) {
-          // plottingLayer.removeFeature(array[index]);
+          plottingLayer.removeFeature(array[index]);
           // 删除转存成功的数据
           array.splice(index, 1);
         }
