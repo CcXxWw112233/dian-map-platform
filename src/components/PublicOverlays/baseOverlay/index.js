@@ -19,6 +19,7 @@ export default function baseOverlay(content, data = {}){
             case "bottomRight" : 
                 return "5,0,10,10,20,0"
             ;
+            case "rightTop": return "10,0,0,5,10,10" ;
             default :
             return "5,0,10,10,20,0";
         }

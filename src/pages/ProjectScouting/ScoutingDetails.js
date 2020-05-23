@@ -14,15 +14,17 @@ import {
   CloseCircleOutlined , 
   SettingTwoTone ,
   DeleteOutlined,
-  EditOutlined
+  EditOutlined,
+  CloseOutlined,
+  CheckOutlined
 } from '@ant-design/icons'
 import { BASIC } from '../../services/config'
 import Event from '../../lib/utils/event'
 const { TabPane } = Tabs;
 
-const Title = ({ name, date, cb }) => {
+const Title = ({ name, date, cb ,id}) => {
   return (
-    <div className={styles.title}>
+    <div className={`${styles.title} ${ id === '1263868959841718272' ? styles.hasBg :""}`}>
       <p style={{ marginTop: 8 }}>
         <i
           className={globalStyle.global_icon + ` ${globalStyle.btn}`}
@@ -296,9 +298,11 @@ const ScoutingItem2 = ({ data }) => {
     </Collapse>
   );
 };
-const UploadItem = ({ type ,data ,onRemove ,onEditCollection ,areaList ,onSelectGroup, onChangeDisplay}) => {
+const UploadItem = ({ type ,data ,onRemove ,onEditCollection = ()=>{} ,areaList ,onSelectGroup, onChangeDisplay}) => {
   let [ visible  ,setVisible ] = useState(false);
   let [groupVisible , setGroupVisible ] = useState(false)
+  let [ isEdit, setIsEdit ] = useState(false);
+  let [ fileName, setFileName ] = useState(data.title);
   const itemKeyVals = {
     paper: "图纸",
     interview: "访谈",
@@ -318,12 +322,16 @@ const UploadItem = ({ type ,data ,onRemove ,onEditCollection ,areaList ,onSelect
     // 添加坐标点
     if(key === 'editCollection'){
       setVisible(false);
-      onEditCollection && onEditCollection(data)
+      onEditCollection && onEditCollection('editCoordinate',data)
     }
     if(key === 'selectGroup'){
 
     }
 
+    if(key === 'eidtTitle'){
+      setIsEdit(!isEdit);
+      setVisible(false);
+    } 
     if(key === 'display'){
       onChangeDisplay && onChangeDisplay(data);
       setVisible(false);
@@ -359,6 +367,9 @@ const UploadItem = ({ type ,data ,onRemove ,onEditCollection ,areaList ,onSelect
           关联坐标
         </Menu.Item>
       }
+      <Menu.Item key='eidtTitle'>
+        修改名称
+      </Menu.Item>
       <Menu.Item key="selectGroup">
         <Popover
         overlayStyle={{zIndex:10000}}
@@ -396,9 +407,45 @@ const UploadItem = ({ type ,data ,onRemove ,onEditCollection ,areaList ,onSelect
         <span>{type === 'pic' ? <img src={data.resource_url} width='48px' alt='图片'/>: itemKeyVals[type]}</span>
       </div>
       <div className={styles.uploadDetail}>
-        <Row style={{width:'100%',textAlign:"left"}}>
-          <span style={{minHeight:'1rem'}} title={title} 
+        <Row style={{width:'95%',textAlign:"left"}}
+        align='middle'
+        justify='center'>
+          {isEdit ? 
+          <Fragment>
+            <Col span={16}>
+              <Input style={{borderRadius:'5px'}}
+              placeholder='请输入名称'
+              size='small'
+              autoFocus
+              onChange={e => setFileName(e.target.value.trim())}
+              onPressEnter={()=> {onEditCollection('editName',data,fileName);setIsEdit(false)}}
+              allowClear
+              value={fileName}/>
+            </Col>
+            <Col span={4} style={{textAlign:"right"}}>
+              <Button
+              onClick={e => setIsEdit(false)}
+              size='small'
+              shape="circle">
+                <CloseOutlined />
+              </Button>
+            </Col>
+            <Col span={4} style={{textAlign:"right"}}>
+              <Button
+              size='small'
+              onClick={()=>{setIsEdit(false);onEditCollection('editName',data,fileName);}}
+              shape="circle"
+              type='primary'>
+                <CheckOutlined />
+              </Button>
+            </Col>
+          </Fragment>
+          
+            :
+            <span style={{minHeight:'1rem'}} title={title} 
           className={`${styles.firstRow} ${styles.text_overflow} text_ellipsis`}>{title}</span>
+          }
+          
         </Row>
         <Row>
           <Space size={8} style={{fontSize:12}}>
@@ -743,20 +790,22 @@ export default class ScoutingDetails extends PureComponent {
     })
   }
 
-  onEditCollection = (val)=>{
+  onEditCollection = async (editType,val,name)=>{
+    let res = '',params = {};
     let { id } = val;
-    message.success(
-    <span>选取一个坐标设置为资料展示点 或 <a onClick={e => {e.stopPropagation(); this.cancelEditCollection();}}>取消选择</a></span>
-    ,0)
-    // 隐藏
-    this.hideOtherSlide();
-    // 添加坐标点的事件
-    Action.addCollectionPosition(val).then(res => {
+    if(editType === 'editCoordinate'){
+      message.success(
+        <span>选取一个坐标设置为资料展示点 或 <a onClick={e => {e.stopPropagation(); this.cancelEditCollection();}}>取消选择</a></span>
+        ,0)
+      // 隐藏
+      this.hideOtherSlide();
+      // 添加坐标点的事件
+      res = await Action.addCollectionPosition(val);
       let { feature } = res;
       // console.log(res);
       let coor = feature.getGeometry().getCoordinates();
       coor = Action.transform(coor);
-      let params = {
+      params = {
         id,
         location:{
           longitude: coor[0],
@@ -764,15 +813,26 @@ export default class ScoutingDetails extends PureComponent {
           site_name: val.title
         }
       }
-      // 执行保存
-      Action.editCollection(params).then(res => {
-        // console.log(res);
-        this.cancelEditCollection();
-        this.fetchCollection()
-      }).catch(err => {
-        console.log(err)
-        this.cancelEditCollection();
-      })
+    }
+    else if(editType === 'editName'){
+      if(!name || name === val.name){
+        return ;
+      }
+      params = {
+        title: name,
+        id
+      }
+    }
+    // 执行保存
+    Action.editCollection(params).then(resp => {
+      // console.log(res);
+      this.cancelEditCollection();
+      this.fetchCollection();
+      let f = editType == 'editCoordinate' ?'关联坐标完成':"修改名称完成"
+      message.success(f);
+    }).catch(err => {
+      console.log(err)
+      this.cancelEditCollection();
     })
   }
   // 选中了分组
@@ -910,6 +970,7 @@ export default class ScoutingDetails extends PureComponent {
         <Title
           name={current_board.board_name}
           date={""}
+          id={current_board.board_id}
           cb={this.handleGoBackClick.bind(this)}
         ></Title>
         <Tabs
@@ -939,7 +1000,7 @@ export default class ScoutingDetails extends PureComponent {
               {pane.content}
             </TabPane>
           ))} */}
-          <TabPane tab={<span>按区域</span>} key="1" style={panelStyle}>
+          <TabPane tab={<span style={{visibility:'hidden'}}>按区域</span>} key="1" style={panelStyle}>
             <div className={globalStyle.autoScrollY} style={{ height: "100%" ,paddingBottom:'40px'}}>
             <Collapse expandIconPosition="right" 
               onChange={e => {this.setActiveCollapse(e)}} 

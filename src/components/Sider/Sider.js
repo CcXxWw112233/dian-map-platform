@@ -25,7 +25,8 @@ export default class Sider extends PureComponent {
 
   toOld = ()=>{
     let search = window.location.search || window.location.hash;
-    let href = '/'+search.replace('#/','');
+    let origin = window.location.origin;
+    let href = origin + '/oldpage/'+search.replace('#/','');
     setTimeout(()=>{
       window.open(href,'_self');
     },500)
