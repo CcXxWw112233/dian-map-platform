@@ -56,6 +56,7 @@ class IndexPage extends React.Component {
   componentDidMount() {
     this.checkListCach();
     Event.Evt.on("hasFeatureToProject", (data) => {
+      console.log(data);
       this.addFeatureForProject(data);
     });
   }
