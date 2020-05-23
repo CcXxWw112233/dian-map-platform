@@ -3,8 +3,8 @@ const getBaseUrl = () => {
   const config = {
     // 获取url传递的参数
     getUrlParam:(function(G){
-      let { hash = "" } = G.location;
-      hash = decodeURIComponent(hash);
+      let { hash = "",search } = G.location;
+      hash = decodeURIComponent(hash || search );
       let paramString = hash.split('?')[1];
       if(!paramString) return {};
       let params = paramString.split('&');
