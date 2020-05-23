@@ -233,7 +233,7 @@ export const TransformCoordinate = (
 export const Fit = (view, extent, option, duration = 1000) => {
   if (view) {
     view.cancelAnimations();
-    view.fit(extent, { duration, ...option });
+    view.fit(extent, { duration,padding: [200, 150, 80, 400], ...option });
   }
 };
 

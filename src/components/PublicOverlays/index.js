@@ -30,3 +30,10 @@ Object.defineProperty(exports, "settingsOverlay", {
     return require('./settingsOverlay/index').default;
   }
 });
+
+Object.defineProperty(exports, "areaDetailOverlay", {
+  enumerable: true,
+  get: function get() {
+    return require('./areaDetailOverlay/index').default;
+  }
+});
