@@ -62,7 +62,7 @@ export const removeAllEventLinstener = function () {
     listenerArr.forEach((listener) => {
       myMapApp.drawing[drawingObj].drawing.un(
         listener,
-        myMapApp.drawing[drawingObj].linsteners[listener]
+        myMapApp.drawing[drawingObj].linsteners[listener].listener
       );
     });
   });

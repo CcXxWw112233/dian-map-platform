@@ -24,6 +24,7 @@ app.model(require("./models/uploadNormal").default);
 app.model(require("./models/plotting").default);
 app.model(require("./models/featureOperatorList").default);
 app.model(require("./models/tempPlotting").default);
+app.model(require("./models/publicMapData").default)
 // 4. Router
 app.router(require("./router").default);
 

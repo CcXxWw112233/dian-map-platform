@@ -8,7 +8,12 @@ import lengedListConf from "components/LengedList/config";
 import { connect } from "dva";
 const MenuData = require("./public_data").default;
 
-@connect(({ lengedList: { config } }) => ({ config }))
+@connect(
+  ({ lengedList: { config }, publicMapData: { dataItemStateList } }) => ({
+    config,
+    dataItemStateList,
+  })
+)
 export default class PublicData extends React.Component {
   constructor(props) {
     super(props);
@@ -126,11 +131,14 @@ export default class PublicData extends React.Component {
     // PublicDataActions.getPublicData()
   };
   render() {
+    const { dispatch } = this.props;
     return (
       <div className={styles.publicBox + ` ${globalStyle.autoScrollY}`}>
         {this.AllCheckData.map((item, index) => {
           return (
             <DataItem
+              stateIndex = { index }
+              dispatch = { dispatch }
               data={item}
               key={item.key}
               onChange={this.toggleViewPulicData}

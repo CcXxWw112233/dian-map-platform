@@ -2,7 +2,7 @@ import PlottingLayer from "./plot2ol/src/PlottingLayer";
 import FeatureOperatorEvent from "./plot2ol/src/events/FeatureOperatorEvent";
 import mapApp from "./INITMAP";
 import { request } from "../services/index";
-import { config } from "./customConfig"
+import { config } from "./customConfig";
 // import Overlay from 'ol/Overlay'
 // import * as DomUtils from './plot2ol/util/dom_util'
 // import { connectEvent, disconnectEvent } from './plot2ol/util/core'
@@ -22,6 +22,18 @@ export const draw = {
   currentType: null,
   drawDispatch: null,
   featureOperatorList: [],
+  responseData: {},
+  getPlottingLayer(dispatch) {
+    this.drawDispatch = dispatch
+    if (!this.map) {
+      this.map = mapApp.map;
+    }
+    if (!this.plottingLayer) {
+      this.plottingLayer = new PlottingLayer(this.map);
+      this.bindEventListener()
+    }
+    return this.plottingLayer;
+  },
   create(type, dispatch) {
     this.drawDispatch = dispatch;
     if (!this.map) {
@@ -35,73 +47,7 @@ export const draw = {
       this.type = "FREEHANDPOLYGON";
     }
     this.currentId = this.typeIdKeys[type];
-    if (!this.plottingLayer) {
-      this.plottingLayer = new PlottingLayer(this.map);
-      dispatch({
-        type: "plotting/setLayer",
-        payload: {
-          layer: this.plottingLayer,
-        },
-      });
-      const me = this;
-      // 标绘激活事件
-      this.plottingLayer.on(FeatureOperatorEvent.ACTIVATE, (e) => {
-        window.featureOperator = e.feature_operator;
-        const featureOperator = window.featureOperator;
-        // 讲标绘存到redux
-        dispatch({
-          type: "plotting/setPotting",
-          payload: {
-            type: this.type,
-            operator: e.feature_operator,
-          },
-        });
-
-        // 更新模态框数据
-        dispatch({
-          type: "modal/updateData",
-          payload: {
-            isEdit: true,
-            featureName: featureOperator.attrs.name || "", // 名称
-            selectName: featureOperator.attrs.selectName || "",
-            featureType: featureOperator.attrs.featureType || "", // 类型
-            remarks: featureOperator.attrs.remark || "", // 备注
-          },
-        });
-        // 查询数据，弹出模态框
-        const currentOperator = me.featureOperatorList.filter((operator) => {
-          return operator.guid === featureOperator.guid;
-        });
-        if (!currentOperator.length) {
-          const url = `${me.baseUrl}/api/map/dict/${me.currentId}/mark`;
-          request("GET", url).then((res) => {
-            // 葛根
-            if (this.type === "POLYGON" || this.type === "FREEHANDPOLYGON") {
-              res.data.data[2].items.push(...config);
-            }
-            dispatch({
-              type: "modal/setVisible",
-              payload: {
-                visible: true,
-                responseData: res.data || {},
-              },
-            });
-          });
-        }
-      });
-      this.plottingLayer.on(FeatureOperatorEvent.DEACTIVATE, (e) => {
-        dispatch({
-          type: "modal/updateData",
-          payload: {
-            isEdit: false,
-            featureName: "", // 名称
-            selectName: "",
-            featureType: "", // 类型
-            remarks: "", // 备注
-          },
-        });
-      });
-    }
+    this.getPlottingLayer(dispatch)
     const PlotTypes = {
       MARKER: "marker",
       POLYLINE: "polyline",
@@ -128,4 +74,78 @@ export const draw = {
     };
     this.plottingLayer.addFeature(PlotTypes[type]);
   },
+  bindEventListener() {
+    const me = this;
+    // 标绘激活事件
+    this.plottingLayer.on(FeatureOperatorEvent.ACTIVATE, (e) => {
+      window.featureOperator = e.feature_operator;
+      const featureOperator = window.featureOperator;
+      // 讲标绘存到redux
+      me.drawDispatch({
+        type: "plotting/setPotting",
+        payload: {
+          type: this.type,
+          operator: e.feature_operator,
+        },
+      });
+
+      // 更新模态框数据
+      me.drawDispatch({
+        type: "modal/updateData",
+        payload: {
+          isEdit: true,
+          featureName: featureOperator.attrs.name || "", // 名称
+          selectName: featureOperator.attrs.selectName || "",
+          featureType: featureOperator.attrs.featureType || "", // 类型
+          remarks: featureOperator.attrs.remark || "", // 备注
+        },
+      });
+
+      // 查询数据，存在当前标绘，弹出模态框
+      const currentOperator = me.featureOperatorList.filter((operator) => {
+        return operator.guid === featureOperator.guid;
+      });
+      // 如果存在
+      if (!currentOperator.length) {
+        if (me.responseData && me.responseData[me.currentId]) {
+          me.drawDispatch({
+            type: "modal/setVisible",
+            payload: {
+              visible: true,
+              responseData: me.responseData[me.currentId].data || {},
+            },
+          });
+        } else {
+          const url = `${me.baseUrl}/api/map/dict/${me.currentId}/mark`;
+          request("GET", url).then((res) => {
+            // 葛根
+            if (this.type === "POLYGON" || this.type === "FREEHANDPOLYGON") {
+              res.data.data[2].items.push(...config);
+            }
+            me.responseData[me.currentId] = res;
+            me.drawDispatch({
+              type: "modal/setVisible",
+              payload: {
+                visible: true,
+                responseData: res.data || {},
+              },
+            });
+          });
+        }
+
+      }
+    });
+    this.plottingLayer.on(FeatureOperatorEvent.DEACTIVATE, (e) => {
+      me.drawDispatch({
+        type: "modal/updateData",
+        payload: {
+          isEdit: false,
+          featureName: "", // 名称
+          selectName: "",
+          featureType: "", // 类型
+          remarks: "", // 备注
+        },
+      });
+    });
+  }
 };

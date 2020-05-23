@@ -70,9 +70,7 @@ class IndexPage extends React.Component {
             let param = {
               coordinates: feature.getGeometry().getCoordinates(),
               geoType: feature.getGeometry().getType(),
-              name: item.name,
-              featureType: item.attrs.featureType,
-              selectName: item.attrs.selectName,
+              ...item.attrs
             };
             let obj = {
               collect_type: 4,
