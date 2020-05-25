@@ -85,7 +85,6 @@ const initMap = {
     }
   },
   changeBaseMap: function (item) {
-    debugger
     if (item && item.keys.length > 0) {
       this.baseMaps.forEach(layer => {
         layer.setVisible(false)

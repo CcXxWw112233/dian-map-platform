@@ -39,7 +39,7 @@ export default class BasemapGallery extends PureComponent {
   // };
 
   changeBaseMap = (item) => {
-    debugger
+    // debugger
     const myMapApp = mapApp
     myMapApp.baseMaps.forEach(layer => {
       layer.setVisible(false)
