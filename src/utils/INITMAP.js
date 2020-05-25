@@ -68,6 +68,7 @@ const initMap = {
   createTilelayer: function (options) {
     return new TileLayer({
       id: options.id,
+      // zIndex: index,
       source: new XYZ({
         crossOrigin: "anonymous",
         url: options.url,
@@ -84,15 +85,21 @@ const initMap = {
       console.warn("已存在该ID图层！");
     }
   },
-  changeBaseMap: function (item) {
-    if (item && item.keys.length > 0) {
+  changeBaseMap: function (key) {
+    let baseMapKey = null
+    if (baseMapKeys && baseMapKeys.length) {
+      baseMapKey = baseMapKeys.filter(item => {
+        return item.key === key
+      })[0]
+    }
+    if (baseMapKey && baseMapKey.keys.length > 0) {
       this.baseMaps.forEach(layer => {
         layer.setVisible(false)
       })
-      item.keys.forEach((key) => {
+      baseMapKey.keys.forEach((key) => {
         let layer = this.findLayerById(key, this.baseMaps);
         if (!layer) {
-          const baseMapItem = baseMaps.filter((baseMap) => {
+          const baseMapItem = baseMaps.filter((baseMap, index) => {
             return baseMap.id === key;
           })[0];
           const baseLayer = this.createTilelayer(baseMapItem);

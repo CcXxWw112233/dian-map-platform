@@ -93,7 +93,7 @@ export default class LengedList extends PureComponent {
   };
   changeBaseMap = (item, index) => {
     this.toggleBaseMapChangeStyle(index);
-    mapApp.changeBaseMap(item)
+    mapApp.changeBaseMap(item.key)
   }
   toggleBaseMapChangeStyle = (index) => {
     this.setState({
@@ -128,7 +128,7 @@ export default class LengedList extends PureComponent {
               return (
                 <div
                   className={styles.layerItem + ` ${active}`}
-                  key={index}
+                  key={item.key}
                   onClick={() => this.changeBaseMap(item, index)}
                 >
                   <p className={styles.layerName}>{item.name}</p>

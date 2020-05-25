@@ -200,19 +200,26 @@ const baseMaps = [
   },
 ];
 const baseMapKeys = [
-  { name: "高德电子图", keys: ["gd_vec_tile"] },
-  { name: "高德影像图", keys: ["gd_img_tile", "gd_roadLabel_tile"] },
-  { name: "谷歌遥感图", keys: ["gg_img_tile"] },
+  { name: "高德电子图", key: "gd_vec", keys: ["gd_vec_tile"] },
   {
-    name: "天地图影像图",
-    keys: ["td_img_tile", "td_roadLabel_tile", "td_label_tile"],
+    name: "高德影像图",
+    key: "gd_img",
+    keys: ["gd_img_tile", "gd_roadLabel_tile"],
   },
+  { name: "谷歌遥感图", key: "gg_img", keys: ["gg_img_tile"] },
   {
     name: "天地图矢量图",
-    keys: ["td_vec_tile", "td_roadLabel_tile", "td_label_tile"],
+    key: "td_vec",
+    keys: [ "td_vec_tile", "td_roadLabel_tile", "td_label_tile" ],
+  },
+  {
+    name: "天地图影像图",
+    key: "td_img",
+    keys: [ "td_img_tile", "td_roadLabel_tile", "td_label_tile",],
   },
   {
     name: "天地图地形图",
+    key: "td_ter",
     keys: ["td_ter_tile", "td_roadLabel_tile", "td_label_tile"],
   },
 ];
