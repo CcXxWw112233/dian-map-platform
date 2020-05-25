@@ -8,8 +8,7 @@ import {
 import TileLayer from "ol/layer/Tile";
 import XYZ from "ol/source/XYZ";
 
-import LayerGroup from "ol/layer/Group";
-import Collection from "ol/Collection";
+import { baseMaps, baseMapKeys } from "utils/mapSource";
 
 const initMap = {
   status: null,
@@ -75,28 +74,34 @@ const initMap = {
       }),
     });
   },
-  createBaseLayer: function (options) {
-    let layerGroup = null;
-    if (options && options.url) {
-      layerGroup = new LayerGroup({ id: options.id });
-      let layerCollection = new Collection();
-      const urls = options.url;
-      urls.forEach((url, index) => {
-        const option = { url: url, id: `${options.id}${index}` };
-        const layer = this.createTilelayer(option);
-        layerCollection.push(layer);
-      });
-      layerGroup.setLayers(layerCollection);
-    }
-    return layerGroup;
-  },
   addBaseLayer: function (layer, layerArr = this.baseMaps) {
-    const myLayer = this.findLayerById(layer, layerArr = this.baseMaps);
+    const id = layer.get("id");
+    const myLayer = this.findLayerById(id, (layerArr = this.baseMaps));
     if (!myLayer) {
-      this.map.setLayerGroup(layer);
+      this.map.addLayer(layer);
       layerArr.push(layer);
     } else {
       console.warn("已存在该ID图层！");
+    }
+  },
+  changeBaseMap: function (item) {
+    debugger
+    if (item && item.keys.length > 0) {
+      this.baseMaps.forEach(layer => {
+        layer.setVisible(false)
+      })
+      item.keys.forEach((key) => {
+        let layer = this.findLayerById(key, this.baseMaps);
+        if (!layer) {
+          const baseMapItem = baseMaps.filter((baseMap) => {
+            return baseMap.id === key;
+          })[0];
+          const baseLayer = this.createTilelayer(baseMapItem);
+          this.addBaseLayer(baseLayer);
+        } else {
+          layer.setVisible(true);
+        }
+      });
     }
   },
   removeLayer: function (layer) {
@@ -106,5 +111,17 @@ const initMap = {
     );
     this.operationLayers.splice(index, 1);
   },
+  // changeBaseMap: (item) => {
+  //   this.baseMaps.forEach(layer => {
+  //     layer.setVisible(false)
+  //   })
+  //   let layer = myMapApp.findLayerById(item.id, myMapApp.baseMaps)
+  //   if (!layer) {
+  //     layer = myMapApp.createTilelayer(item)
+  //     myMapApp.addLayer(layer, myMapApp.baseMaps)
+  //   } else {
+  //     layer.setVisible(true)
+  //   }
+  // }
 };
 export default initMap;

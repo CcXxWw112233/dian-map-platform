@@ -148,7 +148,7 @@ import { baseConfig } from "../globalSet/config";
 //   },
 // };
 
- const baseMaps = [
+const baseMaps = [
   {
     title: "高德电子图",
     id: "gd_vec_tile",
@@ -199,4 +199,21 @@ import { baseConfig } from "../globalSet/config";
     url: `http://t{0-7}.tianditu.gov.cn/DataServer?T=cva_w&x={x}&y={y}&l={z}&tk=${baseConfig.TIANDITU_APP_KEY}`,
   },
 ];
-export default baseMaps
+const baseMapKeys = [
+  { name: "高德电子图", keys: ["gd_vec_tile"] },
+  { name: "高德影像图", keys: ["gd_img_tile", "gd_roadLabel_tile"] },
+  { name: "谷歌遥感图", keys: ["gg_img_tile"] },
+  {
+    name: "天地图影像图",
+    keys: ["td_img_tile", "td_roadLabel_tile", "td_label_tile"],
+  },
+  {
+    name: "天地图矢量图",
+    keys: ["td_vec_tile", "td_roadLabel_tile", "td_label_tile"],
+  },
+  {
+    name: "天地图地形图",
+    keys: ["td_ter_tile", "td_roadLabel_tile", "td_label_tile"],
+  },
+];
+export { baseMaps, baseMapKeys };
