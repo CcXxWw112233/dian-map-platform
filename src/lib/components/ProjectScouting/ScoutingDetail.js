@@ -79,6 +79,7 @@ function Action() {
         "zip",
         "rar",
         "xmind",
+        'pdf'
       ].map((item) => item.toLocaleLowerCase()),
       annotate: [], // 批注
       plotting: ["feature"], // 标绘

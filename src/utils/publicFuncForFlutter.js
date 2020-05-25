@@ -1,9 +1,11 @@
-import { TransformCoordinate } from '../lib/utils/index'
+import initMap from './INITMAP'
 import { getMyPosition } from './getMyPosition'
+
+
 
 // 获取地图和视图
 const _getMap = (key) =>{
-  const initMap = require('./INITMAP').default ;
+  // const initMap = require('./INITMAP').default ;
   if(key)
   return initMap[key] || {};
   else {
@@ -57,7 +59,8 @@ let callFunctions = {
   },
   // 切换底图
   ChangeBaseMap: (key)=>{
-    
+    if(!key) return ;
+    initMap.changeBaseMap(key);
   }
 }
 
