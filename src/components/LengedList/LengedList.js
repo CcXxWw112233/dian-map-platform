@@ -1,6 +1,6 @@
 import React, { PureComponent } from "react";
 import styles from "./LengedList.less";
-import mapSource from "utils/mapSource";
+import {baseMapKeys, baseMaps } from "utils/mapSource";
 import mapApp from "utils/INITMAP";
 import { Collapse } from "antd";
 // import config from "./config";
@@ -69,7 +69,7 @@ export default class LengedList extends PureComponent {
     super(props);
     this.state = {
       width: 322,
-      selectedBaseMapId: mapSource[0].id,
+      selectedBaseMapIndex: 0,
     };
     this.lastConfig = [];
   }
@@ -91,23 +91,13 @@ export default class LengedList extends PureComponent {
       ></img>
     );
   };
-  changeBaseMap = (item) => {
-    const myMapApp = mapApp;
-    this.toggleBaseMapChangeStyle(item.id);
-    myMapApp.baseMaps.forEach((layer) => {
-      layer.setVisible(false);
-    });
-    let layer = myMapApp.findLayerById(item.id, myMapApp.baseMaps);
-    if (!layer) {
-      layer = myMapApp.createTilelayer(item);
-      myMapApp.addLayer(layer, myMapApp.baseMaps);
-    } else {
-      layer.setVisible(true);
-    }
-  };
-  toggleBaseMapChangeStyle = (id) => {
+  changeBaseMap = (item, index) => {
+    this.toggleBaseMapChangeStyle(index);
+    mapApp.changeBaseMap(item.key)
+  }
+  toggleBaseMapChangeStyle = (index) => {
     this.setState({
-      selectedBaseMapId: id || mapSource[0].id,
+      selectedBaseMapIndex: index || 0,
     });
   };
   render() {
@@ -130,18 +120,18 @@ export default class LengedList extends PureComponent {
           }}
         >
           <div className={styles.layerItems + ` ${globalStyle.autoScrollX}`}>
-            {mapSource.map((item) => {
+            {baseMapKeys.map((item, index) => {
               let active = "";
-              if (item.id === this.state.selectedBaseMapId) {
+              if (index === this.state.selectedBaseMapIndex) {
                 active = styles.active;
               }
               return (
                 <div
                   className={styles.layerItem + ` ${active}`}
-                  key={item.id}
-                  onClick={() => this.changeBaseMap(item)}
+                  key={item.key}
+                  onClick={() => this.changeBaseMap(item, index)}
                 >
-                  <p className={styles.layerName}>{item.title}</p>
+                  <p className={styles.layerName}>{item.name}</p>
                 </div>
               );
             })}

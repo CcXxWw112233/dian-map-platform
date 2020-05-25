@@ -42,7 +42,7 @@ export const pointDrawing = {
   addEventLinstener() {
     const me = this
     this.linsteners["drawstart"] = this.drawing.on('drawstart', e => {
-      debugger
+      // debugger
       let point = e.feature ;
       let coordinate = point.getGeometry().getCoordinates();
       const geometry = point.clone().getGeometry()

@@ -24,19 +24,32 @@ export default class BasemapGallery extends PureComponent {
     }
     this.setState({ display: myDisplay });
   };
+  // changeBaseMap = (item) => {
+  //   const myMapApp = mapApp
+  //   myMapApp.baseMaps.forEach(layer => {
+  //     layer.setVisible(false)
+  //   })
+  //   let layer = myMapApp.findLayerById(item.id, myMapApp.baseMaps)
+  //   if (!layer) {
+  //     layer = myMapApp.createTilelayer(item)
+  //     myMapApp.addLayer(layer, myMapApp.baseMaps)
+  //   } else {
+  //     layer.setVisible(true)
+  //   }
+  // };
+
   changeBaseMap = (item) => {
+    // debugger
     const myMapApp = mapApp
     myMapApp.baseMaps.forEach(layer => {
       layer.setVisible(false)
     })
     let layer = myMapApp.findLayerById(item.id, myMapApp.baseMaps)
     if (!layer) {
-      layer = myMapApp.createTilelayer(item)
-      myMapApp.addLayer(layer, myMapApp.baseMaps)
-    } else {
-      layer.setVisible(true)
+      layer = myMapApp.createBaseLayer(item)
+      myMapApp.addBaseLayer(layer, myMapApp.baseMaps)
     }
-  };
+  }
 
   render() {
     const { display } = this.state;

@@ -8,8 +8,7 @@ import {
 import TileLayer from "ol/layer/Tile";
 import XYZ from "ol/source/XYZ";
 
-import LayerGroup from "ol/layer/Group";
-import Collection from "ol/Collection";
+import { baseMaps, baseMapKeys } from "utils/mapSource";
 
 const initMap = {
   status: null,
@@ -66,37 +65,50 @@ const initMap = {
     }
     return layer;
   },
-  createTilelayer: function (options) {
+  createTilelayer: function (options, zIndex) {
     return new TileLayer({
       id: options.id,
+      zIndex: zIndex,
       source: new XYZ({
         crossOrigin: "anonymous",
         url: options.url,
       }),
     });
   },
-  createBaseLayer: function (options) {
-    let layerGroup = null;
-    if (options && options.url) {
-      layerGroup = new LayerGroup({ id: options.id });
-      let layerCollection = new Collection();
-      const urls = options.url;
-      urls.forEach((url, index) => {
-        const option = { url: url, id: `${options.id}${index}` };
-        const layer = this.createTilelayer(option);
-        layerCollection.push(layer);
-      });
-      layerGroup.setLayers(layerCollection);
-    }
-    return layerGroup;
-  },
   addBaseLayer: function (layer, layerArr = this.baseMaps) {
-    const myLayer = this.findLayerById(layer, layerArr = this.baseMaps);
+    const id = layer.get("id");
+    const myLayer = this.findLayerById(id, (layerArr = this.baseMaps));
     if (!myLayer) {
-      this.map.setLayerGroup(layer);
+      this.map.addLayer(layer);
       layerArr.push(layer);
     } else {
       console.warn("已存在该ID图层！");
+    }
+  },
+  changeBaseMap: function (key) {
+    let baseMapKey = null
+    if (baseMapKeys && baseMapKeys.length) {
+      baseMapKey = baseMapKeys.filter(item => {
+        return item.key === key
+      })[0]
+    }
+    if (baseMapKey && baseMapKey.keys.length > 0) {
+      this.baseMaps.forEach(layer => {
+        layer.setVisible(false)
+      })
+      baseMapKey.keys.forEach((key, index) => {
+        let layer = this.findLayerById(key, this.baseMaps);
+        if (!layer) {
+          let zIndex = index
+          const baseMapItem = baseMaps.filter((baseMap) => {
+            return baseMap.id === key;
+          })[0];
+          const baseLayer = this.createTilelayer(baseMapItem, zIndex);
+          this.addBaseLayer(baseLayer);
+        } else {
+          layer.setVisible(true);
+        }
+      });
     }
   },
   removeLayer: function (layer) {
@@ -106,5 +118,17 @@ const initMap = {
     );
     this.operationLayers.splice(index, 1);
   },
+  // changeBaseMap: (item) => {
+  //   this.baseMaps.forEach(layer => {
+  //     layer.setVisible(false)
+  //   })
+  //   let layer = myMapApp.findLayerById(item.id, myMapApp.baseMaps)
+  //   if (!layer) {
+  //     layer = myMapApp.createTilelayer(item)
+  //     myMapApp.addLayer(layer, myMapApp.baseMaps)
+  //   } else {
+  //     layer.setVisible(true)
+  //   }
+  // }
 };
 export default initMap;
