@@ -65,10 +65,10 @@ const initMap = {
     }
     return layer;
   },
-  createTilelayer: function (options) {
+  createTilelayer: function (options, zIndex) {
     return new TileLayer({
       id: options.id,
-      // zIndex: index,
+      zIndex: zIndex,
       source: new XYZ({
         crossOrigin: "anonymous",
         url: options.url,
@@ -96,13 +96,14 @@ const initMap = {
       this.baseMaps.forEach(layer => {
         layer.setVisible(false)
       })
-      baseMapKey.keys.forEach((key) => {
+      baseMapKey.keys.forEach((key, index) => {
         let layer = this.findLayerById(key, this.baseMaps);
         if (!layer) {
-          const baseMapItem = baseMaps.filter((baseMap, index) => {
+          let zIndex = index
+          const baseMapItem = baseMaps.filter((baseMap) => {
             return baseMap.id === key;
           })[0];
-          const baseLayer = this.createTilelayer(baseMapItem);
+          const baseLayer = this.createTilelayer(baseMapItem, zIndex);
           this.addBaseLayer(baseLayer);
         } else {
           layer.setVisible(true);
