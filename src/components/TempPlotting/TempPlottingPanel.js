@@ -139,7 +139,7 @@ export default class TempPlottingPanel extends React.Component {
         };
       }
       if (attrs.featureType.indexOf("rgb") > -1) {
-        style = { ...style, backgroundColor: attrs.featureType };
+        style = { ...style, backgroundColor: attrs.featureType, border: `1px solid ${attrs.strokeColor}` };
       }
       if (attrs.geom.indexOf("POINT") > -1) {
         style = { ...style, borderRadius: 8 };
@@ -170,6 +170,7 @@ export default class TempPlottingPanel extends React.Component {
   // 转存到项目
   saveToProject = () => {
     const me = this;
+    delete window.featureOperator
     const { plottingLayer } = draw;
     let { dispatch, featureOperatorList } = this.props;
     let arr = this.getSelectedData();
@@ -205,12 +206,17 @@ export default class TempPlottingPanel extends React.Component {
 
   render() {
     const { panelVisible, featureOperatorList } = this.props;
-    let style = panelVisible ? { display: "" } : { display: "none" };
-    if (featureOperatorList.length === 0) {
-      style = { display: "none" };
+    let displayPanel = false;
+    if (panelVisible) {
+      displayPanel = true;
+    } else {
+      displayPanel = false;
     }
-    return (
-      <div className={styles.wrap} style={style}>
+    if (!featureOperatorList.length) {
+      displayPanel = false;
+    }
+    return displayPanel ? (
+      <div className={styles.wrap}>
         <div className={styles.header}>
           <span>标绘记录</span>
           <i
@@ -268,6 +274,6 @@ export default class TempPlottingPanel extends React.Component {
           </Button>
         </div>
       </div>
-    );
+    ) : null;
   }
 }

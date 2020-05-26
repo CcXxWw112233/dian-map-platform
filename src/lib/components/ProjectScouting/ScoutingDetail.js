@@ -20,7 +20,7 @@ import {
 import {
   CollectionOverlay,
   settingsOverlay,
-  areaDetailOverlay
+  areaDetailOverlay,
 } from "../../../components/PublicOverlays";
 import { Modify } from "ol/interaction";
 import { always } from "ol/events/condition";
@@ -62,7 +62,7 @@ function Action() {
     if (!suffix) return "unknow";
     const itemKeyVals = {
       paper: [], // 图纸
-      interview: ["aac", "mp3",'语音'], // 访谈
+      interview: ["aac", "mp3", "语音"], // 访谈
       pic: ["jpg", "PNG", "gif", "jpeg"].map((item) =>
         item.toLocaleLowerCase()
       ),
@@ -261,7 +261,7 @@ function Action() {
       }
       let feature = addFeature(content.geoType, {
         coordinates: content.coordinates,
-        ...content
+        ...content,
       });
 
       // code by liulaian
@@ -320,9 +320,6 @@ function Action() {
       feature.setStyle(myStyle);
       this.Source.addFeature(feature);
       this.features.push(feature);
-      // let plottingLayer = draw.getPlottingLayer()
-      // let featureOperator = plottingLayer._addFeature(feature)
-      // featureOperator.setName(content.name)
     });
     let newConfig = [];
     if (!lengedConfig) {
@@ -485,14 +482,15 @@ function Action() {
     this.polygonOverlay && this.polygonOverlay.setPosition(null);
     InitMap.map.removeOverlay(this.polygonOverlay);
     InitMap.map.removeInteraction(this.areaSelect);
-  }
+  };
   // 添加select选择器
-  this.addAreaSelect = ()=>{
+  this.addAreaSelect = () => {
     this.removeAreaSelect();
-    this.areaSelect = setSelectInteraction({layers:[this.Layer],style:
-      createStyle('Polygon',{
-        fillColor:'rgba(176,200,150,0.8)'
-      })
+    this.areaSelect = setSelectInteraction({
+      layers: [this.Layer],
+      // style: createStyle("Polygon", {
+      //   fillColor: "rgba(176,200,150,0.8)",
+      // }),
     });
     InitMap.map.addInteraction(this.areaSelect);
 
@@ -508,23 +506,24 @@ function Action() {
         }
       }
     })
-  }
-  
+  };
+
   // 点击的时候添加overlay
   this.addSelectOverlay = (feature) => {
     let type = feature.getGeometry().getType();
     let coor = feature.getGeometry().getExtent();
-    let point = getPoint(coor,'topRight');
-    if(type === 'Polygon'){
-      let name = feature.get('name');
-      let remark = feature.get('remark');
-      let style = feature.get('style');
+    let point = getPoint(coor, "topRight");
+    if (type === "Polygon") {
+      let name = feature.get("name");
+      let remark = feature.get("remark");
+      let style = feature.get("style");
       let fill = style && style.split(";")[0];
       let ele = new areaDetailOverlay({
-        name, remark,
-        placement:'rightTop',
-        angleColor:'#fff',
-        titleColor: fill
+        name,
+        remark,
+        placement: "rightTop",
+        angleColor: "#fff",
+        titleColor: fill,
       });
       // 缩放
       Fit(InitMap.view, coor, {
@@ -533,16 +532,16 @@ function Action() {
 
       this.polygonOverlay = createOverlay(ele.element);
       ele.on = {
-        close:()=>{
-          this.areaSelect.dispatchEvent({type:'select',selected:[]})
+        close: () => {
+          this.areaSelect.dispatchEvent({ type: "select", selected: [] });
 
           this.addAreaSelect();
-        }
-      }
+        },
+      };
       InitMap.map.addOverlay(this.polygonOverlay);
       this.polygonOverlay.setPosition(point);
     }
-  }
+  };
 
   // 编辑功能
   this.setSelect = () => {

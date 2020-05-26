@@ -1,14 +1,15 @@
 import React from "react";
-import { Button, Tooltip } from "antd";
+import { Button, Badge } from "antd";
 import styles from "./TempPlottingIcon.less";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import { connect } from "dva";
 @connect(
   ({
-    tempPlotting: { iconVisible },
+    tempPlotting: { iconVisible, panelVisible },
     featureOperatorList: { featureOperatorList },
   }) => ({
     iconVisible,
+    panelVisible,
     featureOperatorList,
   })
 )
@@ -27,21 +28,19 @@ export default class TempPlottingIcon extends React.Component {
     });
   };
   render() {
-    const { iconVisible,featureOperatorList } = this.props;
-    let style = (featureOperatorList.length > 0 || iconVisible) ? { display: "" } : { display: "none" };
-    if (featureOperatorList.length > 0) {
-      style = { display: "" }
+    const { panelVisible, featureOperatorList } = this.props;
+    let newIconVisible = false
+    if (panelVisible) {
+      newIconVisible = false
+    } else if (!panelVisible && featureOperatorList.length){
+      newIconVisible = true
     }
-    return (
-      <Button
-        shape="circle"
-        className={styles.wrap}
-        onClick={this.handleClick}
-        style={{ ...style }}
-        title="标绘记录"
-      >
-        <i className={globalStyle.global_icon}>&#xe7b0;</i>
-      </Button>
-    );
+    return newIconVisible ? (
+      <Badge count={featureOperatorList.length} className={styles.wrap}>
+        <Button shape="circle" onClick={this.handleClick} title="标绘记录">
+          <i className={globalStyle.global_icon}>&#xe7b0;</i>
+        </Button>
+      </Badge>
+    ) : null;
   }
 }

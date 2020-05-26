@@ -289,8 +289,6 @@ export const ImageStatic = function(url,extent,data){
 }
 
 export const setSelectInteraction = function(data){
-  let select = new Select({
-    ...data
-  })
+  let select = new Select()
   return select;
 }

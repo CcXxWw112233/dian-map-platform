@@ -4,6 +4,9 @@ import { Modal, Row, Col, Input, Select, message } from "antd";
 import styles from "./Modal.less";
 import { draw } from "../../utils/draw";
 import { createStyle } from "@/lib/utils/index";
+import { UpOutlined } from "@ant-design/icons";
+import { SketchPicker } from "react-color";
+import { Button } from "antd";
 const { Option, OptGroup } = Select;
 const { TextArea } = Input;
 
@@ -37,15 +40,62 @@ const { TextArea } = Input;
 export default class ProjectModal extends React.Component {
   constructor(props) {
     super(props);
+    this.setDefaultState();
     this.state = {
       isEdit: false,
       featureName: "", // 名称
       selectName: "",
       featureType: "rgba(168,9,10,0.7)", // 类型
       remarks: "", // 备注
+      showCustom: this.showCustom,
+      displayFillColorPicker: this.displayFillColorPicker,
+      displayStrokeColorPicker: this.displayStrokeColorPicker,
+      fillColor: this.fillColor,
+      fillColorStyle: this.fillColorStyle,
+      strokeColor: this.strokeColor,
+      strokeColorStyle: this.strokeColorStyle,
+
+      isSureFillColorStyle: this.isSureFillColorStyle,
+      isSureStrokeColorStyle: this.isSureStrokeColorStyle,
     };
-    this.isOk = false;
   }
+
+  setDefaultState = () => {
+    this.showCustom = false;
+    this.displayFillColorPicker = false;
+    this.displayStrokeColorPicker = false;
+    this.isOk = false;
+    this.fillColor = {
+      r: "168",
+      g: "9",
+      b: "10",
+      a: "0.7",
+    };
+    this.fillColorStyle = "rgba(168,9,10,0.7)";
+    this.strokeColor = {
+      r: "168",
+      g: "9",
+      b: "10",
+      a: "1",
+    };
+    this.strokeColorStyle = "rgba(168,9,10,1)";
+    this.isSureFillColorStyle = false;
+    this.isSureStrokeColorStyle = false;
+  };
+
+  updateCustomState = () => {
+    this.setState({
+      showCustom: this.showCustom,
+      displayFillColorPicker: this.displayFillColorPicker,
+      displayStrokeColorPicker: this.displayStrokeColorPicker,
+      fillColor: this.fillColor,
+      fillColorStyle: this.fillColorStyle,
+      strokeColor: this.strokeColor,
+      strokeColorStyle: this.strokeColorStyle,
+      isSureFillColorStyle: this.isSureFillColorStyle,
+      isSureStrokeColorStyle: this.isSureStrokeColorStyle,
+    });
+  };
 
   checkStateChange = (state, attr) => {
     if (state !== attr) {
@@ -62,6 +112,7 @@ export default class ProjectModal extends React.Component {
   };
 
   delCallBack = () => {
+    delete window.featureOperator;
     const { plottingLayer } = draw;
     const { dispatch } = this.props;
     let featureOperatorList = this.props.featureOperatorList;
@@ -85,18 +136,25 @@ export default class ProjectModal extends React.Component {
     if (state) {
       if (this.props.isEdit) {
         // message.success("保存成功");
-        const r = Math.ceil(Math.random() * 255)
-        const g = Math.ceil(Math.random() * 255)
-        const b = Math.ceil(Math.random() * 255)
+        // const r = Math.ceil(Math.random() * 255);
+        // const g = Math.ceil(Math.random() * 255);
+        // const b = Math.ceil(Math.random() * 255);
         let plottingType = this.props.type;
         let tempType = this.toChangedataType(plottingType);
-        const defaultOptions = {
+        let defaultOptions = {
           radius: 8,
           // fillColor: "rgba(168,9,10,0.7)",
-          fillColor: `rgba(${r},${g},${b},0.7)`,
-          strokeColor: "rgba(168,9,10,1)",
+          fillColor: this.fillColorStyle,
+          strokeColor: this.strokeColorStyle,
+          // strokeColor: "rgba(168,9,10,1)",
           text: this.props.featureName,
         };
+        if (this.state.isSureFillColorStyle) {
+          defaultOptions.fillColor = this.state.fillColorStyle;
+        }
+        if (this.state.isSureStrokeColorStyle) {
+          defaultOptions.strokeColor = this.state.strokeColorStyle;
+        }
         const commonStyleOption = {
           textFillColor: "rgba(255,0,0,1)",
           textStrokeColor: "#fff",
@@ -148,6 +206,9 @@ export default class ProjectModal extends React.Component {
               text: featureNameState,
             },
           };
+          if (this.state.isSureStrokeColorStyle) {
+            options.strokeColor = this.state.strokeColorStyle;
+          }
         }
         if (
           tempType === "Polygon" ||
@@ -185,10 +246,17 @@ export default class ProjectModal extends React.Component {
             };
           } else {
             let strokeColor = featureType.replace("0.7", 1);
+            if (this.state.isSureStrokeColorStyle) {
+              strokeColor = this.state.strokeColorStyle;
+            }
+            let fillColor = featureType;
+            if (this.state.isSureFillColorStyle) {
+              fillColor = this.state.fillColorStyle;
+            }
             options = {
               ...commonStyleOption,
               ...{
-                fillColor: featureType,
+                fillColor: fillColor,
                 strokeColor: strokeColor,
                 text: featureNameState,
               },
@@ -264,6 +332,9 @@ export default class ProjectModal extends React.Component {
       this.props.featureType || this.state.featureType,
       featureOperator.attrs.featureType
     );
+    if (this.state.isSureFillColorStyle) {
+      featureTypeState = this.state.fillColorStyle
+    }
     let featureNameState = this.checkStateChange(
       this.props.featureName,
       featureOperator.attrs.featureName
@@ -282,6 +353,7 @@ export default class ProjectModal extends React.Component {
           geom: `POINT(${newGeom})`,
           icon_url: featureTypeState,
           featureType: featureTypeState,
+          strokeColor: this.state.isSureStrokeColorStyle ? this.state.strokeColorStyle : "",
           main_id: "",
           name: featureNameState,
           remark: remarksState,
@@ -307,6 +379,7 @@ export default class ProjectModal extends React.Component {
       case "CIRCLE":
       case "FREEHANDPOLYGON":
         let style = null;
+        let strokeColor
         if (featureTypeState.indexOf("/") > -1) {
           style = `${featureTypeState};icon`;
         } else {
@@ -314,17 +387,18 @@ export default class ProjectModal extends React.Component {
             .getStyle()
             .getFill()
             .getColor();
-          const strokeColor = featureOperator.feature
+          strokeColor = featureOperator.feature
             .getStyle()
             .getStroke()
             .getColor();
           style = `${fillColor};${strokeColor}`;
-          featureTypeState = fillColor
+          featureTypeState = fillColor;
         }
         attr = {
           geom: `POLYGON((${newGeom}))`,
           style: style,
           featureType: featureTypeState,
+          strokeColor: strokeColor,
           main_id: "",
           name: featureNameState,
           remark: remarksState,
@@ -369,6 +443,8 @@ export default class ProjectModal extends React.Component {
   handleCancelClick = () => {
     this.hideModal();
   };
+
+  // 关闭模态框
   hideModal = () => {
     const { dispatch } = this.props;
     dispatch({
@@ -377,6 +453,7 @@ export default class ProjectModal extends React.Component {
         visible: false,
       },
     });
+    this.updateCustomState();
     if (!this.isOk && !this.props.featureName) {
       this.delCallBack();
     } else {
@@ -394,18 +471,24 @@ export default class ProjectModal extends React.Component {
   };
   handleTypeSelectChange = (val) => {
     const { responseData } = this.props;
-    const arr = val.split(",");
-    const index0 = Number(arr[0]);
-    const index1 = Number(arr[1]);
-    const value = responseData.data[index0].items[index1];
-    const { dispatch } = this.props;
-    dispatch({
-      type: "modal/updateData",
-      payload: {
-        selectName: value.name,
-        featureType: value.value1,
-      },
-    });
+    if (val === "custom") {
+      this.setState({
+        showCustom: true,
+      });
+    } else {
+      const arr = val.split(",");
+      const index0 = Number(arr[0]);
+      const index1 = Number(arr[1]);
+      const value = responseData.data[index0 - 1].items[index1];
+      const { dispatch } = this.props;
+      dispatch({
+        type: "modal/updateData",
+        payload: {
+          selectName: value.name,
+          featureType: value.value1,
+        },
+      });
+    }
   };
   handleRemarksInputChange = (value) => {
     const { dispatch } = this.props;
@@ -422,6 +505,54 @@ export default class ProjectModal extends React.Component {
         });
       }
     );
+  };
+  handleFillColorPickerClick = () => {
+    this.setState({
+      displayFillColorPicker: !this.state.displayFillColorPicker,
+      displayStrokeColorPicker: false,
+    });
+  };
+  handleStrokeColorPickerClick = () => {
+    this.setState({
+      displayStrokeColorPicker: !this.state.displayStrokeColorPicker,
+      displayFillColorPicker: false,
+    });
+  };
+  handleFillColorChange = (color) => {
+    this.setState({
+      fillColor: color.rgb,
+      fillColorStyle: `rgba(${color.rgb.r},${color.rgb.g},${color.rgb.b},0.7)`,
+    });
+  };
+  handleStrokeColorChange = (color) => {
+    this.setState({
+      strokeColor: color.rgb,
+      strokeColorStyle: `rgba(${color.rgb.r},${color.rgb.g},${color.rgb.b},${color.rgb.a})`,
+    });
+  };
+  clearStrokeColor = () => {
+    this.setState({
+      fillColor: null,
+      fillColorStyle: null,
+    });
+  };
+  clearStrokeColor = () => {
+    this.setState({
+      strokeColor: null,
+      fillColorStyle: null,
+    });
+  };
+  updateSureFillColor = () => {
+    this.setState({
+      isSureFillColorStyle: true,
+      displayFillColorPicker: false,
+    });
+  };
+  updateSureStrokeColor = () => {
+    this.setState({
+      isSureStrokeColorStyle: true,
+      displayStrokeColorPicker: false,
+    });
   };
   render() {
     const { visible, responseData, operator } = this.props;
@@ -443,11 +574,15 @@ export default class ProjectModal extends React.Component {
     if (responseData && responseData.data) {
       dataArray = responseData.data;
     }
+    if (dataArray.length > 0) {
+      const customType = { type: "自定义类型", value: "custom" };
+      dataArray = [customType, ...dataArray];
+    }
     return (
       <Modal
         destroyOnClose
         className={styles.wrap}
-        width={300}
+        width={310}
         title={title}
         visible={visible}
         onOk={this.handleOKClick}
@@ -479,21 +614,106 @@ export default class ProjectModal extends React.Component {
               placeholder={selectDefaultVal}
             >
               {dataArray.map((data, index0) => {
-                return (
-                  <OptGroup label={data.type} key={data.type}>
-                    {data.items.map((item, index1) => {
-                      return (
-                        <Option value={`${index0},${index1}`} key={item.id}>
-                          {item.name}
-                        </Option>
-                      );
-                    })}
-                  </OptGroup>
-                );
+                if (!data.items) {
+                  return (
+                    <Option value={data.value} key={data.value}>
+                      {data.type}
+                    </Option>
+                  );
+                } else {
+                  return (
+                    <OptGroup label={data.type} key={data.type}>
+                      {data.items.map((item, index1) => {
+                        return (
+                          <Option value={`${index0},${index1}`} key={item.id}>
+                            {item.name}
+                          </Option>
+                        );
+                      })}
+                    </OptGroup>
+                  );
+                }
               })}
             </Select>
           </Col>
         </Row>
+        {this.state.showCustom ? (
+          <Row className={styles.row}>
+            <Col className={styles.firstCol}></Col>
+            <Col className={styles.secondCol}>
+              <div className={styles.custom}>
+                <span>边框颜色</span>
+                <div className={styles.colorpickerBtnBorder}>
+                  <div
+                    className={styles.colorpickerBtn}
+                    style={{ backgroundColor: this.state.strokeColorStyle }}
+                    onClick={this.handleStrokeColorPickerClick}
+                  >
+                    <UpOutlined />
+                  </div>
+                </div>
+                <span>填充颜色</span>
+                <div className={styles.colorpickerBtnBorder}>
+                  <div
+                    className={styles.colorpickerBtn}
+                    style={{ backgroundColor: this.state.fillColorStyle }}
+                    onClick={this.handleFillColorPickerClick}
+                  >
+                    <UpOutlined />
+                  </div>
+                </div>
+              </div>
+            </Col>
+          </Row>
+        ) : null}
+        {this.state.displayFillColorPicker ? (
+          <div className={styles.customPanel}>
+            <SketchPicker
+              className={styles.sketch}
+              color={this.state.fillColor}
+              onChange={this.handleFillColorChange}
+            />
+            <div className={styles.customBtn}>
+              {/* <Button
+                className={styles.customBtn}
+                onClick={this.clearFillColor}
+              >
+                清空
+              </Button> */}
+              <Button
+                className={styles.customBtn}
+                type="primary"
+                onClick={this.updateSureFillColor}
+              >
+                确定
+              </Button>
+            </div>
+          </div>
+        ) : null}
+        {this.state.displayStrokeColorPicker ? (
+          <div className={styles.customPanel}>
+            <SketchPicker
+              className={styles.sketch}
+              color={this.state.strokeColor}
+              onChange={this.handleStrokeColorChange}
+            />
+            <div className={styles.customBtn}>
+              {/* <Button
+                className={styles.customBtn}
+                onClick={this.clearStrokeColor}
+              >
+                清空
+              </Button> */}
+              <Button
+                className={styles.customBtn}
+                type="primary"
+                onClick={this.updateSureStrokeColor}
+              >
+                确定
+              </Button>
+            </div>
+          </div>
+        ) : null}
         <Row className={styles.row}>
           <Col className={styles.firstCol}>
             <label>备注</label>
