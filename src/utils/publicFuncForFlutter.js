@@ -196,8 +196,8 @@ let callFunctions = {
     if(!type) return new Error('缺少type');
     draw.create(type);
     // console.log(draw)
-    draw.onDeactiveEventListener(()=>{
-      
+    draw.onActiveEventListener((e)=>{
+      console.log(e)
     })
   }
 }
