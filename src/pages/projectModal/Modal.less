@@ -11,4 +11,49 @@
   .secondCol {
     width: 82%;
   }
+  .custom {
+    display: flex;
+    .colorpickerBtnBorder {
+      width: 38px;
+      height: 38px;
+      margin: 0 5px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 5px;
+      .colorpickerBtn {
+        width: 30px;
+        height: 30px;
+        border-radius: 4px;
+        margin: 3px auto;
+        text-align: center;
+        display: table;
+        span {
+          display: table-cell;
+          vertical-align: middle;
+          color: rgba(255, 255, 255, 1);
+        }
+      }
+    }
+  }
+  .customPanel {
+    position: absolute;
+    z-index: 99;
+    background: rgba(255, 255, 255, 1);
+    border-radius: 4px;
+    box-shadow: rgba(0, 0, 0, 0.15) 0px 0px 0px 1px,
+      rgba(0, 0, 0, 0.15) 0px 8px 16px;
+    .sketch {
+      background: 0 !important;
+      border-radius: 0 !important;
+      -webkit-box-shadow: unset !important;
+      box-shadow: unset !important;
+    }
+    .customBtn {
+      margin-bottom: 5px;
+      display: flex;
+      justify-content: flex-end;
+      button {
+        margin-right: 10px;
+      }
+    }
+  }
 }

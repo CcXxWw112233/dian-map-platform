@@ -210,12 +210,12 @@ const baseMapKeys = [
   {
     name: "天地图矢量图",
     key: "td_vec",
-    keys: [ "td_vec_tile", "td_roadLabel_tile", "td_label_tile" ],
+    keys: ["td_vec_tile", "td_roadLabel_tile", "td_label_tile" ],
   },
   {
     name: "天地图影像图",
     key: "td_img",
-    keys: [ "td_img_tile", "td_roadLabel_tile", "td_label_tile",],
+    keys: ["td_img_tile", "td_roadLabel_tile", "td_label_tile",],
   },
   {
     name: "天地图地形图",

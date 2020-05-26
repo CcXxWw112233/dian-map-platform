@@ -13,6 +13,7 @@ import ScoutingDetails from "../pages/ProjectScouting/ScoutingDetails";
 import ProjectModal from "../pages/projectModal/Modal";
 import ScoutAction from "../lib/components/ProjectScouting/ScoutingList";
 import ScoutDetail from "../lib/components/ProjectScouting/ScoutingDetail";
+import { SketchPicker } from "react-color";
 import Event from "../lib/utils/event";
 // import { PublicData, ProjectScouting } from 'pages/index'
 import { Tabs, Spin, message } from "antd";
@@ -202,6 +203,7 @@ class IndexPage extends React.Component {
         {/* <BasemapGallery></BasemapGallery> */}
         {/* 工具栏 */}
         <ProjectModal></ProjectModal>
+        {/* <SketchPicker></SketchPicker> */}
         <ToolBar></ToolBar>
         <BottomToolBar></BottomToolBar>
         <TempPlottingIcon></TempPlottingIcon>
