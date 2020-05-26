@@ -35,11 +35,21 @@ instance.interceptors.response.use(config => {
   
   return config ;
 },err => {
-  if(err && err.response && err.response.status == BASIC.SERVER_ERROR){
-    clearTimeout(responseTimer);
-    responseTimer = setTimeout(()=>{
-      message.error('系统繁忙,请稍后再试')
-    },1000)
+  if(err && err.response ){
+    if(err.response.status == BASIC.SERVER_ERROR){
+      clearTimeout(responseTimer);
+      responseTimer = setTimeout(()=>{
+        message.error('系统繁忙,请稍后再试')
+      },1000)
+    }
+
+    if(err.response.status == BASIC.TOKEN_AUTH_ERROR){
+      clearTimeout(responseTimer);
+      responseTimer = setTimeout(()=>{
+        message.error('权限不足，请重新登录');
+      }, 1000)
+    }
+    
     return err.response;
   }
   return err && err.response;

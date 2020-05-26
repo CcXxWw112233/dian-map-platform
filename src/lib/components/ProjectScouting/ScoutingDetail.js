@@ -466,7 +466,7 @@ function Action() {
   this.createImg = (url, extent, data = {}) => {
     this.staticimg && InitMap.map.removeLayer(this.staticimg);
 
-    this.staticimg = ImageStatic(url, extent, data);
+    this.staticimg = ImageStatic(url, extent, {className:'staticImg',...data});
     InitMap.map.addLayer(this.staticimg);
   };
 
@@ -562,21 +562,28 @@ function Action() {
 
   // 添加规划图范围
   this.addPlanPictureDraw = (url, data) => {
+    // 删除已有的select事件，防止冲突
+    this.removeAreaSelect();
     return new Promise((resolve, reject) => {
       this.drawBox = drawBox(this.Source, (data = {}));
 
       this.drawBox.on("drawend", (e) => {
         this.boxFeature = e.feature;
         let extent = this.boxFeature.getGeometry().getExtent();
+        // 设置功能项的位置
         let ele = new settingsOverlay();
         let drawImgOpacity = ele.opacityValue;
         let overlay = createOverlay(ele.element);
+        // 获取范围的右上角
         let center = getPoint(
           this.boxFeature.getGeometry().getExtent(),
           "topRight"
         );
+        // 添加设置项
         InitMap.map.addOverlay(overlay);
+        // 显示设置项
         overlay.setPosition(center);
+        // 删除绘制功能
         InitMap.map.removeInteraction(this.drawBox);
         this.createImg(url, extent, { opacity: drawImgOpacity });
 
@@ -607,6 +614,7 @@ function Action() {
             overlay.setPosition(null);
             InitMap.map.removeOverlay(overlay);
             removeSelect();
+            this.addAreaSelect();
           },
           cancel: () => {
             // console.log('取消规划图')
@@ -614,6 +622,7 @@ function Action() {
             overlay.setPosition(null);
             InitMap.map.removeOverlay(overlay);
             removeSelect();
+            this.addAreaSelect();
           },
         };
       });
