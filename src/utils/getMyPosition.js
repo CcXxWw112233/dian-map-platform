@@ -53,18 +53,20 @@ export const getMyPosition = {
     }
 
     if(String(val) === '[object Object]'){
-      let { position } = val;
-      let { lng,lat } = position;
-      let coordinate = transform([lng,lat], 'EPSG:4326', 'EPSG:3857');
+      // let { position } = val;
+      let { lng,lat,latitude , longitude} = val;
+      let coordinate = transform([+(lat|| latitude),+(lng|| longitude)], 'EPSG:4326', 'EPSG:3857');
+      console.log(coordinate)
       return coordinate ;
     }
   },
   // 渲染icon和圆
-  drawPosition: function() {
-    this.getPosition().then(obj => {
+  drawPosition: function(obj) {
+    // this.getPosition().then(obj => {
       // 获取转换的地址
       let coordinate = this.transformPosition(obj);
-      let radius = obj.accuracy || 1050;
+      // 误差
+      let radius = obj.accuracy*10 || 1050;
       // icon 绘制
       let iconFeature = new Feature({
         geometry: new Point(coordinate),
@@ -74,6 +76,7 @@ export const getMyPosition = {
       // 点
       var iconStyle = new Style({
         image: new Icon({
+          radius:8,
           src: iconpoint
         })
       });
@@ -101,13 +104,13 @@ export const getMyPosition = {
         source: source
       })
       // 添加图层
-      layer.setZIndex(10);
+      layer.setZIndex(15);
       MAINMAP.map.addLayer(layer);
 
 
       // 视图移动
-      this.setViewCenter(coordinate,200)
-    })
+      this.setViewCenter(coordinate,1000)
+    // })
   },
 
   // icon和圆圈变化位置

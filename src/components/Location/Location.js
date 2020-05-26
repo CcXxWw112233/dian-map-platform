@@ -19,7 +19,7 @@ const Location = () => {
   };
   return (
     <Tooltip title="定位" className={style.wrapper}>
-      <Button shape="circle" onClick={getMyCenter}>
+      <Button shape="circle" >
         <i className={globalStyle.global_icon}>&#xe755;</i>
       </Button>
     </Tooltip>

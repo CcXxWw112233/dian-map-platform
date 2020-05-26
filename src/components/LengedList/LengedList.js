@@ -93,6 +93,7 @@ export default class LengedList extends PureComponent {
   };
   changeBaseMap = (item, index) => {
     this.toggleBaseMapChangeStyle(index);
+    console.log(mapApp)
     mapApp.changeBaseMap(item.key)
   }
   toggleBaseMapChangeStyle = (index) => {

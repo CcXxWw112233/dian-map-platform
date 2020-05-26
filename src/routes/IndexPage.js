@@ -138,7 +138,7 @@ class IndexPage extends React.Component {
   MapOnload = ({ map, view }) => {
     this.map = map;
     this.view = view;
-    this.setCenter(map, view);
+    // this.setCenter(map, view);
   };
 
   // 通过高德地图获得自己的定位
@@ -155,11 +155,11 @@ class IndexPage extends React.Component {
 
   setCenter = () => {
     // 渲染icon等;
-    getMyPosition.drawPosition();
+    // getMyPosition.drawPosition();
     // 启动监听--移动端才启用监听
     if (AMap && AMap.Browser.mobile) {
-      alert("当前是手机端页面，将启动移动位置更新");
-      this.addWatchPosition();
+      // alert("当前是手机端页面，将启动移动位置更新");
+      // this.addWatchPosition();
     }
   };
 
@@ -216,6 +216,7 @@ class IndexPage extends React.Component {
               className={`${animateCss.animated} ${animateCss.slideInLeft}`}
               style={{ animationDuration: "0.3s", height: "100%" }}
             >
+
               <Main>
                 <div style={{ flex: "0" }}>
                   <Search onInputChange={this.handleInput}></Search>
