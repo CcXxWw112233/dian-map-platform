@@ -1,6 +1,7 @@
 {
   "extends": "umi",
   "globals":{
-    "AMap":true
+    "AMap":true,
+    "getNearbyAddressInfo":true
   }
 }
