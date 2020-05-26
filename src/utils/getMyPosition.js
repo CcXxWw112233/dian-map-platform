@@ -16,6 +16,8 @@ export const getMyPosition = {
   // 视图移动定时器
   viewTimer : null ,
   geolacation : null,
+  source:null,
+  layer:null,
   // 获取位置信息
   getPosition: function(){
     let _this = this ;
@@ -60,6 +62,16 @@ export const getMyPosition = {
       return coordinate ;
     }
   },
+  // 清除元素
+  clear:function(){
+    if(this.source && this.source.getFeatureByUid(this.positionCircle && this.positionCircle.ol_uid)){
+      this.source.removeFeature(this.positionCircle);
+    }
+    if(this.source && this.source.getFeatureByUid(this.positionIcon && this.positionIcon.ol_uid)){
+      this.source.removeFeature(this.positionIcon);
+    }
+    MAINMAP.map.removeLayer(this.layer);
+  },
   // 渲染icon和圆
   drawPosition: function(obj) {
     // this.getPosition().then(obj => {
@@ -97,19 +109,20 @@ export const getMyPosition = {
 
       this.positionIcon = iconFeature;
       this.positionCircle = cirCleFeature;
-      let source = new VectorSource({
+      this.source = new VectorSource({
         features: [ iconFeature, cirCleFeature]
       })
-      let layer = new VectorLayer({
-        source: source
+      this.layer = new VectorLayer({
+        source: this.source
       })
       // 添加图层
-      layer.setZIndex(15);
-      MAINMAP.map.addLayer(layer);
+      this.layer.setZIndex(15);
+      MAINMAP.map.addLayer(this.layer);
 
 
       // 视图移动
-      this.setViewCenter(coordinate,1000)
+      if(obj.isMove)
+      this.setViewCenter(coordinate,1000);
     // })
   },
 

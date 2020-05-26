@@ -1,9 +1,9 @@
 // import initMap from './INITMAP'
 import { getMyPosition } from './getMyPosition'
-import { TransformCoordinate } from '../lib/utils/index'
+import { TransformCoordinate ,Source,Layer  ,addFeature} from '../lib/utils/index'
 import axios from 'axios'
 import { baseConfig } from '../globalSet/config'
-
+import { draw } from "utils/draw";
 
 
 // 获取地图和视图
@@ -47,6 +47,15 @@ const MapMoveSearch = function(){
 
 // 所有暴露在外面的方法
 let callFunctions = {
+  line:null,
+  source:Source(),
+  layer: Layer({id:"flutter_layer",zIndex:11}),
+  Init:()=>{
+    let map = _getMap('map');
+    callFunctions.layer.setSource(callFunctions.source);
+    map.addLayer(callFunctions.layer);
+  },
+  isMounted:false,
    // 设置视图中心点
   setViewCenter: (val)=>{
     let view = _getMap('view');
@@ -61,6 +70,43 @@ let callFunctions = {
     let view = _getMap('view');
     return view.getCenter();
   },
+
+  // 开始记录
+  startRecord:(coordinates)=>{
+    // coordinates = TransformCoordinate(coordinates);
+    // 如果没加载图层，则加载图层
+    if(!callFunctions.isMounted){
+      callFunctions.Init();
+      callFunctions.isMounted = true;
+    }
+    // 如果没有加载线段，则加载线段
+    if(!callFunctions.line){
+      callFunctions.line = addFeature('LineString',{
+        coordinates:[coordinates]
+      })
+      callFunctions.source.addFeature(callFunctions.line);
+    }else{
+      // 添加线段的点
+      callFunctions.line.getGeometry().appendCoordinate(coordinates);
+    }
+  },
+  // 停止记录
+  stopRecord:({isRemoveLayer = false})=>{
+    if(!callFunctions.line) return ;
+    if(!isRemoveLayer){
+      let coor = callFunctions.line.getGeometry().getCoordinates();
+      let style =  callFunctions.line.getStyle();
+      // let color = style.getStroke().getColor();
+      return JSON.stringify({coordinates: coor});
+    }
+
+    let map = _getMap('map');
+    callFunctions.source.removeFeature(callFunctions.line);
+    callFunctions.line = null;
+    map.removeLayer(callFunctions.layer);
+    callFunctions.isMounted = false;
+  },
+
   // 设置定位位置
   setMapLocation: (val)=>{
     let coor = [+val.latitude, +val.longitude];
@@ -70,8 +116,9 @@ let callFunctions = {
       getMyPosition.setPosition(coor);
     } else {
       // 没有绘制就进行绘制，并设置样式
-      getMyPosition.drawPosition(val);
+      getMyPosition.drawPosition({isMove:true,...val});
     }
+    
   },
   // 切换底图
   ChangeBaseMap: (key)=>{
@@ -142,8 +189,14 @@ let callFunctions = {
     })
     // 调用启动监听
     callFunctions.StartMove();
+  },
+
+  // 绘制标绘
+  startDraw:({type})=>{
+    if(!type) return new Error('缺少type');
+    let d = draw.create(type);
+    console.log(d);
   }
 }
-
 
 window.CallWebMapFunction = CallWebFunction ;
