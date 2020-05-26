@@ -74,24 +74,21 @@ export const draw = {
       TAILED_SQUAD_COMBAT: "tailed_squad_combat",
     };
     this.plottingLayer.addFeature(PlotTypes[type]);
+    return this.plottingLayer;
   },
 
   // 标绘完成回调
-  onActiveEventListener() {
-    return new Promise((resolve) => {
-      this.plottingLayer.on(FeatureOperatorEvent.ACTIVATE, (e) => {
-        window.featureOperator = e.feature_operator;
-        resolve(e.feature_operator);
-      });
+  onActiveEventListener(cb) {
+    this.plottingLayer.on(FeatureOperatorEvent.ACTIVATE, (e) => {
+      window.featureOperator = e.feature_operator;
+      cb && cb(e);
     });
   },
   // 标绘切换回调
-  onDeactiveEventListener() {
-    return new Promise((resolve) => {
-      this.plottingLayer.on(FeatureOperatorEvent.DEACTIVATE, (e) => {
-        window.featureOperator = e.feature_operator;
-        resolve(e.feature_operator);
-      });
+  onDeactiveEventListener(cb) {
+    this.plottingLayer.on(FeatureOperatorEvent.DEACTIVATE, (e) => {
+      window.featureOperator = e.feature_operator;
+      cb && cb(e);
     });
   },
   activeCallBack() {
