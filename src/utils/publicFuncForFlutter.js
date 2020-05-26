@@ -1,3 +1,10 @@
+// import initMap from './INITMAP'
+import { getMyPosition } from './getMyPosition'
+import { TransformCoordinate } from '../lib/utils/index'
+import axios from 'axios'
+import { baseConfig } from '../globalSet/config'
+
+
 
 // 获取地图和视图
 const _getMap = (key) =>{
@@ -10,7 +17,7 @@ const _getMap = (key) =>{
 }
 
 // 全局的针对Flutter APP进行交互的方法
-const CallWebFunction = (function_name , message ,msgType = 'objectStr')=>{
+const CallWebFunction = (function_name , message ,msgType = 'objct')=>{
   // 需要有调用方法
   if(!function_name){
     return JSON.stringify({code: -1, message:"The method name to be called was not passed in"})
@@ -25,6 +32,19 @@ const CallWebFunction = (function_name , message ,msgType = 'objectStr')=>{
     return callFunctions[function_name].call(this, message)
   }
 }
+
+let timer = null;
+const MapMoveSearch = function(){
+  // console.log(e)
+  clearTimeout(timer);
+  // 只取最后一次的移动操作，防止过度请求。
+  timer = setTimeout(()=>{
+    let center = CallWebFunction('getCenter');
+    CallWebFunction('SearchForPoint',{position: TransformCoordinate(center,'EPSG:3857','EPSG:4326') })
+  },1000);
+  
+}
+
 // 所有暴露在外面的方法
 let callFunctions = {
    // 设置视图中心点
@@ -32,8 +52,96 @@ let callFunctions = {
     let view = _getMap('view');
     view.animate({
       zoom: view.getZoom(),
-      center: [12682417.401133642, 2573911.8265894186]
+      center:(val && TransformCoordinate(val)) || [12682417.401133642, 2573911.8265894186]
     })
+    return view.getCenter();
+  },
+  // 获取视图中心点
+  getCenter: ()=>{
+    let view = _getMap('view');
+    return view.getCenter();
+  },
+  // 设置定位位置
+  setMapLocation: (val)=>{
+    let coor = [+val.latitude, +val.longitude];
+    // 绘制定位信息
+    // 如果已经展示了定位信息之后就只改变position
+    if(getMyPosition.positionCircle || getMyPosition.positionIcon){
+      getMyPosition.setPosition(coor);
+    } else {
+      // 没有绘制就进行绘制，并设置样式
+      getMyPosition.drawPosition(val);
+    }
+  },
+  // 切换底图
+  ChangeBaseMap: (key)=>{
+    if(!key) return ;
+    const initMap = require('./INITMAP').default ;
+    initMap.changeBaseMap(key);
+  },
+  // 监听地图移动
+  StartMove: ()=>{
+    let map = _getMap('map');
+    map.on('moveend',MapMoveSearch);
+  },
+  // 停止监听地图拖动
+  StopSearch: ()=>{
+    let map = _getMap('map');
+    map.un('moveend',MapMoveSearch);
+  },
+  // 逆编码转换坐标
+  getAddressForName:(name)=>{
+    if(!name) return Promise.reject({status:401});
+    return new Promise((resolve, reject) => {
+      let url = 'https://restapi.amap.com/v3/place/text'
+      let params = {
+        key: baseConfig.GAODE_SERVER_APP_KEY,
+        keywords: name,
+        offset:1,
+        extensions:"base"
+      }
+      axios.get(url,{params}).then(res => {
+        console.log(res)
+        if(res.status === 200){
+          let data = res.data;
+          if(data.info === "OK"){
+            resolve(data.pois[0]);
+          }else{
+            reject(data);
+          }
+        }else{
+          reject(res);
+        }
+      }).catch(err => {
+        reject(err);
+      })
+    })
+    
+  },
+  // 通过点搜索周围数据
+  SearchForPoint: async (val)=>{
+    let { position ,radius = 200 ,locationName} = val;
+    if(locationName){
+      let data = await callFunctions.getAddressForName(locationName)
+      // console.log(data);
+      if(data){
+        position = data.location.split(',').map(item => +item);
+      }
+    }
+    AMap.service(["AMap.PlaceSearch"], function() {
+      let placeSearch = new AMap.PlaceSearch({
+        pageSize:10,
+        pageIndex:1
+      })
+      placeSearch.searchNearBy('',position,radius,(status,result)=>{
+        // 调用移动端的监听发送数据
+        window.getNearbyAddressInfo && 
+        window.getNearbyAddressInfo.postMessage(JSON.stringify(result.poiList));
+        
+      })
+    })
+    // 调用启动监听
+    callFunctions.StartMove();
   }
 }
 
