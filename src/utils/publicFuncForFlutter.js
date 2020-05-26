@@ -194,8 +194,11 @@ let callFunctions = {
   // 绘制标绘
   startDraw:({type})=>{
     if(!type) return new Error('缺少type');
-    let d = draw.create(type);
-    console.log(d);
+    draw.create(type);
+    // console.log(draw)
+    draw.onDeactiveEventListener(()=>{
+      
+    })
   }
 }
 
