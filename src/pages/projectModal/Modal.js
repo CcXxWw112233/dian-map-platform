@@ -40,35 +40,62 @@ const { TextArea } = Input;
 export default class ProjectModal extends React.Component {
   constructor(props) {
     super(props);
+    this.setDefaultState();
     this.state = {
       isEdit: false,
       featureName: "", // 名称
       selectName: "",
       featureType: "rgba(168,9,10,0.7)", // 类型
       remarks: "", // 备注
-      showCustom: false,
-      displayFillColorPicker: false,
-      displayStrokeColorPicker: false,
-      fillColor: {
-        r: "82",
-        g: "79",
-        b: "77",
-        a: "1",
-      },
-      fillColorStyle: "rgba(82,79,77,0.7)",
-      strokeColor: {
-        r: "82",
-        g: "79",
-        b: "77",
-        a: "1",
-      },
-      strokeColorStyle: "rgba(82,79,77,1)",
+      showCustom: this.showCustom,
+      displayFillColorPicker: this.displayFillColorPicker,
+      displayStrokeColorPicker: this.displayStrokeColorPicker,
+      fillColor: this.fillColor,
+      fillColorStyle: this.fillColorStyle,
+      strokeColor: this.strokeColor,
+      strokeColorStyle: this.strokeColorStyle,
 
-      isSureFillColorStyle: false,
-      isSureStrokeColorStyle: false,
+      isSureFillColorStyle: this.isSureFillColorStyle,
+      isSureStrokeColorStyle: this.isSureStrokeColorStyle,
     };
-    this.isOk = false;
   }
+
+  setDefaultState = () => {
+    this.showCustom = false;
+    this.displayFillColorPicker = false;
+    this.displayStrokeColorPicker = false;
+    this.isOk = false;
+    this.fillColor = {
+      r: "168",
+      g: "9",
+      b: "10",
+      a: "0.7",
+    };
+    this.fillColorStyle = "rgba(168,9,10,0.7)";
+    this.strokeColor = {
+      r: "168",
+      g: "9",
+      b: "10",
+      a: "1",
+    };
+    this.strokeColorStyle = "rgba(168,9,10,1)";
+    this.isSureFillColorStyle = false;
+    this.isSureStrokeColorStyle = false;
+  };
+
+  updateCustomState = () => {
+    this.setState({
+      showCustom: this.showCustom,
+      displayFillColorPicker: this.displayFillColorPicker,
+      displayStrokeColorPicker: this.displayStrokeColorPicker,
+      fillColor: this.fillColor,
+      fillColorStyle: this.fillColorStyle,
+      strokeColor: this.strokeColor,
+      strokeColorStyle: this.strokeColorStyle,
+      isSureFillColorStyle: this.isSureFillColorStyle,
+      isSureStrokeColorStyle: this.isSureStrokeColorStyle,
+    });
+  };
 
   checkStateChange = (state, attr) => {
     if (state !== attr) {
@@ -85,6 +112,7 @@ export default class ProjectModal extends React.Component {
   };
 
   delCallBack = () => {
+    delete window.featureOperator;
     const { plottingLayer } = draw;
     const { dispatch } = this.props;
     let featureOperatorList = this.props.featureOperatorList;
@@ -108,23 +136,25 @@ export default class ProjectModal extends React.Component {
     if (state) {
       if (this.props.isEdit) {
         // message.success("保存成功");
-        const r = Math.ceil(Math.random() * 255);
-        const g = Math.ceil(Math.random() * 255);
-        const b = Math.ceil(Math.random() * 255);
+        // const r = Math.ceil(Math.random() * 255);
+        // const g = Math.ceil(Math.random() * 255);
+        // const b = Math.ceil(Math.random() * 255);
         let plottingType = this.props.type;
         let tempType = this.toChangedataType(plottingType);
-        const defaultOptions = {
+        let defaultOptions = {
           radius: 8,
           // fillColor: "rgba(168,9,10,0.7)",
-          fillColor: this.state.isSureFillColorStyle
-            ? this.state.fillColorStyle
-            : `rgba(${r},${g},${b},0.7)`,
-          strokeColor: this.state.isSureStrokeColorStyle
-            ? this.state.strokeColorStyle
-            : "rgba(168,9,10,1)",
+          fillColor: this.fillColorStyle,
+          strokeColor: this.strokeColorStyle,
           // strokeColor: "rgba(168,9,10,1)",
           text: this.props.featureName,
         };
+        if (this.state.isSureFillColorStyle) {
+          defaultOptions.fillColor = this.state.fillColorStyle;
+        }
+        if (this.state.isSureStrokeColorStyle) {
+          defaultOptions.strokeColor = this.state.strokeColorStyle;
+        }
         const commonStyleOption = {
           textFillColor: "rgba(255,0,0,1)",
           textStrokeColor: "#fff",
@@ -177,7 +207,7 @@ export default class ProjectModal extends React.Component {
             },
           };
           if (this.state.isSureStrokeColorStyle) {
-            options.strokeColor = this.state.strokeColorStyle
+            options.strokeColor = this.state.strokeColorStyle;
           }
         }
         if (
@@ -302,6 +332,9 @@ export default class ProjectModal extends React.Component {
       this.props.featureType || this.state.featureType,
       featureOperator.attrs.featureType
     );
+    if (this.state.isSureFillColorStyle) {
+      featureTypeState = this.state.fillColorStyle
+    }
     let featureNameState = this.checkStateChange(
       this.props.featureName,
       featureOperator.attrs.featureName
@@ -320,6 +353,7 @@ export default class ProjectModal extends React.Component {
           geom: `POINT(${newGeom})`,
           icon_url: featureTypeState,
           featureType: featureTypeState,
+          strokeColor: this.state.isSureStrokeColorStyle ? this.state.strokeColorStyle : "",
           main_id: "",
           name: featureNameState,
           remark: remarksState,
@@ -345,6 +379,7 @@ export default class ProjectModal extends React.Component {
       case "CIRCLE":
       case "FREEHANDPOLYGON":
         let style = null;
+        let strokeColor
         if (featureTypeState.indexOf("/") > -1) {
           style = `${featureTypeState};icon`;
         } else {
@@ -352,7 +387,7 @@ export default class ProjectModal extends React.Component {
             .getStyle()
             .getFill()
             .getColor();
-          const strokeColor = featureOperator.feature
+          strokeColor = featureOperator.feature
             .getStyle()
             .getStroke()
             .getColor();
@@ -363,6 +398,7 @@ export default class ProjectModal extends React.Component {
           geom: `POLYGON((${newGeom}))`,
           style: style,
           featureType: featureTypeState,
+          strokeColor: strokeColor,
           main_id: "",
           name: featureNameState,
           remark: remarksState,
@@ -407,6 +443,8 @@ export default class ProjectModal extends React.Component {
   handleCancelClick = () => {
     this.hideModal();
   };
+
+  // 关闭模态框
   hideModal = () => {
     const { dispatch } = this.props;
     dispatch({
@@ -415,10 +453,7 @@ export default class ProjectModal extends React.Component {
         visible: false,
       },
     });
-    this.setState({
-      isSureFillColorStyle: false,
-      isSureStrokeColorStyle: false,
-    });
+    this.updateCustomState();
     if (!this.isOk && !this.props.featureName) {
       this.delCallBack();
     } else {
@@ -444,7 +479,7 @@ export default class ProjectModal extends React.Component {
       const arr = val.split(",");
       const index0 = Number(arr[0]);
       const index1 = Number(arr[1]);
-      const value = responseData.data[index0].items[index1];
+      const value = responseData.data[index0 - 1].items[index1];
       const { dispatch } = this.props;
       dispatch({
         type: "modal/updateData",
