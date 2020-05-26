@@ -144,6 +144,7 @@ class PlotEdit extends Observable {
       "mousedown",
       () => {
         this.delCb && this.delCb();
+        this.layer.removeFeature(window.featureOperator)
         window.featureOperator && delete window.featureOperator
       },
       this
