@@ -81,14 +81,14 @@ export const draw = {
   onActiveEventListener(cb) {
     this.plottingLayer.on(FeatureOperatorEvent.ACTIVATE, (e) => {
       window.featureOperator = e.feature_operator;
-      cb && cb();
+      cb && cb(e);
     });
   },
   // 标绘切换回调
   onDeactiveEventListener(cb) {
     this.plottingLayer.on(FeatureOperatorEvent.DEACTIVATE, (e) => {
       window.featureOperator = e.feature_operator;
-      cb && cb();
+      cb && cb(e);
     });
   },
   activeCallBack() {
