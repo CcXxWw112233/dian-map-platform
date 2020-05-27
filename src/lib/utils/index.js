@@ -7,14 +7,14 @@ import {
   MultiPoint,
   MultiPolygon,
 } from "ol/geom";
-import { Image } from 'ol/layer'
-import Static from 'ol/source/ImageStatic';
+import { Image } from "ol/layer";
+import Static from "ol/source/ImageStatic";
 import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
 import { GeoJSON, WKT } from "ol/format";
-import { transform ,Projection } from "ol/proj";
-import { Draw ,Select} from 'ol/interaction'
-import { createBox } from 'ol/interaction/Draw'
+import { transform, Projection } from "ol/proj";
+import { Draw, Select } from "ol/interaction";
+import { createBox } from "ol/interaction/Draw";
 import {
   getCenter,
   // getBottomLeft,
@@ -82,7 +82,7 @@ export const getPoint = function (extent, type = "center") {
     case "topLeft":
       return getTopLeft(extent);
     case "topRight":
-      return getTopRight(extent) ;
+      return getTopRight(extent);
     default:
       return getCenter(extent);
   }
@@ -90,7 +90,7 @@ export const getPoint = function (extent, type = "center") {
 
 export const loadFeatureJSON = function (data, type = "WTK") {
   if (type === "WTK") {
-    return new WKT().readFeature(data);
+    return new WKT().readFeature(data.source, data.options);
   }
   return new GeoJSON().readFeature(data);
 };
@@ -233,7 +233,7 @@ export const TransformCoordinate = (
 export const Fit = (view, extent, option, duration = 1000) => {
   if (view) {
     view.cancelAnimations();
-    view.fit(extent, { duration,padding: [200, 150, 80, 400], ...option });
+    view.fit(extent, { duration, padding: [200, 150, 80, 400], ...option });
   }
 };
 
@@ -271,24 +271,24 @@ export const Layer = function (data) {
   return new VectorLayer({ ...data });
 };
 
-export const ImageStatic = function(url,extent,data){
+export const ImageStatic = function (url, extent, data) {
   let projection = new Projection({
-    code: 'xkcd-image',
-    units: 'pixels',
-    extent: extent
+    code: "xkcd-image",
+    units: "pixels",
+    extent: extent,
   });
   return new Image({
-    source: new Static({  
+    source: new Static({
       url,
       imageExtent: extent,
       projection,
       ...data,
     }),
-    ...data
-  })
-}
+    ...data,
+  });
+};
 
-export const setSelectInteraction = function(data){
-  let select = new Select()
+export const setSelectInteraction = function (data) {
+  let select = new Select();
   return select;
-}
+};

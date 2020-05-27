@@ -194,8 +194,9 @@ let callFunctions = {
   // 绘制标绘
   startDraw:({type})=>{
     if(!type) return new Error('缺少type');
-    draw.create(type);
+    const plottingLayer = draw.create(type);
     // console.log(draw)
+
     draw.onActiveEventListener((e)=>{
       console.log(e)
     })

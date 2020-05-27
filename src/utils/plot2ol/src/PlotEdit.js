@@ -137,7 +137,7 @@ class PlotEdit extends Observable {
       positioning: "bottom-center",
       offset: [20, -10],
     });
-    this.layer.plotEdit.controlPoints.push(delBtnOverlay);
+    this.layer.plotEdit.controlPoints && this.layer.plotEdit.controlPoints.push(delBtnOverlay);
     this.map.addOverlay(delBtnOverlay);
     DomUtils.addListener(
       delBtnEle,
@@ -174,7 +174,7 @@ class PlotEdit extends Observable {
         positioning: "center-center",
         element: element,
       });
-      this.controlPoints.push(pnt);
+      this.controlPoints && this.controlPoints.push(pnt);
       this.map.addOverlay(pnt);
       DomUtils.addListener(
         element,
