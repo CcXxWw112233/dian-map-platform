@@ -137,22 +137,25 @@ let callFunctions = {
     map.un('moveend',MapMoveSearch);
   },
   // 逆编码转换坐标
-  getAddressForName:(name)=>{
+  getAddressForName:(name,data = {})=>{
     if(!name) return Promise.reject({status:401});
     return new Promise((resolve, reject) => {
       let url = 'https://restapi.amap.com/v3/place/text'
       let params = {
         key: baseConfig.GAODE_SERVER_APP_KEY,
         keywords: name,
-        offset:1,
+        offset:data.offset || 1,
+        city:data.fromCity || undefined,
         extensions:"base"
       }
       axios.get(url,{params}).then(res => {
-        console.log(res)
+        // console.log(res)
         if(res.status === 200){
           let data = res.data;
           if(data.info === "OK"){
+            if(data.offset === 1)
             resolve(data.pois[0]);
+            else resolve(data.pois);
           }else{
             reject(data);
           }
