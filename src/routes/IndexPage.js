@@ -36,7 +36,8 @@ import BottomToolBar from "components/BottomToolBar/BottomToolBar";
 import TempPlottingIcon from "components/TempPlotting/TempPlottingIcon";
 import TempPlottingPanel from "components/TempPlotting/TempPlottingPanel";
 
-@connect(({ controller: { mainVisible } }) => ({ mainVisible }))
+@connect(({ controller: { mainVisible },openswitch:{toolBars , bottomTools} }) => 
+({ mainVisible ,toolBars, bottomTools }))
 class IndexPage extends React.Component {
   constructor(props) {
     super(...arguments);
@@ -194,6 +195,7 @@ class IndexPage extends React.Component {
 
   render() {
     const { TabPane } = Tabs;
+    let { bottomTools ,toolBars } = this.props;
     return (
       <div className={styles.normal}>
         {/* 地图主体 */}
@@ -202,10 +204,18 @@ class IndexPage extends React.Component {
         {/* <ChangeBaseMap onChange={this.changeMap}/> */}
         {/* <BasemapGallery></BasemapGallery> */}
         {/* 工具栏 */}
+        
         <ProjectModal></ProjectModal>
         {/* <SketchPicker></SketchPicker> */}
-        <ToolBar></ToolBar>
-        <BottomToolBar></BottomToolBar>
+        {
+          toolBars && 
+          <ToolBar></ToolBar>
+        }
+        {
+          bottomTools && 
+          <BottomToolBar></BottomToolBar>
+        }
+        
         <TempPlottingIcon></TempPlottingIcon>
         <TempPlottingPanel></TempPlottingPanel>
         <LengedList></LengedList>

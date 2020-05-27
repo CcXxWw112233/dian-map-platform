@@ -1,6 +1,6 @@
 // import initMap from './INITMAP'
 import { getMyPosition } from './getMyPosition'
-import { TransformCoordinate ,Source,Layer  ,addFeature} from '../lib/utils/index'
+import { TransformCoordinate ,Source,Layer  ,addFeature ,createStyle} from '../lib/utils/index'
 import axios from 'axios'
 import { baseConfig } from '../globalSet/config'
 import { draw } from "utils/draw";
@@ -47,6 +47,7 @@ const MapMoveSearch = function(){
 
 // 所有暴露在外面的方法
 let callFunctions = {
+  lineMsg :[],
   line:null,
   source:Source(),
   layer: Layer({id:"flutter_layer",zIndex:11}),
@@ -72,8 +73,8 @@ let callFunctions = {
   },
 
   // 开始记录
-  startRecord:(coordinates)=>{
-    // coordinates = TransformCoordinate(coordinates);
+  startRecord:({coordinates, time})=>{
+    let coor = TransformCoordinate(coordinates);
     // 如果没加载图层，则加载图层
     if(!callFunctions.isMounted){
       callFunctions.Init();
@@ -81,35 +82,46 @@ let callFunctions = {
     }
     // 如果没有加载线段，则加载线段
     if(!callFunctions.line){
+      console.log('构建初始点')
+      let style = createStyle('LineString',{
+        strokeWidth:3
+      })
       callFunctions.line = addFeature('LineString',{
-        coordinates:[coordinates]
+        coordinates:[coor],
+        style: style
       })
       callFunctions.source.addFeature(callFunctions.line);
     }else{
       // 添加线段的点
-      callFunctions.line.getGeometry().appendCoordinate(coordinates);
+      console.log('记录更新的点...')
+      callFunctions.line.getGeometry().appendCoordinate(coor);
     }
+    callFunctions.lineMsg.push({coordinates:coordinates,time});
   },
   // 停止记录
-  stopRecord:({isRemoveLayer = false})=>{
+  stopRecord:({isRemoveLayer = false,coordinates,time})=>{
     if(!callFunctions.line) return ;
+    callFunctions.lineMsg.push({coordinates,time})
+    let string = JSON.stringify(callFunctions.lineMsg);
     if(!isRemoveLayer){
-      let coor = callFunctions.line.getGeometry().getCoordinates();
-      let style =  callFunctions.line.getStyle();
+      console.log('获取数据保存')
       // let color = style.getStroke().getColor();
-      return JSON.stringify({coordinates: coor});
+      callFunctions.lineMsg = [];
+      window.stopRecord && window.stopRecord.postMessage(string)
+      return string;
     }
+    console.log('清除页面中画的线，停止')
 
-    let map = _getMap('map');
     callFunctions.source.removeFeature(callFunctions.line);
     callFunctions.line = null;
-    map.removeLayer(callFunctions.layer);
-    callFunctions.isMounted = false;
+    window.stopRecord && window.stopRecord.postMessage(string)
+    return string;
+    // callFunctions.isMounted = false;
   },
 
   // 设置定位位置
   setMapLocation: (val)=>{
-    let coor = [+val.latitude, +val.longitude];
+    let coor = [ +val.longitude,+val.latitude];
     // 绘制定位信息
     // 如果已经展示了定位信息之后就只改变position
     if(getMyPosition.positionCircle || getMyPosition.positionIcon){
@@ -137,15 +149,15 @@ let callFunctions = {
     map.un('moveend',MapMoveSearch);
   },
   // 逆编码转换坐标
-  getAddressForName:(name,data = {})=>{
-    if(!name) return Promise.reject({status:401});
+  getAddressForName:({address = '', offset = 1, fromCity = ""})=>{
+    if(!address) return Promise.reject({status:401});
     return new Promise((resolve, reject) => {
       let url = 'https://restapi.amap.com/v3/place/text'
       let params = {
         key: baseConfig.GAODE_SERVER_APP_KEY,
-        keywords: name,
-        offset:data.offset || 1,
-        city:data.fromCity || undefined,
+        keywords: address,
+        offset:offset || 1,
+        city:fromCity || undefined,
         extensions:"base"
       }
       axios.get(url,{params}).then(res => {
@@ -172,7 +184,7 @@ let callFunctions = {
   SearchForPoint: async (val)=>{
     let { position ,radius = 200 ,locationName} = val;
     if(locationName){
-      let data = await callFunctions.getAddressForName(locationName)
+      let data = await callFunctions.getAddressForName({ address: locationName})
       // console.log(data);
       if(data){
         position = data.location.split(',').map(item => +item);

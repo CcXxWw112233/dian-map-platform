@@ -75,7 +75,16 @@ const action = function(){
         
     }
     this.fitToCenter = () => {
-        Fit(InitMap.view, this.Source.getExtent(),{size: InitMap.map.getSize(),padding:[200,150,80,400]})
+        window.lxMap = InitMap;
+        let { getUrlParam } = config;
+        let size = InitMap.map.getSize();
+        let flag = getUrlParam.isMobile === "1" ;
+        let obj = {
+            size: flag ? size.map(item => item/2) : size,
+            padding : !flag ? [200,150,80,400]: [0,0,0,0],
+            nearest:true
+        }
+        Fit(InitMap.view, this.Source.getExtent(),obj);
     }
     // 添加overlay
     this.addOverlay = (data = {} ,source)=>{

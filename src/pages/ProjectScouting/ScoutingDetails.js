@@ -397,11 +397,38 @@ const UploadItem = ({ type ,data ,onRemove ,onEditCollection = ()=>{} ,areaList 
       </Menu.Item>
     </Menu>
   );
+    
+  const itemClick = (val)=>{
+    if(val.is_display === '0') return ;
+    if(val.location && Object.keys(val.location).length && val.is_display === '1'){
+      let coor = [+val.location.longitude,+val.location.latitude];
+      Action.toCenter({center: coor});
+    }
 
+    // 标注
+    if(val.collect_type === '4'){
+      let feature = Action.findFeature(val.id);
+      let extent = feature && feature.getGeometry().getExtent();
+      if(extent){
+        Action.toCenter({type:"extent", center:extent});
+      }
+    }
+
+    // 规划图
+    if(val.collect_type === '5' ){
+      let layer = Action.findImgLayer(val.resource_id);
+      if(layer){
+        let extent = layer.getSource().getImageExtent();
+        // console.log()
+        Action.toCenter({type:'extent',center: extent})
+      }
+    }
+  }
 
   return (
     <div className={styles.uploadItem + ` ${globalStyle.btn}`} draggable={true} 
     // onDragStart={e => console.log(e)}
+    onClick={itemClick.bind(this, data)}
     >
       <div className={styles.uploadIcon + ` ${styles[type]}`}>
         <span>{type === 'pic' ? <img src={data.resource_url} width='48px' alt='图片'/>: itemKeyVals[type]}</span>
