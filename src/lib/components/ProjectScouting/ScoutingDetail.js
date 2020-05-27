@@ -23,6 +23,7 @@ import {
   areaDetailOverlay,
 } from "../../../components/PublicOverlays";
 import { Modify } from "ol/interaction";
+import { extend } from 'ol/extent'
 import { always } from "ol/events/condition";
 
 import { draw } from "utils/draw";
@@ -209,6 +210,26 @@ function Action() {
     });
   };
 
+  // 查找feature
+  this.findFeature = (id)=>{
+    for(let i = 0; i< this.features.length; i++){
+      let item = this.features[i];
+      if(item.get('id') && item.get('id') === id){
+        return item ;
+      }
+    }
+  }
+
+  // 查找规划图
+  this.findImgLayer = (id)=>{
+    for(let i = 0; i< this.imgs.length; i++){
+      let item = this.imgs[i];
+      if(item.get('id') && item.get('id') === id){
+        return item;
+      }
+    }
+  }
+
   // 渲染标绘数据
   this.renderFeaturesCollection = (data, { lengedConfig, dispatch }) => {
     const commonStyleOption = {
@@ -228,6 +249,7 @@ function Action() {
     };
     data.forEach((item) => {
       let content = item.content;
+      console.log(item)
       content = content && JSON.parse(content);
       let featureType = content.featureType || "";
       let isImage = false;
@@ -262,6 +284,7 @@ function Action() {
       let feature = addFeature(content.geoType, {
         coordinates: content.coordinates,
         ...content,
+        ...item
       });
 
       // code by liulaian
@@ -359,7 +382,7 @@ function Action() {
     return pat;
   };
   // 渲染feature
-  this.renderCollection = (data, { lenged, dispatch }) => {
+  this.renderCollection = async (data, { lenged, dispatch }) => {
     // 过滤不显示的数据
     data = data.filter((item) => item.is_display === "1");
     // 删除元素
@@ -374,8 +397,7 @@ function Action() {
     // 渲染标绘数据
     this.renderFeaturesCollection(features, { lenged, dispatch });
     // 渲染规划图
-    this.renderPlanPicCollection(planPic);
-
+    let ext = await this.renderPlanPicCollection(planPic);
     data &&
       data.length &&
       setTimeout(() => {
@@ -383,7 +405,7 @@ function Action() {
         if (this.features.length)
           Fit(
             InitMap.view,
-            this.Source.getExtent(),
+            ext.length ? ext : this.Source.getExtent(),
             {
               size: InitMap.map.getSize(),
               padding: [200, 150, 80, 400],
@@ -393,22 +415,70 @@ function Action() {
       });
   };
 
+  // type coordinate or extent
+  this.toCenter = ({center  , type = 'coordinate' ,duration = 800 ,zoom})=>{
+    if(type === "coordinate"){
+      center = TransformCoordinate(center);
+      InitMap.view.animate({
+        center:center,
+        zoom:zoom ? zoom : InitMap.view.getMaxZoom() - 2,
+        duration
+      })
+    }
+    else if(type === 'extent'){
+      Fit( InitMap.view , center , { size: InitMap.map.getSize(), padding:[200, 150, 80, 400], duration });
+    }
+  }
+
+
   //   删除已存在的规划图
   this.removePlanPicCollection = () => {
     this.imgs && this.imgs.forEach((item) => InitMap.map.removeLayer(item));
     this.imgs = [];
   };
+  let _that = this;
+
+  // 加载规划图,可以自定义
+  let loading = function(staticimg,extent,resp){
+    // 规划图加载状态
+    this.box = '';
+    staticimg.on('imageloadstart',(e)=>{
+      let LT = getPoint(extent,'topLeft');
+      let RT = getPoint(extent,'topRight');
+      let BL = getPoint(extent,'bottomLeft');
+      let BR = getPoint(extent,'bottomRight');
+      this.box = addFeature('Polygon',{
+        coordinates: [[LT,RT,BR,BL,LT]]
+      })
+      this.box.setStyle(createStyle('Polygon',{
+        showName:true,
+        text: '加载中...',
+        textFillColor:'rgb(255,0,0)',
+        textStrokeColor:"rgba(255,255,255,0.8)",
+        font:16,
+        fillColor:"rgba(0,0,0,0.25)"
+      }))
+      _that.Source.addFeature(this.box);
+    })
+    staticimg.on('imageloadend',(e)=>{
+      _that.Source.removeFeature(this.box);
+    })
+  }
 
   //   渲染规划图
-  this.renderPlanPicCollection = (data) => {
+  this.renderPlanPicCollection = async (data) => {
     //   console.log(data);
+    // 所有规划图加载的范围
+    let ext = [];
+
     let promise = data.map((item) => {
       if (item.resource_id) {
         return GET_PLAN_PIC(item.resource_id);
       }
     });
     this.imgs = [];
-    Promise.all(promise).then((res) => {
+    let res = await Promise.all(promise);
+    // .then((res) => {
       this.imgs = [];
       res.forEach((item) => {
         let resp = item.data;
@@ -418,14 +488,27 @@ function Action() {
         let img = ImageStatic(PLAN_IMG_URL(resp.id), extent, {
           opacity: +resp.transparency,
         });
+        let stati = img.getSource();
+        // 添加规划图加载状态
+        new loading(stati,extent,resp);
+        img.set('id',resp.id);
         this.imgs.push(img);
+        // 合并范围-使缩放的时候，可以适应到规划图的位置
+        if(!ext.length){
+          ext = [...extent];
+        }else{
+          ext = extend(ext,[...extent])
+        }
       });
 
       this.imgs.forEach((item) => {
         //   console.log(item)
         InitMap.map.addLayer(item);
       });
-    });
+
+      return ext;
+    // });
+
   };
 
   //   添加元素坐标的overlay
@@ -569,6 +652,7 @@ function Action() {
 
       this.drawBox.on("drawend", (e) => {
         this.boxFeature = e.feature;
+        console.log(e.feature.getGeometry().getCoordinates())
         let extent = this.boxFeature.getGeometry().getExtent();
         // 设置功能项的位置
         let ele = new settingsOverlay();

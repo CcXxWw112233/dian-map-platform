@@ -17,8 +17,8 @@ import { Draw ,Select} from 'ol/interaction'
 import { createBox } from 'ol/interaction/Draw'
 import {
   getCenter,
-  // getBottomLeft,
-  // getBottomRight,
+  getBottomLeft,
+  getBottomRight,
   getTopLeft,
   getTopRight,
 } from "ol/extent";
@@ -83,6 +83,10 @@ export const getPoint = function (extent, type = "center") {
       return getTopLeft(extent);
     case "topRight":
       return getTopRight(extent) ;
+    case "bottomRight":
+      return getBottomRight(extent);
+    case "bottomLeft":
+      return getBottomLeft(extent)
     default:
       return getCenter(extent);
   }
@@ -163,7 +167,7 @@ export const createStyle = function (
         fill: new Fill({
           color: options.textFillColor || defaultColor,
         }),
-        font: options.font,
+        font: typeof options.font === 'number' ? options.font +'px sans-serif':options.font,
         stroke: new Stroke({
           color: options.textStrokeColor || defaultColor,
           width: options.textStrokeWidth || 2,

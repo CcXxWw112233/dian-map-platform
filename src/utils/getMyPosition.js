@@ -57,8 +57,7 @@ export const getMyPosition = {
     if(String(val) === '[object Object]'){
       // let { position } = val;
       let { lng,lat,latitude , longitude} = val;
-      let coordinate = transform([+(lng || latitude),+( lat || longitude)], 'EPSG:4326', 'EPSG:3857');
-      console.log(coordinate)
+      let coordinate = transform([+(lng || longitude),+( lat || latitude)], 'EPSG:4326', 'EPSG:3857');
       return coordinate ;
     }
   },

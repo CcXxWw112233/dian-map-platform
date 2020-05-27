@@ -43,9 +43,13 @@ export default class Sider extends PureComponent {
     }
     return (
       <div className={styles.wrap} style={style}>
-        <a className={styles.changePackage} onClick={this.toOld} target='_self'>
-          切换旧版
-        </a>
+        {
+          showSlideButton && 
+          <a className={styles.changePackage} onClick={this.toOld} target='_self'>
+            切换旧版
+          </a>
+        }
+        
         <div className={styles.main}>{children && children}</div>
         {
           showSlideButton ?
