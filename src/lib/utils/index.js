@@ -278,7 +278,8 @@ export const ImageStatic = function(url,extent,data){
     extent: extent
   });
   return new Image({
-    source: new Static({  
+    source: new Static({
+      crossOrigin:"anonymous",
       url,
       imageExtent: extent,
       projection,
