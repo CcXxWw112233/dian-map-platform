@@ -18,8 +18,10 @@ function(){
     view: null,
     drawing: {},
     baseMaps: [],
+    mapId:"",
     operationLayers: [],
     init: function (mapId) {
+      this.mapId = mapId;
       this.status = "rendering";
       return new Promise((resolve, reject) => {
         this.map = new Map({

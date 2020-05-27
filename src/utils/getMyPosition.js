@@ -43,7 +43,7 @@ export const getMyPosition = {
   },
 
   // 转换高德获取的数据
-  transformPosition:function (val){
+  transformPosition:function (val, type){
     if(!val){
       return [0,0];
     }
@@ -57,8 +57,7 @@ export const getMyPosition = {
     if(String(val) === '[object Object]'){
       // let { position } = val;
       let { lng,lat,latitude , longitude} = val;
-      let coordinate = transform([+(lat|| latitude),+(lng|| longitude)], 'EPSG:4326', 'EPSG:3857');
-      console.log(coordinate)
+      let coordinate = transform([+(lng || longitude),+( lat || latitude)], 'EPSG:4326', 'EPSG:3857');
       return coordinate ;
     }
   },

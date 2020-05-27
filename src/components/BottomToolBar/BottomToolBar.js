@@ -8,6 +8,7 @@ import {
   myDragZoom,
 } from "utils/drawing/public";
 import { getMyPosition } from "utils/getMyPosition";
+import { downloadCapture } from '../../utils/captureMap'
 export default class BottomTollBar extends React.Component {
   constructor(props) {
     super(props);
@@ -47,6 +48,12 @@ export default class BottomTollBar extends React.Component {
         icon: "&#xe727;",
         cb: this.getMyCenter,
       },
+      {
+        name:"下载截图",
+        key:"downloadcapture",
+        icon:"&#xe7ae;",
+        cb: downloadCapture
+      }
     ];
   }
   getMyCenter = () => {
@@ -54,7 +61,8 @@ export default class BottomTollBar extends React.Component {
     getMyPosition.getPosition().then((val) => {
       // let coor = [114.11533,23.66666]
       // 转换地理坐标EPSG:4326 到 EPSG:3857
-      let coordinate = getMyPosition.transformPosition(val);
+      let obj = {...val, ...val.position}
+      let coordinate = getMyPosition.transformPosition(obj);
       // 将视图平移到坐标中心点
       getMyPosition.setViewCenter(coordinate, 200);
     });
@@ -84,7 +92,8 @@ export default class BottomTollBar extends React.Component {
         {this.config.map((item) => {
           const icon = item.toggleIcon ? this.state.fullcreenIcon : item.icon;
           return (
-            <Button key={item.key} title={item.name} onClick={item.cb}>
+            <Button key={item.key} title={item.name} onClick={item.cb}
+            style={{fontSize:'1rem',height:"auto"}}>
               <i
                 className={globalStyle.global_icon}
                 dangerouslySetInnerHTML={{ __html: icon }}
