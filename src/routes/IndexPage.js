@@ -13,7 +13,7 @@ import ScoutingDetails from "../pages/ProjectScouting/ScoutingDetails";
 import ProjectModal from "../pages/projectModal/Modal";
 import ScoutAction from "../lib/components/ProjectScouting/ScoutingList";
 import ScoutDetail from "../lib/components/ProjectScouting/ScoutingDetail";
-import { SketchPicker } from "react-color";
+import SearchToolBar from "../components/Search/Search";
 import Event from "../lib/utils/event";
 // import { PublicData, ProjectScouting } from 'pages/index'
 import { Tabs, Spin, message } from "antd";
@@ -36,8 +36,13 @@ import BottomToolBar from "components/BottomToolBar/BottomToolBar";
 import TempPlottingIcon from "components/TempPlotting/TempPlottingIcon";
 import TempPlottingPanel from "components/TempPlotting/TempPlottingPanel";
 
-@connect(({ controller: { mainVisible },openswitch:{toolBars , bottomTools} }) => 
-({ mainVisible ,toolBars, bottomTools }))
+@connect(
+  ({ controller: { mainVisible }, openswitch: { toolBars, bottomTools } }) => ({
+    mainVisible,
+    toolBars,
+    bottomTools,
+  })
+)
 class IndexPage extends React.Component {
   constructor(props) {
     super(...arguments);
@@ -72,7 +77,7 @@ class IndexPage extends React.Component {
             let param = {
               coordinates: feature.getGeometry().getCoordinates(),
               geoType: feature.getGeometry().getType(),
-              ...item.attrs
+              ...item.attrs,
             };
             let obj = {
               collect_type: 4,
@@ -195,7 +200,12 @@ class IndexPage extends React.Component {
 
   render() {
     const { TabPane } = Tabs;
-    let { bottomTools ,toolBars } = this.props;
+    let { bottomTools, toolBars } = this.props;
+    const SearchToolBarStyle = {
+      position: "absolute",
+      top: 20,
+      boxShadow: "0px 2px 16px 0px rgba(0, 0, 0, 0.09)",
+    };
     return (
       <div className={styles.normal}>
         {/* 地图主体 */}
@@ -204,18 +214,12 @@ class IndexPage extends React.Component {
         {/* <ChangeBaseMap onChange={this.changeMap}/> */}
         {/* <BasemapGallery></BasemapGallery> */}
         {/* 工具栏 */}
-        
+
         <ProjectModal></ProjectModal>
         {/* <SketchPicker></SketchPicker> */}
-        {
-          toolBars && 
-          <ToolBar></ToolBar>
-        }
-        {
-          bottomTools && 
-          <BottomToolBar></BottomToolBar>
-        }
-        
+        {toolBars && <ToolBar></ToolBar>}
+        {bottomTools && <BottomToolBar></BottomToolBar>}
+        <SearchToolBar style={SearchToolBarStyle}></SearchToolBar>
         <TempPlottingIcon></TempPlottingIcon>
         <TempPlottingPanel></TempPlottingPanel>
         <LengedList></LengedList>
@@ -226,7 +230,6 @@ class IndexPage extends React.Component {
               className={`${animateCss.animated} ${animateCss.slideInLeft}`}
               style={{ animationDuration: "0.3s", height: "100%" }}
             >
-
               <Main>
                 <div style={{ flex: "0" }}>
                   <Search onInputChange={this.handleInput}></Search>
