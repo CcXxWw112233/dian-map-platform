@@ -5,6 +5,7 @@ import {
   addFeature,
   TransformCoordinate,
 } from "../../utils/index";
+import { setSession, getSession } from "utils/sessionManage";
 import mapApp from "utils/INITMAP";
 function Action() {
   this.layer = null;
@@ -42,6 +43,40 @@ function Action() {
       size: mapApp.map.getSize(),
       duration: 1000,
     });
+  };
+
+  this.removePOI = () => {
+    this.source && this.source.clear();
+  }
+
+  this.setSession = (address) => {
+    getSession("search").then((res) => {
+      let data = res.data;
+      if (data) {
+        if (data.indexOf(`${address},`) < 0) {
+          setSession("search", `${data}${address},`);
+        }
+      } else {
+        setSession("search", `${address},`);
+      }
+    });
+  };
+  this.cleanSearchSession = () => {
+    setSession("search", "");
+  };
+
+  this.getSessionArray = async () => {
+    const res = await getSession("search");
+    let arr = [];
+    if (res.code === 0) {
+      if (res.data) {
+        arr = res.data.substr(0, res.data.length - 1).split(",");
+        arr = arr.filter((item) => {
+          return item && item.trim();
+        });
+      }
+    }
+    return arr;
   };
 }
 const exportAction = new Action();
