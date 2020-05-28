@@ -213,9 +213,10 @@ let callFunctions = {
       })
       placeSearch.searchNearBy('',position,radius,(status,result)=>{
         // 调用移动端的监听发送数据
-        window.getNearbyAddressInfo && 
+        window.getNearbyAddressInfo &&
+        result.poiList
+        &&
         window.getNearbyAddressInfo.postMessage(JSON.stringify(result.poiList));
-        
       })
     })
     // 调用启动监听
