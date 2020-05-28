@@ -26,7 +26,7 @@ import {
 } from "../../../components/PublicOverlays";
 import { Modify } from "ol/interaction";
 import { extend } from 'ol/extent'
-import { always } from "ol/events/condition";
+import { always,never } from "ol/events/condition";
 
 
 function Action() {
@@ -486,6 +486,7 @@ function Action() {
         let modify = new Modify({
           features: select.getFeatures(),
           condition: always,
+          insertVertexCondition:never
         });
         // 添加修改交互
         InitMap.map.addInteraction(modify);
