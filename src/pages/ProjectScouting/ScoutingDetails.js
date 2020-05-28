@@ -136,6 +136,7 @@ const ScoutingItem = ({
   onUploadPlanStart = ()=>{},
   onUploadPlanCancel = () => {},
   onChangeDisplay = ()=>{},
+  onEditPlanPic = ()=>{},
 }) => {
   
   let [ planExtent, setPlanExtent ] = useState("");
@@ -206,6 +207,7 @@ const ScoutingItem = ({
               key={item.id}>
                 <UploadItem 
                 onChangeDisplay={onChangeDisplay}
+                onEditPlanPic={onEditPlanPic}
                 areaList={areaList}
                 onSelectGroup={onSelectGroup}
                 type={Action.checkCollectionType(item.target)}  data={item} onRemove={onCollectionRemove}
@@ -298,7 +300,16 @@ const ScoutingItem2 = ({ data }) => {
     </Collapse>
   );
 };
-const UploadItem = ({ type ,data ,onRemove ,onEditCollection = ()=>{} ,areaList ,onSelectGroup, onChangeDisplay}) => {
+const UploadItem = ({ 
+  type ,
+  data ,
+  onRemove ,onEditCollection = ()=>{} ,
+  areaList ,
+  onSelectGroup, 
+  onChangeDisplay,
+  onEditPlanPic = ()=>{}
+}) => 
+{
   let [ visible  ,setVisible ] = useState(false);
   let [groupVisible , setGroupVisible ] = useState(false)
   let [ isEdit, setIsEdit ] = useState(false);
@@ -336,6 +347,11 @@ const UploadItem = ({ type ,data ,onRemove ,onEditCollection = ()=>{} ,areaList 
       onChangeDisplay && onChangeDisplay(data);
       setVisible(false);
     }
+    // 编辑规划图
+    if(key === 'editPlanPic'){
+      setVisible(false);
+      onEditPlanPic && onEditPlanPic(data);
+    }
   }
   // 分组列表
   const AreaItem = () => {
@@ -370,6 +386,12 @@ const UploadItem = ({ type ,data ,onRemove ,onEditCollection = ()=>{} ,areaList 
       <Menu.Item key='eidtTitle'>
         修改名称
       </Menu.Item>
+      {
+        data.collect_type === '5' && 
+        <Menu.Item key='editPlanPic'>
+          编辑
+        </Menu.Item>
+      }
       <Menu.Item key="selectGroup">
         <Popover
         overlayStyle={{zIndex:10000}}
@@ -431,7 +453,8 @@ const UploadItem = ({ type ,data ,onRemove ,onEditCollection = ()=>{} ,areaList 
     onClick={itemClick.bind(this, data)}
     >
       <div className={styles.uploadIcon + ` ${styles[type]}`}>
-        <span>{type === 'pic' ? <img src={data.resource_url} width='48px' alt='图片'/>: itemKeyVals[type]}</span>
+        <span>{type === 'pic' ? <img src={data.resource_url} width='48px' alt='图片' 
+        onError={(e)=> { e.target.src = ""; e.target.src = data.resource_url }}/>: itemKeyVals[type]}</span>
       </div>
       <div className={styles.uploadDetail}>
         <Row style={{width:'95%',textAlign:"left"}}
@@ -963,6 +986,7 @@ export default class ScoutingDetails extends PureComponent {
     }
   }
 
+  // 切换显示隐藏
   onChangeDisplay = (val, collection) => {
     // console.log(val, collection)
     let is_display = collection.is_display;
@@ -983,6 +1007,28 @@ export default class ScoutingDetails extends PureComponent {
       })
       this.reSetCollection(arr);
     })
+  }
+  // 编辑规划图
+  onEditPlanPic = (val,collection)=>{
+    // console.log(val,collection)
+    this.hideOtherSlide();
+    let img = Action.findImgLayer(collection.resource_id);
+    Action.setEditPlanPicLayer(img).then(resp => {
+      let param = {
+        extent: resp.extent.join(','),
+        transparency: resp.opacity
+      }
+      this.showOtherSlide();
+      Action.saveEditPlanPic(collection.resource_id, param).then(res => {
+        message.success(`修改${collection.title}成功`);
+        this.fetchCollection();
+      });
+    }).catch(err => {
+      if(err.code === -1)
+      message.warn(err.message);
+      else message.error(err.message);
+      this.showOtherSlide();
+    });
   }
 
   render(h) {
@@ -1065,7 +1111,8 @@ export default class ScoutingDetails extends PureComponent {
                       onEditCollection={this.onEditCollection}
                       onUploadPlanStart={this.onUploadPlanStart.bind(this,item)}
                       onUploadPlanCancel={this.onUploadPlanCancel}
-                      onChangeDisplay={this.onChangeDisplay.bind(this,item)}/>
+                      onChangeDisplay={this.onChangeDisplay.bind(this,item)}
+                      onEditPlanPic={this.onEditPlanPic.bind(this,item)}/>
                     </Collapse.Panel>
                   )
                 })

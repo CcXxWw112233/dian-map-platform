@@ -100,9 +100,25 @@ let callFunctions = {
   },
   // 停止记录
   stopRecord:({isRemoveLayer = false,coordinates,time})=>{
-    if(!callFunctions.line) return ;
-    callFunctions.lineMsg.push({coordinates,time})
+    if(!callFunctions.line) return console.log('没有线段记录');
+    
+    if(coordinates)
+    callFunctions.lineMsg.push({coordinates,time});
+
+    callFunctions.lineMsg = callFunctions.lineMsg.map(item => {
+      let obj = {
+        location: {
+          longitude: item.coordinates[0],
+          latitude: item.coordinates[1],
+          site_name:""
+        },
+        time: item.time
+      }
+      return obj;
+    })
+
     let string = JSON.stringify(callFunctions.lineMsg);
+    console.log('获取到了数据')
     if(!isRemoveLayer){
       console.log('获取数据保存')
       // let color = style.getStroke().getColor();
@@ -165,7 +181,7 @@ let callFunctions = {
         if(res.status === 200){
           let data = res.data;
           if(data.info === "OK"){
-            if(data.offset === 1)
+            if(offset === 1)
             resolve(data.pois[0]);
             else resolve(data.pois);
           }else{
@@ -187,7 +203,7 @@ let callFunctions = {
       let data = await callFunctions.getAddressForName({ address: locationName})
       // console.log(data);
       if(data){
-        position = data.location.split(',').map(item => +item);
+        position = data && data.location.split(',').map(item => +item);
       }
     }
     AMap.service(["AMap.PlaceSearch"], function() {

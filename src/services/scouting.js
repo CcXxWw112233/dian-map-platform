@@ -130,5 +130,14 @@ export default {
     // 规划图接口
     PLAN_IMG_URL: (id)=>{
         return `/api/map/ght/${id}/image`
+    },
+    // 保存修改的规划图
+    SAVE_EDIT_PLAN_IMG: async (id, data)=>{
+        let response = await request('PUT',`/map/ght/${id}/extent`,data);
+        if(BASIC.checkResponse(response)){
+            return response.data;
+        }
+
+        return Promise.reject(response && response.data);
     }
 }
