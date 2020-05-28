@@ -64,7 +64,8 @@ export default class BottomTollBar extends React.Component {
       let obj = {...val, ...val.position}
       let coordinate = getMyPosition.transformPosition(obj);
       // 将视图平移到坐标中心点
-      getMyPosition.setViewCenter(coordinate, 200);
+      getMyPosition.drawPosition({coordinate, isMove:true},false)
+      // getMyPosition.setViewCenter(coordinate, 200);
     });
   };
   toggleFullscreen = () => {

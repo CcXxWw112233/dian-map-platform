@@ -72,10 +72,11 @@ export const getMyPosition = {
     MAINMAP.map.removeLayer(this.layer);
   },
   // 渲染icon和圆
-  drawPosition: function(obj) {
+  drawPosition: function(obj,transform = true) {
     // this.getPosition().then(obj => {
       // 获取转换的地址
-      let coordinate = this.transformPosition(obj);
+      let coordinate = [];
+      coordinate = transform ? this.transformPosition(obj) : obj.coordinate;
       // 误差
       let radius = obj.accuracy*10 || 1050;
       // icon 绘制
