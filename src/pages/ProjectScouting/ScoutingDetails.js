@@ -1024,7 +1024,9 @@ export default class ScoutingDetails extends PureComponent {
         this.fetchCollection();
       });
     }).catch(err => {
-      message.error(err.message)
+      if(err.code === -1)
+      message.warn(err.message);
+      else message.error(err.message);
       this.showOtherSlide();
     });
   }

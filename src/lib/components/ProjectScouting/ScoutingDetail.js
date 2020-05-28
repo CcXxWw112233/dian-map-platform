@@ -626,6 +626,7 @@ function Action() {
           : [];
         let img = ImageStatic(PLAN_IMG_URL(resp.id), extent, {
           opacity: +resp.transparency,
+          minZoom: 10
         });
         let stati = img.getSource();
         // 添加规划图加载状态
