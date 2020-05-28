@@ -169,7 +169,7 @@ let callFunctions = {
         if(res.status === 200){
           let data = res.data;
           if(data.info === "OK"){
-            if(data.offset === 1)
+            if(offset === 1)
             resolve(data.pois[0]);
             else resolve(data.pois);
           }else{
@@ -191,7 +191,7 @@ let callFunctions = {
       let data = await callFunctions.getAddressForName({ address: locationName})
       // console.log(data);
       if(data){
-        position = data.location.split(',').map(item => +item);
+        position = data && data.location.split(',').map(item => +item);
       }
     }
     AMap.service(["AMap.PlaceSearch"], function() {
