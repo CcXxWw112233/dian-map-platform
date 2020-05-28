@@ -107,11 +107,9 @@ let callFunctions = {
 
     callFunctions.lineMsg = callFunctions.lineMsg.map(item => {
       let obj = {
-        location: {
-          longitude: item.coordinates[0],
-          latitude: item.coordinates[1],
-          site_name:""
-        },
+        longitude: item.coordinates[0],
+        latitude: item.coordinates[1],
+        site_name:"",
         time: item.time
       }
       return obj;
