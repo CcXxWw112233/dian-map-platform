@@ -100,9 +100,13 @@ let callFunctions = {
   },
   // 停止记录
   stopRecord:({isRemoveLayer = false,coordinates,time})=>{
-    if(!callFunctions.line) return ;
-    callFunctions.lineMsg.push({coordinates,time})
+    if(!callFunctions.line) return console.log('没有线段记录');
+    
+    if(coordinates)
+    callFunctions.lineMsg.push({coordinates,time});
+
     let string = JSON.stringify(callFunctions.lineMsg);
+    console.log('获取到了数据')
     if(!isRemoveLayer){
       console.log('获取数据保存')
       // let color = style.getStroke().getColor();

@@ -275,25 +275,34 @@ export const Layer = function (data) {
   return new VectorLayer({ ...data });
 };
 
-export const ImageStatic = function(url,extent,data){
+export const SourceStatic = function(url,extent,data){
   let projection = new Projection({
     code: 'xkcd-image',
     units: 'pixels',
     extent: extent
   });
+  return new Static({
+    crossOrigin:"anonymous",
+    url,
+    imageExtent: extent,
+    projection,
+    ...data,
+  })
+}
+
+export const ImageStatic = function(url,extent,data){
   return new Image({
-    source: new Static({
-      crossOrigin:"anonymous",
-      url,
-      imageExtent: extent,
-      projection,
-      ...data,
-    }),
+    source: SourceStatic(url,extent, data),
     ...data
   })
 }
 
-export const setSelectInteraction = function(data){
-  let select = new Select()
+export const setSelectInteraction = function(data = {}){
+  let select = new Select({
+    ...data
+  })
   return select;
 }
+
+// 适应范围后的调整
+export const fitPadding = [200, 150, 80, 400];
