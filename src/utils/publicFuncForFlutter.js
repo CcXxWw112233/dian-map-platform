@@ -105,6 +105,18 @@ let callFunctions = {
     if(coordinates)
     callFunctions.lineMsg.push({coordinates,time});
 
+    callFunctions.lineMsg = callFunctions.lineMsg.map(item => {
+      let obj = {
+        location: {
+          longitude: item.coordinates[0],
+          latitude: item.coordinates[1],
+          site_name:""
+        },
+        time: item.time
+      }
+      return obj;
+    })
+
     let string = JSON.stringify(callFunctions.lineMsg);
     console.log('获取到了数据')
     if(!isRemoveLayer){
