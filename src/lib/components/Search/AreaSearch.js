@@ -1,6 +1,5 @@
 import areaSearch from "services/areaSearch";
-import { Layer, Source } from "../../utils/index";
-import { createStyle, loadFeatureJSON } from "../../utils/index";
+import { Layer, Source, createStyle, loadFeatureJSON } from "../../utils/index";
 import mapApp from "utils/INITMAP";
 function Action() {
   const {
@@ -40,7 +39,7 @@ function Action() {
 
   this.addAreaGeomToMap = (geom) => {
     if (!this.layer) {
-      this.layer = Layer({ id: "scoutingDetailLayer", zIndex: 10 });
+      this.layer = Layer({ id: "areaLayer", zIndex: 10 });
       this.source = Source();
       this.layer.setSource(this.source);
       mapApp.map.addLayer(this.layer);

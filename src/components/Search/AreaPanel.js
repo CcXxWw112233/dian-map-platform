@@ -1,5 +1,5 @@
 import React from "react";
-import styles from "./Search.less";
+import styles from "./Panel.less";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import animateCss from "../../assets/css/animate.min.css";
 import exportAction from "@/lib/components/Search/AreaSearch";
@@ -30,7 +30,7 @@ export default class AreaPanel extends React.Component {
       villageDisabled: true,
       okDisabled: true,
 
-      locationName: ""
+      locationName: "",
     };
   }
   componentDidMount() {
@@ -150,7 +150,7 @@ export default class AreaPanel extends React.Component {
     exportAction.getGeom(code).then((res) => {
       if (res.code === "0") {
         if (res.data && res.data.geom) {
-          exportAction.addAreaGeomToMap(res.data.geom)
+          exportAction.addAreaGeomToMap(res.data.geom);
         }
       }
     });
@@ -167,30 +167,32 @@ export default class AreaPanel extends React.Component {
       cityOptions,
       districtOptions,
       townOptions,
-      villageOptions
+      villageOptions,
     } = this.state;
     let currentCode = 0;
-    let currentLocation = ""
-    let currentOptions = null
+    let currentLocation = "";
+    let currentOptions = null;
     // 如果省份code空
     if (villageCode) {
       currentCode = villageCode;
-      currentOptions = villageOptions
+      currentOptions = villageOptions;
     } else if (townCode) {
       currentCode = townCode;
-      currentOptions = townOptions
+      currentOptions = townOptions;
     } else if (districtCode) {
       currentCode = districtCode;
-      currentOptions = districtOptions
+      currentOptions = districtOptions;
     } else if (cityCode) {
       currentCode = cityCode;
-      currentOptions = cityOptions
+      currentOptions = cityOptions;
     } else if (provinceCode) {
       currentCode = provinceCode;
-      currentOptions = provinceOptions
+      currentOptions = provinceOptions;
     }
-    currentLocation = currentOptions.filter(option => {return option.code === currentCode})[0].name
-    this.props.updateLocationName(currentLocation)
+    currentLocation = currentOptions.filter((option) => {
+      return option.code === currentCode;
+    })[0].name;
+    this.props.updateLocationName(currentLocation);
     this.getGeomByCode(currentCode);
   };
 
@@ -217,16 +219,6 @@ export default class AreaPanel extends React.Component {
       <div
         className={`${styles.locatePanel} ${animateCss.animated} ${animateCss.backInDown}`}
       >
-        <div className={styles.locatePanelHeader}>
-          <span>选择地址</span>
-          <i
-            className={`${globalStyle.global_icon} ${globalStyle.btn}`}
-            style={{ fontSize: 14, float: "right" }}
-            onClick={handleClose}
-          >
-            &#xe607;
-          </i>
-        </div>
         <div className={styles.locatePanelBody}>
           <Select
             className={styles.select}
