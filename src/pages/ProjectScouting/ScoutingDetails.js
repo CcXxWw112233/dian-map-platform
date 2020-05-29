@@ -883,15 +883,19 @@ export default class ScoutingDetails extends PureComponent {
 
   componentWillUnmount() {
     const { dispatch, config: lengedList } = this.props;
+    let newLengedList = lengedList;
+    if (!Array.isArray(lengedList)) {
+      newLengedList = [lengedList];
+    }
     const key = Action.lenged?.key;
-    const index = lengedList.findIndex((item) => {
+    const index = newLengedList.findIndex((item) => {
       return item.key === key;
     });
-    lengedList.splice(index, 1);
+    newLengedList.splice(index, 1);
     dispatch({
       type: "lengedList/updateLengedList",
       payload: {
-        config: lengedList,
+        config: newLengedList,
       },
     });
     Action.removeLayer();

@@ -54,7 +54,7 @@ function Action() {
   };
   this.boxFeature = {};
   this.draw = null;
-  this.lenged = null
+  this.lenged = null;
 
   // 通过范围获取坐标点
   let getBoxCoordinates = (extent) => {
@@ -374,6 +374,9 @@ function Action() {
     let newConfig = [];
     if (!lenged) {
       lenged = [];
+    }
+    if (!Array.isArray(lenged)) {
+      lenged = [lenged];
     }
     const lengedIndex = lenged.findIndex(
       (lenged) => lenged.key === this.lenged.key

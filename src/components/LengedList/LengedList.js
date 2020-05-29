@@ -103,9 +103,15 @@ export default class LengedList extends PureComponent {
     });
   };
   render() {
+    debugger
     const { config: lengedList, lengedSwitch, showLengedButton } = this.props;
-    const newConfig = Array.from(new Set(lengedList || []));
-    this.lastConfig = lengedList || [];
+    let newConfig = [];
+    let newLengedList = lengedList;
+    if (!Array.isArray(newLengedList)) {
+      newLengedList = [lengedList];
+    }
+    newConfig = Array.from(new Set(newLengedList));
+    this.lastConfig = newLengedList || [];
     const baseStyle = { position: "absolute", bottom: 0, right: 0, width: 322 };
     let style = baseStyle;
     if (!lengedSwitch) {
@@ -146,7 +152,7 @@ export default class LengedList extends PureComponent {
             style={{ height: "calc(100% - 80px)" }}
             className={globalStyle.autoScrollY}
           >
-            {lengedList.length > 0 ? (
+            {newConfig.length > 0 ? (
               <Lenged data={newConfig}></Lenged>
             ) : (
               this.createNULL()
