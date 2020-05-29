@@ -9,6 +9,7 @@ import styles from "./Search.less";
 import AreaPanel from "./AreaPanel";
 import LocationPanel from "./LocationPanel";
 import { getMyPosition } from "utils/getMyPosition";
+import { BASIC } from "../../services/config";
 
 import { connect } from "dva";
 
@@ -62,21 +63,24 @@ export default class Search extends React.Component {
     );
   };
   handleSearchInputChange = (e) => {
-    const address = e.target.value;
-    this.setState({
-      showArea: false,
-      showLocation: true,
-      searchVal: address,
-    });
-    const { locationName } = this.state;
-    if (address === "") {
-      commonSearchAction.removePOI();
+    const token = BASIC.getUrlParam.token;
+    if (token) {
+      const address = e.target.value;
       this.setState({
-        searchPanelVisible: false,
-        searchResult: [],
+        showArea: false,
+        showLocation: true,
+        searchVal: address,
       });
+      const { locationName } = this.state;
+      if (address === "") {
+        commonSearchAction.removePOI();
+        this.setState({
+          searchPanelVisible: false,
+          searchResult: [],
+        });
+      }
+      this.handleSearch(address, locationName, 10);
     }
-    this.handleSearch(address, locationName, 10);
   };
 
   // handleSearch = (address, locationName, offset) => {
