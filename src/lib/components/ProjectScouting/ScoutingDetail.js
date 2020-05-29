@@ -17,7 +17,7 @@ import {
   ImageStatic,
   setSelectInteraction,
   fitPadding,
-  SourceStatic
+  SourceStatic,
 } from "../../utils/index";
 import {
   CollectionOverlay,
@@ -25,9 +25,8 @@ import {
   areaDetailOverlay,
 } from "../../../components/PublicOverlays";
 import { Modify } from "ol/interaction";
-import { extend } from 'ol/extent'
-import { always,never } from "ol/events/condition";
-
+import { extend } from "ol/extent";
+import { always, never } from "ol/events/condition";
 
 function Action() {
   const {
@@ -41,7 +40,7 @@ function Action() {
     EDIT_AREA_NAME,
     GET_PLAN_PIC,
     PLAN_IMG_URL,
-    SAVE_EDIT_PLAN_IMG
+    SAVE_EDIT_PLAN_IMG,
   } = config;
   this.activeFeature = {};
   this.Layer = Layer({ id: "scoutingDetailLayer", zIndex: 11 });
@@ -58,16 +57,16 @@ function Action() {
 
   // 通过范围获取坐标点
   let getBoxCoordinates = (extent) => {
-    if(extent.length){
-      let LT = getPoint(extent,'topLeft');
-      let RT = getPoint(extent,'topRight');
-      let BL = getPoint(extent,'bottomLeft');
-      let BR = getPoint(extent,'bottomRight');
+    if (extent.length) {
+      let LT = getPoint(extent, "topLeft");
+      let RT = getPoint(extent, "topRight");
+      let BL = getPoint(extent, "bottomLeft");
+      let BR = getPoint(extent, "bottomRight");
 
-      return [LT,RT,BR,BL,LT];
+      return [LT, RT, BR, BL, LT];
     }
     return [];
-  }
+  };
 
   this.removeListPoint = () => {
     // 删除已经存在的项目列表
@@ -94,8 +93,9 @@ function Action() {
         "docx",
         "zip",
         "rar",
+        "txt",
         "xmind",
-        'pdf'
+        "pdf",
       ].map((item) => item.toLocaleLowerCase()),
       annotate: [], // 批注
       plotting: ["feature"], // 标绘
@@ -187,7 +187,7 @@ function Action() {
       InitMap.map.removeOverlay(item);
     });
     this.overlays = [];
-    if(this.polygonOverlay){
+    if (this.polygonOverlay) {
       this.polygonOverlay.setPosition(null);
       InitMap.map.removeOverlay(this.polygonOverlay);
     }
@@ -230,24 +230,24 @@ function Action() {
   };
 
   // 查找feature
-  this.findFeature = (id)=>{
-    for(let i = 0; i< this.features.length; i++){
+  this.findFeature = (id) => {
+    for (let i = 0; i < this.features.length; i++) {
       let item = this.features[i];
-      if(item.get('id') && item.get('id') === id){
-        return item ;
-      }
-    }
-  }
-
-  // 查找规划图
-  this.findImgLayer = (id)=>{
-    for(let i = 0; i< this.imgs.length; i++){
-      let item = this.imgs[i];
-      if(item.get('id') && item.get('id') === id){
+      if (item.get("id") && item.get("id") === id) {
         return item;
       }
     }
-  }
+  };
+
+  // 查找规划图
+  this.findImgLayer = (id) => {
+    for (let i = 0; i < this.imgs.length; i++) {
+      let item = this.imgs[i];
+      if (item.get("id") && item.get("id") === id) {
+        return item;
+      }
+    }
+  };
 
   // 渲染标绘数据
   this.renderFeaturesCollection = (data, { lengedConfig, dispatch }) => {
@@ -271,12 +271,12 @@ function Action() {
       // console.log(item)
       content = content && JSON.parse(content);
       let featureType = content.featureType || "";
-      let strokeColor = content.strokeColor || ""
+      let strokeColor = content.strokeColor || "";
       let isImage = false;
       let iconUrl = "";
       let obj = null;
       const hasIndex = projectScouting.content.findIndex(
-        (item0) => item0.font === (content.selectName || content.name)
+        (item0) => item0.font === content.selectName
       );
       const featureLowerType = content.geoType.toLowerCase();
       if (featureType.indexOf("/") > -1) {
@@ -286,7 +286,10 @@ function Action() {
         if (hasIndex < 0) {
           obj = {
             imgSrc: iconUrl,
-            font: content.selectName || content.name,
+            font:
+              content.selectName === "自定义类型"
+                ? content.name
+                : content.selectName,
             type: featureLowerType,
           };
           projectScouting.content.push(obj);
@@ -295,7 +298,10 @@ function Action() {
         if (hasIndex < 0) {
           obj = {
             bgColor: featureType,
-            font: content.selectName || content.name,
+            font:
+              content.selectName === "自定义类型"
+                ? content.name
+                : content.selectName,
             type: featureLowerType,
           };
           projectScouting.content.push(obj);
@@ -425,7 +431,9 @@ function Action() {
         if (this.features.length)
           Fit(
             InitMap.view,
-            ext.length ? extend(ext,this.Source.getExtent()) : this.Source.getExtent(),
+            ext.length
+              ? extend(ext, this.Source.getExtent())
+              : this.Source.getExtent(),
             {
               size: InitMap.map.getSize(),
               padding: fitPadding,
@@ -436,26 +444,29 @@ function Action() {
   };
 
   // type coordinate or extent
-  this.toCenter = ({center  , type = 'coordinate' ,duration = 800 ,zoom})=>{
-    if(type === "coordinate"){
+  this.toCenter = ({ center, type = "coordinate", duration = 800, zoom }) => {
+    if (type === "coordinate") {
       center = TransformCoordinate(center);
       InitMap.view.animate({
-        center:center,
-        zoom:zoom ? zoom : InitMap.view.getMaxZoom() - 2,
-        duration
-      })
+        center: center,
+        zoom: zoom ? zoom : InitMap.view.getMaxZoom() - 2,
+        duration,
+      });
+    } else if (type === "extent") {
+      Fit(InitMap.view, center, {
+        size: InitMap.map.getSize(),
+        padding: fitPadding,
+        duration,
+      });
     }
-    else if(type === 'extent'){
-      Fit( InitMap.view , center , { size: InitMap.map.getSize(), padding:fitPadding, duration });
-    }
-  }
+  };
 
   // 添加规划图编辑功能
-  this.setEditPlanPicLayer = (staticImg)=>{
-    return new Promise((resolve,reject)=>{
-      if(staticImg){
+  this.setEditPlanPicLayer = (staticImg) => {
+    return new Promise((resolve, reject) => {
+      if (staticImg) {
         // 保存老的source源
-        let oldSource = staticImg.getSource()
+        let oldSource = staticImg.getSource();
         // 保存图片地址
         let url = oldSource.getUrl();
         // 保存图层的范围
@@ -463,23 +474,23 @@ function Action() {
         // 通过范围获取到坐标绘制polygon
         let coor = getBoxCoordinates(extent);
         // 创建polygon
-        let box = addFeature('Polygon',{
-          coordinates:[coor],
-          ftype:'editImageLayer'
-        })
+        let box = addFeature("Polygon", {
+          coordinates: [coor],
+          ftype: "editImageLayer",
+        });
         // 添加元素
         this.Source.addFeature(box);
         // 添加select
         let select = setSelectInteraction({
           // 做一个判断过滤不需要交互的元素
-          filter:(feature,layer) => {
-            if(layer.get('id') !== 'scoutingDetailLayer'){
+          filter: (feature, layer) => {
+            if (layer.get("id") !== "scoutingDetailLayer") {
               return false;
             }
-            if(feature.get('ftype') === 'editImageLayer'){
+            if (feature.get("ftype") === "editImageLayer") {
               return true;
             }
-          }
+          },
         });
         // 添加交互
         InitMap.map.addInteraction(select);
@@ -487,28 +498,26 @@ function Action() {
         let modify = new Modify({
           features: select.getFeatures(),
           condition: always,
-          insertVertexCondition:never
+          insertVertexCondition: never,
         });
         // 添加修改交互
         InitMap.map.addInteraction(modify);
-        
-  
+
         // 添加右上角的弹框
         let ele = new settingsOverlay();
         // 创建overlay
-        let overlay = createOverlay(ele.element,{
-          position:coor[1]
+        let overlay = createOverlay(ele.element, {
+          position: coor[1],
         });
         // 添加overlay
         InitMap.map.addOverlay(overlay);
-        
+
         // 修改的事件
-        modify.on('modifyend',(e)=>{
-          
+        modify.on("modifyend", (e) => {
           // console.log(e)
           let { features } = e;
           let feature = features.getArray()[0];
-          if(feature){
+          if (feature) {
             let ext = feature.getGeometry().getExtent();
             // 如果有修改,更新新的source,
             let source = SourceStatic(url, ext);
@@ -519,33 +528,33 @@ function Action() {
             // 更新数据源
             staticImg.setSource(source);
           }
-        })
+        });
 
         // 设置默认值
         staticImg.setOpacity(ele.opacityValue);
         // 弹框上面的交互事件
         ele.on = {
-          change: (opacity)=>{
-            staticImg.setOpacity(opacity)
+          change: (opacity) => {
+            staticImg.setOpacity(opacity);
           },
-          enter: (val)=>{
+          enter: (val) => {
             closeAll();
             // console.log(val)
             let ext = staticImg.getSource().getImageExtent();
             let opacity = val.opacity;
-            let obj = {extent: ext, opacity}
+            let obj = { extent: ext, opacity };
             resolve(obj);
           },
-          cancel: ()=>{
+          cancel: () => {
             // 更新回原来的数据源
             staticImg.setSource(oldSource);
-            reject({code:-1,message:"取消编辑"});
-            closeAll()
-          }
-        }
+            reject({ code: -1, message: "取消编辑" });
+            closeAll();
+          },
+        };
 
         // 释放所有事件
-        let closeAll = ()=>{
+        let closeAll = () => {
           InitMap.map.removeInteraction(select);
           select = null;
           InitMap.map.removeInteraction(modify);
@@ -554,19 +563,17 @@ function Action() {
           overlay = null;
           this.Source.removeFeature(box);
           box = null;
-        }
-
-      }else{
-        reject({code : -1, message:"缺少规划图的图层"})
+        };
+      } else {
+        reject({ code: -1, message: "缺少规划图的图层" });
       }
-    })
-    
-  }
+    });
+  };
 
   // 保存编辑的规划图数据
-  this.saveEditPlanPic = async (id,data) => {
-    return await SAVE_EDIT_PLAN_IMG(id,data)
-  }
+  this.saveEditPlanPic = async (id, data) => {
+    return await SAVE_EDIT_PLAN_IMG(id, data);
+  };
 
   //   删除已存在的规划图
   this.removePlanPicCollection = () => {
@@ -575,36 +582,37 @@ function Action() {
     window.stop();
   };
 
-
   let _that = this;
 
   // 加载规划图,可以自定义
-  let loading = function(staticimg,extent,resp){
+  let loading = function (staticimg, extent, resp) {
     // 规划图加载状态
-    this.box = '';
-    staticimg.on('imageloadstart',(e)=>{
+    this.box = "";
+    staticimg.on("imageloadstart", (e) => {
       let coor = getBoxCoordinates(extent);
-      this.box = addFeature('Polygon',{
-        coordinates: [coor]
-      })
-      this.box.setStyle(createStyle('Polygon',{
-        showName:true,
-        text: '加载中...',
-        textFillColor:'rgb(255,0,0)',
-        textStrokeColor:"rgba(255,255,255,0.8)",
-        font:16,
-        fillColor:"rgba(0,0,0,0.25)"
-      }))
+      this.box = addFeature("Polygon", {
+        coordinates: [coor],
+      });
+      this.box.setStyle(
+        createStyle("Polygon", {
+          showName: true,
+          text: "加载中...",
+          textFillColor: "rgb(255,0,0)",
+          textStrokeColor: "rgba(255,255,255,0.8)",
+          font: 16,
+          fillColor: "rgba(0,0,0,0.25)",
+        })
+      );
       _that.Source.addFeature(this.box);
-    })
-    staticimg.on('imageloadend',(e)=>{
+    });
+    staticimg.on("imageloadend", (e) => {
       _that.Source.removeFeature(this.box);
-    })
+    });
 
-    staticimg.on('imageloaderror',()=>{
+    staticimg.on("imageloaderror", () => {
       _that.Source.removeFeature(this.box);
-    })
-  }
+    });
+  };
 
   //   渲染规划图
   this.renderPlanPicCollection = async (data) => {
@@ -620,37 +628,36 @@ function Action() {
     this.imgs = [];
     let res = await Promise.all(promise);
     // .then((res) => {
-      this.imgs = [];
-      res.forEach((item) => {
-        let resp = item.data;
-        let extent = resp.extent
-          ? resp.extent.split(",").map((e) => parseFloat(e))
-          : [];
-        let img = ImageStatic(PLAN_IMG_URL(resp.id), extent, {
-          opacity: +resp.transparency,
-          minZoom: 10
-        });
-        let stati = img.getSource();
-        // 添加规划图加载状态
-        new loading(stati,extent,resp);
-        img.set('id',resp.id);
-        this.imgs.push(img);
-        // 合并范围-使缩放的时候，可以适应到规划图的位置
-        if(!ext.length){
-          ext = [...extent];
-        }else{
-          ext = extend(ext,[...extent])
-        }
+    this.imgs = [];
+    res.forEach((item) => {
+      let resp = item.data;
+      let extent = resp.extent
+        ? resp.extent.split(",").map((e) => parseFloat(e))
+        : [];
+      let img = ImageStatic(PLAN_IMG_URL(resp.id), extent, {
+        opacity: +resp.transparency,
+        minZoom: 10,
       });
+      let stati = img.getSource();
+      // 添加规划图加载状态
+      new loading(stati, extent, resp);
+      img.set("id", resp.id);
+      this.imgs.push(img);
+      // 合并范围-使缩放的时候，可以适应到规划图的位置
+      if (!ext.length) {
+        ext = [...extent];
+      } else {
+        ext = extend(ext, [...extent]);
+      }
+    });
 
-      this.imgs.forEach((item) => {
-        //   console.log(item)
-        InitMap.map.addLayer(item);
-      });
+    this.imgs.forEach((item) => {
+      //   console.log(item)
+      InitMap.map.addLayer(item);
+    });
 
-      return ext;
+    return ext;
     // });
-
   };
 
   //   添加元素坐标的overlay
@@ -691,7 +698,10 @@ function Action() {
   this.createImg = (url, extent, data = {}) => {
     this.staticimg && InitMap.map.removeLayer(this.staticimg);
 
-    this.staticimg = ImageStatic(url, extent, {className:'staticImg',...data});
+    this.staticimg = ImageStatic(url, extent, {
+      className: "staticImg",
+      ...data,
+    });
     InitMap.map.addLayer(this.staticimg);
   };
 
@@ -712,35 +722,39 @@ function Action() {
   this.addAreaSelect = () => {
     this.removeAreaSelect();
     this.areaSelect = setSelectInteraction({
-      filter:(feature, layer)=>{
-        if(layer && layer.get('id') !== 'scoutingDetailLayer'){
+      filter: (feature, layer) => {
+        if (layer && layer.get("id") !== "scoutingDetailLayer") {
           return false;
         }
-        if(feature && !feature.get('collect_type') || feature.getGeometry().getType !== 'Polygon' || !feature.get('remark')){
+        if (
+          (feature && !feature.get("collect_type")) ||
+          feature.getGeometry().getType !== "Polygon" ||
+          !feature.get("remark")
+        ) {
           return false;
         }
 
         return true;
-      }
+      },
     });
     InitMap.map.addInteraction(this.areaSelect);
 
-    this.areaSelect.on('select',(e)=>{
+    this.areaSelect.on("select", (e) => {
       let selected = e.selected[0];
-      if(selected){
-        if(this.polygonOverlay){
+      if (selected) {
+        if (this.polygonOverlay) {
           this.polygonOverlay.setPosition(null);
           InitMap.map.removeOverlay(this.polygonOverlay);
         }
-        this.addSelectOverlay(selected)
-      }else{
-        if(this.polygonOverlay){
+        this.addSelectOverlay(selected);
+      } else {
+        if (this.polygonOverlay) {
           this.polygonOverlay.setPosition(null);
           InitMap.map.removeOverlay(this.polygonOverlay);
         }
       }
-    })
-    // 
+    });
+    //
   };
 
   // 点击的时候添加overlay
