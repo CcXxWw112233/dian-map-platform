@@ -349,10 +349,9 @@ export default class ProjectModal extends React.Component {
           geom: `POINT(${newGeom})`,
           icon_url: featureTypeState,
           featureType: featureTypeState,
-          strokeColor: featureOperator.feature
-            .getStyle()
-            .getStroke()
-            .getColor(),
+          strokeColor:
+            featureOperator.feature.getStyle().getStroke()?.getColor() ||
+            this.state.strokeColorStyle,
           main_id: "",
           name: featureNameState,
           remark: remarksState,

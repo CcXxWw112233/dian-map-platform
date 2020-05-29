@@ -143,7 +143,7 @@ export default class LengedList extends PureComponent {
             })}
           </div>
           <div
-            style={{ height: "calc(100% - 108px)" }}
+            style={{ height: "calc(100% - 80px)" }}
             className={globalStyle.autoScrollY}
           >
             {config.length > 0 ? (
