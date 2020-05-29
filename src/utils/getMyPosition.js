@@ -6,6 +6,9 @@ import { Icon, Style, Fill, Stroke } from "ol/style";
 import { Point, Circle } from "ol/geom";
 import { Feature } from "ol";
 
+import { BASIC } from "../services/config";
+let isMobile = BASIC.getUrlParam.isMobile;
+
 const iconpoint = require("../assets/loc.png");
 
 export const getMyPosition = {
@@ -18,6 +21,8 @@ export const getMyPosition = {
   geolacation: null,
   source: null,
   layer: null,
+  hasMoveendListener: false,
+
   // 获取位置信息
   getPosition: function () {
     let _this = this;
@@ -131,7 +136,7 @@ export const getMyPosition = {
     MAINMAP.map.addLayer(this.layer);
 
     // 视图移动
-    if (obj.isMove) this.setViewCenter(coordinate, 1000, 18);
+    if (obj.isMove) this.setViewCenter(coordinate, 1000);
     // })
   },
 
@@ -159,8 +164,14 @@ export const getMyPosition = {
   },
   // 定位视角
   setViewCenter: function (coordinate, timer, zoom) {
+    if (isMobile && !this.hasMoveendListener) {
+      this.hasMoveendListener = true;
+      MAINMAP.map.on("moveend", function (e) {
+        zoom = Math.round(MAINMAP.map.getView().getZoom());
+      });
+    }
     timer = timer || 0;
-    zoom = zoom || 13;
+    zoom = zoom || 18;
     clearTimeout(this.viewTimer);
     this.viewTimer = setTimeout(() => {
       MAINMAP.view.animate({

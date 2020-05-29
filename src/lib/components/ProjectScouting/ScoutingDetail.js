@@ -252,7 +252,6 @@ function Action() {
 
   // 渲染标绘数据
   this.renderFeaturesCollection = (data, { lenged, dispatch }) => {
-    debugger
     const commonStyleOption = {
       textFillColor: "rgba(255,0,0,1)",
       textStrokeColor: "#fff",
