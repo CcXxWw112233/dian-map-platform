@@ -8,6 +8,7 @@ import commonSearchAction from "@/lib/components/Search/CommonSeach";
 import styles from "./Search.less";
 import AreaPanel from "./AreaPanel";
 import LocationPanel from "./LocationPanel";
+import { getMyPosition } from "utils/getMyPosition";
 
 import { connect } from "dva";
 
@@ -16,7 +17,7 @@ export default class Search extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      locationName: "深圳市",
+      locationName: "中国",
       showArea: false,
       showLocation: false,
       searchResult: [],
@@ -26,6 +27,13 @@ export default class Search extends React.Component {
       searchVal: "",
     };
     this.handleSearch = throttle(this.handleSearch, 1000);
+  }
+  componentDidMount() {
+    getMyPosition.getPosition().then((val) => {
+      this.setState({
+        locationName: val.addressComponent.city || this.state.locationName,
+      });
+    });
   }
   handleAreaClick = () => {
     this.setState({
@@ -87,7 +95,8 @@ export default class Search extends React.Component {
     this.setState({
       searchLoading: true,
     });
-    commonSearchAction.getPOI(address, locationName, offset)
+    commonSearchAction
+      .getPOI(address, locationName, offset)
       .then((res) => {
         const scoutingProjectList = this.props.projectList.filter((item) => {
           return item.board_name.indexOf(address) > -1;

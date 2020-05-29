@@ -57,6 +57,10 @@ export default class AreaPanel extends React.Component {
         okDisabled: false,
       },
       () => {
+        const name = this.state.provinceOptions.filter((item) => {
+          return item.code === val;
+        })[0].name;
+        this.props.updateLocationName(name);
         const { provinceCode } = this.state;
         areaSearchAction.getCity(provinceCode).then((res) => {
           if (res.code === "0") {
@@ -82,6 +86,10 @@ export default class AreaPanel extends React.Component {
         villageDisabled: true,
       },
       () => {
+        const name = this.state.cityOptions.filter((item) => {
+          return item.code === val;
+        })[0].name;
+        this.props.updateLocationName(name);
         const { cityCode } = this.state;
         areaSearchAction.getDistrict(cityCode).then((res) => {
           if (res.code === "0") {
@@ -104,6 +112,10 @@ export default class AreaPanel extends React.Component {
         villageDisabled: true,
       },
       () => {
+        const name = this.state.districtOptions.filter((item) => {
+          return item.code === val;
+        })[0].name;
+        this.props.updateLocationName(name);
         const { districtCode } = this.state;
         areaSearchAction.getTown(districtCode).then((res) => {
           if (res.code === "0") {
@@ -125,6 +137,10 @@ export default class AreaPanel extends React.Component {
         villageDisabled: false,
       },
       () => {
+        const name = this.state.townOptions.filter((item) => {
+          return item.code === val;
+        })[0].name;
+        this.props.updateLocationName(name);
         const { townCode } = this.state;
         areaSearchAction.getVillige(townCode).then((res) => {
           if (res.code === "0") {
@@ -214,10 +230,7 @@ export default class AreaPanel extends React.Component {
       okDisabled,
     } = this.state;
     return (
-      <div
-        className={styles.locatePanel}
-        style = {{ padding: 10 }}
-      >
+      <div className={styles.locatePanel} style={{ padding: 10 }}>
         <div className={styles.locatePanelBody}>
           <Select
             className={styles.select}
