@@ -86,7 +86,7 @@ export const getPoint = function (extent, type = "center") {
     case "bottomRight":
       return getBottomRight(extent);
     case "bottomLeft":
-      return getBottomLeft(extent)
+      return getBottomLeft(extent);
     default:
       return getCenter(extent);
   }
@@ -167,7 +167,10 @@ export const createStyle = function (
         fill: new Fill({
           color: options.textFillColor || defaultColor,
         }),
-        font: typeof options.font === 'number' ? options.font +'px sans-serif':options.font,
+        font:
+          typeof options.font === "number"
+            ? options.font + "px sans-serif"
+            : options.font,
         stroke: new Stroke({
           color: options.textStrokeColor || defaultColor,
           width: options.textStrokeWidth || 2,
@@ -235,7 +238,7 @@ export const TransformCoordinate = (
 };
 
 export const Fit = (view, extent, option, duration = 1000) => {
-  if (view) {
+  if (view && extent[0] !== Infinity) {
     view.cancelAnimations();
     view.fit(extent, { duration, padding: [200, 150, 80, 400], ...option });
   }
@@ -275,34 +278,34 @@ export const Layer = function (data) {
   return new VectorLayer({ ...data });
 };
 
-export const SourceStatic = function(url,extent,data){
+export const SourceStatic = function (url, extent, data) {
   let projection = new Projection({
     code: "xkcd-image",
     units: "pixels",
     extent: extent,
   });
   return new Static({
-    crossOrigin:"anonymous",
+    crossOrigin: "anonymous",
     url,
     imageExtent: extent,
     projection,
     ...data,
-  })
-}
+  });
+};
 
-export const ImageStatic = function(url,extent,data){
+export const ImageStatic = function (url, extent, data) {
   return new Image({
-    source: SourceStatic(url,extent, data),
-    ...data
-  })
-}
+    source: SourceStatic(url, extent, data),
+    ...data,
+  });
+};
 
-export const setSelectInteraction = function(data = {}){
+export const setSelectInteraction = function (data = {}) {
   let select = new Select({
-    ...data
-  })
+    ...data,
+  });
   return select;
-}
+};
 
 // 适应范围后的调整
 export const fitPadding = [200, 150, 80, 400];

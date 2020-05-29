@@ -169,7 +169,7 @@ export default class Search extends React.Component {
     return (
       <div className={styles.wrap} style={this.props.style}>
         <Dropdown overlay={areaPanel}>
-          <Button>
+          <Button style={{ borderRadius: 0 }}>
             {this.state.locationName}
             <DownOutlined />
           </Button>
