@@ -37,11 +37,14 @@ import TempPlottingIcon from "components/TempPlotting/TempPlottingIcon";
 import TempPlottingPanel from "components/TempPlotting/TempPlottingPanel";
 
 @connect(
-  ({ controller: { mainVisible }, openswitch: { toolBars, bottomTools, searchTools } }) => ({
+  ({
+    controller: { mainVisible },
+    openswitch: { toolBars, bottomTools, searchTools },
+  }) => ({
     mainVisible,
     toolBars,
     bottomTools,
-    searchTools
+    searchTools,
   })
 )
 class IndexPage extends React.Component {
@@ -215,7 +218,12 @@ class IndexPage extends React.Component {
         {/* <SketchPicker></SketchPicker> */}
         {toolBars && <ToolBar></ToolBar>}
         {bottomTools && <BottomToolBar></BottomToolBar>}
-        {searchTools && <SearchToolBar style={SearchToolBarStyle}></SearchToolBar>}
+        {searchTools && (
+          <SearchToolBar
+            style={SearchToolBarStyle}
+            isOnMap={true}
+          ></SearchToolBar>
+        )}
         <TempPlottingIcon></TempPlottingIcon>
         <TempPlottingPanel></TempPlottingPanel>
         <LengedList></LengedList>

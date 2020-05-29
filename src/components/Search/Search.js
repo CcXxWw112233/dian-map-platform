@@ -98,9 +98,12 @@ export default class Search extends React.Component {
     commonSearchAction
       .getPOI(address, locationName, offset)
       .then((res) => {
-        const scoutingProjectList = this.props.projectList.filter((item) => {
-          return item.board_name.indexOf(address) > -1;
-        });
+        let scoutingProjectList = [];
+        if (!this.props.isOnMap) {
+          scoutingProjectList = this.props.projectList.filter((item) => {
+            return item.board_name.indexOf(address) > -1;
+          });
+        }
         this.setState({
           searchResult: scoutingProjectList.concat(res),
           searchLoading: false,

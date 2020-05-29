@@ -8,13 +8,13 @@ import {
   myDragZoom,
 } from "utils/drawing/public";
 import { getMyPosition } from "utils/getMyPosition";
-import { downloadCapture } from '../../utils/captureMap'
+import { downloadCapture } from "../../utils/captureMap";
 export default class BottomTollBar extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       isFull: false,
-      fullcreenIcon: "&#xe7f3;"
+      fullcreenIcon: "&#xe7f3;",
     };
     this.config = [
       {
@@ -49,11 +49,11 @@ export default class BottomTollBar extends React.Component {
         cb: this.getMyCenter,
       },
       {
-        name:"下载截图",
-        key:"downloadcapture",
-        icon:"&#xe7ae;",
-        cb: downloadCapture
-      }
+        name: "下载截图",
+        key: "downloadcapture",
+        icon: "&#xe7ae;",
+        cb: downloadCapture,
+      },
     ];
   }
   getMyCenter = () => {
@@ -61,13 +61,12 @@ export default class BottomTollBar extends React.Component {
     getMyPosition.getPosition().then((val) => {
       // let coor = [114.11533,23.66666]
       // 转换地理坐标EPSG:4326 到 EPSG:3857
-      let obj = {...val, ...val.position}
+      let obj = { ...val, ...val.position };
       // let coordinate = getMyPosition.transformPosition(obj);
       // 将视图平移到坐标中心点
-      if(getMyPosition.positionCircle || getMyPosition.positionIcon){
+      if (getMyPosition.positionCircle || getMyPosition.positionIcon) {
         getMyPosition.setPosition([+obj.lng, +obj.lat]);
-      }else
-      getMyPosition.drawPosition({...obj, isMove:true});
+      } else getMyPosition.drawPosition({ ...obj, isMove: true });
       // getMyPosition.setViewCenter(coordinate, 200);
     });
   };
@@ -92,12 +91,23 @@ export default class BottomTollBar extends React.Component {
   };
   render() {
     return (
-      <div style={{ position: "absolute", left: "45%", bottom: 0 }}>
+      <div
+        style={{
+          position: "absolute",
+          left: "50%",
+          bottom: 0,
+          transform: "translateX(-50%)",
+        }}
+      >
         {this.config.map((item) => {
           const icon = item.toggleIcon ? this.state.fullcreenIcon : item.icon;
           return (
-            <Button key={item.key} title={item.name} onClick={item.cb}
-            style={{fontSize:'1rem',height:"auto"}}>
+            <Button
+              key={item.key}
+              title={item.name}
+              onClick={item.cb}
+              style={{ fontSize: "1rem", height: "auto" }}
+            >
               <i
                 className={globalStyle.global_icon}
                 dangerouslySetInnerHTML={{ __html: icon }}

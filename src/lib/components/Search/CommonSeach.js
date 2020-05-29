@@ -11,6 +11,15 @@ function Action() {
   this.layer = null;
   this.source = null;
   this.getPOI = async (address, locationName, offset) => {
+    window
+      .CallWebMapFunction("SearchForPoint", { locationName: "北航大厦" })
+      .then((res) => {
+        debugger;
+        console.log(res);
+      })
+      .catch((e) => {
+        debugger;
+      });
     return await window.CallWebMapFunction("getAddressForName", {
       address: address,
       fromCity: locationName,
@@ -47,7 +56,7 @@ function Action() {
 
   this.removePOI = () => {
     this.source && this.source.clear();
-  }
+  };
 
   this.setSession = (address) => {
     getSession("search").then((res) => {
