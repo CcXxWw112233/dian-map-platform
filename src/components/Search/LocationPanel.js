@@ -12,10 +12,11 @@ export default class LocationPanel extends React.Component {
     this.divElement = null;
   }
   componentDidMount() {
-    document.addEventListener("click", this.outDivClickHandler);
+    // document.addEventListener("click", this.outDivClickHandler);
   }
   componentWillUnmount() {
-    document.removeEventListener("click", this.outDivClickHandler);
+    // document.removeEventListener("click", this.outDivClickHandler);
+    POISearch.removePOI()
   }
   outDivClickHandler = (e) => {
     const target = e.target;
@@ -25,7 +26,7 @@ export default class LocationPanel extends React.Component {
       if (searchHistory.length > 0 && searchResult.length === 0) {
         return;
       }
-      // this.props.changeLocationPanelVisible();
+      this.props.changeLocationPanelVisible();
     }
   };
   handleCleanHistoryClick = () => {
