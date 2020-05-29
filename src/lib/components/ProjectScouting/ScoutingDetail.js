@@ -54,6 +54,7 @@ function Action() {
   };
   this.boxFeature = {};
   this.draw = null;
+  this.lenged = null
 
   // 通过范围获取坐标点
   let getBoxCoordinates = (extent) => {
@@ -250,7 +251,8 @@ function Action() {
   };
 
   // 渲染标绘数据
-  this.renderFeaturesCollection = (data, { lengedConfig, dispatch }) => {
+  this.renderFeaturesCollection = (data, { lenged, dispatch }) => {
+    debugger
     const commonStyleOption = {
       textFillColor: "rgba(255,0,0,1)",
       textStrokeColor: "#fff",
@@ -261,7 +263,7 @@ function Action() {
       pointColor: "#fff",
       showName: true,
     };
-    let projectScouting = {
+    this.lenged = {
       title: "项目踏勘",
       key: "map:projectScouting",
       content: [],
@@ -275,7 +277,7 @@ function Action() {
       let isImage = false;
       let iconUrl = "";
       let obj = null;
-      const hasIndex = projectScouting.content.findIndex(
+      const hasIndex = this.lenged.content.findIndex(
         (item0) => item0.font === content.selectName
       );
       const featureLowerType = content.geoType.toLowerCase();
@@ -292,7 +294,7 @@ function Action() {
                 : content.selectName,
             type: featureLowerType,
           };
-          projectScouting.content.push(obj);
+          this.lenged.content.push(obj);
         }
       } else {
         if (hasIndex < 0) {
@@ -304,7 +306,7 @@ function Action() {
                 : content.selectName,
             type: featureLowerType,
           };
-          projectScouting.content.push(obj);
+          this.lenged.content.push(obj);
         }
       }
       let feature = addFeature(content.geoType, {
@@ -371,19 +373,19 @@ function Action() {
       this.features.push(feature);
     });
     let newConfig = [];
-    if (!lengedConfig) {
-      lengedConfig = [];
+    if (!lenged) {
+      lenged = [];
     }
-    const lengedIndex = lengedConfig.findIndex(
-      (lenged) => lenged.key === projectScouting.key
+    const lengedIndex = lenged.findIndex(
+      (lenged) => lenged.key === this.lenged.key
     );
     if (lengedIndex > -1) {
-      lengedConfig[lengedIndex] = projectScouting;
-      newConfig = lengedConfig[lengedIndex];
+      lenged[lengedIndex] = this.lenged;
+      newConfig = lenged[lengedIndex];
     } else {
-      newConfig = lengedConfig.concat(projectScouting);
+      newConfig = lenged.concat(this.lenged);
     }
-    if (projectScouting.content.length > 0) {
+    if (this.lenged.content.length > 0) {
       dispatch({
         type: "lengedList/updateLengedList",
         payload: {

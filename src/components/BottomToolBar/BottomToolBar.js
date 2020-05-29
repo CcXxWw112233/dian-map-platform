@@ -9,6 +9,7 @@ import {
 } from "utils/drawing/public";
 import { getMyPosition } from "utils/getMyPosition";
 import { downloadCapture } from "../../utils/captureMap";
+import styles from "./BottomToolBar.less";
 export default class BottomTollBar extends React.Component {
   constructor(props) {
     super(props);
@@ -91,14 +92,7 @@ export default class BottomTollBar extends React.Component {
   };
   render() {
     return (
-      <div
-        style={{
-          position: "absolute",
-          left: "50%",
-          bottom: 0,
-          transform: "translateX(-50%)",
-        }}
-      >
+      <div className={styles.wrap}>
         {this.config.map((item) => {
           const icon = item.toggleIcon ? this.state.fullcreenIcon : item.icon;
           return (

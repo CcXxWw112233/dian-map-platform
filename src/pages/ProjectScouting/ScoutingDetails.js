@@ -882,12 +882,24 @@ export default class ScoutingDetails extends PureComponent {
   };
 
   componentWillUnmount() {
+    const { dispatch, config: lengedList } = this.props;
+    const key = Action.lenged?.key;
+    const index = lengedList.findIndex((item) => {
+      return item.key === key;
+    });
+    lengedList.splice(index, 1);
+    dispatch({
+      type: "lengedList/updateLengedList",
+      payload: {
+        config: lengedList,
+      },
+    });
     Action.removeLayer();
   }
   // 渲染带坐标的数据
   renderCollection = (data) => {
-    const { config, dispatch } = this.props;
-    data.length && Action.renderCollection(data, { config, dispatch });
+    const { config: lenged, dispatch } = this.props;
+    data.length && Action.renderCollection(data, { lenged, dispatch });
   };
 
   // 获取资源列表，动态分类
