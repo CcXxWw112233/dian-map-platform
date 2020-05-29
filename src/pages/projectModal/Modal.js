@@ -349,9 +349,10 @@ export default class ProjectModal extends React.Component {
           geom: `POINT(${newGeom})`,
           icon_url: featureTypeState,
           featureType: featureTypeState,
-          strokeColor: this.state.isSureStrokeColorStyle
-            ? this.state.strokeColorStyle
-            : "",
+          strokeColor: featureOperator.feature
+            .getStyle()
+            .getStroke()
+            .getColor(),
           main_id: "",
           name: featureNameState,
           remark: remarksState,
@@ -581,14 +582,14 @@ export default class ProjectModal extends React.Component {
   };
   closeFillColorPicker = () => {
     this.setState({
-      displayFillColorPicker: false
-    })
-  }
+      displayFillColorPicker: false,
+    });
+  };
   closeStrokeColorPicker = () => {
     this.setState({
-      displayStrokeColorPicker: false
-    })
-  }
+      displayStrokeColorPicker: false,
+    });
+  };
   render() {
     const { visible, responseData, operator } = this.props;
     let title = "添加备注";

@@ -271,6 +271,7 @@ function Action() {
       // console.log(item)
       content = content && JSON.parse(content);
       let featureType = content.featureType || "";
+      let strokeColor = content.strokeColor || ""
       let isImage = false;
       let iconUrl = "";
       let obj = null;
@@ -311,9 +312,9 @@ function Action() {
       if (content.geoType === "Point") {
         myStyle = createStyle(content.geoType, {
           radius: 8,
-          fillColor: "rgba(168,9,10,0.7)",
+          fillColor: featureType,
           strokeWidth: 2,
-          strokeColor: "rgba(168,9,10,1)",
+          strokeColor: strokeColor,
           iconUrl: iconUrl,
           text: item.title,
           ...commonStyleOption,
@@ -338,7 +339,7 @@ function Action() {
             const pat = context.createPattern(img, "repeat");
             let options = {
               strokeWidth: 2,
-              strokeColor: isImage ? "" : featureType.replace("0.7", 1),
+              strokeColor: "",
               fillColor: pat,
               text: item.title,
               ...commonStyleOption,
@@ -354,7 +355,7 @@ function Action() {
         myStyle = createStyle(content.geoType, {
           ...commonStyleOption,
           strokeWidth: 2,
-          strokeColor: isImage ? "" : featureType.replace("0.7", 1),
+          strokeColor: strokeColor,
           fillColor: featureType,
           text: item.title,
         });
@@ -712,10 +713,10 @@ function Action() {
     this.removeAreaSelect();
     this.areaSelect = setSelectInteraction({
       filter:(feature, layer)=>{
-        if(layer.get('id') !== 'scoutingDetailLayer'){
+        if(layer && layer.get('id') !== 'scoutingDetailLayer'){
           return false;
         }
-        if(!feature.get('collect_type') || feature.getGeometry().getType !== 'Polygon' || !feature.get('remark')){
+        if(feature && !feature.get('collect_type') || feature.getGeometry().getType !== 'Polygon' || !feature.get('remark')){
           return false;
         }
 

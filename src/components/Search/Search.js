@@ -87,14 +87,23 @@ export default class Search extends React.Component {
     this.setState({
       searchLoading: true,
     });
-    POISearch.getPOI(address, locationName, offset).then((res) => {
-      const scoutingProjectList = this.props.projectList.filter(item => { return item.board_name.indexOf(address) > -1})
-      this.setState({
-        searchResult: scoutingProjectList.concat(res),
-        searchLoading: false,
-        searchPanelVisible: res.length ? true : false,
+    POISearch.getPOI(address, locationName, offset)
+      .then((res) => {
+        const scoutingProjectList = this.props.projectList.filter((item) => {
+          return item.board_name.indexOf(address) > -1;
+        });
+        this.setState({
+          searchResult: scoutingProjectList.concat(res),
+          searchLoading: false,
+          searchPanelVisible: res.length ? true : false,
+        });
+      })
+      .catch((e) => {
+        this.setState({
+          searchLoading: false,
+          searchPanelVisible: false,
+        });
       });
-    });
   };
   changeLocationPanelVisible = () => {
     this.setState({
@@ -161,7 +170,7 @@ export default class Search extends React.Component {
             style={{ height: 32 }}
             placeholder="搜索地址或项目"
             value={this.state.searchVal}
-            searchLoading={this.state.searchLoading}
+            loading={this.state.searchLoading}
             onSearch={(value, event) => this.onSearch(value, event)}
             onChange={this.handleSearchInputChange}
             onFocus={this.onSearchFocus}
