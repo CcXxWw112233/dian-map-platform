@@ -404,7 +404,6 @@ const UploadItem = ({
 
   let secondSetType = type;
   if (type === "unknow") {
-    debugger;
     const lastIndex = data && data.title?.lastIndexOf(".");
     const originalType = data.title?.substr(
       lastIndex + 1,
