@@ -14,7 +14,9 @@ export default {
         // 是否显示右上角的工具
         toolBars: isMobile ? false: true,
         // 是否显示底部的工具
-        bottomTools: isMobile ? false: true
+        bottomTools: isMobile ? false: true,
+        //显示搜索工具条
+        searchTools: isMobile ? false: true
     },
     effects:{
 

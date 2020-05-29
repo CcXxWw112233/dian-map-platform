@@ -1,6 +1,6 @@
 import React, { PureComponent } from "react";
 import styles from "./LengedList.less";
-import {baseMapKeys, baseMaps } from "utils/mapSource";
+import { baseMapKeys, baseMaps } from "utils/mapSource";
 import mapApp from "utils/INITMAP";
 import { Collapse } from "antd";
 // import config from "./config";
@@ -9,15 +9,12 @@ import { connect } from "dva";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import { Row } from "antd";
 const Lenged = ({ data }) => {
-  let activeKeys = []
-  data.forEach(item => {
-    activeKeys.push(item.key)
-  })
+  let activeKeys = [];
+  data.forEach((item) => {
+    activeKeys.push(item.key);
+  });
   return (
-    <Collapse
-      expandIconPosition="right"
-      activeKey={activeKeys}
-    >
+    <Collapse expandIconPosition="right" activeKey={activeKeys}>
       {data.map((item) => {
         const header = <span>{item.title || ""}</span>;
         return (
@@ -41,7 +38,7 @@ const Lenged = ({ data }) => {
               if (itemContent.type) {
                 if (itemContent.type.indexOf("line") > -1) {
                   style.height = 0;
-                  style.border = `1px solid ${itemContent.bgColor}`
+                  style.border = `1px solid ${itemContent.bgColor}`;
                 }
                 if (itemContent.type.indexOf("point") > -1) {
                   style.borderRadius = 7;
@@ -63,7 +60,12 @@ const Lenged = ({ data }) => {
     </Collapse>
   );
 };
-@connect(({ lengedList: { config } ,openswitch: {lengedSwitch, showLengedButton }}) => ({ config ,lengedSwitch ,showLengedButton}))
+@connect(
+  ({
+    lengedList: { config },
+    openswitch: { lengedSwitch, showLengedButton },
+  }) => ({ config, lengedSwitch, showLengedButton })
+)
 export default class LengedList extends PureComponent {
   constructor(props) {
     super(props);
@@ -76,11 +78,11 @@ export default class LengedList extends PureComponent {
   handleLengedListClick = () => {
     let { lengedSwitch, dispatch } = this.props;
     dispatch({
-      type:"openswitch/updateDatas",
-      payload:{
-        lengedSwitch: !lengedSwitch
-      }
-    })
+      type: "openswitch/updateDatas",
+      payload: {
+        lengedSwitch: !lengedSwitch,
+      },
+    });
   };
   createNULL = () => {
     return (
@@ -93,16 +95,15 @@ export default class LengedList extends PureComponent {
   };
   changeBaseMap = (item, index) => {
     this.toggleBaseMapChangeStyle(index);
-    console.log(mapApp)
-    mapApp.changeBaseMap(item.key)
-  }
+    mapApp.changeBaseMap(item.key);
+  };
   toggleBaseMapChangeStyle = (index) => {
     this.setState({
       selectedBaseMapIndex: index || 0,
     });
   };
   render() {
-    const { config ,lengedSwitch, showLengedButton} = this.props;
+    const { config, lengedSwitch, showLengedButton } = this.props;
     const newConfig = Array.from(new Set(config));
     this.lastConfig = config;
     const baseStyle = { position: "absolute", bottom: 0, right: 0, width: 322 };
@@ -126,15 +127,19 @@ export default class LengedList extends PureComponent {
               if (index === this.state.selectedBaseMapIndex) {
                 active = styles.active;
               }
-              return (
-                <div
-                  className={styles.layerItem + ` ${active}`}
-                  key={item.key}
-                  onClick={() => this.changeBaseMap(item, index)}
-                >
-                  <p className={styles.layerName}>{item.name}</p>
-                </div>
-              );
+              if (item.name && item.key) {
+                return (
+                  <div
+                    className={styles.layerItem + ` ${active}`}
+                    key={item.key}
+                    onClick={() => this.changeBaseMap(item, index)}
+                  >
+                    <p className={styles.layerName}>{item.name}</p>
+                  </div>
+                );
+              } else {
+                return null
+              }
             })}
           </div>
           <div
@@ -148,7 +153,7 @@ export default class LengedList extends PureComponent {
             )}
           </div>
         </div>
-        { showLengedButton ? 
+        {showLengedButton ? (
           <div
             className={styles.controller}
             onClick={this.handleLengedListClick}
@@ -162,8 +167,9 @@ export default class LengedList extends PureComponent {
             <span style={{ borderBottom: "1px solid" }}>底图</span>
             <span>图例</span>
           </div>
-        :"" }
-        
+        ) : (
+          ""
+        )}
       </div>
     );
   }

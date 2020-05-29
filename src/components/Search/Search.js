@@ -97,9 +97,10 @@ export default class Search extends React.Component {
   onLocationPanelVisibleChange = (value) => {
     const { searchHistory } = this.state;
     let newState = false;
-    if (searchHistory.length > 0 && value === false) {
-      this.setState({ searchPanelVisible: newState });
+    if (searchHistory.length > 0 && value === true) {
+      newState = true;
     }
+    this.setState({ searchPanelVisible: newState });
   };
   getSearchHistory = async () => {
     const searchHistoryArr = await POISearch.getSessionArray();
@@ -136,12 +137,13 @@ export default class Search extends React.Component {
           overlay={locationPanel}
           visible={this.state.searchPanelVisible}
           overlayClassName="testDrapdown"
-          onVisibleChange={(e) => this.setState({ searchPanelVisible: e })}
+          onVisibleChange={(e) => this.onLocationPanelVisibleChange(e)}
           trigger="hover"
         >
           <Input.Search
             allowClear={true}
             style={{ height: 32 }}
+            placeholder="搜索地址或项目"
             value={this.state.searchVal}
             searchLoading={this.state.searchLoading}
             onSearch={(value, event) => this.onSearch(value, event)}

@@ -135,10 +135,6 @@ export default class ProjectModal extends React.Component {
     const state = this.checkInputState();
     if (state) {
       if (this.props.isEdit) {
-        // message.success("保存成功");
-        // const r = Math.ceil(Math.random() * 255);
-        // const g = Math.ceil(Math.random() * 255);
-        // const b = Math.ceil(Math.random() * 255);
         let plottingType = this.props.type;
         let tempType = this.toChangedataType(plottingType);
         let defaultOptions = {
@@ -543,6 +539,14 @@ export default class ProjectModal extends React.Component {
     });
   };
   updateSureFillColor = () => {
+    const { dispatch } = this.props
+    dispatch({
+      type: "modal/updateData",
+      payload: {
+        selectName: "自定义类型",
+        featureType: this.state.featureType,
+      },
+    });
     this.setState({
       isSureFillColorStyle: true,
       displayFillColorPicker: false,

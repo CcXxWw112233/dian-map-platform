@@ -217,7 +217,8 @@ export default class AreaPanel extends React.Component {
     } = this.state;
     return (
       <div
-        className={`${styles.locatePanel} ${animateCss.animated} ${animateCss.backInDown}`}
+        className={styles.locatePanel}
+        style = {{ padding: 10 }}
       >
         <div className={styles.locatePanelBody}>
           <Select
