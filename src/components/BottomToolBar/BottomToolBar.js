@@ -106,7 +106,12 @@ export default class BottomTollBar extends React.Component {
               key={item.key}
               title={item.name}
               onClick={item.cb}
-              style={{ fontSize: "1rem", height: "auto" }}
+              style={{
+                fontSize: "1rem",
+                height: "auto",
+                border: "none",
+                borderRadius: 0,
+              }}
             >
               <i
                 className={globalStyle.global_icon}
