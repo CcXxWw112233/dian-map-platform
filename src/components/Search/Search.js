@@ -3,7 +3,7 @@ import { Input, Dropdown, Button } from "antd";
 import throttle from "lodash/throttle";
 
 import { DownOutlined } from "@ant-design/icons";
-import POISearch from "@/lib/components/Search/POISeach";
+import commonSearchAction from "@/lib/components/Search/CommonSeach";
 
 import styles from "./Search.less";
 import AreaPanel from "./AreaPanel";
@@ -62,7 +62,7 @@ export default class Search extends React.Component {
     });
     const { locationName } = this.state;
     if (address === "") {
-      POISearch.removePOI();
+      commonSearchAction.removePOI();
       this.setState({
         searchPanelVisible: false,
         searchResult: [],
@@ -75,7 +75,7 @@ export default class Search extends React.Component {
   //   this.setState({
   //     searchLoading: true,
   //   });
-  //   POISearch.getPOI(address, locationName, offset).then((res) => {
+  //   commonSearchAction.getPOI(address, locationName, offset).then((res) => {
   //     this.setState({
   //       searchResult: res,
   //       searchLoading: false,
@@ -87,7 +87,7 @@ export default class Search extends React.Component {
     this.setState({
       searchLoading: true,
     });
-    POISearch.getPOI(address, locationName, offset)
+    commonSearchAction.getPOI(address, locationName, offset)
       .then((res) => {
         const scoutingProjectList = this.props.projectList.filter((item) => {
           return item.board_name.indexOf(address) > -1;
@@ -113,7 +113,7 @@ export default class Search extends React.Component {
   onSearch = (value, event) => {
     const { locationName } = this.state;
     this.handleSearch(value, locationName, 10);
-    POISearch.setSession(value);
+    commonSearchAction.setSession(value);
   };
   onSearchFocus = async (e) => {
     // debugger
@@ -128,7 +128,7 @@ export default class Search extends React.Component {
     this.setState({ searchPanelVisible: newState });
   };
   getSearchHistory = async () => {
-    const searchHistoryArr = await POISearch.getSessionArray();
+    const searchHistoryArr = await commonSearchAction.getSessionArray();
     this.setState({
       searchHistory: searchHistoryArr,
       searchPanelVisible: searchHistoryArr.length > 0 ? true : false,

@@ -1,8 +1,6 @@
 import React from "react";
 import styles from "./Panel.less";
-import globalStyle from "@/globalSet/styles/globalStyles.less";
-import animateCss from "../../assets/css/animate.min.css";
-import exportAction from "@/lib/components/Search/AreaSearch";
+import areaSearchAction from "@/lib/components/Search/AreaSearch";
 
 import { Select, Button } from "antd";
 
@@ -34,7 +32,7 @@ export default class AreaPanel extends React.Component {
     };
   }
   componentDidMount() {
-    exportAction.getProvince().then((res) => {
+    areaSearchAction.getProvince().then((res) => {
       if (res.code === "0") {
         this.setState({
           provinceOptions: res.data,
@@ -60,7 +58,7 @@ export default class AreaPanel extends React.Component {
       },
       () => {
         const { provinceCode } = this.state;
-        exportAction.getCity(provinceCode).then((res) => {
+        areaSearchAction.getCity(provinceCode).then((res) => {
           if (res.code === "0") {
             this.setState({
               cityOptions: res.data,
@@ -85,7 +83,7 @@ export default class AreaPanel extends React.Component {
       },
       () => {
         const { cityCode } = this.state;
-        exportAction.getDistrict(cityCode).then((res) => {
+        areaSearchAction.getDistrict(cityCode).then((res) => {
           if (res.code === "0") {
             this.setState({
               districtOptions: res.data,
@@ -107,7 +105,7 @@ export default class AreaPanel extends React.Component {
       },
       () => {
         const { districtCode } = this.state;
-        exportAction.getTown(districtCode).then((res) => {
+        areaSearchAction.getTown(districtCode).then((res) => {
           if (res.code === "0") {
             this.setState({
               townOptions: res.data,
@@ -128,7 +126,7 @@ export default class AreaPanel extends React.Component {
       },
       () => {
         const { townCode } = this.state;
-        exportAction.getVillige(townCode).then((res) => {
+        areaSearchAction.getVillige(townCode).then((res) => {
           if (res.code === "0") {
             this.setState({
               villageOptions: res.data,
@@ -147,10 +145,10 @@ export default class AreaPanel extends React.Component {
   };
 
   getGeomByCode = (code) => {
-    exportAction.getGeom(code).then((res) => {
+    areaSearchAction.getGeom(code).then((res) => {
       if (res.code === "0") {
         if (res.data && res.data.geom) {
-          exportAction.addAreaGeomToMap(res.data.geom);
+          areaSearchAction.addAreaGeomToMap(res.data.geom);
         }
       }
     });

@@ -2,7 +2,7 @@ import React from "react";
 
 import styles from "./Panel.less";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
-import POISearch from "@/lib/components/Search/POISeach";
+import commonSearchAction from "@/lib/components/Search/CommonSeach";
 import { connect } from "dva";
 
 @connect(({ scoutingProject: { cb } }) => ({ cb }))
@@ -16,7 +16,7 @@ export default class LocationPanel extends React.Component {
   }
   componentWillUnmount() {
     // document.removeEventListener("click", this.outDivClickHandler);
-    POISearch.removePOI()
+    commonSearchAction.removePOI()
   }
   outDivClickHandler = (e) => {
     const target = e.target;
@@ -30,7 +30,7 @@ export default class LocationPanel extends React.Component {
     }
   };
   handleCleanHistoryClick = () => {
-    POISearch.cleanSearchSession();
+    commonSearchAction.cleanSearchSession();
     this.props.getSearchHistory();
   };
   handleRowClick = (item, historyMode) => {
@@ -38,7 +38,7 @@ export default class LocationPanel extends React.Component {
       this.props.updateSearchValue(item);
     } else {
       if (item.id) {
-        POISearch.addPOIToMap(item);
+        commonSearchAction.addPOIToMap(item);
       } else {
         this.props.cb(item);
       }
