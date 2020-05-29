@@ -138,6 +138,7 @@ export const getMyPosition = {
     }
     this.positionIcon && this.positionIcon.getGeometry().setCoordinates(coordinate);
     this.positionCircle && this.positionCircle.getGeometry().setCenter(coordinate);
+    this.setViewCenter(coordinate,1000);
   },
 
   // 当定位的准确范围更新了

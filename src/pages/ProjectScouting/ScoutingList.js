@@ -51,10 +51,18 @@ export default class ScoutingList extends PureComponent {
   }
 
   getProjectList = () => {
+    const { dispatch } = this.props
     return new Promise((resolve,reject) => {
       Action.getList().then(res => {
         this.setState({
           projects: res.data
+        })
+        dispatch({
+          type: "scoutingProject/updateList",
+          payload: {
+            projectList: res.data,
+            cb: this.handleClick.bind(this)
+          }
         })
         resolve(res.data)
         // console.log(res)
@@ -101,6 +109,13 @@ export default class ScoutingList extends PureComponent {
       this.setState({
         projects: list.filter(item => item.board_id !== id)
       },()=>{
+        const { dispatch } = this.props
+        dispatch({
+          type: "scoutingProject/updateList",
+          payload: {
+            projectList: this.state.projects
+          }
+        })
         // 重新渲染
         Action.renderProjectPoint(this.state.projects);
       })
@@ -112,6 +127,7 @@ export default class ScoutingList extends PureComponent {
     if(val.board_name === name){
       return ;
     }
+    const { dispatch } = this.props
     Action.editBoardName(val.board_id,{	board_name: name}).then(res => {
       message.success('项目名称修改成功');
       let projects = [...this.state.projects].map(item => {
@@ -124,6 +140,12 @@ export default class ScoutingList extends PureComponent {
         projects
       },()=>{
         Action.renderProjectPoint(projects)
+        dispatch({
+          type: "scoutingProject/updateList",
+          payload: {
+            projectList: projects
+          }
+        })
       })
     }).catch(err => {
       message.error(err && err.message)
@@ -143,6 +165,13 @@ export default class ScoutingList extends PureComponent {
         Action.projects = this.state.projects;
         // 更新点的数据
         Action.renderProjectPoint(this.state.projects);
+        const { dispatch } = this.props
+        dispatch({
+          type: "scoutingProject/updateList",
+          payload: {
+            projectList: this.state.projects
+          }
+        })
       })
       message.success('新建项目成功')
       this.showOtherSlide();

@@ -9,6 +9,9 @@ import styles from "./Search.less";
 import AreaPanel from "./AreaPanel";
 import LocationPanel from "./LocationPanel";
 
+import { connect } from "dva";
+
+@connect(({ scoutingProject: { projectList } }) => ({ projectList }))
 export default class Search extends React.Component {
   constructor(props) {
     super(props);
@@ -68,13 +71,26 @@ export default class Search extends React.Component {
     this.handleSearch(address, locationName, 10);
   };
 
+  // handleSearch = (address, locationName, offset) => {
+  //   this.setState({
+  //     searchLoading: true,
+  //   });
+  //   POISearch.getPOI(address, locationName, offset).then((res) => {
+  //     this.setState({
+  //       searchResult: res,
+  //       searchLoading: false,
+  //       searchPanelVisible: res.length ? true : false,
+  //     });
+  //   });
+  // };
   handleSearch = (address, locationName, offset) => {
     this.setState({
       searchLoading: true,
     });
     POISearch.getPOI(address, locationName, offset).then((res) => {
+      const scoutingProjectList = this.props.projectList.filter(item => { return item.board_name.indexOf(address) > -1})
       this.setState({
-        searchResult: res,
+        searchResult: scoutingProjectList.concat(res),
         searchLoading: false,
         searchPanelVisible: res.length ? true : false,
       });

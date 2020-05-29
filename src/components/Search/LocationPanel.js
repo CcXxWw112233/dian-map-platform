@@ -3,7 +3,9 @@ import React from "react";
 import styles from "./Panel.less";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import POISearch from "@/lib/components/Search/POISeach";
+import { connect } from "dva";
 
+@connect(({ scoutingProject: { cb } }) => ({ cb }))
 export default class LocationPanel extends React.Component {
   constructor(props) {
     super(props);
@@ -28,13 +30,17 @@ export default class LocationPanel extends React.Component {
   };
   handleCleanHistoryClick = () => {
     POISearch.cleanSearchSession();
-    this.props.getSearchHistory()
+    this.props.getSearchHistory();
   };
   handleRowClick = (item, historyMode) => {
     if (historyMode) {
       this.props.updateSearchValue(item);
     } else {
-      POISearch.addPOIToMap(item);
+      if (item.id) {
+        POISearch.addPOIToMap(item);
+      } else {
+        this.props.cb(item);
+      }
     }
   };
   render() {
@@ -71,22 +77,24 @@ export default class LocationPanel extends React.Component {
               );
             })
           : searchResult.map((item, index) => {
+              const iconfont = item.id ? "&#xe72a;" : "&#xe72b;";
               return (
                 <p
                   className={styles.searchItem}
-                  key={index}
+                  key={item.id || item.board_id}
                   onClick={() => this.handleRowClick(item, historyMode)}
                 >
                   <i
                     className={globalStyle.global_icon}
                     style={{ color: "rgb(23, 105, 251)" }}
-                  >
-                    &#xe72a;
-                  </i>
-                  <span>{item.name}</span>
-                  <span
-                    className={styles.area}
-                  >{`${item.pname}${item.cityname}${item.adname}`}</span>
+                    dangerouslySetInnerHTML={{ __html: iconfont }}
+                  ></i>
+                  <span>{item.name || item.board_name}</span>
+                  {item.id ? (
+                    <span
+                      className={styles.area}
+                    >{`${item.pname}${item.cityname}${item.adname}`}</span>
+                  ) : null}
                 </p>
               );
             })}
