@@ -329,7 +329,7 @@ export default class ProjectModal extends React.Component {
       featureOperator.attrs.featureType
     );
     if (this.state.isSureFillColorStyle) {
-      featureTypeState = this.state.fillColorStyle
+      featureTypeState = this.state.fillColorStyle;
     }
     let featureNameState = this.checkStateChange(
       this.props.featureName,
@@ -349,7 +349,9 @@ export default class ProjectModal extends React.Component {
           geom: `POINT(${newGeom})`,
           icon_url: featureTypeState,
           featureType: featureTypeState,
-          strokeColor: this.state.isSureStrokeColorStyle ? this.state.strokeColorStyle : "",
+          strokeColor: this.state.isSureStrokeColorStyle
+            ? this.state.strokeColorStyle
+            : "",
           main_id: "",
           name: featureNameState,
           remark: remarksState,
@@ -358,6 +360,9 @@ export default class ProjectModal extends React.Component {
         };
         break;
       case "POLYLINE":
+        if (this.state.isSureStrokeColorStyle) {
+          featureTypeState = this.state.strokeColorStyle;
+        }
         attr = {
           geom: `LINESTRING(${newGeom})`,
           style: `${featureTypeState};${featureTypeState}`,
@@ -375,7 +380,7 @@ export default class ProjectModal extends React.Component {
       case "CIRCLE":
       case "FREEHANDPOLYGON":
         let style = null;
-        let strokeColor
+        let strokeColor;
         if (featureTypeState.indexOf("/") > -1) {
           style = `${featureTypeState};icon`;
         } else {
@@ -539,25 +544,51 @@ export default class ProjectModal extends React.Component {
     });
   };
   updateSureFillColor = () => {
-    const { dispatch } = this.props
-    dispatch({
-      type: "modal/updateData",
-      payload: {
-        selectName: "自定义类型",
-        featureType: this.state.featureType,
+    const { dispatch } = this.props;
+    this.setState(
+      {
+        isSureFillColorStyle: true,
+        displayFillColorPicker: false,
       },
-    });
-    this.setState({
-      isSureFillColorStyle: true,
-      displayFillColorPicker: false,
-    });
+      () => {
+        dispatch({
+          type: "modal/updateData",
+          payload: {
+            selectName: "自定义类型",
+            featureType: this.state.fillColorStyle,
+          },
+        });
+      }
+    );
   };
   updateSureStrokeColor = () => {
-    this.setState({
-      isSureStrokeColorStyle: true,
-      displayStrokeColorPicker: false,
-    });
+    const { dispatch } = this.props;
+    this.setState(
+      {
+        isSureStrokeColorStyle: true,
+        displayStrokeColorPicker: false,
+      },
+      () => {
+        dispatch({
+          type: "modal/updateData",
+          payload: {
+            selectName: "自定义类型",
+            strokeColorStyle: this.state.strokeColorStyle,
+          },
+        });
+      }
+    );
   };
+  closeFillColorPicker = () => {
+    this.setState({
+      displayFillColorPicker: false
+    })
+  }
+  closeStrokeColorPicker = () => {
+    this.setState({
+      displayStrokeColorPicker: false
+    })
+  }
   render() {
     const { visible, responseData, operator } = this.props;
     let title = "添加备注";
@@ -582,6 +613,43 @@ export default class ProjectModal extends React.Component {
       const customType = { type: "自定义类型", value: "custom" };
       dataArray = [customType, ...dataArray];
     }
+    // 自定义线框颜色、填充颜色
+    // let customStrokeColor = this.strokeColor,
+    //   customFillColor = this.fillColor;
+    //   let customStrokeColorStyle = this.strokeColorStyle,
+    //   customFillColorStyle = this.fillColorStyle;
+    // if (operator && operator.attrs) {
+    //   const attribute = operator.attrs;
+    //   customStrokeColorStyle = attribute.strokeColor
+    //   customFillColorStyle = attribute.featureType
+    //   const tempFillColorStr =
+    //     attribute.featureType &&
+    //     attribute.featureType.replace("rgba(", "").replace(")", "");
+    //   const tempStrokeColorStr =
+    //     attribute.strokeColor &&
+    //     attribute.strokeColor.replace("rgba(", "").replace(")", "");
+    //   if (tempFillColorStr) {
+    //     const tempFillColorArr = tempFillColorStr.split(",");
+    //     customFillColor = {
+    //       r: tempFillColorArr[0],
+    //       g: tempFillColorArr[1],
+    //       b: tempFillColorArr[2],
+    //       a: tempFillColorArr[3],
+    //     };
+    //   }
+    //   if (tempStrokeColorStr) {
+    //     const tempStrokeColorArr = tempStrokeColorStr.split(",");
+    //     customFillColor = {
+    //       r: tempStrokeColorArr[0],
+    //       g: tempStrokeColorArr[1],
+    //       b: tempStrokeColorArr[2],
+    //       a: tempStrokeColorArr[3],
+    //     };
+    //   }
+    //   if (attribute.plottingType === "POLYLINE") {
+    //     customFillColor = customStrokeColor;
+    //   }
+    // }
     return (
       <Modal
         destroyOnClose
@@ -645,25 +713,29 @@ export default class ProjectModal extends React.Component {
           <Row className={styles.row}>
             <Col className={styles.firstCol}></Col>
             <Col className={styles.secondCol}>
-              <div className={styles.custom}>
-                <span>边框颜色</span>
-                <div className={styles.colorpickerBtnBorder}>
-                  <div
-                    className={styles.colorpickerBtn}
-                    style={{ backgroundColor: this.state.strokeColorStyle }}
-                    onClick={this.handleStrokeColorPickerClick}
-                  >
-                    <UpOutlined />
+              <div className={styles.customList}>
+                <div className={styles.customItem}>
+                  <span className={styles.span}>线框颜色</span>
+                  <div className={styles.colorpickerBtnBorder}>
+                    <div
+                      className={styles.colorpickerBtn}
+                      style={{ backgroundColor: this.state.strokeColorStyle }}
+                      onClick={this.handleStrokeColorPickerClick}
+                    >
+                      <UpOutlined />
+                    </div>
                   </div>
                 </div>
-                <span>填充颜色</span>
-                <div className={styles.colorpickerBtnBorder}>
-                  <div
-                    className={styles.colorpickerBtn}
-                    style={{ backgroundColor: this.state.fillColorStyle }}
-                    onClick={this.handleFillColorPickerClick}
-                  >
-                    <UpOutlined />
+                <div className={styles.customItem} style={{ marginLeft: 8 }}>
+                  <span className={styles.span}>填充颜色</span>
+                  <div className={styles.colorpickerBtnBorder}>
+                    <div
+                      className={styles.colorpickerBtn}
+                      style={{ backgroundColor: this.state.fillColorStyle }}
+                      onClick={this.handleFillColorPickerClick}
+                    >
+                      <UpOutlined />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -678,12 +750,12 @@ export default class ProjectModal extends React.Component {
               onChange={this.handleFillColorChange}
             />
             <div className={styles.customBtn}>
-              {/* <Button
+              <Button
                 className={styles.customBtn}
-                onClick={this.clearFillColor}
+                onClick={this.closeFillColorPicker}
               >
-                清空
-              </Button> */}
+                取消
+              </Button>
               <Button
                 className={styles.customBtn}
                 type="primary"
@@ -702,12 +774,12 @@ export default class ProjectModal extends React.Component {
               onChange={this.handleStrokeColorChange}
             />
             <div className={styles.customBtn}>
-              {/* <Button
+              <Button
                 className={styles.customBtn}
-                onClick={this.clearStrokeColor}
+                onClick={this.closeStrokeColorPicker}
               >
-                清空
-              </Button> */}
+                取消
+              </Button>
               <Button
                 className={styles.customBtn}
                 type="primary"
