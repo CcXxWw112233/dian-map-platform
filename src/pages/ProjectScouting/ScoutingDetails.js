@@ -581,7 +581,7 @@ const UploadItem = ({
           {secondSetType === "pic" ? (
             <img
               src={data.resource_url}
-              width="48px"
+              style={{width:46, height:46, borderRadius: 4}}
               alt="图片"
               onError={(e) => {
                 e.target.src = "";

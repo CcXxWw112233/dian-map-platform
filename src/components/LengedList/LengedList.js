@@ -103,7 +103,6 @@ export default class LengedList extends PureComponent {
     });
   };
   render() {
-    debugger
     const { config: lengedList, lengedSwitch, showLengedButton } = this.props;
     let newConfig = [];
     let newLengedList = lengedList;

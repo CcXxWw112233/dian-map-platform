@@ -300,7 +300,7 @@ function Action() {
           obj = {
             bgColor: featureType,
             font:
-              content.selectName === "自定义类型"
+              content.selectName === "自定义类型" || content.selectName === ""
                 ? content.name
                 : content.selectName,
             type: featureLowerType,
