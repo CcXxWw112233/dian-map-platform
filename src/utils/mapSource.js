@@ -1,8 +1,5 @@
 import { baseConfig } from "../globalSet/config";
 
-import { BASIC } from "../services/config";
-let isMobile = BASIC.getUrlParam.isMobile;
-
 const baseMaps = [
   {
     title: "高德电子图",
@@ -61,7 +58,7 @@ const baseMapKeys = [
     key: "gd_img",
     keys: ["gd_img_tile", "gd_roadLabel_tile"],
   },
-  isMobile ? {} : { name: "谷歌遥感图", key: "gg_img", keys: ["gg_img_tile"] },
+  { name: "谷歌遥感图", key: "gg_img", keys: ["gg_img_tile"] },
   {
     name: "天地图矢量图",
     key: "td_vec",
