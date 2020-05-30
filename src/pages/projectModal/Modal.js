@@ -477,18 +477,25 @@ export default class ProjectModal extends React.Component {
         showCustom: true,
       });
     } else {
-      const arr = val.split(",");
-      const index0 = Number(arr[0]);
-      const index1 = Number(arr[1]);
-      const value = responseData.data[index0 - 1].items[index1];
-      const { dispatch } = this.props;
-      dispatch({
-        type: "modal/updateData",
-        payload: {
-          selectName: value.name,
-          featureType: value.value1,
+      this.setState(
+        {
+          showCustom: false,
         },
-      });
+        () => {
+          const arr = val.split(",");
+          const index0 = Number(arr[0]);
+          const index1 = Number(arr[1]);
+          const value = responseData.data[index0 - 1].items[index1];
+          const { dispatch } = this.props;
+          dispatch({
+            type: "modal/updateData",
+            payload: {
+              selectName: value.name,
+              featureType: value.value1,
+            },
+          });
+        }
+      );
     }
   };
   handleRemarksInputChange = (value) => {
