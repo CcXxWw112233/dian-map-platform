@@ -113,7 +113,8 @@ export default class PlottingModal extends Component {
       type: "modal/updateData",
       payload: {
         selectName: featureSelectName,
-        featureType: fillColorStyle
+        featureType: fillColorStyle,
+        strokeColorStyle: fillColorStyle
       }
     })
   }
