@@ -383,9 +383,9 @@ function Action() {
     );
     if (lengedIndex > -1) {
       lenged[lengedIndex] = this.lenged;
-      newConfig = lenged[lengedIndex];
+      newConfig = [...lenged[lengedIndex]];
     } else {
-      newConfig = lenged.concat(this.lenged);
+      newConfig = [...lenged.concat(this.lenged)];
     }
     if (this.lenged.content.length > 0) {
       dispatch({

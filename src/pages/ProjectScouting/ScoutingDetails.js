@@ -883,7 +883,7 @@ export default class ScoutingDetails extends PureComponent {
 
   componentWillUnmount() {
     const { dispatch, config: lengedList } = this.props;
-    let newLengedList = lengedList;
+    let newLengedList = [...lengedList];
     if (!Array.isArray(lengedList)) {
       newLengedList = [lengedList];
     }
