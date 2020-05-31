@@ -101,12 +101,12 @@ export default class TempPlottingPanel extends React.Component {
     dispatch({
       type: "modal/updateData",
       payload: {
-        isEdit: true,
-        featureName: featureOperator.attrs.name || "", // 名称
-        selectName: featureOperator.attrs.selectName || "",
-        featureType: featureOperator.attrs.featureType || "", // 类型
-        remarks: featureOperator.attrs.remark || "", // 备注
         responseData: featureOperator.responseData,
+        featureName: featureOperator.attrs.name,
+        selectName: featureOperator.attrs.selectName,
+        featureType: featureOperator.attrs.featureType,
+        remarks: featureOperator.attrs.remark,
+        strokeColorStyle: featureOperator.attrs.strokeColor,
       },
     });
     dispatch({
@@ -204,7 +204,7 @@ export default class TempPlottingPanel extends React.Component {
     });
   };
 
-  render() {
+  render () {
     const { panelVisible, featureOperatorList } = this.props;
     let displayPanel = false;
     if (panelVisible) {

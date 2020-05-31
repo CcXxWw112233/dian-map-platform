@@ -1,6 +1,6 @@
 import React, { PureComponent } from "react";
 import styles from "./LengedList.less";
-import { baseMapKeys, baseMaps } from "utils/mapSource";
+import { baseMapDictionary, baseMaps } from "utils/mapSource";
 import mapApp from "utils/INITMAP";
 import { Collapse } from "antd";
 // import config from "./config";
@@ -127,7 +127,7 @@ export default class LengedList extends PureComponent {
           }}
         >
           <div className={styles.layerItems + ` ${globalStyle.autoScrollX}`}>
-            {baseMapKeys.map((item, index) => {
+            {baseMapDictionary.map((item, index) => {
               let active = "";
               if (index === this.state.selectedBaseMapIndex) {
                 active = styles.active;

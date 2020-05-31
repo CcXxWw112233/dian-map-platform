@@ -8,7 +8,7 @@ import {
 import TileLayer from "ol/layer/Tile";
 import XYZ from "ol/source/XYZ";
 
-import { baseMaps, baseMapKeys } from "utils/mapSource";
+import { baseMaps, baseMapDictionary } from "utils/mapSource";
 
 const initMap = 
 function(){
@@ -91,16 +91,16 @@ function(){
     },
     changeBaseMap: function (key) {
       let baseMapKey = null
-      if (baseMapKeys && baseMapKeys.length) {
-        baseMapKey = baseMapKeys.filter(item => {
+      if (baseMapDictionary && baseMapDictionary.length) {
+        baseMapKey = baseMapDictionary.filter(item => {
           return item.key === key
         })[0]
       }
-      if (baseMapKey && baseMapKey.keys.length > 0) {
+      if (baseMapKey && baseMapKey.values.length > 0) {
         this.baseMaps.forEach(layer => {
           layer.setVisible(false)
         })
-        baseMapKey.keys.forEach((key, index) => {
+        baseMapKey.values.forEach((key, index) => {
           let layer = this.findLayerById(key, this.baseMaps);
           if (!layer) {
             let zIndex = index

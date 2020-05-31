@@ -102,17 +102,17 @@ export const draw = {
       },
     });
 
-    // 更新模态框数据
     this.drawDispatch({
       type: "modal/updateData",
       payload: {
-        isEdit: true,
-        featureName: featureOperator.attrs.name || "", // 名称
-        selectName: featureOperator.attrs.selectName || "",
-        featureType: featureOperator.attrs.featureType || "", // 类型
-        remarks: featureOperator.attrs.remark || "", // 备注
-      },
-    });
+        featureName: featureOperator.attrs.name,
+        selectName: featureOperator.attrs.selectName,
+        featureType: featureOperator.attrs.featureType,
+        remarks: featureOperator.attrs.remark,
+        strokeColorStyle: featureOperator.attrs.strokeColor,
+      }
+    })
+
 
     // 查询数据，存在当前标绘，弹出模态框
     const currentOperator = this.featureOperatorList.filter((operator) => {

@@ -7,6 +7,7 @@ export default {
     featureName: "", // 名称
     selectName: "",
     featureType: "", // 类型
+    strokeColorStyle: "", 
     remarks: "", // 备注
   },
   effects: {},

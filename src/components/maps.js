@@ -2,7 +2,7 @@ import React from 'react'
 import 'ol/ol.css';
 import 'utils/plot2ol/css/ol.css'
 import 'utils/plot2ol/css/plottingol.less'
-import { baseMapKeys, baseMaps } from '../utils/mapSource'
+import { baseMapDictionary, baseMaps } from '../utils/mapSource'
 import mapApp from '../utils/INITMAP'
 
 const styles = {
@@ -32,10 +32,10 @@ export default class LayerMap extends React.Component{
       // arr.forEach(item => {
       //   map.addLayer(item)
       // })
-      const firstBaseMaps = baseMapKeys[0]
+      const firstBaseMaps = baseMapDictionary[0]
       if(firstBaseMaps) {
-        const keys = firstBaseMaps.keys
-        const currenttBaseMaps = baseMaps.filter(item => {return keys.indexOf(item.id) > -1})
+        const values = firstBaseMaps.values
+        const currenttBaseMaps = baseMaps.filter(item => {return values.indexOf(item.id) > -1})
         currenttBaseMaps.forEach(baseMap => {
           const layer = mapApp.createTilelayer(baseMap)
           mapApp.addBaseLayer(layer)
