@@ -781,7 +781,7 @@ function Action() {
     let coor = feature.getGeometry().getExtent();
     let point = getPoint(coor, "topRight");
     let remark = feature.get("remark") || "";
-    if (type === "Polygon" && remark) {
+    if (remark) {
       let name = feature.get("name");
       let style = feature.get("featureType");
       let fill = style && style.split(";")[0];
@@ -797,10 +797,13 @@ function Action() {
         padding: [200, 220, 80, 400],
       });
 
-      this.polygonOverlay = createOverlay(ele.element);
+      this.polygonOverlay = createOverlay(ele.element,{
+        offset: type === 'Point' ? [10,0]: [0,0]
+      });
       ele.on = {
         close: () => {
           this.areaSelect.dispatchEvent({ type: "select", selected: [] });
+          // 重新加载select选择器
           this.addAreaSelect();
         },
       };
