@@ -208,7 +208,6 @@ export default class PlottingModal extends Component {
     }
     return (
       <Modal
-        destroyOnClose
         className={styles.wrap}
         width={310}
         title={title}
@@ -218,6 +217,10 @@ export default class PlottingModal extends Component {
         okText="确定"
         cancelText="取消"
         centered={true}
+        // mask={false}
+        getContainer={document.getElementById("MapsView")}
+        destroyOnClose={true}
+        maskClosable={false}
       >
         <Row className={styles.row}>
           <Col className={styles.firstCol}>
