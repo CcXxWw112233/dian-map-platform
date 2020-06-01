@@ -137,6 +137,7 @@ export default class LengedList extends PureComponent {
                   <div
                     className={styles.layerItem + ` ${active}`}
                     key={item.key}
+                    // style={{backgroundImage: `url(${item.img})`}}
                     onClick={() => this.changeBaseMap(item, index)}
                   >
                     <p

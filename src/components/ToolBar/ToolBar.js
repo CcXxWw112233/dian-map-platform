@@ -150,7 +150,7 @@ export default class ToolBar extends PureComponent {
           },
           {
             name: "标记自由面",
-            key: "polygon",
+            key: "freepolygon",
             icon: "&#xe718;",
             cb: () => draw.create('FREEHAND_POLYGON', dispatch),
           },

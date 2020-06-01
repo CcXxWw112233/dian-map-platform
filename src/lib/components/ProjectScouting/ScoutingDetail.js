@@ -301,6 +301,7 @@ function Action() {
         if (hasIndex < 0) {
           obj = {
             bgColor: featureType,
+            borderColor: strokeColor,
             font:
               content.selectName === "自定义类型" || content.selectName === ""
                 ? content.name

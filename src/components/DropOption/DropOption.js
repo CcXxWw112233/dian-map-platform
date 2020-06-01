@@ -11,7 +11,6 @@ const DropOption = ({ options }) => {
   const children = options.children;
   const menu = children.map((item) => (
     <Menu.Item key={item.key} onClick={item.cb}>
-      {/* <MyIcon type={item.icon} /> */}
       <i
         style={{ color: "rgba(24, 144, 255,1)", fontSize: 14, marginRight: 5 }}
         className={globalStyle.global_icon}
@@ -31,9 +30,12 @@ const DropOption = ({ options }) => {
         style={{ border: "none", padding: "4px 10px", cursor: "pointer" }}
         onClick={options.cb}
       >
-        {/* <MyIcon type={icon} /> */}
         <i
-          style={{ color: "rgba(24, 144, 255,1)", fontSize: 14, marginRight: 5 }}
+          style={{
+            color: "rgba(24, 144, 255,1)",
+            fontSize: 14,
+            marginRight: 5,
+          }}
           className={globalStyle.global_icon}
           dangerouslySetInnerHTML={{ __html: icon }}
         ></i>
@@ -47,9 +49,12 @@ const DropOption = ({ options }) => {
         style={{ border: "none", padding: "4px 10px", cursor: "pointer" }}
         key={optionKey}
       >
-        {/* <MyIcon type={ icon }/> */}
         <i
-          style={{ color: "rgba(24, 144, 255,1)", fontSize: 14, marginRight: 5 }}
+          style={{
+            color: "rgba(24, 144, 255,1)",
+            fontSize: 14,
+            marginRight: 5,
+          }}
           className={globalStyle.global_icon}
           dangerouslySetInnerHTML={{ __html: icon }}
         ></i>

@@ -83,9 +83,7 @@ export const draw = {
 
   // 标绘完成回调
   onActiveEventListener(cb) {
-    const me = this
     this.plottingLayer.on(FeatureOperatorEvent.ACTIVATE, (e) => {
-      me.target.style.cursor = ""
       window.featureOperator = e.feature_operator;
       cb && cb(e);
     });
@@ -171,6 +169,7 @@ export const draw = {
     const me = this;
     // 标绘激活事件
     this.plottingLayer.on(FeatureOperatorEvent.ACTIVATE, (e) => {
+      me.target.style.cursor = ""
       window.featureOperator = e.feature_operator;
       let isMobile = BASIC.getUrlParam.isMobile;
       if (!isMobile) {
@@ -184,6 +183,7 @@ export const draw = {
       }
     });
     this.plottingLayer.on(FeatureOperatorEvent.DEACTIVATE, (e) => {
+      me.target.style.cursor = ""
       let isMobile = BASIC.getUrlParam.isMobile;
       if (!isMobile) {
         me.deactiveCallback();
