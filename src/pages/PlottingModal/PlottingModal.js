@@ -1,20 +1,31 @@
-import React, { Component } from "react"
+import React, { Component } from "react";
 import { Modal, Row, Col, Input, Select, message } from "antd";
 import styles from "./Modal.less";
-import ColorPicker from "components/ColorPicker"
-import Action from "../../lib/components/PlottingModal/Action"
+import ColorPicker from "components/ColorPicker";
+import Action from "../../lib/components/PlottingModal/Action";
 
 import { connect } from "dva";
 
 const { Option, OptGroup } = Select;
 const { TextArea } = Input;
 
-@connect(({
-  plotting: { operator, type },
-  featureOperatorList: {
-    featureOperatorList
-  },
-  modal: {
+@connect(
+  ({
+    plotting: { operator, type },
+    featureOperatorList: { featureOperatorList },
+    modal: {
+      visible,
+      responseData,
+      featureName,
+      selectName,
+      featureType,
+      strokeColorStyle,
+      remarks,
+    },
+  }) => ({
+    operator,
+    type,
+    featureOperatorList,
     visible,
     responseData,
     featureName,
@@ -22,155 +33,178 @@ const { TextArea } = Input;
     featureType,
     strokeColorStyle,
     remarks,
-  }
-}) => ({
-  operator, type, featureOperatorList, visible, responseData, featureName,
-  selectName,
-  featureType,
-  strokeColorStyle,
-  remarks
-}))
+  })
+)
 export default class PlottingModal extends Component {
   constructor(props) {
-    super(props)
-    this.isOK = false
+    super(props);
+    this.isOK = false;
+    this.strokeColorStyle = undefined;
+    this.fillColorStyle = undefined;
   }
   handleOKClick = () => {
-    console.log(this)
-    if (!this.props.featureName) {
+    if (!this.props.featureName?.trim()) {
       message.warn("请输入名称");
     } else {
-      this.isOK = true
-      const { dispatch, type: plottingType, operator, featureOperatorList, responseData } = this.props
-      operator.responseData = responseData
+      this.isOK = true;
+      const {
+        dispatch,
+        type: plottingType,
+        operator,
+        featureOperatorList,
+        responseData,
+      } = this.props;
+      operator.responseData = responseData;
       const attrs = {
-        featureName: this.props.featureName, //名称 
+        featureName: this.props.featureName, //名称
         featureSelectName: this.props.selectName, // 选择类型的名称
         remarks: this.props.remarks, // 备注
         strokeColorStyle: this.props.strokeColorStyle, // 边线颜色
-        fillColorStyle: this.props.featureType// 填充颜色
-      }
-      Action.setAttribute(attrs, { dispatch, plottingType, operator, featureOperatorList })
-      this.handleCancelClick()
+        fillColorStyle: this.props.featureType, // 填充颜色
+      };
+      Action.setAttribute(attrs, {
+        dispatch,
+        plottingType,
+        operator,
+        featureOperatorList,
+      });
+      this.handleCancelClick();
     }
-  }
+  };
 
   // 取消
   handleCancelClick = () => {
     if (!this.isOK) {
-      const { featureOperatorList } = this.props
-      const index = featureOperatorList.findIndex(item => {
-        return item.guid === window.featureOperator.guid
-      })
+      const { featureOperatorList } = this.props;
+      const index = featureOperatorList.findIndex((item) => {
+        return item.guid === window.featureOperator.guid;
+      });
       if (index === -1) {
-        const { dispatch } = this.props
-        Action.delCallBack({ dispatch })
+        const { dispatch } = this.props;
+        Action.delCallBack({ dispatch });
       }
     }
-    const { dispatch } = this.props
+    const { dispatch } = this.props;
+    dispatch({
+      type: "modal/updateData",
+      payload: {
+        featureName: undefined,
+        selectName: undefined,
+        featureType: undefined,
+        remarks: undefined,
+        strokeColorStyle: undefined,
+      },
+    });
     dispatch({
       type: "modal/setVisible",
       payload: {
         visible: false,
       },
-    }, {
-      type: "modal/setVisible",
-      payload: {
-        strokeColorStyle: undefined,
-        featureType: undefined
-      },
-    })
-    this.isOK = false
-  }
+    });
+    this.isOK = false;
+    this.strokeColorStyle = undefined;
+    this.fillColorStyle = undefined;
+  };
 
   // 名称
   handleNameInputChange = (value) => {
-    const { dispatch } = this.props
+    const { dispatch } = this.props;
     dispatch({
       type: "modal/updateData",
       payload: {
-        featureName: value
-      }
-    })
-  }
+        featureName: value,
+      },
+    });
+  };
   // 名称
   handleTypeSelectChange = (value) => {
-    let featureSelectName = ""
-    let fillColorStyle = ""
+    let featureSelectName = "";
+    let fillColorStyle = "";
     if (value === "custom") {
-      featureSelectName = "自定义类型"
+      featureSelectName = "自定义类型";
     } else {
       const { responseData } = this.props;
       const arr = value.split(",");
       const index0 = Number(arr[0]);
       const index1 = Number(arr[1]);
       const selectValue = responseData.data[index0 - 1].items[index1];
-      featureSelectName = selectValue.name
-      fillColorStyle = selectValue.value1
+      featureSelectName = selectValue.name;
+      fillColorStyle = selectValue.value1;
     }
-    const { dispatch } = this.props
+    const { dispatch } = this.props;
     dispatch({
       type: "modal/updateData",
       payload: {
         selectName: featureSelectName,
         featureType: fillColorStyle,
-        strokeColorStyle: fillColorStyle
-      }
-    })
-  }
+        strokeColorStyle: fillColorStyle,
+      },
+    });
+  };
   // 线框颜色
   handleStrokeColorOkClick = (value) => {
-    const { dispatch } = this.props
+    const { dispatch } = this.props;
     dispatch({
       type: "modal/updateData",
       payload: {
-        strokeColorStyle: value
-      }
-    })
-  }
+        strokeColorStyle: value,
+      },
+    });
+  };
 
   // 填充颜色
   handleFillColorOkClick = (value) => {
-    const { dispatch } = this.props
+    const { dispatch } = this.props;
     dispatch({
       type: "modal/updateData",
       payload: {
-        featureType: value
-      }
-    })
-  }
+        featureType: value,
+      },
+    });
+  };
 
   // 备注
   handleRemarksInputChange = (value) => {
-    const { dispatch } = this.props
+    const { dispatch } = this.props;
     dispatch({
       type: "modal/updateData",
       payload: {
-        remarks: value
-      }
-    })
-  }
-  render () {
+        remarks: value,
+      },
+    });
+  };
+  render() {
     let title = "新增备注";
     if (this.props.operator) {
       if (this.props.operator.name) {
-        title = "修改备注"
+        title = "修改备注";
       }
     }
-    let selectOptions = []
+    let selectOptions = [];
     if (this.props.responseData) {
-      const customTypeOption = { type: "自定义类型", value: "custom" }
-      const responseData = this.props.responseData.data
-      selectOptions = [customTypeOption, ...responseData]
+      const customTypeOption = { type: "自定义类型", value: "custom" };
+      const responseData = this.props.responseData.data;
+      selectOptions = [customTypeOption, ...responseData];
     }
-    let strokeColorStyle = null, fillColorStyle = null, disableStyle = null
+    let strokeColorStyle = null,
+      fillColorStyle = null,
+      disableStyle = null;
     if (this.props.type === "POLYLINE") {
-      strokeColorStyle = this.props.featureType
-      fillColorStyle = null
-      disableStyle = { color: "rgba(0,0,0,0.2)" }
+      strokeColorStyle = this.props.featureType;
+      if (strokeColorStyle && this.props.selectName === "自定义类型") {
+        this.strokeColorStyle = strokeColorStyle;
+      }
+      fillColorStyle = null;
+      disableStyle = { color: "rgba(0,0,0,0.2)" };
     } else {
-      strokeColorStyle = this.props.strokeColorStyle
-      fillColorStyle = this.props.featureType
+      strokeColorStyle = this.props.strokeColorStyle;
+      fillColorStyle = this.props.featureType;
+      if (strokeColorStyle && this.props.selectName === "自定义类型") {
+        this.strokeColorStyle = strokeColorStyle;
+      }
+      if (fillColorStyle && this.props.selectName === "自定义类型") {
+        this.fillColorStyle = fillColorStyle;
+      }
     }
     return (
       <Modal
@@ -232,26 +266,32 @@ export default class PlottingModal extends Component {
             </Select>
           </Col>
         </Row>
-        {this.props.selectName === "自定义类型" ? <Row className={styles.row}>
-          <Col className={styles.firstCol}></Col>
-          <Col className={styles.secondCol}>
-            <div className={styles.customList}>
-              <div className={styles.customItem}>
-                <span className={styles.span}>线框颜色</span>
-                <ColorPicker colorStyle={strokeColorStyle}
-                  handleOK={this.handleStrokeColorOkClick}>
-                </ColorPicker>
+        {this.props.selectName === "自定义类型" ? (
+          <Row className={styles.row}>
+            <Col className={styles.firstCol}></Col>
+            <Col className={styles.secondCol}>
+              <div className={styles.customList}>
+                <div className={styles.customItem}>
+                  <span className={styles.span}>线框颜色</span>
+                  <ColorPicker
+                    colorStyle={strokeColorStyle || this.strokeColorStyle}
+                    handleOK={this.handleStrokeColorOkClick}
+                  ></ColorPicker>
+                </div>
+                <div className={styles.customItem} style={{ marginLeft: 8 }}>
+                  <span className={styles.span} style={disableStyle}>
+                    填充颜色
+                  </span>
+                  <ColorPicker
+                    colorStyle={fillColorStyle || this.fillColorStyle}
+                    disable={this.props.type === "POLYLINE" ? true : false}
+                    handleOK={this.handleFillColorOkClick}
+                  ></ColorPicker>
+                </div>
               </div>
-              <div className={styles.customItem} style={{ marginLeft: 8 }}>
-                <span className={styles.span} style={disableStyle}>填充颜色</span>
-                <ColorPicker colorStyle={fillColorStyle}
-                  disable={this.props.type === "POLYLINE" ? true : false}
-                  handleOK={this.handleFillColorOkClick}>
-                </ColorPicker>
-              </div>
-            </div>
-          </Col>
-        </Row> : null}
+            </Col>
+          </Row>
+        ) : null}
         <Row className={styles.row}>
           <Col className={styles.firstCol}>
             <label>备注</label>
@@ -264,6 +304,6 @@ export default class PlottingModal extends Component {
           </Col>
         </Row>
       </Modal>
-    )
+    );
   }
 }
