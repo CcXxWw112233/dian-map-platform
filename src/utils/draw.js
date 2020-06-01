@@ -9,6 +9,7 @@ import { BASIC } from "../services/config";
 // import { connectEvent, disconnectEvent } from './plot2ol/util/core'
 export const draw = {
   map: null,
+  target: null,
   plottingLayer: null,
   delBtnOverlay: null,
   delBtnOverlayEl: null,
@@ -39,7 +40,10 @@ export const draw = {
     this.drawDispatch = dispatch;
     if (!this.map) {
       this.map = mapApp.map;
+      this.target = document.getElementById(this.map.getTarget())
     }
+
+    this.target.style.cursor = "crosshair"
     this.type = type;
     if (type === "MARKER") {
       this.type = "POINT";
@@ -79,7 +83,9 @@ export const draw = {
 
   // 标绘完成回调
   onActiveEventListener(cb) {
+    const me = this
     this.plottingLayer.on(FeatureOperatorEvent.ACTIVATE, (e) => {
+      me.target.style.cursor = ""
       window.featureOperator = e.feature_operator;
       cb && cb(e);
     });

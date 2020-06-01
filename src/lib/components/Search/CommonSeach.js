@@ -19,7 +19,7 @@ function Action() {
   };
   this.addPOIToMap = (item) => {
     if (!this.layer) {
-      this.layer = Layer({ id: "POILayer", zIndex: 11 });
+      this.layer = Layer({ id: "POILayer", zIndex: 12 });
       this.source = Source();
       this.layer.setSource(this.source);
       mapApp.map.addLayer(this.layer);

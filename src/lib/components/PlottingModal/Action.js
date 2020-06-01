@@ -10,6 +10,7 @@ const Action = {
     iconScale: 0.6,
     pointColor: "#fff",
     showName: true,
+    commonFunc: null,
   },
   defaultFillColor: "rgba(168,9,10,0.7)",
   defaultStrokeColor: "rgba(168,9,10,1)",
@@ -34,12 +35,30 @@ const Action = {
       });
     }
     plottingLayer.removeFeature(window.featureOperator);
-    delete window.featureOperator;
   },
 
-  bindDelCb: function ({ dispatch }) {
+
+  updateCallBack: function({dispatch}) {
+    const { featureOperatorList } = draw
+    let newFeatureOperatorList = [...featureOperatorList]
+    const index = featureOperatorList.findIndex(item => {
+      return item.guid === window.featureOperator.guid
+    })
+    if (index >= 0) {
+      draw.featureOperatorList = newFeatureOperatorList
+      dispatch({
+        type: "featureOperatorList/updateList",
+        payload: {
+          featureOperatorList: newFeatureOperatorList,
+        },
+      });
+    }
+  },
+
+  bindCb: function ({ dispatch }) {
     const { plottingLayer } = draw;
     plottingLayer.plotEdit.setDelCallback(this.delCallBack.bind(this, { dispatch }))
+    plottingLayer.plotEdit.setUpdateCallback(this.updateCallBack.bind(this, {dispatch}))
   },
   // 拼接poiStr
   getPointStr: function () {
@@ -219,7 +238,7 @@ const Action = {
         featureOperatorList: newList
       }
     })
-    Action.bindDelCb({ dispatch })
+    this.bindCb({ dispatch })
   }
 }
 
