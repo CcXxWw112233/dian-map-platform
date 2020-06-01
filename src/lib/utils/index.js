@@ -21,6 +21,7 @@ import {
   getBottomRight,
   getTopLeft,
   getTopRight,
+  isEmpty
 } from "ol/extent";
 import {
   Fill,
@@ -75,7 +76,12 @@ export const getExtent = function (feature) {
   return extent;
 };
 
+export const getExtentIsEmpty = (extent) =>{
+  return isEmpty(extent);
+}
+
 export const getPoint = function (extent, type = "center") {
+  if(isEmpty(extent)) return ;
   switch (type) {
     case "center":
       return getCenter(extent);

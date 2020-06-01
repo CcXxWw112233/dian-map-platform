@@ -18,6 +18,7 @@ import {
   setSelectInteraction,
   fitPadding,
   SourceStatic,
+  getExtentIsEmpty
 } from "../../utils/index";
 import {
   CollectionOverlay,
@@ -428,11 +429,12 @@ function Action() {
     this.renderFeaturesCollection(features, { lenged, dispatch });
     // 渲染规划图
     let ext = await this.renderPlanPicCollection(planPic);
+  
     data &&
       data.length &&
       setTimeout(() => {
-        // 当存在feature的时候，才可以缩放
-        if (this.features.length)
+        // 当存在feature的时候，才可以缩放 需要兼容规划图，规划图不存在source的元素中
+        if (this.features.length && !getExtentIsEmpty(this.Source.getExtent())){
           Fit(
             InitMap.view,
             ext.length
@@ -444,6 +446,18 @@ function Action() {
             },
             800
           );
+        }else if(ext.length){
+          Fit(
+            InitMap.view, 
+            ext,
+            {
+              size: InitMap.map.getSize(),
+              padding: fitPadding,
+            },
+          800)
+        }
+
+          
       });
   };
 
@@ -488,7 +502,7 @@ function Action() {
         let select = setSelectInteraction({
           // 做一个判断过滤不需要交互的元素
           filter: (feature, layer) => {
-            if (layer.get("id") !== "scoutingDetailLayer") {
+            if (layer && layer.get("id") !== "scoutingDetailLayer") {
               return false;
             }
             if (feature.get("ftype") === "editImageLayer") {
@@ -629,7 +643,6 @@ function Action() {
         return GET_PLAN_PIC(item.resource_id);
       }
     });
-    this.imgs = [];
     let res = await Promise.all(promise);
     // .then((res) => {
     this.imgs = [];
@@ -638,6 +651,7 @@ function Action() {
       let extent = resp.extent
         ? resp.extent.split(",").map((e) => parseFloat(e))
         : [];
+
       let img = ImageStatic(PLAN_IMG_URL(resp.id), extent, {
         opacity: +resp.transparency,
         minZoom: 10,
@@ -732,7 +746,6 @@ function Action() {
         }
         if (
           (feature && !feature.get("collect_type")) ||
-          feature.getGeometry().getType !== "Polygon" ||
           !feature.get("remark")
         ) {
           return false;

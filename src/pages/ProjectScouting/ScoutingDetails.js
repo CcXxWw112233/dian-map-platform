@@ -403,50 +403,50 @@ const UploadItem = ({
   let hours = Action.dateFormat(create_time, "HH:mm");
 
   let secondSetType = type;
-  if (type === "unknow") {
-    const lastIndex = data && data.title?.lastIndexOf(".");
-    const originalType = data.title?.substr(
-      lastIndex + 1,
-      data.title.length - lastIndex - 1
-    );
-    const originalItemKeyVals = {
-      paper: [], // 图纸
-      interview: ["aac", "mp3", "语音"], // 访谈
-      pic: ["jpg", "PNG", "gif", "jpeg"].map((item) =>
-        item.toLocaleLowerCase()
-      ),
-      video: ["MP4", "WebM", "Ogg", "avi"].map((item) =>
-        item.toLocaleLowerCase()
-      ),
-      word: [
-        "ppt",
-        "pptx",
-        "xls",
-        "xlsx",
-        "doc",
-        "docx",
-        "zip",
-        "rar",
-        "txt",
-        "xmind",
-        "pdf",
-      ].map((item) => item.toLocaleLowerCase()),
-      annotate: [], // 批注
-      plotting: ["feature"], // 标绘
-      planPic: ["plan"], // 规划图
-    };
+  // if (type === "unknow") {
+  //   const lastIndex = data && data.title?.lastIndexOf(".");
+  //   const originalType = data.title?.substr(
+  //     lastIndex + 1,
+  //     data.title.length - lastIndex - 1
+  //   );
+  //   const originalItemKeyVals = {
+  //     paper: [], // 图纸
+  //     interview: ["aac", "mp3", "语音"], // 访谈
+  //     pic: ["jpg", "PNG", "gif", "jpeg"].map((item) =>
+  //       item.toLocaleLowerCase()
+  //     ),
+  //     video: ["MP4", "WebM", "Ogg", "avi"].map((item) =>
+  //       item.toLocaleLowerCase()
+  //     ),
+  //     word: [
+  //       "ppt",
+  //       "pptx",
+  //       "xls",
+  //       "xlsx",
+  //       "doc",
+  //       "docx",
+  //       "zip",
+  //       "rar",
+  //       "txt",
+  //       "xmind",
+  //       "pdf",
+  //     ].map((item) => item.toLocaleLowerCase()),
+  //     annotate: [], // 批注
+  //     plotting: ["feature"], // 标绘
+  //     planPic: ["plan"], // 规划图
+  //   };
 
-    const keyVals = Object.keys(originalItemKeyVals);
-    for (let i = 0; i < keyVals.length; i++) {
-      const temp = originalItemKeyVals[keyVals[i]].filter((item) => {
-        return item === originalType;
-      });
-      if (temp.length) {
-        secondSetType = keyVals[i];
-        break;
-      }
-    }
-  }
+  //   const keyVals = Object.keys(originalItemKeyVals);
+  //   for (let i = 0; i < keyVals.length; i++) {
+  //     const temp = originalItemKeyVals[keyVals[i]].filter((item) => {
+  //       return item === originalType;
+  //     });
+  //     if (temp.length) {
+  //       secondSetType = keyVals[i];
+  //       break;
+  //     }
+  //   }
+  // }
 
   const onHandleMenu = ({ key }) => {
     // 添加坐标点
