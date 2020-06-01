@@ -120,6 +120,9 @@ export default class PlottingModal extends Component {
   handleTypeSelectChange = (value) => {
     let featureSelectName = "";
     let fillColorStyle = "";
+    const { dispatch } = this.props;
+    this.strokeColorStyle = undefined;
+    this.fillColorStyle = undefined;
     if (value === "custom") {
       featureSelectName = "自定义类型";
     } else {
@@ -131,7 +134,6 @@ export default class PlottingModal extends Component {
       featureSelectName = selectValue.name;
       fillColorStyle = selectValue.value1;
     }
-    const { dispatch } = this.props;
     dispatch({
       type: "modal/updateData",
       payload: {
