@@ -176,7 +176,7 @@ export default class PlottingModal extends Component {
   render() {
     let title = "新增备注";
     if (this.props.operator) {
-      if (this.props.operator.name) {
+      if (this.props.operator.name !== "未命名") {
         title = "修改备注";
       }
     }
