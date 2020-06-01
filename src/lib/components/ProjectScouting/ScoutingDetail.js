@@ -387,6 +387,9 @@ function Action() {
     } else {
       newConfig = [...lenged.concat(this.lenged)];
     }
+    if (newConfig.length === 1 && !newConfig[0].content.length) {
+      newConfig = []
+    }
     dispatch({
       type: "lengedList/updateLengedList",
       payload: {
