@@ -137,10 +137,17 @@ export default class LengedList extends PureComponent {
                   <div
                     className={styles.layerItem + ` ${active}`}
                     key={item.key}
+                    // style={{backgroundImage: `url(${item.img})`}}
                     onClick={() => this.changeBaseMap(item, index)}
                   >
-                    <p className={styles.layerName}>
+                    <p
+                      className={styles.layerName}
+                      style={{ top: 20, fontSize: 16 }}
+                    >
                       <span>{item.name}</span>
+                    </p>
+                    <p className={styles.layerName}>
+                      <span>{item.type}</span>
                     </p>
                   </div>
                 );
@@ -150,7 +157,7 @@ export default class LengedList extends PureComponent {
             })}
           </div>
           <div
-            style={{ height: "calc(100% - 80px)" }}
+            style={{ height: "calc(100% - 84px)" }}
             className={globalStyle.autoScrollY}
           >
             {newConfig.length > 0 ? (

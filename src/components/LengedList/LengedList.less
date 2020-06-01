@@ -18,16 +18,17 @@
     }
   }
   .layerItems {
-    height: 80px;
+    height: 84px;
     margin: 0 16px;
-    display: -ms-flexbox;
-    display: flex;
+    display: -webkit-inline-box;
+    /* display: flex; */
+    /* flex-direction: row; */
     -ms-flex-pack: justify;
     justify-content: space-between;
     white-space: nowrap;
     overflow-y: hidden;
+    -ms-flex-align: center;
     align-items: center;
-    // border-bottom: 1px solid #000;
   }
   .layerItem {
     width: 60px;
@@ -37,13 +38,17 @@
     margin: 0 16px 0 0;
     margin-top: 12px;
     cursor: pointer;
+    border: 2px solid rgba(0,0,0,0.1);
     &.active {
       border: 2px solid rgba(23, 105, 255, 1);
+      span {
+        color: #1769ff;
+      }
     }
   }
   .layerName {
     position: relative;
-    top: 36px;
+    top: 22px;
     text-align: center;
     margin: 0;
     font-size: 12px;

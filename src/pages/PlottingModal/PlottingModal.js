@@ -84,6 +84,9 @@ export default class PlottingModal extends Component {
         Action.delCallBack({ dispatch });
       }
     }
+    this.isOK = false;
+    this.strokeColorStyle = undefined;
+    this.fillColorStyle = undefined;
     const { dispatch } = this.props;
     dispatch({
       type: "modal/updateData",
@@ -101,9 +104,6 @@ export default class PlottingModal extends Component {
         visible: false,
       },
     });
-    this.isOK = false;
-    this.strokeColorStyle = undefined;
-    this.fillColorStyle = undefined;
   };
 
   // 名称
@@ -120,6 +120,9 @@ export default class PlottingModal extends Component {
   handleTypeSelectChange = (value) => {
     let featureSelectName = "";
     let fillColorStyle = "";
+    const { dispatch } = this.props;
+    this.strokeColorStyle = undefined;
+    this.fillColorStyle = undefined;
     if (value === "custom") {
       featureSelectName = "自定义类型";
     } else {
@@ -131,7 +134,6 @@ export default class PlottingModal extends Component {
       featureSelectName = selectValue.name;
       fillColorStyle = selectValue.value1;
     }
-    const { dispatch } = this.props;
     dispatch({
       type: "modal/updateData",
       payload: {
@@ -208,7 +210,6 @@ export default class PlottingModal extends Component {
     }
     return (
       <Modal
-        destroyOnClose
         className={styles.wrap}
         width={310}
         title={title}
@@ -218,6 +219,10 @@ export default class PlottingModal extends Component {
         okText="确定"
         cancelText="取消"
         centered={true}
+        // mask={false}
+        getContainer={document.getElementById("MapsView")}
+        destroyOnClose={true}
+        maskClosable={false}
       >
         <Row className={styles.row}>
           <Col className={styles.firstCol}>

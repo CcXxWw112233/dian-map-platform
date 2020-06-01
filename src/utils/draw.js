@@ -9,6 +9,7 @@ import { BASIC } from "../services/config";
 // import { connectEvent, disconnectEvent } from './plot2ol/util/core'
 export const draw = {
   map: null,
+  target: null,
   plottingLayer: null,
   delBtnOverlay: null,
   delBtnOverlayEl: null,
@@ -39,7 +40,10 @@ export const draw = {
     this.drawDispatch = dispatch;
     if (!this.map) {
       this.map = mapApp.map;
+      this.target = document.getElementById(this.map.getTarget())
     }
+
+    this.target.style.cursor = "crosshair"
     this.type = type;
     if (type === "MARKER") {
       this.type = "POINT";
@@ -91,8 +95,7 @@ export const draw = {
       cb && cb(e);
     });
   },
-  activeCallBack() {
-    const featureOperator = window.featureOperator;
+  updateProps(featureOperator) {
     // 讲标绘存到redux
     this.drawDispatch({
       type: "plotting/setPotting",
@@ -101,7 +104,6 @@ export const draw = {
         operator: featureOperator,
       },
     });
-
     this.drawDispatch({
       type: "modal/updateData",
       payload: {
@@ -110,10 +112,11 @@ export const draw = {
         featureType: featureOperator.attrs.featureType,
         remarks: featureOperator.attrs.remark,
         strokeColorStyle: featureOperator.attrs.strokeColor,
-      }
-    })
-
-
+      },
+    });
+  },
+  activeCallBack() {
+    const featureOperator = window.featureOperator;
     // 查询数据，存在当前标绘，弹出模态框
     const currentOperator = this.featureOperatorList.filter((operator) => {
       return operator.guid === featureOperator.guid;
@@ -121,6 +124,7 @@ export const draw = {
     // 如果存在
     if (!currentOperator.length) {
       if (this.responseData && this.responseData[this.currentId]) {
+        this.updateProps(featureOperator);
         this.drawDispatch({
           type: "modal/setVisible",
           payload: {
@@ -137,6 +141,7 @@ export const draw = {
             res.data.data[2].items = items;
           }
           this.responseData[this.currentId] = res;
+          this.updateProps(featureOperator);
           this.drawDispatch({
             type: "modal/setVisible",
             payload: {
@@ -164,6 +169,7 @@ export const draw = {
     const me = this;
     // 标绘激活事件
     this.plottingLayer.on(FeatureOperatorEvent.ACTIVATE, (e) => {
+      me.target.style.cursor = ""
       window.featureOperator = e.feature_operator;
       let isMobile = BASIC.getUrlParam.isMobile;
       if (!isMobile) {
@@ -177,6 +183,7 @@ export const draw = {
       }
     });
     this.plottingLayer.on(FeatureOperatorEvent.DEACTIVATE, (e) => {
+      me.target.style.cursor = ""
       let isMobile = BASIC.getUrlParam.isMobile;
       if (!isMobile) {
         me.deactiveCallback();

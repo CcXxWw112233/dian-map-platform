@@ -29,6 +29,7 @@ import { Modify } from "ol/interaction";
 import { extend } from "ol/extent";
 import { always, never } from "ol/events/condition";
 import Event from '../../utils/event'
+import { draw } from "utils/draw"
 
 function Action() {
   const {
@@ -303,6 +304,7 @@ function Action() {
         if (hasIndex < 0) {
           obj = {
             bgColor: featureType,
+            borderColor: strokeColor,
             font:
               content.selectName === "自定义类型" || content.selectName === ""
                 ? content.name
@@ -403,18 +405,6 @@ function Action() {
 
     // 添加区域选择
     this.addAreaSelect();
-  };
-  this.getPolygonFill = (iconUrl) => {
-    let canvas = document.createElement("canvas");
-    let context = canvas.getContext("2d");
-    let img = new Image();
-    img.src = iconUrl;
-    img.onload = function () {
-      const pat = context.createPattern(img, "repeat");
-      return pat;
-    };
-    const pat = context.createPattern(img, "repeat");
-    return pat;
   };
   // 渲染feature
   this.renderCollection = async (data, { lenged, dispatch }) => {

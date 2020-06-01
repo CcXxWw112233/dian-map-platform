@@ -208,10 +208,10 @@ export default class AreaPanel extends React.Component {
     })[0].name;
     this.props.updateLocationName(currentLocation);
     this.getGeomByCode(currentCode);
+    window.areaCode = currentCode;
   };
 
   render() {
-    const { handleClose } = this.props;
     const {
       provinceOptions,
       cityOptions,
