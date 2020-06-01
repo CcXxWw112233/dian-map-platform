@@ -84,6 +84,9 @@ export default class PlottingModal extends Component {
         Action.delCallBack({ dispatch });
       }
     }
+    this.isOK = false;
+    this.strokeColorStyle = undefined;
+    this.fillColorStyle = undefined;
     const { dispatch } = this.props;
     dispatch({
       type: "modal/updateData",
@@ -101,9 +104,6 @@ export default class PlottingModal extends Component {
         visible: false,
       },
     });
-    this.isOK = false;
-    this.strokeColorStyle = undefined;
-    this.fillColorStyle = undefined;
   };
 
   // 名称

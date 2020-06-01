@@ -91,8 +91,7 @@ export const draw = {
       cb && cb(e);
     });
   },
-  activeCallBack() {
-    const featureOperator = window.featureOperator;
+  updateProps(featureOperator) {
     // 讲标绘存到redux
     this.drawDispatch({
       type: "plotting/setPotting",
@@ -101,7 +100,6 @@ export const draw = {
         operator: featureOperator,
       },
     });
-
     this.drawDispatch({
       type: "modal/updateData",
       payload: {
@@ -110,10 +108,11 @@ export const draw = {
         featureType: featureOperator.attrs.featureType,
         remarks: featureOperator.attrs.remark,
         strokeColorStyle: featureOperator.attrs.strokeColor,
-      }
-    })
-
-
+      },
+    });
+  },
+  activeCallBack() {
+    const featureOperator = window.featureOperator;
     // 查询数据，存在当前标绘，弹出模态框
     const currentOperator = this.featureOperatorList.filter((operator) => {
       return operator.guid === featureOperator.guid;
@@ -121,6 +120,7 @@ export const draw = {
     // 如果存在
     if (!currentOperator.length) {
       if (this.responseData && this.responseData[this.currentId]) {
+        this.updateProps(featureOperator);
         this.drawDispatch({
           type: "modal/setVisible",
           payload: {
@@ -137,6 +137,7 @@ export const draw = {
             res.data.data[2].items = items;
           }
           this.responseData[this.currentId] = res;
+          this.updateProps(featureOperator);
           this.drawDispatch({
             type: "modal/setVisible",
             payload: {
