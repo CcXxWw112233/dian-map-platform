@@ -11,6 +11,8 @@ export default function overlay (data = {}){
     this.more = "";
     let type = data.pointType;
     this.show = false;
+    this.audio = null;
+    this.video = null;
 
     div.onclick = (e)=>{
         e.stopPropagation();
@@ -28,13 +30,7 @@ export default function overlay (data = {}){
     title.innerHTML = data.title;
     div.appendChild(title);
 
-    // 添加箭头
-    if(type === 'pic'){
-        this.more = document.createElement('span');
-        this.more.className = `${styles.pictureDivMore} ${iconCss.global_icon}`;
-        this.more.innerHTML = "&#xe7ed;"
-        div.appendChild(this.more);
-    }
+    
 
     // 添加媒体信息
     let append = (t)=>{
@@ -52,12 +48,95 @@ export default function overlay (data = {}){
             }
         }
     }
+    // 视频和音频的播放按钮
+    let playBtn = (element,type = 'audio')=>{
+        let icons = {
+            'audio':{
+                play:"&#xe609;",
+                pause:'&#xe60a;'
+            },
+            'video':{
+                play:"&#xe608;",
+                pause:"&#xe60b;"
+            }
+        }
+        let btn = document.createElement('span');
+        btn.className = iconCss.global_icon +' '+ styles.playButton;
+        btn.innerHTML = icons[type].play;
+        btn.addEventListener('click',function(){
+            if(element.paused){
+                let audios = document.querySelectorAll('audio');
+                audios.forEach(item => {
+                    item.pause();
+                })
+                element.play();
+            }else{
+                element.pause();
+            }
+        })
+        element.addEventListener('play',()=>{
+            btn.innerHTML = icons[type].pause;
+        }) 
+        
+        element.addEventListener('pause',()=>{
+            btn.innerHTML = icons[type].play;
+        })
+        return btn;
+    }
+
+    // 创建一个音频播放器
+    let createAudioElement = ()=>{
+        this.audioView = document.createElement('div');
+        // 创建一个音频播放器
+        this.audio = document.createElement('audio');
+        // 隐藏音频播放器，用js控制
+        this.audio.src = data.resource_url;
+        this.audio.style.display = 'none';
+        this.audio.preload = 'metadata';
+        this.audio.className = 'collectionAudio'
+        // this.audio.
+
+        this.audioView.className = styles.audioView;
+        let play = document.createElement('span');
+        play.className = styles.collectionPlayBtn;
+        play.appendChild(playBtn(this.audio))
+        
+        this.audioView.appendChild(play);
+        let t = document.createElement('span');
+        t.className = styles.audioName;
+        t.innerHTML = data.title;
+        this.audioView.appendChild(t);
+        div.innerHTML = "";
+        div.style.padding = "0";
+        div.appendChild(this.audioView);
+        div.appendChild(this.audio);
+        
+        this.audio.onloadedmetadata = (e)=>{
+            let duration = e.target.duration;
+            let dom = document.createElement('span');
+            dom.className = styles.audioTimes;
+            if(!isNaN(duration)){
+               let time = duration/60;
+                let minut = parseInt(time);// 分钟
+                let seconds = parseInt((time - minut) * 60);
+                let text = `${minut}'${seconds}"`
+                dom.innerHTML = text;
+            }else{
+                dom.innerHTML = "0'00\"";
+            }
+            this.audioView.appendChild(dom);
+        }
+        
+    }   
+
+    
+
     // 删除媒体信息
     let remove = (t) => {
         this.show = false;
         if(t === 'pic' && this.imgDiv){
             div.removeChild(this.imgDiv);
-            this.imgDiv = "";
+            this.imgDiv = null;
         }
         
     }
@@ -66,8 +145,18 @@ export default function overlay (data = {}){
 
     
 
-    this.element = new baseOverlay(div,{});
-    
+    this.element = new baseOverlay(div,data);
+    // 添加箭头
+    if(type === 'pic'){
+        this.more = document.createElement('span');
+        this.more.className = `${styles.pictureDivMore} ${iconCss.global_icon}`;
+        this.more.innerHTML = "&#xe7ed;"
+        div.appendChild(this.more);
+    }
+    if(type === 'interview'){
+        // 创建音频播放
+        createAudioElement();
+    }
     document.body.appendChild(this.element);
     this.remove = ()=>{
         document.body.removeChild(this.element);

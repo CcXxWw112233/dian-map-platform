@@ -28,6 +28,7 @@ import {
 import { Modify } from "ol/interaction";
 import { extend } from "ol/extent";
 import { always, never } from "ol/events/condition";
+import Event from '../../utils/event'
 import { draw } from "utils/draw"
 
 function Action() {
@@ -80,7 +81,7 @@ function Action() {
     if (!suffix) return "unknow";
     const itemKeyVals = {
       paper: [], // 图纸
-      interview: ["aac", "mp3", "语音"], // 访谈
+      interview: ["aac", "mp3", "语音",'m4a'], // 访谈
       pic: ["jpg", "PNG", "gif", "jpeg"].map((item) =>
         item.toLocaleLowerCase()
       ),
@@ -217,10 +218,12 @@ function Action() {
         +item.location.longitude,
         +item.location.latitude,
       ]);
-      let feature = addFeature("Point", { coordinates: coor });
+      let feature = addFeature("Point", { coordinates: coor ,});
       let style = createStyle("Point", {
+        iconUrl: require('../../../assets/mark/collectionIcon.png'),
         strokeWidth: 2,
         strokeColor: "#fff",
+        icon:{ anchorOrigin:"bottom-left" ,anchor:[0.35,0.25]}
       });
 
       let pointType = this.checkCollectionType(item.target);
@@ -671,14 +674,35 @@ function Action() {
 
   //   添加元素坐标的overlay
   this.addOverlay = (coor, data) => {
-    let ele = new CollectionOverlay(data);
+    let ele = new CollectionOverlay({...data,angleColor:"#fff",placement:"bottomCenter"});
     let overlay = createOverlay(ele.element, {
-      positioning: "bottom-left",
-      offset: [-12, -10],
+      positioning: "bottom-center",
+      offset: [0, -25],
     });
     InitMap.map.addOverlay(overlay);
     this.overlays.push(overlay);
     overlay.setPosition(coor);
+
+    if(ele.audio){
+      ele.audio.addEventListener('play',(e)=>{
+        Event.Evt.firEvent('hasAudioStart',{
+          ele: e.target,
+          ...data
+        })
+      })
+      ele.audio.addEventListener('pause',(e)=>{
+        // console.log(e,'pause')
+      })
+      ele.audio.ontimeupdate = (e)=>{
+        // console.log(e.target.currentTime)
+      }
+    }
+    if(ele.video){
+      ele.video.onplay = (e)=>{
+
+      }
+    }
+
   };
 
   //   删除元素坐标的overlay

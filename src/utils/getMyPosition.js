@@ -102,7 +102,8 @@ export const getMyPosition = {
     // 点
     var iconStyle = new Style({
       image: new Icon({
-        radius: 8,
+        // radius: 11,
+        scale:1.5,
         src: iconpoint,
       }),
     });
