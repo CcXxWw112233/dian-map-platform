@@ -32,6 +32,7 @@ import {
 } from "@ant-design/icons";
 import { BASIC } from "../../services/config";
 import Event from "../../lib/utils/event";
+import AudioControl from './components/audioPlayControl'
 const { TabPane } = Tabs;
 
 const Title = ({ name, date, cb, id }) => {
@@ -733,6 +734,9 @@ export default class ScoutingDetails extends PureComponent {
       visible: true,
       activeKey: panes[0].key,
       panes,
+      audioData: {
+
+      }
     };
   }
   componentDidMount() {
@@ -746,8 +750,19 @@ export default class ScoutingDetails extends PureComponent {
     Event.Evt.on("addCollectionForFeature", (data) => {
       this.fetchCollection();
     });
+    // 有音频正在播放
+    Event.Evt.on('hasAudioStart',(data)=>{
+      this.setAudio(data)
+    })
   }
 
+  // 设置正在播放的数据
+  setAudio = (data)=>{
+    // console.log(data)
+    this.setState({
+      audioData:data,
+    })
+  }
   // 获取缓存中选定的项目
   getDetails = (flag) => {
     ScouListAction.checkItem().then((res) => {
@@ -1249,7 +1264,11 @@ export default class ScoutingDetails extends PureComponent {
         this.showOtherSlide();
       });
   };
-
+  // 
+  audioDistory = ()=>{
+    // 页面清除了
+    
+  }
   render(h) {
     const { current_board, area_list, not_area_id_collection } = this.state;
     const panelStyle = {
@@ -1260,6 +1279,14 @@ export default class ScoutingDetails extends PureComponent {
         className={`${styles.wrap} ${animateCss.animated} ${animateCss.slideInLeft}`}
         style={{ animationDuration: "0.3s" }}
       >
+        {
+          this.state.audioData.ele &&
+          !this.state.audioData.ele.paused &&
+          <AudioControl audioEle={this.state.audioData.ele} 
+          onDistory={this.audioDistory}  data={this.state.audioData}
+          onClose={()=> this.setState({audioData:{}})}/>
+        }
+        
         <Title
           name={current_board.board_name}
           date={""}

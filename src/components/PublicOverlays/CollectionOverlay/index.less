@@ -1,6 +1,7 @@
+@import '../../../globalSet/styles/globalStyles.less';
 .overlay{
-    background-color: #1769FF;
-    color: #fff;
+    background-color: #fff;
+    color: #000;
     position: relative;
     transition: all 0.3s linear;
     padding: 0px 22px;
@@ -20,4 +21,45 @@
     position: absolute;
     right: 5px;
     bottom: 0px;
+}
+.audioView{
+    position: relative;
+    display: flex;
+    height: 40px;
+    font-size: 12px;
+}
+.playButton{
+    color: @color_theme;
+}
+.collectionPlayBtn{
+    display: inline-block;
+    vertical-align: middle;
+    height: 100%;
+    font-size: 2.5rem;
+    // position: absolute;
+    height: 40px;
+    transform: translateY(-10px);
+    margin-right: 5px;
+}
+.audioName{
+    display: inline-block;
+    width: 165px;
+    text-overflow: -o-ellipsis-lastline;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    word-break: break-all;
+    word-wrap: pre-wrap;
+    white-space: pre-wrap;
+    text-align: left;
+}
+.audioTimes{
+    margin-left: 12px;
+    margin-right: 5px;
+    font-size: 12px;
+    color: rgba(0,0,0,0.5);
+    line-height: 40px;
 }

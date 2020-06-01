@@ -151,6 +151,8 @@ export const createStyle = function (
     fillColor = getPolygonFillColor(properties, fillColorKeyVals);
   }
 
+  options.icon = !options.icon ? {} : options.icon;
+
   let defaultColor = "rgba(255,255,255,0.8)";
   // 填充色
   let fill = new Fill({
@@ -190,6 +192,7 @@ export const createStyle = function (
             src: options.iconUrl,
             color: options.pointColor || defaultColor,
             scale: options.iconScale || 0.8,
+            ...options.icon ,
           })
         : new Circle({
             radius: options.radius || 5,
