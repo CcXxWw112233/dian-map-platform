@@ -4,26 +4,22 @@ const baseMaps = [
   {
     title: "高德电子图",
     id: "gd_vec_tile",
-    url:
-      `${document.location.protocol}//webrd0{1-4}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}`,
+    url: `${document.location.protocol}//webrd0{1-4}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}`,
   },
   {
     title: "高德影像图",
     id: "gd_img_tile",
-    url:
-      `${document.location.protocol}//webst0{1-4}.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}`,
+    url: `${document.location.protocol}//webst0{1-4}.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}`,
   },
   {
     title: "高德路线图",
     id: "gd_roadLabel_tile",
-    url:
-      `${document.location.protocol}//webst0{1-4}.is.autonavi.com/appmaptile?style=8&x={x}&y={y}&z={z}`,
+    url: `${document.location.protocol}//webst0{1-4}.is.autonavi.com/appmaptile?style=8&x={x}&y={y}&z={z}`,
   },
   {
     title: "谷歌遥感图",
     id: "gg_img_tile",
-    url:
-      `${document.location.protocol}//mt2.google.cn/vt/lyrs=y&hl=zh-CN&gl=CN&src=app&x={x}&y={y}&z={z}&s=G`,
+    url: `${document.location.protocol}//mt2.google.cn/vt/lyrs=y&hl=zh-CN&gl=CN&src=app&x={x}&y={y}&z={z}&s=G`,
   },
   {
     title: "天地图影像图",
@@ -52,25 +48,29 @@ const baseMaps = [
   },
 ];
 const baseMapDictionary = [
-  { name: "高德电子图", key: "gd_vec", values: ["gd_vec_tile"] },
+  { name: "高德", type: "电子图", key: "gd_vec", values: ["gd_vec_tile"] },
   {
-    name: "高德影像图",
+    name: "高德",
+    type: "影像图",
     key: "gd_img",
     values: ["gd_img_tile", "gd_roadLabel_tile"],
   },
-  { name: "谷歌遥感图", key: "gg_img", values: ["gg_img_tile"] },
+  { name: "谷歌", type: "遥感图", key: "gg_img", values: ["gg_img_tile"] },
   {
-    name: "天地图矢量图",
+    name: "天地图",
+    type: "矢量图",
     key: "td_vec",
     values: ["td_vec_tile", "td_roadLabel_tile", "td_label_tile"],
   },
   {
-    name: "天地图影像图",
+    name: "天地图",
+    type: "影像图",
     key: "td_img",
     values: ["td_img_tile", "td_roadLabel_tile", "td_label_tile"],
   },
   {
-    name: "天地图地形图",
+    name: "天地图",
+    type: "地形图",
     key: "td_ter",
     values: ["td_ter_tile", "td_roadLabel_tile", "td_label_tile"],
   },
