@@ -139,7 +139,9 @@ export default class LengedList extends PureComponent {
                     key={item.key}
                     onClick={() => this.changeBaseMap(item, index)}
                   >
-                    <p className={styles.layerName}>{item.name}</p>
+                    <p className={styles.layerName}>
+                      <span>{item.name}</span>
+                    </p>
                   </div>
                 );
               } else {

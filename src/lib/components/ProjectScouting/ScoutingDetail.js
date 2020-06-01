@@ -384,18 +384,19 @@ function Action() {
     );
     if (lengedIndex > -1) {
       lenged[lengedIndex] = this.lenged;
-      newConfig = [...lenged[lengedIndex]];
+      newConfig = [...lenged];
     } else {
       newConfig = [...lenged.concat(this.lenged)];
     }
-    if (this.lenged.content.length > 0) {
-      dispatch({
-        type: "lengedList/updateLengedList",
-        payload: {
-          config: newConfig,
-        },
-      });
+    if (newConfig.length === 1 && !newConfig[0].content.length) {
+      newConfig = []
     }
+    dispatch({
+      type: "lengedList/updateLengedList",
+      payload: {
+        config: newConfig,
+      },
+    });
 
     // 添加区域选择
     this.addAreaSelect();

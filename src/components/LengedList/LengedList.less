@@ -32,13 +32,13 @@
   .layerItem {
     width: 60px;
     height: 60px;
-    background: #EFF0EF;
+    background: #eff0ef;
     border-radius: 4px;
     margin: 0 16px 0 0;
     margin-top: 12px;
     cursor: pointer;
     &.active {
-      border:2px solid rgba(23,105,255,1);
+      border: 2px solid rgba(23, 105, 255, 1);
     }
   }
   .layerName {
@@ -46,11 +46,14 @@
     top: 36px;
     text-align: center;
     margin: 0;
-    font-size:12px;
-    font-family:PingFangSC-Semibold,PingFang SC;
-    font-weight:600;
-    color:rgba(0,0,0,0.65);
-    line-height:17px;
+    font-size: 12px;
+    font-family: PingFangSC-Semibold, PingFang SC;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.65);
+    line-height: 17px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
   .myDirection {
     zoom: 0.8;
