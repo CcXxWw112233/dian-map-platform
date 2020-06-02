@@ -1,4 +1,5 @@
 import styles from './index.less'
+import { BASIC } from '../../../services/config'
 export default function ProjectOverlay(data){
     this.on = {
         click: ()=>{
@@ -19,9 +20,11 @@ export default function ProjectOverlay(data){
     this.element.appendChild(span);
 
     this.element.onclick = (e) =>{
+        if(BASIC.getUrlParam.isMobile !== "1")
         this.on['click'] && this.on['click'].call(this,e);
     }
     this.element.onmousedown = (e) => {
+        if(BASIC.getUrlParam.isMobile !== "1")
         this.on['mousedown'] && this.on['mousedown'].call(this, e);
     }
     document.body.appendChild(this.element);

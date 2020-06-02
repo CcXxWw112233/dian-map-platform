@@ -179,12 +179,12 @@ const ScoutingItem = ({
   let [transparency, setTransparency] = useState("1");
 
   // 开始上传
-  const startUpload = ({ file, fileList }) => {
+  const startUpload = ({ file, fileList ,event}) => {
     let { response } = file;
-    onChange && onChange(file, fileList);
+    onChange && onChange(file, fileList,event);
     if (response) {
       BASIC.checkResponse(response)
-        ? onUpload && onUpload(response.data, fileList)
+        ? onUpload && onUpload(response.data, fileList,event)
         : onError && onError(response);
     } else {
       // onError && onError(file)
@@ -738,6 +738,7 @@ export default class ScoutingDetails extends PureComponent {
 
       }
     };
+    this.scrollView = React.createRef();
   }
   componentDidMount() {
     this.getDetails();
@@ -853,6 +854,10 @@ export default class ScoutingDetails extends PureComponent {
     };
     this.setState({
       area_list: this.state.area_list.concat([obj]),
+    },()=>{
+      // 将新增的顶上去
+      this.scrollView.current &&
+      (this.scrollView.current.scrollTop = this.scrollView.current.scrollHeight + 1000)
     });
   };
 
@@ -961,11 +966,15 @@ export default class ScoutingDetails extends PureComponent {
   };
 
   // 上传中
-  filesChange = (val, file, fileList) => {
-    console.log("上传中...", file, fileList);
+  filesChange = (val, file, fileList,event) => {
+    // console.log("上传中...", file, fileList,event);
+    if(event){
+      let percent = Math.floor((event.loaded / event.total) * 100)
+      console.log(percent,event.percent);
+    }
   };
   // 上传完成
-  fileUpload = (val, resp) => {
+  fileUpload = (val, resp,event) => {
     if (resp) {
       message.success("上传成功");
       let { file_resource_id, suffix, original_file_name } = resp;
@@ -1328,6 +1337,7 @@ export default class ScoutingDetails extends PureComponent {
             <div
               className={globalStyle.autoScrollY}
               style={{ height: "100%", paddingBottom: "40px" }}
+              ref={this.scrollView}
             >
               <Collapse
                 expandIconPosition="right"

@@ -35,6 +35,7 @@ import BottomToolBar from "components/BottomToolBar/BottomToolBar";
 
 import TempPlottingIcon from "components/TempPlotting/TempPlottingIcon";
 import TempPlottingPanel from "components/TempPlotting/TempPlottingPanel";
+import PhotoSwipe from '../components/PhotoSwipe'
 
 @connect(
   ({
@@ -279,6 +280,7 @@ class IndexPage extends React.Component {
         </Sider>
         {/* <CityPanel></CityPanel> */}
         <Overlay />
+        <PhotoSwipe/>
       </div>
     );
   }

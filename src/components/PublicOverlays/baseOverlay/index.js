@@ -3,11 +3,12 @@ export default function baseOverlay(content, data = {}){
     this.bgColor = data.color || '#fff';
     this.placement = data.placement ? styles[data.placement] : styles.bottomLeft;
     this.width = data.width || 200 ;
+    this.activeClassName = 'activeOverlayDefault'
 
     let div = document.createElement('div');
     let style = data.style || {};
     Object.assign(div.style, style);
-    div.className = styles.baseOverlay ;
+    div.className = styles.baseOverlay +' baseOverlayDefault';
     if(data.className){
         div.classList.add(data.className);
     }
@@ -45,6 +46,17 @@ export default function baseOverlay(content, data = {}){
     div.style.backgroundColor = this.bgColor;
     div.style.minWidth = typeof this.width === 'number' ? this.width +'px' : this.width;
     this.element = div;
+    this.element.firstChild.addEventListener('click',(e)=>{
+        e.stopPropagation();
+        this.on['click'] && this.on['click'].call(this,e);
+        let target  = this.element;
+        let doms = document.querySelectorAll('.baseOverlayDefault');
+        doms.forEach(item => {
+            item.classList.remove(this.activeClassName);
+        })
+        target.classList.add(this.activeClassName);
+    }) 
+    this.on = {}
 
     return this.element ;
 }

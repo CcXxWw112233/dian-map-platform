@@ -1,20 +1,21 @@
 // import initMap from './INITMAP'
-import { getMyPosition } from "./getMyPosition";
+import { getMyPosition } from "../getMyPosition";
 import {
   TransformCoordinate,
   Source,
   Layer,
   addFeature,
   createStyle,
-} from "../lib/utils/index";
+} from "../../lib/utils/index";
 import axios from "axios";
-import { baseConfig } from "../globalSet/config";
+import { baseConfig } from "../../globalSet/config";
 import { draw } from "utils/draw";
-import scoutingProjectAction from "../lib/components/ProjectScouting/ScoutingList";
+import scoutingProjectAction from "../../lib/components/ProjectScouting/ScoutingList";
+import lib from './drawForMap'
 
 // 获取地图和视图
 const _getMap = (key) => {
-  const initMap = require("./INITMAP").default;
+  const initMap = require("../INITMAP").default;
   if (key) return initMap[key] || {};
   else {
     return initMap || {};
@@ -161,7 +162,7 @@ let callFunctions = {
   // 切换底图
   ChangeBaseMap: (key) => {
     if (!key) return;
-    const initMap = require("./INITMAP").default;
+    const initMap = require("../INITMAP").default;
     initMap.changeBaseMap(key);
   },
   // 监听地图移动
@@ -252,6 +253,16 @@ let callFunctions = {
   clearSoutingProjectLayer: () => {
     scoutingProjectAction.clear();
   },
+
+  // 渲染项目列表
+  renderProjectList: ()=>{
+    lib.showProjectPoint();
+  },
+  // 隐藏已经渲染的列表
+  hideProjectList:()=>{
+    lib.hideProjectPoint();
+  },
+  
 
   
 };
