@@ -59,7 +59,8 @@ export default class LayerMap extends React.Component{
   // }
   render(){
     return (
-      <div style={styles.mapView} id="MapsView">
+      <div style={styles.mapView} id="MapsView" onClick={e => {e.stopPropagation();e.preventDefault()}} 
+      onTouchStart={e => {e.stopPropagation();e.preventDefault()}}>
 
       </div>
     )

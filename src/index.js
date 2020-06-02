@@ -1,6 +1,6 @@
 import dva from "dva";
 import "./index.less";
-import "./utils/publicFuncForFlutter";
+import "./utils/functionForFlutter/publicFuncForFlutter";
 
 import { createBrowserHistory as createHistory } from 'history';
 

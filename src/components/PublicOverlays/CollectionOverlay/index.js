@@ -13,6 +13,7 @@ export default function overlay (data = {}){
     this.show = false;
     this.audio = null;
     this.video = null;
+    this.uid = Math.floor(Math.random() * 1000 +1);
 
     div.onclick = (e)=>{
         e.stopPropagation();
@@ -40,13 +41,46 @@ export default function overlay (data = {}){
             this.imgDiv.className = styles.pictureDiv;
             let img = new Image();
             img.src = data.resource_url;
+            img.dataset.name = data.title;
             this.imgDiv.appendChild(img);
             // 添加图片div
             div.insertBefore(this.imgDiv, title);    
             img.onclick = (e)=>{
                 e.stopPropagation();
+                this.on['imgClick'] && this.on['imgClick'].call(this,{target:e.target,name: data.title});
             }
         }
+
+        if(t === 'video'){
+            this.video = document.createElement('video');
+            this.video.className = styles.video;
+            this.video.dataset.uid = this.uid;
+            this.video.controls = 'controls';
+            this.videoDiv = document.createElement('div');
+            this.videoDiv.className = styles.videoDiv;
+            let play = document.createElement('div');
+            play.className = styles.videoPlayBtn;
+            this.video.src = data.resource_url;
+            this.videoDiv.appendChild(this.video)
+            play.appendChild(playBtn(this.video,'video'));
+            div.insertBefore(this.videoDiv, title);
+            this.video.onplay = ()=>{
+                // 停止所有音频，视频
+                stopPlayAll();
+            }
+        }
+    }
+
+    let stopPlayAll = ()=>{
+        let audios = document.querySelectorAll('audio');
+        audios.forEach(item => {
+            item.pause();
+        })
+        let videos = document.querySelectorAll('video');
+        videos.forEach(item => {
+            if(item.dataset.uid != this.uid)
+            item.pause();
+        })
     }
     // 视频和音频的播放按钮
     let playBtn = (element,type = 'audio')=>{
@@ -65,10 +99,7 @@ export default function overlay (data = {}){
         btn.innerHTML = icons[type].play;
         btn.addEventListener('click',function(){
             if(element.paused){
-                let audios = document.querySelectorAll('audio');
-                audios.forEach(item => {
-                    item.pause();
-                })
+                stopPlayAll();
                 element.play();
             }else{
                 element.pause();
@@ -138,6 +169,10 @@ export default function overlay (data = {}){
             div.removeChild(this.imgDiv);
             this.imgDiv = null;
         }
+        if(t === 'video' && this.videoDiv){
+            div.removeChild(this.videoDiv);
+            this.videoDiv = null;
+        }
         
     }
 
@@ -147,7 +182,7 @@ export default function overlay (data = {}){
 
     this.element = new baseOverlay(div,data);
     // 添加箭头
-    if(type === 'pic'){
+    if(type === 'pic' || type === 'video'){
         this.more = document.createElement('span');
         this.more.className = `${styles.pictureDivMore} ${iconCss.global_icon}`;
         this.more.innerHTML = "&#xe7ed;"

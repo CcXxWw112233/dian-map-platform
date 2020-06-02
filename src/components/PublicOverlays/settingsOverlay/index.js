@@ -39,15 +39,19 @@ export default function (){
     opacity.min = 0.3;
     opacity.step = 0.05;
     opacity.value = this.opacityValue;
-
+    let text = document.createElement('span');
+    text.innerText = Math.floor(this.opacityValue * 100) +'%'
+    text.className = styles.opacityName ;
     opacity.onchange = (val)=>{
         this.opacityValue = +val.target.value;
         this.on['change'] && this.on['change'].call(this, +val.target.value);
+        text.innerText = Math.floor(val.target.value * 100) +'%';
     }
     
     this.opacityDiv = document.createElement('div');
     this.opacityDiv.className = styles.opacityDiv;
     this.opacityDiv.appendChild(opacity);
+    this.opacityDiv.appendChild(text)
     
 
     let oncancel = ()=>{

@@ -1,5 +1,6 @@
 import { setSession } from "../../../utils/sessionManage";
 import listAction from "./ScoutingList";
+import PhotoSwipe from '../../../components/PhotoSwipe/action'
 import config from "../../../services/scouting";
 import { dateFormat } from "../../../utils/utils";
 import InitMap from "../../../utils/INITMAP";
@@ -29,7 +30,7 @@ import { Modify } from "ol/interaction";
 import { extend } from "ol/extent";
 import { always, never } from "ol/events/condition";
 import Event from '../../utils/event'
-import { draw } from "utils/draw"
+import { message } from 'antd'
 
 function Action() {
   const {
@@ -674,6 +675,7 @@ function Action() {
 
   //   添加元素坐标的overlay
   this.addOverlay = (coor, data) => {
+    let isLoading = false;
     let ele = new CollectionOverlay({...data,angleColor:"#fff",placement:"bottomCenter"});
     let overlay = createOverlay(ele.element, {
       positioning: "bottom-center",
@@ -700,6 +702,31 @@ function Action() {
     if(ele.video){
       ele.video.onplay = (e)=>{
 
+      }
+    }
+
+    ele.on = {
+      imgClick: ({target,name})=>{
+        if(isLoading) return ;
+        isLoading = true;
+        message.success('加载中...',0);
+        let img = new Image();
+        img.src = target.src;
+        img.onload = ()=>{
+          console.dir(target)
+          isLoading = false;
+          message.destroy();
+          // console.log(img.width)
+          let w = img.width;
+          let h = img.height;
+          let src = target.src;
+          let title = name || '图片'
+          PhotoSwipe.show([{w,h,src,title}])
+          // message.success('加载完成');
+        }
+        img.onerror = ()=>{
+          isLoading = false;
+        }
       }
     }
 
