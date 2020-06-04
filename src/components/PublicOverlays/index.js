@@ -3,6 +3,20 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+Object.defineProperty(exports, "baseOverlay", {
+  enumerable: true,
+  get: function get() {
+    return require('./baseOverlay/index').default;
+  }
+});
+
+Object.defineProperty(exports, "PopupOverlay", {
+  enumerable: true,
+  get: function get() {
+    return require('./PopupOverlay/index').default;
+  }
+});
+
 Object.defineProperty(exports, "project", {
     enumerable: true,
     get: function get() {

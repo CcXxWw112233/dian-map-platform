@@ -9,12 +9,16 @@ class Plot {
     constructor(points) {
         this.setPoints(points);
         this.geo_type ='RootTest'; 
+        this.isActive = true
     }
     /**
 	 * 是否为图元
 	 */
     isPlot() {
-        return true;
+        return this.isActive;
+    }
+    updatePlot(active = false) {
+      this.isActive = active
     }
     /**
 	 * 设置点集

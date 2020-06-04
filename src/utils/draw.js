@@ -4,6 +4,7 @@ import mapApp from "./INITMAP";
 import { request } from "../services/index";
 import { config } from "./customConfig";
 import { BASIC } from "../services/config";
+import Event from "../lib/utils/event"
 // import Overlay from 'ol/Overlay'
 // import * as DomUtils from './plot2ol/util/dom_util'
 // import { connectEvent, disconnectEvent } from './plot2ol/util/core'
@@ -29,21 +30,19 @@ export const draw = {
     this.drawDispatch = dispatch;
     if (!this.map) {
       this.map = mapApp.map;
+      this.target = document.getElementById(this.map.getTarget());
     }
     if (!this.plottingLayer) {
       this.plottingLayer = new PlottingLayer(this.map);
+      window.plottingLayer = this.plottingLayer;
       this.bindEventListener();
     }
     return this.plottingLayer;
   },
   create(type, dispatch) {
     this.drawDispatch = dispatch;
-    if (!this.map) {
-      this.map = mapApp.map;
-      this.target = document.getElementById(this.map.getTarget())
-    }
-
-    this.target.style.cursor = "crosshair"
+    this.getPlottingLayer(dispatch);
+    this.target.style.cursor = "crosshair";
     this.type = type;
     if (type === "MARKER") {
       this.type = "POINT";
@@ -52,7 +51,6 @@ export const draw = {
       this.type = "FREEHANDPOLYGON";
     }
     this.currentId = this.typeIdKeys[type];
-    this.getPlottingLayer(dispatch);
     const PlotTypes = {
       MARKER: "marker",
       POLYLINE: "polyline",
@@ -97,23 +95,25 @@ export const draw = {
   },
   updateProps(featureOperator) {
     // 讲标绘存到redux
-    this.drawDispatch({
-      type: "plotting/setPotting",
-      payload: {
-        type: this.type,
-        operator: featureOperator,
-      },
-    });
-    this.drawDispatch({
-      type: "modal/updateData",
-      payload: {
-        featureName: featureOperator.attrs.name,
-        selectName: featureOperator.attrs.selectName,
-        featureType: featureOperator.attrs.featureType,
-        remarks: featureOperator.attrs.remark,
-        strokeColorStyle: featureOperator.attrs.strokeColor,
-      },
-    });
+    if (this.drawDispatch) {
+      this.drawDispatch({
+        type: "plotting/setPotting",
+        payload: {
+          type: this.type,
+          operator: featureOperator,
+        },
+      });
+      this.drawDispatch({
+        type: "modal/updateData",
+        payload: {
+          featureName: featureOperator.attrs.name,
+          selectName: featureOperator.attrs.selectName,
+          featureType: featureOperator.attrs.featureType,
+          remarks: featureOperator.attrs.remark,
+          strokeColorStyle: featureOperator.attrs.strokeColor,
+        },
+      });
+    }
   },
   activeCallBack() {
     const featureOperator = window.featureOperator;
@@ -169,24 +169,38 @@ export const draw = {
     const me = this;
     // 标绘激活事件
     this.plottingLayer.on(FeatureOperatorEvent.ACTIVATE, (e) => {
-      me.target.style.cursor = ""
-      window.featureOperator = e.feature_operator;
-      let isMobile = BASIC.getUrlParam.isMobile;
-      if (!isMobile) {
-        window.onbeforeunload = function (ee) {
-          if (window.featureOperator) {
-            var ex = window.event || ee;
-            ex.returnValue = "当前标绘未保存，确定离开当前页面吗？";
-          }
-        };
-        me.activeCallBack();
+      if (!e.feature_operator.isScouting) {
+        me.target.style.cursor = "default";
+        window.featureOperator = e.feature_operator;
+        let isMobile = BASIC.getUrlParam.isMobile;
+        if (!isMobile) {
+          window.onbeforeunload = function (ee) {
+            if (window.featureOperator) {
+              var ex = window.event || ee;
+              ex.returnValue = "当前标绘未保存，确定离开当前页面吗？";
+            }
+          };
+          me.activeCallBack();
+        }
       }
     });
     this.plottingLayer.on(FeatureOperatorEvent.DEACTIVATE, (e) => {
-      me.target.style.cursor = ""
-      let isMobile = BASIC.getUrlParam.isMobile;
-      if (!isMobile) {
-        me.deactiveCallback();
+      if (!e.feature_operator.isScouting) {
+        me.target.style.cursor = "default";
+        let isMobile = BASIC.getUrlParam.isMobile;
+        if (!isMobile) {
+          me.deactiveCallback();
+        }
+      } else {
+        const operator = e.feature_operator;
+        const feature = operator.feature;
+        const plot = feature && feature.getGeometry();
+        plot.isActive = false;
+        //保存到数据库
+        const data = operator.data
+        operator.updateFeatueToDB(data, feature).then(res => {
+          Event.Evt.firEvent("updatePlotFeature",res)
+        });
       }
     });
   },

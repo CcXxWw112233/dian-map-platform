@@ -92,7 +92,16 @@ const UploadBtn = ({ onChange }) => {
 };
 
 const ScoutingHeader = (props) => {
-  let { edit, onCancel, onSave, data, index, onDragEnter } = props;
+  let {
+    edit,
+    remarkEdit,
+    onCancel,
+    onSave,
+    onRemarkSave,
+    data,
+    index,
+    onDragEnter,
+  } = props;
   let [areaName, setAreaName] = useState(data.name);
   let [isEdit, setIsEdit] = useState(edit);
   // 保存事件
@@ -175,6 +184,8 @@ const ScoutingItem = ({
   onChangeDisplay = () => {},
   onEditPlanPic = () => {},
   onCopyCollection,
+  onModifyFeature = () => {},
+  onModifyRemark = () => {},
 }) => {
   let [planExtent, setPlanExtent] = useState("");
   let [transparency, setTransparency] = useState("1");
@@ -264,6 +275,8 @@ const ScoutingItem = ({
               data={item}
               onRemove={onCollectionRemove}
               onEditCollection={onEditCollection}
+              onModifyFeature={onModifyFeature}
+              onModifyRemark={onModifyRemark}
             />
           </div>
         );
@@ -386,12 +399,25 @@ const UploadItem = ({
   onChangeDisplay,
   onEditPlanPic = () => {},
   onCopyCollection = ()=>{},
+  onModifyRemark = () => {},
+  onModifyFeature = () => {},
+  onRemarkSave = () => {},
 }) => {
   let [visible, setVisible] = useState(false);
   let [groupVisible, setGroupVisible] = useState(false);
   let [copyVisible, setCopyVisible ] = useState(false);
   let [isEdit, setIsEdit] = useState(false);
+  let [remark, setRemark] = useState("");
+  let [isRemarkEdit, setIsRemarkEdit] = useState(false);
   let [fileName, setFileName] = useState(data.title);
+  const { TextArea } = Input;
+  const saveRemark = (data) => {
+    let dataObj = JSON.parse(data.content);
+    dataObj.remark = remark;
+    data.content = JSON.stringify(dataObj);
+    onRemarkSave && onRemarkSave(data);
+    setIsRemarkEdit(false);
+  };
   const itemKeyVals = {
     paper: "图纸",
     interview: "访谈",
@@ -408,50 +434,6 @@ const UploadItem = ({
   let hours = Action.dateFormat(create_time, "HH:mm");
 
   let secondSetType = type;
-  // if (type === "unknow") {
-  //   const lastIndex = data && data.title?.lastIndexOf(".");
-  //   const originalType = data.title?.substr(
-  //     lastIndex + 1,
-  //     data.title.length - lastIndex - 1
-  //   );
-  //   const originalItemKeyVals = {
-  //     paper: [], // 图纸
-  //     interview: ["aac", "mp3", "语音"], // 访谈
-  //     pic: ["jpg", "PNG", "gif", "jpeg"].map((item) =>
-  //       item.toLocaleLowerCase()
-  //     ),
-  //     video: ["MP4", "WebM", "Ogg", "avi"].map((item) =>
-  //       item.toLocaleLowerCase()
-  //     ),
-  //     word: [
-  //       "ppt",
-  //       "pptx",
-  //       "xls",
-  //       "xlsx",
-  //       "doc",
-  //       "docx",
-  //       "zip",
-  //       "rar",
-  //       "txt",
-  //       "xmind",
-  //       "pdf",
-  //     ].map((item) => item.toLocaleLowerCase()),
-  //     annotate: [], // 批注
-  //     plotting: ["feature"], // 标绘
-  //     planPic: ["plan"], // 规划图
-  //   };
-
-  //   const keyVals = Object.keys(originalItemKeyVals);
-  //   for (let i = 0; i < keyVals.length; i++) {
-  //     const temp = originalItemKeyVals[keyVals[i]].filter((item) => {
-  //       return item === originalType;
-  //     });
-  //     if (temp.length) {
-  //       secondSetType = keyVals[i];
-  //       break;
-  //     }
-  //   }
-  // }
 
   const onHandleMenu = ({ key }) => {
     // 添加坐标点
@@ -474,6 +456,15 @@ const UploadItem = ({
     if (key === "editPlanPic") {
       setVisible(false);
       onEditPlanPic && onEditPlanPic(data);
+    }
+    if (key === "modifyRemark") {
+      setIsRemarkEdit(!isRemarkEdit);
+      setVisible(false);
+      onModifyRemark && onModifyRemark(data);
+    }
+    if (key === "modifyFeature") {
+      setVisible(false);
+      onModifyFeature && onModifyFeature(data);
     }
   };
   // 分组列表
@@ -529,6 +520,12 @@ const UploadItem = ({
           </div>
         </Popover>
       </Menu.Item>
+      {data.content && JSON.parse(data.content)?.remark ? (
+        <Menu.Item key="modifyRemark">编辑备注</Menu.Item>
+      ) : null}
+      {data.content ? (
+        <Menu.Item key="modifyFeature">编辑几何图形</Menu.Item>
+      ) : null}
       <Menu.Item key="selectGroup">
         <Popover
           overlayStyle={{ zIndex: 10000 }}
@@ -542,9 +539,9 @@ const UploadItem = ({
           <div style={{ width: "100%" }}>移动到分组</div>
         </Popover>
       </Menu.Item>
-      <Menu.Item key="display">
+      {/* <Menu.Item key="display">
         {data.is_display === "0" ? "显示" : "隐藏"}
-      </Menu.Item>
+      </Menu.Item> */}
       <Menu.Item key="removeBoard">
         <Popconfirm
           title="确定删除此资料吗?"
@@ -593,122 +590,175 @@ const UploadItem = ({
       }
     }
   };
-
+  let oldRemark = data.content && JSON.parse(data.content).remark;
+  // setRemark(oldRemark);
+  let myStyle = null;
+  if (oldRemark) {
+    myStyle = {
+      height: 100,
+    };
+    if (isRemarkEdit) {
+      myStyle = {
+        height: 115,
+      };
+    } else {
+      myStyle = {
+        height: 100,
+      };
+    }
+  }
   return (
     <div
       className={styles.uploadItem + ` ${globalStyle.btn}`}
       draggable={true}
-      // onDragStart={e => console.log(e)}
+      style={myStyle}
       onClick={itemClick.bind(this, data)}
     >
-      <div className={styles.uploadIcon + ` ${styles[secondSetType]}`}>
-        <span>
-          {secondSetType === "pic" ? (
-            <img
-              src={data.resource_url}
-              style={{width:46, height:46, borderRadius: 4}}
-              alt="图片"
-              onError={(e) => {
-                e.target.src = "";
-                e.target.src = data.resource_url;
-              }}
-            />
-          ) : (
-            itemKeyVals[secondSetType]
-          )}
-        </span>
-      </div>
-      <div className={styles.uploadDetail}>
-        <Row
-          style={{ width: "95%", textAlign: "left" }}
-          align="middle"
-          justify="center"
+      <div style={{ width: "100%", display: "flex" }}>
+        <div className={styles.uploadIcon + ` ${styles[secondSetType]}`}>
+          <span>
+            {secondSetType === "pic" ? (
+              <img
+                src={data.resource_url}
+                style={{ width: 46, height: 46, borderRadius: 4 }}
+                alt="图片"
+                onError={(e) => {
+                  e.target.src = "";
+                  e.target.src = data.resource_url;
+                }}
+              />
+            ) : (
+              itemKeyVals[secondSetType]
+            )}
+          </span>
+        </div>
+        <div className={styles.uploadDetail}>
+          <Row style={{ textAlign: "left" }} align="middle" justify="center">
+            {isEdit ? (
+              <Fragment>
+                <Col span={16}>
+                  <Input
+                    style={{ borderRadius: "5px" }}
+                    placeholder="请输入名称"
+                    size="small"
+                    autoFocus
+                    onChange={(e) => setFileName(e.target.value.trim())}
+                    onPressEnter={() => {
+                      onEditCollection("editName", data, fileName);
+                      setIsEdit(false);
+                    }}
+                    allowClear
+                    value={fileName}
+                  />
+                </Col>
+                <Col span={4} style={{ textAlign: "right" }}>
+                  <Button
+                    onClick={(e) => setIsEdit(false)}
+                    size="small"
+                    shape="circle"
+                  >
+                    <CloseOutlined />
+                  </Button>
+                </Col>
+                <Col span={4} style={{ textAlign: "right" }}>
+                  <Button
+                    size="small"
+                    onClick={() => {
+                      setIsEdit(false);
+                      onEditCollection("editName", data, fileName);
+                    }}
+                    shape="circle"
+                    type="primary"
+                  >
+                    <CheckOutlined />
+                  </Button>
+                </Col>
+              </Fragment>
+            ) : (
+              <span
+                style={{ minHeight: "1rem" }}
+                title={title}
+                className={`${styles.firstRow} ${styles.text_overflow} text_ellipsis`}
+              >
+                {title}
+              </span>
+            )}
+          </Row>
+          <Row>
+            <Space size={8} style={{ fontSize: 12 }}>
+              <span>{create_by.name}</span>
+              <span>{time}</span>
+              <span>{hours}</span>
+            </Space>
+          </Row>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            paddingRight: "5px",
+            flexDirection: "column",
+          }}
         >
-          {isEdit ? (
-            <Fragment>
-              <Col span={16}>
-                <Input
-                  style={{ borderRadius: "5px" }}
-                  placeholder="请输入名称"
-                  size="small"
-                  autoFocus
-                  onChange={(e) => setFileName(e.target.value.trim())}
-                  onPressEnter={() => {
-                    onEditCollection("editName", data, fileName);
-                    setIsEdit(false);
-                  }}
-                  allowClear
-                  value={fileName}
-                />
-              </Col>
-              <Col span={4} style={{ textAlign: "right" }}>
-                <Button
-                  onClick={(e) => setIsEdit(false)}
-                  size="small"
-                  shape="circle"
-                >
-                  <CloseOutlined />
-                </Button>
-              </Col>
-              <Col span={4} style={{ textAlign: "right" }}>
-                <Button
-                  size="small"
-                  onClick={() => {
-                    setIsEdit(false);
-                    onEditCollection("editName", data, fileName);
-                  }}
-                  shape="circle"
-                  type="primary"
-                >
-                  <CheckOutlined />
-                </Button>
-              </Col>
-            </Fragment>
-          ) : (
-            <span
-              style={{ minHeight: "1rem" }}
-              title={title}
-              className={`${styles.firstRow} ${styles.text_overflow} text_ellipsis`}
+          <span
+            className={`${styles.eyes} ${globalStyle.global_icon}`}
+            style={{ color: "#1769FF" }}
+            onClick={() => {
+              onChangeDisplay && onChangeDisplay(data);
+            }}
+          >
+            {data.is_display === "0" ? "显示" : "隐藏"}
+          </span>
+          <Dropdown
+            overlay={menu}
+            trigger="click"
+            onVisibleChange={(val) => setVisible(val)}
+            visible={visible}
+          >
+            <span style={{ color: "#1769FF" }}>更多</span>
+          </Dropdown>
+        </div>
+      </div>
+      {oldRemark ? (
+        <div style={{ width: "100%", display: "flex" }}>
+          <div
+            className={styles.uploadIcon + ` ${styles[secondSetType]}`}
+            style={{ background: 0 }}
+          >
+            <span style={{ verticalAlign: "top" }}>备注:</span>
+          </div>
+          {isRemarkEdit ? (
+            <div
+              style={{ display: "flex", flexDirection: "row", width: "85%" }}
             >
-              {title}
-            </span>
+              <TextArea
+                defaultValue={oldRemark}
+                onChange={(e) => setRemark(e.target.value)}
+              />
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <Button
+                  onClick={() => saveRemark(data)}
+                  size="middle"
+                  type="primary"
+                  icon={<CheckCircleOutlined />}
+                ></Button>
+                <Button
+                  onClick={() => {
+                    setIsRemarkEdit(false);
+                  }}
+                  size="middle"
+                  icon={<CloseCircleOutlined />}
+                ></Button>
+              </div>
+            </div>
+          ) : (
+            <div className={styles.uploadDetail} style={{ textAlign: "left" }}>
+              <span title={oldRemark}>{oldRemark}</span>
+            </div>
           )}
-        </Row>
-        <Row>
-          <Space size={8} style={{ fontSize: 12 }}>
-            <span>{create_by.name}</span>
-            <span>{time}</span>
-            <span>{hours}</span>
-          </Space>
-        </Row>
-      </div>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          paddingRight: "5px",
-          flexDirection: "column",
-        }}
-      >
-        <span
-          className={`${styles.eyes} ${globalStyle.global_icon}`}
-          dangerouslySetInnerHTML={{
-            __html: data.is_display === "0" ? "&#xe6cb;" : "&#xe615;",
-          }}
-          onClick={() => {
-            onChangeDisplay && onChangeDisplay(data);
-          }}
-        ></span>
-        <Dropdown
-          overlay={menu}
-          trigger="click"
-          onVisibleChange={(val) => setVisible(val)}
-          visible={visible}
-        >
-          <SettingTwoTone />
-        </Dropdown>
-      </div>
+        </div>
+      ) : null}
     </div>
   );
 };
@@ -779,6 +829,10 @@ export default class ScoutingDetails extends PureComponent {
     Event.Evt.on('hasAudioStart',(data)=>{
       this.setAudio(data)
     })
+
+    Event.Evt.on("updatePlotFeature", (data) => {
+      this.fetchCollection();
+    });
   }
 
   // 设置正在播放的数据
@@ -812,7 +866,7 @@ export default class ScoutingDetails extends PureComponent {
         let respData = resp.data;
         this.setState({
           area_list: respData.map((item) =>
-            Object.assign(item, { _edit: false })
+            Object.assign(item, { _edit: false, _remarkEdit: false })
           ),
           area_active_key: respData[0] && respData[0].id,
         });
@@ -1302,6 +1356,17 @@ export default class ScoutingDetails extends PureComponent {
     // 页面清除了
     
   }
+
+  onRemarkSave = (data) => {
+    Action.modifyRemark(data).then((res) => {
+      this.fetchCollection();
+    });
+  };
+
+  onModifyFeatureInDetails = (data) => {
+    Action.modifyFeature(data);
+  };
+
   render(h) {
     const { current_board, area_list, not_area_id_collection } = this.state;
     const panelStyle = {
@@ -1380,8 +1445,10 @@ export default class ScoutingDetails extends PureComponent {
                           data={item}
                           index={index + 1}
                           edit={item._edit}
+                          remarkEdit={item._remarkEdit}
                           onCancel={this.addCancel.bind(this, item)}
                           onSave={this.saveArea.bind(this, item)}
+                          onRemarkSave={() => this.saveRemark(item)}
                           // onDragEnter={e => {this.setState({area_active_key: item.id})}}
                         />
                       }
@@ -1412,6 +1479,8 @@ export default class ScoutingDetails extends PureComponent {
                         onUploadPlanCancel={this.onUploadPlanCancel}
                         onChangeDisplay={this.onChangeDisplay.bind(this, item)}
                         onEditPlanPic={this.onEditPlanPic.bind(this, item)}
+                        onModifyRemark={this.onModifyRemark}
+                        onModifyFeature={this.onModifyFeatureInDetails}
                       />
                     </Collapse.Panel>
                   );
@@ -1456,6 +1525,9 @@ export default class ScoutingDetails extends PureComponent {
                                 this,
                                 item
                               )}
+                              onModifyRemark={this.onModifyRemark}
+                              onRemarkSave={this.onRemarkSave}
+                              onModifyFeature={this.onModifyFeatureInDetails}
                             />
                           </div>
                         );

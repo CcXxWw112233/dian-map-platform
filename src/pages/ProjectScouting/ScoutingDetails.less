@@ -134,6 +134,7 @@
   }
   .uploadItem {
     display: flex;
+    flex-direction: column;
     width: 336px;
     height: 56px;
     background: rgba(0, 0, 0, 0.02);
@@ -159,7 +160,10 @@
     color: rgba(0, 0, 0, 0.45);
     line-height: 20px;
     margin: 3px 0 0 10px;
-    width: 75%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    width: 72%;
     
     .firstRow {
       color: rgb(0,0,0,0.85);
