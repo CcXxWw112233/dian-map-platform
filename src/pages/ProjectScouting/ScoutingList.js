@@ -174,10 +174,15 @@ export default class ScoutingList extends PureComponent {
           }
         })
       })
-      // 调用灵犀
-      if(window.parent){
-        window.parent.postMessage("map_board_create");
+      try{
+        if(window.parent){
+          window.parent.postMessage("map_board_create");
+        }
+      }catch(err){
+        console.log(err)
       }
+      // 调用灵犀
+      
       message.success('新建项目成功');
       
       this.showOtherSlide();

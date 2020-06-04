@@ -30,9 +30,14 @@ instance.interceptors.response.use(config => {
     responseTimer = setTimeout(()=>{
       message.error('权限不足，请重新登录');
       // 调用灵犀
-      if(window.parent){
-        window.parent.postMessage("token_invalid");
+      try{
+        if(window.parent){
+          window.parent.postMessage("token_invalid");
+        }
+      }catch(err){
+        console.log(err)
       }
+      
     }, 1000)
     return config;
   }else

@@ -213,9 +213,14 @@ const action = function () {
   this.handleClickBoard = (data) => {
     // 保存选中数据到本地
     setSession(this.sesstionSaveKey, data.board_id);
-    if(window.parent){
-      window.parent.postMessage('map_board_change_'+data.board_id, window.parent.location.href);
+    try{
+      if(window.parent){
+        window.parent.postMessage('map_board_change_'+data.board_id, window.parent.location.href);
+      }
+    }catch(err){
+      console.log(err);
     }
+    
   };
 
   // 获取保存的本地缓存
