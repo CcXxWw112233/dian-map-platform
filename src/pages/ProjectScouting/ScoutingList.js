@@ -175,8 +175,8 @@ export default class ScoutingList extends PureComponent {
         })
       })
       // 调用灵犀
-      if(window.top){
-        window.top.postMessage("map_board_create");
+      if(window.parent){
+        window.parent.postMessage("map_board_create");
       }
       message.success('新建项目成功');
       
