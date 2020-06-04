@@ -1,5 +1,5 @@
 import { BASIC } from '../services/config'
-let isMobile = BASIC.getUrlParam.isMobile;
+let isMobile = BASIC.getUrlParam.isMobile === "1";
 export default {
     namespace:"openswitch",
     state:{
@@ -16,7 +16,9 @@ export default {
         // 是否显示底部的工具
         bottomTools: isMobile ? false: true,
         //显示搜索工具条
-        searchTools: isMobile ? false: true
+        searchTools: isMobile ? false: true,
+        // 是否显示手机端的页面
+        isShowMobile: false,
     },
     effects:{
 

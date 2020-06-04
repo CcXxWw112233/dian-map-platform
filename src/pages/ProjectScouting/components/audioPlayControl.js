@@ -84,11 +84,11 @@ export default class AudioControl extends React.PureComponent{
             return n < 10 ? "0" +n : n;
         }
         if(time < 60){
-            return '00:'+zero(parseInt(time));
+            return '00:'+zero(Math.round(time));
         }else{
             let t = time/60;
             let m = parseInt(t);
-            let s = parseInt((t - m) * 60);
+            let s = Math.round((t - m) * 60);
             return `${zero(m)}:${zero(s)}`
         }
         // return 0

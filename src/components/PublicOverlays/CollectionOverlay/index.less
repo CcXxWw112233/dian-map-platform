@@ -6,6 +6,18 @@
     transition: all 0.3s linear;
     padding: 0px 22px;
     cursor: pointer;
+    text-overflow: -o-ellipsis-lastline;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    word-break: break-all;
+    word-wrap: pre-wrap;
+    white-space: pre-wrap;
+    display: flex;
+    flex-direction: column;
 }
 .pictureDiv{
     width: 100%;
