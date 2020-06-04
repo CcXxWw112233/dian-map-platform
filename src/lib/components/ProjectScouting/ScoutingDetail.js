@@ -183,7 +183,7 @@ function Action() {
   // 查找数据中，有存在效坐标的资料
   const findHasLocationData = (data) => {
     let arr = data.filter(
-      (item) => !!item.location && Object.keys(item.location).length !== 0
+      (item) => !!item.location && Object.keys(item.location).length >= 2
     );
     return arr;
   };

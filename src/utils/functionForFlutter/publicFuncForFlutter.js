@@ -269,8 +269,13 @@ let callFunctions = {
   // 渲染坐标点
   renderCollection:(data = [])=>{
     callFunctions.addLayer();
-    lib.getCollectionData(callFunctions.source)
-    // lib.renderCollection(data,callFunctions.source)
+    if(data.length) lib.renderCollection(data,callFunctions.source);
+    else lib.getCollectionData(callFunctions.source)
+    
+  },
+  // 清除渲染的元素
+  clearCollection:()=>{
+    lib.clear();
   },
   // 视图根据元素显示中间位置
   viewFitById: ({id})=>{

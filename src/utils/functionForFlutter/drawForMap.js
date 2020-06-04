@@ -1,4 +1,4 @@
-import { addFeature ,createOverlay} from '../../lib/utils/index'
+import { addFeature ,createOverlay ,getExtentIsEmpty} from '../../lib/utils/index'
 import ListAction from '../../lib/components/ProjectScouting/ScoutingList'
 import DetailAction from '../../lib/components/ProjectScouting/ScoutingDetail'
 import { CollectionOverlay } from '../../components/PublicOverlays'
@@ -21,6 +21,9 @@ function renderAction (){
 
     // 清除所有元素
     this.clear = ()=>{
+        if(this.overlay)
+        this.overlay.setPosition(null);
+        
         if(this.Source && this.features.length){
             this.features.forEach(item => this.Source.removeFeature(item));
             this.features = [];
@@ -35,7 +38,7 @@ function renderAction (){
     }
 
     // 显示所有采集资料点
-    this.renderCollection = (data, Source) => {
+    this.renderCollection = async (data, Source) => {
         if(!Source) return new Error('required Source For Map!');
         if(!data && !data.length){
             return ;
@@ -68,6 +71,16 @@ function renderAction (){
             }
         }
 
+        if(!getExtentIsEmpty(this.Source.getExtent())){
+            const { view ,map} = require('../INITMAP').default;
+            view.fit(this.Source.getExtent(),{size:getMapSize(map),duration:800 });
+        }
+
+    }
+
+    const getMapSize = (map) =>{
+        let size = map.getSize();
+        size.map(item => item/2);
     }
     // 查找元素
     this.findFeature = (feature_id)=>{
