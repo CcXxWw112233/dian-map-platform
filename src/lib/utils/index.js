@@ -64,6 +64,7 @@ export const addFeature = function (type, data) {
     geometry: geoType(),
     ...data,
   });
+  console.log(feature.getGeometry())
   // 如果有id，则强制添加ID
   if (data.id) {
     feature.setId(data.id);

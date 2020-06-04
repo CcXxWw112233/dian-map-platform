@@ -112,6 +112,8 @@ class PlottingLayer extends Observable {
      * @type {Function}
      */
     this._ls_mapclick = null;
+
+    this.projectScoutingArr = []
     //--合并地图选项
     combineOpts(this.opts, this.defaults, opts);
     //--创建layer
@@ -174,7 +176,7 @@ class PlottingLayer extends Observable {
 
       if (feature && !feature.get(Constants.SE_DISABLED)) {
         // 开始编辑
-        this.plotEdit.activate(feature);
+        this.plotEdit.activate(feature, e.coordinate);
       } else {
         // 结束编辑
         this.plotEdit.deactivate();

@@ -19,7 +19,7 @@ import {
   setSelectInteraction,
   fitPadding,
   SourceStatic,
-  getExtentIsEmpty
+  getExtentIsEmpty,
 } from "../../utils/index";
 import {
   CollectionOverlay,
@@ -31,6 +31,8 @@ import { extend } from "ol/extent";
 import { always, never } from "ol/events/condition";
 import Event from '../../utils/event'
 import { message } from 'antd'
+import { createPlottingFeature, createPopupOverlay } from "./createPlotting";
+import { draw } from "utils/draw";
 
 function Action() {
   const {
@@ -55,6 +57,7 @@ function Action() {
   this.init = () => {
     this.Layer.setSource(this.Source);
     InitMap.map.addLayer(this.Layer);
+    this.layer = draw.getPlottingLayer();
   };
   this.boxFeature = {};
   this.draw = null;
@@ -238,12 +241,45 @@ function Action() {
 
   // 查找feature
   this.findFeature = (id) => {
-    for (let i = 0; i < this.features.length; i++) {
-      let item = this.features[i];
-      if (item.get("id") && item.get("id") === id) {
-        return item;
+    for (let i = 0; i < this.layer.projectScoutingArr.length; i++) {
+      const feature = this.layer.projectScoutingArr[i].feature;
+      if (feature?.get("id") && feature?.get("id") === id) {
+        return feature;
       }
     }
+  };
+
+  this.modifyFeature = (data) => {
+    const feature = this.findFeature(data.id);
+    const plot = feature?.getGeometry();
+    if (plot && !plot.isActive) {
+      plot.updatePlot(true);
+      feature.isScouting = true;
+      this.layer.plotEdit.activate(feature);
+    }
+  };
+
+  // 修改图形后保存
+  this.updateFeatueToDB = async (data, feature) => {
+    const geometry = feature.getGeometry();
+    const newCoordinates = geometry.getCoordinates();
+    let content = JSON.parse(data.content);
+    content.coordinates = newCoordinates;
+    let newData = { ...data };
+    newData.content = JSON.stringify(content);
+    newData.create_by && delete newData.create_by;
+    newData.create_time && delete newData.create_time;
+    newData.update_time && delete newData.update_time;
+    await this.editCollection(newData);
+  };
+
+  //修改备注
+  this.modifyRemark = async (data) => {
+    let newData = { ...data };
+    newData.create_by && delete newData.create_by;
+    newData.create_time && delete newData.create_time;
+    newData.update_time && delete newData.update_time;
+    return await this.editCollection(newData);
   };
 
   // 查找规划图
@@ -254,6 +290,10 @@ function Action() {
         return item;
       }
     }
+  };
+
+  this.handlePlotClick = (feature, pixel) => {
+    createPopupOverlay(feature, pixel);
   };
 
   // 渲染标绘数据
@@ -273,6 +313,11 @@ function Action() {
       key: "map:projectScouting",
       content: [],
     };
+    this.layer.projectScoutingArr.forEach((item) => {
+      this.layer.removeFeature(item);
+    });
+    this.layer.projectScoutingArr = [];
+    this.layer.plotEdit.updateCb = null
     data.forEach((item) => {
       let content = item.content;
       // console.log(item)
@@ -315,13 +360,8 @@ function Action() {
           this.lenged.content.push(obj);
         }
       }
-      let feature = addFeature(content.geoType, {
-        coordinates: content.coordinates,
-        ...item,
-        ...content,
-      });
-
       // code by liulaian
+      let feature = createPlottingFeature({ ...item, ...content });
       let myStyle = null;
       if (content.geoType === "Point") {
         myStyle = createStyle(content.geoType, {
@@ -360,8 +400,12 @@ function Action() {
             };
             myStyle = createStyle(content.geoType, options);
             feature.setStyle(myStyle);
-            me.Source.addFeature(feature);
-            me.features.push(feature);
+            let operator = me.layer._addFeature(feature);
+            operator.isScouting = true;
+            operator.data = item;
+            operator.updateFeatueToDB = me.updateFeatueToDB.bind(me);
+            me.layer.projectScoutingArr.push(operator);
+            me.layer.plotEdit.plotClickCb = me.handlePlotClick.bind(me);
             return;
           };
           return;
@@ -375,8 +419,12 @@ function Action() {
         });
       }
       feature.setStyle(myStyle);
-      this.Source.addFeature(feature);
-      this.features.push(feature);
+      let operator = this.layer._addFeature(feature);
+      operator.isScouting = true;
+      this.layer.projectScoutingArr.push(operator);
+      this.layer.plotEdit.plotClickCb = this.handlePlotClick.bind(this);
+      operator.data = item;
+      operator.updateFeatueToDB = this.updateFeatueToDB.bind(this);
     });
     let newConfig = [];
     if (!lenged) {
@@ -395,7 +443,7 @@ function Action() {
       newConfig = [...lenged.concat(this.lenged)];
     }
     if (newConfig.length === 1 && !newConfig[0].content.length) {
-      newConfig = []
+      newConfig = [];
     }
     dispatch({
       type: "lengedList/updateLengedList",
@@ -424,12 +472,15 @@ function Action() {
     this.renderFeaturesCollection(features, { lenged, dispatch });
     // 渲染规划图
     let ext = await this.renderPlanPicCollection(planPic);
-  
+
     data &&
       data.length &&
       setTimeout(() => {
         // 当存在feature的时候，才可以缩放 需要兼容规划图，规划图不存在source的元素中
-        if (this.features.length && !getExtentIsEmpty(this.Source.getExtent())){
+        if (
+          this.features.length &&
+          !getExtentIsEmpty(this.Source.getExtent())
+        ) {
           Fit(
             InitMap.view,
             ext.length
@@ -441,18 +492,17 @@ function Action() {
             },
             800
           );
-        }else if(ext.length){
+        } else if (ext.length) {
           Fit(
-            InitMap.view, 
+            InitMap.view,
             ext,
             {
               size: InitMap.map.getSize(),
               padding: fitPadding,
             },
-          800)
+            800
+          );
         }
-
-          
       });
   };
 
@@ -780,6 +830,7 @@ function Action() {
   };
   // 添加select选择器
   this.addAreaSelect = () => {
+    return;
     this.removeAreaSelect();
     this.areaSelect = setSelectInteraction({
       filter: (feature, layer) => {
@@ -838,8 +889,8 @@ function Action() {
         padding: [200, 220, 80, 400],
       });
 
-      this.polygonOverlay = createOverlay(ele.element,{
-        offset: type === 'Point' ? [10,0]: [0,0]
+      this.polygonOverlay = createOverlay(ele.element, {
+        offset: type === "Point" ? [10, 0] : [0, 0],
       });
       ele.on = {
         close: () => {
