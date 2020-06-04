@@ -173,7 +173,12 @@ export default class ScoutingList extends PureComponent {
           }
         })
       })
-      message.success('新建项目成功')
+      // 调用灵犀
+      if(window.top){
+        window.top.postMessage("map_board_create");
+      }
+      message.success('新建项目成功');
+      
       this.showOtherSlide();
     }).catch(err => {
       console.log(err)

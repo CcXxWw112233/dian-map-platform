@@ -52,9 +52,9 @@ export default function baseOverlay(content, data = {}){
         let target  = this.element;
         let doms = document.querySelectorAll('.baseOverlayDefault');
         doms.forEach(item => {
-            item.classList.remove(this.activeClassName);
+            item.parentNode.classList.remove(this.activeClassName);
         })
-        target.classList.add(this.activeClassName);
+        target.parentNode.classList.add(this.activeClassName);
     }) 
     this.on = {}
 

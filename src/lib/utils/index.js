@@ -201,6 +201,7 @@ export const createStyle = function (
             stroke: stroke,
           }),
       text: text,
+      zIndex: options.zIndex || Infinity
     });
   }
   if (
@@ -211,6 +212,7 @@ export const createStyle = function (
     return new Style({
       text: text,
       stroke: stroke,
+      zIndex: options.zIndex || Infinity
     });
   }
   if (type === "MultiPolygon") {
@@ -218,6 +220,7 @@ export const createStyle = function (
       fill: fill,
       stroke: stroke,
       text: text,
+      zIndex: options.zIndex || Infinity
     });
   }
   if (type === "Polygon") {
@@ -225,6 +228,7 @@ export const createStyle = function (
       fill,
       stroke,
       text,
+      zIndex: options.zIndex || Infinity
     });
   }
   if (type === "MultiPoint") {
@@ -235,6 +239,7 @@ export const createStyle = function (
         scale: options.iconScale || 0.6,
       }),
       text: text,
+      zIndex: options.zIndex || Infinity
     });
   }
 };

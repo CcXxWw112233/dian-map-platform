@@ -1,4 +1,4 @@
-
+@import '~antd/lib/style/themes/default.less';
 html, body, :global(#root) {
   height: 100%;
   padding: 0;
@@ -7,6 +7,7 @@ html, body, :global(#root) {
 :global(*){
   outline: none;
   box-sizing: border-box;
+  touch-action: pan-y;
 }
 :global(.ol-zoom){
   display: none;
@@ -77,6 +78,10 @@ html, body, :global(#root) {
 }
 
 :global{
+  .danger{
+    color: @red-5;
+  }
+
   .slideRight-enter {
       transform: translateX(100%);
       opacity: 0;

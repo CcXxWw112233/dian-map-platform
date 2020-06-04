@@ -186,7 +186,7 @@ function Action() {
   // 查找数据中，有存在效坐标的资料
   const findHasLocationData = (data) => {
     let arr = data.filter(
-      (item) => !!item.location && Object.keys(item.location).length !== 0
+      (item) => !!item.location && Object.keys(item.location).length >= 2
     );
     return arr;
   };
@@ -214,15 +214,16 @@ function Action() {
     this.features = [];
   };
 
-  this.renderPointCollection = (data) => {
+  this.renderPointCollection = (data,addOverlay = true) => {
     let array = findHasLocationData(data);
     // console.log(array)
+    let features = [];
     array.forEach((item) => {
       let coor = TransformCoordinate([
         +item.location.longitude,
         +item.location.latitude,
       ]);
-      let feature = addFeature("Point", { coordinates: coor ,});
+      let feature = addFeature("Point", { coordinates: coor ,id:item.id});
       let style = createStyle("Point", {
         iconUrl: require('../../../assets/mark/collectionIcon.png'),
         strokeWidth: 2,
@@ -233,10 +234,13 @@ function Action() {
       let pointType = this.checkCollectionType(item.target);
       item.pointType = pointType;
       feature.setStyle(style);
+
+      addOverlay &&
       this.addOverlay(coor, item);
-      this.features.push(feature);
-      this.Source.addFeature(feature);
+
+      features.push(feature)
     });
+    return features;
   };
 
   // 查找feature
@@ -467,7 +471,10 @@ function Action() {
     let features = data.filter((item) => item.collect_type === "4");
     let planPic = data.filter((item) => item.collect_type === "5");
     // 渲染点的数据
-    this.renderPointCollection(ponts);
+    let pointCollection = this.renderPointCollection(ponts);
+    this.features = this.features.concat(pointCollection)
+    this.Source.addFeatures(pointCollection);
+
     // 渲染标绘数据
     this.renderFeaturesCollection(features, { lenged, dispatch });
     // 渲染规划图
@@ -811,6 +818,7 @@ function Action() {
     this.staticimg = ImageStatic(url, extent, {
       className: "staticImg",
       ...data,
+      zIndex:14
     });
     InitMap.map.addLayer(this.staticimg);
   };
@@ -921,13 +929,35 @@ function Action() {
     return { modify: this.modify, snap };
   };
 
+
+  // 隐藏显示的资料overlay
+  this.hideCollectionOverlay = ()=>{
+    if(!this.overlays.length) return;
+    this.overlays.map(item => {
+      item.set('oldPosition',item.getPosition());
+
+      item.setPosition(null);
+      return item;
+    })
+  }
+
+  // 显示采集资料的overlay
+  this.showCollectionOverlay = () => {
+    if(!this.overlays.length) return;
+    this.overlays.map(item => {
+      // console.log(item);
+      let oldPosition = item.get('oldPosition');
+      item.setPosition(oldPosition);
+      return item;
+    })
+  }
   // 添加规划图范围
   this.addPlanPictureDraw = (url, data) => {
     // 删除已有的select事件，防止冲突
     this.removeAreaSelect();
+    this.hideCollectionOverlay();
     return new Promise((resolve, reject) => {
-      this.drawBox = drawBox(this.Source, (data = {}));
-
+      this.drawBox = drawBox(this.Source, {});
       this.drawBox.on("drawend", (e) => {
         this.boxFeature = e.feature;
         // console.log(e.feature.getGeometry().getCoordinates())
@@ -977,6 +1007,7 @@ function Action() {
             InitMap.map.removeOverlay(overlay);
             removeSelect();
             this.addAreaSelect();
+            this.showCollectionOverlay();
           },
           cancel: () => {
             // console.log('取消规划图')
@@ -985,6 +1016,7 @@ function Action() {
             InitMap.map.removeOverlay(overlay);
             removeSelect();
             this.addAreaSelect();
+            this.showCollectionOverlay();
           },
         };
       });

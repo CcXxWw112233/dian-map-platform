@@ -211,6 +211,9 @@ const action = function () {
 
   // 进入项目详情
   this.handleClickBoard = (data) => {
+    if(window.top){
+      window.top.postMessage('map_board_change_'+data.board_id, window.top.location.href);
+    }
     // 保存选中数据到本地
     setSession(this.sesstionSaveKey, data.board_id);
   };
