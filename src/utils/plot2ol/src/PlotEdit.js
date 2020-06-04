@@ -122,9 +122,11 @@ class PlotEdit extends Observable {
   }
 
   setOpenCallback(cb) {
-    this.openCb = cb
+    this.openCb = cb;
   }
-
+  setPopupOvelay(overlay) {
+    this.popupOverlay = overlay;
+  }
   // 删除按钮
   createDelBtn(pt) {
     const delBtnEle = document.createElement("div");
@@ -137,15 +139,17 @@ class PlotEdit extends Observable {
       positioning: "bottom-center",
       offset: [20, -10],
     });
-    this.layer.plotEdit.controlPoints && this.layer.plotEdit.controlPoints.push(delBtnOverlay);
+    this.layer.plotEdit.controlPoints &&
+      this.layer.plotEdit.controlPoints.push(delBtnOverlay);
     this.map.addOverlay(delBtnOverlay);
     DomUtils.addListener(
       delBtnEle,
       "mousedown",
       () => {
         this.delCb && this.delCb(0);
-        window.featureOperator && this.layer.removeFeature(window.featureOperator)
-        window.featureOperator && delete window.featureOperator
+        window.featureOperator &&
+          this.layer.removeFeature(window.featureOperator);
+        window.featureOperator && delete window.featureOperator;
       },
       this
     );
@@ -155,16 +159,18 @@ class PlotEdit extends Observable {
 
   updateDelBtn(pt) {
     const delOvely = this.map.getOverlayById("featureDelBtn");
-    delOvely.setPosition(pt);
+    delOvely && delOvely.setPosition(pt);
   }
 
-  initControlPoints() {
+  initControlPoints(isScouting) {
     if (!this.map) {
       return;
     }
     this.controlPoints = [];
     var cPnts = this.getControlPoints();
-    this.createDelBtn(cPnts[cPnts.length - 1]);
+    if (!isScouting) {
+      this.createDelBtn(cPnts[cPnts.length - 1]);
+    }
     for (var i = 0; i < cPnts.length; i++) {
       var id = Constants.HELPER_CONTROL_POINT_DIV + "-" + i;
       var element = DomUtils.get(id);
@@ -229,11 +235,11 @@ class PlotEdit extends Observable {
       plot.updatePoint(coordinate, index);
       const len = Object.keys(this.elementTable).length;
       if (index === len - 1) {
-        this.updateDelBtn(coordinate);
+        this.updateDelBtn && this.updateDelBtn(coordinate);
       }
       var overlay = this.map.getOverlayById(this.activeControlPointId);
-      overlay.setPosition(coordinate);
-      this.updateCb && this.updateCb();
+      overlay && overlay.setPosition(coordinate);
+      this.updateCb && this.updateCb(this.activePlot);
     }
   }
 
@@ -253,13 +259,17 @@ class PlotEdit extends Observable {
     );
   }
 
-  activate(plot) {
+  activate(plot, pixel) {
     if (!plot || !(plot instanceof Feature) || plot == this.activePlot) {
       return;
     }
 
     var geom = plot.getGeometry();
     if (!geom.isPlot || !geom.isPlot()) {
+      // 弹框
+      if (geom.isPlot !== "undefined") {
+        this.plotClickCb && this.plotClickCb(plot, pixel);
+      }
       return;
     }
 
@@ -283,7 +293,7 @@ class PlotEdit extends Observable {
 
     this.initHelperDom();
     //
-    this.initControlPoints();
+    this.initControlPoints(plot.isScouting);
     //--FIX dyj 这一贞无法拿到控制点元素的offsetWidth 和 offsetHeight。
     //--overLay刷新逻辑对于center-center布局有问题；
     //--故强制刷新一帧
@@ -375,7 +385,7 @@ class PlotEdit extends Observable {
       overlay.setPositioning("center-center");
     }
     const delOverlay = this.map.getOverlayById("featureDelBtn");
-    delOverlay.setPosition(lastPoi);
+    delOverlay && delOverlay.setPosition(lastPoi);
     var plot = this.activePlot.getGeometry();
     plot.setPoints(newPoints);
   }

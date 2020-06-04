@@ -1,0 +1,46 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+  font-family: PingFangSC-Semibold, PingFang SC;
+  max-width: 300px;
+  max-height: 400px;
+  .title {
+    height: 20px;
+    width: 100%;
+    .close {
+      float: right;
+      display: inline-block;
+      cursor: pointer;
+      width: 16px;
+      height: 16px;
+      background: url(../../../assets/close.svg) no-repeat;
+      background-size: 100% 100%;
+    }
+  }
+  .context {
+    display: flex;
+    flex-direction: column;
+    .item {
+      display: flex;
+      span {
+        word-break: normal;
+        display: block;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        margin-right: 10px;
+        max-height: 300px;
+      }
+    }
+    .first {
+      width: 50px;
+    }
+    .second {
+      max-width: 200px;
+      max-height: 200px;
+    }
+  }
+  .footer {
+    transform: translateX(-50%);
+  }
+}

@@ -35,6 +35,7 @@ const Action = {
       });
     }
     plottingLayer.removeFeature(window.featureOperator);
+    window.featureOperator && delete window.featureOperator
   },
 
 
