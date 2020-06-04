@@ -6,6 +6,7 @@ import { connect } from "dva";
 import Action from '../../lib/components/ProjectScouting/ScoutingList'
 import ScoutingItem from './components/ScoutingItem'
 import { message } from "antd";
+import Bitmap from '../../assets/Bitmap.png'
 
 const ScoutingAddBtn = ({ cb }) => {
   return (
@@ -271,6 +272,9 @@ export default class ScoutingList extends PureComponent {
             )
           })}
         <ScoutingAddBtn cb={this.handleAddClick.bind(this)} />
+        <div className={styles.bgStyleImg}>
+          <img src={Bitmap}/>
+        </div>
       </div>
     );
   }

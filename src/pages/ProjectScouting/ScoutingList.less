@@ -2,6 +2,16 @@
   padding: 0 16px;
   height: 93%;
   font-family: PingFangSC-Semibold, PingFang SC;
+  .bgStyleImg{
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: -1;
+    img{
+      max-width: 100%;
+    }
+  }
   .scoutingList {
     padding: 0;
   }
@@ -182,7 +192,9 @@
   .scoutingAdd {
     width: 328px;
     height: 80px;
-    background: rgba(0, 0, 0, 0.02);
+    position: relative;
+    z-index: 5;
+    background: #fff;
     border-radius: 4px;
     border: 2px dashed rgba(0, 0, 0, 0.09);
     display: flex;
