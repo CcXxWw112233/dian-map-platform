@@ -160,7 +160,7 @@ let callFunctions = {
       getMyPosition.setPosition(coor);
     } else {
       // 没有绘制就进行绘制，并设置样式
-      getMyPosition.drawPosition({ isMove: true, ...val });
+      getMyPosition.drawPosition({ isMove: val.isMove !== undefined ? val.isMove : true, ...val });
     }
   },
   // 切换底图
@@ -276,6 +276,9 @@ let callFunctions = {
   // 清除渲染的元素
   clearCollection:()=>{
     lib.clear();
+  },
+  hideOverlay:()=>{
+    lib.hideOverlay();
   },
   // 视图根据元素显示中间位置
   viewFitById: ({id})=>{

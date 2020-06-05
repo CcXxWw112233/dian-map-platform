@@ -1,7 +1,8 @@
-import { addFeature ,createOverlay ,getExtentIsEmpty} from '../../lib/utils/index'
+import { createOverlay ,getExtentIsEmpty } from '../../lib/utils/index'
 import ListAction from '../../lib/components/ProjectScouting/ScoutingList'
 import DetailAction from '../../lib/components/ProjectScouting/ScoutingDetail'
 import { CollectionOverlay } from '../../components/PublicOverlays'
+import { extend } from 'ol/extent'
 function renderAction (){
     this.features = [];
     this.Source = null;
@@ -24,18 +25,33 @@ function renderAction (){
         if(this.overlay)
         this.overlay.setPosition(null);
         
+        // 删除规划图贴图
+        DetailAction.removePlanPicCollection();
+
         if(this.Source && this.features.length){
-            this.features.forEach(item => this.Source.removeFeature(item));
+            this.features.forEach(item => {
+                if(this.Source.getFeatureByUid(item.ol_uid)){
+                    this.Source.removeFeature(item)
+                }
+            });
             this.features = [];
         }
     }
     // 渲染带坐标点的数据
     const renderPoint = (data)=>{
-        this.clear();
+        // this.clear();
         // this.features = [];
         let features = DetailAction.renderPointCollection(data,false);
         return features;
     }
+
+    // 渲染元素
+    const renderFeatures = (data)=>{
+        // this.clear();
+        let feature = DetailAction.renderFeaturesCollection(data,{addSource: false});
+        return feature;
+    }
+
 
     // 显示所有采集资料点
     this.renderCollection = async (data, Source) => {
@@ -43,21 +59,22 @@ function renderAction (){
         if(!data && !data.length){
             return ;
         }
+        this.clear();
         this.datas = data;
         let pointCollection = [];
         let features = [];
         let pic = [];
         data.forEach(item => {
             // 有坐标点的展示
-            if(item.collection_type !== '4' && item.collection_type !== '5'){
+            if(item.collect_type !== '4' && item.collect_type !== '5'){
                 pointCollection.push(item);
             }
             // 元素的展示
-            if(item.collection_type === '4'){
+            if(item.collect_type === '4'){
                 features.push(item);
             }
             // 规划图
-            if(item.collection_type === '5'){
+            if(item.collect_type === '5'){
                 pic.push(item);
             }
         })
@@ -71,9 +88,30 @@ function renderAction (){
             }
         }
 
-        if(!getExtentIsEmpty(this.Source.getExtent())){
+        // 标绘的列表
+        if(features.length){
+            let fs = renderFeatures(features);
+            if(fs.length){
+                this.features = this.features.concat(fs);
+                Source.addFeatures(fs);
+            }
+        }
+
+        let picExt = [Infinity,Infinity,-Infinity,-Infinity];
+        // 显示规划图
+        if(pic.length){
+            picExt = await DetailAction.renderPlanPicCollection(pic);
+        }
+        let SourceExtent = this.Source.getExtent();
+        if(!getExtentIsEmpty(picExt)){
+            if(!getExtentIsEmpty(SourceExtent))
+            SourceExtent = extend(picExt,[...SourceExtent]);
+            else SourceExtent = picExt;
+        }
+
+        if(!getExtentIsEmpty(SourceExtent)){
             const { view ,map} = require('../INITMAP').default;
-            view.fit(this.Source.getExtent(),{size:getMapSize(map),duration:800 });
+            view.fit(SourceExtent,{size:getMapSize(map),duration:800 });
         }
 
     }
@@ -104,6 +142,11 @@ function renderAction (){
             offset: [0, -25],
         });
         map.addOverlay(this.overlay);
+        ele.on = {
+            'click':()=>{
+                window.previewFile && window.previewFile.postMessage(data.resource_url);
+            }
+        }
         this.overlay.setPosition(coordinate);
     }
 
@@ -111,9 +154,9 @@ function renderAction (){
     this.fitCenter = (id)=>{
         let {view,map} = require('../INITMAP').default;
         let feature = this.findFeature(id);
-        if(feature){
-            let d = this.datas.find(item => item.id === id);
-            
+        let d = this.datas.find(item => item.id === id);
+        this.overlay && this.overlay.setPosition(null);
+        if(feature && d && d.collect_type !== '4' && d.collect_type !== '5'){
             let coor = feature.getGeometry().getCoordinates();
             view.animate({
                 zoom:view.getMaxZoom(),
@@ -123,6 +166,29 @@ function renderAction (){
             // 添加overlay
             this.addOverlay(d,coor,map)
         }
+        else if(d && d.collect_type === '4'){
+            // 是标注信息
+            let type = feature.getGeometry().getType();
+            if(type === 'Polygon' || type === 'LineString'){
+                let ext = feature.getGeometry().getExtent();
+                DetailAction.toCenter({type:"extent",center:ext});
+            }
+            else if(type === 'Point'){
+                let coor = feature.getGeometry().getCoordinates();
+                DetailAction.toCenter({type:"coordinate",center:coor});
+            }
+        }else if(d && d.collect_type === '5'){
+            let imgLayer = DetailAction.findImgLayer(d.resource_id);
+            if(imgLayer){
+                let ext = imgLayer.getSource().getImageExtent();
+                DetailAction.toCenter({type:"extent",center:ext});
+            }
+        }
+    }
+
+    // 隐藏气泡
+    this.hideOverlay = ()=>{
+        this.overlay && this.overlay.setPosition(null);
     }
 
     // 获取列表数据---测试功能
