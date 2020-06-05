@@ -263,7 +263,6 @@ class PlotEdit extends Observable {
     if (!plot || !(plot instanceof Feature) || plot == this.activePlot) {
       return;
     }
-
     var geom = plot.getGeometry();
     if (!geom.isPlot || !geom.isPlot()) {
       // 弹框

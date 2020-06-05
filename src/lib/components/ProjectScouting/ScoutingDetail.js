@@ -132,6 +132,7 @@ function Action() {
         this.layer.removeFeature(item);
       });
     this.layer.projectScoutingArr = [];
+    this.layer.plotEdit.plotClickCb =  null
     setSession(listAction.sesstionSaveKey, "");
   };
   // 获取区域列表
