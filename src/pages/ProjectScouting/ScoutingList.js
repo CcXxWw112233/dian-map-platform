@@ -176,7 +176,7 @@ export default class ScoutingList extends PureComponent {
       })
       try{
         if(window.parent){
-          window.parent.postMessage("map_board_create");
+          window.parent.postMessage("map_board_create",window.parent.location.href);
         }
       }catch(err){
         console.log(err)
