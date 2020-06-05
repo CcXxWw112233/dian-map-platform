@@ -880,7 +880,7 @@ function Action() {
     this.staticimg = ImageStatic(url, extent, {
       className: "staticImg",
       ...data,
-      zIndex: 14,
+      zIndex: 18,
     });
     InitMap.map.addLayer(this.staticimg);
   };
@@ -983,6 +983,7 @@ function Action() {
     this.modify = new Modify({
       features: this.select.getFeatures(),
       condition: always,
+      insertVertexCondition: never,
     });
     // snap = new Snap({features:this.select.getFeatures()});
     InitMap.map.addInteraction(this.modify);
