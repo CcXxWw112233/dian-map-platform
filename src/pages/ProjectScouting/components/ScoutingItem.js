@@ -1,5 +1,5 @@
 import React,{ Fragment} from 'react'
-import { Menu, Dropdown ,Popconfirm ,Input ,Button ,Space} from 'antd';
+import { Menu, Dropdown ,Popconfirm ,Input ,Button ,Space,Upload ,message} from 'antd';
 import { SettingOutlined ,
     // CheckCircleOutlined ,CloseCircleOutlined
 } from '@ant-design/icons'
@@ -7,6 +7,7 @@ import styles from '../ScoutingList.less'
 import animateCss from '../../../assets/css/animate.min.css'
 import globalStyle from '../../../globalSet/styles/globalStyles.less'
 import { keepLastIndex } from '../../../utils/utils'
+import { BASIC } from '../../../services/config'
 export default class ScoutingItem extends React.PureComponent {
     constructor(props){
         super(props);
@@ -112,7 +113,8 @@ export default class ScoutingItem extends React.PureComponent {
                 remark: text,
             })
         })
-        
+        let { onSaveRemark } = this.props;
+        onSaveRemark && onSaveRemark(text);
     }
     // 粘贴文本格式化
     textFormat (e) {
@@ -172,12 +174,21 @@ export default class ScoutingItem extends React.PureComponent {
         })
     }
 
+    onUploadImg = ({file})=>{
+        let { response } = file;
+        const { onSetBgImg = ()=>{} } = this.props;
+        if(response){
+            if(BASIC.checkResponse(response))
+            onSetBgImg(response.message);
+        }
+    }
+
     componentWillUnmount(){
         this.EditEnd();
     }
     render(){
-        let { visible ,editName ,remarkStatus , isEdit ,remark ,defaultValue} = this.state;
-        let { onRemove , cb , name, date , remarkText = '暂无备注信息'} = this.props;
+        let { visible ,editName ,remarkStatus , isEdit } = this.state;
+        let { onRemove , cb , name, date , remarkText = '暂无备注信息',bgImage} = this.props;
         const menu = (
             <Menu onClick={this.onHandleMenu}>
               <Menu.Item key="editBoard">
@@ -187,7 +198,15 @@ export default class ScoutingItem extends React.PureComponent {
                 编辑备注
               </Menu.Item>
               <Menu.Item key="setBgImg">
-                设置背景图片
+                <Upload
+                action='/api/map/file/upload/public'
+                showUploadList={false}
+                beforeUpload={()=>{message.success('正在上传'); return true}}
+                headers={{ Authorization: BASIC.getUrlParam.token }}
+                onChange={this.onUploadImg}
+                >
+                    <span>设置背景图片</span>
+                </Upload>
               </Menu.Item>
               <Menu.Item key="removeBoard">
                 <Popconfirm title='确定删除这个项目吗?'
@@ -214,6 +233,11 @@ export default class ScoutingItem extends React.PureComponent {
                 onClick={cb}
                 style={{...this.props.style}}
             >
+                {
+                    bgImage && <div className={styles.itemBgImage}>
+                        <img src={bgImage}/>
+                    </div>
+                }
                 <div className={`${remarkStatus === 'full' ? styles.nameHidden : styles.nameShow } ${styles.nameBox}`}>
                     <div className={styles.settings} onClick={e => e.stopPropagation()}>
                         <Dropdown overlay={menu} 
@@ -264,7 +288,7 @@ export default class ScoutingItem extends React.PureComponent {
                         <div className={styles.remarkTitle}>
                             {/* 小标题 */}
                             {
-                                remarkStatus === 'small' ?
+                                remarkStatus !== 'full' ?
                                     <div className={`${styles.remarkSmallTitle}`}>
                                         <span>备注：</span>{remarkText }
                                         <span className={styles.moreText} onClick={this.showMore}>更多

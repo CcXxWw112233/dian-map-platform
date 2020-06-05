@@ -27,6 +27,7 @@ export default function ProjectOverlay(data){
         if(BASIC.getUrlParam.isMobile !== "1")
         this.on['mousedown'] && this.on['mousedown'].call(this, e);
     }
+    this.element.style.zIndex = data.zIndex || 1;
     document.body.appendChild(this.element);
     this.remove = ()=>{
         document.body.removeChild(this.element);

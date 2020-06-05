@@ -129,7 +129,7 @@ export default class ScoutingList extends PureComponent {
       return ;
     }
     const { dispatch } = this.props
-    Action.editBoardName(val.board_id,{	board_name: name}).then(res => {
+    Action.editBoard(val.board_id,{	board_name: name}).then(res => {
       message.success('项目名称修改成功');
       let projects = [...this.state.projects].map(item => {
         if(item.board_id === val.board_id){
@@ -155,9 +155,9 @@ export default class ScoutingList extends PureComponent {
 
   // 添加项目请求
   addBoard = (val)=>{
-    let { name } = val;
+    let { name ,remark} = val;
     message.destroy();
-    Action.addBoard({board_name: name,lng: val.coordinates[0],lat:val.coordinates[1]}).then(res => {
+    Action.addBoard({board_name: name,remark ,lng: val.coordinates[0],lat:val.coordinates[1]}).then(res => {
       let { data } = res;
       // 添加数据
       this.setState({
@@ -191,6 +191,7 @@ export default class ScoutingList extends PureComponent {
       this.showOtherSlide();
       Action.removeDraw();
       message.error(err && err.message)
+      
     })
   }
   // 显示被隐藏的页面
@@ -211,6 +212,7 @@ export default class ScoutingList extends PureComponent {
   // 隐藏不需要的页面
   hideOtherSlide = ()=>{
     let { dispatch } = this.props;
+    Action.hideOverlay();
     // 关闭其他不需要的元素
     dispatch({
       type:"openswitch/updateDatas",
@@ -249,9 +251,47 @@ export default class ScoutingList extends PureComponent {
       }).catch(err => {
         // 取消新增
         this.cancelAdd();
-
+        Action.showOverlay();
         message.warn('已取消新建操作');
       });
+    })
+  }
+
+  // 保存备注
+  onSaveRemark = (val,text)=>{
+    if(!text || text === val.remark) return ;
+    Action.editBoard(val.board_id,{remark: text}).then(res => {
+      // console.log(res);
+      let arr = this.state.projects.map(item => {
+        if(item.board_id === val.board_id){
+          item.remark = text;
+        }
+        return item;
+      })
+      this.setState({
+        projects: arr
+      });
+      message.success('修改备注成功')
+    }).catch(err => {
+      message.error(err.message)
+    })
+  }
+
+  // 设置背景图
+  onSetBgImg = (val,url) => {
+    Action.editBoard(val.board_id,{bg_image: url}).then(res => {
+      let arr = this.state.projects.map(item => {
+        if(item.board_id === val.board_id){
+          item.bg_image = url;
+        }
+        return item;
+      })
+      this.setState({
+        projects: arr
+      });
+      message.success('设置背景图完成');
+    }).catch(err => {
+      message.error(err.message)
     })
   }
 
@@ -270,9 +310,13 @@ export default class ScoutingList extends PureComponent {
                   animationDuration:"0.3s" ,
                   animationTimingFunction:"ease-in-out"
                 }}
+                remarkText={item.remark}
+                bgImage={item.bg_image}
                 onRename={this.handleEditBoard.bind(this,item)}
                 cb={this.handleClick.bind(this,item)}
                 onRemove={this.removeBoard.bind(this, item)}
+                onSaveRemark={this.onSaveRemark.bind(this,item)}
+                onSetBgImg={this.onSetBgImg.bind(this,item)}
               ></ScoutingItem>
             )
           })}
