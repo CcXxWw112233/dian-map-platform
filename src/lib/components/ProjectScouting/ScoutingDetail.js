@@ -129,6 +129,7 @@ function Action() {
     this.layer.projectScoutingArr &&
       this.layer.projectScoutingArr.forEach((item) => {
         INITMAP.map.removeOverlay(item.feature && item.feature.overlay);
+        if(item.feature)
         this.layer.removeFeature(item);
       });
     this.layer.projectScoutingArr = [];
@@ -347,7 +348,6 @@ function Action() {
     }
     
     data.forEach((item) => {
-      debugger
       let content = item.content;
       // console.log(item)
       if (!content) return;
