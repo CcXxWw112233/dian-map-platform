@@ -260,13 +260,13 @@ class PlotEdit extends Observable {
   }
 
   activate(plot, pixel) {
-    if (!plot || !(plot instanceof Feature) || plot == this.activePlot) {
+    if (!plot || !(plot instanceof Feature) || plot === this.activePlot) {
       return;
     }
     var geom = plot.getGeometry();
     if (!geom.isPlot || !geom.isPlot()) {
       // 弹框
-      if (geom.isPlot !== "undefined") {
+      if (typeof geom.isPlot !== "undefined") {
         this.plotClickCb && this.plotClickCb(plot, pixel);
       }
       return;
