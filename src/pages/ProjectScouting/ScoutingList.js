@@ -6,6 +6,7 @@ import { connect } from "dva";
 import Action from '../../lib/components/ProjectScouting/ScoutingList'
 import ScoutingItem from './components/ScoutingItem'
 import { message } from "antd";
+import Bitmap from '../../assets/Bitmap.png'
 
 const ScoutingAddBtn = ({ cb }) => {
   return (
@@ -173,7 +174,12 @@ export default class ScoutingList extends PureComponent {
           }
         })
       })
-      message.success('新建项目成功')
+      // 调用灵犀
+      if(window.top){
+        window.top.postMessage("map_board_create");
+      }
+      message.success('新建项目成功');
+      
       this.showOtherSlide();
     }).catch(err => {
       console.log(err)
@@ -266,6 +272,9 @@ export default class ScoutingList extends PureComponent {
             )
           })}
         <ScoutingAddBtn cb={this.handleAddClick.bind(this)} />
+        <div className={styles.bgStyleImg}>
+          <img src={Bitmap}/>
+        </div>
       </div>
     );
   }

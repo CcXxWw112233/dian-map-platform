@@ -1,7 +1,7 @@
 import React from 'react'
 import 'photoswipe/dist/default-skin/default-skin.css'
 import 'photoswipe/dist/photoswipe.css'
-import photoswipe from './action'
+import ReactDOM from 'react-dom'
 
 export default class PhotoSwiper extends React.PureComponent{
     constructor(props){
@@ -12,8 +12,9 @@ export default class PhotoSwiper extends React.PureComponent{
     }
     render(){
         return (
-            // <!-- Root element of PhotoSwipe. Must have class pswp. -->
-            <div className="pswp" tabIndex="-1" role="dialog" aria-hidden="true">
+            ReactDOM.createPortal(
+                // <!-- Root element of PhotoSwipe. Must have class pswp. -->
+                <div className="pswp" tabIndex="-1" role="dialog" aria-hidden="true">
 
                 {/* <!-- Background of PhotoSwipe. 
                     It's a separate element as animating opacity is faster than rgba(). --> */}
@@ -74,7 +75,9 @@ export default class PhotoSwiper extends React.PureComponent{
 
                 </div>
 
-            </div>
+            </div>,
+            document.body
+            )
         )
     }
 }

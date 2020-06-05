@@ -22,8 +22,8 @@ export default function (data = {}){
     div.appendChild(title);
 
     let content = document.createElement('div');
-    content.innerHTML = data.remark;
-    content.className = styles.overlayContent;
+    content.innerHTML = data.remark || '暂无备注信息';
+    content.className = styles.overlayContent +' ' + globalStyle.autoScrollY;
     div.appendChild(content);
 
     this.element = new baseOverlay(div,data);

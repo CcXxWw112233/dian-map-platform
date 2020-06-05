@@ -65,6 +65,7 @@ let callFunctions = {
     let map = _getMap("map");
     callFunctions.layer.setSource(callFunctions.source);
     map.addLayer(callFunctions.layer);
+    lib.Source = callFunctions.source;
   },
   isMounted: false,
   // 设置视图中心点
@@ -84,15 +85,18 @@ let callFunctions = {
     let view = _getMap("view");
     return view.getCenter();
   },
-
-  // 开始记录
-  startRecord: ({ coordinates, time }) => {
-    let coor = TransformCoordinate(coordinates);
-    // 如果没加载图层，则加载图层
+  // 添加图层
+  addLayer:()=>{
     if (!callFunctions.isMounted) {
       callFunctions.Init();
       callFunctions.isMounted = true;
     }
+  },
+  // 开始记录
+  startRecord: ({ coordinates, time }) => {
+    let coor = TransformCoordinate(coordinates);
+    // 如果没加载图层，则加载图层
+    callFunctions.addLayer();
     // 如果没有加载线段，则加载线段
     if (!callFunctions.line) {
       console.log("构建初始点");
@@ -262,8 +266,21 @@ let callFunctions = {
   hideProjectList:()=>{
     lib.hideProjectPoint();
   },
-  
-
+  // 渲染坐标点
+  renderCollection:(data = [])=>{
+    callFunctions.addLayer();
+    if(data.length) lib.renderCollection(data,callFunctions.source);
+    else lib.getCollectionData(callFunctions.source)
+    
+  },
+  // 清除渲染的元素
+  clearCollection:()=>{
+    lib.clear();
+  },
+  // 视图根据元素显示中间位置
+  viewFitById: ({id})=>{
+    lib.fitCenter(id);
+  }
   
 };
 

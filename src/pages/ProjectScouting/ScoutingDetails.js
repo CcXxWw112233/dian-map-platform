@@ -183,6 +183,7 @@ const ScoutingItem = ({
   onUploadPlanCancel = () => {},
   onChangeDisplay = () => {},
   onEditPlanPic = () => {},
+  onCopyCollection,
   onModifyFeature = () => {},
   onModifyRemark = () => {},
 }) => {
@@ -265,6 +266,7 @@ const ScoutingItem = ({
             key={item.id}
           >
             <UploadItem
+              onCopyCollection={onCopyCollection}
               onChangeDisplay={onChangeDisplay}
               onEditPlanPic={onEditPlanPic}
               areaList={areaList}
@@ -396,6 +398,7 @@ const UploadItem = ({
   onSelectGroup,
   onChangeDisplay,
   onEditPlanPic = () => {},
+  onCopyCollection = ()=>{},
   onModifyRemark = () => {},
   onModifyFeature = () => {},
   onRemarkSave = () => {},
@@ -403,6 +406,7 @@ const UploadItem = ({
 }) => {
   let [visible, setVisible] = useState(false);
   let [groupVisible, setGroupVisible] = useState(false);
+  let [copyVisible, setCopyVisible ] = useState(false);
   let [isEdit, setIsEdit] = useState(false);
   let [remark, setRemark] = useState("");
   let [isRemarkEdit, setIsRemarkEdit] = useState(false);
@@ -465,11 +469,14 @@ const UploadItem = ({
     }
   };
   // 分组列表
-  const AreaItem = () => {
+  const AreaItem = ({type = 'select'}) => {
     const setGroup = (item) => {
+      setCopyVisible(false);
       setGroupVisible(false);
       setVisible(false);
+      if(type === 'select')
       onSelectGroup && onSelectGroup(item, data);
+      else onCopyCollection && onCopyCollection(item,data);
     };
     let list = areaList.map((item) => {
       if (item.id !== data.area_type_id) {
@@ -485,7 +492,9 @@ const UploadItem = ({
         return dom;
       }
     });
-    return list;
+    if(list.length)
+      return list;
+    else return '暂无分组可以选择';
   };
 
   const menu = (
@@ -497,6 +506,21 @@ const UploadItem = ({
       {data.collect_type === "5" && (
         <Menu.Item key="editPlanPic">编辑</Menu.Item>
       )}
+      <Menu.Item key="copyToGroup">
+        <Popover
+        overlayStyle={{ zIndex: 10000 }}
+        visible={copyVisible}
+        onVisibleChange={val => setCopyVisible(val)}
+        trigger='click'
+        placement="rightTop"
+        title={`复制 ${data.title} 到`}
+        content={<AreaItem type='copy'/>}
+        >
+          <div style={{width:'100%'}}>
+            复制到分组
+          </div>
+        </Popover>
+      </Menu.Item>
       {data.content && JSON.parse(data.content)?.remark ? (
         <Menu.Item key="modifyRemark">编辑备注</Menu.Item>
       ) : null}
@@ -510,8 +534,8 @@ const UploadItem = ({
           placement="rightTop"
           visible={groupVisible}
           onVisibleChange={(val) => setGroupVisible(val)}
-          title={data.title}
-          content={<AreaItem />}
+          title={`移动 ${data.title} 到`}
+          content={<AreaItem type='select'/>}
         >
           <div style={{ width: "100%" }}>移动到分组</div>
         </Popover>

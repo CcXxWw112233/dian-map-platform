@@ -36,17 +36,19 @@ import BottomToolBar from "components/BottomToolBar/BottomToolBar";
 
 import TempPlottingIcon from "components/TempPlotting/TempPlottingIcon";
 import TempPlottingPanel from "components/TempPlotting/TempPlottingPanel";
-import PhotoSwipe from "../components/PhotoSwipe";
+import PhotoSwipe from '../components/PhotoSwipe'
+import FlutterComponents from '../pages/FlutterComponents'
 
 @connect(
   ({
     controller: { mainVisible },
-    openswitch: { toolBars, bottomTools, searchTools },
+    openswitch: { toolBars, bottomTools, searchTools ,isShowMobile },
   }) => ({
     mainVisible,
     toolBars,
     bottomTools,
     searchTools,
+    isShowMobile,
   })
 )
 class IndexPage extends React.Component {
@@ -206,7 +208,7 @@ class IndexPage extends React.Component {
 
   render() {
     const { TabPane } = Tabs;
-    let { bottomTools, toolBars, searchTools } = this.props;
+    let { bottomTools, toolBars, searchTools ,isShowMobile} = this.props;
     const SearchToolBarStyle = {
       position: "absolute",
       top: 20,
@@ -282,7 +284,11 @@ class IndexPage extends React.Component {
         </Sider>
         {/* <CityPanel></CityPanel> */}
         <Overlay />
-        <PhotoSwipe />
+        <PhotoSwipe/>
+        {/* 是否显示手机页面 */}
+        {
+          isShowMobile && <FlutterComponents/>
+        }
       </div>
     );
   }
