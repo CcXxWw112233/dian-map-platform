@@ -186,6 +186,11 @@ function renderAction (){
         }
     }
 
+    // 隐藏气泡
+    this.hideOverlay = ()=>{
+        this.overlay && this.overlay.setPosition(null);
+    }
+
     // 获取列表数据---测试功能
     this.getCollectionData = (Source)=>{
         ListAction.checkItem().then(({data}) => {
