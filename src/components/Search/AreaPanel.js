@@ -160,11 +160,19 @@ export default class AreaPanel extends React.Component {
     });
   };
 
-  getGeomByCode = (code) => {
-    areaSearchAction.getGeom(code).then((res) => {
+  getGeomByCode = (code, needChange) => {
+    areaSearchAction.getGeom(code, needChange).then((res) => {
       if (res.code === "0") {
-        if (res.data && res.data.geom) {
-          areaSearchAction.addAreaGeomToMap(res.data.geom);
+        if (res.data) {
+          if (!Array.isArray(res.data)) {
+            if (res.data.geom) {
+              areaSearchAction.addAreaGeomToMap(res.data.geom);
+            }
+          } else {
+            res.data.forEach((item) => {
+              areaSearchAction.addAreaGeomToMap(item.geom);
+            });
+          }
         }
       }
     });
@@ -186,11 +194,14 @@ export default class AreaPanel extends React.Component {
     let currentCode = 0;
     let currentLocation = "";
     let currentOptions = null;
+    let needChange = false;
     // 如果省份code空
     if (villageCode) {
+      needChange = true;
       currentCode = villageCode;
       currentOptions = villageOptions;
     } else if (townCode) {
+      needChange = true;
       currentCode = townCode;
       currentOptions = townOptions;
     } else if (districtCode) {
@@ -207,7 +218,7 @@ export default class AreaPanel extends React.Component {
       return option.code === currentCode;
     })[0].name;
     this.props.updateLocationName(currentLocation);
-    this.getGeomByCode(currentCode);
+    this.getGeomByCode(currentCode, needChange);
     window.areaCode = currentCode;
   };
 

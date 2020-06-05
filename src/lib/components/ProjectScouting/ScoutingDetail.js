@@ -1,6 +1,6 @@
 import { setSession } from "../../../utils/sessionManage";
 import listAction from "./ScoutingList";
-import PhotoSwipe from '../../../components/PhotoSwipe/action'
+import PhotoSwipe from "../../../components/PhotoSwipe/action";
 import config from "../../../services/scouting";
 import { dateFormat } from "../../../utils/utils";
 import InitMap from "../../../utils/INITMAP";
@@ -29,10 +29,11 @@ import {
 import { Modify } from "ol/interaction";
 import { extend } from "ol/extent";
 import { always, never } from "ol/events/condition";
-import Event from '../../utils/event'
-import { message } from 'antd'
+import Event from "../../utils/event";
+import { message } from "antd";
 import { createPlottingFeature, createPopupOverlay } from "./createPlotting";
 import { draw } from "utils/draw";
+import INITMAP from "../../../utils/INITMAP";
 
 function Action() {
   const {
@@ -54,10 +55,10 @@ function Action() {
   this.features = [];
   this.overlays = [];
   this.drawBox = null;
-  this.init = () => {
+  this.init = (dispatch) => {
     this.Layer.setSource(this.Source);
     InitMap.map.addLayer(this.Layer);
-    this.layer = draw.getPlottingLayer();
+    this.layer = draw.getPlottingLayer(dispatch);
   };
   this.boxFeature = {};
   this.draw = null;
@@ -85,7 +86,7 @@ function Action() {
     if (!suffix) return "unknow";
     const itemKeyVals = {
       paper: [], // 图纸
-      interview: ["aac", "mp3", "语音",'m4a'], // 访谈
+      interview: ["aac", "mp3", "语音", "m4a"], // 访谈
       pic: ["jpg", "PNG", "gif", "jpeg"].map((item) =>
         item.toLocaleLowerCase()
       ),
@@ -125,6 +126,12 @@ function Action() {
 
   this.dateFormat = dateFormat;
   this.onBack = () => {
+    this.layer.projectScoutingArr &&
+      this.layer.projectScoutingArr.forEach((item) => {
+        INITMAP.map.removeOverlay(item.feature && item.feature.overlay);
+        this.layer.removeFeature(item);
+      });
+    this.layer.projectScoutingArr = [];
     setSession(listAction.sesstionSaveKey, "");
   };
   // 获取区域列表
@@ -214,7 +221,7 @@ function Action() {
     this.features = [];
   };
 
-  this.renderPointCollection = (data,addOverlay = true) => {
+  this.renderPointCollection = (data, addOverlay = true) => {
     let array = findHasLocationData(data);
     // console.log(array)
     let features = [];
@@ -223,22 +230,21 @@ function Action() {
         +item.location.longitude,
         +item.location.latitude,
       ]);
-      let feature = addFeature("Point", { coordinates: coor ,id:item.id});
+      let feature = addFeature("Point", { coordinates: coor, id: item.id });
       let style = createStyle("Point", {
-        iconUrl: require('../../../assets/mark/collectionIcon.png'),
+        iconUrl: require("../../../assets/mark/collectionIcon.png"),
         strokeWidth: 2,
         strokeColor: "#fff",
-        icon:{ anchorOrigin:"bottom-left" ,anchor:[0.35,0.25]}
+        icon: { anchorOrigin: "bottom-left", anchor: [0.35, 0.25] },
       });
 
       let pointType = this.checkCollectionType(item.target);
       item.pointType = pointType;
       feature.setStyle(style);
 
-      addOverlay &&
-      this.addOverlay(coor, item);
+      addOverlay && this.addOverlay(coor, item);
 
-      features.push(feature)
+      features.push(feature);
     });
     return features;
   };
@@ -255,6 +261,8 @@ function Action() {
 
   this.modifyFeature = (data) => {
     const feature = this.findFeature(data.id);
+    InitMap.map.removeOverlay(feature && feature.overlay);
+    feature.hasPopup = false;
     const plot = feature?.getGeometry();
     if (plot && !plot.isActive) {
       plot.updatePlot(true);
@@ -319,6 +327,7 @@ function Action() {
     };
     if(addSource){
       this.layer.projectScoutingArr.forEach((item) => {
+        InitMap.map.removeOverlay(item.feature.overlay)
         this.layer.removeFeature(item);
       });
       this.layer.projectScoutingArr = [];
@@ -328,6 +337,7 @@ function Action() {
     data.forEach((item) => {
       let content = item.content;
       // console.log(item)
+      if (!content) return;
       content = content && JSON.parse(content);
       let featureType = content.featureType || "";
       let strokeColor = content.strokeColor || "";
@@ -485,7 +495,7 @@ function Action() {
     let planPic = data.filter((item) => item.collect_type === "5");
     // 渲染点的数据
     let pointCollection = this.renderPointCollection(ponts);
-    this.features = this.features.concat(pointCollection)
+    this.features = this.features.concat(pointCollection);
     this.Source.addFeatures(pointCollection);
 
 
@@ -784,7 +794,11 @@ function Action() {
   //   添加元素坐标的overlay
   this.addOverlay = (coor, data) => {
     let isLoading = false;
-    let ele = new CollectionOverlay({...data,angleColor:"#fff",placement:"bottomCenter"});
+    let ele = new CollectionOverlay({
+      ...data,
+      angleColor: "#fff",
+      placement: "bottomCenter",
+    });
     let overlay = createOverlay(ele.element, {
       positioning: "bottom-center",
       offset: [0, -25],
@@ -793,51 +807,48 @@ function Action() {
     this.overlays.push(overlay);
     overlay.setPosition(coor);
 
-    if(ele.audio){
-      ele.audio.addEventListener('play',(e)=>{
-        Event.Evt.firEvent('hasAudioStart',{
+    if (ele.audio) {
+      ele.audio.addEventListener("play", (e) => {
+        Event.Evt.firEvent("hasAudioStart", {
           ele: e.target,
-          ...data
-        })
-      })
-      ele.audio.addEventListener('pause',(e)=>{
+          ...data,
+        });
+      });
+      ele.audio.addEventListener("pause", (e) => {
         // console.log(e,'pause')
-      })
-      ele.audio.ontimeupdate = (e)=>{
+      });
+      ele.audio.ontimeupdate = (e) => {
         // console.log(e.target.currentTime)
-      }
+      };
     }
-    if(ele.video){
-      ele.video.onplay = (e)=>{
-
-      }
+    if (ele.video) {
+      ele.video.onplay = (e) => {};
     }
 
     ele.on = {
-      imgClick: ({target,name})=>{
-        if(isLoading) return ;
+      imgClick: ({ target, name }) => {
+        if (isLoading) return;
         isLoading = true;
-        message.success('加载中...',0);
+        message.success("加载中...", 0);
         let img = new Image();
         img.src = target.src;
-        img.onload = ()=>{
-          console.dir(target)
+        img.onload = () => {
+          console.dir(target);
           isLoading = false;
           message.destroy();
           // console.log(img.width)
           let w = img.width;
           let h = img.height;
           let src = target.src;
-          let title = name || '图片'
-          PhotoSwipe.show([{w,h,src,title}])
+          let title = name || "图片";
+          PhotoSwipe.show([{ w, h, src, title }]);
           // message.success('加载完成');
-        }
-        img.onerror = ()=>{
+        };
+        img.onerror = () => {
           isLoading = false;
-        }
-      }
-    }
-
+        };
+      },
+    };
   };
 
   //   删除元素坐标的overlay
@@ -869,7 +880,7 @@ function Action() {
     this.staticimg = ImageStatic(url, extent, {
       className: "staticImg",
       ...data,
-      zIndex:14
+      zIndex: 14,
     });
     InitMap.map.addLayer(this.staticimg);
   };
@@ -980,28 +991,27 @@ function Action() {
     return { modify: this.modify, snap };
   };
 
-
   // 隐藏显示的资料overlay
-  this.hideCollectionOverlay = ()=>{
-    if(!this.overlays.length) return;
-    this.overlays.map(item => {
-      item.set('oldPosition',item.getPosition());
+  this.hideCollectionOverlay = () => {
+    if (!this.overlays.length) return;
+    this.overlays.map((item) => {
+      item.set("oldPosition", item.getPosition());
 
       item.setPosition(null);
       return item;
-    })
-  }
+    });
+  };
 
   // 显示采集资料的overlay
   this.showCollectionOverlay = () => {
-    if(!this.overlays.length) return;
-    this.overlays.map(item => {
+    if (!this.overlays.length) return;
+    this.overlays.map((item) => {
       // console.log(item);
-      let oldPosition = item.get('oldPosition');
+      let oldPosition = item.get("oldPosition");
       item.setPosition(oldPosition);
       return item;
-    })
-  }
+    });
+  };
   // 添加规划图范围
   this.addPlanPictureDraw = (url, data) => {
     // 删除已有的select事件，防止冲突

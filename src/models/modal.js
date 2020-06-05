@@ -9,6 +9,7 @@ export default {
     featureType: "", // 类型
     strokeColorStyle: "", 
     remarks: "", // 备注
+    confirmVidible: false
   },
   effects: {},
   reducers: {

@@ -132,7 +132,6 @@ export default class Search extends React.Component {
     commonSearchAction.setSession(value);
   };
   onSearchFocus = async (e) => {
-    // debugger
     this.getSearchHistory();
   };
   onLocationPanelVisibleChange = (value) => {
