@@ -33,6 +33,7 @@ const action = function () {
   this.projects = [];
   this.addProjecStyle = createStyle("Point", {
     iconUrl: require("../../../assets/addPointLocation.png"),
+    icon:{ anchorOrigin:"bottom-left" ,anchor:[0.50,0.25]}
   });
 
   this.init = async () => {
@@ -58,6 +59,24 @@ const action = function () {
     });
     this.overlays = [];
   };
+
+  // 隐藏气泡
+  this.hideOverlay = ()=>{
+    this.overlays = this.overlays.map(item => {
+      let oldpage = item.getPosition();
+      item.set('oldposition',oldpage);
+      item.setPosition(null);
+      return item;
+    })
+  }
+  // 显示气泡
+  this.showOverlay = ()=>{
+    this.overlays = this.overlays.map(item => {
+      let oldposition = item.get('oldposition');
+      item.setPosition(oldposition);
+      return item;
+    })
+  }
 
   this.renderProjectPoint = (data) => {
     this.Source.clear();
@@ -102,7 +121,7 @@ const action = function () {
   };
   // 添加overlay
   this.addOverlay = (data = {}, source) => {
-    let ele = new project(data);
+    let ele = new project({...data,zIndex:25});
     // console.log(overlay)
     let overlay = createOverlay(ele.element, { offset: [0, -53] });
 
@@ -124,7 +143,7 @@ const action = function () {
   };
 
   // 修改项目名称
-  this.editBoardName = async (id, data) => {
+  this.editBoard = async (id, data) => {
     return await EDIT_BOARD_NAME(id, data);
   };
 
@@ -140,7 +159,7 @@ const action = function () {
       });
       let overlay = createOverlay(ele.element, {
         positioning: "bottom-left",
-        offset: [-10, -15],
+        offset: [-10, -38],
       });
       this.addProjectOverlay = overlay;
       InitMap.map.addOverlay(overlay);
@@ -211,11 +230,16 @@ const action = function () {
 
   // 进入项目详情
   this.handleClickBoard = (data) => {
-    if(window.top){
-      window.top.postMessage('map_board_change_'+data.board_id, window.top.location.href);
-    }
     // 保存选中数据到本地
     setSession(this.sesstionSaveKey, data.board_id);
+    try{
+      if(window.parent){
+        window.parent.postMessage('map_board_change_'+data.board_id, window.parent.location.href);
+      }
+    }catch(err){
+      console.log(err);
+    }
+    
   };
 
   // 获取保存的本地缓存

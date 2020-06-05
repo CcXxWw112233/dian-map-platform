@@ -424,11 +424,14 @@ function Action() {
       }
       feature.setStyle(myStyle);
       let operator = this.layer._addFeature(feature);
+      this.features.push(feature)
       operator.isScouting = true;
       this.layer.projectScoutingArr.push(operator);
       this.layer.plotEdit.plotClickCb = this.handlePlotClick.bind(this);
       operator.data = item;
       operator.updateFeatueToDB = this.updateFeatueToDB.bind(this);
+
+      
     });
     let newConfig = [];
     if (!lenged) {
@@ -458,6 +461,7 @@ function Action() {
 
     // 添加区域选择
     this.addAreaSelect();
+    return this.layer.showLayer.getSource();
   };
   // 渲染feature
   this.renderCollection = async (data, { lenged, dispatch }) => {
@@ -475,10 +479,55 @@ function Action() {
     this.features = this.features.concat(pointCollection)
     this.Source.addFeatures(pointCollection);
 
+
     // 渲染标绘数据
-    this.renderFeaturesCollection(features, { lenged, dispatch });
+    const sou = this.renderFeaturesCollection(features, { lenged, dispatch });
+    
     // 渲染规划图
     let ext = await this.renderPlanPicCollection(planPic);
+    
+
+    let sourceExtent = this.Source.getExtent();
+    let subExtent = [Infinity,Infinity,-Infinity,-Infinity];
+    let sourceFlag = getExtentIsEmpty(sourceExtent);
+    let souFlag = getExtentIsEmpty(sou.getExtent());
+    let extFlag = getExtentIsEmpty(ext);
+    // 规划图和元素都有范围的时候
+    if(!souFlag && !extFlag){
+      // 合并范围
+      subExtent = extend(sou.getExtent(),ext);
+      // console.log(sou.getExtent(),ext)
+      // 如果也有点的数据，就一起合并
+      if(!sourceFlag){
+        sourceExtent = extend(subExtent,sourceExtent);
+      }else{
+        // 如果没有点的数据，就只有规划图和标注范围
+        sourceExtent = subExtent;
+      }
+    }
+    // 如果只有一个类型的有范围
+    else if(!extFlag || !souFlag){
+      // 如果是规划图有范围，说明标注没有范围
+      if(!extFlag){
+        // 合并规划图的范围
+        if(!sourceFlag){
+          sourceExtent = extend(ext, sourceExtent);
+        }else {
+          // 说明没有点的数据
+          sourceExtent = ext;
+        }
+      }
+      // 只有标注的数据
+      if(!souFlag){
+        // 有标点数据，要合并
+        if(!sourceFlag)
+          sourceExtent = extend(sou.getExtent(),sourceExtent);
+        else{
+          // 没有就直接赋值
+          sourceExtent = sou.getExtent();
+        }
+      }
+    }
 
     data &&
       data.length &&
@@ -486,32 +535,25 @@ function Action() {
         // 当存在feature的时候，才可以缩放 需要兼容规划图，规划图不存在source的元素中
         if (
           this.features.length &&
-          !getExtentIsEmpty(this.Source.getExtent())
+          !getExtentIsEmpty(sourceExtent)
         ) {
-          Fit(
-            InitMap.view,
-            ext.length
-              ? extend(ext, this.Source.getExtent())
-              : this.Source.getExtent(),
-            {
-              size: InitMap.map.getSize(),
-              padding: fitPadding,
-            },
-            800
-          );
-        } else if (ext.length) {
-          Fit(
-            InitMap.view,
-            ext,
-            {
-              size: InitMap.map.getSize(),
-              padding: fitPadding,
-            },
-            800
-          );
-        }
+          this.toCenter({center:sourceExtent,type:"extent"})
+        } 
+        // else if (ext.length) {
+        //   Fit(
+        //     InitMap.view,
+        //     ext,
+        //     {
+        //       size: InitMap.map.getSize(),
+        //       padding: fitPadding,
+        //     },
+        //     800
+        //   );
+        // }
       });
   };
+
+
 
   // type coordinate or extent
   this.toCenter = ({ center, type = "coordinate", duration = 800, zoom }) => {
@@ -688,7 +730,7 @@ function Action() {
   this.renderPlanPicCollection = async (data) => {
     //   console.log(data);
     // 所有规划图加载的范围
-    let ext = [];
+    let ext = [Infinity,Infinity,-Infinity,-Infinity];
 
     let promise = data.map((item) => {
       if (item.resource_id) {

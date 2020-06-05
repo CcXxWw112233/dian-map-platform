@@ -1,5 +1,5 @@
 import React,{ Fragment} from 'react'
-import { Menu, Dropdown ,Popconfirm ,Input ,Button ,Space} from 'antd';
+import { Menu, Dropdown ,Popconfirm ,Input ,Button ,Space,Upload ,message} from 'antd';
 import { SettingOutlined ,
     // CheckCircleOutlined ,CloseCircleOutlined
 } from '@ant-design/icons'
@@ -7,6 +7,7 @@ import styles from '../ScoutingList.less'
 import animateCss from '../../../assets/css/animate.min.css'
 import globalStyle from '../../../globalSet/styles/globalStyles.less'
 import { keepLastIndex } from '../../../utils/utils'
+import { BASIC } from '../../../services/config'
 export default class ScoutingItem extends React.PureComponent {
     constructor(props){
         super(props);
@@ -17,7 +18,7 @@ export default class ScoutingItem extends React.PureComponent {
             // hidden 隐藏 small 跟多按钮 full 全部展开 
             remarkStatus:"small",
             isEdit: false,
-            remark:"我是测试的remark",
+            remark:"暂无备注信息",
             defaultValue: '备注：'
         }
         this.colors = [
@@ -35,12 +36,14 @@ export default class ScoutingItem extends React.PureComponent {
         this.setState({
             editName: true,
             visible:false,
-            name:name
+            name:name,
+            remarkStatus:"hidden"
         })
     }
     EditEnd = ()=>{
         this.setState({
             editName: false,
+            remarkStatus:"small"
         })
     }
 
@@ -75,6 +78,9 @@ export default class ScoutingItem extends React.PureComponent {
 
     // 显示更多
     showMore = () => {
+        let { remarkText } = this.props;
+        let { current } = this.content;
+        current.innerText = '备注：' + (remarkText || "暂无备注信息");
         this.setState({
             remarkStatus: 'full'
         })
@@ -83,9 +89,13 @@ export default class ScoutingItem extends React.PureComponent {
     // 编辑备注
     editContent = ()=>{
         let { current } = this.content;
+        let { remarkText } = this.props;
+        // console.dir(current)
+        current.innerText = remarkText || "";
         this.setState({
             isEdit:true,
-            defaultValue:""
+            defaultValue:"",
+            remark: remarkText
         },()=>{
             current.focus()
             keepLastIndex(current);
@@ -96,11 +106,15 @@ export default class ScoutingItem extends React.PureComponent {
     setRemark = ()=>{
         let { current } = this.content;
         let text = current.innerText.trim();
-        this.setState({
-            isEdit:false,
-            remark: text,
-            defaultValue:"备注："
+        current.innerText = '备注：' + text;
+        setTimeout(()=>{
+            this.setState({
+                isEdit:false,
+                remark: text,
+            })
         })
+        let { onSaveRemark } = this.props;
+        onSaveRemark && onSaveRemark(text);
     }
     // 粘贴文本格式化
     textFormat (e) {
@@ -147,24 +161,34 @@ export default class ScoutingItem extends React.PureComponent {
 
     // 取消编辑
     onCancelEditRemark = ()=>{
-        let { remark } = this.state;
+        let { remarkText } = this.props;
+        let { current } = this.content;
+        current.innerText = '备注：' + (remarkText || '暂无备注信息');
         this.setState({
             isEdit: false,
-            defaultValue:"备注：",
             remark: '',
         },()=>{
             this.setState({
-                remark: remark
+                remark: remarkText
             })
         })
+    }
+
+    onUploadImg = ({file})=>{
+        let { response } = file;
+        const { onSetBgImg = ()=>{} } = this.props;
+        if(response){
+            if(BASIC.checkResponse(response))
+            onSetBgImg(response.message);
+        }
     }
 
     componentWillUnmount(){
         this.EditEnd();
     }
     render(){
-        let { visible ,editName ,remarkStatus , isEdit , remark ,defaultValue} = this.state;
-        let { onRemove , cb , name, date } = this.props;
+        let { visible ,editName ,remarkStatus , isEdit } = this.state;
+        let { onRemove , cb , name, date , remarkText = '暂无备注信息',bgImage} = this.props;
         const menu = (
             <Menu onClick={this.onHandleMenu}>
               <Menu.Item key="editBoard">
@@ -174,7 +198,15 @@ export default class ScoutingItem extends React.PureComponent {
                 编辑备注
               </Menu.Item>
               <Menu.Item key="setBgImg">
-                设置背景图片
+                <Upload
+                action='/api/map/file/upload/public'
+                showUploadList={false}
+                beforeUpload={()=>{message.success('正在上传'); return true}}
+                headers={{ Authorization: BASIC.getUrlParam.token }}
+                onChange={this.onUploadImg}
+                >
+                    <span>设置背景图片</span>
+                </Upload>
               </Menu.Item>
               <Menu.Item key="removeBoard">
                 <Popconfirm title='确定删除这个项目吗?'
@@ -201,6 +233,11 @@ export default class ScoutingItem extends React.PureComponent {
                 onClick={cb}
                 style={{...this.props.style}}
             >
+                {
+                    bgImage && <div className={styles.itemBgImage}>
+                        <img src={bgImage}/>
+                    </div>
+                }
                 <div className={`${remarkStatus === 'full' ? styles.nameHidden : styles.nameShow } ${styles.nameBox}`}>
                     <div className={styles.settings} onClick={e => e.stopPropagation()}>
                         <Dropdown overlay={menu} 
@@ -251,9 +288,9 @@ export default class ScoutingItem extends React.PureComponent {
                         <div className={styles.remarkTitle}>
                             {/* 小标题 */}
                             {
-                                remarkStatus === 'small' ?
+                                remarkStatus !== 'full' ?
                                     <div className={`${styles.remarkSmallTitle}`}>
-                                        <span>备注：</span>我是在外面的标题预热哦亲无数的不会
+                                        <span>备注：</span>{remarkText }
                                         <span className={styles.moreText} onClick={this.showMore}>更多
                                             <b className={globalStyle.global_icon} dangerouslySetInnerHTML={{__html:'&#xe7f0;'}}></b>
                                         </span>
@@ -279,7 +316,7 @@ export default class ScoutingItem extends React.PureComponent {
                         onPaste={this.textFormat}
                         ref={this.content}
                         >
-                            { defaultValue } { remark }
+                            
                         </div>
                         {
                             isEdit && 

@@ -26,13 +26,15 @@ export default function initOverlay(data = {}){
     let content = document.createElement('div');
     content.className = styles.content;
     content.innerHTML = `
-        <input placeholder="请输入名称" class="${styles.inputName}" id="addProjectInput"/>
+        <input placeholder="请输入名称(必填)" class="${styles.inputName}" id="addProjectInput"/>
+        <textarea placeholder="备注信息(非必填)" class="${styles.remark}" id="addProjectRemark"></textarea>
     `
 
     okBtn.onclick = ()=>{
         let inputval = div.querySelector('#addProjectInput').value;
+        let remark = div.querySelector('#addProjectRemark').value;
         if(!inputval) return ;
-        this.on['sure'] && this.on['sure'].call(this, {name: inputval})
+        this.on['sure'] && this.on['sure'].call(this, {name: inputval,remark})
     }
     cancelBtn.onclick = ()=>{
         this.on['cancel'] && this.on['cancel'].call(this);
