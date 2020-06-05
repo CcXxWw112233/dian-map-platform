@@ -234,7 +234,7 @@ const action = function () {
     setSession(this.sesstionSaveKey, data.board_id);
     try{
       if(window.parent){
-        window.parent.postMessage('map_board_change_'+data.board_id, window.parent.location.href);
+        window.parent.postMessage('map_board_change_'+data.board_id, "*");
       }
     }catch(err){
       console.log(err);
