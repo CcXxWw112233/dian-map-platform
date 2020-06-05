@@ -35,19 +35,23 @@ import Event from "../../lib/utils/event";
 import AudioControl from "./components/audioPlayControl";
 const { TabPane } = Tabs;
 
-const Title = ({ name, date, cb ,data}) => {
+const Title = ({ name, date, cb, data }) => {
   return (
-    <div
-      className={`${styles.title}`}
-    >
-      {
-        data.bg_image && 
+    <div className={`${styles.title}`}>
+      {data.bg_image && (
         <div className={styles.boardBgImg}>
-          <img src={data.bg_image}/>
+          <img src={data.bg_image} />
         </div>
-      }
+      )}
       <div className={styles.projectModal}></div>
-      <div style={{position:"relative",zIndex:5,width:'100%',height:"100%"}}>
+      <div
+        style={{
+          position: "relative",
+          zIndex: 5,
+          width: "100%",
+          height: "100%",
+        }}
+      >
         <p style={{ marginTop: 8 }}>
           <i
             className={globalStyle.global_icon + ` ${globalStyle.btn}`}
@@ -193,6 +197,7 @@ const ScoutingItem = ({
   onCopyCollection,
   onModifyFeature = () => {},
   onModifyRemark = () => {},
+  onRemarkSave = () => {},
 }) => {
   let [planExtent, setPlanExtent] = useState("");
   let [transparency, setTransparency] = useState("1");
@@ -282,6 +287,7 @@ const ScoutingItem = ({
               data={item}
               onRemove={onCollectionRemove}
               onEditCollection={onEditCollection}
+              onRemarkSave={onRemarkSave}
               onModifyFeature={onModifyFeature}
               onModifyRemark={onModifyRemark}
             />
@@ -405,7 +411,7 @@ const UploadItem = ({
   onSelectGroup,
   onChangeDisplay,
   onEditPlanPic = () => {},
-  onCopyCollection = ()=>{},
+  onCopyCollection = () => {},
   onModifyRemark = () => {},
   onModifyFeature = () => {},
   onRemarkSave = () => {},
@@ -413,9 +419,10 @@ const UploadItem = ({
 }) => {
   let [visible, setVisible] = useState(false);
   let [groupVisible, setGroupVisible] = useState(false);
-  let [copyVisible, setCopyVisible ] = useState(false);
+  let [copyVisible, setCopyVisible] = useState(false);
   let [isEdit, setIsEdit] = useState(false);
   let [remark, setRemark] = useState("");
+  let [isAddMark, addRemark] = useState(false);
   let [isRemarkEdit, setIsRemarkEdit] = useState(false);
   let [fileName, setFileName] = useState(data.title);
   const { TextArea } = Input;
@@ -470,20 +477,25 @@ const UploadItem = ({
       setVisible(false);
       onModifyRemark && onModifyRemark(data);
     }
+    if (key === "addRemark") {
+      addRemark(!isAddMark);
+      setIsRemarkEdit(!isRemarkEdit);
+      setVisible(false);
+      onModifyRemark && onModifyRemark(data);
+    }
     if (key === "modifyFeature") {
       setVisible(false);
       onModifyFeature && onModifyFeature(data);
     }
   };
   // 分组列表
-  const AreaItem = ({type = 'select'}) => {
+  const AreaItem = ({ type = "select" }) => {
     const setGroup = (item) => {
       setCopyVisible(false);
       setGroupVisible(false);
       setVisible(false);
-      if(type === 'select')
-      onSelectGroup && onSelectGroup(item, data);
-      else onCopyCollection && onCopyCollection(item,data);
+      if (type === "select") onSelectGroup && onSelectGroup(item, data);
+      else onCopyCollection && onCopyCollection(item, data);
     };
     let list = areaList.map((item) => {
       if (item.id !== data.area_type_id) {
@@ -499,9 +511,8 @@ const UploadItem = ({
         return dom;
       }
     });
-    if(list.length)
-      return list;
-    else return '暂无分组可以选择';
+    if (list.length) return list;
+    else return "暂无分组可以选择";
   };
 
   const menu = (
@@ -516,28 +527,30 @@ const UploadItem = ({
       {data.content && JSON.parse(data.content)?.remark ? (
         <Menu.Item key="modifyRemark">编辑备注</Menu.Item>
       ) : null}
+      {data.content && JSON.parse(data.content)?.remark ? (
+        <Menu.Item key="modifyRemark">编辑备注</Menu.Item>
+      ) : null}
+      {data.content && !JSON.parse(data.content)?.remark ? (
+        <Menu.Item key="addRemark">新增备注</Menu.Item>
+      ) : null}
       {data.content ? (
         <Menu.Item key="modifyFeature">编辑几何图形</Menu.Item>
       ) : null}
-      {
-        data.collect_type === '4' && (
-          <Menu.Item key="copyToGroup">
-            <Popover
+      {data.collect_type === "4" && (
+        <Menu.Item key="copyToGroup">
+          <Popover
             overlayStyle={{ zIndex: 10000 }}
             visible={copyVisible}
-            onVisibleChange={val => setCopyVisible(val)}
-            trigger='click'
+            onVisibleChange={(val) => setCopyVisible(val)}
+            trigger="click"
             placement="rightTop"
             title={`复制 ${data.title} 到`}
-            content={<AreaItem type='copy'/>}
-            >
-              <div style={{width:'100%'}}>
-                复制到分组
-              </div>
-            </Popover>
-          </Menu.Item>
-        )
-      }
+            content={<AreaItem type="copy" />}
+          >
+            <div style={{ width: "100%" }}>复制到分组</div>
+          </Popover>
+        </Menu.Item>
+      )}
       <Menu.Item key="selectGroup">
         <Popover
           overlayStyle={{ zIndex: 10000 }}
@@ -546,7 +559,7 @@ const UploadItem = ({
           visible={groupVisible}
           onVisibleChange={(val) => setGroupVisible(val)}
           title={`移动 ${data.title} 到`}
-          content={<AreaItem type='select'/>}
+          content={<AreaItem type="select" />}
         >
           <div style={{ width: "100%" }}>移动到分组</div>
         </Popover>
@@ -566,7 +579,9 @@ const UploadItem = ({
           }}
           placement="topRight"
         >
-          <div style={{ width: "100%" }} className="danger">删除</div>
+          <div style={{ width: "100%" }} className="danger">
+            删除
+          </div>
         </Popconfirm>
       </Menu.Item>
     </Menu>
@@ -604,9 +619,8 @@ const UploadItem = ({
     onToggleChangeStyle && onToggleChangeStyle(val);
   };
   let oldRemark = data.content && JSON.parse(data.content).remark;
-  // setRemark(oldRemark);
   let myStyle = null;
-  if (oldRemark) {
+  if (oldRemark || isAddMark) {
     myStyle = {
       height: 100,
     };
@@ -733,7 +747,7 @@ const UploadItem = ({
           </Dropdown>
         </div>
       </div>
-      {oldRemark ? (
+      {oldRemark || isAddMark === true ? (
         <div style={{ width: "100%", display: "flex" }}>
           <div
             className={styles.uploadIcon + ` ${styles[secondSetType]}`}
@@ -836,8 +850,8 @@ export default class ScoutingDetails extends PureComponent {
     // console.log(Event.Evt)
     Event.Evt.on("addCollectionForFeature", (data) => {
       this.setState({
-        area_active_key:"other"
-      })
+        area_active_key: "other",
+      });
       this.fetchCollection();
     });
     // 有音频正在播放
@@ -1401,7 +1415,7 @@ export default class ScoutingDetails extends PureComponent {
       content: collection.content,
     };
     // console.log(obj)
-    Action.addCollection(obj).then(res => {
+    Action.addCollection(obj).then((res) => {
       // console.log(res)
       message.success(
         <span>
@@ -1411,15 +1425,15 @@ export default class ScoutingDetails extends PureComponent {
         </span>
       );
       this.fetchCollection();
-    })
-  }
+    });
+  };
 
   render(h) {
     const { current_board, area_list, not_area_id_collection } = this.state;
     const panelStyle = {
       height: "96%",
     };
-    const { activeId } = this.state
+    const { activeId } = this.state;
     return (
       <div
         className={`${styles.wrap} ${animateCss.animated} ${animateCss.slideInLeft}`}
@@ -1534,6 +1548,7 @@ export default class ScoutingDetails extends PureComponent {
                         onUploadPlanCancel={this.onUploadPlanCancel}
                         onChangeDisplay={this.onChangeDisplay.bind(this, item)}
                         onEditPlanPic={this.onEditPlanPic.bind(this, item)}
+                        onRemarkSave={this.onRemarkSave}
                         onModifyRemark={this.onModifyRemark}
                         onModifyFeature={this.onModifyFeatureInDetails}
                         onToggleChangeStyle={this.onToggleChangeStyle}

@@ -121,7 +121,7 @@ const Action = {
           strokeColor: attrs.strokeColorStyle || this.defaultStrokeColor,
           main_id: "",
           name: attrs.featureName,
-          remark: attrs.remarks,
+          remark: attrs.remarks || "",
           selectName: attrs.featureSelectName,
           plottingType: plottingType,
         }
@@ -139,7 +139,7 @@ const Action = {
           featureType: attrs.strokeColorStyle || this.defaultStrokeColor,
           main_id: "",
           name: attrs.featureName,
-          remark: attrs.remarks,
+          remark: attrs.remarks || "",
           selectName: attrs.featureSelectName,
           plottingType: plottingType,
         }
@@ -176,7 +176,7 @@ const Action = {
               strokeColor: attrs.strokeColorStyle,
               main_id: "",
               name: attrs.featureName,
-              remark: attrs.remarks,
+              remark: attrs.remarks || "",
               selectName: attrs.featureSelectName,
               plottingType: plottingType,
             }
@@ -206,7 +206,7 @@ const Action = {
           strokeColor: attrs.strokeColorStyle || this.defaultStrokeColor,
           main_id: "",
           name: attrs.featureName,
-          remark: attrs.remarks,
+          remark: attrs.remarks || "",
           selectName: attrs.featureSelectName,
           plottingType: plottingType,
         }
