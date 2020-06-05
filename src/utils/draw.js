@@ -196,32 +196,37 @@ export const draw = {
         const feature = operator.feature;
         const plot = feature && feature.getGeometry();
         plot.isActive = false;
-        //保存到数据库, 线提示需不需要保存
-        me.drawDispatch &&
-          me.drawDispatch({
-            type: "modal/updateData",
-            payload: {
-              confirmVidible: true,
-            },
-          });
-        Event.Evt.on("saveFeatureToDB", (val) => {
-          if (val === true) {
-            const data = operator.data;
-            operator.updateFeatueToDB(data, feature).then((res) => {
-              Event.Evt.firEvent("updatePlotFeature", res);
+        //检测是否修改
+        const g = operator.feature.getGeometry();
+        const coord = g?.getCoordinates();
+        if (JSON.stringify(coord) !== JSON.stringify(JSON.parse(operator.data.content)?.coordinates)) {
+          //保存到数据库, 线提示需不需要保存
+          me.drawDispatch &&
+            me.drawDispatch({
+              type: "modal/updateData",
+              payload: {
+                confirmVidible: true,
+              },
             });
-          } else {
-            let coordinates = JSON.parse(operator.data.content)?.coordinates;
-            const type = operator.feature.getGeometry().getType();
-            if (type === "Point") {
-              coordinates = [coordinates]
+          Event.Evt.on("saveFeatureToDB", (val) => {
+            if (val === true) {
+              const data = operator.data;
+              operator.updateFeatueToDB(data, feature).then((res) => {
+                Event.Evt.firEvent("updatePlotFeature", res);
+              });
+            } else {
+              let coordinates = JSON.parse(operator.data.content)?.coordinates;
+              const type = operator.feature.getGeometry().getType();
+              if (type === "Point") {
+                coordinates = [coordinates];
+              }
+              if (type === "Polygon") {
+                coordinates = [...coordinates[0]];
+              }
+              operator.setCoordinates(coordinates || []);
             }
-            if (type === "Polygon") {
-              coordinates = [...coordinates[0]];
-            }
-            operator.setCoordinates(coordinates || []);
-          }
-        });
+          });
+        }
       }
     });
   },
