@@ -217,6 +217,15 @@ function Action() {
         this.Source.removeFeature(item);
       }
     });
+    // 删除绘制的元素
+    if(this.layer){
+      this.layer.projectScoutingArr && this.layer.projectScoutingArr.forEach((item) => {
+        if(item && item.feature){
+          InitMap.map.removeOverlay( item.feature.overlay);
+          item && this.layer.removeFeature(item);
+        }
+      });
+    }
 
     this.features = [];
   };
@@ -327,8 +336,10 @@ function Action() {
     };
     if(addSource){
       this.layer.projectScoutingArr.forEach((item) => {
-        InitMap.map.removeOverlay(item.feature.overlay)
-        this.layer.removeFeature(item);
+        if(item && item.feature){
+          InitMap.map.removeOverlay(item.feature.overlay);
+          this.layer.removeFeature(item);
+        }
       });
       this.layer.projectScoutingArr = [];
       this.layer.plotEdit.updateCb = null
@@ -484,10 +495,11 @@ function Action() {
   };
   // 渲染feature
   this.renderCollection = async (data, { lenged, dispatch }) => {
-    // 过滤不显示的数据
-    data = data.filter((item) => item.is_display === "1");
     // 删除元素
     this.removeFeatures();
+    if(!data.length) return ;
+    // 过滤不显示的数据
+    data = data.filter((item) => item.is_display === "1");
     let ponts = data.filter(
       (item) => item.collect_type !== "4" && item.collect_type !== "5"
     );
@@ -575,9 +587,11 @@ function Action() {
 
 
   // type coordinate or extent
-  this.toCenter = ({ center, type = "coordinate", duration = 800, zoom }) => {
+  this.toCenter = ({ center, type = "coordinate", duration = 800, zoom ,transform = true }) => {
     if (type === "coordinate") {
+      if(transform)
       center = TransformCoordinate(center);
+
       InitMap.view.animate({
         center: center,
         zoom: zoom ? zoom : InitMap.view.getMaxZoom() - 2,

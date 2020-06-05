@@ -175,7 +175,7 @@ function renderAction (){
             }
             else if(type === 'Point'){
                 let coor = feature.getGeometry().getCoordinates();
-                DetailAction.toCenter({type:"coordinate",center:coor});
+                DetailAction.toCenter({type:"coordinate",center:coor,transform:false});
             }
         }else if(d && d.collect_type === '5'){
             let imgLayer = DetailAction.findImgLayer(d.resource_id);
