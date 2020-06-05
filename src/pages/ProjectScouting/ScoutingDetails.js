@@ -985,6 +985,7 @@ export default class ScoutingDetails extends PureComponent {
 
   // 保存新增的区域
   saveArea = (data, name) => {
+    if(!name) return message.warn('分组名称不能为空');
     // 编辑状态
     if (data.board_id) {
       Action.editAreaName(data.id, { name }).then((res) => {
