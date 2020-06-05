@@ -1045,7 +1045,7 @@ export default class ScoutingDetails extends PureComponent {
   // 渲染带坐标的数据
   renderCollection = (data) => {
     const { config: lenged, dispatch } = this.props;
-    data.length && Action.renderCollection(data, { lenged, dispatch });
+    Action.renderCollection(data || [], { lenged, dispatch });
   };
 
   // 获取资源列表，动态分类
@@ -1304,7 +1304,7 @@ export default class ScoutingDetails extends PureComponent {
     if (key) {
       let obj = this.state.area_list.find((item) => item.id === key);
       if (obj) {
-        obj.collection && this.renderCollection(obj.collection);
+        this.renderCollection(obj.collection || []);
       } else {
         this.renderCollection(this.state.not_area_id_collection || []);
       }
