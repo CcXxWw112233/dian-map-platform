@@ -149,7 +149,7 @@ export default function overlay (data = {}){
             if(!isNaN(duration)){
                let time = duration/60;
                 let minut = parseInt(time);// 分钟
-                let seconds = parseInt((time - minut) * 60);
+                let seconds = Math.round((time - minut) * 60);
                 let text = `${minut}'${seconds}"`
                 dom.innerHTML = text;
             }else{
