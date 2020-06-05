@@ -33,6 +33,7 @@ import Event from "../../utils/event";
 import { message } from "antd";
 import { createPlottingFeature, createPopupOverlay } from "./createPlotting";
 import { draw } from "utils/draw";
+import INITMAP from "../../../utils/INITMAP";
 
 function Action() {
   const {
@@ -125,6 +126,12 @@ function Action() {
 
   this.dateFormat = dateFormat;
   this.onBack = () => {
+    this.layer.projectScoutingArr &&
+      this.layer.projectScoutingArr.forEach((item) => {
+        INITMAP.map.removeOverlay(item.feature && item.feature.overlay);
+        this.layer.removeFeature(item);
+      });
+    this.layer.projectScoutingArr = [];
     setSession(listAction.sesstionSaveKey, "");
   };
   // 获取区域列表
@@ -214,7 +221,7 @@ function Action() {
     this.features = [];
   };
 
-  this.renderPointCollection = (data,addOverlay = true) => {
+  this.renderPointCollection = (data, addOverlay = true) => {
     let array = findHasLocationData(data);
     // console.log(array)
     let features = [];
@@ -223,7 +230,7 @@ function Action() {
         +item.location.longitude,
         +item.location.latitude,
       ]);
-      let feature = addFeature("Point", { coordinates: coor ,id:item.id});
+      let feature = addFeature("Point", { coordinates: coor, id: item.id });
       let style = createStyle("Point", {
         iconUrl: require("../../../assets/mark/collectionIcon.png"),
         strokeWidth: 2,
@@ -235,10 +242,9 @@ function Action() {
       item.pointType = pointType;
       feature.setStyle(style);
 
-      addOverlay &&
-      this.addOverlay(coor, item);
+      addOverlay && this.addOverlay(coor, item);
 
-      features.push(feature)
+      features.push(feature);
     });
     return features;
   };
@@ -475,7 +481,7 @@ function Action() {
     let planPic = data.filter((item) => item.collect_type === "5");
     // 渲染点的数据
     let pointCollection = this.renderPointCollection(ponts);
-    this.features = this.features.concat(pointCollection)
+    this.features = this.features.concat(pointCollection);
     this.Source.addFeatures(pointCollection);
 
     // 渲染标绘数据
@@ -822,7 +828,7 @@ function Action() {
     this.staticimg = ImageStatic(url, extent, {
       className: "staticImg",
       ...data,
-      zIndex:14
+      zIndex: 14,
     });
     InitMap.map.addLayer(this.staticimg);
   };
@@ -933,28 +939,27 @@ function Action() {
     return { modify: this.modify, snap };
   };
 
-
   // 隐藏显示的资料overlay
-  this.hideCollectionOverlay = ()=>{
-    if(!this.overlays.length) return;
-    this.overlays.map(item => {
-      item.set('oldPosition',item.getPosition());
+  this.hideCollectionOverlay = () => {
+    if (!this.overlays.length) return;
+    this.overlays.map((item) => {
+      item.set("oldPosition", item.getPosition());
 
       item.setPosition(null);
       return item;
-    })
-  }
+    });
+  };
 
   // 显示采集资料的overlay
   this.showCollectionOverlay = () => {
-    if(!this.overlays.length) return;
-    this.overlays.map(item => {
+    if (!this.overlays.length) return;
+    this.overlays.map((item) => {
       // console.log(item);
-      let oldPosition = item.get('oldPosition');
+      let oldPosition = item.get("oldPosition");
       item.setPosition(oldPosition);
       return item;
-    })
-  }
+    });
+  };
   // 添加规划图范围
   this.addPlanPictureDraw = (url, data) => {
     // 删除已有的select事件，防止冲突
