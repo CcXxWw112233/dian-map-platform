@@ -49,7 +49,7 @@ export default class PublicData extends React.Component {
       let arr = this.getItems(oldVal, newVal);
       // 新增了哪些图层key
       let keys = this.getCheckBoxForDatas(arr);
-      keys.forEach((item) => {
+      keys && keys.forEach((item) => {
         let data = { ...item };
         if (newVal.length === oldVal.length) {
           data.key = 1;

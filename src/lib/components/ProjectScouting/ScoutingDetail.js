@@ -326,6 +326,7 @@ function Action() {
       content: [],
     };
     this.layer.projectScoutingArr.forEach((item) => {
+      InitMap.map.removeOverlay(item.feature.overlay)
       this.layer.removeFeature(item);
     });
     this.layer.projectScoutingArr = [];
