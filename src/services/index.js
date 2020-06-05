@@ -32,7 +32,7 @@ instance.interceptors.response.use(config => {
       // 调用灵犀
       try{
         if(window.parent){
-          window.parent.postMessage("token_invalid",window.parent.location.href);
+          window.parent.postMessage("token_invalid","*");
         }
       }catch(err){
         console.log(err)
