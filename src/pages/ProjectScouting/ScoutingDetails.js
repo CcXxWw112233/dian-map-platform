@@ -417,6 +417,14 @@ const UploadItem = ({
   onRemarkSave = () => {},
   onToggleChangeStyle = () => {},
 }) => {
+  let obj = {...data};
+  // 过滤后缀
+  let suffix = obj.title.substring(obj.title.lastIndexOf('.'));
+  let reg = /\.[a-z]/i;
+  if(suffix && reg.test(suffix)){
+    obj.title = obj.title.replace(suffix,'');
+  }
+
   let [visible, setVisible] = useState(false);
   let [groupVisible, setGroupVisible] = useState(false);
   let [copyVisible, setCopyVisible] = useState(false);
@@ -424,7 +432,7 @@ const UploadItem = ({
   let [remark, setRemark] = useState("");
   let [isAddMark, addRemark] = useState(false);
   let [isRemarkEdit, setIsRemarkEdit] = useState(false);
-  let [fileName, setFileName] = useState(data.title);
+  let [fileName, setFileName] = useState(obj.title);
   const { TextArea } = Input;
   const saveRemark = (data) => {
     let dataObj = JSON.parse(data.content);
@@ -584,6 +592,11 @@ const UploadItem = ({
     </Menu>
   );
 
+  const setSuffix = (name)=>{
+    if(suffix) return name + suffix;
+    else return name;
+  }
+
   const itemClick = (val) => {
     if (val.is_display === "0") return;
     if (
@@ -668,7 +681,7 @@ const UploadItem = ({
                     autoFocus
                     onChange={(e) => setFileName(e.target.value.trim())}
                     onPressEnter={() => {
-                      onEditCollection("editName", data, fileName);
+                      onEditCollection("editName", data, setSuffix(fileName));
                       setIsEdit(false);
                     }}
                     allowClear
@@ -689,7 +702,7 @@ const UploadItem = ({
                     size="small"
                     onClick={() => {
                       setIsEdit(false);
-                      onEditCollection("editName", data, fileName);
+                      onEditCollection("editName", data, setSuffix(fileName));
                     }}
                     shape="circle"
                     type="primary"
@@ -983,6 +996,7 @@ export default class ScoutingDetails extends PureComponent {
 
   // 保存新增的区域
   saveArea = (data, name) => {
+    if(!name) return message.warn('分组名称不能为空');
     // 编辑状态
     if (data.board_id) {
       Action.editAreaName(data.id, { name }).then((res) => {
@@ -1376,7 +1390,7 @@ export default class ScoutingDetails extends PureComponent {
         });
       })
       .catch((err) => {
-        if (err.code === -1) message.warn(err.message);
+        if (err.code === -1) { /**message.warn(err.message)*/}
         else message.error(err.message);
         this.showOtherSlide();
       });
