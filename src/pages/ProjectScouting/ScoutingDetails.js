@@ -32,7 +32,7 @@ import {
 } from "@ant-design/icons";
 import { BASIC } from "../../services/config";
 import Event from "../../lib/utils/event";
-import AudioControl from './components/audioPlayControl'
+import AudioControl from "./components/audioPlayControl";
 const { TabPane } = Tabs;
 
 const Title = ({ name, date, cb, id }) => {
@@ -190,12 +190,12 @@ const ScoutingItem = ({
   let [transparency, setTransparency] = useState("1");
 
   // 开始上传
-  const startUpload = ({ file, fileList ,event}) => {
+  const startUpload = ({ file, fileList, event }) => {
     let { response } = file;
-    onChange && onChange(file, fileList,event);
+    onChange && onChange(file, fileList, event);
     if (response) {
       BASIC.checkResponse(response)
-        ? onUpload && onUpload(response.data, fileList,event)
+        ? onUpload && onUpload(response.data, fileList, event)
         : onError && onError(response);
     } else {
       // onError && onError(file)
@@ -399,6 +399,7 @@ const UploadItem = ({
   onModifyRemark = () => {},
   onModifyFeature = () => {},
   onRemarkSave = () => {},
+  onToggleChangeStyle = () => {},
 }) => {
   let [visible, setVisible] = useState(false);
   let [groupVisible, setGroupVisible] = useState(false);
@@ -565,6 +566,7 @@ const UploadItem = ({
         Action.toCenter({ type: "extent", center: extent });
       }
     }
+    onToggleChangeStyle && onToggleChangeStyle(val);
   };
   let oldRemark = data.content && JSON.parse(data.content).remark;
   // setRemark(oldRemark);
@@ -588,7 +590,7 @@ const UploadItem = ({
       className={styles.uploadItem + ` ${globalStyle.btn}`}
       draggable={true}
       style={myStyle}
-      onClick={itemClick.bind(this, data)}
+      onClick={() => itemClick(data)}
     >
       <div style={{ width: "100%", display: "flex" }}>
         <div className={styles.uploadIcon + ` ${styles[secondSetType]}`}>
@@ -784,9 +786,8 @@ export default class ScoutingDetails extends PureComponent {
       visible: true,
       activeKey: panes[0].key,
       panes,
-      audioData: {
-
-      }
+      activeId: -1,
+      audioData: {},
     };
     this.scrollView = React.createRef();
   }
@@ -795,16 +796,16 @@ export default class ScoutingDetails extends PureComponent {
     // 删除存在与页面中的项目点和元素
     Action.removeListPoint();
     // 构建地图组件
-    Action.init();
+    Action.init(this.props.dispatch);
     // 当外部的数据保存成功后的回调
     // console.log(Event.Evt)
     Event.Evt.on("addCollectionForFeature", (data) => {
       this.fetchCollection();
     });
     // 有音频正在播放
-    Event.Evt.on('hasAudioStart',(data)=>{
-      this.setAudio(data)
-    })
+    Event.Evt.on("hasAudioStart", (data) => {
+      this.setAudio(data);
+    });
 
     Event.Evt.on("updatePlotFeature", (data) => {
       this.fetchCollection();
@@ -812,12 +813,12 @@ export default class ScoutingDetails extends PureComponent {
   }
 
   // 设置正在播放的数据
-  setAudio = (data)=>{
+  setAudio = (data) => {
     // console.log(data)
     this.setState({
-      audioData:data,
-    })
-  }
+      audioData: data,
+    });
+  };
   // 获取缓存中选定的项目
   getDetails = (flag) => {
     ScouListAction.checkItem().then((res) => {
@@ -906,13 +907,17 @@ export default class ScoutingDetails extends PureComponent {
       _edit: true,
       name: "",
     };
-    this.setState({
-      area_list: this.state.area_list.concat([obj]),
-    },()=>{
-      // 将新增的顶上去
-      this.scrollView.current &&
-      (this.scrollView.current.scrollTop = this.scrollView.current.scrollHeight + 1000)
-    });
+    this.setState(
+      {
+        area_list: this.state.area_list.concat([obj]),
+      },
+      () => {
+        // 将新增的顶上去
+        this.scrollView.current &&
+          (this.scrollView.current.scrollTop =
+            this.scrollView.current.scrollHeight + 1000);
+      }
+    );
   };
 
   // 取消新增区域
@@ -1020,15 +1025,15 @@ export default class ScoutingDetails extends PureComponent {
   };
 
   // 上传中
-  filesChange = (val, file, fileList,event) => {
+  filesChange = (val, file, fileList, event) => {
     // console.log("上传中...", file, fileList,event);
-    if(event){
-      let percent = Math.floor((event.loaded / event.total) * 100)
-      console.log(percent,event.percent);
+    if (event) {
+      let percent = Math.floor((event.loaded / event.total) * 100);
+      console.log(percent, event.percent);
     }
   };
   // 上传完成
-  fileUpload = (val, resp,event) => {
+  fileUpload = (val, resp, event) => {
     if (resp) {
       message.success("上传成功");
       let { file_resource_id, suffix, original_file_name } = resp;
@@ -1327,11 +1332,10 @@ export default class ScoutingDetails extends PureComponent {
         this.showOtherSlide();
       });
   };
-  // 
-  audioDistory = ()=>{
+  //
+  audioDistory = () => {
     // 页面清除了
-    
-  }
+  };
 
   onRemarkSave = (data) => {
     Action.modifyRemark(data).then((res) => {
@@ -1343,24 +1347,32 @@ export default class ScoutingDetails extends PureComponent {
     Action.modifyFeature(data);
   };
 
+  onToggleChangeStyle = (val) => {
+    this.setState({
+      activeId: val.id,
+    });
+  };
+
   render(h) {
     const { current_board, area_list, not_area_id_collection } = this.state;
     const panelStyle = {
       height: "96%",
     };
+    const { activeId } = this.state
     return (
       <div
         className={`${styles.wrap} ${animateCss.animated} ${animateCss.slideInLeft}`}
         style={{ animationDuration: "0.3s" }}
       >
-        {
-          this.state.audioData.ele &&
-          !this.state.audioData.ele.paused &&
-          <AudioControl audioEle={this.state.audioData.ele} 
-          onDistory={this.audioDistory}  data={this.state.audioData}
-          onClose={()=> this.setState({audioData:{}})}/>
-        }
-        
+        {this.state.audioData.ele && !this.state.audioData.ele.paused && (
+          <AudioControl
+            audioEle={this.state.audioData.ele}
+            onDistory={this.audioDistory}
+            data={this.state.audioData}
+            onClose={() => this.setState({ audioData: {} })}
+          />
+        )}
+
         <Title
           name={current_board.board_name}
           date={""}
@@ -1414,6 +1426,10 @@ export default class ScoutingDetails extends PureComponent {
                 activeKey={this.state.area_active_key}
               >
                 {area_list.map((item, index) => {
+                  let activeStyle = null;
+                  if (item.id === activeId) {
+                    activeStyle = { backgroundColor: "rgba(214,228,255,0.5)" };
+                  }
                   return (
                     <Collapse.Panel
                       header={
@@ -1433,6 +1449,7 @@ export default class ScoutingDetails extends PureComponent {
                     >
                       <ScoutingItem
                         // onDrop={()=> console.log(item)}
+                        style={activeStyle}
                         data={item}
                         onAreaEdit={this.onAreaEdit.bind(this, true)}
                         onAreaDelete={this.onAreaDelete}
@@ -1457,6 +1474,7 @@ export default class ScoutingDetails extends PureComponent {
                         onEditPlanPic={this.onEditPlanPic.bind(this, item)}
                         onModifyRemark={this.onModifyRemark}
                         onModifyFeature={this.onModifyFeatureInDetails}
+                        onToggleChangeStyle={this.onToggleChangeStyle}
                       />
                     </Collapse.Panel>
                   );
@@ -1478,6 +1496,12 @@ export default class ScoutingDetails extends PureComponent {
                   {!!not_area_id_collection.length && (
                     <div className={styles.norAreaIdsData}>
                       {not_area_id_collection.map((item, index) => {
+                        let activeStyle = null;
+                        if (item.id === activeId) {
+                          activeStyle = {
+                            backgroundColor: "rgba(214,228,255,0.5)",
+                          };
+                        }
                         return (
                           <div
                             key={item.id}
@@ -1488,6 +1512,7 @@ export default class ScoutingDetails extends PureComponent {
                             }}
                           >
                             <UploadItem
+                              style={activeStyle}
                               data={item}
                               type={Action.checkCollectionType(item.target)}
                               areaList={area_list}
@@ -1504,6 +1529,7 @@ export default class ScoutingDetails extends PureComponent {
                               onModifyRemark={this.onModifyRemark}
                               onRemarkSave={this.onRemarkSave}
                               onModifyFeature={this.onModifyFeatureInDetails}
+                              onToggleChangeStyle={this.onToggleChangeStyle}
                             />
                           </div>
                         );

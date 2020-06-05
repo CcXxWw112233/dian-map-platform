@@ -4,7 +4,7 @@ import mapApp from "./INITMAP";
 import { request } from "../services/index";
 import { config } from "./customConfig";
 import { BASIC } from "../services/config";
-import Event from "../lib/utils/event"
+import Event from "../lib/utils/event";
 // import Overlay from 'ol/Overlay'
 // import * as DomUtils from './plot2ol/util/dom_util'
 // import { connectEvent, disconnectEvent } from './plot2ol/util/core'
@@ -196,10 +196,31 @@ export const draw = {
         const feature = operator.feature;
         const plot = feature && feature.getGeometry();
         plot.isActive = false;
-        //保存到数据库
-        const data = operator.data
-        operator.updateFeatueToDB(data, feature).then(res => {
-          Event.Evt.firEvent("updatePlotFeature",res)
+        //保存到数据库, 线提示需不需要保存
+        me.drawDispatch &&
+          me.drawDispatch({
+            type: "modal/updateData",
+            payload: {
+              confirmVidible: true,
+            },
+          });
+        Event.Evt.on("saveFeatureToDB", (val) => {
+          if (val === true) {
+            const data = operator.data;
+            operator.updateFeatueToDB(data, feature).then((res) => {
+              Event.Evt.firEvent("updatePlotFeature", res);
+            });
+          } else {
+            let coordinates = JSON.parse(operator.data.content)?.coordinates;
+            const type = operator.feature.getGeometry().getType();
+            if (type === "Point") {
+              coordinates = [coordinates]
+            }
+            if (type === "Polygon") {
+              coordinates = [...coordinates[0]];
+            }
+            operator.setCoordinates(coordinates || []);
+          }
         });
       }
     });

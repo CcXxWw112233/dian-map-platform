@@ -1,6 +1,6 @@
 import { setSession } from "../../../utils/sessionManage";
 import listAction from "./ScoutingList";
-import PhotoSwipe from '../../../components/PhotoSwipe/action'
+import PhotoSwipe from "../../../components/PhotoSwipe/action";
 import config from "../../../services/scouting";
 import { dateFormat } from "../../../utils/utils";
 import InitMap from "../../../utils/INITMAP";
@@ -29,8 +29,8 @@ import {
 import { Modify } from "ol/interaction";
 import { extend } from "ol/extent";
 import { always, never } from "ol/events/condition";
-import Event from '../../utils/event'
-import { message } from 'antd'
+import Event from "../../utils/event";
+import { message } from "antd";
 import { createPlottingFeature, createPopupOverlay } from "./createPlotting";
 import { draw } from "utils/draw";
 
@@ -54,10 +54,10 @@ function Action() {
   this.features = [];
   this.overlays = [];
   this.drawBox = null;
-  this.init = () => {
+  this.init = (dispatch) => {
     this.Layer.setSource(this.Source);
     InitMap.map.addLayer(this.Layer);
-    this.layer = draw.getPlottingLayer();
+    this.layer = draw.getPlottingLayer(dispatch);
   };
   this.boxFeature = {};
   this.draw = null;
@@ -85,7 +85,7 @@ function Action() {
     if (!suffix) return "unknow";
     const itemKeyVals = {
       paper: [], // 图纸
-      interview: ["aac", "mp3", "语音",'m4a'], // 访谈
+      interview: ["aac", "mp3", "语音", "m4a"], // 访谈
       pic: ["jpg", "PNG", "gif", "jpeg"].map((item) =>
         item.toLocaleLowerCase()
       ),
@@ -222,12 +222,12 @@ function Action() {
         +item.location.longitude,
         +item.location.latitude,
       ]);
-      let feature = addFeature("Point", { coordinates: coor ,});
+      let feature = addFeature("Point", { coordinates: coor });
       let style = createStyle("Point", {
-        iconUrl: require('../../../assets/mark/collectionIcon.png'),
+        iconUrl: require("../../../assets/mark/collectionIcon.png"),
         strokeWidth: 2,
         strokeColor: "#fff",
-        icon:{ anchorOrigin:"bottom-left" ,anchor:[0.35,0.25]}
+        icon: { anchorOrigin: "bottom-left", anchor: [0.35, 0.25] },
       });
 
       let pointType = this.checkCollectionType(item.target);
@@ -251,6 +251,8 @@ function Action() {
 
   this.modifyFeature = (data) => {
     const feature = this.findFeature(data.id);
+    InitMap.map.removeOverlay(feature && feature.overlay);
+    feature.hasPopup = false;
     const plot = feature?.getGeometry();
     if (plot && !plot.isActive) {
       plot.updatePlot(true);
@@ -317,10 +319,11 @@ function Action() {
       this.layer.removeFeature(item);
     });
     this.layer.projectScoutingArr = [];
-    this.layer.plotEdit.updateCb = null
+    this.layer.plotEdit.updateCb = null;
     data.forEach((item) => {
       let content = item.content;
       // console.log(item)
+      if (!content) return;
       content = content && JSON.parse(content);
       let featureType = content.featureType || "";
       let strokeColor = content.strokeColor || "";
@@ -726,7 +729,11 @@ function Action() {
   //   添加元素坐标的overlay
   this.addOverlay = (coor, data) => {
     let isLoading = false;
-    let ele = new CollectionOverlay({...data,angleColor:"#fff",placement:"bottomCenter"});
+    let ele = new CollectionOverlay({
+      ...data,
+      angleColor: "#fff",
+      placement: "bottomCenter",
+    });
     let overlay = createOverlay(ele.element, {
       positioning: "bottom-center",
       offset: [0, -25],
@@ -735,51 +742,48 @@ function Action() {
     this.overlays.push(overlay);
     overlay.setPosition(coor);
 
-    if(ele.audio){
-      ele.audio.addEventListener('play',(e)=>{
-        Event.Evt.firEvent('hasAudioStart',{
+    if (ele.audio) {
+      ele.audio.addEventListener("play", (e) => {
+        Event.Evt.firEvent("hasAudioStart", {
           ele: e.target,
-          ...data
-        })
-      })
-      ele.audio.addEventListener('pause',(e)=>{
+          ...data,
+        });
+      });
+      ele.audio.addEventListener("pause", (e) => {
         // console.log(e,'pause')
-      })
-      ele.audio.ontimeupdate = (e)=>{
+      });
+      ele.audio.ontimeupdate = (e) => {
         // console.log(e.target.currentTime)
-      }
+      };
     }
-    if(ele.video){
-      ele.video.onplay = (e)=>{
-
-      }
+    if (ele.video) {
+      ele.video.onplay = (e) => {};
     }
 
     ele.on = {
-      imgClick: ({target,name})=>{
-        if(isLoading) return ;
+      imgClick: ({ target, name }) => {
+        if (isLoading) return;
         isLoading = true;
-        message.success('加载中...',0);
+        message.success("加载中...", 0);
         let img = new Image();
         img.src = target.src;
-        img.onload = ()=>{
-          console.dir(target)
+        img.onload = () => {
+          console.dir(target);
           isLoading = false;
           message.destroy();
           // console.log(img.width)
           let w = img.width;
           let h = img.height;
           let src = target.src;
-          let title = name || '图片'
-          PhotoSwipe.show([{w,h,src,title}])
+          let title = name || "图片";
+          PhotoSwipe.show([{ w, h, src, title }]);
           // message.success('加载完成');
-        }
-        img.onerror = ()=>{
+        };
+        img.onerror = () => {
           isLoading = false;
-        }
-      }
-    }
-
+        };
+      },
+    };
   };
 
   //   删除元素坐标的overlay

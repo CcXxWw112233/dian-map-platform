@@ -11,6 +11,7 @@ import PublicData from "../pages/publicMapData/publicMapData";
 import ProjectScouting from "../pages/ProjectScouting/ScoutingList";
 import ScoutingDetails from "../pages/ProjectScouting/ScoutingDetails";
 import PlottingModal from "../pages/PlottingModal/PlottingModal";
+import ConfirmModal from "../pages/PlottingModal/ConfirmModal";
 import ScoutAction from "../lib/components/ProjectScouting/ScoutingList";
 import ScoutDetail from "../lib/components/ProjectScouting/ScoutingDetail";
 import SearchToolBar from "../components/Search/Search";
@@ -35,7 +36,7 @@ import BottomToolBar from "components/BottomToolBar/BottomToolBar";
 
 import TempPlottingIcon from "components/TempPlotting/TempPlottingIcon";
 import TempPlottingPanel from "components/TempPlotting/TempPlottingPanel";
-import PhotoSwipe from '../components/PhotoSwipe'
+import PhotoSwipe from "../components/PhotoSwipe";
 
 @connect(
   ({
@@ -65,7 +66,7 @@ class IndexPage extends React.Component {
     left: "0px",
     draw_visible: false,
   };
-  componentDidMount () {
+  componentDidMount() {
     this.checkListCach();
     Event.Evt.on("hasFeatureToProject", (data) => {
       console.log(data);
@@ -203,7 +204,7 @@ class IndexPage extends React.Component {
     }
   };
 
-  render () {
+  render() {
     const { TabPane } = Tabs;
     let { bottomTools, toolBars, searchTools } = this.props;
     const SearchToolBarStyle = {
@@ -215,7 +216,8 @@ class IndexPage extends React.Component {
       <div className={styles.normal}>
         {/* 地图主体 */}
         <LayerMap onLoad={this.MapOnload} />
-        <PlottingModal></PlottingModal>
+        <PlottingModal />
+        <ConfirmModal />
         {/* <SketchPicker></SketchPicker> */}
         {toolBars && <ToolBar></ToolBar>}
         {bottomTools && <BottomToolBar></BottomToolBar>}
@@ -273,14 +275,14 @@ class IndexPage extends React.Component {
               <Spin />
             </div>
           ) : (
-                <Main>
-                  <ScoutingDetails></ScoutingDetails>
-                </Main>
-              )}
+            <Main>
+              <ScoutingDetails></ScoutingDetails>
+            </Main>
+          )}
         </Sider>
         {/* <CityPanel></CityPanel> */}
         <Overlay />
-        <PhotoSwipe/>
+        <PhotoSwipe />
       </div>
     );
   }

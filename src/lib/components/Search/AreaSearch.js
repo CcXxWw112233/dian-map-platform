@@ -33,30 +33,44 @@ function Action() {
     return await GET_VILLIGE(town);
   };
 
-  this.getGeom = async (code) => {
-    return await GET_GEOM(code);
+  this.getGeom = async (code, needChange) => {
+    return await GET_GEOM(code, needChange);
   };
 
-  this.addAreaGeomToMap = (geom) => {
+  this.loadFeature = (data, style) => {
+    const newFeature = loadFeatureJSON(data);
+    newFeature.setStyle(style);
+    this.source.addFeature(newFeature);
+    mapApp.map.getView().fit(this.source.getExtent(), {
+      size: mapApp.map.getSize(),
+      duration: 1000,
+    });
+  };
+
+  this.addAreaGeomToMap = (data) => {
+    if (!data) return;
     if (!this.layer) {
       this.layer = Layer({ id: "areaLayer", zIndex: 10 });
       this.source = Source();
       this.layer.setSource(this.source);
       mapApp.map.addLayer(this.layer);
     }
-    this.source.clear()
-    const style = createStyle("MultiLineString", {
+    this.source.clear();
+    let options = {
       strokeColor: "#0000FF",
       strokeWidth: 4,
-    });
-    const data = {
-      source: geom,
-      options: { dataProjection: "EPSG:4326", featureProjection: "EPSG:3857" },
+      // fillColor: "rgba(255,255,255,0)",
+    }
+    const style = createStyle("MultiLineString", options);
+    let newData = null;
+    newData = {
+      source: data,
+      options: {
+        dataProjection: "EPSG:4326",
+        featureProjection: "EPSG:3857",
+      },
     };
-    const newFeature = loadFeatureJSON(data);
-    newFeature.setStyle(style);
-    this.source.addFeature(newFeature);
-    mapApp.map.getView().fit(this.source.getExtent(),{size: mapApp.map.getSize(),duration:1000})
+    this.loadFeature(newData, style);
   };
 }
 const exportAction = new Action();
