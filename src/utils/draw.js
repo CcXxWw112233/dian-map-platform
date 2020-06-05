@@ -216,7 +216,8 @@ export const draw = {
               });
             } else {
               let coordinates = JSON.parse(operator.data.content)?.coordinates;
-              const type = operator.feature.getGeometry().getType();
+              const type = operator.feature?.getGeometry().getType();
+              if (!type) return
               if (type === "Point") {
                 coordinates = [coordinates];
               }

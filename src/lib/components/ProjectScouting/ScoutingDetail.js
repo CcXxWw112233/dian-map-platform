@@ -336,6 +336,7 @@ function Action() {
     }
     
     data.forEach((item) => {
+      debugger
       let content = item.content;
       // console.log(item)
       if (!content) return;
@@ -370,7 +371,7 @@ function Action() {
             bgColor: featureType,
             borderColor: strokeColor,
             font:
-              content.selectName === "自定义类型" || content.selectName === ""
+              content.selectName === "自定义类型" || content.selectName === "" || !content.selectName
                 ? content.name
                 : content.selectName,
             type: featureLowerType,
