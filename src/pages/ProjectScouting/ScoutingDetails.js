@@ -527,9 +527,6 @@ const UploadItem = ({
       {data.content && JSON.parse(data.content)?.remark ? (
         <Menu.Item key="modifyRemark">编辑备注</Menu.Item>
       ) : null}
-      {data.content && JSON.parse(data.content)?.remark ? (
-        <Menu.Item key="modifyRemark">编辑备注</Menu.Item>
-      ) : null}
       {data.content && !JSON.parse(data.content)?.remark ? (
         <Menu.Item key="addRemark">新增备注</Menu.Item>
       ) : null}
