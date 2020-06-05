@@ -309,7 +309,7 @@ function Action() {
   };
 
   // 渲染标绘数据
-  this.renderFeaturesCollection = (data, { lenged, dispatch }) => {
+  this.renderFeaturesCollection = (data, { lenged, dispatch ,addSource = true}) => {
     const commonStyleOption = {
       textFillColor: "rgba(255,0,0,1)",
       textStrokeColor: "#fff",
@@ -325,12 +325,15 @@ function Action() {
       key: "map:projectScouting",
       content: [],
     };
-    this.layer.projectScoutingArr.forEach((item) => {
-      InitMap.map.removeOverlay(item.feature.overlay)
-      this.layer.removeFeature(item);
-    });
-    this.layer.projectScoutingArr = [];
-    this.layer.plotEdit.updateCb = null;
+    if(addSource){
+      this.layer.projectScoutingArr.forEach((item) => {
+        InitMap.map.removeOverlay(item.feature.overlay)
+        this.layer.removeFeature(item);
+      });
+      this.layer.projectScoutingArr = [];
+      this.layer.plotEdit.updateCb = null
+    }
+    
     data.forEach((item) => {
       let content = item.content;
       // console.log(item)
@@ -433,16 +436,21 @@ function Action() {
         });
       }
       feature.setStyle(myStyle);
-      let operator = this.layer._addFeature(feature);
+      if(addSource){
+        let operator = this.layer._addFeature(feature);
+        operator.isScouting = true;
+        this.layer.projectScoutingArr.push(operator);
+        this.layer.plotEdit.plotClickCb = this.handlePlotClick.bind(this);
+        operator.data = item;
+        operator.updateFeatueToDB = this.updateFeatueToDB.bind(this);
+      }
       this.features.push(feature)
-      operator.isScouting = true;
-      this.layer.projectScoutingArr.push(operator);
-      this.layer.plotEdit.plotClickCb = this.handlePlotClick.bind(this);
-      operator.data = item;
-      operator.updateFeatueToDB = this.updateFeatueToDB.bind(this);
-
-      
     });
+
+    if(!addSource){
+      return this.features;
+    }
+
     let newConfig = [];
     if (!lenged) {
       lenged = [];
@@ -462,6 +470,7 @@ function Action() {
     if (newConfig.length === 1 && !newConfig[0].content.length) {
       newConfig = [];
     }
+    dispatch &&
     dispatch({
       type: "lengedList/updateLengedList",
       payload: {
