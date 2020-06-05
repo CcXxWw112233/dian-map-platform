@@ -35,36 +35,43 @@ import Event from "../../lib/utils/event";
 import AudioControl from "./components/audioPlayControl";
 const { TabPane } = Tabs;
 
-const Title = ({ name, date, cb, id }) => {
+const Title = ({ name, date, cb ,data}) => {
   return (
     <div
-      className={`${styles.title} ${
-        id === "1263868959841718272" ? styles.hasBg : ""
-      }`}
+      className={`${styles.title}`}
     >
-      <p style={{ marginTop: 8 }}>
-        <i
-          className={globalStyle.global_icon + ` ${globalStyle.btn}`}
+      {
+        data.bg_image && 
+        <div className={styles.boardBgImg}>
+          <img src={data.bg_image}/>
+        </div>
+      }
+      <div className={styles.projectModal}></div>
+      <div style={{position:"relative",zIndex:5,width:'100%',height:"100%"}}>
+        <p style={{ marginTop: 8 }}>
+          <i
+            className={globalStyle.global_icon + ` ${globalStyle.btn}`}
+            style={{
+              color: "#fff",
+              fontSize: 22,
+            }}
+            onClick={cb}
+          >
+            &#xe602;
+          </i>
+        </p>
+        <p className={styles.name} style={{ marginTop: 109 }}>
+          <span>{name}</span>
+        </p>
+        <p
+          className={styles.date}
           style={{
-            color: "#fff",
-            fontSize: 22,
+            marginTop: 5,
           }}
-          onClick={cb}
         >
-          &#xe602;
-        </i>
-      </p>
-      <p className={styles.name} style={{ marginTop: 109 }}>
-        <span>{name}</span>
-      </p>
-      <p
-        className={styles.date}
-        style={{
-          marginTop: 5,
-        }}
-      >
-        <span>{date}</span>
-      </p>
+          <span>{date}</span>
+        </p>
+      </div>
     </div>
   );
 };
@@ -506,27 +513,31 @@ const UploadItem = ({
       {data.collect_type === "5" && (
         <Menu.Item key="editPlanPic">编辑</Menu.Item>
       )}
-      <Menu.Item key="copyToGroup">
-        <Popover
-        overlayStyle={{ zIndex: 10000 }}
-        visible={copyVisible}
-        onVisibleChange={val => setCopyVisible(val)}
-        trigger='click'
-        placement="rightTop"
-        title={`复制 ${data.title} 到`}
-        content={<AreaItem type='copy'/>}
-        >
-          <div style={{width:'100%'}}>
-            复制到分组
-          </div>
-        </Popover>
-      </Menu.Item>
       {data.content && JSON.parse(data.content)?.remark ? (
         <Menu.Item key="modifyRemark">编辑备注</Menu.Item>
       ) : null}
       {data.content ? (
         <Menu.Item key="modifyFeature">编辑几何图形</Menu.Item>
       ) : null}
+      {
+        data.collect_type === '4' && (
+          <Menu.Item key="copyToGroup">
+            <Popover
+            overlayStyle={{ zIndex: 10000 }}
+            visible={copyVisible}
+            onVisibleChange={val => setCopyVisible(val)}
+            trigger='click'
+            placement="rightTop"
+            title={`复制 ${data.title} 到`}
+            content={<AreaItem type='copy'/>}
+            >
+              <div style={{width:'100%'}}>
+                复制到分组
+              </div>
+            </Popover>
+          </Menu.Item>
+        )
+      }
       <Menu.Item key="selectGroup">
         <Popover
           overlayStyle={{ zIndex: 10000 }}
@@ -555,7 +566,7 @@ const UploadItem = ({
           }}
           placement="topRight"
         >
-          <div style={{ width: "100%" }}>删除</div>
+          <div style={{ width: "100%" }} className="danger">删除</div>
         </Popconfirm>
       </Menu.Item>
     </Menu>
@@ -638,7 +649,7 @@ const UploadItem = ({
           <Row style={{ textAlign: "left" }} align="middle" justify="center">
             {isEdit ? (
               <Fragment>
-                <Col span={16}>
+                <Col span={18}>
                   <Input
                     style={{ borderRadius: "5px" }}
                     placeholder="请输入名称"
@@ -653,7 +664,7 @@ const UploadItem = ({
                     value={fileName}
                   />
                 </Col>
-                <Col span={4} style={{ textAlign: "right" }}>
+                <Col span={3} style={{ textAlign: "right" }}>
                   <Button
                     onClick={(e) => setIsEdit(false)}
                     size="small"
@@ -662,7 +673,7 @@ const UploadItem = ({
                     <CloseOutlined />
                   </Button>
                 </Col>
-                <Col span={4} style={{ textAlign: "right" }}>
+                <Col span={3} style={{ textAlign: "center" }}>
                   <Button
                     size="small"
                     onClick={() => {
@@ -824,6 +835,9 @@ export default class ScoutingDetails extends PureComponent {
     // 当外部的数据保存成功后的回调
     // console.log(Event.Evt)
     Event.Evt.on("addCollectionForFeature", (data) => {
+      this.setState({
+        area_active_key:"other"
+      })
       this.fetchCollection();
     });
     // 有音频正在播放
@@ -1376,6 +1390,29 @@ export default class ScoutingDetails extends PureComponent {
       activeId: val.id,
     });
   };
+  // 复制collection
+  onCopyCollection = (val, collection) => {
+    let obj = {
+      collect_type: collection.collect_type,
+      title: collection.title,
+      target: collection.target,
+      area_type_id: val.id,
+      board_id: val.board_id,
+      content: collection.content,
+    };
+    // console.log(obj)
+    Action.addCollection(obj).then(res => {
+      // console.log(res)
+      message.success(
+        <span>
+          已将<a>{collection.title}</a>
+          复制到<a>{val.name}</a>
+          分组
+        </span>
+      );
+      this.fetchCollection();
+    })
+  }
 
   render(h) {
     const { current_board, area_list, not_area_id_collection } = this.state;
@@ -1401,6 +1438,7 @@ export default class ScoutingDetails extends PureComponent {
           name={current_board.board_name}
           date={""}
           id={current_board.board_id}
+          data={current_board}
           cb={this.handleGoBackClick.bind(this)}
         ></Title>
         <Tabs
@@ -1499,6 +1537,7 @@ export default class ScoutingDetails extends PureComponent {
                         onModifyRemark={this.onModifyRemark}
                         onModifyFeature={this.onModifyFeatureInDetails}
                         onToggleChangeStyle={this.onToggleChangeStyle}
+                        onCopyCollection={this.onCopyCollection}
                       />
                     </Collapse.Panel>
                   );
@@ -1554,6 +1593,7 @@ export default class ScoutingDetails extends PureComponent {
                               onRemarkSave={this.onRemarkSave}
                               onModifyFeature={this.onModifyFeatureInDetails}
                               onToggleChangeStyle={this.onToggleChangeStyle}
+                              onCopyCollection={this.onCopyCollection}
                             />
                           </div>
                         );
