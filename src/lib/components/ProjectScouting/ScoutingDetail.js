@@ -596,8 +596,10 @@ function Action() {
   this.setEditPlanPicLayer = (staticImg) => {
     return new Promise((resolve, reject) => {
       if (staticImg) {
+        this.hideCollectionOverlay();
         // 保存老的source源
         let oldSource = staticImg.getSource();
+        let oldOpacity = staticImg.getOpacity();
         // 保存图片地址
         let url = oldSource.getUrl();
         // 保存图层的范围
@@ -674,13 +676,16 @@ function Action() {
             let ext = staticImg.getSource().getImageExtent();
             let opacity = val.opacity;
             let obj = { extent: ext, opacity };
+            this.showCollectionOverlay();
             resolve(obj);
           },
           cancel: () => {
             // 更新回原来的数据源
             staticImg.setSource(oldSource);
+            staticImg.setOpacity(oldOpacity);
             reject({ code: -1, message: "取消编辑" });
             closeAll();
+            this.showCollectionOverlay();
           },
         };
 
@@ -880,7 +885,7 @@ function Action() {
     this.staticimg = ImageStatic(url, extent, {
       className: "staticImg",
       ...data,
-      zIndex: 14,
+      zIndex: 18,
     });
     InitMap.map.addLayer(this.staticimg);
   };
@@ -983,6 +988,7 @@ function Action() {
     this.modify = new Modify({
       features: this.select.getFeatures(),
       condition: always,
+      insertVertexCondition: never,
     });
     // snap = new Snap({features:this.select.getFeatures()});
     InitMap.map.addInteraction(this.modify);
