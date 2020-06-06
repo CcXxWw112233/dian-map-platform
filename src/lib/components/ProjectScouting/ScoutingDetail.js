@@ -35,7 +35,7 @@ import { createPlottingFeature, createPopupOverlay } from "./createPlotting";
 import { draw } from "utils/draw";
 import INITMAP from "../../../utils/INITMAP";
 
-function Action() {
+function Action () {
   const {
     GET_AREA_LIST,
     ADD_AREA_BOARD,
@@ -129,11 +129,11 @@ function Action() {
     this.layer.projectScoutingArr &&
       this.layer.projectScoutingArr.forEach((item) => {
         INITMAP.map.removeOverlay(item.feature && item.feature.overlay);
-        if(item.feature)
-        this.layer.removeFeature(item);
+        if (item.feature)
+          this.layer.removeFeature(item);
       });
     this.layer.projectScoutingArr = [];
-    this.layer.plotEdit.plotClickCb =  null
+    this.layer.plotEdit.plotClickCb = null
     setSession(listAction.sesstionSaveKey, "");
   };
   // 获取区域列表
@@ -220,10 +220,10 @@ function Action() {
       }
     });
     // 删除绘制的元素
-    if(this.layer){
+    if (this.layer) {
       this.layer.projectScoutingArr && this.layer.projectScoutingArr.forEach((item) => {
-        if(item && item.feature){
-          InitMap.map.removeOverlay( item.feature.overlay);
+        if (item && item.feature) {
+          InitMap.map.removeOverlay(item.feature.overlay);
           item && this.layer.removeFeature(item);
         }
       });
@@ -282,6 +282,10 @@ function Action() {
     }
   };
 
+  this.stopModifyFeature = () => {
+    this.layer.plotEdit.deactivate()
+  }
+
   // 修改图形后保存
   this.updateFeatueToDB = async (data, feature) => {
     const geometry = feature.getGeometry();
@@ -320,7 +324,7 @@ function Action() {
   };
 
   // 渲染标绘数据
-  this.renderFeaturesCollection = (data, { lenged, dispatch ,addSource = true}) => {
+  this.renderFeaturesCollection = (data, { lenged, dispatch, addSource = true }) => {
     const commonStyleOption = {
       textFillColor: "rgba(255,0,0,1)",
       textStrokeColor: "#fff",
@@ -336,9 +340,9 @@ function Action() {
       key: "map:projectScouting",
       content: [],
     };
-    if(addSource){
+    if (addSource) {
       this.layer.projectScoutingArr.forEach((item) => {
-        if(item && item.feature){
+        if (item && item.feature) {
           InitMap.map.removeOverlay(item.feature.overlay);
           this.layer.removeFeature(item);
         }
@@ -346,7 +350,7 @@ function Action() {
       this.layer.projectScoutingArr = [];
       this.layer.plotEdit.updateCb = null
     }
-    
+
     data.forEach((item) => {
       let content = item.content;
       // console.log(item)
@@ -449,7 +453,7 @@ function Action() {
         });
       }
       feature.setStyle(myStyle);
-      if(addSource){
+      if (addSource) {
         let operator = this.layer._addFeature(feature);
         operator.isScouting = true;
         this.layer.projectScoutingArr.push(operator);
@@ -460,7 +464,7 @@ function Action() {
       this.features.push(feature)
     });
 
-    if(!addSource){
+    if (!addSource) {
       return this.features;
     }
 
@@ -484,12 +488,12 @@ function Action() {
       newConfig = [];
     }
     dispatch &&
-    dispatch({
-      type: "lengedList/updateLengedList",
-      payload: {
-        config: newConfig,
-      },
-    });
+      dispatch({
+        type: "lengedList/updateLengedList",
+        payload: {
+          config: newConfig,
+        },
+      });
 
     // 添加区域选择
     this.addAreaSelect();
@@ -499,7 +503,7 @@ function Action() {
   this.renderCollection = async (data, { lenged, dispatch }) => {
     // 删除元素
     this.removeFeatures();
-    if(!data.length) return ;
+    if (!data.length) return;
     // 过滤不显示的数据
     data = data.filter((item) => item.is_display === "1");
     let ponts = data.filter(
@@ -515,47 +519,47 @@ function Action() {
 
     // 渲染标绘数据
     const sou = this.renderFeaturesCollection(features, { lenged, dispatch });
-    
+
     // 渲染规划图
     let ext = await this.renderPlanPicCollection(planPic);
-    
+
 
     let sourceExtent = this.Source.getExtent();
-    let subExtent = [Infinity,Infinity,-Infinity,-Infinity];
+    let subExtent = [Infinity, Infinity, -Infinity, -Infinity];
     let sourceFlag = getExtentIsEmpty(sourceExtent);
     let souFlag = getExtentIsEmpty(sou.getExtent());
     let extFlag = getExtentIsEmpty(ext);
     // 规划图和元素都有范围的时候
-    if(!souFlag && !extFlag){
+    if (!souFlag && !extFlag) {
       // 合并范围
-      subExtent = extend(sou.getExtent(),ext);
+      subExtent = extend(sou.getExtent(), ext);
       // console.log(sou.getExtent(),ext)
       // 如果也有点的数据，就一起合并
-      if(!sourceFlag){
-        sourceExtent = extend(subExtent,sourceExtent);
-      }else{
+      if (!sourceFlag) {
+        sourceExtent = extend(subExtent, sourceExtent);
+      } else {
         // 如果没有点的数据，就只有规划图和标注范围
         sourceExtent = subExtent;
       }
     }
     // 如果只有一个类型的有范围
-    else if(!extFlag || !souFlag){
+    else if (!extFlag || !souFlag) {
       // 如果是规划图有范围，说明标注没有范围
-      if(!extFlag){
+      if (!extFlag) {
         // 合并规划图的范围
-        if(!sourceFlag){
+        if (!sourceFlag) {
           sourceExtent = extend(ext, sourceExtent);
-        }else {
+        } else {
           // 说明没有点的数据
           sourceExtent = ext;
         }
       }
       // 只有标注的数据
-      if(!souFlag){
+      if (!souFlag) {
         // 有标点数据，要合并
-        if(!sourceFlag)
-          sourceExtent = extend(sou.getExtent(),sourceExtent);
-        else{
+        if (!sourceFlag)
+          sourceExtent = extend(sou.getExtent(), sourceExtent);
+        else {
           // 没有就直接赋值
           sourceExtent = sou.getExtent();
         }
@@ -570,8 +574,8 @@ function Action() {
           this.features.length &&
           !getExtentIsEmpty(sourceExtent)
         ) {
-          this.toCenter({center:sourceExtent,type:"extent"})
-        } 
+          this.toCenter({ center: sourceExtent, type: "extent" })
+        }
         // else if (ext.length) {
         //   Fit(
         //     InitMap.view,
@@ -589,10 +593,10 @@ function Action() {
 
 
   // type coordinate or extent
-  this.toCenter = ({ center, type = "coordinate", duration = 800, zoom ,transform = true }) => {
+  this.toCenter = ({ center, type = "coordinate", duration = 800, zoom, transform = true }) => {
     if (type === "coordinate") {
-      if(transform)
-      center = TransformCoordinate(center);
+      if (transform)
+        center = TransformCoordinate(center);
 
       InitMap.view.animate({
         center: center,
@@ -770,7 +774,7 @@ function Action() {
   this.renderPlanPicCollection = async (data) => {
     //   console.log(data);
     // 所有规划图加载的范围
-    let ext = [Infinity,Infinity,-Infinity,-Infinity];
+    let ext = [Infinity, Infinity, -Infinity, -Infinity];
 
     let promise = data.map((item) => {
       if (item.resource_id) {
@@ -843,7 +847,7 @@ function Action() {
       };
     }
     if (ele.video) {
-      ele.video.onplay = (e) => {};
+      ele.video.onplay = (e) => { };
     }
 
     ele.on = {

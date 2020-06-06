@@ -168,8 +168,8 @@ const ScoutingHeader = (props) => {
               ></Button>
             </Fragment>
           ) : (
-            <div className={styles.groupTitle}>{data.name}</div>
-          )}
+              <div className={styles.groupTitle}>{data.name}</div>
+            )}
         </div>
       </Fragment>
     </div>
@@ -187,17 +187,18 @@ const ScoutingItem = ({
   onDrop,
   areaList,
   onSelectGroup,
-  onAreaEdit = () => {},
-  onAreaDelete = () => {},
-  onUploadPlan = () => {},
-  onUploadPlanStart = () => {},
-  onUploadPlanCancel = () => {},
-  onChangeDisplay = () => {},
-  onEditPlanPic = () => {},
+  onAreaEdit = () => { },
+  onAreaDelete = () => { },
+  onUploadPlan = () => { },
+  onUploadPlanStart = () => { },
+  onUploadPlanCancel = () => { },
+  onChangeDisplay = () => { },
+  onEditPlanPic = () => { },
   onCopyCollection,
-  onModifyFeature = () => {},
-  onModifyRemark = () => {},
-  onRemarkSave = () => {},
+  onModifyFeature = () => { },
+  onModifyRemark = () => { },
+  onRemarkSave = () => { },
+  onStopMofifyFeatureInDetails
 }) => {
   let [planExtent, setPlanExtent] = useState("");
   let [transparency, setTransparency] = useState("1");
@@ -289,6 +290,7 @@ const ScoutingItem = ({
               onEditCollection={onEditCollection}
               onRemarkSave={onRemarkSave}
               onModifyFeature={onModifyFeature}
+              onStopMofifyFeatureInDetails={onStopMofifyFeatureInDetails}
               onModifyRemark={onModifyRemark}
             />
           </div>
@@ -406,23 +408,24 @@ const UploadItem = ({
   type,
   data,
   onRemove,
-  onEditCollection = () => {},
+  onEditCollection = () => { },
   areaList,
   onSelectGroup,
   onChangeDisplay,
-  onEditPlanPic = () => {},
-  onCopyCollection = () => {},
-  onModifyRemark = () => {},
-  onModifyFeature = () => {},
-  onRemarkSave = () => {},
-  onToggleChangeStyle = () => {},
+  onEditPlanPic = () => { },
+  onCopyCollection = () => { },
+  onModifyRemark = () => { },
+  onModifyFeature = () => { },
+  onStopMofifyFeatureInDetails,
+  onRemarkSave = () => { },
+  onToggleChangeStyle = () => { },
 }) => {
-  let obj = {...data};
+  let obj = { ...data };
   // 过滤后缀
   let suffix = obj.title.substring(obj.title.lastIndexOf('.'));
   let reg = /\.[a-z]/i;
-  if(suffix && reg.test(suffix)){
-    obj.title = obj.title.replace(suffix,'');
+  if (suffix && reg.test(suffix)) {
+    obj.title = obj.title.replace(suffix, '');
   }
 
   let [visible, setVisible] = useState(false);
@@ -432,6 +435,7 @@ const UploadItem = ({
   let [remark, setRemark] = useState("");
   let [isAddMark, addRemark] = useState(false);
   let [isRemarkEdit, setIsRemarkEdit] = useState(false);
+  let [isPlotEdit, setIsPlotEdit] = useState(false)
   let [fileName, setFileName] = useState(obj.title);
   const { TextArea } = Input;
   const saveRemark = (data) => {
@@ -493,7 +497,11 @@ const UploadItem = ({
     }
     if (key === "modifyFeature") {
       setVisible(false);
+      setIsPlotEdit(true)
       onModifyFeature && onModifyFeature(data);
+      Event.Evt.on("stopEditPlot", () => {
+        setIsPlotEdit(false)
+      })
     }
   };
   // 分组列表
@@ -541,7 +549,7 @@ const UploadItem = ({
       {data.content ? (
         <Menu.Item key="modifyFeature">编辑几何图形</Menu.Item>
       ) : null}
-      {data.collect_type === "4" && (
+      {data.collect_type === "4" && !isPlotEdit ? (
         <Menu.Item key="copyToGroup">
           <Popover
             overlayStyle={{ zIndex: 10000 }}
@@ -555,20 +563,53 @@ const UploadItem = ({
             <div style={{ width: "100%" }}>复制到分组</div>
           </Popover>
         </Menu.Item>
-      )}
-      <Menu.Item key="selectGroup">
-        <Popover
+      ) : null}
+      {data.collect_type === "4" && isPlotEdit ? <Menu.Item key="copyToGroup">
+        <Popconfirm
+          title="检测到图形正在编辑中，是否先停止编辑图形?"
+          okText="好的"
+          cancelText="继续编辑"
           overlayStyle={{ zIndex: 10000 }}
-          trigger="click"
-          placement="rightTop"
-          visible={groupVisible}
-          onVisibleChange={(val) => setGroupVisible(val)}
-          title={`移动 ${data.title} 到`}
-          content={<AreaItem type="select" />}
+          onConfirm={() => {
+            setVisible(false);
+            setIsPlotEdit(false)
+            onStopMofifyFeatureInDetails && onStopMofifyFeatureInDetails()
+          }}
+          onCancel={() => { setVisible(false) }}
+          placement="topRight"
+        >
+          <div style={{ width: "100%" }}>复制到分组</div>
+        </Popconfirm>
+      </Menu.Item> : null}
+      {isPlotEdit ? <Menu.Item key="selectGroup">
+        <Popconfirm
+          title="检测到图形正在编辑中，是否先停止编辑图形?"
+          okText="好的"
+          cancelText="继续编辑"
+          overlayStyle={{ zIndex: 10000 }}
+          onConfirm={() => {
+            setVisible(false);
+            setIsPlotEdit(false)
+            onStopMofifyFeatureInDetails && onStopMofifyFeatureInDetails()
+          }}
+          onCancel={() => { setVisible(false) }}
+          placement="topRight"
         >
           <div style={{ width: "100%" }}>移动到分组</div>
-        </Popover>
-      </Menu.Item>
+        </Popconfirm>
+      </Menu.Item> : <Menu.Item key="selectGroup">
+          <Popover
+            overlayStyle={{ zIndex: 10000 }}
+            trigger="click"
+            placement="rightTop"
+            visible={groupVisible}
+            onVisibleChange={(val) => setGroupVisible(val)}
+            title={`移动 ${data.title} 到`}
+            content={<AreaItem type="select" />}
+          >
+            <div style={{ width: "100%" }}>移动到分组</div>
+          </Popover>
+        </Menu.Item>}
       {/* <Menu.Item key="display">
         {data.is_display === "0" ? "显示" : "隐藏"}
       </Menu.Item> */}
@@ -592,8 +633,8 @@ const UploadItem = ({
     </Menu>
   );
 
-  const setSuffix = (name)=>{
-    if(suffix) return name + suffix;
+  const setSuffix = (name) => {
+    if (suffix) return name + suffix;
     else return name;
   }
 
@@ -665,8 +706,8 @@ const UploadItem = ({
                 }}
               />
             ) : (
-              itemKeyVals[secondSetType]
-            )}
+                itemKeyVals[secondSetType]
+              )}
           </span>
         </div>
         <div className={styles.uploadDetail}>
@@ -712,14 +753,14 @@ const UploadItem = ({
                 </Col>
               </Fragment>
             ) : (
-              <span
-                style={{ minHeight: "1rem" }}
-                title={title}
-                className={`${styles.firstRow} ${styles.text_overflow} text_ellipsis`}
-              >
-                {title}
-              </span>
-            )}
+                <span
+                  style={{ minHeight: "1rem" }}
+                  title={title}
+                  className={`${styles.firstRow} ${styles.text_overflow} text_ellipsis`}
+                >
+                  {title}
+                </span>
+              )}
           </Row>
           <Row>
             <Space size={8} style={{ fontSize: 12 }}>
@@ -790,10 +831,10 @@ const UploadItem = ({
               </div>
             </div>
           ) : (
-            <div className={styles.uploadDetail} style={{ textAlign: "left" }}>
-              <span title={oldRemark}>{oldRemark}</span>
-            </div>
-          )}
+              <div className={styles.uploadDetail} style={{ textAlign: "left" }}>
+                <span title={oldRemark}>{oldRemark}</span>
+              </div>
+            )}
         </div>
       ) : null}
     </div>
@@ -850,7 +891,7 @@ export default class ScoutingDetails extends PureComponent {
     };
     this.scrollView = React.createRef();
   }
-  componentDidMount() {
+  componentDidMount () {
     this.getDetails();
     // 删除存在与页面中的项目点和元素
     Action.removeListPoint();
@@ -996,7 +1037,7 @@ export default class ScoutingDetails extends PureComponent {
 
   // 保存新增的区域
   saveArea = (data, name) => {
-    if(!name) return message.warn('分组名称不能为空');
+    if (!name) return message.warn('分组名称不能为空');
     // 编辑状态
     if (data.board_id) {
       Action.editAreaName(data.id, { name }).then((res) => {
@@ -1023,7 +1064,7 @@ export default class ScoutingDetails extends PureComponent {
     );
   };
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     const { dispatch, config: lengedList } = this.props;
     let newLengedList = [...lengedList];
     if (!Array.isArray(lengedList)) {
@@ -1390,7 +1431,7 @@ export default class ScoutingDetails extends PureComponent {
         });
       })
       .catch((err) => {
-        if (err.code === -1) { /**message.warn(err.message)*/}
+        if (err.code === -1) { /**message.warn(err.message)*/ }
         else message.error(err.message);
         this.showOtherSlide();
       });
@@ -1406,9 +1447,15 @@ export default class ScoutingDetails extends PureComponent {
     });
   };
 
+  //激活编辑几何图形
   onModifyFeatureInDetails = (data) => {
     Action.modifyFeature(data);
   };
+
+  //停止编辑几何图形
+  onStopMofifyFeatureInDetails = () => {
+    Action.stopModifyFeature()
+  }
 
   onToggleChangeStyle = (val) => {
     this.setState({
@@ -1439,7 +1486,7 @@ export default class ScoutingDetails extends PureComponent {
     });
   };
 
-  render(h) {
+  render (h) {
     const { current_board, area_list, not_area_id_collection } = this.state;
     const panelStyle = {
       height: "96%",
@@ -1528,7 +1575,7 @@ export default class ScoutingDetails extends PureComponent {
                           onCancel={this.addCancel.bind(this, item)}
                           onSave={this.saveArea.bind(this, item)}
                           onRemarkSave={() => this.saveRemark(item)}
-                          // onDragEnter={e => {this.setState({area_active_key: item.id})}}
+                        // onDragEnter={e => {this.setState({area_active_key: item.id})}}
                         />
                       }
                       key={item.id}
@@ -1562,6 +1609,7 @@ export default class ScoutingDetails extends PureComponent {
                         onRemarkSave={this.onRemarkSave}
                         onModifyRemark={this.onModifyRemark}
                         onModifyFeature={this.onModifyFeatureInDetails}
+                        onStopMofifyFeatureInDetails={() => this.onStopMofifyFeatureInDetails()}
                         onToggleChangeStyle={this.onToggleChangeStyle}
                         onCopyCollection={this.onCopyCollection}
                       />
@@ -1576,9 +1624,9 @@ export default class ScoutingDetails extends PureComponent {
                       data={{ name: "未分组" }}
                       edit={false}
                       index={area_list.length + 1}
-                      onCancel={() => {}}
-                      onSave={() => {}}
-                      // onDragEnter={e => {this.setState({area_active_key: item.id})}}
+                      onCancel={() => { }}
+                      onSave={() => { }}
+                    // onDragEnter={e => {this.setState({area_active_key: item.id})}}
                     />
                   }
                 >
@@ -1618,6 +1666,7 @@ export default class ScoutingDetails extends PureComponent {
                               onModifyRemark={this.onModifyRemark}
                               onRemarkSave={this.onRemarkSave}
                               onModifyFeature={this.onModifyFeatureInDetails}
+                              onStopMofifyFeatureInDetails={this.onStopMofifyFeatureInDetails}
                               onToggleChangeStyle={this.onToggleChangeStyle}
                               onCopyCollection={this.onCopyCollection}
                             />

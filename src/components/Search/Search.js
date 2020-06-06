@@ -31,8 +31,9 @@ export default class Search extends React.Component {
   }
   componentDidMount() {
     getMyPosition.getPosition().then((val) => {
+      if (!val) return
       this.setState({
-        locationName: val.addressComponent.city || this.state.locationName,
+        locationName: val.addressComponent?.city || this.state.locationName,
       });
     });
   }

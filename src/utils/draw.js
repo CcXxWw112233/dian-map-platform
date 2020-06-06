@@ -192,6 +192,7 @@ export const draw = {
           me.deactiveCallback();
         }
       } else {
+        Event.Evt.firEvent("stopEditPlot")
         const operator = e.feature_operator;
         const feature = operator.feature;
         const plot = feature && feature.getGeometry();
