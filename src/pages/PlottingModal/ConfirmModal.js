@@ -31,7 +31,7 @@ export default class ConfirmModal extends Component {
   render() {
     return (
       <Modal
-        width={250}
+        width={300}
         okText="确定"
         cancelText="取消"
         centered={true}
