@@ -566,7 +566,7 @@ const UploadItem = ({
       ) : null}
       {data.collect_type === "4" && isPlotEdit ? <Menu.Item key="copyToGroup">
         <Popconfirm
-          title="检测到图形正在编辑中，是否先停止编辑图形?"
+          title="系统检测到图形正在编辑中，是否先停止编辑图形?"
           okText="好的"
           cancelText="继续编辑"
           overlayStyle={{ zIndex: 10000 }}
@@ -583,7 +583,7 @@ const UploadItem = ({
       </Menu.Item> : null}
       {isPlotEdit ? <Menu.Item key="selectGroup">
         <Popconfirm
-          title="检测到图形正在编辑中，是否先停止编辑图形?"
+          title="系统检测到图形正在编辑中，是否先停止编辑图形?"
           okText="好的"
           cancelText="继续编辑"
           overlayStyle={{ zIndex: 10000 }}

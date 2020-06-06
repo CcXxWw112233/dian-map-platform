@@ -41,7 +41,7 @@ export default class ConfirmModal extends Component {
         onOk={this.handleOk}
         onCancel={this.handleCancel}
       >
-        <p>检测到图形已修改，是否保存？</p>
+        <p>系统检测到图形已修改，是否保存？</p>
       </Modal>
     );
   }
