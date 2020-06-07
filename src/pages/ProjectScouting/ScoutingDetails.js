@@ -546,7 +546,7 @@ const UploadItem = ({
       {data.content && !JSON.parse(data.content)?.remark ? (
         <Menu.Item key="addRemark">新增备注</Menu.Item>
       ) : null}
-      {data.content ? (
+      {data.content && JSON.parse(data.content)?.featureType ? (
         <Menu.Item key="modifyFeature">编辑几何图形</Menu.Item>
       ) : null}
       {data.collect_type === "4" && !isPlotEdit ? (
