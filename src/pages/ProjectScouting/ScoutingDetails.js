@@ -516,7 +516,9 @@ const UploadItem = ({
       addRemark(!isAddMark);
       setIsRemarkEdit(!isRemarkEdit);
       setVisible(false);
-      onModifyRemark && onModifyRemark(data);
+      let newData = {...data}
+      delete newData.resource_url
+      onModifyRemark && onModifyRemark(newData);
     }
     if (key === "modifyFeature") {
       setVisible(false);

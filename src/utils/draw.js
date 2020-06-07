@@ -137,7 +137,7 @@ export const draw = {
         request("GET", url).then((res) => {
           // 葛根
           if (this.type === "POLYGON" || this.type === "FREEHANDPOLYGON") {
-            const items = [...res.data.data[2].items, ...config];
+            const items = [...res.data?.data[2].items || [], ...config];
             res.data.data[2].items = items;
           }
           this.responseData[this.currentId] = res;
