@@ -160,7 +160,7 @@ let callFunctions = {
       getMyPosition.setPosition(coor);
     } else {
       // 没有绘制就进行绘制，并设置样式
-      getMyPosition.drawPosition({ isMove: val.isMove !== undefined ? val.isMove : true, ...val });
+      getMyPosition.drawPosition({ isMove: val.isMove === undefined ? true : val.isMove , ...val });
     }
   },
   // 切换底图

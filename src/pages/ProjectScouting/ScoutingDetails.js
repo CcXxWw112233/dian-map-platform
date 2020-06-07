@@ -33,6 +33,8 @@ import {
 import { BASIC } from "../../services/config";
 import Event from "../../lib/utils/event";
 import AudioControl from "./components/audioPlayControl";
+import { formatSize } from '../../utils/utils';
+import { configConsumerProps } from "antd/lib/config-provider";
 const { TabPane } = Tabs;
 
 const Title = ({ name, date, cb, data }) => {
@@ -79,10 +81,24 @@ const Title = ({ name, date, cb, data }) => {
     </div>
   );
 };
+
+const checkFileSize = (file)=>{
+  // console.log(file);
+  let { size,text } = formatSize(file.size);
+  text = text.trim();
+  console.log(size,text);
+  if(+size > 100 && text === 'MB'){
+    message.error('文件不能大于100MB');
+    return false;
+  }
+  return true;
+}
+
 const UploadBtn = ({ onChange }) => {
   return (
     <Upload
       action="/api/map/file/upload"
+      beforeUpload={checkFileSize}
       headers={{ Authorization: BASIC.getUrlParam.token }}
       onChange={(e) => onChange(e)}
       showUploadList={false}
@@ -229,6 +245,13 @@ const ScoutingItem = ({
   // 上传规划图
   const beforeUploadPlan = (val) => {
     onUploadPlanStart && onUploadPlanStart(val);
+    // 文件大小限制
+    let { size,text } = formatSize(val.size);
+    text = text.trim();
+    if(+size > 100 && text === 'MB'){
+      message.error('文件不能大于100MB');
+      return false;
+    }
     return new Promise((resolve, reject) => {
       let url = window.URL.createObjectURL(val);
       Action.addPlanPictureDraw(url)
