@@ -82,12 +82,12 @@ const Title = ({ name, date, cb, data }) => {
   );
 };
 
-const checkFileSize = (file)=>{
+const checkFileSize = (file) => {
   // console.log(file);
-  let { size,text } = formatSize(file.size);
+  let { size, text } = formatSize(file.size);
   text = text.trim();
-  console.log(size,text);
-  if(+size > 100 && text === 'MB'){
+  console.log(size, text);
+  if (+size > 100 && text === 'MB') {
     message.error('文件不能大于100MB');
     return false;
   }
@@ -247,9 +247,9 @@ const ScoutingItem = ({
   const beforeUploadPlan = (val) => {
     onUploadPlanStart && onUploadPlanStart(val);
     // 文件大小限制
-    let { size,text } = formatSize(val.size);
+    let { size, text } = formatSize(val.size);
     text = text.trim();
-    if(+size > 100 && text === 'MB'){
+    if (+size > 100 && text === 'MB') {
       message.error('文件不能大于100MB');
       return false;
     }
@@ -508,15 +508,15 @@ const UploadItem = ({
       onEditPlanPic && onEditPlanPic(data);
     }
     if (key === "modifyRemark") {
-      setIsRemarkEdit(!isRemarkEdit);
+      setIsRemarkEdit(true);
       setVisible(false);
       onModifyRemark && onModifyRemark(data);
     }
     if (key === "addRemark") {
       addRemark(!isAddMark);
-      setIsRemarkEdit(!isRemarkEdit);
+      setIsRemarkEdit(true);
       setVisible(false);
-      let newData = {...data}
+      let newData = { ...data }
       delete newData.resource_url
       onModifyRemark && onModifyRemark(newData);
     }
@@ -695,6 +695,9 @@ const UploadItem = ({
     onToggleChangeStyle && onToggleChangeStyle(val);
   };
   let oldRemark = data.content && JSON.parse(data.content).remark;
+  if (oldRemark?.trim() === "") {
+    oldRemark = null
+  }
   let myStyle = null;
   if (oldRemark || isAddMark) {
     myStyle = {
