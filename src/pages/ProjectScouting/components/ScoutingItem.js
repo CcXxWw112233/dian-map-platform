@@ -201,6 +201,7 @@ export default class ScoutingItem extends React.PureComponent {
                 <Upload
                 action='/api/map/file/upload/public'
                 showUploadList={false}
+                accept=".jpg, .jpeg, .png, .bmp"
                 beforeUpload={()=>{message.success('正在上传'); return true}}
                 headers={{ Authorization: BASIC.getUrlParam.token }}
                 onChange={this.onUploadImg}
