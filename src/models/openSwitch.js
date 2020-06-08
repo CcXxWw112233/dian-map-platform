@@ -19,6 +19,8 @@ export default {
         searchTools: isMobile ? false: true,
         // 是否显示手机端的页面
         isShowMobile: false,
+        // 是否显示规划图编辑
+        isShowPlanPicEdit: false,
     },
     effects:{
 

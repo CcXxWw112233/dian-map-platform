@@ -34,7 +34,7 @@ import { BASIC } from "../../services/config";
 import Event from "../../lib/utils/event";
 import AudioControl from "./components/audioPlayControl";
 import { formatSize } from '../../utils/utils';
-import { configConsumerProps } from "antd/lib/config-provider";
+import MatrixEdit from '../../components/MatrixEdit'
 const { TabPane } = Tabs;
 
 const Title = ({ name, date, cb, data }) => {
@@ -193,6 +193,7 @@ const ScoutingHeader = (props) => {
 };
 
 const ScoutingItem = ({
+  dispatch,
   data,
   onError,
   onUpload,
@@ -253,6 +254,7 @@ const ScoutingItem = ({
       message.error('文件不能大于100MB');
       return false;
     }
+    
     return new Promise((resolve, reject) => {
       let url = window.URL.createObjectURL(val);
       Action.addPlanPictureDraw(url)
@@ -890,9 +892,14 @@ const tagScouting = () => {
   );
 };
 
-@connect(({ controller: { mainVisible }, lengedList: { config } }) => ({
+@connect((
+  { controller: { mainVisible }, 
+  lengedList: { config } ,
+  openswitch:{ isShowPlanPicEdit }}) => 
+({
   mainVisible,
   config,
+  isShowPlanPicEdit
 }))
 export default class ScoutingDetails extends PureComponent {
   constructor(props) {
@@ -909,8 +916,6 @@ export default class ScoutingDetails extends PureComponent {
       not_area_id_collection: [],
       area_active_key: [],
 
-      name: "阳山县沙寮村踏勘",
-      date: "3/15-3/17",
       visible: true,
       activeKey: panes[0].key,
       panes,
@@ -1514,12 +1519,18 @@ export default class ScoutingDetails extends PureComponent {
     });
   };
 
+  // 当
+  onBeforeUploadPlan = ()=>{
+
+  }
+
   render (h) {
     const { current_board, area_list, not_area_id_collection } = this.state;
     const panelStyle = {
       height: "96%",
     };
     const { activeId } = this.state;
+    const { dispatch ,isShowPlanPicEdit} = this.props;
     return (
       <div
         className={`${styles.wrap} ${animateCss.animated} ${animateCss.slideInLeft}`}
@@ -1610,6 +1621,7 @@ export default class ScoutingDetails extends PureComponent {
                       style={{ backgroundColor: "#fff", marginBottom: "10px" }}
                     >
                       <ScoutingItem
+                        dispatch={dispatch}
                         // onDrop={()=> console.log(item)}
                         style={activeStyle}
                         data={item}
@@ -1725,6 +1737,10 @@ export default class ScoutingDetails extends PureComponent {
             </div>
           </TabPane> */}
         </Tabs>
+        {
+          isShowPlanPicEdit && 
+          <MatrixEdit/>
+        }
       </div>
     );
   }

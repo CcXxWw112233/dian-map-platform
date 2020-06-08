@@ -734,8 +734,9 @@ function Action () {
   //   删除已存在的规划图
   this.removePlanPicCollection = () => {
     this.imgs && this.imgs.forEach((item) => InitMap.map.removeLayer(item));
+    // if(this.imgs && this.imgs.length)
+    // window.stop();
     this.imgs = [];
-    window.stop();
   };
 
   let _that = this;
