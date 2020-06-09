@@ -7,6 +7,7 @@ import { Collapse } from "antd";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import { connect } from "dva";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
+import { setLocal } from '../../utils/sessionManage'
 import { Row } from "antd";
 const Lenged = ({ data }) => {
   let activeKeys = [];
@@ -95,6 +96,7 @@ export default class LengedList extends PureComponent {
   };
   changeBaseMap = (item, index) => {
     this.toggleBaseMapChangeStyle(index);
+    setLocal('baseMapKey',item.key);
     mapApp.changeBaseMap(item.key);
   };
   toggleBaseMapChangeStyle = (index) => {
