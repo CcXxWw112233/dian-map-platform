@@ -4,7 +4,7 @@ import 'utils/plot2ol/css/ol.css'
 import 'utils/plot2ol/css/plottingol.less'
 import { baseMapDictionary, baseMaps } from '../utils/mapSource'
 import mapApp from '../utils/INITMAP'
-import { getLocal } from '../utils/sessionManage'
+import { getLocal ,setLocal} from '../utils/sessionManage'
 
 const styles = {
   mapView:{
@@ -38,10 +38,11 @@ export default class LayerMap extends React.Component{
       let firstBaseMaps = undefined;
       if(!baseMapKey){
         firstBaseMaps = baseMapDictionary[0];
+        setLocal(baseMapKey,firstBaseMaps.key)
       }else{
-        firstBaseMaps = baseMapDictionary.find(item => item.key === baseMapKey);
+        firstBaseMaps = baseMapDictionary.find(item => item.key === baseMapKey) || baseMapDictionary[0].key;
       }
-
+      
       if(firstBaseMaps) {
         const values = firstBaseMaps.values
         const currenttBaseMaps = baseMaps.filter(item => {return values.indexOf(item.id) > -1})
