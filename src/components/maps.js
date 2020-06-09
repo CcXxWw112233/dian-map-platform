@@ -35,7 +35,6 @@ export default class LayerMap extends React.Component{
       // })
       let baseMapKey = await getLocal('baseMapKey');
       baseMapKey = baseMapKey.data;
-      console.log(baseMapKey,'baseMapkey')
       let firstBaseMaps = undefined;
       if(!baseMapKey){
         firstBaseMaps = baseMapDictionary[0];
@@ -43,7 +42,6 @@ export default class LayerMap extends React.Component{
       }else{
         firstBaseMaps = baseMapDictionary.find(item => item.key === baseMapKey) || baseMapDictionary[0];
       }
-      
       if(firstBaseMaps) {
         const values = firstBaseMaps.values
         const currenttBaseMaps = baseMaps.filter(item => {return values.indexOf(item.id) > -1})
@@ -54,6 +52,7 @@ export default class LayerMap extends React.Component{
       }
       // 父级回调
       onLoad && onLoad(_)
+      return baseMapKey;
     })
   }
   // 获取底图

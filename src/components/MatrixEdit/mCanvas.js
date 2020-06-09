@@ -29,16 +29,16 @@ export default function(props){
     var rotate = 0;
     let historyDots = [];
 
-    var getPixelRatio = function(context) {
-        var backingStore = context.backingStorePixelRatio ||
-            context.webkitBackingStorePixelRatio ||
-            context.mozBackingStorePixelRatio ||
-            context.msBackingStorePixelRatio ||
-            context.oBackingStorePixelRatio ||
-            context.backingStorePixelRatio || 1;
+    // var getPixelRatio = function(context) {
+    //     var backingStore = context.backingStorePixelRatio ||
+    //         context.webkitBackingStorePixelRatio ||
+    //         context.mozBackingStorePixelRatio ||
+    //         context.msBackingStorePixelRatio ||
+    //         context.oBackingStorePixelRatio ||
+    //         context.backingStorePixelRatio || 1;
     
-        return (window.devicePixelRatio || 1) / backingStore;
-    };
+    //     return (window.devicePixelRatio || 1) / backingStore;
+    // };
 
     var ratio = 0;
     const loadImage = ()=>{
@@ -58,7 +58,7 @@ export default function(props){
         img = await loadImage();
         canvas = document.querySelector("#canvas_edit");
         ctx = canvas.getContext('2d');
-        ratio = getPixelRatio(ctx)
+        // ratio = getPixelRatio(ctx)
         maxHeight = height;
         maxWidth = width;
         img_h = img.height;
@@ -94,8 +94,9 @@ export default function(props){
        * @param e
        */
     
-        canvas.onmousedown = eventStart.bind(this,'click');
-        canvas.ontouchstart = eventStart.bind(this,'touch');
+        // canvas.onmousedown = eventStart.bind(this,'click');
+        // canvas.ontouchstart = eventStart.bind(this,'touch');
+        canvas.onpointerdown = eventStart;
     }
 
     const render = (flag)=>{
@@ -202,12 +203,12 @@ export default function(props){
             img,
             (vertex.x - idots[0].x) / imgRatio - 1,
             (vertex.y - idots[0].y) / imgRatio - 1,
-            w / imgRatio + 2 * ratio,
-            h / imgRatio + 2 * ratio,
+            w / imgRatio + 2 ,
+            h / imgRatio + 2 ,
             vertex.x - 1,
             vertex.y - 1,
-            w + 2 * ratio,
-            h + 2 * ratio
+            w + 2 ,
+            h + 2 
         );
         }
 
@@ -282,10 +283,10 @@ export default function(props){
         }
     }
 
-    let eventStart = function(type = 'click',e) {
+    let eventStart = function(e) {
         // 鼠标和手指移动事件
         const move = function(e) {
-          var narea = getArea(e,type);
+          var narea = getArea(e);
           var nx = (narea.l - area.l) ;
           var ny = (narea.t - area.t) ;
           // console.log(dot.x ,dot.y,canvas.width,canvas.height)
@@ -311,12 +312,14 @@ export default function(props){
           canvas.onmouseup = null;
           canvas.ontouchmove = null;
           canvas.ontouchend = null;
+          canvas.onpointerup = null;
+          canvas.onpointermove = null;
         };
         // console.log(e,'start')
         
         if (!dots.length) return;
     
-        let area = getArea(e,type);
+        let area = getArea(e);
         let dot, i;
         //鼠标事件触发区域
         let n = null;
@@ -335,16 +338,9 @@ export default function(props){
           if(i === 3){x += 5;y-=5;}
           ctx.arc(x,y + 5,5,0,360,false);
           ctx.fill();
-          let layerX = 0;
-          let layerY = 0;
-          if(type === 'touch'){
-              layerX = e.touches[0].clientX;
-              layerY = e.touches[0].clientY;
-          }
-          else{
-              layerX = e.layerX;
-              layerY = e.layerY;
-          }
+          let layerX = e.clientX;
+          let layerY = e.clientY;
+          
           //封闭新路径
           ctx.closePath();
           if(ctx.isPointInPath(layerX,layerY)){
@@ -366,22 +362,28 @@ export default function(props){
 
 
         if (!n) return;
-        if(type === 'click'){
-          canvas.onmouseup = ()=>{
-              clear();
-              historyDots.push(JSON.parse(JSON.stringify(dots)));
-          };
-          // canvas.onmouseout = clear;
-          canvas.onmousemove = move;
+
+        canvas.onpointerup = ()=>{
+            clear();
+            historyDots.push(JSON.parse(JSON.stringify(dots)));
         }
-        if(type === 'touch'){
-          canvas.onmousedown = null;
-          canvas.ontouchmove = move
-          canvas.ontouchend = ()=>{
-              clear();
-              historyDots.push(JSON.parse(JSON.stringify(dots)));
-          }
-        }
+        canvas.onpointermove = move;
+        // if(type === 'click'){
+        //   canvas.onmouseup = ()=>{
+        //       clear();
+        //       historyDots.push(JSON.parse(JSON.stringify(dots)));
+        //   };
+        //   // canvas.onmouseout = clear;
+        //   canvas.onmousemove = move;
+        // }
+        // if(type === 'touch'){
+        //   canvas.onmousedown = null;
+        //   canvas.ontouchmove = move
+        //   canvas.ontouchend = ()=>{
+        //       clear();
+        //       historyDots.push(JSON.parse(JSON.stringify(dots)));
+        //   }
+        // }
       };
     
     /**
@@ -391,9 +393,9 @@ export default function(props){
      */
     function getArea(e,type) {
     e = e || window.event;
-    if(type === 'touch'){
-        e = e.touches[0];
-    }
+    // if(type === 'touch'){
+    //     e = e.touches[0];
+    // }
     return {
         // t: e.clientY - canvas.offsetTop + document.body.scrollTop + document.documentElement.scrollTop,
         t: e.clientY,

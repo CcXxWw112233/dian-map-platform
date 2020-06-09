@@ -72,7 +72,7 @@ function(){
     createTilelayer: function (options, zIndex) {
       return new TileLayer({
         id: options.id,
-        zIndex: zIndex || 1,
+        zIndex: zIndex ,
         source: new XYZ({
           crossOrigin: "anonymous",
           url: options.url,
