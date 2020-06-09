@@ -27,6 +27,7 @@ app.model(require("./models/tempPlotting").default);
 app.model(require("./models/publicMapData").default)
 app.model(require("./models/scoutingProject").default)
 app.model(require("./models/flutterPage").default)
+app.model(require("./models/editPicture").default)
 // 4. Router
 app.router(require("./router").default);
 

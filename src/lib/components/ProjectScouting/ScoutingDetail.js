@@ -20,6 +20,7 @@ import {
   fitPadding,
   SourceStatic,
   getExtentIsEmpty,
+  animate
 } from "../../utils/index";
 import {
   CollectionOverlay,
@@ -1029,6 +1030,7 @@ function Action () {
     });
   };
 
+
   // 显示采集资料的overlay
   this.showCollectionOverlay = () => {
     if (!this.overlays.length) return;
@@ -1040,11 +1042,13 @@ function Action () {
     });
   };
   // 添加规划图范围
-  this.addPlanPictureDraw = (url, data) => {
+  this.addPlanPictureDraw = (url, files ,dispatch) => {
+    console.log(files)
     // 删除已有的select事件，防止冲突
     this.removeAreaSelect();
     this.hideCollectionOverlay();
     return new Promise((resolve, reject) => {
+      let globalurl = url,file = null;
       this.drawBox = drawBox(this.Source, {});
       this.drawBox.on("drawend", (e) => {
         this.boxFeature = e.feature;
@@ -1065,17 +1069,18 @@ function Action () {
         overlay.setPosition(center);
         // 删除绘制功能
         InitMap.map.removeInteraction(this.drawBox);
-        this.createImg(url, extent, { opacity: drawImgOpacity });
+        this.createImg(globalurl, extent, { opacity: drawImgOpacity });
 
         let { modify } = this.setSelect();
 
         modify.on("modifyend", (e) => {
           let features = e.features;
           let f = features.getArray()[0];
+          this.boxFeature = f;
           let ext = f.getGeometry().getExtent();
           let point = getPoint(ext, "topRight");
           overlay.setPosition(point);
-          this.createImg(url, ext, { opacity: drawImgOpacity });
+          this.createImg(globalurl, ext, { opacity: drawImgOpacity });
         });
         //
         ele.on = {
@@ -1090,6 +1095,8 @@ function Action () {
               feature: e.feature,
               ...val,
               extent: e.feature.getGeometry().getExtent(),
+              url: globalurl,
+              blobFile: file
             });
             overlay.setPosition(null);
             InitMap.map.removeOverlay(overlay);
@@ -1106,6 +1113,92 @@ function Action () {
             this.addAreaSelect();
             this.showCollectionOverlay();
           },
+          editImg: async ()=>{
+            // 等待视图移动到合适地点
+            let center = getPoint(this.boxFeature.getGeometry().getExtent(),'center');
+            await animate({center:center });
+            // 隐藏页面中的元素
+            this.staticimg && this.staticimg.setVisible(false);
+            this.Source.removeFeature(e.feature);
+            overlay.setPosition(null);
+            // console.log('开始编辑图片');
+            // Event.Evt.firEvent('editPlanImg',{resolve, reject});
+            let ex = this.boxFeature.getGeometry().getExtent()
+            let topLeft = getPoint(
+              ex,
+              "topLeft"
+            );
+            let br = getPoint(
+              ex,
+              "bottomRight"
+            )
+
+            topLeft = InitMap.map.getPixelFromCoordinate(topLeft);
+            br = InitMap.map.getPixelFromCoordinate(br);
+            let w = br[0] - topLeft[0],h =  br[1] - topLeft[1];
+            dispatch && dispatch({
+              type:"editPicture/updateDatas",
+              payload:{
+                editShow:true,
+                pictureUrl: url,
+                position: {x:topLeft[0], y: topLeft[1]},
+                pictureWidth: w,
+                pictureHeight: h
+              }
+            })
+
+            // 保存新的图层
+            Event.Evt.on('ImgEditComplete',(data)=>{
+              globalurl = data.url;
+              file = new File([data.blob], files.name , {type: files.type, lastModified: Date.now()});
+              let tl = [data.extent[0],data.extent[1]];
+              let rb = [data.extent[2],data.extent[3]]
+              // 将图片中的最小x,y 和最大x,y组成一个矩形,渲染在地图中
+              let ctl = InitMap.map.getCoordinateFromPixel(tl);
+              let crb = InitMap.map.getCoordinateFromPixel(rb);
+              // console.log(ctl,crb);
+              // 组合图片编辑后的范围
+              let ext = ctl.concat(crb);
+              // 右上角位置
+              let tr = getPoint(ext,'topRight');
+
+              // 确定保存之后,更新source,试页面渲染
+              let source = SourceStatic(data.url,ext);
+              this.staticimg.setSource(source)
+              this.staticimg.setVisible(true);
+              // 更新设置的透明度
+              this.staticimg.setOpacity(data.opacity);
+              // 设置设置弹窗的透明度,同步更新
+              ele.setOpacity(data.opacity)
+              // 显示弹窗
+              overlay.setPosition(tr);
+              // 更新显示元素
+              let coordinates = getBoxCoordinates(ext);
+              this.boxFeature.getGeometry().setCoordinates([coordinates]) ;
+              this.Source.addFeature(this.boxFeature);
+              // 隐藏编辑窗口
+              dispatch && dispatch({
+                type:"editPicture/updateDatas",
+                payload: {
+                  editShow: false
+                }
+              })
+            })
+            // 点击了取消保存
+            Event.Evt.on('ImgEditCancel',()=>{
+              // console.log(data);
+              this.staticimg && this.staticimg.setVisible(true);
+              this.Source.addFeature(this.boxFeature);
+              let p = getPoint(this.boxFeature.getGeometry().getExtent(),'topRight');
+              overlay.setPosition(p);
+              dispatch && dispatch({
+                type:"editPicture/updateDatas",
+                payload: {
+                  editShow: false
+                }
+              })
+            })
+          }
         };
       });
       this.drawBox.on("drawabort", () => {
