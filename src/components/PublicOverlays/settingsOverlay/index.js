@@ -21,13 +21,16 @@ export default function (){
     }
     let items = `
     <div class="${styles.settingsItem}">
-        <span class="${globalStyle.global_icon} setOpacity">
+        <span class="${globalStyle.global_icon} setOpacity" title="设置透明度">
             &#xe6c9;
         </span>
-        <span class="${globalStyle.global_icon} onEnter">
+        <span class="${globalStyle.global_icon} editImg" title="编辑图片">
+            &#xe61a;
+        </span>
+        <span class="${globalStyle.global_icon} onEnter" title="确定">
             &#xe639;
         </span>
-        <span class="${globalStyle.global_icon} onCancel">
+        <span class="${globalStyle.global_icon} onCancel" title="取消">
             &#xe606;
         </span>
     </div>
@@ -36,7 +39,7 @@ export default function (){
     opacity.className = styles.setOpacityInput;
     opacity.type = "range"
     opacity.max = 1.0;
-    opacity.min = 0.3;
+    opacity.min = 0.1;
     opacity.step = 0.05;
     opacity.value = this.opacityValue;
     let text = document.createElement('span');
@@ -52,7 +55,10 @@ export default function (){
     this.opacityDiv.className = styles.opacityDiv;
     this.opacityDiv.appendChild(opacity);
     this.opacityDiv.appendChild(text)
-    
+
+    this.setOpacity = (val = 1)=>{
+        opacity.value = val;
+    }
 
     let oncancel = ()=>{
         this.on['cancel'] && this.on['cancel'].call(this);
@@ -61,10 +67,15 @@ export default function (){
     let onenter = () => {
         this.on['enter'] && this.on['enter'].call(this,{opacity: this.opacityValue})
     }
+
+    let onedit = () => {
+        this.on['editImg'] && this.on['editImg'].call(this)
+    }
     
     this.element.innerHTML = items;
     this.element.querySelector('.setOpacity').onclick = openOpacity;
     this.element.querySelector('.onCancel').onclick = oncancel;
     this.element.querySelector('.onEnter').onclick = onenter;
+    this.element.querySelector('.editImg').onclick = onedit;
     this.on = {};
 }
