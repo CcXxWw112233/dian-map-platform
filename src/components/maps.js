@@ -38,7 +38,7 @@ export default class LayerMap extends React.Component{
       let firstBaseMaps = undefined;
       if(!baseMapKey){
         firstBaseMaps = baseMapDictionary[0];
-        setLocal(baseMapKey,firstBaseMaps.key)
+        setLocal("baseMapKey",firstBaseMaps.key)
       }else{
         firstBaseMaps = baseMapDictionary.find(item => item.key === baseMapKey) || baseMapDictionary[0].key;
       }
