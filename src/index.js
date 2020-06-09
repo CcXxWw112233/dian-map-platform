@@ -1,8 +1,10 @@
 import dva from "dva";
 import "./index.less";
 import "./utils/functionForFlutter/publicFuncForFlutter";
+import 'hidpi-canvas/dist/hidpi-canvas';
 
 import { createBrowserHistory as createHistory } from 'history';
+require('polyfill');
 
 // 1. Initialize
 const app = dva({

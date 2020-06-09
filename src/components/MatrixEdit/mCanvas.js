@@ -4,6 +4,7 @@ import styles from './index.less'
 import globalStyle from '../../globalSet/styles/globalStyles.less'
 import { Popover ,Slider } from 'antd'
 import Event from '../../lib/utils/event'
+
 const { Evt } = Event;
 
 export default function(props){
@@ -28,6 +29,18 @@ export default function(props){
     var rotate = 0;
     let historyDots = [];
 
+    var getPixelRatio = function(context) {
+        var backingStore = context.backingStorePixelRatio ||
+            context.webkitBackingStorePixelRatio ||
+            context.mozBackingStorePixelRatio ||
+            context.msBackingStorePixelRatio ||
+            context.oBackingStorePixelRatio ||
+            context.backingStorePixelRatio || 1;
+    
+        return (window.devicePixelRatio || 1) / backingStore;
+    };
+
+    var ratio = 0;
     const loadImage = ()=>{
         return new Promise((resolve,reject)=>{
             let img = new Image();
@@ -45,6 +58,7 @@ export default function(props){
         img = await loadImage();
         canvas = document.querySelector("#canvas_edit");
         ctx = canvas.getContext('2d');
+        ratio = getPixelRatio(ctx)
         maxHeight = height;
         maxWidth = width;
         img_h = img.height;
@@ -56,8 +70,8 @@ export default function(props){
             img_h = maxHeight  ;
             img_w = img_w * imgRatio ;
         }
-        canvas.width = document.body.clientWidth;
-        canvas.height = document.body.clientHeight;
+        canvas.width = document.body.clientWidth / window.devicePixelRatio * 2;
+        canvas.height = document.body.clientHeight/ window.devicePixelRatio * 2;
 
         dots = [
             { x: left, y: top },
@@ -188,12 +202,12 @@ export default function(props){
             img,
             (vertex.x - idots[0].x) / imgRatio - 1,
             (vertex.y - idots[0].y) / imgRatio - 1,
-            w / imgRatio + 2,
-            h / imgRatio + 2,
+            w / imgRatio + 2 * ratio,
+            h / imgRatio + 2 * ratio,
             vertex.x - 1,
             vertex.y - 1,
-            w + 2,
-            h + 2
+            w + 2 * ratio,
+            h + 2 * ratio
         );
         }
 
@@ -321,9 +335,19 @@ export default function(props){
           if(i === 3){x += 5;y-=5;}
           ctx.arc(x,y + 5,5,0,360,false);
           ctx.fill();
+          let layerX = 0;
+          let layerY = 0;
+          if(type === 'touch'){
+              layerX = e.touches[0].clientX;
+              layerY = e.touches[0].clientY;
+          }
+          else{
+              layerX = e.layerX;
+              layerY = e.layerY;
+          }
           //封闭新路径
           ctx.closePath();
-          if(ctx.isPointInPath(e.layerX,e.layerY)){
+          if(ctx.isPointInPath(layerX,layerY)){
               n = true;
               break;
           }
@@ -427,7 +451,7 @@ export default function(props){
             cn.width = x1 - x0;
             cn.height = y1 - y0;
             let imgdata = ctx.getImageData(x0,y0,x1,y1);
-            cntx.putImageData(imgdata,0,0);
+            cntx.putImageData(imgdata,0,0,0,0,cn.width,cn.height);
             cn.toBlob((blob)=>{
                 let ur = window.URL.createObjectURL(blob);
                 Evt.firEvent('ImgEditComplete',{extent:[x0,y1,x1,y0], opacity ,url: ur ,blob});
