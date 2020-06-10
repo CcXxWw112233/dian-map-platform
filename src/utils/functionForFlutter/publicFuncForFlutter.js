@@ -224,22 +224,26 @@ let callFunctions = {
         position = data && data.location.split(",").map((item) => +item);
       }
     }
-    AMap.service(["AMap.PlaceSearch"], function () {
-      let placeSearch = new AMap.PlaceSearch({
-        pageSize: 10,
-        pageIndex: 1,
+    let data = await new Promise((resolve,reject) => {
+      AMap.service(["AMap.PlaceSearch"], function () {
+        let placeSearch = new AMap.PlaceSearch({
+          pageSize: 10,
+          pageIndex: 1,
+        });
+        placeSearch.searchNearBy("", position, radius, (status, result) => {
+          resolve(result.poiList)
+          // 调用移动端的监听发送数据
+          window.getNearbyAddressInfo &&
+            result.poiList &&
+            window.getNearbyAddressInfo.postMessage(
+              JSON.stringify(result.poiList)
+            );
+        });
       });
-      placeSearch.searchNearBy("", position, radius, (status, result) => {
-        // 调用移动端的监听发送数据
-        window.getNearbyAddressInfo &&
-          result.poiList &&
-          window.getNearbyAddressInfo.postMessage(
-            JSON.stringify(result.poiList)
-          );
-      });
-    });
-    // 调用启动监听
-    callFunctions.StartMove();
+      // 调用启动监听
+      callFunctions.StartMove();
+    })
+    return data;
   },
 
   // 绘制标绘
@@ -256,6 +260,24 @@ let callFunctions = {
   // 清除踏勘项目点
   clearSoutingProjectLayer: () => {
     scoutingProjectAction.clear();
+  },
+
+  // 通过坐标点查询
+  SearchPoint:({position, radius = 500,city})=>{
+    return new Promise((resolve,reject) => {
+      var geocoder = new AMap.Geocoder({
+        city: city, //城市设为北京，默认：“全国”
+        radius: radius //范围，默认：500
+      });
+      geocoder.getAddress(position,(status, result)=>{
+        if (status === 'complete'&&result.regeocode) {
+          var address = result.regeocode.formattedAddress;
+          resolve(address)
+        }else{
+          reject({code:-1,message:"查询失败"})
+        }
+      })
+    })
   },
 
   // 渲染项目列表

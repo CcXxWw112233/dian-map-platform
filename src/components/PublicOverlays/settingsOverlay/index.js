@@ -5,7 +5,7 @@ export default function (){
 
     this.element = document.createElement('div');
     this.element.className = styles.overlay;
-    this.opacityValue = 0.7;
+    this.opacityValue = 1;
     let isOpenOpacitySetting = false;
 
     let openOpacity = () => {
