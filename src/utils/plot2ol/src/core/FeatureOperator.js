@@ -1,6 +1,8 @@
 import { guid } from "../../util/core";
 import StyleFactory from "../style/StyleFactory";
 import Constants from "../Constants";
+
+import Event from "../../../../lib/utils/event";
 class FeatureOperator {
   /**
    * @classdesc 标绘图元操作类
@@ -56,8 +58,9 @@ class FeatureOperator {
     const style = this.feature.getStyle() || ft_style.parse();
     style.setZIndex(zindex);
     this.feature.setStyle(style);
-    this.ft_style = ft_style
+    this.ft_style = ft_style;
   }
+
   /**
    * @ignore
    */

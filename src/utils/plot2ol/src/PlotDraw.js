@@ -13,6 +13,7 @@ import Constants from './Constants'
 import FeatureEvent from './events/FeatureEvent'
 import DrawEvent from './events/DrawEvent'
 import { connectEvent, disconnectEvent } from '../util/core'
+import Event from "../../../lib/utils/event"
 class PlotDraw extends Observable {
 
 	/**
@@ -38,8 +39,13 @@ class PlotDraw extends Observable {
 			source: this.featureSource,
 			// zIndex:999
     });
+
 		this.drawOverlay.setStyle(this.style);
-		this.setMap(map);
+    this.setMap(map);
+    Event.Evt.on("setStyle", (style)=> {
+      this.style = style
+      this.drawOverlay.setStyle(this.style);
+    })
 	}
 	/**
 	 * @ignore

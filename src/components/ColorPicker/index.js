@@ -104,12 +104,14 @@ export default class ColorPicker extends Component {
         </div>
       </div>
     );
+    const position = this.props.position || "bottomLeft";
     return (
       <Dropdown
         overlay={overlay}
         trigger="click"
         visible={this.state.visible}
         onVisibleChange={this.onVisibleChange}
+        placement={position}
       >
         <div
           className={btnStyles.wrap + disable}

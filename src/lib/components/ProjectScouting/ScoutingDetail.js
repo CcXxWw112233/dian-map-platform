@@ -33,7 +33,7 @@ import { always, never } from "ol/events/condition";
 import Event from "../../utils/event";
 import { message } from "antd";
 import { createPlottingFeature, createPopupOverlay } from "./createPlotting";
-import { draw } from "utils/draw";
+import { plotEdit } from "utils/plotEdit";
 import INITMAP from "../../../utils/INITMAP";
 
 function Action () {
@@ -59,7 +59,7 @@ function Action () {
   this.init = (dispatch) => {
     this.Layer.setSource(this.Source);
     InitMap.map.addLayer(this.Layer);
-    this.layer = draw.getPlottingLayer(dispatch);
+    this.layer = plotEdit.getPlottingLayer(dispatch);
   };
   this.boxFeature = {};
   this.draw = null;
