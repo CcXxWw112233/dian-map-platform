@@ -312,8 +312,11 @@ class PlottingLayer extends Observable {
       };
     }
     this.feature_operators.push(fo);
-    const tempList = this.getArrDifference(this.feature_operators, this.projectScoutingArr)
-    this.listCb && this.listCb(tempList);
+    if (this.attrs) {
+      const tempList = this.getArrDifference(this.feature_operators, this.projectScoutingArr)
+      this.listCb && this.listCb(tempList);
+      this.attrs = null
+    }
     return fo;
   }
   /**
