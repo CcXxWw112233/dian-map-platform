@@ -5,6 +5,7 @@ import { Skeleton } from "antd";
 import styles from "./Styles.less";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import plotServices from "../../services/plot";
+import { config } from "../../utils/customConfig";
 export default class SymbolStore extends Component {
   constructor(props) {
     super(props);
@@ -23,6 +24,11 @@ export default class SymbolStore extends Component {
     ]).then((res) => {
       let tempArr = [];
       res.forEach((item) => {
+        item.data.forEach((item0) => {
+          if (item0.type === "农产品") {
+            item0.items = [...item0.items, ...config];
+          }
+        });
         tempArr = [...tempArr, ...item.data];
       });
       this.setState({
@@ -69,7 +75,9 @@ export default class SymbolStore extends Component {
           <TabPane tab="系统符号库" key="1">
             <div className={styles.body} style={{ height: "100%" }}>
               <div
-                className={`${styles.symbolPanel} ${globalStyle.autoScrollY}`} style={{height: 410}}>
+                className={`${styles.symbolPanel} ${globalStyle.autoScrollY}`}
+                style={{ height: 410 }}
+              >
                 {this.state.publicSymbolStore.length > 0 ? (
                   this.state.publicSymbolStore.map((symbol, index) => {
                     return (

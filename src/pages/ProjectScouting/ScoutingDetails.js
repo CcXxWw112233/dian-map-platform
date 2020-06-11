@@ -463,7 +463,7 @@ const UploadItem = ({
 }) => {
   let obj = { ...data };
   // 过滤后缀
-  let suffix = obj.title.substring(obj.title.lastIndexOf('.'));
+  let suffix = obj.title?.substring(obj.title?.lastIndexOf('.'));
   let reg = /\.[a-z]/i;
   if (suffix && reg.test(suffix)) {
     obj.title = obj.title.replace(suffix, '');

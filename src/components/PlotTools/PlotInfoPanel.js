@@ -8,6 +8,7 @@ import ColorPicker from "../ColorPicker";
 import plotServices from "../../services/plot";
 import { plotEdit } from "../../utils/plotEdit";
 import Event from "../../lib/utils/event";
+import { config } from "../../utils/customConfig";
 import { createStyle } from "@/lib/utils";
 import { connect } from "dva";
 
@@ -123,6 +124,7 @@ export default class PlotInfoPanel extends Component {
         plotType === "circle"
       ) {
         res = await plotServices.GET_POLYGONSYMBOL();
+        res.data[2].items = [...res.data[2].items, ...config];
       }
       this.symbols[plotType] = res?.data;
     }
