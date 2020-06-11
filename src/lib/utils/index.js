@@ -24,7 +24,7 @@ import {
   isEmpty,
   getSize,
   getWidth,
-  getHeight
+  getHeight,
 } from "ol/extent";
 import {
   Fill,
@@ -81,12 +81,12 @@ export const getExtent = function (feature) {
   return extent;
 };
 
-export const getExtentIsEmpty = (extent) =>{
+export const getExtentIsEmpty = (extent) => {
   return isEmpty(extent);
-}
+};
 
 export const getPoint = function (extent, type = "center") {
-  if(isEmpty(extent)) return ;
+  if (isEmpty(extent)) return;
   switch (type) {
     case "center":
       return getCenter(extent);
@@ -98,11 +98,11 @@ export const getPoint = function (extent, type = "center") {
       return getBottomRight(extent);
     case "bottomLeft":
       return getBottomLeft(extent);
-    case "size": 
+    case "size":
       return getSize(extent);
-    case 'width':
+    case "width":
       return getWidth(extent);
-    case 'height':
+    case "height":
       return getHeight(extent);
     default:
       return getCenter(extent);
@@ -197,13 +197,20 @@ export const createStyle = function (
       })
     : null;
   if (type === "Point") {
+    let isIcon = true;
+    if (!options.iconUrl) {
+      isIcon = false;
+    }
+    if (!options.icon) {
+      isIcon = false;
+    }
     return new Style({
-      image:( options.iconUrl || options.icon)
+      image: isIcon
         ? new Icon({
             src: options.iconUrl,
             color: options.pointColor || defaultColor,
             scale: options.iconScale || 0.8,
-            ...options.icon ,
+            ...options.icon,
           })
         : new Circle({
             radius: options.radius || 5,
@@ -211,7 +218,7 @@ export const createStyle = function (
             stroke: stroke,
           }),
       text: text,
-      zIndex: options.zIndex || Infinity
+      zIndex: options.zIndex || Infinity,
     });
   }
   if (
@@ -222,7 +229,7 @@ export const createStyle = function (
     return new Style({
       text: text,
       stroke: stroke,
-      zIndex: options.zIndex || Infinity
+      zIndex: options.zIndex || Infinity,
     });
   }
   if (type === "MultiPolygon") {
@@ -230,7 +237,7 @@ export const createStyle = function (
       fill: fill,
       stroke: stroke,
       text: text,
-      zIndex: options.zIndex || Infinity
+      zIndex: options.zIndex || Infinity,
     });
   }
   if (type === "Polygon") {
@@ -238,7 +245,7 @@ export const createStyle = function (
       fill,
       stroke,
       text,
-      zIndex: options.zIndex || Infinity
+      zIndex: options.zIndex || Infinity,
     });
   }
   if (type === "MultiPoint") {
@@ -249,7 +256,7 @@ export const createStyle = function (
         scale: options.iconScale || 0.6,
       }),
       text: text,
-      zIndex: options.zIndex || Infinity
+      zIndex: options.zIndex || Infinity,
     });
   }
 };
@@ -263,15 +270,21 @@ export const TransformCoordinate = (
 };
 
 export const Fit = (view, extent, option, duration = 1000) => {
-  return new Promise((resolve,reject)=>{
+  return new Promise((resolve, reject) => {
     if (view && extent[0] !== Infinity) {
       view.cancelAnimations();
-      view.fit(extent, { duration, padding: [200, 150, 80, 400], ...option ,callback: (e)=>{resolve(e)}});
-    }else{
+      view.fit(extent, {
+        duration,
+        padding: [200, 150, 80, 400],
+        ...option,
+        callback: (e) => {
+          resolve(e);
+        },
+      });
+    } else {
       reject(extent);
     }
-  })
-  
+  });
 };
 
 export const createOverlay = (ele, data = {}) => {
@@ -281,19 +294,18 @@ export const createOverlay = (ele, data = {}) => {
   });
 };
 
-export const animate = ({zoom,center,duration = 800})=>{
-  return new Promise((resolve,reject) => {
+export const animate = ({ zoom, center, duration = 800 }) => {
+  return new Promise((resolve, reject) => {
     INITMAP.view.animate({
-      zoom:zoom || INITMAP.view.getZoom(),
+      zoom: zoom || INITMAP.view.getZoom(),
       center,
       duration,
-    })
-    setTimeout(()=>{
-      resolve()
-    },duration) 
-    
-  })
-}
+    });
+    setTimeout(() => {
+      resolve();
+    }, duration);
+  });
+};
 
 export const drawPoint = (source, data = {}) => {
   return new Draw({

@@ -94,7 +94,7 @@ export default class SymbolStore extends Component {
                                     : ""
                                 }`}
                                 key={item.id}
-                                onClick={() => this.handleSymbolItemClick(item)}
+                                // onClick={() => this.handleSymbolItemClick(item)}
                               >
                                 <div
                                   className={styles.symbolColor}

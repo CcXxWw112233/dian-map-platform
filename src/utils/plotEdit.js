@@ -75,14 +75,43 @@ export const plotEdit = {
     const me = this;
     // 标绘激活事件
     this.plottingLayer.on(FeatureOperatorEvent.ACTIVATE, (e) => {
-      me.target.style.cursor = "default";
-      window.featureOperator = e.feature_operator;
+      if (!e.feature_operator.isScouting) {
+        me.target.style.cursor = "default";
+        window.featureOperator = e.feature_operator;
+        let isMobile = BASIC.getUrlParam.isMobile;
+        if (!isMobile) {
+          window.onbeforeunload = function (ee) {
+            if (window.featureOperator) {
+              var ex = window.event || ee;
+              ex.returnValue = "当前标绘未保存，确定离开当前页面吗？";
+            }
+          };
+        }
+      }
     });
     // 取消激活
     this.plottingLayer.on(FeatureOperatorEvent.DEACTIVATE, (e) => {
       me.target.style.cursor = "default";
-      // 做临时保存操作
-
+      if (!e.feature_operator.isScouting) {
+      } else {
+        Event.Evt.firEvent("stopEditPlot");
+        const operator = e.feature_operator;
+        const feature = operator.feature;
+        const plot = feature && feature.getGeometry();
+        plot.isActive = false;
+        //检测是否修改
+        const g = operator.feature.getGeometry();
+        const coord = g?.getCoordinates();
+        if (
+          JSON.stringify(coord) !==
+          JSON.stringify(JSON.parse(operator.data.content)?.coordinates)
+        ) {
+          const data = operator.data;
+          operator.updateFeatueToDB(data, feature).then((res) => {
+            Event.Evt.firEvent("updatePlotFeature", res);
+          });
+        }
+      }
     });
   },
 };

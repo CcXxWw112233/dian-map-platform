@@ -24,6 +24,7 @@ export default class ToolBar extends Component {
       showSymbolStorePanel: false,
       plotType: "",
       isModifyPlot: false,
+      addOtherNum: 0,
     };
     this.tools = [
       {
@@ -64,7 +65,7 @@ export default class ToolBar extends Component {
             showPlotAddpanel: true,
             showTempPlotPanel: false,
             showSymbolStorePanel: false,
-            plotType: "Polyline",
+            plotType: "LineString",
             isModifyPlot: false,
           });
         },
@@ -99,51 +100,53 @@ export default class ToolBar extends Component {
           });
         },
       },
-      // {
-      //   key: "arrow",
-      //   icon: "&#xe62d;",
-      //   name: "箭头",
-      //   cb: () => {
-      //     this.handleToolClick("arrowPlot");
-      //     this.setState({
-      //       showPlotAddpanel: true,
-      //       showTempPlotPanel: false,
-      //       showSymbolStorePanel: false,
-      //       plotType: "arrow",
-      //       isModifyPlot: false,
-      //     });
-      //   },
-      // },
-      // {
-      //   key: "rect",
-      //   icon: "&#xe62e;",
-      //   name: "矩形",
-      //   cb: () => {
-      //     this.handleToolClick("rectPlot");
-      //     this.setState({
-      //       showPlotAddpanel: true,
-      //       showTempPlotPanel: false,
-      //       showSymbolStorePanel: false,
-      //       plotType: "rect",
-      //       isModifyPlot: false,
-      //     });
-      //   },
-      // },
-      // {
-      //   key: "circle",
-      //   icon: "&#xe62f;",
-      //   name: "圆",
-      //   cb: () => {
-      //     this.handleToolClick("circlePlot");
-      //     this.setState({
-      //       showPlotAddpanel: true,
-      //       showTempPlotPanel: false,
-      //       showSymbolStorePanel: false,
-      //       plotType: "circle",
-      //       isModifyPlot: false,
-      //     });
-      //   },
-      // },
+      {
+        key: "arrowPlot",
+        icon: "&#xe62d;",
+        name: "箭头",
+        cb: () => {
+          this.handleToolClick("arrowPlot");
+          this.setState({
+            showPlotAddpanel: true,
+            showTempPlotPanel: false,
+            showSymbolStorePanel: false,
+            plotType: "arrow",
+            isModifyPlot: false,
+          });
+        },
+      },
+      {
+        key: "rectPlot",
+        icon: "&#xe62e;",
+        name: "矩形",
+        cb: () => {
+          this.handleToolClick("rectPlot");
+          this.setState({
+            showPlotAddpanel: true,
+            showTempPlotPanel: false,
+            showSymbolStorePanel: false,
+            plotType: "rect",
+            isModifyPlot: false,
+          });
+        },
+      },
+      {
+        key: "circlePlot",
+        icon: "&#xe62f;",
+        name: "圆",
+        cb: () => {
+          this.handleToolClick("circlePlot");
+          this.setState({
+            showPlotAddpanel: true,
+            showTempPlotPanel: false,
+            showSymbolStorePanel: false,
+            plotType: "circle",
+            isModifyPlot: false,
+          });
+        },
+      },
+    ];
+    this.otherTools = [
       {
         key: "coordinateMeasure",
         icon: "&#xe627;",
@@ -205,7 +208,7 @@ export default class ToolBar extends Component {
     this.setState({
       showPlotAddpanel: value,
       showTempPlotPanel: false,
-      showSymbolStorePanel: false
+      showSymbolStorePanel: false,
     });
   };
   changePlotType = (type) => {
@@ -258,6 +261,25 @@ export default class ToolBar extends Component {
               </div>
             );
           })}
+          <div
+            className={`${styles.tool}`}
+            onClick={() => {
+              if (this.state.addOtherNum < this.otherTools.length) {
+                let num = this.state.addOtherNum
+                num ++
+                this.tools.push(this.otherTools[num -1])
+                this.setState({
+                  addOtherNum: num
+                })
+              }
+            }}
+            style={{ height: 30 }}
+          >
+            <i
+              className={globalStyle.global_icon + ` ${styles.icon}`}
+              dangerouslySetInnerHTML={{ __html: "&#xe629;" }}
+            ></i>
+          </div>
         </div>
         {this.state.showTempPlotPanel ? (
           <TempPlotPanel

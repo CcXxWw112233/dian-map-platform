@@ -65,9 +65,12 @@ export default class PlotInfoPanel extends Component {
     };
     this.plotKeyVal = {
       Point: "MARKER",
-      Polyline: "POLYLINE",
+      LineString: "POLYLINE",
       Polygon: "POLYGON",
       freePolygon: "FREEHAND_POLYGON",
+      arrow: "FINE_ARROW",
+      rect: "RECTANGLE",
+      circle: "CIRCLE",
     };
   }
   componentDidMount() {
@@ -112,7 +115,13 @@ export default class PlotInfoPanel extends Component {
       if (plotType === "Polyline" || plotType === "LineString") {
         res = await plotServices.GET_POLYLINESYMBOL();
       }
-      if (plotType === "Polygon" || plotType === "freePolygon") {
+      if (
+        plotType === "Polygon" ||
+        plotType === "freePolygon" ||
+        plotType === "arrow" ||
+        plotType === "rect" ||
+        plotType === "circle"
+      ) {
         res = await plotServices.GET_POLYGONSYMBOL();
       }
       this.symbols[plotType] = res?.data;
@@ -190,6 +199,8 @@ export default class PlotInfoPanel extends Component {
           selectName: value.name,
           remark: this.props.remarks,
         };
+      } else {
+        delete options.iconUrl;
       }
       style = createStyle("Point", options);
     }
@@ -216,7 +227,10 @@ export default class PlotInfoPanel extends Component {
     }
     if (
       this.state.plotType === "Polygon" ||
-      this.state.plotType === "freePolygon"
+      this.state.plotType === "freePolygon" ||
+      this.state.plotType === "arrow" ||
+      this.state.plotType === "rect" ||
+      this.state.plotType === "circle"
     ) {
       if (featureType.indexOf("rgb") > -1) {
         options = {
@@ -366,7 +380,10 @@ export default class PlotInfoPanel extends Component {
     if (
       this.props.plotType === "Point" ||
       this.props.plotType === "Polygon" ||
-      this.props.plotType === "freePolygon"
+      this.props.plotType === "freePolygon" ||
+      this.props.plotType === "arrow" ||
+      this.props.plotType === "rect" ||
+      this.props.plotType === "circle"
     ) {
       options = {
         ...this.commonStyleOptions,
@@ -382,11 +399,9 @@ export default class PlotInfoPanel extends Component {
         selectName: "自定义类型",
         remark: this.props.remarks,
       };
+      delete options.iconUrl;
     }
-    if (
-      this.props.plotType === "Polyline" ||
-      this.props.plotType === "LineString"
-    ) {
+    if (this.props.plotType === "LineString") {
       options = {
         ...this.commonStyleOptions,
         fillColor: value,
@@ -402,7 +417,12 @@ export default class PlotInfoPanel extends Component {
       };
     }
     let newPlotType = this.props.plotType;
-    if (newPlotType === "freePolygon") {
+    if (
+      newPlotType === "freePolygon" ||
+      newPlotType === "arrow" ||
+      newPlotType === "rect" ||
+      newPlotType === "circle"
+    ) {
       newPlotType = "Polygon";
     }
     style = createStyle(newPlotType, options);
@@ -446,7 +466,10 @@ export default class PlotInfoPanel extends Component {
     if (
       this.props.plotType === "Point" ||
       this.props.plotType === "Polygon" ||
-      this.props.plotType === "freePolygon"
+      this.props.plotType === "freePolygon" ||
+      this.props.plotType === "arrow" ||
+      this.props.plotType === "rect" ||
+      this.props.plotType === "circle"
     ) {
       options = {
         ...this.commonStyleOptions,
@@ -462,11 +485,9 @@ export default class PlotInfoPanel extends Component {
         selectName: "自定义类型",
         remark: this.props.remarks,
       };
+      delete options.iconUrl;
     }
-    if (
-      this.props.plotType === "Polyline" ||
-      this.props.plotType === "LineString"
-    ) {
+    if (this.props.plotType === "LineString") {
       options = {
         ...this.commonStyleOptions,
         fillColor: value,
@@ -482,7 +503,12 @@ export default class PlotInfoPanel extends Component {
       };
     }
     let newPlotType = this.props.plotType;
-    if (newPlotType === "freePolygon") {
+    if (
+      newPlotType === "freePolygon" ||
+      newPlotType === "arrow" ||
+      newPlotType === "rect" ||
+      newPlotType === "circle"
+    ) {
       newPlotType = "Polygon";
     }
     style = createStyle(newPlotType, options);
@@ -543,7 +569,7 @@ export default class PlotInfoPanel extends Component {
             ></ColorPicker>
             <span
               className={styles.rowspan}
-              style={this.state.plotType === "Polyline" ? disableStyle : {}}
+              style={this.state.plotType === "LineString" ? disableStyle : {}}
             >
               填充颜色
             </span>
@@ -554,7 +580,7 @@ export default class PlotInfoPanel extends Component {
                   ? this.props.featureType
                   : "rgba(155,155,155,1)"
               }
-              disable={this.state.plotType === "Polyline" ? true : false}
+              disable={this.state.plotType === "LineString" ? true : false}
               handleOK={this.handleFillColorOkClick}
             ></ColorPicker>
           </div>
