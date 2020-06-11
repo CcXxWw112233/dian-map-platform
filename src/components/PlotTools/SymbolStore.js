@@ -71,9 +71,9 @@ export default class SymbolStore extends Component {
               <div
                 className={`${styles.symbolPanel} ${globalStyle.autoScrollY}`} style={{height: 410}}>
                 {this.state.publicSymbolStore.length > 0 ? (
-                  this.state.publicSymbolStore.map((symbol) => {
+                  this.state.publicSymbolStore.map((symbol, index) => {
                     return (
-                      <div className={styles.symbolBlock} key={symbol.type}>
+                      <div className={styles.symbolBlock} key={index}>
                         <p
                           style={{
                             margin: 0,

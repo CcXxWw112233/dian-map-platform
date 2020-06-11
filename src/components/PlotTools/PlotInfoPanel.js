@@ -342,7 +342,6 @@ export default class PlotInfoPanel extends Component {
   };
   // 线框颜色
   handleStrokeColorOkClick = (value) => {
-    debugger;
     const { dispatch } = this.props;
     dispatch({
       type: "modal/updateData",

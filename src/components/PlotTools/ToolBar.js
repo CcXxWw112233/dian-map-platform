@@ -99,6 +99,51 @@ export default class ToolBar extends Component {
           });
         },
       },
+      // {
+      //   key: "arrow",
+      //   icon: "&#xe62d;",
+      //   name: "箭头",
+      //   cb: () => {
+      //     this.handleToolClick("arrowPlot");
+      //     this.setState({
+      //       showPlotAddpanel: true,
+      //       showTempPlotPanel: false,
+      //       showSymbolStorePanel: false,
+      //       plotType: "arrow",
+      //       isModifyPlot: false,
+      //     });
+      //   },
+      // },
+      // {
+      //   key: "rect",
+      //   icon: "&#xe62e;",
+      //   name: "矩形",
+      //   cb: () => {
+      //     this.handleToolClick("rectPlot");
+      //     this.setState({
+      //       showPlotAddpanel: true,
+      //       showTempPlotPanel: false,
+      //       showSymbolStorePanel: false,
+      //       plotType: "rect",
+      //       isModifyPlot: false,
+      //     });
+      //   },
+      // },
+      // {
+      //   key: "circle",
+      //   icon: "&#xe62f;",
+      //   name: "圆",
+      //   cb: () => {
+      //     this.handleToolClick("circlePlot");
+      //     this.setState({
+      //       showPlotAddpanel: true,
+      //       showTempPlotPanel: false,
+      //       showSymbolStorePanel: false,
+      //       plotType: "circle",
+      //       isModifyPlot: false,
+      //     });
+      //   },
+      // },
       {
         key: "coordinateMeasure",
         icon: "&#xe627;",
