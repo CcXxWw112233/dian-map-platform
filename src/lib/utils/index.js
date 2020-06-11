@@ -21,7 +21,10 @@ import {
   getBottomRight,
   getTopLeft,
   getTopRight,
-  isEmpty
+  isEmpty,
+  getSize,
+  getWidth,
+  getHeight
 } from "ol/extent";
 import {
   Fill,
@@ -35,6 +38,7 @@ import {
   // MultiPolygon as MultiPolygonStyle,
   Icon,
 } from "ol/style";
+import INITMAP from "../../utils/INITMAP";
 
 // 新建feature
 export const addFeature = function (type, data) {
@@ -94,6 +98,12 @@ export const getPoint = function (extent, type = "center") {
       return getBottomRight(extent);
     case "bottomLeft":
       return getBottomLeft(extent);
+    case "size": 
+      return getSize(extent);
+    case 'width':
+      return getWidth(extent);
+    case 'height':
+      return getHeight(extent);
     default:
       return getCenter(extent);
   }
@@ -188,7 +198,7 @@ export const createStyle = function (
     : null;
   if (type === "Point") {
     return new Style({
-      image: options.iconUrl
+      image:( options.iconUrl || options.icon)
         ? new Icon({
             src: options.iconUrl,
             color: options.pointColor || defaultColor,
@@ -253,10 +263,15 @@ export const TransformCoordinate = (
 };
 
 export const Fit = (view, extent, option, duration = 1000) => {
-  if (view && extent[0] !== Infinity) {
-    view.cancelAnimations();
-    view.fit(extent, { duration, padding: [200, 150, 80, 400], ...option });
-  }
+  return new Promise((resolve,reject)=>{
+    if (view && extent[0] !== Infinity) {
+      view.cancelAnimations();
+      view.fit(extent, { duration, padding: [200, 150, 80, 400], ...option ,callback: (e)=>{resolve(e)}});
+    }else{
+      reject(extent);
+    }
+  })
+  
 };
 
 export const createOverlay = (ele, data = {}) => {
@@ -265,6 +280,20 @@ export const createOverlay = (ele, data = {}) => {
     ...data,
   });
 };
+
+export const animate = ({zoom,center,duration = 800})=>{
+  return new Promise((resolve,reject) => {
+    INITMAP.view.animate({
+      zoom:zoom || INITMAP.view.getZoom(),
+      center,
+      duration,
+    })
+    setTimeout(()=>{
+      resolve()
+    },duration) 
+    
+  })
+}
 
 export const drawPoint = (source, data = {}) => {
   return new Draw({

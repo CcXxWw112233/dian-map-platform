@@ -39,17 +39,20 @@ import TempPlottingPanel from "components/TempPlotting/TempPlottingPanel";
 import PhotoSwipe from '../components/PhotoSwipe'
 import FlutterComponents from '../pages/FlutterComponents'
 import PlotTools from "../components/PlotTools/ToolBar"
+import MatrixEdit from '../components/MatrixEdit'
 
 @connect(
   ({
     controller: { mainVisible },
     openswitch: { toolBars, bottomTools, searchTools ,isShowMobile },
+    editPicture:{ editShow }
   }) => ({
     mainVisible,
     toolBars,
     bottomTools,
     searchTools,
     isShowMobile,
+    editShow
   })
 )
 class IndexPage extends React.Component {
@@ -209,7 +212,7 @@ class IndexPage extends React.Component {
 
   render() {
     const { TabPane } = Tabs;
-    let { bottomTools, toolBars, searchTools ,isShowMobile} = this.props;
+    let { bottomTools, toolBars, searchTools ,isShowMobile ,editShow} = this.props;
     const SearchToolBarStyle = {
       position: "absolute",
       top: 20,
@@ -290,6 +293,10 @@ class IndexPage extends React.Component {
         {/* 是否显示手机页面 */}
         {
           isShowMobile && <FlutterComponents/>
+        }
+        {
+          editShow && 
+          <MatrixEdit/>
         }
       </div>
     );

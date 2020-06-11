@@ -41,7 +41,7 @@ function(){
         center: center,
         projection: "EPSG:3857",
         minZoom: 3,
-        zoom: 7,
+        zoom: 10,
         maxZoom: 18,
       });
       return this.view;
@@ -72,7 +72,7 @@ function(){
     createTilelayer: function (options, zIndex) {
       return new TileLayer({
         id: options.id,
-        zIndex: zIndex,
+        zIndex: zIndex ,
         source: new XYZ({
           crossOrigin: "anonymous",
           url: options.url,

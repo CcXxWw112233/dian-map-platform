@@ -34,7 +34,7 @@ import { BASIC } from "../../services/config";
 import Event from "../../lib/utils/event";
 import AudioControl from "./components/audioPlayControl";
 import { formatSize } from '../../utils/utils';
-import MatrixEdit from '../../components/MatrixEdit'
+import ExcelRead from '../../components/ExcelRead'
 const { TabPane } = Tabs;
 
 const Title = ({ name, date, cb, data }) => {
@@ -202,6 +202,7 @@ const ScoutingItem = ({
   onCollectionRemove,
   onEditCollection,
   onDrop,
+  board,
   areaList,
   onSelectGroup,
   onAreaEdit = () => { },
@@ -215,10 +216,12 @@ const ScoutingItem = ({
   onModifyFeature = () => { },
   onModifyRemark = () => { },
   onRemarkSave = () => { },
-  onStopMofifyFeatureInDetails
+  onStopMofifyFeatureInDetails,
+  onExcelSuccess =()=>{}
 }) => {
   let [planExtent, setPlanExtent] = useState("");
   let [transparency, setTransparency] = useState("1");
+  let [transformFile ,setTransformFile] = useState(null);
 
   // 开始上传
   const startUpload = ({ file, fileList, event }) => {
@@ -244,6 +247,12 @@ const ScoutingItem = ({
       // onError && onError(file)
     }
   };
+
+  // 设置更新的文件
+  const beforeTransformFile = ()=>{
+    return Promise.resolve(transformFile)
+  }
+
   // 上传规划图
   const beforeUploadPlan = (val) => {
     onUploadPlanStart && onUploadPlanStart(val);
@@ -254,14 +263,19 @@ const ScoutingItem = ({
       message.error('文件不能大于100MB');
       return false;
     }
-    
     return new Promise((resolve, reject) => {
       let url = window.URL.createObjectURL(val);
-      Action.addPlanPictureDraw(url)
+      Action.addPlanPictureDraw(url,val,dispatch)
         .then((res) => {
           let { feature } = res;
           let extent = feature.getGeometry().getExtent();
-          // 设置data
+          if(res.blobFile){
+            // 设置文件
+            setTransformFile(res.blobFile);
+          }else{
+            setTransformFile(val);
+          }
+          // 设置透明度,设置范围大小
           setTransparency(res.opacity);
           setPlanExtent(extent.join(","));
           resolve({ ...val });
@@ -337,6 +351,7 @@ const ScoutingItem = ({
               accept=".jpg, .jpeg, .png, .bmp"
               headers={{ Authorization: BASIC.getUrlParam.token }}
               beforeUpload={beforeUploadPlan}
+              transformFile={beforeTransformFile}
               data={{ extent: planExtent, transparency }}
               onChange={onStartUploadPlan}
               showUploadList={false}
@@ -352,7 +367,8 @@ const ScoutingItem = ({
                 &#xe6ee;
               </Button>
             </Upload>
-          )}
+          )} 
+          <ExcelRead id={data.id} group={data} board={board} onExcelSuccess={onExcelSuccess}/>
           {/* 编辑按钮 */}
           {!!onAreaEdit && (
             <Button
@@ -894,12 +910,10 @@ const tagScouting = () => {
 
 @connect((
   { controller: { mainVisible }, 
-  lengedList: { config } ,
-  openswitch:{ isShowPlanPicEdit }}) => 
+  lengedList: { config } }) => 
 ({
   mainVisible,
-  config,
-  isShowPlanPicEdit
+  config
 }))
 export default class ScoutingDetails extends PureComponent {
   constructor(props) {
@@ -1519,9 +1533,12 @@ export default class ScoutingDetails extends PureComponent {
     });
   };
 
-  // 当
+  // 
   onBeforeUploadPlan = ()=>{
 
+  }
+  onExcelSuccess = (arr)=>{
+    this.fetchCollection();
   }
 
   render (h) {
@@ -1530,7 +1547,7 @@ export default class ScoutingDetails extends PureComponent {
       height: "96%",
     };
     const { activeId } = this.state;
-    const { dispatch ,isShowPlanPicEdit} = this.props;
+    const { dispatch } = this.props;
     return (
       <div
         className={`${styles.wrap} ${animateCss.animated} ${animateCss.slideInLeft}`}
@@ -1621,6 +1638,7 @@ export default class ScoutingDetails extends PureComponent {
                       style={{ backgroundColor: "#fff", marginBottom: "10px" }}
                     >
                       <ScoutingItem
+                        board={this.state.current_board}
                         dispatch={dispatch}
                         // onDrop={()=> console.log(item)}
                         style={activeStyle}
@@ -1652,6 +1670,7 @@ export default class ScoutingDetails extends PureComponent {
                         onStopMofifyFeatureInDetails={() => this.onStopMofifyFeatureInDetails()}
                         onToggleChangeStyle={this.onToggleChangeStyle}
                         onCopyCollection={this.onCopyCollection}
+                        onExcelSuccess={this.onExcelSuccess}
                       />
                     </Collapse.Panel>
                   );
@@ -1737,10 +1756,6 @@ export default class ScoutingDetails extends PureComponent {
             </div>
           </TabPane> */}
         </Tabs>
-        {
-          isShowPlanPicEdit && 
-          <MatrixEdit/>
-        }
       </div>
     );
   }
