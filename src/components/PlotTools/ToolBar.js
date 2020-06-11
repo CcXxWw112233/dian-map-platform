@@ -19,15 +19,6 @@ import { connect } from "dva";
 export default class ToolBar extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      active: "",
-      showPlotAddpanel: false,
-      showTempPlotPanel: false,
-      showSymbolStorePanel: false,
-      plotType: "",
-      isModifyPlot: false,
-      addOtherNum: 0,
-    };
     this.tools = [
       {
         key: "symbolStore",
@@ -35,6 +26,7 @@ export default class ToolBar extends Component {
         name: "符号库",
         cb: () => {
           this.handleToolClick("symbolStore");
+         this.deactivate()
           this.setState({
             showPlotAddpanel: false,
             showTempPlotPanel: false,
@@ -48,7 +40,8 @@ export default class ToolBar extends Component {
         name: "标记点",
         cb: () => {
           this.handleToolClick("pointPlot");
-          plotEdit.create("MARKER");
+          this.deactivate()
+          // plotEdit.create("MARKER");
           this.setState({
             showPlotAddpanel: true,
             showTempPlotPanel: false,
@@ -64,7 +57,8 @@ export default class ToolBar extends Component {
         name: "标记线",
         cb: () => {
           this.handleToolClick("linePlot");
-          plotEdit.create("POLYLINE");
+          this.deactivate()
+          // plotEdit.create("POLYLINE");
           this.setState({
             showPlotAddpanel: true,
             showTempPlotPanel: false,
@@ -80,7 +74,8 @@ export default class ToolBar extends Component {
         name: "标记面",
         cb: () => {
           this.handleToolClick("polygonPlot");
-          plotEdit.create("POLYGON");
+          this.deactivate()
+          // plotEdit.create("POLYGON");
           this.setState({
             showPlotAddpanel: true,
             showTempPlotPanel: false,
@@ -96,7 +91,8 @@ export default class ToolBar extends Component {
         name: "自由面",
         cb: () => {
           this.handleToolClick("freePlygonPlot");
-          plotEdit.create("FREEHAND_POLYGON");
+          this.deactivate()
+          // plotEdit.create("FREEHAND_POLYGON");
           this.setState({
             showPlotAddpanel: true,
             showTempPlotPanel: false,
@@ -112,7 +108,8 @@ export default class ToolBar extends Component {
         name: "箭头",
         cb: () => {
           this.handleToolClick("arrowPlot");
-          plotEdit.create("FINE_ARROW");
+          this.deactivate()
+          // plotEdit.create("FINE_ARROW");
           this.setState({
             showPlotAddpanel: true,
             showTempPlotPanel: false,
@@ -128,7 +125,8 @@ export default class ToolBar extends Component {
         name: "矩形",
         cb: () => {
           this.handleToolClick("rectPlot");
-          plotEdit.create("RECTANGLE");
+          this.deactivate()
+          // plotEdit.create("RECTANGLE");
           this.setState({
             showPlotAddpanel: true,
             showTempPlotPanel: false,
@@ -144,7 +142,8 @@ export default class ToolBar extends Component {
         name: "圆",
         cb: () => {
           this.handleToolClick("circlePlot");
-          plotEdit.create("CIRCLE");
+          this.deactivate()
+          // plotEdit.create("CIRCLE");
           this.setState({
             showPlotAddpanel: true,
             showTempPlotPanel: false,
@@ -162,6 +161,7 @@ export default class ToolBar extends Component {
         name: "坐标",
         cb: () => {
           this.toggleActive("coordinateMeasure");
+          this.deactivate()
           this.setState({
             showPlotAddpanel: false,
             showTempPlotPanel: false,
@@ -176,6 +176,7 @@ export default class ToolBar extends Component {
         name: "距离",
         cb: () => {
           this.toggleActive("distanceMeasure");
+          this.deactivate()
           this.setState({
             showPlotAddpanel: false,
             showTempPlotPanel: false,
@@ -190,6 +191,7 @@ export default class ToolBar extends Component {
         name: "面积",
         cb: () => {
           this.toggleActive("areaMeasure");
+          this.deactivate()
           this.setState({
             showPlotAddpanel: false,
             showTempPlotPanel: false,
@@ -199,7 +201,23 @@ export default class ToolBar extends Component {
         },
       },
     ];
+    this.state = {
+      active: "",
+      showPlotAddpanel: false,
+      showTempPlotPanel: false,
+      showSymbolStorePanel: false,
+      plotType: "",
+      isModifyPlot: false,
+      tools: this.tools,
+      transformStyle: {},
+    };
   }
+  deactivate = () => {
+    plotEdit.deactivate()
+    pointDrawing.deactivate()
+    lineDrawing.deactivate()
+    polygonDrawing.deactivate()
+  } 
   clearReduxModal = () => {
     const { dispatch } = this.props;
     dispatch({
@@ -219,7 +237,7 @@ export default class ToolBar extends Component {
   };
   handleToolClick = (key) => {
     this.toggleActive(key);
-    this.clearReduxModal()
+    this.clearReduxModal();
   };
   toggleActive = (key) => {
     this.setState({
@@ -269,7 +287,7 @@ export default class ToolBar extends Component {
             <span>临时</span>
             <span>标绘</span>
           </div>
-          {this.tools.map((tool) => {
+          {this.state.tools.map((tool) => {
             return (
               <div
                 key={tool.key}
@@ -290,17 +308,23 @@ export default class ToolBar extends Component {
           })}
           <div
             className={`${styles.tool}`}
+            style={{ height: 30, ...this.state.transformStyle }}
             onClick={() => {
-              if (this.state.addOtherNum < this.otherTools.length) {
-                let num = this.state.addOtherNum;
-                num++;
-                this.tools.push(this.otherTools[num - 1]);
+              if (
+                this.state.tools.length <
+                this.tools.length + this.otherTools.length
+              ) {
                 this.setState({
-                  addOtherNum: num,
+                  tools: [...this.tools, ...this.otherTools],
+                  transformStyle: { transform: "rotateX(180deg)" },
+                });
+              } else {
+                this.setState({
+                  tools: this.tools,
+                  transformStyle: {},
                 });
               }
             }}
-            style={{ height: 30 }}
           >
             <i
               className={globalStyle.global_icon + ` ${styles.icon}`}

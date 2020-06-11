@@ -73,6 +73,8 @@ export default class PlotInfoPanel extends Component {
       rect: "RECTANGLE",
       circle: "CIRCLE",
     };
+    this.strokeColorStyle = "rgba(155,155,155,1)"
+    this.fillColorStyle = "rgba(155,155,155,0.7)"
   }
   componentDidMount() {
     this.getSymbolData(this.props);
@@ -349,7 +351,7 @@ export default class PlotInfoPanel extends Component {
   handleOKClick = () => {
     if (this.props.isModifyPlot) {
       window.featureOperator.attrs.name = this.props.featureName;
-      window.featureOperator.setName(this.featureName);
+      window.featureOperator.setName(this.props.featureName);
       window.featureOperator.attrs.remark = this.props.remarks;
       let style = window.featureOperator.feature.getStyle();
       let text = style.getText(this.props.featureName);
@@ -366,6 +368,10 @@ export default class PlotInfoPanel extends Component {
   };
   // 线框颜色
   handleStrokeColorOkClick = (value) => {
+    this.strokeColorStyle = value
+    this.setState({
+      selectedSymbolId: -1,
+    });
     const { dispatch } = this.props;
     dispatch({
       type: "modal/updateData",
@@ -383,10 +389,7 @@ export default class PlotInfoPanel extends Component {
       attrs = {};
     let text = this.props.featureName || "未命名";
     let remark = this.props.remarks;
-    let featureType =
-      this.props.featureType.indexOf("rgb") > -1
-        ? this.props.featureType
-        : "rgba(155,155,155,1)";
+    let featureType = this.fillColorStyle;
     let style = {};
     if (
       this.props.plotType === "Point" ||
@@ -453,6 +456,10 @@ export default class PlotInfoPanel extends Component {
 
   // 填充颜色
   handleFillColorOkClick = (value) => {
+    this.setState({
+      selectedSymbolId: -1,
+    });
+    this.fillColorStyle = value
     const { dispatch } = this.props;
     dispatch({
       type: "modal/updateData",
@@ -469,10 +476,7 @@ export default class PlotInfoPanel extends Component {
     let options = {},
       attrs = {};
     let text = this.props.featureName || "未命名";
-    let strokeColor =
-      this.props.strokeColorStyle.indexOf("rgb") > -1
-        ? this.props.strokeColorStyle
-        : "rgba(155,155,155,1)";
+    let strokeColor = this.strokeColorStyle
     let style = {};
     if (
       this.props.plotType === "Point" ||
@@ -574,7 +578,7 @@ export default class PlotInfoPanel extends Component {
               colorStyle={
                 this.props.selectName === "自定义类型"
                   ? this.props.strokeColorStyle
-                  : "rgba(155,155,155,1)"
+                  : this.strokeColorStyle
               }
               handleOK={this.handleStrokeColorOkClick}
             ></ColorPicker>
@@ -589,7 +593,7 @@ export default class PlotInfoPanel extends Component {
               colorStyle={
                 this.props.selectName === "自定义类型"
                   ? this.props.featureType
-                  : "rgba(155,155,155,1)"
+                  : this.fillColorStyle
               }
               disable={this.state.plotType === "LineString" ? true : false}
               handleOK={this.handleFillColorOkClick}

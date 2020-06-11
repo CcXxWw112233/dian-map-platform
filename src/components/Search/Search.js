@@ -31,7 +31,7 @@ export default class Search extends React.Component {
   }
   componentDidMount() {
     getMyPosition.getPosition().then((val) => {
-      if (!val) return
+      if (!val) return;
       this.setState({
         locationName: val.addressComponent?.city || this.state.locationName,
       });
@@ -168,7 +168,7 @@ export default class Search extends React.Component {
     );
     return (
       <div className={styles.wrap} style={this.props.style}>
-        <Dropdown overlay={areaPanel}>
+        <Dropdown overlay={areaPanel} trigger="click">
           <Button style={{ borderRadius: 0 }}>
             {this.state.locationName}
             <DownOutlined />
@@ -179,7 +179,7 @@ export default class Search extends React.Component {
           visible={this.state.searchPanelVisible}
           overlayClassName="testDrapdown"
           onVisibleChange={(e) => this.onLocationPanelVisibleChange(e)}
-          trigger="hover"
+          trigger="click"
         >
           <Input.Search
             allowClear={true}

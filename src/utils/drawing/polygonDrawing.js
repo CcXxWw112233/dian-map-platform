@@ -1,6 +1,11 @@
-import { MyOverlay, drawFeature, formatArea } from '../mapUtils'
-import mapApp from '../INITMAP'
-import { createIconElement, closeOverlay, myStyle, removeAllEventLinstener } from './public'
+import { MyOverlay, drawFeature, formatArea } from "../mapUtils";
+import mapApp from "../INITMAP";
+import {
+  createIconElement,
+  closeOverlay,
+  myStyle,
+  removeAllEventLinstener,
+} from "./public";
 
 export const polygonDrawing = {
   drawing: null,
@@ -11,54 +16,63 @@ export const polygonDrawing = {
   linsteners: {},
 
   createDrawing() {
-    removeAllEventLinstener()
-    mapApp.drawing["polygon"] = this
+    removeAllEventLinstener();
+    mapApp.drawing["polygon"] = this;
     if (!this.drawing) {
-      this.drawing = drawFeature.addDraw(false, 'Polygon' , myStyle)
+      this.drawing = drawFeature.addDraw(false, "Polygon", myStyle);
     }
     if (!this.isActive) {
-      mapApp.map.addInteraction(this.drawing)
-      this.addEventLinstener()
-      this.isActive = true
+      mapApp.map.addInteraction(this.drawing);
+      this.addEventLinstener();
+      this.isActive = true;
     } else {
-      mapApp.map.removeInteraction(this.drawing)
-      this.isActive = false
+      mapApp.map.removeInteraction(this.drawing);
+      this.isActive = false;
     }
   },
 
   getOverlays() {
     if (!this.overlays) {
-      this.overlays = new MyOverlay()
+      this.overlays = new MyOverlay();
     }
-    return this.overlays
+    return this.overlays;
   },
 
   addEventLinstener() {
-    const me = this
-    const start = this.drawing.on('drawstart', e => {
-      const overlays = me.getOverlays()
-      me.overlay = overlays.add('drawPolygonArea')
-      me.el = me.overlay.getElement()
-      mapApp.map.addOverlay(me.overlay)
-      const feature = e.feature
-      feature.getGeometry().on('change',(geo) => {
+    const me = this;
+    const start = this.drawing.on("drawstart", (e) => {
+      const overlays = me.getOverlays();
+      me.overlay = overlays.add("drawPolygonArea");
+      me.el = me.overlay.getElement();
+      mapApp.map.addOverlay(me.overlay);
+      const feature = e.feature;
+      feature.getGeometry().on("change", (geo) => {
         let target = geo.target;
-        me.el.innerHTML = formatArea(target)
-        let lastCoor = target.getInteriorPoint().getCoordinates()
+        me.el.innerHTML = formatArea(target);
+        let lastCoor = target.getInteriorPoint().getCoordinates();
         me.overlay.setPosition(lastCoor);
-      })
-      me.icon = createIconElement()
-      me.icon.onclick = closeOverlay.bind(me, me.drawing, overlays, me.overlay, feature)
-    })
-    this.linsteners['drawstart'] = start
+      });
+      me.icon = createIconElement();
+      me.icon.onclick = closeOverlay.bind(
+        me,
+        me.drawing,
+        overlays,
+        me.overlay,
+        feature
+      );
+    });
+    this.linsteners["drawstart"] = start;
 
-    const end = this.drawing.on('drawend', e => {
-      me.el.appendChild(this.icon)
-      mapApp.map.removeInteraction(me.drawing)
-      me.isActive = false
-    })
+    const end = this.drawing.on("drawend", (e) => {
+      me.el.appendChild(this.icon);
+      mapApp.map.removeInteraction(me.drawing);
+      me.isActive = false;
+    });
 
-    this.linsteners['drawend'] = end
-
-  }
-}
+    this.linsteners["drawend"] = end;
+  },
+  deactivate() {
+    mapApp.map.removeInteraction(this.drawing);
+    this.isActive = false;
+  },
+};

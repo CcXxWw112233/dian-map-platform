@@ -19,6 +19,12 @@ export const plotEdit = {
   drawDispatch: null,
   featureOperatorList: [],
   responseData: {},
+  deactivate() {
+    if (this.plottingLayer) {
+      this.plottingLayer.plotDraw.deactivate();
+      this.target.style.cursor = "default";
+    }
+  },
   getPlottingLayer(dispatch) {
     this.drawDispatch = dispatch;
     if (!this.map) {

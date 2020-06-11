@@ -84,7 +84,7 @@ export default class TempPlotPanel extends React.Component {
 
   handleEditClick = (featureOperator) => {
     window.featureOperator = featureOperator;
-    // plotEdit.plottingLayer.plotEdit.activate(featureOperator.feature);
+    plotEdit.plottingLayer.plotEdit.activate(featureOperator.feature);
     const { dispatch, showPlotInfoPanel, changePlotType } = this.props;
     // 更新模态框数据
     dispatch({

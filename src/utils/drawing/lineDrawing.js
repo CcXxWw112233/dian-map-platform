@@ -62,5 +62,9 @@ export const lineDrawing = {
 
     this.linsteners['drawend'] = end
 
-  }
+  },
+  deactivate() {
+    mapApp.map.removeInteraction(this.drawing);
+    this.isActive = false;
+  },
 }
