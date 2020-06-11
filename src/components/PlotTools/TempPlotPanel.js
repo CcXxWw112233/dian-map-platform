@@ -15,7 +15,7 @@ export default class TempPlotPanel extends React.Component {
       checkedList: [],
       indeterminate: false,
       checkAll: false,
-      selectedGuid: -1
+      selectedGuid: -1,
     };
   }
   onChange = (e) => {
@@ -213,12 +213,14 @@ export default class TempPlotPanel extends React.Component {
   };
   handleRowClick = (featureOperator) => {
     this.setState({
-      selectedGuid: featureOperator.guid
-    })
-    plotEdit.map.getView().fit(featureOperator.feature.getGeometry().getExtent(), {
-      size: plotEdit.map.getSize(),
-      duration: 1000,
+      selectedGuid: featureOperator.guid,
     });
+    plotEdit.map
+      .getView()
+      .fit(featureOperator.feature.getGeometry().getExtent(), {
+        size: plotEdit.map.getSize(),
+        duration: 1000,
+      });
   };
 
   render() {
@@ -275,7 +277,7 @@ export default class TempPlotPanel extends React.Component {
                       style={this.getStyle(featureOperator)}
                     ></div>
                     <div className={styles.text}>
-                      <span>{featureOperator.name}</span>
+                      <span>{featureOperator.attrs.name}</span>
                     </div>
                     <div
                       className={styles.edit}

@@ -298,8 +298,10 @@ class PlottingLayer extends Observable {
       zindex || this.feature_operators.length + 1
     );
     if (this.attrs) {
+      const newAttrs = JSON.parse(JSON.stringify(this.attrs))
+      fo.setName(newAttrs.name)
       fo.attrs = {
-        ...this.attrs,
+        ...newAttrs,
         geometryType: feature.getGeometry().getType(),
       };
     }
