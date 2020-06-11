@@ -8,6 +8,7 @@ import ColorPicker from "../ColorPicker";
 import plotServices from "../../services/plot";
 import { plotEdit } from "../../utils/plotEdit";
 import Event from "../../lib/utils/event";
+import { config } from "../../utils/customConfig";
 import { createStyle } from "@/lib/utils";
 import { connect } from "dva";
 
@@ -50,8 +51,8 @@ export default class PlotInfoPanel extends Component {
       plotFill: "",
     };
     this.symbols = {};
-    this.handlePlotNameChange = throttle(this.handlePlotNameChange, 1000);
-    this.handlePotRemarkChange = throttle(this.handlePotRemarkChange, 1000);
+    // this.handlePlotNameChange = throttle(this.handlePlotNameChange, 1000);
+    // this.handlePotRemarkChange = throttle(this.handlePotRemarkChange, 1000);
     this.commonStyleOptions = {
       textFillColor: "rgba(255,0,0,1)",
       textStrokeColor: "#fff",
@@ -123,6 +124,7 @@ export default class PlotInfoPanel extends Component {
         plotType === "circle"
       ) {
         res = await plotServices.GET_POLYGONSYMBOL();
+        res.data[2].items = [...res.data[2].items, ...config];
       }
       this.symbols[plotType] = res?.data;
     }
@@ -173,6 +175,9 @@ export default class PlotInfoPanel extends Component {
     });
   };
   handleSymbolItemClick = (value) => {
+    this.setState({
+      selectedSymbolId: value.id,
+    });
     if (!this.props.isModifyPlot) {
       plotEdit.create(
         this.plotKeyVal[this.props.plotType],
@@ -184,6 +189,7 @@ export default class PlotInfoPanel extends Component {
       attrs = {};
     let featureType = value.value1;
     let text = this.props.featureName || "未命名";
+    let remark = this.props.remarks;
     if (this.state.plotType === "Point") {
       if (featureType.indexOf("/") > -1) {
         let iconUrl = featureType.replace("img", "");
@@ -197,7 +203,7 @@ export default class PlotInfoPanel extends Component {
           name: text,
           featureType: value.value1,
           selectName: value.name,
-          remark: this.props.remarks,
+          remark: remark,
         };
       } else {
         delete options.iconUrl;
@@ -220,7 +226,7 @@ export default class PlotInfoPanel extends Component {
           featureType: value.value1,
           strokeColor: value.value1,
           selectName: value.name,
-          remark: this.props.remarks,
+          remark: remark,
         };
         style = createStyle("Polyline", options);
       }
@@ -244,7 +250,7 @@ export default class PlotInfoPanel extends Component {
           featureType: value.value1,
           strokeColor: value.value1,
           selectName: value.name,
-          remark: this.props.remarks,
+          remark: remark,
         };
         style = createStyle("Polygon", options);
       } else if (featureType.indexOf("/") > -1) {
@@ -308,10 +314,6 @@ export default class PlotInfoPanel extends Component {
         featureName: value,
       },
     });
-    if (window.featureOperator) {
-      window.featureOperator.attrs.name = value;
-      window.featureOperator.setName(value);
-    }
   };
 
   updateReduxOperatorList = () => {
@@ -346,6 +348,14 @@ export default class PlotInfoPanel extends Component {
   };
   handleOKClick = () => {
     if (this.props.isModifyPlot) {
+      window.featureOperator.attrs.name = this.props.featureName;
+      window.featureOperator.setName(this.featureName);
+      window.featureOperator.attrs.remark = this.props.remarks;
+      let style = window.featureOperator.feature.getStyle();
+      let text = style.getText(this.props.featureName);
+      text.setText(this.props.featureName);
+      style.setText(text);
+      window.featureOperator.feature.setStyle(style);
       this.updateReduxOperatorList();
       this.props.showPlotInfoPanel(false);
     } else {
@@ -372,6 +382,7 @@ export default class PlotInfoPanel extends Component {
     let options = {},
       attrs = {};
     let text = this.props.featureName || "未命名";
+    let remark = this.props.remarks;
     let featureType =
       this.props.featureType.indexOf("rgb") > -1
         ? this.props.featureType
@@ -397,7 +408,7 @@ export default class PlotInfoPanel extends Component {
         featureType: featureType,
         strokeColor: value,
         selectName: "自定义类型",
-        remark: this.props.remarks,
+        remark: remark,
       };
       delete options.iconUrl;
     }
@@ -413,7 +424,7 @@ export default class PlotInfoPanel extends Component {
         featureType: value,
         strokeColor: value,
         selectName: "自定义类型",
-        remark: this.props.remarks,
+        remark: remark,
       };
     }
     let newPlotType = this.props.plotType;
@@ -547,13 +558,13 @@ export default class PlotInfoPanel extends Component {
           <Input
             placeholder="输入标绘名称"
             style={{ marginBottom: 12 }}
-            defaultValue={this.props.featureName}
+            value={this.props.featureName}
             onChange={(e) => this.handlePlotNameChange(e.target.value)}
           ></Input>
           <TextArea
             placeholder="填写备注"
             style={{ marginBottom: 12, height: 84 }}
-            defaultValue={this.props.remarks}
+            value={this.props.remarks}
             onChange={(e) => this.handlePotRemarkChange(e.target.value)}
           ></TextArea>
           <div className={styles.row}>

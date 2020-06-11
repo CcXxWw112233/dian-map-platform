@@ -13,7 +13,9 @@ import {
 import PlotToolPanel from "./PlotInfoPanel";
 import TempPlotPanel from "./TempPlotPanel";
 import SymbolStore from "./SymbolStore";
+import { connect } from "dva";
 
+@connect(() => ({}))
 export default class ToolBar extends Component {
   constructor(props) {
     super(props);
@@ -46,6 +48,7 @@ export default class ToolBar extends Component {
         name: "标记点",
         cb: () => {
           this.handleToolClick("pointPlot");
+          plotEdit.create("MARKER");
           this.setState({
             showPlotAddpanel: true,
             showTempPlotPanel: false,
@@ -61,6 +64,7 @@ export default class ToolBar extends Component {
         name: "标记线",
         cb: () => {
           this.handleToolClick("linePlot");
+          plotEdit.create("POLYLINE");
           this.setState({
             showPlotAddpanel: true,
             showTempPlotPanel: false,
@@ -76,6 +80,7 @@ export default class ToolBar extends Component {
         name: "标记面",
         cb: () => {
           this.handleToolClick("polygonPlot");
+          plotEdit.create("POLYGON");
           this.setState({
             showPlotAddpanel: true,
             showTempPlotPanel: false,
@@ -91,6 +96,7 @@ export default class ToolBar extends Component {
         name: "自由面",
         cb: () => {
           this.handleToolClick("freePlygonPlot");
+          plotEdit.create("FREEHAND_POLYGON");
           this.setState({
             showPlotAddpanel: true,
             showTempPlotPanel: false,
@@ -106,6 +112,7 @@ export default class ToolBar extends Component {
         name: "箭头",
         cb: () => {
           this.handleToolClick("arrowPlot");
+          plotEdit.create("FINE_ARROW");
           this.setState({
             showPlotAddpanel: true,
             showTempPlotPanel: false,
@@ -121,6 +128,7 @@ export default class ToolBar extends Component {
         name: "矩形",
         cb: () => {
           this.handleToolClick("rectPlot");
+          plotEdit.create("RECTANGLE");
           this.setState({
             showPlotAddpanel: true,
             showTempPlotPanel: false,
@@ -136,6 +144,7 @@ export default class ToolBar extends Component {
         name: "圆",
         cb: () => {
           this.handleToolClick("circlePlot");
+          plotEdit.create("CIRCLE");
           this.setState({
             showPlotAddpanel: true,
             showTempPlotPanel: false,
@@ -191,8 +200,26 @@ export default class ToolBar extends Component {
       },
     ];
   }
+  clearReduxModal = () => {
+    const { dispatch } = this.props;
+    dispatch({
+      type: "modal/updateData",
+      payload: {
+        visible: false,
+        responseData: null,
+        isEdit: false,
+        featureName: "", // 名称
+        selectName: "",
+        featureType: "", // 类型
+        strokeColorStyle: "",
+        remarks: "", // 备注
+        confirmVidible: false,
+      },
+    });
+  };
   handleToolClick = (key) => {
     this.toggleActive(key);
+    this.clearReduxModal()
   };
   toggleActive = (key) => {
     this.setState({
@@ -265,12 +292,12 @@ export default class ToolBar extends Component {
             className={`${styles.tool}`}
             onClick={() => {
               if (this.state.addOtherNum < this.otherTools.length) {
-                let num = this.state.addOtherNum
-                num ++
-                this.tools.push(this.otherTools[num -1])
+                let num = this.state.addOtherNum;
+                num++;
+                this.tools.push(this.otherTools[num - 1]);
                 this.setState({
-                  addOtherNum: num
-                })
+                  addOtherNum: num,
+                });
               }
             }}
             style={{ height: 30 }}

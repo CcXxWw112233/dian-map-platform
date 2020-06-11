@@ -287,6 +287,12 @@ class PlottingLayer extends Observable {
       : msg1 + msg2 + msg3;
     this.help_overlay.setPosition(drawstate.position);
   }
+
+  getArrDifference(arr1, arr2) {
+    return arr1.concat(arr2).filter((v, i, arr) => {
+      return arr.indexOf(v) === arr.lastIndexOf(v);
+    });
+  }
   /**
    * @ignore
    * 添加图元
@@ -298,13 +304,19 @@ class PlottingLayer extends Observable {
       zindex || this.feature_operators.length + 1
     );
     if (this.attrs) {
+      const newAttrs = JSON.parse(JSON.stringify(this.attrs));
+      fo.setName(newAttrs.name);
       fo.attrs = {
-        ...this.attrs,
+        ...newAttrs,
         geometryType: feature.getGeometry().getType(),
       };
     }
     this.feature_operators.push(fo);
-    this.listCb && this.listCb(this.feature_operators);
+    if (this.attrs) {
+      const tempList = this.getArrDifference(this.feature_operators, this.projectScoutingArr)
+      this.listCb && this.listCb(tempList);
+      this.attrs = null
+    }
     return fo;
   }
   /**
