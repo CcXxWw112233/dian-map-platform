@@ -198,7 +198,7 @@ export const createStyle = function (
     : null;
   if (type === "Point") {
     return new Style({
-      image:( options.iconUrl || options.icon)
+      image:( options.iconUrl || (options.icon && options.icon.hasOwnProperty('src')))
         ? new Icon({
             src: options.iconUrl,
             color: options.pointColor || defaultColor,

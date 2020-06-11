@@ -254,6 +254,7 @@ class IndexPage extends React.Component {
                     className='HomeTabs'
                     defaultActiveKey="1"
                     // tabBarGutter={60}
+                    animated={true}
                     onChange={this.tabChange}
                     tabBarStyle={{
                       textAlign:"center"
