@@ -269,14 +269,17 @@ export default class ExcelRead extends React.Component{
                 target:"board_xlsx",
                 title: item.name
             }
+            if(item.name)
             return ADD_COLLECTION(obj);
         })
 
-        let list = await Promise.all(promise);
+        // 过滤部分没有名称的数据
+        promise = promise.filter(item => item);
+        await Promise.all(promise);
 
         let hasUid = hasLocation.map(item => item.uid);
         arr = data.filter(item => !hasUid.includes(item.uid));
-        message.success('导入完成');
+        message.success('导入完成,已过滤没有名称的数据');
         this.setState({
             hasLocation: [],
             data: arr
