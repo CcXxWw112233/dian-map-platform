@@ -966,6 +966,7 @@ export default class ScoutingDetails extends PureComponent {
     this.scrollView = React.createRef();
   }
   componentDidMount () {
+    const { Evt } = Event;
     this.getDetails();
     // 删除存在与页面中的项目点和元素
     Action.removeListPoint();
@@ -987,6 +988,10 @@ export default class ScoutingDetails extends PureComponent {
     Event.Evt.on("updatePlotFeature", (data) => {
       this.fetchCollection();
     });
+    Evt.on('CollectionUpdate:remove',this.onCollectionUpdate.bind(this,'remove'))
+    Evt.on('CollectionUpdate:add',this.onCollectionUpdate.bind(this,'add'))
+    Evt.on('CollectionUpdate:reload',this.onCollectionUpdate.bind(this,'reload'))
+
   }
 
   // 设置正在播放的数据
@@ -996,6 +1001,23 @@ export default class ScoutingDetails extends PureComponent {
       audioData: data,
     });
   };
+
+  // 轮询中的数据监听
+  onCollectionUpdate = (type,collections)=>{
+    let arr = Array.from(this.state.all_collection);
+    if(type === 'add'){
+      arr = arr.concat(collections);
+    }
+    if(type === 'remove'){
+      let key = collections.map(item => item.id);
+      arr = arr.filter(item => !key.includes(item.id));
+    }
+    // 重组所有数据
+    let list = this.reSetCollection(arr);
+    // 更新分组列表和所有collection
+    this.updateCollection(arr ,list)
+  }
+
   // 获取缓存中选定的项目
   getDetails = (flag) => {
     ScouListAction.checkItem().then((res) => {
@@ -1014,7 +1036,8 @@ export default class ScoutingDetails extends PureComponent {
 
   // 渲染区域分类列表
   renderAreaList = () => {
-    Action.fetchAreaList({ board_id: this.state.current_board.board_id })
+    let param = { board_id: this.state.current_board.board_id };
+    Action.fetchAreaList(param)
       .then((resp) => {
         // console.log(resp)
         let respData = resp.data;
@@ -1027,6 +1050,7 @@ export default class ScoutingDetails extends PureComponent {
         });
         // 获取区域分类的数据列表
         this.fetchCollection();
+        Action.addToListen(param);
       })
       .catch((err) => {
         console.log(err);
@@ -1157,6 +1181,7 @@ export default class ScoutingDetails extends PureComponent {
       },
     });
     Action.removeLayer();
+    Action.clearListen();
   }
   // 渲染带坐标的数据
   renderCollection = (data) => {
@@ -1171,6 +1196,8 @@ export default class ScoutingDetails extends PureComponent {
     };
     Action.getCollectionList(params).then((res) => {
       let data = res.data;
+      // 轮询中，加入对比更新机制
+      Action.oldData = data;
       // 将重组后的数据更新,保存没有关联区域的数据
       let array = this.reSetCollection(data);
       this.updateCollection(data, array)
@@ -1266,6 +1293,7 @@ export default class ScoutingDetails extends PureComponent {
             let arr = this.reSetCollection(this.state.all_collection);
             // this.renderCollection();
             this.updateCollection(Array.from(this.state.all_collection), arr);
+            Action.oldData = this.state.all_collection;
           }
         );
       })
