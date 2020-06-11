@@ -2,7 +2,7 @@ import { setSession } from "../../../utils/sessionManage";
 import listAction from "./ScoutingList";
 import PhotoSwipe from "../../../components/PhotoSwipe/action";
 import config from "../../../services/scouting";
-import { dateFormat } from "../../../utils/utils";
+import { dateFormat ,Different} from "../../../utils/utils";
 import InitMap from "../../../utils/INITMAP";
 import {
   drawPoint,
@@ -64,6 +64,8 @@ function Action () {
   this.boxFeature = {};
   this.draw = null;
   this.lenged = null;
+  this.oldData = [];
+  let requestTime = 10 * 1000;
 
   // 通过范围获取坐标点
   let getBoxCoordinates = (extent) => {
@@ -818,6 +820,20 @@ function Action () {
     // });
   };
 
+  // 设置overlay层叠问题
+  this.editZIndexOverlay = (id)=>{
+    let overlay = InitMap.map.getOverlayById(id);
+    // console.log(overlay)
+    let className = "activeOverlayDefault";
+    let activeOverlays = document.querySelectorAll('.'+ className);
+    activeOverlays.forEach(item => {
+      item.classList.remove(className);
+    })
+
+    let element = overlay.getElement();
+    element.parentNode && element.parentNode.classList.add(className);
+  }
+
   //   添加元素坐标的overlay
   this.addOverlay = (coor, data) => {
     let isLoading = false;
@@ -829,6 +845,7 @@ function Action () {
     let overlay = createOverlay(ele.element, {
       positioning: "bottom-center",
       offset: [0, -25],
+      id: data.id
     });
     InitMap.map.addOverlay(overlay);
     this.overlays.push(overlay);
@@ -1207,6 +1224,41 @@ function Action () {
       InitMap.map.addInteraction(this.drawBox);
     });
   };
+  this.clearListen = ()=>{
+    if(this.repeatRequst){
+      clearTimeout(this.repeatRequst);
+    }
+  }
+  this.addToListen = (param)=>{
+    this.repeatRequst = setTimeout(()=>{
+      this.addListenAjax(param);
+      this.addToListen(param);
+    },requestTime)
+  }
+  // 添加轮询机制
+  this.addListenAjax = async (param)=>{
+    let oldData = this.oldData;
+    let res = await this.getCollectionList(param);
+    let data = res.data;
+    let arr = Different(oldData,data,'id');
+    if(oldData.length > data.length){
+      // 这里是删除了，所以可以调用删除更新
+      // console.log(arr,'删除');
+      Event.Evt.firEvent('CollectionUpdate:remove',arr);
+    }
+    if(oldData.length < data.length){
+      // 这里是新增，所以要调用新增的更新监听
+      // console.log(arr,'新增');
+      Event.Evt.firEvent('CollectionUpdate:add',arr);
+    }
+    if(arr.length && oldData.length === data.length){
+      // 这里是删除之后又新增了，所以长度一致，但是ID不同，会有更新的数据，要调用刷新的监听
+      // console.log(arr,'刷新');
+      Event.Evt.firEvent('CollectionUpdate:reload',arr);
+    }
+    // 将最新的数据更新到本地。用来对比
+    this.oldData = data;
+  }
 }
 
 let action = new Action();

@@ -218,4 +218,36 @@ export const formatSize = (limit)=>{
   return {size,text: sizeFormat};  
 }
 
+export function Different(fArr,cArr,field){
+  let diffRes = []
+  let fDatas = []
+  let cDatas = []
+  for(let i in fArr){
+      let flg = false
+      for(let j in cArr){
+          if(cArr[j][field]===fArr[i][field]){
+              flg = true
+              break
+          }
+      }
+      if(!flg){
+          fDatas.push(fArr[i])
+      }
+  }
+  for(let i in cArr){
+      let flg = false
+      for(let j in fArr){
+          if(fArr[j][field]===cArr[i][field]){
+              flg = true
+              break
+          }
+      }
+      if(!flg){
+          cDatas.push(cArr[i])
+      }
+  }
+  diffRes.push(...cDatas.concat(fDatas))
+  return diffRes
+}
+
 
