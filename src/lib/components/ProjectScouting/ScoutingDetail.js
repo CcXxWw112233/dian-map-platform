@@ -820,6 +820,20 @@ function Action () {
     // });
   };
 
+  // 设置overlay层叠问题
+  this.editZIndexOverlay = (id)=>{
+    let overlay = InitMap.map.getOverlayById(id);
+    // console.log(overlay)
+    let className = "activeOverlayDefault";
+    let activeOverlays = document.querySelectorAll('.'+ className);
+    activeOverlays.forEach(item => {
+      item.classList.remove(className);
+    })
+
+    let element = overlay.getElement();
+    element.parentNode && element.parentNode.classList.add(className);
+  }
+
   //   添加元素坐标的overlay
   this.addOverlay = (coor, data) => {
     let isLoading = false;
@@ -831,6 +845,7 @@ function Action () {
     let overlay = createOverlay(ele.element, {
       positioning: "bottom-center",
       offset: [0, -25],
+      id: data.id
     });
     InitMap.map.addOverlay(overlay);
     this.overlays.push(overlay);

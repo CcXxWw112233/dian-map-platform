@@ -673,6 +673,7 @@ export const UploadItem = ({
         val.is_display === "1"
       ) {
         let coor = [+val.location.longitude, +val.location.latitude];
+        Action.editZIndexOverlay(val.id);
         Action.toCenter({ center: coor });
       }
   
