@@ -38,6 +38,7 @@ import TempPlottingIcon from "components/TempPlotting/TempPlottingIcon";
 import TempPlottingPanel from "components/TempPlotting/TempPlottingPanel";
 import PhotoSwipe from '../components/PhotoSwipe'
 import FlutterComponents from '../pages/FlutterComponents'
+import PlotTools from "../components/PlotTools/ToolBar"
 
 @connect(
   ({
@@ -218,10 +219,10 @@ class IndexPage extends React.Component {
       <div className={styles.normal}>
         {/* 地图主体 */}
         <LayerMap onLoad={this.MapOnload} />
-        <PlottingModal />
+        {/* <PlottingModal /> */}
         <ConfirmModal />
         {/* <SketchPicker></SketchPicker> */}
-        {toolBars && <ToolBar></ToolBar>}
+        {/* {toolBars && <ToolBar></ToolBar>} */}
         {bottomTools && <BottomToolBar></BottomToolBar>}
         {searchTools && (
           <SearchToolBar
@@ -231,6 +232,7 @@ class IndexPage extends React.Component {
         )}
         <TempPlottingIcon></TempPlottingIcon>
         <TempPlottingPanel></TempPlottingPanel>
+        <PlotTools></PlotTools>
         <LengedList></LengedList>
         {/* <Location></Location> */}
         <Sider width={360}>

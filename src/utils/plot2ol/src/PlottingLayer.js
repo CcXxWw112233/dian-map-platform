@@ -16,6 +16,8 @@ import * as ArrTools from "../util/array";
 import * as ol from "ol";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
+
+import Event from "../../../lib/utils/event";
 class PlottingLayer extends Observable {
   /**
    * @classdesc 标绘主图层封装。后续可以有多个对象。目前就中心而言应该就一个对象
@@ -113,7 +115,7 @@ class PlottingLayer extends Observable {
      */
     this._ls_mapclick = null;
 
-    this.projectScoutingArr = []
+    this.projectScoutingArr = [];
     //--合并地图选项
     combineOpts(this.opts, this.defaults, opts);
     //--创建layer
@@ -124,6 +126,14 @@ class PlottingLayer extends Observable {
     this.plotDraw = new PlotDraw(map);
     //--绑定地图事件
     this._bindListener();
+
+    this.style = null;
+
+    Event.Evt.on("setAttribute", ({ style, attrs, cb }) => {
+      this.style = style;
+      this.attrs = attrs;
+      this.listCb = cb;
+    });
   }
   /**
    * @ignore
@@ -248,6 +258,7 @@ class PlottingLayer extends Observable {
    */
   _onDrawEnd(event) {
     const feature = event.feature;
+    this.style && feature.setStyle(this.style);
 
     this._removeHelpOverlay();
 
@@ -270,7 +281,7 @@ class PlottingLayer extends Observable {
       border: "#e60a14 1px solid",
       "font-size": "12px",
     };
-    Object.assign(this.help_overlay_ele.style, style)
+    Object.assign(this.help_overlay_ele.style, style);
     this.help_overlay_ele.innerHTML = drawstate.freehand
       ? freehandmsg
       : msg1 + msg2 + msg3;
@@ -281,12 +292,19 @@ class PlottingLayer extends Observable {
    * 添加图元
    */
   _addFeature(feature, zindex) {
-    const fo = this._getFeatureOperator(
+    let fo = this._getFeatureOperator(
       feature,
       this.showLayer,
       zindex || this.feature_operators.length + 1
     );
+    if (this.attrs) {
+      fo.attrs = {
+        ...this.attrs,
+        geometryType: feature.getGeometry().getType(),
+      };
+    }
     this.feature_operators.push(fo);
+    this.listCb && this.listCb(this.feature_operators);
     return fo;
   }
   /**

@@ -176,7 +176,7 @@ export default class PlottingModal extends Component {
     });
   };
   render() {
-    let title = "新增b标绘";
+    let title = "新增标绘";
     if (this.props.operator) {
       if (this.props.operator.name !== "未命名") {
         title = "修改标绘";

@@ -6,6 +6,7 @@ import Constants from "./Constants";
 import * as DomUtils from "../util/dom_util";
 import FeatureEvent from "./events/FeatureEvent";
 import { connectEvent, disconnectEvent } from "../util/core";
+import Event from "../../../lib/utils/event";
 class PlotEdit extends Observable {
   /**
    * @classdesc 图元进行编辑的基类。用来创建控制点，绑定控制点事件，对feature的数据进行处理
@@ -146,10 +147,10 @@ class PlotEdit extends Observable {
       delBtnEle,
       "mousedown",
       () => {
-        this.delCb && this.delCb(0);
         window.featureOperator &&
           this.layer.removeFeature(window.featureOperator);
         window.featureOperator && delete window.featureOperator;
+        this.layer.listCb && this.layer.listCb(this.layer.feature_operators);
       },
       this
     );
