@@ -133,7 +133,7 @@ export default class PlayCollectionControl extends React.PureComponent{
 
     render(){
         let { hasNext,hasPrev ,playMode ,isAutoPlay} = this.state;
-        let { isPlay, onExit = ()=>{} ,currentGroup} = this.props;
+        let { onExit = ()=>{} ,currentGroup ,onNextGroup = ()=>{} ,hasNextGroup ,hasPrevGroup ,onPrevGroup = () => {}} = this.props;
         return ReactDOM.createPortal(
             <div className={styles.PlayCollectionControl}>
                 <div className={styles.playCollectionTitle}>
@@ -164,6 +164,20 @@ export default class PlayCollectionControl extends React.PureComponent{
                             {/* {isPlay?'暂停':"继续"} */}
                         </Button>
                     }
+                    <Button shape="round" size='small'
+                    danger
+                    icon={<MyIcon type="icon-doubleleft"/>}
+                    disabled={!hasPrevGroup}
+                    onClick={onPrevGroup}>
+                        {/* 上一组 */}
+                    </Button>
+                    <Button shape="round" size='small'
+                    danger
+                    icon={<MyIcon type="icon-doubleright"/>}
+                    disabled={!hasNextGroup}
+                    onClick={onNextGroup}>
+                        {/* 下一组 */}
+                    </Button>
 
                     <Button shape="round" size='small'
                     danger
