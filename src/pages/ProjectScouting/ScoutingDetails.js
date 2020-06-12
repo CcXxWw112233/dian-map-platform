@@ -789,11 +789,16 @@ export default class ScoutingDetails extends PureComponent {
     })
   }
 
-  // 查询最近一组中含有采集数据的分组
+  // 查询最近一组中含有采集数据的分组,添加选中，默认播放选中分组
   getFirstAreaCollection = (index)=>{
     for(let i = index; i< this.state.area_list.length; i++){
       let item = this.state.area_list[i];
-      if(item.collection && item.collection.length){
+      if(this.state.area_active_key){
+        if(this.state.area_active_key === item.id){
+          return item;
+        }
+      }else
+      if((item.collection && item.collection.length)){
         return item;
       }
     }
@@ -883,10 +888,21 @@ export default class ScoutingDetails extends PureComponent {
       data = areaData;
     }else{
       data = this.getFirstAreaCollection(index);
+      !data && (data = {});
     }
-    
-    let collection = data.collection.filter(item => item.is_display === '1');
-    let flag = PlayCollectionAction.setData(mode, collection.sort((a,b)=> (a.__index || 0) - (b.__index || 0)));
+    // 过滤空坐标信息
+    let collection = data.collection && data.collection.filter(item => (item.is_display === '1'));
+    if(!collection || collection && !collection.length) return message.warn('当前分组没有数据可以进行播放');
+    let arr = [];
+    collection.forEach(item => {
+      if(item.collect_type !== '4' && item.collect_type !== '5'){
+        if(item.location && item.location.hasOwnProperty('latitude')){
+          arr.push(item);
+        }
+      }else
+      arr.push(item);
+    })
+    let flag = PlayCollectionAction.setData(mode, arr.sort((a,b)=> (a.__index || 0) - (b.__index || 0)));
     if(flag){
       PlayCollectionAction.play();
       this.hideOtherSlide();
