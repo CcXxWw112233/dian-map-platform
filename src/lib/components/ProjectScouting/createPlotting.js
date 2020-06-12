@@ -33,7 +33,7 @@ export const createPopupOverlay = (feature, coordinate) => {
   const geometry = feature.getGeometry();
   let len, area, xy,remark;
   if (geometry.type === "polygon") {
-    len = formatLength(geometry);
+    // len = formatLength(geometry);
     area = formatArea(geometry);
   }
   if (geometry.type === "polyline") {

@@ -117,10 +117,16 @@ export default class TempPlotPanel extends React.Component {
     });
     plotEdit.plottingLayer.removeFeature(newList[index]);
     newList.splice(index, 1);
+    let newList2 = []
+    newList.forEach(item => {
+      if (item.attrs.name) {
+        newList2.push(item)
+      }
+    })
     dispatch({
       type: "featureOperatorList/updateList",
       payload: {
-        featureOperatorList: newList,
+        featureOperatorList: newList2,
       },
     });
   };
@@ -183,34 +189,42 @@ export default class TempPlotPanel extends React.Component {
     const { plottingLayer } = plotEdit;
     let { dispatch, featureOperatorList } = this.props;
     let arr = this.getSelectedData();
-    // 转存
-    event.Evt.firEvent("hasFeatureToProject", arr);
-    // 转存之后的回调
-    event.Evt.on("appendToProjectSuccess", (val) => {
-      // console.log(val);
-      let array = [...featureOperatorList];
-      val.forEach((item) => {
-        let index = array.findIndex((feature) => feature.guid === item.guid);
-        if (index >= 0) {
-          plottingLayer.removeFeature(array[index]);
-          // 删除转存成功的数据
-          array.splice(index, 1);
-        }
+    if (arr.length) {
+      // 转存
+      event.Evt.firEvent("hasFeatureToProject", arr);
+      // 转存之后的回调
+      event.Evt.on("appendToProjectSuccess", (val) => {
+        // console.log(val);
+        let array = [...featureOperatorList];
+        val.forEach((item) => {
+          let index = array.findIndex((feature) => feature.guid === item.guid);
+          if (index >= 0) {
+            plottingLayer.removeFeature(array[index]);
+            // 删除转存成功的数据
+            array.splice(index, 1);
+          }
+        });
+        me.setState({
+          checkedList: [],
+        });
+        me.setState({
+          indeterminate: false,
+          checkAll: false,
+        });
+        let newList2 = []
+        array.forEach(item => {
+          if (item.attrs.name) {
+            newList2.push(item)
+          }
+        })
+        dispatch({
+          type: "featureOperatorList/updateList",
+          payload: {
+            featureOperatorList: newList2,
+          },
+        });
       });
-      me.setState({
-        checkedList: [],
-      });
-      me.setState({
-        indeterminate: false,
-        checkAll: false,
-      });
-      dispatch({
-        type: "featureOperatorList/updateList",
-        payload: {
-          featureOperatorList: array,
-        },
-      });
-    });
+    }
   };
   handleRowClick = (featureOperator) => {
     this.setState({
