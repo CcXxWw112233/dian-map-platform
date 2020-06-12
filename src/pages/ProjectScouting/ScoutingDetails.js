@@ -586,9 +586,9 @@ export default class ScoutingDetails extends PureComponent {
   // 点击panel时的回调
   setActiveCollapse = (key) => {
     this.setState({ area_active_key: key });
+    if(this.state.multipleGroup) return;
     // 关闭的时候，全部清空
     if(!key){this.renderCollection([])};
-    if(this.state.multipleGroup) return;
     this.setState({area_selected:[key]})
     if (key) {
       let obj = this.state.area_list.find((item) => item.id === key);
