@@ -58,6 +58,7 @@ export default function (){
 
     this.setOpacity = (val = 1)=>{
         opacity.value = val;
+        text.innerText =  Math.floor(val * 100) +'%';
     }
 
     let oncancel = ()=>{

@@ -1189,9 +1189,9 @@ function Action () {
               this.staticimg.setSource(source)
               this.staticimg.setVisible(true);
               // 更新设置的透明度
-              this.staticimg.setOpacity(1);
+              this.staticimg.setOpacity(data.opacity);
               // 设置设置弹窗的透明度,同步更新
-              ele.setOpacity(1);
+              ele.setOpacity(data.opacity);
               // 显示弹窗
               overlay.setPosition(tr);
               // 更新显示元素
