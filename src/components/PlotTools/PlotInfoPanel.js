@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Input, Button, Skeleton } from "antd";
+import { Input, Button, Skeleton, message } from "antd";
 import throttle from "lodash/throttle";
 
 import globalStyle from "@/globalSet/styles/globalStyles.less";
@@ -80,7 +80,6 @@ export default class PlotInfoPanel extends Component {
     this.getSymbolData(this.props);
   }
   componentWillReceiveProps(nextProps) {
-    const { isModifyPlot } = nextProps;
     this.getSymbolData(nextProps);
   }
   componentWillUnmount() {
@@ -109,36 +108,46 @@ export default class PlotInfoPanel extends Component {
     });
   }
   getSymbolData = async (props) => {
-    const { plotType } = props;
-    if (!this.symbols[plotType]) {
-      let res = null;
-      if (plotType === "Point") {
-        res = await plotServices.GET_POINTSYMBOL();
+    try {
+      const { plotType, responseData, isModifyPlot } = props;
+      if (!isModifyPlot) {
+        let res = null;
+        if (plotType === "Point") {
+          res = await plotServices.GET_POINTSYMBOL();
+        }
+        if (plotType === "Polyline" || plotType === "LineString") {
+          res = await plotServices.GET_POLYLINESYMBOL();
+        }
+        if (
+          plotType === "Polygon" ||
+          plotType === "freePolygon" ||
+          plotType === "arrow" ||
+          plotType === "rect" ||
+          plotType === "circle"
+        ) {
+          res = await plotServices.GET_POLYGONSYMBOL();
+          res.data[2].items = [...res.data[2].items, ...config];
+        }
+        // this.symbols[plotType] = res?.data;
+        let symbols = [];
+        if (res) {
+          res.data.forEach((item) => {
+            symbols = [...symbols, ...item.items];
+          });
+        }
+        this.setState({
+          symbols: symbols || [],
+          plotType: plotType,
+        });
+      } else {
+        this.setState({
+          symbols: responseData || [],
+          plotType: plotType,
+        });
       }
-      if (plotType === "Polyline" || plotType === "LineString") {
-        res = await plotServices.GET_POLYLINESYMBOL();
-      }
-      if (
-        plotType === "Polygon" ||
-        plotType === "freePolygon" ||
-        plotType === "arrow" ||
-        plotType === "rect" ||
-        plotType === "circle"
-      ) {
-        res = await plotServices.GET_POLYGONSYMBOL();
-        res.data[2].items = [...res.data[2].items, ...config];
-      }
-      // this.symbols[plotType] = res?.data;
-      let symbols = [];
-      res.data.forEach((item) => {
-        symbols = [...symbols, ...item.items];
-      });
-      this.symbols[plotType] = symbols;
+    } catch (err) {
+      message.error(err);
     }
-    this.setState({
-      symbols: this.symbols[plotType] || [],
-      plotType: plotType,
-    });
   };
   getSymbol = (data) => {
     if (!data) return;
@@ -286,6 +295,7 @@ export default class PlotInfoPanel extends Component {
             Event.Evt.firEvent("setAttribute", {
               style: style,
               attrs: attrs,
+              responeseData: me.state.symbols,
               cb: me.updateRedux.bind(me),
             });
           } else {
@@ -302,6 +312,7 @@ export default class PlotInfoPanel extends Component {
       Event.Evt.firEvent("setAttribute", {
         style: style,
         attrs: attrs,
+        responseData: this.state.symbols,
         cb: this.updateRedux.bind(this),
       });
     } else {
@@ -449,6 +460,7 @@ export default class PlotInfoPanel extends Component {
       Event.Evt.firEvent("setAttribute", {
         style: style,
         attrs: attrs,
+        responseData: this.state.symbols,
         cb: this.updateRedux.bind(this),
       });
     } else {
@@ -536,6 +548,7 @@ export default class PlotInfoPanel extends Component {
       Event.Evt.firEvent("setAttribute", {
         style: style,
         attrs: attrs,
+        responseData: this.state.symbols,
         cb: this.updateRedux.bind(this),
       });
     } else {
@@ -563,7 +576,10 @@ export default class PlotInfoPanel extends Component {
             &#xe632;
           </i>
         </div>
-        <div className={`${styles.body} ${globalStyle.autoScrollY}`} style={{ height: "calc(100% - 74px)" }}>
+        <div
+          className={`${styles.body} ${globalStyle.autoScrollY}`}
+          style={{ height: "calc(100% - 74px)" }}
+        >
           <Input
             placeholder="输入标绘名称"
             style={{ marginBottom: 6 }}

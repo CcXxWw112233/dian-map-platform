@@ -129,9 +129,12 @@ class PlottingLayer extends Observable {
 
     this.style = null;
 
-    Event.Evt.on("setAttribute", ({ style, attrs, cb }) => {
+    this.responseData = null;
+
+    Event.Evt.on("setAttribute", ({ style, attrs, responseData, cb }) => {
       this.style = style;
       this.attrs = attrs;
+      this.responseData = responseData;
       this.listCb = cb;
     });
   }
@@ -310,12 +313,18 @@ class PlottingLayer extends Observable {
         ...newAttrs,
         geometryType: feature.getGeometry().getType(),
       };
+      fo.responseData = this.responseData
     }
     this.feature_operators.push(fo);
     if (this.attrs) {
-      const tempList = this.getArrDifference(this.feature_operators, this.projectScoutingArr)
+      const tempList = this.getArrDifference(
+        this.feature_operators,
+        this.projectScoutingArr
+      );
       this.listCb && this.listCb(tempList);
-      this.attrs = null
+      this.attrs = null;
+      this.responseData = null
+      delete this.listCb
     }
     return fo;
   }
