@@ -51,7 +51,7 @@ function action(){
         this.isPlay = true;
         this.getCurrent();
         this.status = 'play';
-        if(mode === 'auto'){
+        if(this.playMode === 'auto'){
             // 自动播放
             replay();
         }

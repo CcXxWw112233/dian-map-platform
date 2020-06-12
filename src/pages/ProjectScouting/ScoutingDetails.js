@@ -24,7 +24,7 @@ import { MyIcon } from '../../components/utils'
 import { Title, ScoutingHeader, ScoutingItem, UploadItem,  areaScouting} from './components/ScoutingDetailsSubComponents'
 import PlayCollectionControl from './components/playCollectionControl'
 
-
+const { Evt } = Event;
 const { TabPane } = Tabs;
 
 
@@ -52,7 +52,9 @@ export default class ScoutingDetails extends PureComponent {
       area_selected:[],
       isPlay:false,
       playing: false,
-      currentGroup:{},
+      currentGroup:null,
+      notNextGroup:false,
+      notPrevGroup:false,
 
       visible: true,
       activeKey: panes[0].key,
@@ -88,7 +90,7 @@ export default class ScoutingDetails extends PureComponent {
     Evt.on('CollectionUpdate:remove',this.onCollectionUpdate.bind(this,'remove'))
     Evt.on('CollectionUpdate:add',this.onCollectionUpdate.bind(this,'add'))
     Evt.on('CollectionUpdate:reload',this.onCollectionUpdate.bind(this,'reload'))
-
+    
   }
 
   // 设置正在播放的数据
@@ -138,12 +140,14 @@ export default class ScoutingDetails extends PureComponent {
       .then((resp) => {
         // console.log(resp)
         let respData = resp.data;
+        // 当前激活的区域
+        let active = this.area_active_key || ( respData[0] && respData[0].id);
         this.setState({
           area_list: respData.map((item) =>
             Object.assign(item, { _edit: false, _remarkEdit: false })
           ),
-          area_active_key: respData[0] && respData[0].id,
-          area_selected:[respData[0] && respData[0].id],
+          area_active_key: active,
+          area_selected:active,
         });
         // 获取区域分类的数据列表
         this.fetchCollection();
@@ -214,7 +218,7 @@ export default class ScoutingDetails extends PureComponent {
         // 将新增的顶上去
         this.scrollView.current &&
           (this.scrollView.current.scrollTop =
-            this.scrollView.current.scrollHeight + 1000);
+            this.scrollView.current.scrollHeight + 10000);
       }
     );
   };
@@ -254,6 +258,9 @@ export default class ScoutingDetails extends PureComponent {
     Action.addArea({ board_id: current_board.board_id, name: name }).then(
       (res) => {
         message.success("新增操作成功");
+        this.setState({
+          area_active_key: res.data || ""
+        })
         // console.log(res);
         this.renderAreaList();
       }
@@ -552,7 +559,7 @@ export default class ScoutingDetails extends PureComponent {
         let arr = this.state.area_list.filter((item) => item.id !== val.id);
         this.setState({
           area_list: arr,
-          multipleGroup: arr.length > 1
+          multipleGroup: this.state.multipleGroup ? arr.length > 1 :false
         });
       })
       .catch((err) => {
@@ -578,6 +585,8 @@ export default class ScoutingDetails extends PureComponent {
   // 点击panel时的回调
   setActiveCollapse = (key) => {
     this.setState({ area_active_key: key });
+    // 关闭的时候，全部清空
+    if(!key){this.renderCollection([])};
     if(this.state.multipleGroup) return;
     this.setState({area_selected:[key]})
     if (key) {
@@ -779,8 +788,8 @@ export default class ScoutingDetails extends PureComponent {
   }
 
   // 查询最近一组中含有采集数据的分组
-  getFirstAreaCollection = ()=>{
-    for(let i = 0; i< this.state.area_list.length; i++){
+  getFirstAreaCollection = (index)=>{
+    for(let i = index; i< this.state.area_list.length; i++){
       let item = this.state.area_list[i];
       if(item.collection && item.collection.length){
         return item;
@@ -800,20 +809,97 @@ export default class ScoutingDetails extends PureComponent {
     PlayCollectionAction.stop();
   }
 
+  // 播放下一组
+  playNextGroup = ()=>{
+    PlayCollectionAction.stop();
+    // 如果有下一组
+    let next = this.checkHasNextGroup();
+    if(next){
+      this.startPlayCollection("",next)
+      Evt.firEvent('autoPlayChange');
+    }
+  }
+
+  // 播放上一组
+  playPrevGroup = ()=>{
+    PlayCollectionAction.stop();
+    let prev = this.checkHasPrevGroup();
+    if(prev){
+      this.startPlayCollection("",prev);
+      Evt.firEvent('autoPlayChange');
+    }
+  }
+  // 检查有没有下一个
+  checkHasNextGroup = () => {
+    let current = this.state.currentGroup ? {...this.state.currentGroup} : {};
+    let index = this.state.area_list.findIndex(item => item.id === current.id);
+    if(index !== -1){
+      let next = this.state.area_list[index + 1];
+      if(next){
+        if(next.collection && next.collection.length)
+        return next;
+        else {
+          for(let i = index + 1; i< this.state.area_list.length; i++){
+            let item = this.state.area_list[i];
+            if(item.collection && item.collection.length){
+              return item;
+            }
+          }
+        }
+      }else return undefined;
+    }
+    else return undefined;
+  }
+  // 检查有没有上一个
+  checkHasPrevGroup = ()=>{
+    let current = this.state.currentGroup ? {...this.state.currentGroup} : {};
+    let index = this.state.area_list.findIndex(item => item.id === current.id);
+    if(index !== -1){
+      if(index === 0){
+        return undefined;
+      }
+      let prev = this.state.area_list[index - 1];
+      if(prev){
+        if(prev.collection.length)
+        return prev;
+        else {
+          for(let i = index - 1; i >= 0;i--){
+            let item = this.state.area_list[i];
+            if(item.collection && item.collection.length){
+              return item;
+            }
+          }
+        }
+      }else return undefined;
+    }else return undefined;
+  }
   // 开始播放
-  startPlayCollection = (mode)=>{
+  startPlayCollection = (mode , areaData ,index = 0)=>{
     // 获取有数据的分组，不包含未分组区域
-    let data = this.getFirstAreaCollection();
+    let data = [];
+    if(areaData && areaData.collection.length){
+      data = areaData;
+    }else{
+      data = this.getFirstAreaCollection(index);
+    }
+    
     let collection = data.collection.filter(item => item.is_display === '1');
     let flag = PlayCollectionAction.setData(mode, collection.sort((a,b)=> (a.__index || 0) - (b.__index || 0)));
     if(flag){
       PlayCollectionAction.play();
-
       this.hideOtherSlide();
       this.setState({
         isPlay:true,
         playing:true,
         currentGroup: data,
+      },()=>{
+        // 检查是不是有上一个和下一个，自动过滤没有任何数据的
+        let next = this.checkHasNextGroup();
+        let prev = this.checkHasPrevGroup();
+        this.setState({
+          notNextGroup: !next,
+          notPrevGroup: !prev
+        })
       })
     }
   }
@@ -1050,9 +1136,9 @@ export default class ScoutingDetails extends PureComponent {
                 content={
                   <div>
                     <Button type='link' size='small'
-                    onClick={this.startPlayCollection.bind(this,'hand')}>手动播放</Button>
+                    onClick={()=> this.startPlayCollection('hand')}>手动播放</Button>
                     <Button type='link' size='small'
-                    onClick={this.startPlayCollection.bind(this,'auto')}>自动播放</Button>
+                    onClick={()=> this.startPlayCollection('auto')}>自动播放</Button>
                   </div>
                 }>
                   <Button shape="round" 
@@ -1077,7 +1163,11 @@ export default class ScoutingDetails extends PureComponent {
           </TabPane> */}
         </Tabs>
         {playing && <PlayCollectionControl isPlay={isPlay} onExit={this.StopPlay}
-        currentGroup={this.state.currentGroup}/> }
+        currentGroup={this.state.currentGroup}
+        onNextGroup={this.playNextGroup}
+        onPrevGroup={this.playPrevGroup}
+        hasNextGroup={!this.state.notNextGroup}
+        hasPrevGroup={!this.state.notPrevGroup}/> }
       </div>
     );
   }
