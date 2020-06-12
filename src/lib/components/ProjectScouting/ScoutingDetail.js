@@ -788,6 +788,7 @@ function Action () {
       }
     });
     let res = await Promise.all(promise);
+    this.removePlanPicCollection();
     // .then((res) => {
     this.imgs = [];
     res.forEach((item) => {
@@ -904,6 +905,7 @@ function Action () {
     this.removeOverlay();
     this.removeFeatures();
     this.removeAreaSelect();
+    this.removePlanPicCollection();
     if(!flag)
     InitMap.map.removeLayer(this.Layer);
   };
