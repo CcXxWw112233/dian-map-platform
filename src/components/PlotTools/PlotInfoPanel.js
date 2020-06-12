@@ -81,10 +81,10 @@ export default class PlotInfoPanel extends Component {
   }
   componentWillReceiveProps(nextProps) {
     this.getSymbolData(nextProps);
-    const { isModifyPlot } = nextProps;
-    if (!isModifyPlot) {
-      this.updateProps();
-    }
+    // const { isModifyPlot } = nextProps;
+    // if (!isModifyPlot) {
+    //   this.updateProps();
+    // }
   }
 
   updateProps = () => {
