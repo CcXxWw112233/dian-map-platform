@@ -793,7 +793,7 @@ export default class ScoutingDetails extends PureComponent {
   getFirstAreaCollection = (index)=>{
     for(let i = index; i< this.state.area_list.length; i++){
       let item = this.state.area_list[i];
-      if(item.collection && item.collection.length){
+      if( this.state.area_active_key === item.id && item.collection && item.collection.length){
         return item;
       }
     }
@@ -883,9 +883,11 @@ export default class ScoutingDetails extends PureComponent {
       data = areaData;
     }else{
       data = this.getFirstAreaCollection(index);
+      !data && (data = {});
     }
-    
-    let collection = data.collection.filter(item => item.is_display === '1');
+    // 过滤空坐标信息
+    let collection = data.collection && data.collection.filter(item => (item.is_display === '1' && item.location && item.location.hasOwnProperty('latitude')));
+    if(!collection) return ;
     let flag = PlayCollectionAction.setData(mode, collection.sort((a,b)=> (a.__index || 0) - (b.__index || 0)));
     if(flag){
       PlayCollectionAction.play();
