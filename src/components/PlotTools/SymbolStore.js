@@ -81,7 +81,8 @@ export default class SymbolStore extends Component {
                 {this.state.publicSymbolStore.length > 0 ? (
                   this.state.publicSymbolStore.map((symbol, index) => {
                     return (
-                      <div className={styles.symbolBlock} key={index}>
+                      <div className={styles.symbolBlock} key={index}
+                      title="系统符号仅支持查看">
                         <p
                           style={{
                             margin: 0,
@@ -91,7 +92,10 @@ export default class SymbolStore extends Component {
                         >
                           {symbol.type}
                         </p>
-                        <div className={styles.symbolList}>
+                        <div
+                          className={styles.symbolList}
+                          style={{ pointerEvents: "none" }}
+                        >
                           {symbol.items.map((item) => {
                             return (
                               <div
@@ -123,7 +127,7 @@ export default class SymbolStore extends Component {
             </div>
           </TabPane>
           <TabPane tab="项目符号" key="2">
-            <p style={{ marginBottom: 0, marginTop: "80%" }}>功能正在开发中</p>
+            <p style={{ marginBottom: 0, marginTop: "70%" }}>功能正在开发中</p>
             <p>敬请期待~</p>
           </TabPane>
         </Tabs>
