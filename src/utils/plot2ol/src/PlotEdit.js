@@ -6,7 +6,9 @@ import Constants from "./Constants";
 import * as DomUtils from "../util/dom_util";
 import FeatureEvent from "./events/FeatureEvent";
 import { connectEvent, disconnectEvent } from "../util/core";
-import Event from "../../../lib/utils/event";
+
+import douglasPeucker from "../../douglasPeucker";
+
 class PlotEdit extends Observable {
   /**
    * @classdesc 图元进行编辑的基类。用来创建控制点，绑定控制点事件，对feature的数据进行处理
@@ -59,6 +61,7 @@ class PlotEdit extends Observable {
     );
 
     var cPnts = this.getControlPoints();
+    // cPnts = douglasPeucker(cPnts, 100);
     for (var i = 0; i < cPnts.length; i++) {
       var id = Constants.HELPER_CONTROL_POINT_DIV + "-" + i;
       const dom = DomUtils.create(
@@ -71,8 +74,7 @@ class PlotEdit extends Observable {
         dom,
         "mousedown",
         () => {
-
-           // 标绘回调更新redux
+          // 标绘回调更新redux
           const tempList = this.layer.getArrDifference(
             this.layer.feature_operators,
             this.layer.projectScoutingArr
@@ -157,7 +159,7 @@ class PlotEdit extends Observable {
           this.layer.removeFeature(window.featureOperator);
         window.featureOperator && delete window.featureOperator;
 
-         // 标绘回调更新redux
+        // 标绘回调更新redux
         const tempList = this.layer.getArrDifference(
           this.layer.feature_operators,
           this.layer.projectScoutingArr
@@ -181,6 +183,7 @@ class PlotEdit extends Observable {
     }
     this.controlPoints = [];
     var cPnts = this.getControlPoints();
+    // cPnts = douglasPeucker(cPnts, 100);
     if (!isScouting) {
       this.createDelBtn(cPnts[cPnts.length - 1]);
     }
@@ -193,6 +196,7 @@ class PlotEdit extends Observable {
         positioning: "center-center",
         element: element,
       });
+      pnt.geometryId = cPnts[i].id
       this.controlPoints && this.controlPoints.push(pnt);
       this.map.addOverlay(pnt);
       DomUtils.addListener(
@@ -245,6 +249,7 @@ class PlotEdit extends Observable {
     if (this.activeControlPointId) {
       var plot = this.activePlot.getGeometry();
       var index = this.elementTable[this.activeControlPointId];
+      // index = this.controlPoints[index]?.geometryId
       plot.updatePoint(coordinate, index);
       const len = Object.keys(this.elementTable).length;
       if (index === len - 1) {
