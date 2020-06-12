@@ -324,6 +324,7 @@ class PlottingLayer extends Observable {
       this.listCb && this.listCb(tempList);
       this.attrs = null;
       this.responseData = null
+      delete this.listCb
     }
     return fo;
   }

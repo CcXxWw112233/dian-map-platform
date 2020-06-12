@@ -74,12 +74,14 @@ class PlotEdit extends Observable {
         dom,
         "mousedown",
         () => {
-          // 标绘回调更新redux
-          const tempList = this.layer.getArrDifference(
-            this.layer.feature_operators,
-            this.layer.projectScoutingArr
-          );
-          this.layer.listCb && this.layer.listCb(tempList);
+          if (!this.activePlot.isScouting) {
+            // 标绘回调更新redux
+            const tempList = this.layer.getArrDifference(
+              this.layer.feature_operators,
+              this.layer.projectScoutingArr
+            );
+            this.layer.listCb && this.layer.listCb(tempList);
+          }
         },
         this
       );
@@ -138,7 +140,7 @@ class PlotEdit extends Observable {
   }
   // 删除按钮
   createDelBtn(pt) {
-    return
+    return;
     const delBtnEle = document.createElement("div");
     delBtnEle.title = "删除图斑";
     delBtnEle.classList.add("p-helper-control-feature-del");
@@ -197,7 +199,7 @@ class PlotEdit extends Observable {
         positioning: "center-center",
         element: element,
       });
-      pnt.geometryId = cPnts[i].id
+      pnt.geometryId = cPnts[i].id;
       this.controlPoints && this.controlPoints.push(pnt);
       this.map.addOverlay(pnt);
       DomUtils.addListener(
@@ -258,13 +260,14 @@ class PlotEdit extends Observable {
       }
       var overlay = this.map.getOverlayById(this.activeControlPointId);
       overlay && overlay.setPosition(coordinate);
-
-      // 标绘回调更新redux
-      const tempList = this.layer.getArrDifference(
-        this.layer.feature_operators,
-        this.layer.projectScoutingArr
-      );
-      this.layer.listCb && this.layer.listCb(tempList);
+      if (!this.activePlot.isScouting) {
+        // 标绘回调更新redux
+        const tempList = this.layer.getArrDifference(
+          this.layer.feature_operators,
+          this.layer.projectScoutingArr
+        );
+        this.layer.listCb && this.layer.listCb(tempList);
+      }
     }
   }
 
