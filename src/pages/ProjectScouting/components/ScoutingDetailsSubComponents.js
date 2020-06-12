@@ -298,7 +298,7 @@ export const ScoutingItem = ({
     };
   
     return (
-      <DragDropContext onDragEnd={onDragEnd}>
+      <DragDropContext onDragEnd={onDragEnd.bind(this,data)}>
         <Droppable droppableId="droppable">
           {(provided, snapshot)=>(
             <div
@@ -480,6 +480,7 @@ export const UploadItem = ({
       plotting: "标绘",
       unknow: "未知",
       planPic: "规划",
+      address:"地址"
     };
     let { create_by, title, create_time } = data;
     let time = Action.dateFormat(create_time, "yyyy/MM/dd");
