@@ -260,7 +260,7 @@ export default class TempPlotPanel extends React.Component {
                     key={index}
                     className={`${styles.myRow} ${
                       this.state.selectedGuid === featureOperator.guid
-                        ? "active"
+                        ? styles.active
                         : ""
                     }`}
                     onClick={() => this.handleRowClick(featureOperator)}
