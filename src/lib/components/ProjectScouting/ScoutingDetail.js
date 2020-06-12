@@ -802,6 +802,7 @@ function Action() {
       }
     });
     let res = await Promise.all(promise);
+    this.removePlanPicCollection();
     // .then((res) => {
     this.imgs = [];
     res.forEach((item) => {
@@ -918,7 +919,9 @@ function Action() {
     this.removeOverlay();
     this.removeFeatures();
     this.removeAreaSelect();
-    if (!flag) InitMap.map.removeLayer(this.Layer);
+    this.removePlanPicCollection();
+    if(!flag)
+    InitMap.map.removeLayer(this.Layer);
   };
   this.RemoveArea = async (id) => {
     return await DELETE_AREA(id);
