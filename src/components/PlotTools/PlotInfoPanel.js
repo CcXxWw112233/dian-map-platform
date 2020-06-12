@@ -81,8 +81,13 @@ export default class PlotInfoPanel extends Component {
   }
   componentWillReceiveProps(nextProps) {
     this.getSymbolData(nextProps);
+    const { isModifyPlot } = nextProps;
+    if (!isModifyPlot) {
+      this.updateProps();
+    }
   }
-  componentWillUnmount() {
+
+  updateProps = () => {
     const { dispatch } = this.props;
     dispatch({
       type: "modal/updateData",
@@ -106,6 +111,9 @@ export default class PlotInfoPanel extends Component {
         operator: null,
       },
     });
+  };
+  componentWillUnmount() {
+    this.updateProps();
   }
   getSymbolData = async (props) => {
     try {
@@ -183,10 +191,16 @@ export default class PlotInfoPanel extends Component {
   createAttr = () => {};
   updateRedux = (list) => {
     const { dispatch } = this.props;
+    let newList = [];
+    list.forEach((item) => {
+      if (item.attrs.name) {
+        newList.push(item);
+      }
+    });
     dispatch({
       type: "featureOperatorList/updateList",
       payload: {
-        featureOperatorList: list,
+        featureOperatorList: newList,
       },
     });
   };
@@ -299,6 +313,7 @@ export default class PlotInfoPanel extends Component {
               cb: me.updateRedux.bind(me),
             });
           } else {
+            if (!window.featureOperator) return;
             window.featureOperator.attrs = attrs;
             window.featureOperator.setName(attrs.name);
             window.featureOperator.feature.setStyle(style);
@@ -316,6 +331,7 @@ export default class PlotInfoPanel extends Component {
         cb: this.updateRedux.bind(this),
       });
     } else {
+      if (!window.featureOperator) return;
       window.featureOperator.attrs = attrs;
       window.featureOperator.setName(attrs.name);
       window.featureOperator.feature.setStyle(style);
@@ -342,10 +358,16 @@ export default class PlotInfoPanel extends Component {
     });
     if (index > -1) {
       newList[index] = window.featureOperator;
+      let newList2 = [];
+      newList.forEach((item) => {
+        if (item.attrs.name) {
+          newList2.push(item);
+        }
+      });
       dispatch({
         type: "featureOperatorList/updateList",
         payload: {
-          featureOperatorList: newList,
+          featureOperatorList: newList2,
         },
       });
     }

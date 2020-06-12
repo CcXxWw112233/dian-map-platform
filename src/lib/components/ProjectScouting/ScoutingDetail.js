@@ -2,7 +2,7 @@ import { setSession } from "../../../utils/sessionManage";
 import listAction from "./ScoutingList";
 import PhotoSwipe from "../../../components/PhotoSwipe/action";
 import config from "../../../services/scouting";
-import { dateFormat ,Different} from "../../../utils/utils";
+import { dateFormat, Different } from "../../../utils/utils";
 import InitMap from "../../../utils/INITMAP";
 import {
   drawPoint,
@@ -20,7 +20,7 @@ import {
   fitPadding,
   SourceStatic,
   getExtentIsEmpty,
-  animate
+  animate,
 } from "../../utils/index";
 import {
   CollectionOverlay,
@@ -36,7 +36,7 @@ import { createPlottingFeature, createPopupOverlay } from "./createPlotting";
 import { plotEdit } from "utils/plotEdit";
 import INITMAP from "../../../utils/INITMAP";
 
-function Action () {
+function Action() {
   const {
     GET_AREA_LIST,
     ADD_AREA_BOARD,
@@ -112,7 +112,7 @@ function Action () {
       annotate: [], // 批注
       plotting: ["feature"], // 标绘
       planPic: ["plan"], // 规划图
-      address: ['board_xlsx']
+      address: ["board_xlsx"],
     };
 
     let keys = Object.keys(itemKeyVals);
@@ -133,11 +133,10 @@ function Action () {
     this.layer.projectScoutingArr &&
       this.layer.projectScoutingArr.forEach((item) => {
         INITMAP.map.removeOverlay(item.feature && item.feature.overlay);
-        if (item.feature)
-          this.layer.removeFeature(item);
+        if (item.feature) this.layer.removeFeature(item);
       });
     this.layer.projectScoutingArr = [];
-    this.layer.plotEdit.plotClickCb = null
+    this.layer.plotEdit.plotClickCb = null;
     setSession(listAction.sesstionSaveKey, "");
   };
   // 获取区域列表
@@ -225,12 +224,13 @@ function Action () {
     });
     // 删除绘制的元素
     if (this.layer) {
-      this.layer.projectScoutingArr && this.layer.projectScoutingArr.forEach((item) => {
-        if (item && item.feature) {
-          InitMap.map.removeOverlay(item.feature.overlay);
-          item && this.layer.removeFeature(item);
-        }
-      });
+      this.layer.projectScoutingArr &&
+        this.layer.projectScoutingArr.forEach((item) => {
+          if (item && item.feature) {
+            InitMap.map.removeOverlay(item.feature.overlay);
+            item && this.layer.removeFeature(item);
+          }
+        });
     }
 
     this.features = [];
@@ -287,8 +287,8 @@ function Action () {
   };
 
   this.stopModifyFeature = () => {
-    this.layer.plotEdit.deactivate()
-  }
+    this.layer.plotEdit.deactivate();
+  };
 
   // 修改图形后保存
   this.updateFeatueToDB = async (data, feature) => {
@@ -328,7 +328,10 @@ function Action () {
   };
 
   // 渲染标绘数据
-  this.renderFeaturesCollection = (data, { lenged, dispatch, addSource = true }) => {
+  this.renderFeaturesCollection = (
+    data,
+    { lenged, dispatch, addSource = true }
+  ) => {
     const commonStyleOption = {
       textFillColor: "rgba(255,0,0,1)",
       textStrokeColor: "#fff",
@@ -352,7 +355,7 @@ function Action () {
         }
       });
       this.layer.projectScoutingArr = [];
-      this.layer.plotEdit.updateCb = null
+      this.layer.plotEdit.updateCb = null;
     }
 
     data.forEach((item) => {
@@ -378,7 +381,7 @@ function Action () {
             imgSrc: iconUrl,
             font:
               content.selectName === "自定义类型"
-                ? content.name
+                ? item.title
                 : content.selectName,
             type: featureLowerType,
           };
@@ -390,8 +393,10 @@ function Action () {
             bgColor: featureType,
             borderColor: strokeColor,
             font:
-              content.selectName === "自定义类型" || content.selectName === "" || !content.selectName
-                ? content.name
+              content.selectName === "自定义类型" ||
+              content.selectName === "" ||
+              !content.selectName
+                ? item.title
                 : content.selectName,
             type: featureLowerType,
           };
@@ -465,7 +470,7 @@ function Action () {
         operator.data = item;
         operator.updateFeatueToDB = this.updateFeatueToDB.bind(this);
       }
-      this.features.push(feature)
+      this.features.push(feature);
     });
 
     if (!addSource) {
@@ -504,10 +509,21 @@ function Action () {
     return this.layer.showLayer.getSource();
   };
   // 渲染feature
-  this.renderCollection = async (data, { lenged, dispatch , animation = true}) => {
+  this.renderCollection = async (
+    data,
+    { lenged, dispatch, animation = true }
+  ) => {
     // 删除元素
     this.removeFeatures();
-    if (!data.length) return;
+    if (!data.length) {
+      dispatch({
+        type: "lengedList/updateLengedList",
+        payload: {
+          config: [],
+        },
+      });
+      return;
+    }
     // 过滤不显示的数据
     data = data.filter((item) => item.is_display === "1");
     let ponts = data.filter(
@@ -520,14 +536,13 @@ function Action () {
     this.features = this.features.concat(pointCollection);
     this.Source.addFeatures(pointCollection);
 
-
     // 渲染标绘数据
     const sou = this.renderFeaturesCollection(features, { lenged, dispatch });
 
     // 渲染规划图
     let ext = await this.renderPlanPicCollection(planPic);
 
-    if(!animation) return this.features;
+    if (!animation) return this.features;
 
     let sourceExtent = this.Source.getExtent();
     let subExtent = [Infinity, Infinity, -Infinity, -Infinity];
@@ -562,8 +577,7 @@ function Action () {
       // 只有标注的数据
       if (!souFlag) {
         // 有标点数据，要合并
-        if (!sourceFlag)
-          sourceExtent = extend(sou.getExtent(), sourceExtent);
+        if (!sourceFlag) sourceExtent = extend(sou.getExtent(), sourceExtent);
         else {
           // 没有就直接赋值
           sourceExtent = sou.getExtent();
@@ -575,11 +589,8 @@ function Action () {
       data.length &&
       setTimeout(() => {
         // 当存在feature的时候，才可以缩放 需要兼容规划图，规划图不存在source的元素中
-        if (
-          this.features.length &&
-          !getExtentIsEmpty(sourceExtent)
-        ) {
-          this.toCenter({ center: sourceExtent, type: "extent" })
+        if (this.features.length && !getExtentIsEmpty(sourceExtent)) {
+          this.toCenter({ center: sourceExtent, type: "extent" });
         }
         // else if (ext.length) {
         //   Fit(
@@ -595,13 +606,16 @@ function Action () {
       });
   };
 
-
-
   // type coordinate or extent
-  this.toCenter = ({ center, type = "coordinate", duration = 800, zoom, transform = true }) => {
+  this.toCenter = ({
+    center,
+    type = "coordinate",
+    duration = 800,
+    zoom,
+    transform = true,
+  }) => {
     if (type === "coordinate") {
-      if (transform)
-        center = TransformCoordinate(center);
+      if (transform) center = TransformCoordinate(center);
 
       InitMap.view.animate({
         center: center,
@@ -824,20 +838,20 @@ function Action () {
   };
 
   // 设置overlay层叠问题
-  this.editZIndexOverlay = (id)=>{
+  this.editZIndexOverlay = (id) => {
     let overlay = InitMap.map.getOverlayById(id);
     // console.log(overlay)
-    if(!overlay) return;
+    if (!overlay) return;
     let className = "activeOverlayDefault";
-    let activeOverlays = document.querySelectorAll('.'+ className);
-    activeOverlays.forEach(item => {
+    let activeOverlays = document.querySelectorAll("." + className);
+    activeOverlays.forEach((item) => {
       item.classList.remove(className);
-    })
+    });
 
     let element = overlay.getElement();
     element.parentNode && element.parentNode.classList.add(className);
     return element;
-  }
+  };
 
   //   添加元素坐标的overlay
   this.addOverlay = (coor, data) => {
@@ -850,7 +864,7 @@ function Action () {
     let overlay = createOverlay(ele.element, {
       positioning: "bottom-center",
       offset: [0, -25],
-      id: data.id
+      id: data.id,
     });
     InitMap.map.addOverlay(overlay);
     this.overlays.push(overlay);
@@ -871,7 +885,7 @@ function Action () {
       };
     }
     if (ele.video) {
-      ele.video.onplay = (e) => { };
+      ele.video.onplay = (e) => {};
     }
 
     ele.on = {
@@ -1054,7 +1068,6 @@ function Action () {
     });
   };
 
-
   // 显示采集资料的overlay
   this.showCollectionOverlay = () => {
     if (!this.overlays.length) return;
@@ -1066,13 +1079,14 @@ function Action () {
     });
   };
   // 添加规划图范围
-  this.addPlanPictureDraw = (url, files ,dispatch) => {
-    console.log(files)
+  this.addPlanPictureDraw = (url, files, dispatch) => {
+    console.log(files);
     // 删除已有的select事件，防止冲突
     this.removeAreaSelect();
     this.hideCollectionOverlay();
     return new Promise((resolve, reject) => {
-      let globalurl = url,file = null;
+      let globalurl = url,
+        file = null;
       this.drawBox = drawBox(this.Source, {});
       this.drawBox.on("drawend", (e) => {
         this.boxFeature = e.feature;
@@ -1120,7 +1134,7 @@ function Action () {
               ...val,
               extent: e.feature.getGeometry().getExtent(),
               url: globalurl,
-              blobFile: file
+              blobFile: file,
             });
             overlay.setPosition(null);
             InitMap.map.removeOverlay(overlay);
@@ -1137,46 +1151,48 @@ function Action () {
             this.addAreaSelect();
             this.showCollectionOverlay();
           },
-          editImg: async ()=>{
+          editImg: async () => {
             // 等待视图移动到合适地点
-            let center = getPoint(this.boxFeature.getGeometry().getExtent(),'center');
-            await animate({center:center });
+            let center = getPoint(
+              this.boxFeature.getGeometry().getExtent(),
+              "center"
+            );
+            await animate({ center: center });
             // 隐藏页面中的元素
             this.staticimg && this.staticimg.setVisible(false);
             this.Source.removeFeature(e.feature);
             overlay.setPosition(null);
             // console.log('开始编辑图片');
             // Event.Evt.firEvent('editPlanImg',{resolve, reject});
-            let ex = this.boxFeature.getGeometry().getExtent()
-            let topLeft = getPoint(
-              ex,
-              "topLeft"
-            );
-            let br = getPoint(
-              ex,
-              "bottomRight"
-            )
+            let ex = this.boxFeature.getGeometry().getExtent();
+            let topLeft = getPoint(ex, "topLeft");
+            let br = getPoint(ex, "bottomRight");
 
             topLeft = InitMap.map.getPixelFromCoordinate(topLeft);
             br = InitMap.map.getPixelFromCoordinate(br);
-            let w = br[0] - topLeft[0],h =  br[1] - topLeft[1];
-            dispatch && dispatch({
-              type:"editPicture/updateDatas",
-              payload:{
-                editShow:true,
-                pictureUrl: url,
-                position: {x:topLeft[0], y: topLeft[1]},
-                pictureWidth: w,
-                pictureHeight: h
-              }
-            })
+            let w = br[0] - topLeft[0],
+              h = br[1] - topLeft[1];
+            dispatch &&
+              dispatch({
+                type: "editPicture/updateDatas",
+                payload: {
+                  editShow: true,
+                  pictureUrl: url,
+                  position: { x: topLeft[0], y: topLeft[1] },
+                  pictureWidth: w,
+                  pictureHeight: h,
+                },
+              });
 
             // 保存新的图层
-            Event.Evt.on('ImgEditComplete',(data)=>{
+            Event.Evt.on("ImgEditComplete", (data) => {
               globalurl = data.url;
-              file = new File([data.blob], files.name , {type: files.type, lastModified: Date.now()});
-              let tl = [data.extent[0],data.extent[1]];
-              let rb = [data.extent[2],data.extent[3]]
+              file = new File([data.blob], files.name, {
+                type: files.type,
+                lastModified: Date.now(),
+              });
+              let tl = [data.extent[0], data.extent[1]];
+              let rb = [data.extent[2], data.extent[3]];
               // 将图片中的最小x,y 和最大x,y组成一个矩形,渲染在地图中
               let ctl = InitMap.map.getCoordinateFromPixel(tl);
               let crb = InitMap.map.getCoordinateFromPixel(rb);
@@ -1184,11 +1200,11 @@ function Action () {
               // 组合图片编辑后的范围
               let ext = ctl.concat(crb);
               // 右上角位置
-              let tr = getPoint(ext,'topRight');
+              let tr = getPoint(ext, "topRight");
 
               // 确定保存之后,更新source,试页面渲染
-              let source = SourceStatic(data.url,ext);
-              this.staticimg.setSource(source)
+              let source = SourceStatic(data.url, ext);
+              this.staticimg.setSource(source);
               this.staticimg.setVisible(true);
               // 更新设置的透明度
               this.staticimg.setOpacity(data.opacity);
@@ -1198,31 +1214,36 @@ function Action () {
               overlay.setPosition(tr);
               // 更新显示元素
               let coordinates = getBoxCoordinates(ext);
-              this.boxFeature.getGeometry().setCoordinates([coordinates]) ;
+              this.boxFeature.getGeometry().setCoordinates([coordinates]);
               this.Source.addFeature(this.boxFeature);
               // 隐藏编辑窗口
-              dispatch && dispatch({
-                type:"editPicture/updateDatas",
-                payload: {
-                  editShow: false
-                }
-              })
-            })
+              dispatch &&
+                dispatch({
+                  type: "editPicture/updateDatas",
+                  payload: {
+                    editShow: false,
+                  },
+                });
+            });
             // 点击了取消保存
-            Event.Evt.on('ImgEditCancel',()=>{
+            Event.Evt.on("ImgEditCancel", () => {
               // console.log(data);
               this.staticimg && this.staticimg.setVisible(true);
               this.Source.addFeature(this.boxFeature);
-              let p = getPoint(this.boxFeature.getGeometry().getExtent(),'topRight');
+              let p = getPoint(
+                this.boxFeature.getGeometry().getExtent(),
+                "topRight"
+              );
               overlay.setPosition(p);
-              dispatch && dispatch({
-                type:"editPicture/updateDatas",
-                payload: {
-                  editShow: false
-                }
-              })
-            })
-          }
+              dispatch &&
+                dispatch({
+                  type: "editPicture/updateDatas",
+                  payload: {
+                    editShow: false,
+                  },
+                });
+            });
+          },
         };
       });
       this.drawBox.on("drawabort", () => {
@@ -1231,41 +1252,41 @@ function Action () {
       InitMap.map.addInteraction(this.drawBox);
     });
   };
-  this.clearListen = ()=>{
-    if(this.repeatRequst){
+  this.clearListen = () => {
+    if (this.repeatRequst) {
       clearTimeout(this.repeatRequst);
     }
-  }
-  this.addToListen = (param)=>{
-    this.repeatRequst = setTimeout(()=>{
+  };
+  this.addToListen = (param) => {
+    this.repeatRequst = setTimeout(() => {
       this.addListenAjax(param);
       this.addToListen(param);
-    },requestTime)
-  }
+    }, requestTime);
+  };
   // 添加轮询机制
-  this.addListenAjax = async (param)=>{
+  this.addListenAjax = async (param) => {
     let oldData = this.oldData;
     let res = await this.getCollectionList(param);
     let data = res.data;
-    let arr = Different(oldData,data,'id');
-    if(oldData.length > data.length){
+    let arr = Different(oldData, data, "id");
+    if (oldData.length > data.length) {
       // 这里是删除了，所以可以调用删除更新
       // console.log(arr,'删除');
-      Event.Evt.firEvent('CollectionUpdate:remove',arr);
+      Event.Evt.firEvent("CollectionUpdate:remove", arr);
     }
-    if(oldData.length < data.length){
+    if (oldData.length < data.length) {
       // 这里是新增，所以要调用新增的更新监听
       // console.log(arr,'新增');
-      Event.Evt.firEvent('CollectionUpdate:add',arr);
+      Event.Evt.firEvent("CollectionUpdate:add", arr);
     }
-    if(arr.length && oldData.length === data.length){
+    if (arr.length && oldData.length === data.length) {
       // 这里是删除之后又新增了，所以长度一致，但是ID不同，会有更新的数据，要调用刷新的监听
       // console.log(arr,'刷新');
-      Event.Evt.firEvent('CollectionUpdate:reload',arr);
+      Event.Evt.firEvent("CollectionUpdate:reload", arr);
     }
     // 将最新的数据更新到本地。用来对比
     this.oldData = data;
-  }
+  };
 }
 
 let action = new Action();

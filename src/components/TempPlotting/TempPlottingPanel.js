@@ -195,10 +195,16 @@ export default class TempPlottingPanel extends React.Component {
         indeterminate: false,
         checkAll: false,
       });
+      let newList2 = []
+      array.forEach(item => {
+        if (item.attrs.name) {
+          newList2.push(item)
+        }
+      })
       dispatch({
         type: "featureOperatorList/updateList",
         payload: {
-          featureOperatorList: array,
+          featureOperatorList: newList2,
         },
       });
     });
