@@ -47,7 +47,7 @@ export default class ScoutingDetails extends PureComponent {
       area_list: [],
       all_collection: [],
       not_area_id_collection: [],
-      area_active_key: [],
+      area_active_key: null,
       multipleGroup:false,
       area_selected:[],
       isPlay:false,
@@ -141,7 +141,7 @@ export default class ScoutingDetails extends PureComponent {
         // console.log(resp)
         let respData = resp.data;
         // 当前激活的区域
-        let active = this.area_active_key || ( respData[0] && respData[0].id);
+        let active = this.state.area_active_key || ( respData[0] && respData[0].id);
         this.setState({
           area_list: respData.map((item) =>
             Object.assign(item, { _edit: false, _remarkEdit: false })
@@ -260,9 +260,10 @@ export default class ScoutingDetails extends PureComponent {
         message.success("新增操作成功");
         this.setState({
           area_active_key: res.data || ""
+        },()=>{
+          // console.log(res);
+          this.renderAreaList();
         })
-        // console.log(res);
-        this.renderAreaList();
       }
     );
   };
