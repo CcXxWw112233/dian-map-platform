@@ -71,8 +71,8 @@ export default class SymbolStore extends Component {
     const { TabPane } = Tabs;
     return (
       <div className={styles.panel}>
-        {/* <Tabs defaultActiveKey="1">
-          <TabPane tab="系统符号库" key="1">
+        <Tabs defaultActiveKey="1">
+          <TabPane tab="系统符号" key="1">
             <div className={styles.body} style={{ height: "100%" }}>
               <div
                 className={`${styles.symbolPanel} ${globalStyle.autoScrollY}`}
@@ -122,12 +122,11 @@ export default class SymbolStore extends Component {
               </div>
             </div>
           </TabPane>
-          <TabPane tab="项目符号库" key="2">
-            敬请期待
+          <TabPane tab="项目符号" key="2">
+            <p style={{ marginBottom: 0, marginTop: "80%" }}>功能正在开发中</p>
+            <p>敬请期待~</p>
           </TabPane>
-        </Tabs> */}
-        <p style={{ marginBottom: 0, marginTop: "80%" }}>功能正在开发中</p>
-        <p>敬请期待~</p>
+        </Tabs>
       </div>
     );
   }

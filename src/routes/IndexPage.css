@@ -56,4 +56,7 @@
 :global(.panels .ant-tabs-tabpane){
   height: 100%;
 }
+:global(.ant-tabs-nav-list) {
+  margin: 0 auto;
+}
 

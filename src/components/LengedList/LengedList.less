@@ -19,7 +19,7 @@
   }
   .layerItems {
     height: 84px;
-    margin: 0 16px;
+    margin: 16px;
     display: -webkit-inline-box;
     /* display: flex; */
     /* flex-direction: row; */
@@ -31,19 +31,39 @@
     align-items: center;
   }
   .layerItem {
-    width: 60px;
-    height: 60px;
+    width: 64px;
+    height: 64px;
     background: #eff0ef;
-    border-radius: 4px;
+    border-radius: 2px;
     margin: 0 16px 0 0;
     margin-top: 12px;
     cursor: pointer;
-    border: 2px solid rgba(0,0,0,0.1);
+    border: 2px solid rgba(0, 0, 0, 0.1);
     &.active {
       border: 2px solid rgba(23, 105, 255, 1);
       span {
         color: #1769ff;
       }
+    }
+  }
+  .lengedItem {
+    width: 64px;
+    height: 68px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    div {
+      width: 36px;
+      height: 36px;
+      margin: 0 auto;
+      margin-top: 4px;
+      margin-bottom: 4px;
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-size: 100% 100%
     }
   }
   .layerName {

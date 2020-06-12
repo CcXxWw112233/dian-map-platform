@@ -7,7 +7,7 @@ import { Collapse } from "antd";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import { connect } from "dva";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
-import { setLocal } from '../../utils/sessionManage'
+import { setLocal } from "../../utils/sessionManage";
 import { Row } from "antd";
 const Lenged = ({ data }) => {
   let activeKeys = [];
@@ -96,7 +96,7 @@ export default class LengedList extends PureComponent {
   };
   changeBaseMap = (item, index) => {
     this.toggleBaseMapChangeStyle(index);
-    setLocal('baseMapKey',item.key);
+    setLocal("baseMapKey", item.key);
     mapApp.changeBaseMap(item.key);
   };
   toggleBaseMapChangeStyle = (index) => {
@@ -113,7 +113,7 @@ export default class LengedList extends PureComponent {
     }
     newConfig = Array.from(new Set(newLengedList));
     this.lastConfig = newLengedList || [];
-    const baseStyle = { position: "absolute", bottom: 0, right: 0, width: 322 };
+    const baseStyle = { position: "absolute", bottom: 0, right: 0, width: 290 };
     let style = baseStyle;
     if (!lengedSwitch) {
       style = { ...baseStyle, ...{ transform: "translateX(100%)" } };
@@ -130,27 +130,40 @@ export default class LengedList extends PureComponent {
         >
           <div className={styles.layerItems + ` ${globalStyle.autoScrollX}`}>
             {baseMapDictionary.map((item, index) => {
-              let active = "";
+              let activeStyle = {};
               if (index === this.state.selectedBaseMapIndex) {
-                active = styles.active;
+                activeStyle = { border: "2px solid rgba(0,0,255,0.7)" };
               }
               if (item.name && item.key) {
+                // return (
+                //   <div
+                //     className={styles.layerItem + ` ${active}`}
+                //     key={item.key}
+                //     // style={{backgroundImage: `url(${item.img})`}}
+                //     onClick={() => this.changeBaseMap(item, index)}
+                //   >
+                //     <p
+                //       className={styles.layerName}
+                //       style={{ top: 20, fontSize: 16 }}
+                //     >
+                //       <span>{item.name}</span>
+                //     </p>
+                //     <p className={styles.layerName}>
+                //       <span>{item.type}</span>
+                //     </p>
+                //   </div>
+                // );
                 return (
                   <div
-                    className={styles.layerItem + ` ${active}`}
-                    key={item.key}
-                    // style={{backgroundImage: `url(${item.img})`}}
+                    className={styles.lengedItem}
+                    style={activeStyle}
                     onClick={() => this.changeBaseMap(item, index)}
                   >
-                    <p
-                      className={styles.layerName}
-                      style={{ top: 20, fontSize: 16 }}
-                    >
-                      <span>{item.name}</span>
-                    </p>
-                    <p className={styles.layerName}>
-                      <span>{item.type}</span>
-                    </p>
+                    <div style={{ backgroundImage: `url(${item.img})` }}></div>
+                    <span>
+                      {item.name}
+                      {item.type}
+                    </span>
                   </div>
                 );
               } else {
