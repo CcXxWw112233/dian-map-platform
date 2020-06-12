@@ -21,6 +21,8 @@ export default {
         isShowMobile: false,
         // 是否显示规划图编辑
         isShowPlanPicEdit: false,
+        // 是否显示右侧的工具
+        isShowTempPlot: true
     },
     effects:{
 

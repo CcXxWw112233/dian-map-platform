@@ -112,6 +112,7 @@ function Action () {
       annotate: [], // 批注
       plotting: ["feature"], // 标绘
       planPic: ["plan"], // 规划图
+      address: ['board_xlsx']
     };
 
     let keys = Object.keys(itemKeyVals);
@@ -503,7 +504,7 @@ function Action () {
     return this.layer.showLayer.getSource();
   };
   // 渲染feature
-  this.renderCollection = async (data, { lenged, dispatch }) => {
+  this.renderCollection = async (data, { lenged, dispatch , animation = true}) => {
     // 删除元素
     this.removeFeatures();
     if (!data.length) return;
@@ -526,6 +527,7 @@ function Action () {
     // 渲染规划图
     let ext = await this.renderPlanPicCollection(planPic);
 
+    if(!animation) return this.features;
 
     let sourceExtent = this.Source.getExtent();
     let subExtent = [Infinity, Infinity, -Infinity, -Infinity];
@@ -824,6 +826,7 @@ function Action () {
   this.editZIndexOverlay = (id)=>{
     let overlay = InitMap.map.getOverlayById(id);
     // console.log(overlay)
+    if(!overlay) return;
     let className = "activeOverlayDefault";
     let activeOverlays = document.querySelectorAll('.'+ className);
     activeOverlays.forEach(item => {
@@ -832,6 +835,7 @@ function Action () {
 
     let element = overlay.getElement();
     element.parentNode && element.parentNode.classList.add(className);
+    return element;
   }
 
   //   添加元素坐标的overlay
@@ -896,10 +900,11 @@ function Action () {
   };
 
   //   删除元素坐标的overlay
-  this.removeLayer = () => {
+  this.removeLayer = (flag) => {
     this.removeOverlay();
     this.removeFeatures();
     this.removeAreaSelect();
+    if(!flag)
     InitMap.map.removeLayer(this.Layer);
   };
   this.RemoveArea = async (id) => {
