@@ -71,7 +71,13 @@ class PlotEdit extends Observable {
         dom,
         "mousedown",
         () => {
-          this.openCb && this.openCb();
+
+           // 标绘回调更新redux
+          const tempList = this.layer.getArrDifference(
+            this.layer.feature_operators,
+            this.layer.projectScoutingArr
+          );
+          this.layer.listCb && this.layer.listCb(tempList);
         },
         this
       );
@@ -150,7 +156,13 @@ class PlotEdit extends Observable {
         window.featureOperator &&
           this.layer.removeFeature(window.featureOperator);
         window.featureOperator && delete window.featureOperator;
-        this.layer.listCb && this.layer.listCb(this.layer.feature_operators);
+
+         // 标绘回调更新redux
+        const tempList = this.layer.getArrDifference(
+          this.layer.feature_operators,
+          this.layer.projectScoutingArr
+        );
+        this.layer.listCb && this.layer.listCb(tempList);
       },
       this
     );
@@ -240,7 +252,13 @@ class PlotEdit extends Observable {
       }
       var overlay = this.map.getOverlayById(this.activeControlPointId);
       overlay && overlay.setPosition(coordinate);
-      this.updateCb && this.updateCb(this.activePlot);
+
+      // 标绘回调更新redux
+      const tempList = this.layer.getArrDifference(
+        this.layer.feature_operators,
+        this.layer.projectScoutingArr
+      );
+      this.layer.listCb && this.layer.listCb(tempList);
     }
   }
 

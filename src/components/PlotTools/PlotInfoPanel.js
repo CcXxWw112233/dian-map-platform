@@ -73,8 +73,8 @@ export default class PlotInfoPanel extends Component {
       rect: "RECTANGLE",
       circle: "CIRCLE",
     };
-    this.strokeColorStyle = "rgba(155,155,155,1)"
-    this.fillColorStyle = "rgba(155,155,155,0.7)"
+    this.strokeColorStyle = "rgba(155,155,155,1)";
+    this.fillColorStyle = "rgba(155,155,155,0.7)";
   }
   componentDidMount() {
     this.getSymbolData(this.props);
@@ -128,7 +128,12 @@ export default class PlotInfoPanel extends Component {
         res = await plotServices.GET_POLYGONSYMBOL();
         res.data[2].items = [...res.data[2].items, ...config];
       }
-      this.symbols[plotType] = res?.data;
+      // this.symbols[plotType] = res?.data;
+      let symbols = [];
+      res.data.forEach((item) => {
+        symbols = [...symbols, ...item.items];
+      });
+      this.symbols[plotType] = symbols;
     }
     this.setState({
       symbols: this.symbols[plotType] || [],
@@ -368,7 +373,7 @@ export default class PlotInfoPanel extends Component {
   };
   // 线框颜色
   handleStrokeColorOkClick = (value) => {
-    this.strokeColorStyle = value
+    this.strokeColorStyle = value;
     this.setState({
       selectedSymbolId: -1,
     });
@@ -459,7 +464,7 @@ export default class PlotInfoPanel extends Component {
     this.setState({
       selectedSymbolId: -1,
     });
-    this.fillColorStyle = value
+    this.fillColorStyle = value;
     const { dispatch } = this.props;
     dispatch({
       type: "modal/updateData",
@@ -476,7 +481,7 @@ export default class PlotInfoPanel extends Component {
     let options = {},
       attrs = {};
     let text = this.props.featureName || "未命名";
-    let strokeColor = this.strokeColorStyle
+    let strokeColor = this.strokeColorStyle;
     let style = {};
     if (
       this.props.plotType === "Point" ||
@@ -558,16 +563,16 @@ export default class PlotInfoPanel extends Component {
             &#xe632;
           </i>
         </div>
-        <div className={styles.body} style={{ height: "calc(100% - 74px)" }}>
+        <div className={`${styles.body} ${globalStyle.autoScrollY}`} style={{ height: "calc(100% - 74px)" }}>
           <Input
             placeholder="输入标绘名称"
-            style={{ marginBottom: 12 }}
+            style={{ marginBottom: 6 }}
             value={this.props.featureName}
             onChange={(e) => this.handlePlotNameChange(e.target.value)}
           ></Input>
           <TextArea
             placeholder="填写备注"
-            style={{ marginBottom: 12, height: 84 }}
+            style={{ marginBottom: 6, height: 84 }}
             value={this.props.remarks}
             onChange={(e) => this.handlePotRemarkChange(e.target.value)}
           ></TextArea>
@@ -599,8 +604,8 @@ export default class PlotInfoPanel extends Component {
               handleOK={this.handleFillColorOkClick}
             ></ColorPicker>
           </div>
-          <div className={`${styles.symbolPanel} ${globalStyle.autoScrollY}`}>
-            {this.state.symbols.length > 0 ? (
+          <div className={styles.symbolPanel}>
+            {/* {this.state.symbols.length > 0 ? (
               this.state.symbols.map((symbol) => {
                 return (
                   <div className={styles.symbolBlock} key={symbol.type}>
@@ -634,6 +639,34 @@ export default class PlotInfoPanel extends Component {
                   </div>
                 );
               })
+            ) : (
+              <Skeleton paragraph={{ rows: 6 }} />
+            )} */}
+            {this.state.symbols.length > 0 ? (
+              <div className={styles.symbolBlock}>
+                <div className={styles.symbolList}>
+                  {this.state.symbols.map((item) => {
+                    return (
+                      <div
+                        title={item.name}
+                        className={`${styles.symbol} ${
+                          this.state.selectedSymbolId === item.id
+                            ? styles.symbolActive
+                            : ""
+                        }`}
+                        key={item.id}
+                        onClick={() => this.handleSymbolItemClick(item)}
+                      >
+                        <div
+                          className={styles.symbolColor}
+                          style={this.getSymbol(item)}
+                        ></div>
+                        <span>{item.name}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             ) : (
               <Skeleton paragraph={{ rows: 6 }} />
             )}

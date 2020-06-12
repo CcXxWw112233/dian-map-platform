@@ -71,7 +71,7 @@ export default class SymbolStore extends Component {
     const { TabPane } = Tabs;
     return (
       <div className={styles.panel}>
-        <Tabs defaultActiveKey="1">
+        {/* <Tabs defaultActiveKey="1">
           <TabPane tab="系统符号库" key="1">
             <div className={styles.body} style={{ height: "100%" }}>
               <div
@@ -125,7 +125,9 @@ export default class SymbolStore extends Component {
           <TabPane tab="项目符号库" key="2">
             敬请期待
           </TabPane>
-        </Tabs>
+        </Tabs> */}
+        <p style={{ marginBottom: 0, marginTop: "80%" }}>功能正在开发中</p>
+        <p>敬请期待~</p>
       </div>
     );
   }
