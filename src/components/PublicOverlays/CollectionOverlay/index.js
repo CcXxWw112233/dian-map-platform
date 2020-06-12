@@ -5,7 +5,7 @@ import iconCss from '../../../globalSet/styles/globalStyles.less'
 export default function overlay (data = {}){
     let div = document.createElement('div');
     this.data = data;
-    div.className = styles.overlay;
+    div.className = styles.overlay + ' defineCollectionOverlay';
     this.imgDiv = "";
     this.videoDiv = "";
     this.more = "";

@@ -44,7 +44,7 @@ import MatrixEdit from '../components/MatrixEdit'
 @connect(
   ({
     controller: { mainVisible },
-    openswitch: { toolBars, bottomTools, searchTools ,isShowMobile },
+    openswitch: { toolBars, bottomTools, searchTools ,isShowMobile ,isShowTempPlot},
     editPicture:{ editShow }
   }) => ({
     mainVisible,
@@ -52,7 +52,8 @@ import MatrixEdit from '../components/MatrixEdit'
     bottomTools,
     searchTools,
     isShowMobile,
-    editShow
+    editShow,
+    isShowTempPlot
   })
 )
 class IndexPage extends React.Component {
@@ -212,7 +213,7 @@ class IndexPage extends React.Component {
 
   render() {
     const { TabPane } = Tabs;
-    let { bottomTools, toolBars, searchTools ,isShowMobile ,editShow} = this.props;
+    let { bottomTools, toolBars, searchTools ,isShowMobile ,editShow ,isShowTempPlot} = this.props;
     const SearchToolBarStyle = {
       position: "absolute",
       top: 20,
@@ -234,8 +235,13 @@ class IndexPage extends React.Component {
           ></SearchToolBar>
         )}
         <TempPlottingIcon></TempPlottingIcon>
-        <TempPlottingPanel></TempPlottingPanel>
-        <PlotTools></PlotTools>
+        { isShowTempPlot && 
+          <TempPlottingPanel></TempPlottingPanel>
+        }
+        {
+          isShowTempPlot && 
+          <PlotTools></PlotTools>
+        }
         <LengedList></LengedList>
         {/* <Location></Location> */}
         <Sider width={360}>

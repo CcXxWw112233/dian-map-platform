@@ -457,7 +457,10 @@ class PlottingLayer extends Observable {
    * 移除一个图元操作对象
    */
   removeFeature(feature_operator) {
-    this.showLayer.getSource().removeFeature(feature_operator.feature);
+    let source = this.showLayer.getSource();
+    if(source.getFeatureByUid( feature_operator.feature && feature_operator.feature.ol_uid)){
+      source.removeFeature(feature_operator.feature);
+    }
     this.plotEdit.deactivate();
     const curIndex = this._getFeatureOperatorIndex(feature_operator);
     feature_operator.destory();

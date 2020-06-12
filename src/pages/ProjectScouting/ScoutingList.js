@@ -205,6 +205,8 @@ export default class ScoutingList extends PureComponent {
         showSlideButton: true,
         lengedSwitch: false,
         showLengedButton: true,
+        bottomTools:true,
+        isShowTempPlot:true
       }
     })
   }
@@ -221,6 +223,8 @@ export default class ScoutingList extends PureComponent {
         showSlideButton: false,
         lengedSwitch: false,
         showLengedButton: false,
+        bottomTools:false,
+        isShowTempPlot:false
       }
     })
   }

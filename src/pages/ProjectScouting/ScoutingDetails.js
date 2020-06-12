@@ -4,6 +4,7 @@ import animateCss from "../../assets/css/animate.min.css";
 import styles from "./ScoutingDetails.less";
 import Action from "../../lib/components/ProjectScouting/ScoutingDetail";
 import ScouListAction from "../../lib/components/ProjectScouting/ScoutingList";
+import PlayCollectionAction from '../../lib/components/ProjectScouting/playCollection'
 import { connect } from "dva";
 import {
   Collapse,
@@ -11,6 +12,7 @@ import {
   Button,
   message,
   Space,
+  Popover
 } from "antd";
 import {
   PlusCircleOutlined,
@@ -20,6 +22,9 @@ import Event from "../../lib/utils/event";
 import AudioControl from "./components/audioPlayControl";
 import { MyIcon } from '../../components/utils'
 import { Title, ScoutingHeader, ScoutingItem, UploadItem,  areaScouting} from './components/ScoutingDetailsSubComponents'
+import PlayCollectionControl from './components/playCollectionControl'
+
+
 const { TabPane } = Tabs;
 
 
@@ -45,6 +50,9 @@ export default class ScoutingDetails extends PureComponent {
       area_active_key: [],
       multipleGroup:false,
       area_selected:[],
+      isPlay:false,
+      playing: false,
+      currentGroup:{},
 
       visible: true,
       activeKey: panes[0].key,
@@ -314,12 +322,12 @@ export default class ScoutingDetails extends PureComponent {
       }
     );
   }
-  // 更新数据
+  // 将数据分类，更新到区域列表
   reSetCollection = (val) => {
     let data = val || [];
     let list = this.state.area_list.map((item) => {
       let f_list = data.filter((v) => v.area_type_id === item.id);
-      item.collection = f_list;
+      item.collection = f_list.sort((a,b) => (a.__index||0) - (b.__index||0));
       return item;
     });
     return list;
@@ -410,6 +418,8 @@ export default class ScoutingDetails extends PureComponent {
         showSlideButton: false,
         lengedSwitch: false,
         showLengedButton: false,
+        bottomTools:false,
+        isShowTempPlot:false
       },
     });
   };
@@ -425,6 +435,8 @@ export default class ScoutingDetails extends PureComponent {
         showSlideButton: true,
         lengedSwitch: false,
         showLengedButton: true,
+        bottomTools:true,
+        isShowTempPlot:true
       },
     });
   };
@@ -537,8 +549,10 @@ export default class ScoutingDetails extends PureComponent {
     Action.RemoveArea(val.id)
       .then((res) => {
         message.success("删除成功");
+        let arr = this.state.area_list.filter((item) => item.id !== val.id);
         this.setState({
-          area_list: this.state.area_list.filter((item) => item.id !== val.id),
+          area_list: arr,
+          multipleGroup: arr.length > 1
         });
       })
       .catch((err) => {
@@ -726,31 +740,86 @@ export default class ScoutingDetails extends PureComponent {
   }
 
   // 拖拽排序
-  onCollectionDragEnd = (result)=>{
-    return message.warn('排序功能暂未开放');
+  onCollectionDragEnd = (data,result)=>{
+    let ondragId = data.id;
+    // return message.warn('排序功能暂未开放');
     if (!result.destination) {
       return;
     }
     // 重新记录数组顺序
     const reorder = (list, startIndex, endIndex) => {
-      const result = Array.from(list);
+      let result = Array.from(list);
       //删除并记录 删除元素
       const [removed] = result.splice(startIndex, 1);
       //将原来的元素添加进数组
       result.splice(endIndex, 0, removed);
+      result = result.map((item, index) => {item.__index = index + 1; return item;})
       return result;
     };
 
+    let area_list = Array.from(this.state.area_list);
+
+    // 找到当前拖拽的分组
+    let obj = area_list.find(item => item.id === ondragId);
     const items = reorder(
-      [],
+      obj ? obj.collection : [],
       result.source.index,
       result.destination.index
     );
-
+    // 重组
+    area_list = area_list.map(item => {
+      if(item.id === ondragId){
+        item.collection = items.sort((a,b)=> a.__index - b.__index);
+      }
+      return item;
+    })
+    this.setState({
+      area_list
+    })
   }
 
-  render (h) {
-    const { current_board, area_list, not_area_id_collection } = this.state;
+  // 查询最近一组中含有采集数据的分组
+  getFirstAreaCollection = ()=>{
+    for(let i = 0; i< this.state.area_list.length; i++){
+      let item = this.state.area_list[i];
+      if(item.collection && item.collection.length){
+        return item;
+      }
+    }
+  }
+
+  // 停止播放
+  StopPlay = ()=>{
+    this.setState({
+      isPlay:false,
+      playing:false,
+      currentGroup:{}
+    })
+    this.showOtherSlide();
+    this.fetchCollection();
+    PlayCollectionAction.stop();
+  }
+
+  // 开始播放
+  startPlayCollection = (mode)=>{
+    // 获取有数据的分组，不包含未分组区域
+    let data = this.getFirstAreaCollection();
+    let collection = data.collection.filter(item => item.is_display === '1');
+    let flag = PlayCollectionAction.setData(mode, collection.sort((a,b)=> (a.__index || 0) - (b.__index || 0)));
+    if(flag){
+      PlayCollectionAction.play();
+
+      this.hideOtherSlide();
+      this.setState({
+        isPlay:true,
+        playing:true,
+        currentGroup: data,
+      })
+    }
+  }
+
+  render () {
+    const { current_board, area_list, not_area_id_collection ,all_collection ,isPlay, playing} = this.state;
     const panelStyle = {
       height: "96%",
     };
@@ -961,6 +1030,7 @@ export default class ScoutingDetails extends PureComponent {
                   icon={<PlusCircleOutlined />}
                   onClick={this.pushAreaItem}
                   shape="round"
+                  size="small"
                 >
                   新增
                 </Button>
@@ -970,9 +1040,31 @@ export default class ScoutingDetails extends PureComponent {
                 disabled={area_list.length < 2}
                 onClick={()=> this.setMultipleCheck()}
                 ghost
+                size="small"
                 icon={<MyIcon type="icon-duoxuan"/>}>
-                  {this.state.multipleGroup ? '切换单选':'切换多选'}
+                  {this.state.multipleGroup ? '分组展示':'组合展示'}
                 </Button>
+                <Popover
+                trigger="focus"
+                title="选择播放模式"
+                content={
+                  <div>
+                    <Button type='link' size='small'
+                    onClick={this.startPlayCollection.bind(this,'hand')}>手动播放</Button>
+                    <Button type='link' size='small'
+                    onClick={this.startPlayCollection.bind(this,'auto')}>自动播放</Button>
+                  </div>
+                }>
+                  <Button shape="round" 
+                  icon={<MyIcon type="icon-bofang"/>}
+                  ghost
+                  size="small"
+                  type="primary"
+                  disabled={!all_collection.length}>
+                    演播
+                  </Button>
+                </Popover>
+                
               </Space>
             </div>
           </TabPane>
@@ -984,6 +1076,8 @@ export default class ScoutingDetails extends PureComponent {
             </div>
           </TabPane> */}
         </Tabs>
+        {playing && <PlayCollectionControl isPlay={isPlay} onExit={this.StopPlay}
+        currentGroup={this.state.currentGroup}/> }
       </div>
     );
   }
