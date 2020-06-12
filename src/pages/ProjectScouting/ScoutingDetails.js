@@ -213,6 +213,7 @@ export default class ScoutingDetails extends PureComponent {
     this.setState(
       {
         area_list: this.state.area_list.concat([obj]),
+        area_active_key: ""
       },
       () => {
         // 将新增的顶上去

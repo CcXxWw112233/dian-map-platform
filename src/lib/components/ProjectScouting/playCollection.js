@@ -204,7 +204,12 @@ function action(){
             }
             // 规划图
             if(this.currentPlay.collect_type === '5'){
-
+                let img = DetailAction.findImgLayer(this.currentPlay.resource_id);
+                if(img){
+                    let source = img.getSource();
+                    let ext = source.getImageExtent();
+                    Fit(this.view, ext, {size:this.map.getSize(),padding: [100,100,100,100]})
+                }
             }
         }
     }
