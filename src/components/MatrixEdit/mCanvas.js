@@ -2,7 +2,7 @@ import React ,{useState}from 'react'
 import matrix from '../../utils/matrix'
 import styles from './index.less'
 import globalStyle from '../../globalSet/styles/globalStyles.less'
-import { Popover ,Slider } from 'antd'
+import { Popover ,Slider,message } from 'antd'
 import Event from '../../lib/utils/event'
 
 const { Evt } = Event;
@@ -26,8 +26,10 @@ export default function(props){
     var img_w = 0,
       img_h = 0;
 
-    var rotate = 0;
+    var rotate = 0.5 * Math.PI / 180;
     let historyDots = [];
+    let translateX = 0;
+    let translateY = 0;
 
     // var getPixelRatio = function(context) {
     //     var backingStore = context.backingStorePixelRatio ||
@@ -40,7 +42,7 @@ export default function(props){
     //     return (window.devicePixelRatio || 1) / backingStore;
     // };
 
-    var ratio = 0;
+    var ratio = 1;
     const loadImage = ()=>{
         return new Promise((resolve,reject)=>{
             let img = new Image();
@@ -58,7 +60,6 @@ export default function(props){
         img = await loadImage();
         canvas = document.querySelector("#canvas_edit");
         ctx = canvas.getContext('2d');
-        // ratio = getPixelRatio(ctx)
         maxHeight = height;
         maxWidth = width;
         img_h = img.height;
@@ -70,8 +71,16 @@ export default function(props){
             img_h = maxHeight  ;
             img_w = img_w * imgRatio ;
         }
-        canvas.width = document.body.clientWidth / window.devicePixelRatio * 2;
-        canvas.height = document.body.clientHeight/ window.devicePixelRatio * 2;
+        canvas.width = document.body.clientWidth ;
+        canvas.height = document.body.clientHeight;
+
+        translateX = (canvas.width - img_w) *0.5 + img_w/2;
+        translateY = (canvas.height - img_h)*0.5 + img_h/2;
+
+        ctx.translate(translateX,translateY);
+
+        left -= translateX;
+        top -= translateY;
 
         dots = [
             { x: left, y: top },
@@ -100,7 +109,7 @@ export default function(props){
     }
 
     const render = (flag)=>{
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0 - translateX, 0 - translateY, canvas.width, canvas.height);
 
         var ndots = rectsplit(count, dots[0], dots[1], dots[2], dots[3]);
         
@@ -284,23 +293,31 @@ export default function(props){
     }
 
     let eventStart = function(e) {
+        console.dir(canvas)
         // 鼠标和手指移动事件
         const move = function(e) {
           var narea = getArea(e);
           var nx = (narea.l - area.l) ;
-          var ny = (narea.t - area.t) ;
+          var ny = (narea.t - area.t)  ;
+          if(ratio > 0.5){
+              nx /= ratio;
+              ny /= ratio;
+          }else {
+              nx /= 0.7;
+              ny /= 0.7;
+          }
           // console.log(dot.x ,dot.y,canvas.width,canvas.height)
           // 边界处理
           // 在框中的时候，可以正常拖动
-          if(dot.x >= 0 && dot.x <= canvas.width)
+          if(dot.x >= (0 - translateX) && dot.x <= (canvas.width - translateX))
           dot.x += nx;
-          else if( dot.x <=0 && nx > 0) dot.x += nx;// 在最左侧的时候
-          else if(dot.x >= canvas.width && nx < 0) dot.x += nx; // 在最右侧的时候
+          else if( dot.x <=(0 - translateX) && nx > 0) dot.x += nx;// 在最左侧的时候
+          else if(dot.x >= (canvas.width - translateX) && nx < 0) dot.x += nx; // 在最右侧的时候
     
-          if(dot.y > 0 && dot.y < canvas.height)
+          if(dot.y > (0 - translateY) && dot.y < (canvas.height - translateY))
           dot.y += ny;
-          else if( dot.y <= 0 && ny > 0) dot.y += ny;
-          else if(dot.y >= canvas.height && ny < 0) dot.y += ny;
+          else if( dot.y <= (0 - translateY) && ny > 0) dot.y += ny;
+          else if(dot.y >= (canvas.height - translateY) && ny < 0) dot.y += ny;
     
           area = narea;
     
@@ -386,6 +403,12 @@ export default function(props){
         // }
       };
     
+
+    function getRotateDeg (narea){
+        let x = (narea.l - translateX) * Math.cos(rotate) - (narea.t - translateY) * Math.sin(rotate) + translateX;
+        let y = (narea.l - translateX) * Math.sin(rotate) + (narea.t - translateY) * Math.cos(rotate) + translateY;
+        return {l:x,t:y}
+    }
     /**
      * 获取鼠标点击/移过的位置
      * @param e
@@ -396,6 +419,8 @@ export default function(props){
     // if(type === 'touch'){
     //     e = e.touches[0];
     // }
+    // let obj = getRotateDeg({t:e.clientY,l:e.clientX});
+    // return obj;
     return {
         // t: e.clientY - canvas.offsetTop + document.body.scrollTop + document.documentElement.scrollTop,
         t: e.clientY,
@@ -409,30 +434,61 @@ export default function(props){
 
     // 向右旋转
     const TurnRight = ()=>{
-        ctx.save();
-        rotate -= 0.1;
-        ctx.rotate(0.1*Math.PI/180);
+        // ctx.rotate(rotate);
+        dots = dots.map(item => {
+            item.x = Math.round(item.x * Math.cos(rotate) - item.y * Math.sin(rotate)) ;
+            item.y = Math.round(item.x * Math.sin(rotate) + item.y * Math.cos(rotate)) ;
+            return item;
+        })
         render();
+    }
+    let repeatTimer = null,intervalTimer = null;
+    const longpressTurnRight = ()=>{
+        clearTimeout(repeatTimer);
+        repeatTimer = setTimeout(()=>{
+            intervalTimer = setInterval(()=>{
+                TurnRight();
+            },100)
+        },800);
+    }
+    const cancelLongpress = ()=>{
+        clearTimeout(repeatTimer);
+        clearInterval(intervalTimer);
+    }
+    const longpressTurnLeft = ()=>{
+        clearTimeout(repeatTimer);
+        repeatTimer = setTimeout(()=>{
+            intervalTimer = setInterval(()=>{
+                TurnLeft();
+            },100)
+        },800);
     }
     // 向左旋转
     const TurnLeft = ()=>{
-        ctx.save();
-        rotate += 0.1
-        ctx.rotate((-0.1*Math.PI/180));
+        dots = dots.map(item => {
+            item.x = Math.round(item.x * Math.cos(-rotate) - item.y * Math.sin(-rotate)) ;
+            item.y = Math.round(item.x * Math.sin(-rotate) + item.y * Math.cos(-rotate)) ;
+            return item;
+        })
         render();
     }
     // 翻转
-    const Flip = ()=>{
+    // const Flip = ()=>{
 
-    }
+    // }
     // 放大
     const ZoomIn = ()=>{
-        // ctx.scale(1.1,1.1);
-        // render();
+        if(ratio >= 1.5) return message.warn('已放大到最大值');
+        ratio += 0.05;
+        ctx.scale(1.05,1.05)
+        render();
     }
     // 缩小
     const ZoomOut = ()=>{
-
+        if(ratio <= 0.4) return message.warn('已缩小到最小值');
+        ratio -= 0.05;
+        ctx.scale(0.95,0.95);
+        render();
     }
     // 确定
     const Save = ()=>{
@@ -441,13 +497,12 @@ export default function(props){
         // 顺便去除四个角的圆
         render(true);
         setTimeout(()=>{
-            let xs = dots.map(item => item.x);
-            let ys = dots.map(item => item.y);
+            let xs = dots.map(item => (item.x * ratio + translateX ));
+            let ys = dots.map(item => (item.y * ratio + translateY ));
             let x0 = Math.min(...xs);
             let y0 = Math.min(...ys);
             let x1 = Math.max(...xs);
             let y1 = Math.max(...ys);
-
             let cn = document.createElement('canvas');
             let cntx = cn.getContext('2d');
             cn.width = x1 - x0;
@@ -472,9 +527,9 @@ export default function(props){
         let obj = historyDots.pop();
         if(obj){
             dots = obj;
-            ctx.rotate(rotate * Math.PI/180);
-            rotate = 0;
             render();
+        }else{
+            historyDots = [JSON.parse(JSON.stringify(dotscopy))]
         }
     }
     // 设置透明度
@@ -488,26 +543,33 @@ export default function(props){
     return {
         cvs: <canvas id="canvas_edit"></canvas>,
         tools:<div className={styles.tools}>
-            {/* <span className={globalStyle.global_icon}
+            <span className={globalStyle.global_icon}
             dangerouslySetInnerHTML={{__html:"&#xe61e;"}}
             title="向左旋转"
-            onClick={TurnLeft}
+            onClick={()=> {TurnLeft();cancelLongpress()}}
+            onPointerDown={longpressTurnLeft}
+            onPointerUp={cancelLongpress}
+            onPointerOut={cancelLongpress}
             >
 
             </span>
             <span className={globalStyle.global_icon}
             dangerouslySetInnerHTML={{__html:"&#xe61d;"}}
             title="向右旋转"
-            onClick={TurnRight}>
+            onClick={()=> {TurnRight();cancelLongpress()}}
+            onPointerDown={longpressTurnRight}
+            onPointerUp={cancelLongpress}
+            onPointerOut={cancelLongpress}
+            >
 
-            </span> */}
+            </span>
             {/* <span className={globalStyle.global_icon}
             dangerouslySetInnerHTML={{__html:"&#xe82d;"}}
             title="翻转"
             onClick={Flip}>
 
             </span> */}
-            {/* <span className={globalStyle.global_icon}
+            <span className={globalStyle.global_icon}
             dangerouslySetInnerHTML={{__html:"&#xe898;"}}
             title="放大"
             onClick={ZoomIn}>
@@ -518,7 +580,7 @@ export default function(props){
             title="缩小"
             onClick={ZoomOut}>
 
-            </span> */}
+            </span>
             <Popover 
             trigger="click"
             title="设置透明度"
@@ -539,13 +601,13 @@ export default function(props){
             onClick={Reset}>
 
             </span>
-            <span className={globalStyle.global_icon}
+            <span className={`${globalStyle.global_icon} ${styles.saveBtn}`}
             dangerouslySetInnerHTML={{__html:"&#xe639;"}}
             title="保存"
             onClick={Save}>
 
             </span>
-            <span className={globalStyle.global_icon}
+            <span className={`${globalStyle.global_icon} ${styles.cancelBtn}`}
             dangerouslySetInnerHTML={{__html:"&#xe607;"}}
             title="退出"
             onClick={Exit}>

@@ -1,3 +1,4 @@
+@import '../../globalSet/styles/globalStyles.less';
 .MatrixEditModal{
     position: fixed;
     width: 100%;
@@ -30,6 +31,12 @@
             padding: 4px;
             margin-left: 10px;
             cursor: pointer;
+            &.saveBtn{
+                color: @color_theme;
+            }
+            &.cancelBtn{
+                color: @red-5;
+            }
         }
     }
 }
