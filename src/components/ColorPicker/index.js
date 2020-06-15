@@ -22,7 +22,7 @@ export default class ColorPicker extends Component {
       colorStyle: this.defaultColorStyle,
     };
   }
-  componentDidMount() {
+  updateProps = () => {
     const colorStr = this.props.colorStyle?.match(/\(([^)]*)\)/);
     if (colorStr) {
       const colorArr = colorStr[1].split(",");
@@ -39,6 +39,15 @@ export default class ColorPicker extends Component {
         color: colorObj,
       });
     }
+  };
+  componentDidMount() {
+    this.updateProps();
+  }
+  componentWillUnmount() {
+    this.updateProps();
+  }
+  componentWillReceiveProps() {
+    this.updateProps();
   }
   handleCancelClick = () => {
     this.setState(

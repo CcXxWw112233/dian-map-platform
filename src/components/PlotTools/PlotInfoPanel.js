@@ -81,7 +81,7 @@ export default class PlotInfoPanel extends Component {
   }
   componentWillReceiveProps(nextProps) {
     this.getSymbolData(nextProps);
-    // const { isModifyPlot } = nextProps;
+    const { isModifyPlot } = nextProps;
     // if (!isModifyPlot) {
     //   this.updateProps();
     // }
@@ -427,7 +427,7 @@ export default class PlotInfoPanel extends Component {
       attrs = {};
     let text = this.props.featureName || "未命名";
     let remark = this.props.remarks;
-    let featureType = this.fillColorStyle;
+    let featureType = this.props.featureType || this.fillColorStyle;
     let style = {};
     if (
       this.props.plotType === "Point" ||
@@ -515,7 +515,7 @@ export default class PlotInfoPanel extends Component {
     let options = {},
       attrs = {};
     let text = this.props.featureName || "未命名";
-    let strokeColor = this.strokeColorStyle;
+    let strokeColor = this.props.strokeColorStyle || this.strokeColorStyle;
     let style = {};
     if (
       this.props.plotType === "Point" ||
