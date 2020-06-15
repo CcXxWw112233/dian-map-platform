@@ -473,19 +473,19 @@ export default function(props){
         render();
     }
     // 翻转
-    const Flip = ()=>{
+    // const Flip = ()=>{
 
-    }
+    // }
     // 放大
     const ZoomIn = ()=>{
-        if(ratio >= 1.3) return message.warn('已放大到最大值');
+        if(ratio >= 1.5) return message.warn('已放大到最大值');
         ratio += 0.05;
         ctx.scale(1.05,1.05)
         render();
     }
     // 缩小
     const ZoomOut = ()=>{
-        if(ratio <= 0.7) return message.warn('已缩小到最小值');
+        if(ratio <= 0.4) return message.warn('已缩小到最小值');
         ratio -= 0.05;
         ctx.scale(0.95,0.95);
         render();

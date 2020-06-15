@@ -46,7 +46,7 @@ export default class LayerMap extends React.Component{
         const values = firstBaseMaps.values
         const currenttBaseMaps = baseMaps.filter(item => {return values.indexOf(item.id) > -1})
         currenttBaseMaps.forEach(baseMap => {
-          const layer = mapApp.createTilelayer(baseMap)
+          const layer = mapApp.createTilelayer(baseMap);
           mapApp.addBaseLayer(layer)
         })
       }
