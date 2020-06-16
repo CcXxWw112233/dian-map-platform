@@ -132,7 +132,6 @@ export default class TempPlotPanel extends React.Component {
   };
 
   getStyle = (featureOperator) => {
-    debugger;
     if (!featureOperator) return;
     const attrs = featureOperator.attrs;
     const geometryType = featureOperator.feature?.getGeometry().getType();

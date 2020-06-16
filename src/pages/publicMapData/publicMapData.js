@@ -32,7 +32,7 @@ export default class PublicData extends React.Component {
       const { dataItemStateList: publicMapData } = this.props;
       const list = [...publicMapData.dataItemStateList] || [];
       const dataConf = [...publicDataConf.data] || [];
-      PublicDataActions.clear()
+      PublicDataActions.clear();
       for (let i = 0; i < list.length; i++) {
         let checkedList = list[i].checkedList;
         checkedList.forEach((checked) => {
@@ -41,9 +41,9 @@ export default class PublicData extends React.Component {
               if (data.child[j].key === checked) {
                 let loadFeatureKeys = data.child[j].loadFeatureKeys;
                 loadFeatureKeys.forEach((key) => {
-                  key.cql_filter = key.cql_filter.replace(
-                    /\([^\)]*\)/g,
-                    `(${codeStr})`
+                  key.cql_filter = key.cql_filter?.replace(
+                    /\%[^\%]*\%/g,
+                    `%${codeStr}%`
                   );
                   PublicDataActions.getPublicData({
                     url: "",
@@ -94,6 +94,10 @@ export default class PublicData extends React.Component {
               PublicDataActions.removeFeatures(a);
             }
           }
+          data.cql_filter = data.cql_filter?.replace(
+            /\%[^\%]*\%/g,
+            `%${window.areaCode}%`
+          );
           PublicDataActions.getPublicData({
             url: "",
             data: data,

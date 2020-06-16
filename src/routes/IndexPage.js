@@ -234,7 +234,6 @@ class IndexPage extends React.Component {
             isOnMap={true}
           ></SearchToolBar>
         )}
-        <TempPlottingIcon></TempPlottingIcon>
         { isShowTempPlot && 
           <TempPlottingPanel></TempPlottingPanel>
         }

@@ -244,7 +244,7 @@ export default class PlotInfoPanel extends Component {
         attrs = {
           name: text,
           featureType: featureType,
-          selectName: value.name,
+          selectName: value.name || value.icon_name,
           remark: remark,
         };
       } else {
@@ -267,7 +267,7 @@ export default class PlotInfoPanel extends Component {
           name: text,
           featureType: featureType,
           strokeColor: featureType,
-          selectName: value.name,
+          selectName: value.name || value.icon_name,
           remark: remark,
         };
         style = createStyle("Polyline", options);
@@ -317,7 +317,7 @@ export default class PlotInfoPanel extends Component {
           attrs = {
             name: text,
             featureType: featureType,
-            selectName: value.name,
+            selectName: value.name || value.icon_name,
             remark: me.props.remarks,
           };
           style = createStyle("Polygon", options);

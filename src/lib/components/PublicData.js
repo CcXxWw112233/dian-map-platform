@@ -163,7 +163,7 @@ const publicData = {
   },
   clear: function () {
     this.source.clear();
-    mapApp.removeLayer(this.layer);
+    // mapApp.removeLayer(this.layer);
   },
 };
 export default publicData;

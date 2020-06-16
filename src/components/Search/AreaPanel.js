@@ -42,6 +42,9 @@ export default class AreaPanel extends React.Component {
     });
   }
 
+  updatePublicData = (codeStr) => {
+    Event.Evt.firEvent("updatePublicData", codeStr)
+  }
   // 省份选择
   handleProvinceSelectChange = (val) => {
     this.setState(
@@ -62,6 +65,7 @@ export default class AreaPanel extends React.Component {
           return item.code === val;
         })[0].name;
         this.props.updateLocationName(name);
+        this.updatePublicData(val)
         const { provinceCode } = this.state;
         areaSearchAction.getCity(provinceCode).then((res) => {
           if (res.code === "0") {
@@ -91,15 +95,11 @@ export default class AreaPanel extends React.Component {
           return item.code === val;
         })[0].name;
         this.props.updateLocationName(name);
+        this.updatePublicData(val)
         const { cityCode } = this.state;
         areaSearchAction.getDistrict(cityCode).then((res) => {
           if (res.code === "0") {
-            let codeStr = "";
-            res.data.forEach((item) => {
-              codeStr = codeStr + `'${item.code}',`;
-            });
-            codeStr = codeStr?.substr(0, codeStr.length - 1);
-            Event.Evt.firEvent("updatePublicData", codeStr)
+            this.updatePublicData(res)
             this.setState({
               districtOptions: res.data,
             });
@@ -122,10 +122,12 @@ export default class AreaPanel extends React.Component {
         const name = this.state.districtOptions.filter((item) => {
           return item.code === val;
         })[0].name;
+        this.updatePublicData(val)
         this.props.updateLocationName(name);
         const { districtCode } = this.state;
         areaSearchAction.getTown(districtCode).then((res) => {
           if (res.code === "0") {
+            this.updatePublicData(res)
             this.setState({
               townOptions: res.data,
             });
@@ -147,10 +149,12 @@ export default class AreaPanel extends React.Component {
         const name = this.state.townOptions.filter((item) => {
           return item.code === val;
         })[0].name;
+        this.updatePublicData(val)
         this.props.updateLocationName(name);
         const { townCode } = this.state;
         areaSearchAction.getVillige(townCode).then((res) => {
           if (res.code === "0") {
+            this.updatePublicData(res)
             this.setState({
               villageOptions: res.data,
             });

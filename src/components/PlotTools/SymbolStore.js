@@ -81,9 +81,7 @@ export default class SymbolStore extends Component {
       backgroundSize: "100%",
     };
   };
-  onSearch = () => {};
-  handleSearchInputChange = (e) => {
-    const value = e.target?.value.trim();
+  searchSymbol = (value) => {
     let tempArr = [];
     if (value) {
       tempArr = this.symbols.filter((item) => {
@@ -98,6 +96,13 @@ export default class SymbolStore extends Component {
     this.setState({
       orgSymbols: tempArr,
     });
+  };
+  onSearch = (value, event) => {
+    this.searchSymbol(value);
+  };
+  handleSearchInputChange = (e) => {
+    const value = e.target?.value.trim();
+    this.searchSymbol(value);
   };
   handleAddOrgSymbolClick = () => {};
   checkFileSize = (file) => {
@@ -222,11 +227,11 @@ export default class SymbolStore extends Component {
                   onSearch={(value, event) => this.onSearch(value, event)}
                   onChange={(e) => this.handleSearchInputChange(e)}
                 />
-                {this.state.orgSymbols.length > 0 ? (
-                  <div
-                    className={styles.symbolBlock}
-                    style={{ marginTop: 10, height: 330 }}
-                  >
+                <div
+                  className={styles.symbolBlock}
+                  style={{ marginTop: 10, height: 330 }}
+                >
+                  {this.state.orgSymbols.length > 0 ? (
                     <div className={styles.symbolList}>
                       {this.state.orgSymbols.map((item) => {
                         return (
@@ -264,12 +269,30 @@ export default class SymbolStore extends Component {
                         );
                       })}
                     </div>
-                  </div>
-                ) : (
-                  <p>
-                    <span>请新增符号</span>
-                  </p>
-                )}
+                  ) : (
+                    <div style={{ width: "100%" }}>
+                      <p
+                        style={{
+                          textAlign: "center",
+                          color: "rgba(0,0,0,0.65)",
+                          paddingTop: 120,
+                          fontWeight: "inherit",
+                        }}
+                      >
+                        <span>暂无符号</span>
+                      </p>
+                      <p
+                        style={{
+                          textAlign: "center",
+                          color: "rgba(0,0,0,0.65)",
+                          fontWeight: "inherit",
+                        }}
+                      >
+                        <span>请上传符号</span>
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
               <div style={{ width: "100%", height: 40, display: "flex" }}>
                 <Upload
