@@ -15,7 +15,8 @@ import {
   Popconfirm,
   Popover,
   Col,
-  Checkbox
+  Checkbox,
+  Empty
 } from "antd";
 import {
   CheckCircleOutlined,
@@ -304,7 +305,7 @@ export const ScoutingItem = ({
             <div
               {...provided.droppableProps}
               ref={provided.innerRef}>  
-              {dataSource.map((item, index) => {
+              {dataSource.length ? dataSource.map((item, index) => {
                 return (
                   <Draggable key={item.id} draggableId={item.id} index={index}>
                       {(provided, snapshot) => (
@@ -345,7 +346,7 @@ export const ScoutingItem = ({
                       )}
                     </Draggable>
                 );
-              })}
+              }): <Empty style={{textAlign:"center"}} description="暂无采集数据"/>}
               {provided.placeholder}
             <div
               style={{
