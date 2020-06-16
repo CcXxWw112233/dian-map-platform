@@ -45,7 +45,7 @@ instance.interceptors.response.use(config => {
   return config ;
 },err => {
   if(err && err.response ){
-    if(err.response.status == BASIC.SERVER_ERROR){
+    if(err.response.status === BASIC.SERVER_ERROR){
       clearTimeout(responseTimer);
       responseTimer = setTimeout(()=>{
         message.error('系统繁忙,请稍后再试')

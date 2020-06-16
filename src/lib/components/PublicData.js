@@ -6,7 +6,7 @@ import {
   // getExtent,
   // getPoint,
   createStyle,
-  Fit
+  Fit,
 } from "../../lib/utils";
 import { publicDataUrl } from "../../services/publicData";
 import mapApp from "../../utils/INITMAP";
@@ -73,7 +73,7 @@ const publicData = {
           typeName: data.typeName,
         };
         if (data.cql_filter) {
-          params.cql_filter = data.cql_filter
+          params.cql_filter = data.cql_filter;
         }
         getFeature(url ? url : GET_GEO_DATA, params)
           .then((res) => {
@@ -154,18 +154,16 @@ const publicData = {
   areaForExtent: function (extent, duration = 1000) {
     if (extent) {
       // 动画
-      Fit(mapApp.view,extent,{
+      Fit(mapApp.view, extent, {
         size: mapApp.map.getSize(),
         maxZoom: mapApp.view.getMaxZoom(),
         duration,
-      })
+      });
     }
   },
-  clear: function ({ removeLayer }) {
+  clear: function () {
     this.source.clear();
-    if (removeLayer) {
-      mapApp.removeLayer(this.layer);
-    }
+    mapApp.removeLayer(this.layer);
   },
 };
 export default publicData;

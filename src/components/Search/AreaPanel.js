@@ -1,6 +1,7 @@
 import React from "react";
 import styles from "./Panel.less";
 import areaSearchAction from "@/lib/components/Search/AreaSearch";
+import Event from "../../lib/utils/event"
 
 import { Select, Button } from "antd";
 
@@ -93,6 +94,12 @@ export default class AreaPanel extends React.Component {
         const { cityCode } = this.state;
         areaSearchAction.getDistrict(cityCode).then((res) => {
           if (res.code === "0") {
+            let codeStr = "";
+            res.data.forEach((item) => {
+              codeStr = codeStr + `'${item.code}',`;
+            });
+            codeStr = codeStr?.substr(0, codeStr.length - 1);
+            Event.Evt.firEvent("updatePublicData", codeStr)
             this.setState({
               districtOptions: res.data,
             });

@@ -9,6 +9,7 @@ import plotServices from "../../services/plot";
 import { plotEdit } from "../../utils/plotEdit";
 import Event from "../../lib/utils/event";
 import { config } from "../../utils/customConfig";
+import symbolStoreServices from "../../services/symbolStore";
 import { createStyle } from "@/lib/utils";
 import { connect } from "dva";
 
@@ -81,10 +82,6 @@ export default class PlotInfoPanel extends Component {
   }
   componentWillReceiveProps(nextProps) {
     this.getSymbolData(nextProps);
-    const { isModifyPlot } = nextProps;
-    // if (!isModifyPlot) {
-    //   this.updateProps();
-    // }
   }
 
   updateProps = () => {
@@ -122,6 +119,8 @@ export default class PlotInfoPanel extends Component {
         let res = null;
         if (plotType === "Point") {
           res = await plotServices.GET_POINTSYMBOL();
+          const res0 = await symbolStoreServices.GET_ICON()
+          res.data = [{type: "自定义", items:[...res0.data]}, ...res.data]
         }
         if (plotType === "Polyline" || plotType === "LineString") {
           res = await plotServices.GET_POLYLINESYMBOL();
@@ -134,7 +133,9 @@ export default class PlotInfoPanel extends Component {
           plotType === "circle"
         ) {
           res = await plotServices.GET_POLYGONSYMBOL();
-          res.data[2].items = [...res.data[2].items, ...config];
+          const res0 = await symbolStoreServices.GET_ICON()
+          res.data[2].items = [...res.data[2].items, ...config, ...res0.data].reverse();
+          res.data = res.data.reverse()
         }
         // this.symbols[plotType] = res?.data;
         let symbols = [];
@@ -160,16 +161,22 @@ export default class PlotInfoPanel extends Component {
   getSymbol = (data) => {
     if (!data) return;
     let style = {};
-    let symbolUrl = data.value1;
+    let symbolUrl = data.value1 || data.icon_url;
+    let src = ""
     if (symbolUrl.indexOf("/") > -1) {
-      symbolUrl = symbolUrl.replace("img", "");
-      const src = require("../../assets" + symbolUrl);
+      if (symbolUrl.indexOf("https") === 0) {
+        src = symbolUrl
+      } else {
+        symbolUrl = symbolUrl.replace("img", "");
+        src = require("../../assets" + symbolUrl);
+      }
       style = {
         ...style,
         backgroundImage: `url(${src})`,
         backgroundColor: "rgba(255,255,255,1)",
         backgroundRepeat: "no-repeat",
-        backgroundPosition: "center center",
+        backgroundPosition: "center",
+        backgroundSize: "100%"
       };
     } else if (data.value1.indexOf("rgb") > -1) {
       style = {
@@ -217,13 +224,18 @@ export default class PlotInfoPanel extends Component {
     let options = {},
       style = {},
       attrs = {};
-    let featureType = value.value1;
+    let featureType = value.value1 || value.icon_url;
     let text = this.props.featureName || "未命名";
     let remark = this.props.remarks;
+    let iconUrl = ""
     if (this.state.plotType === "Point") {
       if (featureType.indexOf("/") > -1) {
-        let iconUrl = featureType.replace("img", "");
-        iconUrl = require("../../assets" + iconUrl);
+        if (featureType.indexOf("https") === 0) {
+          iconUrl = featureType
+        } else {
+          iconUrl = featureType.replace("img", "");
+          iconUrl = require("../../assets" + iconUrl);
+        }
         options = {
           ...this.commonStyleOptions,
           iconUrl: iconUrl,
@@ -231,7 +243,7 @@ export default class PlotInfoPanel extends Component {
         };
         attrs = {
           name: text,
-          featureType: value.value1,
+          featureType: featureType,
           selectName: value.name,
           remark: remark,
         };
@@ -247,14 +259,14 @@ export default class PlotInfoPanel extends Component {
       if (featureType.indexOf("rgb") > -1) {
         options = {
           ...this.commonStyleOptions,
-          strokeColor: value.value1,
+          strokeColor: featureType,
           strokeWidth: 3,
           text: text,
         };
         attrs = {
           name: text,
-          featureType: value.value1,
-          strokeColor: value.value1,
+          featureType: featureType,
+          strokeColor: featureType,
           selectName: value.name,
           remark: remark,
         };
@@ -271,21 +283,25 @@ export default class PlotInfoPanel extends Component {
       if (featureType.indexOf("rgb") > -1) {
         options = {
           ...this.commonStyleOptions,
-          fillColor: value.value1,
-          strokeColor: value.value1,
+          fillColor: featureType,
+          strokeColor: featureType,
           text: text,
         };
         attrs = {
           name: text,
-          featureType: value.value1,
-          strokeColor: value.value1,
+          featureType: featureType,
+          strokeColor: featureType,
           selectName: value.name,
           remark: remark,
         };
         style = createStyle("Polygon", options);
       } else if (featureType.indexOf("/") > -1) {
-        let iconUrl = featureType.replace("img", "");
-        iconUrl = require("../../assets" + iconUrl);
+        if (featureType.indexOf("https") === 0) {
+          iconUrl = featureType
+        } else {
+          iconUrl = featureType.replace("img", "");
+          iconUrl = require("../../assets" + iconUrl);
+        }
         let canvas = document.createElement("canvas");
         let context = canvas.getContext("2d");
         let img = new Image();
@@ -300,7 +316,7 @@ export default class PlotInfoPanel extends Component {
           };
           attrs = {
             name: text,
-            featureType: value.value1,
+            featureType: featureType,
             selectName: value.name,
             remark: me.props.remarks,
           };
@@ -309,7 +325,7 @@ export default class PlotInfoPanel extends Component {
             Event.Evt.firEvent("setAttribute", {
               style: style,
               attrs: attrs,
-              responeseData: me.state.symbols,
+              responseData: me.state.symbols,
               cb: me.updateRedux.bind(me),
             });
           } else {
@@ -699,7 +715,7 @@ export default class PlotInfoPanel extends Component {
                           className={styles.symbolColor}
                           style={this.getSymbol(item)}
                         ></div>
-                        <span>{item.name}</span>
+                        <span>{item.name || item.icon_name}</span>
                       </div>
                     );
                   })}
