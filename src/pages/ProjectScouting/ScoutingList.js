@@ -5,7 +5,7 @@ import globalStyle from "../../globalSet/styles/globalStyles.less";
 import { connect } from "dva";
 import Action from '../../lib/components/ProjectScouting/ScoutingList'
 import ScoutingItem from './components/ScoutingItem'
-import { message } from "antd";
+import { message, Empty } from "antd";
 import Bitmap from '../../assets/Bitmap.png'
 
 const ScoutingAddBtn = ({ cb }) => {
@@ -303,7 +303,7 @@ export default class ScoutingList extends PureComponent {
     const { projects} = this.state;
     return (
       <div className={styles.wrap + ` ${globalStyle.autoScrollY}`}>
-          { projects.map((item,index) => {
+          { projects.length ? projects.map((item,index) => {
             return (
               <ScoutingItem
                 key={item.board_id}
@@ -323,7 +323,7 @@ export default class ScoutingList extends PureComponent {
                 onSetBgImg={this.onSetBgImg.bind(this,item)}
               ></ScoutingItem>
             )
-          })}
+          }) : <Empty description="暂无项目数据"/>}
         <ScoutingAddBtn cb={this.handleAddClick.bind(this)} />
         <div className={styles.bgStyleImg}>
           <img src={Bitmap}/>

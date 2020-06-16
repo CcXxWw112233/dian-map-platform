@@ -12,7 +12,8 @@ import {
   Button,
   message,
   Space,
-  Popover
+  Popover,
+  Empty
 } from "antd";
 import {
   PlusCircleOutlined,
@@ -925,7 +926,7 @@ export default class ScoutingDetails extends PureComponent {
   render () {
     const { current_board, area_list, not_area_id_collection ,all_collection ,isPlay, playing} = this.state;
     const panelStyle = {
-      height: "96%",
+      height: "90%",
     };
     const { activeId } = this.state;
     const { dispatch } = this.props;
@@ -984,7 +985,7 @@ export default class ScoutingDetails extends PureComponent {
           >
             <div
               className={globalStyle.autoScrollY}
-              style={{ height: "75vh", paddingBottom: "40px" }}
+              style={{ height: "100%", paddingBottom: "40px" }}
               ref={this.scrollView}
             >
               <Collapse
@@ -998,7 +999,7 @@ export default class ScoutingDetails extends PureComponent {
                 expandIconPosition="left"
                 expandIcon={({ isActive }) => <CaretRightOutlined rotate={isActive ? 90 : 0} />}
               >
-                {area_list.map((item, index) => {
+                { area_list.map((item, index) => {
                   let activeStyle = null;
                   if (item.id === activeId) {
                     activeStyle = { backgroundColor: "rgba(214,228,255,0.5)" };
@@ -1078,7 +1079,7 @@ export default class ScoutingDetails extends PureComponent {
                     />
                   }
                 >
-                  {!!not_area_id_collection.length && (
+                  {!!not_area_id_collection.length ? (
                     <div className={styles.norAreaIdsData}>
                       {not_area_id_collection.map((item, index) => {
                         let activeStyle = null;
@@ -1122,7 +1123,7 @@ export default class ScoutingDetails extends PureComponent {
                         );
                       })}
                     </div>
-                  )}
+                  ) : <Empty style={{textAlign:"center"}} description="暂无采集数据"/>}
                 </Collapse.Panel>
               </Collapse>
             </div>
