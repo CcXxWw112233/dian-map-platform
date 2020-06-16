@@ -82,6 +82,24 @@ export default {
         
         return Promise.reject(response && response.data);
     },
+    // 组合一个采集数据
+    MERGE_COLLECTION: async (data) => {
+        let response = await request('POST','/map/collection/group',data);
+        if(BASIC.checkResponse(response)){
+            return response.data;
+        }
+        
+        return Promise.reject(response && response.data);
+    },
+    // 排序采集数据
+    SORT_COLLECTION_DATA: async (data)=>{
+        let response = await request('POST',`/map/collection/sort`,data);
+        if(BASIC.checkResponse(response)){
+            return response.data;
+        }
+        
+        return Promise.reject(response && response.data);
+    },
     // 删除一条采集数据
     DELETE_COLLECTION: async (id) => {
         let response = await request('DELETE',`/map/collection/${id}`,{});

@@ -30,9 +30,10 @@ const getBaseUrl = () => {
   }
 
   let NODE_ENV = process.env.NODE_ENV ;
-  console.log(process.env);
+  // console.log(process.env);
   if(NODE_ENV === 'development'){
     return {
+      BASE_URL:"http://maptest.new-di.com",
       API_URL: '/api',
       Geo_WFS:"https://map.di-an.com/geoserver/wfs",
       ...config,
@@ -40,6 +41,7 @@ const getBaseUrl = () => {
   }
   if(NODE_ENV === 'production'){
     return {
+      BASE_URL:"https://map.di-an.com",
       API_URL: '/api',
       Geo_WFS:"https://map.di-an.com/geoserver/wfs",
       ...config,

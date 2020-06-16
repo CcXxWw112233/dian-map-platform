@@ -57,6 +57,9 @@ export default function overlay (data = {}){
             this.video.dataset.uid = this.uid;
             this.video.controls = 'controls';
             this.videoDiv = document.createElement('div');
+            this.videoDiv.onclick = (e)=>{
+                e.stopPropagation();
+            }
             this.videoDiv.className = styles.videoDiv;
             let play = document.createElement('div');
             play.className = styles.videoPlayBtn;

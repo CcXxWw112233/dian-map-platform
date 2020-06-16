@@ -227,7 +227,9 @@ export const ScoutingItem = ({
     onRemarkSave = () => { },
     onStopMofifyFeatureInDetails,
     onExcelSuccess =()=>{},
-    onDragEnd = ()=>{}
+    onDragEnd = ()=>{},
+    onMergeUp,
+    onMergeDown
   }) => {
     let [planExtent, setPlanExtent] = useState("");
     let [transparency, setTransparency] = useState("1");
@@ -340,6 +342,10 @@ export const ScoutingItem = ({
                               onModifyFeature={onModifyFeature}
                               onStopMofifyFeatureInDetails={onStopMofifyFeatureInDetails}
                               onModifyRemark={onModifyRemark}
+                              onMergeDown={onMergeDown}
+                              onMergeUp={onMergeUp}
+                              index={index}
+                              length={dataSource.length}
                             />
                           </div>
                         </div>
@@ -445,6 +451,10 @@ export const UploadItem = ({
     onStopMofifyFeatureInDetails,
     onRemarkSave = () => { },
     onToggleChangeStyle = () => { },
+    onMergeUp = ()=>{},
+    onMergeDown = ()=>{},
+    index,
+    length
   }) => {
     let obj = { ...data };
     // 过滤后缀
@@ -531,6 +541,16 @@ export const UploadItem = ({
         Event.Evt.on("stopEditPlot", () => {
           setIsPlotEdit(false)
         })
+      }
+      if(key === 'mergeUp'){
+        // 向上组合
+        setVisible(false);
+        onMergeUp && onMergeUp(data,index)
+      }
+      if(key === 'mergeDown'){
+        // 向下组合
+        setVisible(false);
+        onMergeDown && onMergeDown(data,index)
       }
     };
     // 分组列表
@@ -639,6 +659,17 @@ export const UploadItem = ({
               <div style={{ width: "100%" }}>移动到分组</div>
             </Popover>
           </Menu.Item>}
+        {
+          index !== 0 && 
+          <Menu.Item key="mergeUp">
+            向上组合
+          </Menu.Item>
+        }
+        { index < length - 1 &&
+          <Menu.Item key="mergeDown">
+            向下组合
+          </Menu.Item>
+        }
         {/* <Menu.Item key="display">
           {data.is_display === "0" ? "显示" : "隐藏"}
         </Menu.Item> */}
