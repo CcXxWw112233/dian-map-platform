@@ -85,7 +85,7 @@ export default function(props){
         dots = [
             { x: left, y: top },
             { x: left + img_w - 2, y: top },
-            { x: left + img_w, y: top + img_h -5 },
+            { x: left + img_w -2 , y: top + img_h -5 },
             { x: left, y: top + img_h - 5 },
         ];
         dotscopy = [
@@ -109,7 +109,7 @@ export default function(props){
     }
 
     const render = (flag)=>{
-        ctx.clearRect(0 - translateX, 0 - translateY, canvas.width, canvas.height);
+        ctx.clearRect(-10000 *4, -10000 *4 , 10000 * 8, 10000 *8);
 
         var ndots = rectsplit(count, dots[0], dots[1], dots[2], dots[3]);
         
@@ -280,11 +280,11 @@ export default function(props){
           //   ctx.fillStyle="green";
             let x = dot.x ,y = dot.y;
 
-            if(i === 0){x += 5;}
-            if(i === 1){x -=5;}
-            if(i === 2){x -= 5; y-= 5;}
-            if(i === 3){x += 5;y-=5;}
-            ctx.arc(x,y + 5,5,0,360,false);
+            if(i === 0){x += 8;}
+            if(i === 1){x -=8;}
+            if(i === 2){x -= 8; y-= 8;}
+            if(i === 3){x += 8;y-=8;}
+            ctx.arc(x,y + 8,8,0,360,false);
             ctx.fill();
             //封闭新路径
             ctx.closePath();
@@ -293,7 +293,6 @@ export default function(props){
     }
 
     let eventStart = function(e) {
-        console.dir(canvas)
         // 鼠标和手指移动事件
         const move = function(e) {
           var narea = getArea(e);
@@ -349,11 +348,11 @@ export default function(props){
         //   ctx.fillStyle="green";
           let x = dot.x ,y = dot.y;
 
-          if(i === 0){x += 5;}
-          if(i === 1){x -=5;}
-          if(i === 2){x -= 5; y-= 5;}
-          if(i === 3){x += 5;y-=5;}
-          ctx.arc(x,y + 5,5,0,360,false);
+          if(i === 0){x += 8;}
+          if(i === 1){x -=8;}
+          if(i === 2){x -= 8; y-= 8;}
+          if(i === 3){x += 8;y-=8;}
+          ctx.arc(x,y + 8,8,0,360,false);
           ctx.fill();
           let layerX = e.clientX;
           let layerY = e.clientY;
@@ -375,10 +374,45 @@ export default function(props){
             x:e.layerX,
             y:e.layerY
         }
+        let rgb = ctx.getImageData(e.clientX,e.clientY,1,1);
+        if(rgb.data[3] === 0){
+            return ;
+        }
 
-
-
-        if (!n) return;
+        if (!n) {
+            canvas.onpointermove = (evt) => {
+                let darea = getArea(evt);
+                var dx = (darea.l - area.l) ;
+                var dy = (darea.t - area.t)  ;
+                area = darea;
+                let xs = dots.map(item => item.x);
+                let ys = dots.map(item => item.y);
+                dots = dots.map((item,index) => {
+                    let minX = Math.min(...xs);
+                    let minY = Math.min(...ys);
+                    let maxY = Math.max(...ys);
+                    let maxX = Math.max(...xs);
+                    if(dx<=0 && Math.abs(minX) >= Math.abs(translateX / ratio)){
+                        dx = 0;
+                    }else if(dx >= 0 && Math.abs(maxX) >= translateX / ratio){
+                        dx = 0;
+                    }
+                    if(dy <= 0 & Math.abs(minY) >= translateY / ratio){
+                        dy = 0;
+                    }else if(dy >= 0 && Math.abs(maxY) >= translateY / ratio){
+                        dy = 0;
+                    }
+                    item.x += dx;
+                    item.y += dy;
+                    return item;
+                })
+                render();
+            }
+            canvas.onpointerup = ()=>{
+                canvas.onpointermove = null;
+            }
+            return ;
+        };
 
         canvas.onpointerup = ()=>{
             clear();
@@ -402,7 +436,7 @@ export default function(props){
         //   }
         // }
       };
-    
+
 
     function getRotateDeg (narea){
         let x = (narea.l - translateX) * Math.cos(rotate) - (narea.t - translateY) * Math.sin(rotate) + translateX;
@@ -448,7 +482,7 @@ export default function(props){
         repeatTimer = setTimeout(()=>{
             intervalTimer = setInterval(()=>{
                 TurnRight();
-            },100)
+            },50)
         },800);
     }
     const cancelLongpress = ()=>{
@@ -460,7 +494,7 @@ export default function(props){
         repeatTimer = setTimeout(()=>{
             intervalTimer = setInterval(()=>{
                 TurnLeft();
-            },100)
+            },50)
         },800);
     }
     // 向左旋转
@@ -480,7 +514,7 @@ export default function(props){
     const ZoomIn = ()=>{
         if(ratio >= 1.5) return message.warn('已放大到最大值');
         ratio += 0.05;
-        ctx.scale(1.05,1.05)
+        ctx.scale(1.05,1.05);
         render();
     }
     // 缩小

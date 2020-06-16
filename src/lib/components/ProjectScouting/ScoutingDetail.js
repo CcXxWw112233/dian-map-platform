@@ -49,6 +49,8 @@ function Action() {
     GET_PLAN_PIC,
     PLAN_IMG_URL,
     SAVE_EDIT_PLAN_IMG,
+    SORT_COLLECTION_DATA,
+    MERGE_COLLECTION,
   } = config;
   this.activeFeature = {};
   this.Layer = Layer({ id: "scoutingDetailLayer", zIndex: 11 });
@@ -783,10 +785,12 @@ function Action() {
     });
     staticimg.on("imageloadend", (e) => {
       _that.Source.removeFeature(this.box);
+      this.box = null;
     });
 
     staticimg.on("imageloaderror", () => {
       _that.Source.removeFeature(this.box);
+      this.box = null;
     });
   };
 
@@ -811,6 +815,7 @@ function Action() {
         ? resp.extent.split(",").map((e) => parseFloat(e))
         : [];
 
+      // let url = config.BASE_URL + PLAN_IMG_URL(resp.id);
       let img = ImageStatic(PLAN_IMG_URL(resp.id), extent, {
         opacity: +resp.transparency,
         minZoom: 10,
@@ -819,6 +824,7 @@ function Action() {
       // 添加规划图加载状态
       new loading(stati, extent, resp);
       img.set("id", resp.id);
+      // 保存规划图
       this.imgs.push(img);
       // 合并范围-使缩放的时候，可以适应到规划图的位置
       if (!ext.length) {
@@ -1287,6 +1293,15 @@ function Action() {
     // 将最新的数据更新到本地。用来对比
     this.oldData = data;
   };
+
+  // 保存排序操作
+  this.saveSortCollection = async (data) => {
+    return await SORT_COLLECTION_DATA(data)
+  }
+  // 保存合并操作
+  this.saveMergeCollection = async (data)=>{
+    return await MERGE_COLLECTION(data);
+  }
 }
 
 let action = new Action();

@@ -64,6 +64,8 @@ export default class ScoutingDetails extends PureComponent {
       audioData: {},
     };
     this.scrollView = React.createRef();
+    this.saveSortTimer = null;
+    this.saveSortTime = 2 * 1000;// 秒
   }
   componentDidMount () {
     const { Evt } = Event;
@@ -755,7 +757,7 @@ export default class ScoutingDetails extends PureComponent {
   onCollectionDragEnd = (data,result)=>{
     let ondragId = data.id;
     // return message.warn('排序功能暂未开放');
-    if (!result.destination) {
+    if (!result.destination || (result.source.index === (result.destination && result.destination.index))) {
       return;
     }
     // 重新记录数组顺序
@@ -785,11 +787,27 @@ export default class ScoutingDetails extends PureComponent {
       }
       return item;
     })
+    // 清除定时器
+    clearTimeout(this.saveSortTimer);
     this.setState({
       area_list
+    },()=>{
+      this.saveSortTimer = setTimeout(()=>{
+        this.saveSort(items);
+      },this.saveSortTime)
     })
   }
-
+  // 保存排序列表
+  saveSort = (data)=>{
+    let ids = data.map(item => item.id);
+    // console.log(ids);
+    let param = {
+      board_id : this.state.current_board.board_id,
+      sort: ids
+    }
+    // 调用保存
+    Action.saveSortCollection(param);
+  }
   // 查询最近一组中含有采集数据的分组,添加选中，默认播放选中分组
   getFirstAreaCollection = (index)=>{
     for(let i = index; i< this.state.area_list.length; i++){
@@ -837,6 +855,12 @@ export default class ScoutingDetails extends PureComponent {
       Evt.firEvent('autoPlayChange');
     }
   }
+  // 检查是否有goupId，有的话就合并
+  getSameGroupIdData = (data, list)=>{
+    if(!data.group_id) return data;
+    
+  }
+
   // 检查有没有下一个
   checkHasNextGroup = () => {
     let current = this.state.currentGroup ? {...this.state.currentGroup} : {};
@@ -921,6 +945,24 @@ export default class ScoutingDetails extends PureComponent {
         })
       })
     }
+  }
+
+  CollectionMerge = (type,data,collection,index)=>{
+    let current = data.collection;
+    let other = null;
+    let ids = [];
+    if(type === 'up'){
+      other = current[index - 1];
+      ids = [other.id, collection.id]
+    }
+    if(type === 'down'){
+      other = current[index + 1];
+      ids = [collection.id ,other.id]
+    }
+    // 保存
+    Action.saveMergeCollection({data_ids: ids}).then(res => {
+      message.success('操作成功');
+    })
   }
 
   render () {
@@ -1060,6 +1102,8 @@ export default class ScoutingDetails extends PureComponent {
                         onCopyCollection={this.onCopyCollection}
                         onExcelSuccess={this.onExcelSuccess}
                         onDragEnd={this.onCollectionDragEnd}
+                        onMergeDown={this.CollectionMerge.bind(this,'down',item)}
+                        onMergeUp={this.CollectionMerge.bind(this,'up',item)}
                       />
                     </Collapse.Panel>
                   );
