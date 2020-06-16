@@ -117,12 +117,12 @@ export default class TempPlotPanel extends React.Component {
     });
     plotEdit.plottingLayer.removeFeature(newList[index]);
     newList.splice(index, 1);
-    let newList2 = []
-    newList.forEach(item => {
+    let newList2 = [];
+    newList.forEach((item) => {
       if (item.attrs.name) {
-        newList2.push(item)
+        newList2.push(item);
       }
-    })
+    });
     dispatch({
       type: "featureOperatorList/updateList",
       payload: {
@@ -136,17 +136,23 @@ export default class TempPlotPanel extends React.Component {
     const attrs = featureOperator.attrs;
     const geometryType = featureOperator.feature?.getGeometry().getType();
     if (!geometryType) return;
+    let tempIconUrl, image;
     if (attrs && attrs.featureType) {
       let style = {};
       if (attrs.featureType.indexOf("/") > -1) {
-        const tempIconUrl = attrs.featureType.replace("img", "");
-        const image = require("../../assets" + tempIconUrl);
+        if (attrs.featureType.indexOf("https") === 0) {
+          image = attrs.featureType;
+        } else {
+          tempIconUrl = attrs.featureType.replace("img", "");
+          image = require("../../assets" + tempIconUrl);
+        }
         style = {
           ...style,
           backgroundImage: `url(${image})`,
           backgroundColor: "rgba(255,255,255,1)",
           backgroundRepeat: "no-repeat",
-          backgroundPosition: "center center",
+          backgroundPosition: "center",
+          backgroundSize: "100%",
         };
       }
       if (attrs.featureType.indexOf("rgb") > -1) {
@@ -211,12 +217,12 @@ export default class TempPlotPanel extends React.Component {
           indeterminate: false,
           checkAll: false,
         });
-        let newList2 = []
-        array.forEach(item => {
+        let newList2 = [];
+        array.forEach((item) => {
           if (item.attrs.name) {
-            newList2.push(item)
+            newList2.push(item);
           }
-        })
+        });
         dispatch({
           type: "featureOperatorList/updateList",
           payload: {

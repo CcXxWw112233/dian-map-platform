@@ -32,6 +32,7 @@ const Lenged = ({ data }) => {
                 style.backgroundColor = "#fff";
                 style.backgroundRepeat = "no-repeat";
                 style.backgroundPosition = "center";
+                style.backgroundSize = "100%";
               }
               if (itemContent.borderColor) {
                 style.border = `1px solid ${itemContent.borderColor}`;

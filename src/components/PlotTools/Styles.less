@@ -16,7 +16,7 @@
     position: absolute;
     top: 0px;
     right: 55px;
-    border-radius: 4px;
+    // border-radius: 4px;
     border: 1px solid rgba(0, 0, 0, 0.1);
     padding-left: 4px;
     .header {
@@ -85,8 +85,20 @@
             // .symbol.symbolActive {
             //   background-color: rgba(0, 0, 0, 0.1) !important;
             // }
+            .deleteBtn {
+              position: relative;
+              top: -15%;
+              right: -50%;
+              font-size: 12px;
+              border-radius: 12px;
+              color: rgb(255, 47, 0);
+              background-color: #fff;
+            }
           }
         }
+      }
+      :global(.ant-upload-list) {
+        display: none;
       }
     }
     .footer {

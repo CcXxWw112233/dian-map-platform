@@ -26,6 +26,7 @@ export default class Search extends React.Component {
       searchLoading: false,
       searchHistory: [],
       searchVal: "",
+      adcode: "",
     };
     this.handleSearch = throttle(this.handleSearch, 1000);
   }
@@ -33,8 +34,10 @@ export default class Search extends React.Component {
     getMyPosition.getPosition().then((val) => {
       if (!val) return;
       this.setState({
-        locationName: val.addressComponent?.city || this.state.locationName,
+        locationName: val.addressComponent?.district || this.state.locationName,
+        adcode: val.addressComponent?.adcode,
       });
+      window.areaCode = `${val.addressComponent?.adcode}`;
     });
   }
   handleAreaClick = () => {

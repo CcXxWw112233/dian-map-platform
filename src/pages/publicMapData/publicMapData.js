@@ -3,17 +3,17 @@ import styles from "./publicMapData.less";
 import DataItem from "./DataItem";
 import PublicDataActions from "../../lib/components/PublicData";
 import globalStyle from "../../globalSet/styles/globalStyles.less";
+import Event from "../../lib/utils/event";
+import publicDataConf from "./public_data";
 // import publicData from "../../lib/components/PublicData";
 import lengedListConf from "components/LengedList/config";
 import { connect } from "dva";
 const MenuData = require("./public_data").default;
 
-@connect(
-  ({ lengedList: { config }, publicMapData: { dataItemStateList } }) => ({
-    config,
-    dataItemStateList,
-  })
-)
+@connect(({ lengedList: { config }, publicMapData: dataItemStateList }) => ({
+  config,
+  dataItemStateList,
+}))
 export default class PublicData extends React.Component {
   constructor(props) {
     super(props);
@@ -25,7 +25,39 @@ export default class PublicData extends React.Component {
   componentDidMount() {
     // console.log(m)
     PublicDataActions.init();
+    this.getAllData();
   }
+  getAllData = () => {
+    Event.Evt.on("updatePublicData", (codeStr) => {
+      const { dataItemStateList: publicMapData } = this.props;
+      const list = [...publicMapData.dataItemStateList] || [];
+      const dataConf = [...publicDataConf.data] || [];
+      PublicDataActions.clear();
+      for (let i = 0; i < list.length; i++) {
+        let checkedList = list[i].checkedList;
+        checkedList.forEach((checked) => {
+          dataConf.forEach((data) => {
+            for (let j = 0; j < data.child.length; j++) {
+              if (data.child[j].key === checked) {
+                let loadFeatureKeys = data.child[j].loadFeatureKeys;
+                loadFeatureKeys.forEach((key) => {
+                  key.cql_filter = key.cql_filter?.replace(
+                    /\%[^\%]*\%/g,
+                    `%${codeStr}%`
+                  );
+                  PublicDataActions.getPublicData({
+                    url: "",
+                    data: key,
+                    fillColor: null,
+                  });
+                });
+              }
+            }
+          });
+        });
+      }
+    });
+  };
   // 获取多出来的那些 arr1 是原数据，arr2 是对比数据，新的数据是从arr2中获取
   getItems = (arr1, arr2) => {
     let arraynew = [];
@@ -49,22 +81,29 @@ export default class PublicData extends React.Component {
       let arr = this.getItems(oldVal, newVal);
       // 新增了哪些图层key
       let keys = this.getCheckBoxForDatas(arr);
-      keys && keys.forEach((item) => {
-        let data = { ...item };
-        if (newVal.length === oldVal.length) {
-          data.key = 1;
-          if (keys.length) {
-            // 删除勾选的选项-这里只需要传key，剔除其他属性
-            let a = keys.map((item) => item.typeName + (item.cql_filter || ""));
-            PublicDataActions.removeFeatures(a);
+      keys &&
+        keys.forEach((item) => {
+          let data = { ...item };
+          if (newVal.length === oldVal.length) {
+            data.key = 1;
+            if (keys.length) {
+              // 删除勾选的选项-这里只需要传key，剔除其他属性
+              let a = keys.map(
+                (item) => item.typeName + (item.cql_filter || "")
+              );
+              PublicDataActions.removeFeatures(a);
+            }
           }
-        }
-        PublicDataActions.getPublicData({
-          url: "",
-          data: data,
-          fillColor: fillColor,
+          data.cql_filter = data.cql_filter?.replace(
+            /\%[^\%]*\%/g,
+            `%${window.areaCode}%`
+          );
+          PublicDataActions.getPublicData({
+            url: "",
+            data: data,
+            fillColor: fillColor,
+          });
         });
-      });
     } else if (newVal.length < oldVal.length) {
       // 删除了需要显示的内容
       let arr = this.getItems(newVal, oldVal);
@@ -137,8 +176,8 @@ export default class PublicData extends React.Component {
         {this.AllCheckData.map((item, index) => {
           return (
             <DataItem
-              stateIndex = { index }
-              dispatch = { dispatch }
+              stateIndex={index}
+              dispatch={dispatch}
               data={item}
               key={item.key}
               onChange={this.toggleViewPulicData}

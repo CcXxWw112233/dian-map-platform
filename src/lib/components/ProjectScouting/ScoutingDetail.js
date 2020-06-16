@@ -359,7 +359,6 @@ function Action() {
       this.layer.projectScoutingArr = [];
       this.layer.plotEdit.updateCb = null;
     }
-
     data.forEach((item) => {
       let content = item.content;
       // console.log(item)
@@ -376,8 +375,12 @@ function Action() {
       const featureLowerType = content.geoType.toLowerCase();
       if (featureType.indexOf("/") > -1) {
         isImage = true;
-        featureType = featureType.replace("img", "");
-        iconUrl = require("../../../assets" + featureType);
+        if (featureType.indexOf("https") === 0) {
+          iconUrl = featureType
+        } else {
+          featureType = featureType.replace("img", "");
+          iconUrl = require("../../../assets" + featureType);
+        }
         if (hasIndex < 0) {
           obj = {
             imgSrc: iconUrl,
