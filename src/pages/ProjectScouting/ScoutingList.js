@@ -323,7 +323,7 @@ export default class ScoutingList extends PureComponent {
                 onSetBgImg={this.onSetBgImg.bind(this,item)}
               ></ScoutingItem>
             )
-          }) : <Empty description="暂无项目数据"/>}
+          }) : <Empty description="暂无项目数据" style={{marginBottom:10}}/>}
         <ScoutingAddBtn cb={this.handleAddClick.bind(this)} />
         <div className={styles.bgStyleImg}>
           <img src={Bitmap}/>
