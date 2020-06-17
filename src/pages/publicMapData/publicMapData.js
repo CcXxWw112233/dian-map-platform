@@ -46,11 +46,11 @@ export default class PublicData extends React.Component {
                   //   `%${codeStr}%`
                   // );
                   if (key.cql_filter) {
-                    const index = key.cql_filter.indexOf("AND");
+                    const index = key.cql_filter.indexOf(" AND");
                     if (index > -1) {
                       key.cql_filter =
                         queryStr +
-                        key.cql_filter.substring(index + 3, key.cql_filter.length);
+                        key.cql_filter.substring(index, key.cql_filter.length);
                     }
                   } else {
                     key.cql_filter = queryStr;
@@ -109,11 +109,11 @@ export default class PublicData extends React.Component {
           //   `%${window.areaCode}%`
           // );
           if (data.cql_filter) {
-            const index = data.cql_filter.indexOf("AND");
+            const index = data.cql_filter.indexOf(" AND");
             if (index > -1) {
               data.cql_filter =
                 window.queryStr +
-                data.cql_filter.substring(index + 3, data.cql_filter.length);
+                data.cql_filter.substring(index, data.cql_filter.length);
             }
           } else {
             data.cql_filter = window.queryStr;
