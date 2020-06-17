@@ -13,7 +13,11 @@ import {
   message,
   Space,
   Popover,
-  Empty
+  Empty,
+  Radio,
+  Form,
+  Input,
+  InputNumber
 } from "antd";
 import {
   PlusCircleOutlined,
@@ -56,6 +60,7 @@ export default class ScoutingDetails extends PureComponent {
       currentGroup:null,
       notNextGroup:false,
       notPrevGroup:false,
+      playCollectionVisible:false,
 
       visible: true,
       activeKey: panes[0].key,
@@ -1039,6 +1044,18 @@ export default class ScoutingDetails extends PureComponent {
     }
   }
 
+  toPlayCollection = (data)=>{
+    // console.log(data)
+    let {mode ,time , showone} = data;
+    PlayCollectionAction.playMode = mode;
+    PlayCollectionAction.autoPlayTime = time;
+    PlayCollectionAction.justShowOne = showone;
+
+    // 开始播放
+    this.startPlayCollection(mode);
+    this.setState({playCollectionVisible: false})
+  }
+
   render () {
     const { current_board, area_list, not_area_id_collection ,all_collection ,isPlay, playing} = this.state;
     const panelStyle = {
@@ -1269,14 +1286,63 @@ export default class ScoutingDetails extends PureComponent {
                   {this.state.multipleGroup ? '分组展示':'组合展示'}
                 </Button>
                 <Popover
-                trigger="focus"
+                trigger={['click','focus']}
                 title="选择播放模式"
+                trigger="click"
+                visible={this.state.playCollectionVisible}
+                onVisibleChange={(visible)=> this.setState({playCollectionVisible: visible})}
                 content={
-                  <div>
-                    <Button type='link' size='small'
-                    onClick={()=> this.startPlayCollection('hand')}>手动播放</Button>
-                    <Button type='link' size='small'
-                    onClick={()=> this.startPlayCollection('auto')}>自动播放</Button>
+                  <div style={{textAlign:"center"}}>
+                    <Form size='small' onFinish={this.toPlayCollection}
+                    initialValues={
+                      {
+                        mode:PlayCollectionAction.playMode,
+                        time:PlayCollectionAction.autoPlayTime,
+                        showone: PlayCollectionAction.justShowOne
+                      }
+                    }>
+                      <Form.Item label="播放模式" name='mode'>
+                        <Radio.Group buttonStyle="solid" 
+                        size="small">
+                          <Radio.Button value="hand">手动</Radio.Button>
+                          <Radio.Button value='auto'>自动</Radio.Button>
+                        </Radio.Group>
+                      </Form.Item>
+                      <Form.Item
+                      noStyle
+                      shouldUpdate={(prevValues, currentValues) => prevValues.mode !== currentValues.mode}>
+                        {({getFieldValue }) => {
+                          return (
+                            <Form.Item name="time" label="播放间隔">
+                              <InputNumber value={PlayCollectionAction.autoPlayTime} size="small" 
+                              max={60}
+                              formatter={value => `${value}s`}
+                              parser={value => value.replace('s', '')}
+                              disabled={getFieldValue('mode') === 'hand'}/>
+                            </Form.Item>
+                          )
+                        }}
+                      </Form.Item>
+                      <Form.Item
+                      noStyle
+                      shouldUpdate={(prevValues, currentValues) => prevValues.mode !== currentValues.mode}>
+                        {({getFieldValue}) => {
+                            return (
+                              <Form.Item name="showone" label="单个展示">
+                                <Radio.Group disabled={getFieldValue('mode') === 'hand'}>
+                                  <Radio value={false}>否</Radio>
+                                  <Radio value={true}>是</Radio>
+                                </Radio.Group>
+                              </Form.Item>
+                            )
+                        }}
+                      </Form.Item>
+                      <Form.Item style={{marginBottom:"5px"}}>
+                        <Button type="primary" htmlType="submit" shape='round' size='small'>
+                          开始
+                        </Button>
+                      </Form.Item>
+                    </Form>
                   </div>
                 }>
                   <Button shape="round" 
