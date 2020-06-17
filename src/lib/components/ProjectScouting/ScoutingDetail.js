@@ -934,7 +934,7 @@ function Action() {
           isLoading = false;
         };
       },
-      click:(val)=>{
+      preview:(val)=>{
         // console.log(val)
         let { target } = val;
         let ty = this.checkCollectionType(target);
