@@ -195,6 +195,16 @@ export default function overlay (data = {}){
         // 创建音频播放
         createAudioElement();
     }
+    if(type === 'word'){
+        let preview = document.createElement('span');
+        preview.className = `${styles.previewBtn} ${iconCss.global_icon}`;
+        preview.innerHTML = '&#xe638;';
+        preview.title = data.target === 'pdf' ? '预览':"下载";
+        div.appendChild(preview);
+    }
+    this.element.querySelector('.'+styles.previewBtn) && (this.element.querySelector('.'+styles.previewBtn).onclick = ()=>{
+        this.on['preview'] && this.on['preview'](data);
+    })
     document.body.appendChild(this.element);
     this.remove = ()=>{
         document.body.removeChild(this.element);
