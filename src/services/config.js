@@ -35,8 +35,8 @@ const getBaseUrl = () => {
     return {
       BASE_URL:"http://maptest.new-di.com",
       API_URL: '/api',
-      // Geo_WFS:"http://maptest.new-di.com/geoserver/wfs",
-      Geo_WFS:"https://map.di-an.com/geoserver/wfs",
+      Geo_WFS:"http://maptest.new-di.com/geoserver/wfs",
+      // Geo_WFS:"https://map.di-an.com/geoserver/wfs",
       ...config,
     }
   }

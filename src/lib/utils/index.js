@@ -179,6 +179,7 @@ export const createStyle = function (
     ? new Text({
         offsetX: 0,
         offsetY: options.offsetY || -25,
+        overflow: true,
         text:
           fillColorKeyVals && fillColorKeyVals.length
             ? `${options.text}(${properties[fillColorKeyVals[0].property]})`
@@ -201,7 +202,7 @@ export const createStyle = function (
     if (!options.iconUrl) {
       isIcon = false;
     }
-    if (!options.icon && !options.icon.hasOwnProperty('src')) {
+    if (!options.icon && !options.icon.hasOwnProperty("src")) {
       isIcon = false;
     }
     return new Style({

@@ -92,6 +92,11 @@ const publicData = {
             // 如果出错了，不处理，直接跳过。
             this.status = "ready";
             console.log(err);
+            // 如果有挂起的请求，则请求
+            if (this.loadKey.length) {
+              let n = this.loadKey.splice(0, 1);
+              this.getPublicData(n[0]);
+            }
           });
       }
     }

@@ -112,4 +112,5 @@ const strParam = data => {
     });
   });
 }
+
 export {request, getFeature}

@@ -1,4 +1,4 @@
-window.areaCode = "440117"
+window.queryStr = "districtCode='440117'"
 const commonStyleOption = {
   textFillColor: "#3F48CC",
   textStrokeColor: "#fff",
@@ -10,7 +10,7 @@ const commonStyleOption = {
 };
 const commonFeatureKeys = {
   typeName: "lingxi:model_statistics_polygon",
-  cql_filter: `areaCode like '%${window.areaCode}%'`,
+  cql_filter: `${window.queryStr}`,
   showName: true,
   style: {
     strokeWidth: 3,
@@ -153,7 +153,7 @@ const jsons = {
           loadFeatureKeys: [
             {
               typeName: "lingxi:ggss_point",
-              cql_filter:  `adcode like '%${window.areaCode}%' and type='13'`,
+              cql_filter:  `${window.queryStr} AND type='13'`,
               showName: true,
               style: {
                 iconUrl: require("../../assets/img/qiche.png"),
@@ -169,7 +169,7 @@ const jsons = {
           loadFeatureKeys: [
             {
               typeName: "lingxi:ggss_point",
-              cql_filter:  `adcode like '%${window.areaCode}%' and type='2'`,
+              cql_filter:  `${window.queryStr} AND type='2'`,
               showName: true,
               style: {
                 iconUrl: require("../../assets/img/huochezhan.png"),
@@ -185,7 +185,7 @@ const jsons = {
           loadFeatureKeys: [
             {
               typeName: "lingxi:ggss_point",
-              cql_filter:  `adcode like '%${window.areaCode}%' and type='1'`,
+              cql_filter:  `${window.queryStr} AND type='1'`,
               showName: true,
               style: {
                 iconUrl: require("../../assets/img/chengshi.png"),
@@ -208,7 +208,7 @@ const jsons = {
           loadFeatureKeys: [
             {
               typeName: "lingxi:ggss_point",
-              cql_filter:  `adcode like '%${window.areaCode}%' and type='3'`,
+              cql_filter:  `${window.queryStr} AND type='3'`,
               showName: true,
               style: {
                 iconUrl: require("../../assets/img/icon-drop-shangye.png"),
@@ -224,7 +224,7 @@ const jsons = {
           loadFeatureKeys: [
             {
               typeName: "lingxi:ggss_point",
-              cql_filter: `adcode like '%${window.areaCode}%' and type='4'`,
+              cql_filter: `${window.queryStr} AND type='4'`,
               showName: true,
               style: {
                 iconUrl: require("../../assets/img/icon-drop-shangye.png"),
@@ -240,7 +240,7 @@ const jsons = {
           loadFeatureKeys: [
             {
               typeName: "lingxi:ggss_point",
-              cql_filter:  `adcode like '%${window.areaCode}%' and type='5'`,
+              cql_filter:  `${window.queryStr} AND type='5'`,
               showName: true,
               style: {
                 iconUrl: require("../../assets/img/icon-drop-jiaoyu.png"),
@@ -256,7 +256,7 @@ const jsons = {
           loadFeatureKeys: [
             {
               typeName: "lingxi:ggss_point",
-              cql_filter:  `adcode like '%${window.areaCode}%' and type='6'`,
+              cql_filter:  `${window.queryStr} AND type='6'`,
               showName: true,
               style: {
                 iconUrl: require("../../assets/img/icon-drop-wenti.png"),
@@ -272,7 +272,7 @@ const jsons = {
           loadFeatureKeys: [
             {
               typeName: "lingxi:ggss_point",
-              cql_filter:  `adcode like '%${window.areaCode}%' and type='7'`,
+              cql_filter:  `${window.queryStr} AND type='7'`,
               showName: true,
               style: {
                 iconUrl: require("../../assets/img/icon-drop-shizhensesi.png"),
@@ -295,7 +295,7 @@ const jsons = {
           loadFeatureKeys: [
             {
               typeName: "lingxi:ggss_point",
-              cql_filter:  `adcode like '%${window.areaCode}%' and type='9'`,
+              cql_filter:  `${window.queryStr} AND type='9'`,
               showName: true,
               style: {
                 iconUrl: require("../../assets/img/renwenjingguan.png"),
@@ -311,7 +311,7 @@ const jsons = {
           loadFeatureKeys: [
             {
               typeName: "lingxi:ggss_point",
-              cql_filter:  `adcode like '%${window.areaCode}%' and type='8'`,
+              cql_filter:  `${window.queryStr} AND type='8'`,
               showName: true,
               style: {
                 iconUrl: require("../../assets/img/ziranjingguan.png"),
@@ -334,7 +334,7 @@ const jsons = {
           loadFeatureKeys: [
             {
               typeName: "lingxi:ggss_point",
-              cql_filter:  `adcode like '%${window.areaCode}%' and type='10'`,
+              cql_filter:  `${window.queryStr} AND type='10'`,
               showName: true,
               style: {
                 iconUrl: require("../../assets/img/diyichanye.png"),
@@ -350,7 +350,7 @@ const jsons = {
           loadFeatureKeys: [
             {
               typeName: "lingxi:ggss_point",
-              cql_filter:  `adcode like '%${window.areaCode}%' and type='11'`,
+              cql_filter:  `${window.queryStr} AND type='11'`,
               showName: true,
               style: {
                 iconUrl: require("../../assets/img/dierchanye.png"),
@@ -366,7 +366,7 @@ const jsons = {
           loadFeatureKeys: [
             {
               typeName: "lingxi:ggss_point",
-              cql_filter:  `adcode like '%${window.areaCode}%' and type='12'`,
+              cql_filter:  `${window.queryStr} AND type='12'`,
               showName: true,
               style: {
                 iconUrl: require("../../assets/img/disanchanye.png"),
@@ -390,7 +390,7 @@ const jsons = {
             // 水路路线图
             {
               typeName: "lingxi:diji_sxss_polyline",
-              cql_filter:  `adcode like '%${window.areaCode}%'`,
+              cql_filter:  `${window.queryStr}`,
               style: {
                 strokeColor: "#00B0F0",
                 strokeWidth: 4,
@@ -399,7 +399,7 @@ const jsons = {
             //水系设施图
             {
               typeName: "lingxi:diji_sxss_polygon",
-              cql_filter:  `adcode like '%${window.areaCode}%'`,
+              cql_filter:  `${window.queryStr}`,
               style: {
                 fillColor: "#00B0F0",
                 strokeWidth: 1,
@@ -424,7 +424,7 @@ const jsons = {
             // 农业用地
             {
               typeName: "lingxi:diji_zbtz_polyline",
-              cql_filter: `adcode like '%${window.areaCode}%'`,
+              cql_filter: `${window.queryStr}`,
               style: {
                 strokeColor: "#92D050",
                 strokeWidth: 2,
@@ -434,7 +434,7 @@ const jsons = {
             // 林业用地
             {
               typeName: "lingxi:diji_zbtz_point",
-              cql_filter: `adcode like '%${window.areaCode}%'`,
+              cql_filter: `${window.queryStr}`,
               showName: true,
               style: {
                 fillColor: "#803a0a",

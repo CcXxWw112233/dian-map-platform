@@ -28,7 +28,7 @@ export default class PublicData extends React.Component {
     this.getAllData();
   }
   getAllData = () => {
-    Event.Evt.on("updatePublicData", (codeStr) => {
+    Event.Evt.on("updatePublicData", (queryStr) => {
       const { dataItemStateList: publicMapData } = this.props;
       const list = [...publicMapData.dataItemStateList] || [];
       const dataConf = [...publicDataConf.data] || [];
@@ -41,10 +41,20 @@ export default class PublicData extends React.Component {
               if (data.child[j].key === checked) {
                 let loadFeatureKeys = data.child[j].loadFeatureKeys;
                 loadFeatureKeys.forEach((key) => {
-                  key.cql_filter = key.cql_filter?.replace(
-                    /\%[^\%]*\%/g,
-                    `%${codeStr}%`
-                  );
+                  // key.cql_filter = key.cql_filter?.replace(
+                  //   /\%[^\%]*\%/g,
+                  //   `%${codeStr}%`
+                  // );
+                  if (key.cql_filter) {
+                    const index = key.cql_filter.indexOf("AND");
+                    if (index > -1) {
+                      key.cql_filter =
+                        queryStr +
+                        key.cql_filter.substring(index + 3, key.cql_filter.length);
+                    }
+                  } else {
+                    key.cql_filter = queryStr;
+                  }
                   PublicDataActions.getPublicData({
                     url: "",
                     data: key,
@@ -94,10 +104,20 @@ export default class PublicData extends React.Component {
               PublicDataActions.removeFeatures(a);
             }
           }
-          data.cql_filter = data.cql_filter?.replace(
-            /\%[^\%]*\%/g,
-            `%${window.areaCode}%`
-          );
+          // data.cql_filter = data.cql_filter?.replace(
+          //   /\%[^\%]*\%/g,
+          //   `%${window.areaCode}%`
+          // );
+          if (data.cql_filter) {
+            const index = data.cql_filter.indexOf("AND");
+            if (index > -1) {
+              data.cql_filter =
+                window.queryStr +
+                data.cql_filter.substring(index + 3, data.cql_filter.length);
+            }
+          } else {
+            data.cql_filter = window.queryStr;
+          }
           PublicDataActions.getPublicData({
             url: "",
             data: data,
