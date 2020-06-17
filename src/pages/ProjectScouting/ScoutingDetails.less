@@ -175,6 +175,7 @@
     margin-bottom: 4px;
     padding: 4px;
     border: 1px solid rgba(0,0,0,0.15);
+    border-radius: 4px;
   }
   .text_overflow{
     width: 100%;
@@ -220,7 +221,7 @@
     }
     :global {
       .ant-collapse-content-box {
-        padding: 12px;
+        padding: 10px;
         // padding-top: 0 !important;
       }
     }
@@ -250,7 +251,7 @@
 
   .handleCollection{
     position: absolute;
-    left: -10px;
+    left: -7px;
     top:50%;
     transform: translateY(-50%);
     font-size: 1rem;
@@ -263,6 +264,24 @@
     width: 80%
   }
 
+  .groupCollection{
+    background-color: rgba(0,0,0,0.06);
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 4px;
+    border: 1px solid rgba(0,0,0,0.15);
+    & > .uploadItem:first-child{
+      border-top-width: 0;
+    }
+    & > .uploadItem:last-child{
+      border-bottom-width: 0;
+    }
+    .uploadItem{
+      border-width: 0;
+      border-bottom-width: 1px;
+      margin-bottom: 0;
+    }
+  }
   :global {
     .ant-tabs-top-content {
       height: 100%;

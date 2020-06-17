@@ -1,6 +1,7 @@
 import DetailAction from './ScoutingDetail'
-import { animate, Fit ,TransformCoordinate} from '../../utils/index'
+import { animate, Fit ,TransformCoordinate } from '../../utils/index'
 import Event from '../../utils/event'
+import { extend,createEmpty } from 'ol/extent'
 const { Evt } = Event;
 
 function action(){
@@ -32,6 +33,8 @@ function action(){
     this.features = [];
     this.timer = null;
     this.status = 'stop';
+    // 是否单个显示
+    this.justShowOne = true;
 
     this.setData = (mode,data)=>{
         if(!data.length) {
@@ -63,7 +66,7 @@ function action(){
         return this.features;
     }
     // 更新当前播放数据
-    this.getCurrent = ()=>{
+    this.getCurrent = (isPrev = false)=>{
         // 播放进度超出了数据长度
         if(this.currentPlayIndex === this.playData.length -1){
             this.nextCurrent = null ;
@@ -78,7 +81,17 @@ function action(){
         }
         // 获取当前播放的数据
         this.currentPlay = this.playData[this.currentPlayIndex];
-        this.renderedFeatures.push(this.currentPlay);
+        if(!this.justShowOne){
+            if(this.currentPlay.type !== 'groupCollection' && !isPrev)
+                this.renderedFeatures.push(this.currentPlay);
+            else if(this.currentPlay.type === 'groupCollection' && !isPrev) 
+                this.renderedFeatures = this.renderedFeatures.concat(this.currentPlay.child);
+        }else{
+            if(this.currentPlay.type !== 'groupCollection')
+                this.renderedFeatures = [this.currentPlay];
+            else 
+                this.renderedFeatures = [...this.currentPlay.child];
+        }
         // 如果不是在播放第一个，就获取上一个和下一个播放的元素
         if(this.currentPlayIndex > 0){
             this.nextCurrent = this.playData[this.currentPlayIndex + 1];
@@ -106,7 +119,7 @@ function action(){
     this.playPrev = ()=>{
         if(this.currentPlayIndex > 0){
             this.currentPlayIndex = this.playData.findIndex(item => item.id === this.currentPlay.id) - 1;
-            let canPlay = this.getCurrent();
+            let canPlay = this.getCurrent(true);
             if(canPlay){
                 this.play();
                 this.status = 'play';
@@ -133,6 +146,17 @@ function action(){
     }
     // 继续
     this.playR = ()=>{
+        // 如果在播放完成之后还继续播放,就从头开始
+        if(this.status === 'end'){
+            this.status = 'play';
+            this.currentPlayIndex = 0;
+            // 先走第一步,防止等待
+            this.getCurrent();
+            // 清空原来的所有数据
+            this.renderedFeatures.length = 1;
+            // 播放
+            this.play();
+        }
         replay();
         Evt.firEvent('autoPlayChange',this);
     }
@@ -181,7 +205,7 @@ function action(){
     this.play = async ()=>{
         if(this.currentPlay){
             await this.renderFeatures();
-            if(this.currentPlay.collect_type !== '4' && this.currentPlay.collect_type !== '5'){
+            if(this.currentPlay.collect_type !== '4' && this.currentPlay.collect_type !== '5' && this.currentPlay.type !== 'groupCollection'){
                 playPoint(this.currentPlay);
             }
             // 标绘
@@ -198,7 +222,7 @@ function action(){
                     }
                     if(type === 'LineString' || type === 'Polygon'){
                         let ext = feaure.getGeometry().getExtent();
-                        Fit(this.view, ext, {size:this.map.getSize(),padding: [100,100,100,100]})
+                        Fit(this.view, ext, {size:this.map.getSize(),padding: [150,150,150,150]})
                     }
                 }
             }
@@ -208,8 +232,34 @@ function action(){
                 if(img){
                     let source = img.getSource();
                     let ext = source.getImageExtent();
-                    Fit(this.view, ext, {size:this.map.getSize(),padding: [100,100,100,100]})
+                    Fit(this.view, ext, {size:this.map.getSize(),padding: [150,150,150,150]})
                 }
+            }
+            // 组合展示
+            if(this.currentPlay.type === 'groupCollection'){
+                // 创建一个空的范围
+                let ext = createEmpty();
+                this.currentPlay.child && this.currentPlay.child.forEach(item => {
+                    let feature = this.features.find(f => f.get('id') === item.id);
+                    let img = DetailAction.findImgLayer(item.resource_id);
+                    if(feature){
+                        // console.log(feature)
+                        // 如果是feature,则获取feature 的范围,并进行合并
+                        let fExtent = feature.getGeometry().getExtent();
+                        ext = extend(ext,fExtent);
+                    }
+                    else if(img){
+                        // console.log(img)
+                        // 如果是规划图
+                        let iExtent = img.getSource().getImageExtent();
+                        ext = extend(ext,iExtent);
+                    }
+                })
+                // console.log(ext);
+                setTimeout(()=>{
+                    // 动画到合适范围
+                  Fit(this.view, ext, {size:this.map.getSize(),padding: [150,150,150,150]})  
+                },10)
             }
         }
     }

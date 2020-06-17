@@ -91,6 +91,15 @@ export default {
         
         return Promise.reject(response && response.data);
     },
+    // 解除一个元素的组合
+    CANCEL_COLLECTION_MERGE: async (data)=>{
+        let response = await request('DELETE','/map/collection/group',data);
+        if(BASIC.checkResponse(response)){
+            return response.data;
+        }
+        
+        return Promise.reject(response && response.data);
+    },
     // 排序采集数据
     SORT_COLLECTION_DATA: async (data)=>{
         let response = await request('POST',`/map/collection/sort`,data);

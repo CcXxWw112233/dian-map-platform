@@ -51,6 +51,7 @@ function Action() {
     SAVE_EDIT_PLAN_IMG,
     SORT_COLLECTION_DATA,
     MERGE_COLLECTION,
+    CANCEL_COLLECTION_MERGE,
   } = config;
   this.activeFeature = {};
   this.Layer = Layer({ id: "scoutingDetailLayer", zIndex: 11 });
@@ -529,10 +530,23 @@ function Action() {
       });
       return;
     }
+    // 取出有子集的数据，合并到列表展示中
+    let arr = [];
+    data.forEach(item => {
+      if(item.type !== 'groupCollection'){
+        arr.push(item);
+      }
+      else {
+        arr = arr.concat(item.child);
+      }
+    })
+    // 将所有数据更新
+    data = arr ;
     // 过滤不显示的数据
     data = data.filter((item) => item.is_display === "1");
+
     let ponts = data.filter(
-      (item) => item.collect_type !== "4" && item.collect_type !== "5"
+      (item) => item.collect_type !== "4" && item.collect_type !== "5" && item.collect_type !== 'group'
     );
     let features = data.filter((item) => item.collect_type === "4");
     let planPic = data.filter((item) => item.collect_type === "5");
@@ -920,6 +934,14 @@ function Action() {
           isLoading = false;
         };
       },
+      click:(val)=>{
+        // console.log(val)
+        let { target } = val;
+        let ty = this.checkCollectionType(target);
+        if(ty === 'word'){
+          window.open(val.resource_url,'_blank');
+        }
+      }
     };
   };
 
@@ -1304,6 +1326,10 @@ function Action() {
   // 保存合并操作
   this.saveMergeCollection = async (data)=>{
     return await MERGE_COLLECTION(data);
+  }
+  // 取消合并操作
+  this.cancelMergeCollection = async (data)=>{
+    return await CANCEL_COLLECTION_MERGE(data);
   }
 }
 
