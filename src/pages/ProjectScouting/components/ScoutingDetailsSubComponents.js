@@ -229,7 +229,8 @@ export const ScoutingItem = ({
     onExcelSuccess =()=>{},
     onDragEnd = ()=>{},
     onMergeUp,
-    onMergeDown
+    onMergeDown,
+    onMergeCancel
   }) => {
     let [planExtent, setPlanExtent] = useState("");
     let [transparency, setTransparency] = useState("1");
@@ -328,25 +329,60 @@ export const ScoutingItem = ({
                             <span className={styles.handleCollection} {...provided.dragHandleProps}>
                               <MyIcon type="icon-tuozhuaitingliu"/>
                             </span>
-                            <UploadItem
-                              onCopyCollection={onCopyCollection}
-                              onChangeDisplay={onChangeDisplay}
-                              onEditPlanPic={onEditPlanPic}
-                              areaList={areaList}
-                              onSelectGroup={onSelectGroup}
-                              type={Action.checkCollectionType(item.target)}
-                              data={item}
-                              onRemove={onCollectionRemove}
-                              onEditCollection={onEditCollection}
-                              onRemarkSave={onRemarkSave}
-                              onModifyFeature={onModifyFeature}
-                              onStopMofifyFeatureInDetails={onStopMofifyFeatureInDetails}
-                              onModifyRemark={onModifyRemark}
-                              onMergeDown={onMergeDown}
-                              onMergeUp={onMergeUp}
-                              index={index}
-                              length={dataSource.length}
-                            />
+                            { item.type !== 'groupCollection' ?
+                              <UploadItem
+                                onCopyCollection={onCopyCollection}
+                                onChangeDisplay={onChangeDisplay}
+                                onEditPlanPic={onEditPlanPic}
+                                areaList={areaList}
+                                onSelectGroup={onSelectGroup}
+                                type={Action.checkCollectionType(item.target)}
+                                data={item}
+                                onRemove={onCollectionRemove}
+                                onEditCollection={onEditCollection}
+                                onRemarkSave={onRemarkSave}
+                                onModifyFeature={onModifyFeature}
+                                onStopMofifyFeatureInDetails={onStopMofifyFeatureInDetails}
+                                onModifyRemark={onModifyRemark}
+                                onMergeDown={onMergeDown}
+                                onMergeUp={onMergeUp}
+                                index={index}
+                                length={dataSource.length}
+                              />
+                              :
+                              <div className={styles.groupCollection} >
+                                {
+                                  item.child && item.child.map((child,i) => 
+                                    (
+                                       <UploadItem
+                                        group_id={item.gid}
+                                        subIndex={i}
+                                        group_length={item.child.length}
+                                         onCopyCollection={onCopyCollection}
+                                         onChangeDisplay={onChangeDisplay}
+                                         onEditPlanPic={onEditPlanPic}
+                                         areaList={areaList}
+                                         onSelectGroup={onSelectGroup}
+                                         type={Action.checkCollectionType(child.target)}
+                                         data={child}
+                                         onRemove={onCollectionRemove}
+                                         onEditCollection={onEditCollection}
+                                         onRemarkSave={onRemarkSave}
+                                         onModifyFeature={onModifyFeature}
+                                         onStopMofifyFeatureInDetails={onStopMofifyFeatureInDetails}
+                                         onModifyRemark={onModifyRemark}
+                                         onMergeDown={onMergeDown}
+                                         onMergeUp={onMergeUp}
+                                         index={index}
+                                         key={child.id}
+                                         length={dataSource.length}
+                                         onMergeCancel={onMergeCancel}/>
+                                     )
+                                  )
+                                }
+                               </div>
+                            }
+                            
                           </div>
                         </div>
                       )}
@@ -451,10 +487,14 @@ export const UploadItem = ({
     onStopMofifyFeatureInDetails,
     onRemarkSave = () => { },
     onToggleChangeStyle = () => { },
-    onMergeUp = ()=>{},
-    onMergeDown = ()=>{},
+    onMergeUp ,
+    onMergeDown,
     index,
-    length
+    length,
+    subIndex,
+    group_length,
+    group_id,
+    onMergeCancel = ()=>{}
   }) => {
     let obj = { ...data };
     // 过滤后缀
@@ -551,6 +591,11 @@ export const UploadItem = ({
         // 向下组合
         setVisible(false);
         onMergeDown && onMergeDown(data,index)
+      }
+      if(key === 'mergeCancel'){
+        // 取消组合
+        setVisible(false);
+        onMergeCancel && onMergeCancel(data)
       }
     };
     // 分组列表
@@ -658,16 +703,27 @@ export const UploadItem = ({
             >
               <div style={{ width: "100%" }}>移动到分组</div>
             </Popover>
-          </Menu.Item>}
+          </Menu.Item>
+        }        
         {
-          index !== 0 && 
+          (( index !== 0 && onMergeUp && subIndex === undefined) || 
+          (index !== 0 && onMergeUp && subIndex === 0 ))
+           && 
           <Menu.Item key="mergeUp">
             向上组合
           </Menu.Item>
         }
-        { index < length - 1 &&
+        { 
+          ((index < length - 1 && onMergeDown && subIndex === undefined) ||
+          (index < length - 1 && onMergeDown && subIndex === group_length - 1) )
+           &&
           <Menu.Item key="mergeDown">
             向下组合
+          </Menu.Item>
+        }
+        {
+          group_id && <Menu.Item key="mergeCancel">
+            退出组合
           </Menu.Item>
         }
         {/* <Menu.Item key="display">

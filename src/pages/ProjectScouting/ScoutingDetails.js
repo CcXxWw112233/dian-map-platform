@@ -337,6 +337,7 @@ export default class ScoutingDetails extends PureComponent {
   // 将数据分类，更新到区域列表
   reSetCollection = (val) => {
     let data = val || [];
+    data = this.getSameGroupIdData(data);
     let list = this.state.area_list.map((item) => {
       let f_list = data.filter((v) => v.area_type_id === item.id);
       item.collection = f_list.sort((a,b) => (a.__index||0) - (b.__index||0));
@@ -512,12 +513,15 @@ export default class ScoutingDetails extends PureComponent {
       });
   };
   // 选中了分组
-  onSelectGroup = (group, data) => {
+  onSelectGroup = async (group, data) => {
     // console.log(group,data)
     let params = {
       id: data.id,
       area_type_id: group.id,
     };
+    if(data.group_id){
+      await this.CollectionReMerge(data);
+    }
     Action.editCollection(params).then((res) => {
       // console.log(res)
       message.success(
@@ -799,8 +803,15 @@ export default class ScoutingDetails extends PureComponent {
   }
   // 保存排序列表
   saveSort = (data)=>{
-    let ids = data.map(item => item.id);
-    // console.log(ids);
+    let ids = [];
+    // 合并所有的id
+    data.forEach(item => {
+      if(item.type === 'groupCollection'){
+        ids = ids.concat(item.childIds)
+      }else{
+        ids.push(item.id)
+      }
+    });
     let param = {
       board_id : this.state.current_board.board_id,
       sort: ids
@@ -856,9 +867,48 @@ export default class ScoutingDetails extends PureComponent {
     }
   }
   // 检查是否有goupId，有的话就合并
-  getSameGroupIdData = (data, list)=>{
-    if(!data.group_id) return data;
-    
+  getSameGroupIdData = (data)=>{
+    if(!data.length) return [];
+    let arr = [];
+    data.forEach(item => {
+      if(item.group_id){
+        // 查找有没有已经存在同一个group_id的数据，如果有，就添加到子集
+        let hasGroup = arr.find(a => a.gid === item.group_id);
+        // 如果存在一个groupid，就添加
+        if(hasGroup && hasGroup.child){
+          hasGroup.child.push(item);
+          // 保存存在的子集id
+          hasGroup.childIds.push(item.id);
+        }else if(hasGroup){
+          hasGroup.child = [item];
+          hasGroup.childIds = [item.id]
+        }else {
+          // 如果不存在，就创建
+          let obj = {
+            gid: item.group_id,
+            title:"",
+            id:item.id,
+            area_type_id: item.area_type_id,
+            collect_type:"group",
+            target:"none",
+            type:"groupCollection",
+            childIds:[item.id],
+            child:[item],
+            create_by:{},
+            __index: item.__index
+          }
+          arr.push(obj);
+        }
+      }else arr.push(item);
+    })
+
+    // 过滤只有一个分组的情况
+    arr = arr.map(item => {
+      if(item.gid && item.child.length === 1){
+        return item.child[0];
+      }else return item;
+    })
+    return arr ;
   }
 
   // 检查有没有下一个
@@ -916,11 +966,11 @@ export default class ScoutingDetails extends PureComponent {
       !data && (data = {});
     }
     // 过滤空坐标信息
-    let collection = data.collection && data.collection.filter(item => (item.is_display === '1'));
+    let collection = data.collection && data.collection.filter(item => (item.is_display === '1' || item.type === 'groupCollection'));
     if(!collection || collection && !collection.length) return message.warn('当前分组没有数据可以进行播放');
     let arr = [];
     collection.forEach(item => {
-      if(item.collect_type !== '4' && item.collect_type !== '5'){
+      if(item.collect_type !== '4' && item.collect_type !== '5' && item.collect_type !== 'group'){
         if(item.location && item.location.hasOwnProperty('latitude')){
           arr.push(item);
         }
@@ -946,8 +996,24 @@ export default class ScoutingDetails extends PureComponent {
       })
     }
   }
+  // 退出合并
+  CollectionReMerge = (collection)=>{
+    return new Promise((resolve,reject) => {
+      let param = {
+        data_id: collection.id
+      }
+      Action.cancelMergeCollection(param).then(res => {
+        resolve(res);
+      }).catch(err => {
+        message.warn(err.message);
+        reject(err);
+      })
+    })
+    
+  }
 
-  CollectionMerge = (type,data,collection,index)=>{
+  // 上下合并,取消合并
+  CollectionMerge = async (type,data,collection,index)=>{
     let current = data.collection;
     let other = null;
     let ids = [];
@@ -960,9 +1026,17 @@ export default class ScoutingDetails extends PureComponent {
       ids = [collection.id ,other.id]
     }
     // 保存
+    if(ids.length)
     Action.saveMergeCollection({data_ids: ids}).then(res => {
       message.success('操作成功');
-    })
+      this.fetchCollection();
+    });
+    // 退出这个组合
+    if(type === 'cancel'){
+      await this.CollectionReMerge(collection);
+      message.success('操作成功');
+      this.fetchCollection();
+    }
   }
 
   render () {
@@ -1104,6 +1178,7 @@ export default class ScoutingDetails extends PureComponent {
                         onDragEnd={this.onCollectionDragEnd}
                         onMergeDown={this.CollectionMerge.bind(this,'down',item)}
                         onMergeUp={this.CollectionMerge.bind(this,'up',item)}
+                        onMergeCancel={this.CollectionMerge.bind(this,'cancel',item)}
                       />
                     </Collapse.Panel>
                   );
