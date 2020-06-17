@@ -934,6 +934,13 @@ function Action() {
           isLoading = false;
         };
       },
+      click:(val)=>{
+        // console.log(val)
+        let { target } = val;
+        if(target === 'pdf'){
+          window.open(val.resource_url,'_blank');
+        }
+      }
     };
   };
 

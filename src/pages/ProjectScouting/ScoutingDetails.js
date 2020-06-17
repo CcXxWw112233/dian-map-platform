@@ -1286,7 +1286,6 @@ export default class ScoutingDetails extends PureComponent {
                   {this.state.multipleGroup ? '分组展示':'组合展示'}
                 </Button>
                 <Popover
-                trigger={['click','focus']}
                 title="选择播放模式"
                 trigger="click"
                 visible={this.state.playCollectionVisible}
@@ -1323,19 +1322,11 @@ export default class ScoutingDetails extends PureComponent {
                           )
                         }}
                       </Form.Item>
-                      <Form.Item
-                      noStyle
-                      shouldUpdate={(prevValues, currentValues) => prevValues.mode !== currentValues.mode}>
-                        {({getFieldValue}) => {
-                            return (
-                              <Form.Item name="showone" label="单个展示">
-                                <Radio.Group disabled={getFieldValue('mode') === 'hand'}>
-                                  <Radio value={false}>否</Radio>
-                                  <Radio value={true}>是</Radio>
-                                </Radio.Group>
-                              </Form.Item>
-                            )
-                        }}
+                      <Form.Item name="showone" label="单个展示">
+                        <Radio.Group>
+                          <Radio value={false}>否</Radio>
+                          <Radio value={true}>是</Radio>
+                        </Radio.Group>
                       </Form.Item>
                       <Form.Item style={{marginBottom:"5px"}}>
                         <Button type="primary" htmlType="submit" shape='round' size='small'>
@@ -1358,13 +1349,6 @@ export default class ScoutingDetails extends PureComponent {
               </Space>
             </div>
           </TabPane>
-          {/* <TabPane tab={<span>按标签</span>} key="2">
-            <div className={globalStyle.autoScrollY} style={{ height: "100%" }}>
-              <ScoutingItem2 />
-              <ScoutingItem2 />
-              <ScoutingItem2 />
-            </div>
-          </TabPane> */}
         </Tabs>
         {playing && <PlayCollectionControl isPlay={isPlay} onExit={this.StopPlay}
         currentGroup={this.state.currentGroup}
