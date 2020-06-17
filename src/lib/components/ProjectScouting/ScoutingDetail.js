@@ -937,7 +937,8 @@ function Action() {
       click:(val)=>{
         // console.log(val)
         let { target } = val;
-        if(target === 'pdf'){
+        let ty = this.checkCollectionType(target);
+        if(ty === 'word'){
           window.open(val.resource_url,'_blank');
         }
       }
