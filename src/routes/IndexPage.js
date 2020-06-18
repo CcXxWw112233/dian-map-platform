@@ -180,6 +180,13 @@ class IndexPage extends React.Component {
       || (data.x > extent.x && data.x < extent.w && data.y > extent.y && data.y < extent.h)){
         return true;
       }
+      else if(
+        (data.w <= extent.w && data.x >= extent.x && data.y >= extent.y && data.h <= extent.h)
+         || (data.w >= extent.w && data.x <= extent.x && data.y <= extent.y && data.h >= extent.h)
+        // || (data.w <= extent.extent.w && data.y >= extent.y && data.x <= extent.x && data.h >= extent.h)
+        ){
+          return true;
+        }
       return false;
   }
 
@@ -215,14 +222,15 @@ class IndexPage extends React.Component {
         let ext = {x:nx,y:ny,w:nw,h:nh,text:ntext};
         // 检查是否与他有交际
         // 参照是对比，如果是隐藏，直接不处理
-        if(extent.text == ntext){
-          if(extent.visible === 'hidden'){
-            return ;
-          }
-        }
+        // if(extent.text == ntext){
+        //   if(extent.visible === 'hidden'){
+        //     return ;
+        //   }
+        // }
         // 去除当前参照和对比一样的数据
         if(extent.text != ntext){
           if(this.checkHasExtent(ext,extent)){
+            // console.log(extent.text,extent.visible ,ext.text)
             if(extent.visible !== 'hidden')
               nElement.style.visibility = 'hidden';
             }else if(!this.checkHasExtent(ext,extent)){
