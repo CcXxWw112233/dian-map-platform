@@ -100,7 +100,6 @@ export default class AreaPanel extends React.Component {
         const { cityCode } = this.state;
         areaSearchAction.getDistrict(cityCode).then((res) => {
           if (res.code === "0") {
-            this.updatePublicData(res);
             this.setState({
               districtOptions: res.data,
             });
@@ -128,7 +127,6 @@ export default class AreaPanel extends React.Component {
         const { districtCode } = this.state;
         areaSearchAction.getTown(districtCode).then((res) => {
           if (res.code === "0") {
-            this.updatePublicData(res);
             this.setState({
               townOptions: res.data,
             });
