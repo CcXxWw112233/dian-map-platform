@@ -12,19 +12,23 @@ export const getCanvas = ()=>{
     })
 }
 
+export const ToDownLoad = (src ,name)=>{
+    if(!src) return ;
+    let url = src ;
+    let a = document.createElement('a');
+    a.href = url;
+    a.id = "capture_download_a"
+    a.target = '_blank';
+    a.download = name || 'MAP截图下载'
+    a.click();
+    a = null;
+}
+
 export const downloadCapture = ()=>{
     getCanvas().then(canvas => {
         canvas.toBlob(function(blob){
             let url = URL.createObjectURL(blob);
-            let a = document.createElement('a');
-            a.href = url;
-            a.id = "capture_download_a"
-            a.target = '_blank';
-            a.download = 'MAP截图下载'
-            // document.body.append(a);
-            a.click();
-            // $(a).remove();
-            a = null;
+            ToDownLoad(url);
         })
     })
 }

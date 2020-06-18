@@ -52,6 +52,7 @@ function Action() {
     SORT_COLLECTION_DATA,
     MERGE_COLLECTION,
     CANCEL_COLLECTION_MERGE,
+    GET_DOWNLOAD_URL,
   } = config;
   this.activeFeature = {};
   this.Layer = Layer({ id: "scoutingDetailLayer", zIndex: 11 });
@@ -1330,6 +1331,34 @@ function Action() {
   // 取消合并操作
   this.cancelMergeCollection = async (data)=>{
     return await CANCEL_COLLECTION_MERGE(data);
+  }
+  // 采集资料的点击事件
+  this.handleCollection = async (val)=>{
+    let { target ,resource_url,title ,resource_id} = val;
+    let pointType = this.checkCollectionType(target);
+    if(pointType === 'word'){
+      if(target === 'pdf'){
+        // pdf只需要打开
+        window.open(resource_url,'_blank');
+      }else {
+        let data = await GET_DOWNLOAD_URL(resource_id);
+        let message = data.message;
+        window.open(message,'_blank');
+      }
+    }
+    if(pointType === 'audio' || pointType === 'video'){
+      window.open(resource_url,'_blank');
+    }
+    if(pointType === 'pic'){
+      let img = new Image();
+      img.src = resource_url;
+      img.onload = ()=>{
+        let w = img.width;
+        let h = img.height;
+        PhotoSwipe.show([{ w, h, src:img.src, title }]);
+      }
+    }
+
   }
 }
 

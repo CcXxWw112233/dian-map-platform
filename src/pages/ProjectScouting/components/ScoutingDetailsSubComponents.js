@@ -813,7 +813,12 @@ export const UploadItem = ({
         onClick={() => itemClick(data)}
       >
         <div style={{ width: "100%", display: "flex" }}>
-          <div className={styles.uploadIcon + ` ${styles[secondSetType]}`}>
+          <div className={styles.uploadIcon + ` ${styles[secondSetType]}`}
+          onClick={(e)=> 
+          {
+            e.stopPropagation();
+            Action.handleCollection(data)
+          }}>
             <span>
               {secondSetType === "pic" ? (
                 <img
@@ -821,8 +826,8 @@ export const UploadItem = ({
                   style={{ width: 46, height: 46, borderRadius: 4 }}
                   alt="图片"
                   onError={(e) => {
-                    e.target.src = "";
-                    e.target.src = data.resource_url;
+                    // e.target.src = "";
+                    // e.target.src = data.resource_url;
                   }}
                 />
               ) : (
