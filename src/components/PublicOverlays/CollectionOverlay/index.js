@@ -125,6 +125,7 @@ export default function overlay (data = {}){
         this.audio = document.createElement('audio');
         // 隐藏音频播放器，用js控制
         this.audio.src = data.resource_url;
+        this.audio.crossorigin = 'anonymous';
         this.audio.style.display = 'none';
         this.audio.preload = 'metadata';
         this.audio.className = 'collectionAudio'
