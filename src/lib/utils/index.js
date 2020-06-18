@@ -289,10 +289,11 @@ export const Fit = (view, extent, option, duration = 1000) => {
 };
 
 export const createOverlay = (ele, data = {}) => {
-  return new Overlay({
+  const overlay = new Overlay({
     element: ele,
     ...data,
   });
+  return overlay;
 };
 
 export const animate = ({ zoom, center, duration = 800 }) => {

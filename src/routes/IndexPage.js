@@ -79,6 +79,7 @@ class IndexPage extends React.Component {
       console.log(data);
       this.addFeatureForProject(data);
     });
+    
   }
 
   addFeatureForProject = (val) => {
@@ -157,8 +158,83 @@ class IndexPage extends React.Component {
   MapOnload = ({ map, view }) => {
     this.map = map;
     this.view = view;
+    let minResolution = this.view.getMinResolution();
+    let tolerance = 0;
+    this.map.on('moveend',()=>{
+      let overlays = this.map.getOverlays();
+      let arr = overlays.getArray();
+      if(!arr.length) return ;
+      // 计算overlay的位置
+      this.computedOverlayPosition(arr ,minResolution,tolerance);
+    })
     // this.setCenter(map, view);
   };
+
+  // 检查是否有交集
+  checkHasExtent = (data, extent)=>{
+    // console.log(data,extent)
+    if(
+      (data.w > extent.x && data.w < extent.w && data.h > extent.y && data.h < extent.h) 
+      || (data.h > extent.y && data.x < extent.w && data.h < extent.h && data.x > extent.x) 
+      || (data.w > extent.x && data.y < extent.h && data.w < extent.w && data.y > extent.x)
+      || (data.x > extent.x && data.x < extent.w && data.y > extent.y && data.y < extent.h)){
+        return true;
+      }
+      return false;
+  }
+
+  computedOverlayPosition = (arr,min ,tolerance)=>{
+    if(!arr.length) return ;
+    let resolution = this.view.getResolution();
+    for(let i = 0; i< arr.length;i++){
+      let item = arr[i];
+      let element = item.getElement().parentNode;
+      let style = window.getComputedStyle(element);
+      let transform = style.transform;
+      // 得出这个overlay的矩阵大小
+      let x = parseInt(transform.substring(7).split(',')[4])
+      let y = parseInt(transform.substring(7).split(',')[5]);
+      let h = element.clientHeight + y;
+      let w = element.clientWidth + x;
+      let visible = element.style.visibility || 'visible';
+      let text = element.textContent;
+      let extent = {x,y,w,h ,visible ,text};
+
+      let flag = [];
+      arr.forEach(nitem => {
+        let nElement = nitem.getElement().parentNode;
+        let nstyle = window.getComputedStyle(nElement);
+        let transform = nstyle.transform;
+        // 得出这个overlay的矩阵大小
+        let nx = parseInt(transform.substring(7).split(',')[4])
+        let ny = parseInt(transform.substring(7).split(',')[5]);
+        let nh = nElement.clientHeight + ny;
+        let nw = nElement.clientWidth + nx;
+        let ntext = nElement.textContent;
+        // let visible = nElement.style.visibility || 'visible';
+        let ext = {x:nx,y:ny,w:nw,h:nh,text:ntext};
+        // 检查是否与他有交际
+        // 参照是对比，如果是隐藏，直接不处理
+        if(extent.text == ntext){
+          if(extent.visible === 'hidden'){
+            return ;
+          }
+        }
+        // 去除当前参照和对比一样的数据
+        if(extent.text != ntext){
+          if(this.checkHasExtent(ext,extent)){
+            if(extent.visible !== 'hidden')
+              nElement.style.visibility = 'hidden';
+            }else if(!this.checkHasExtent(ext,extent)){
+            nElement.style.visibility = 'visible';
+          }
+        }else{
+          // 对比项，需要检查是不是隐藏的
+
+        }
+      })
+    }
+  }
 
   // 通过高德地图获得自己的定位
   getMyCenter = (flag) => {

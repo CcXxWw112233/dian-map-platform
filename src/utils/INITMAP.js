@@ -43,7 +43,7 @@ function(){
         minZoom: 3,
         zoom: 10,
         maxZoom: 18,
-        enableRotation:false
+        enableRotation:false,
       });
       return this.view;
     },

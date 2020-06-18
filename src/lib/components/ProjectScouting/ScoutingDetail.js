@@ -874,6 +874,9 @@ function Action() {
 
     let element = overlay.getElement();
     element.parentNode && element.parentNode.classList.add(className);
+    setTimeout(()=>{
+      element.parentNode && (element.parentNode.style.visibility = 'visible');
+    },850)
     return element;
   };
 
@@ -935,12 +938,19 @@ function Action() {
           isLoading = false;
         };
       },
-      preview:(val)=>{
+      preview: async (val)=>{
         // console.log(val)
-        let { target } = val;
+        let { target , resource_url, resource_id} = val;
         let ty = this.checkCollectionType(target);
         if(ty === 'word'){
-          window.open(val.resource_url,'_blank');
+          if(target === 'pdf'){
+            // pdf只需要打开
+            window.open(resource_url ,'_blank');
+          }else {
+            let data = await GET_DOWNLOAD_URL(resource_id);
+            let message = data.message;
+            window.open(message,'_blank');
+          }
         }
       }
     };
@@ -1339,7 +1349,7 @@ function Action() {
     if(pointType === 'word'){
       if(target === 'pdf'){
         // pdf只需要打开
-        window.open(resource_url,'_blank');
+        window.open(resource_url ,'_blank');
       }else {
         let data = await GET_DOWNLOAD_URL(resource_id);
         let message = data.message;
