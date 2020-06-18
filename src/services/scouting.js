@@ -166,5 +166,14 @@ export default {
         }
 
         return Promise.reject(response && response.data);
+    },
+    // 获取下载地址
+    GET_DOWNLOAD_URL:async (id) => {
+        let response = await request('POST',`/map/file/download/${id}`,{});
+        if(BASIC.checkResponse(response)){
+            return response.data;
+        }
+
+        return Promise.reject(response && response.data);
     }
 }
