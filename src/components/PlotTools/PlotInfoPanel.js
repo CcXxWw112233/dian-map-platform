@@ -119,8 +119,8 @@ export default class PlotInfoPanel extends Component {
         let res = null;
         if (plotType === "Point") {
           res = await plotServices.GET_POINTSYMBOL();
-          const res0 = await symbolStoreServices.GET_ICON()
-          res.data = [{type: "自定义", items:[...res0.data]}, ...res.data]
+          const res0 = await symbolStoreServices.GET_ICON();
+          res.data = [{ type: "自定义", items: [...res0.data] }, ...res.data];
         }
         if (plotType === "Polyline" || plotType === "LineString") {
           res = await plotServices.GET_POLYLINESYMBOL();
@@ -133,9 +133,13 @@ export default class PlotInfoPanel extends Component {
           plotType === "circle"
         ) {
           res = await plotServices.GET_POLYGONSYMBOL();
-          const res0 = await symbolStoreServices.GET_ICON()
-          res.data[2].items = [...res.data[2].items, ...config, ...res0.data].reverse();
-          res.data = res.data.reverse()
+          const res0 = await symbolStoreServices.GET_ICON();
+          res.data[2].items = [
+            ...res.data[2].items,
+            ...config,
+            ...res0.data,
+          ].reverse();
+          res.data = res.data.reverse();
         }
         // this.symbols[plotType] = res?.data;
         let symbols = [];
@@ -162,10 +166,10 @@ export default class PlotInfoPanel extends Component {
     if (!data) return;
     let style = {};
     let symbolUrl = data.value1 || data.icon_url;
-    let src = ""
+    let src = "";
     if (symbolUrl.indexOf("/") > -1) {
       if (symbolUrl.indexOf("https") === 0) {
-        src = symbolUrl
+        src = symbolUrl;
       } else {
         symbolUrl = symbolUrl.replace("img", "");
         src = require("../../assets" + symbolUrl);
@@ -176,7 +180,7 @@ export default class PlotInfoPanel extends Component {
         backgroundColor: "rgba(255,255,255,1)",
         backgroundRepeat: "no-repeat",
         backgroundPosition: "center",
-        backgroundSize: "100%"
+        backgroundSize: "100%",
       };
     } else if (data.value1.indexOf("rgb") > -1) {
       style = {
@@ -227,11 +231,31 @@ export default class PlotInfoPanel extends Component {
     let featureType = value.value1 || value.icon_url;
     let text = this.props.featureName || "未命名";
     let remark = this.props.remarks;
-    let iconUrl = ""
+    let iconUrl = "";
     if (this.state.plotType === "Point") {
       if (featureType.indexOf("/") > -1) {
         if (featureType.indexOf("https") === 0) {
-          iconUrl = featureType
+          iconUrl = featureType;
+          let tempImg = new Image();
+          tempImg.src = iconUrl;
+          const me = this
+          tempImg.onload = function () {
+            options = {
+              ...me.commonStyleOptions,
+              iconUrl: iconUrl,
+              text: text,
+            };
+            options.iconScale = 32 / tempImg.width
+            attrs = {
+              name: text,
+              featureType: featureType,
+              selectName: value.name || value.icon_name,
+              remark: remark,
+            };
+            style = createStyle("Point", options);
+            me.addPlot(style,attrs)
+          };
+          return
         } else {
           iconUrl = featureType.replace("img", "");
           iconUrl = require("../../assets" + iconUrl);
@@ -297,7 +321,7 @@ export default class PlotInfoPanel extends Component {
         style = createStyle("Polygon", options);
       } else if (featureType.indexOf("/") > -1) {
         if (featureType.indexOf("https") === 0) {
-          iconUrl = featureType
+          iconUrl = featureType;
         } else {
           iconUrl = featureType.replace("img", "");
           iconUrl = require("../../assets" + iconUrl);
@@ -321,24 +345,15 @@ export default class PlotInfoPanel extends Component {
             remark: me.props.remarks,
           };
           style = createStyle("Polygon", options);
-          if (!me.props.isModifyPlot) {
-            Event.Evt.firEvent("setAttribute", {
-              style: style,
-              attrs: attrs,
-              responseData: me.state.symbols,
-              cb: me.updateRedux.bind(me),
-            });
-          } else {
-            if (!window.featureOperator) return;
-            window.featureOperator.attrs = attrs;
-            window.featureOperator.setName(attrs.name);
-            window.featureOperator.feature.setStyle(style);
-            me.updateReduxOperatorList();
-          }
+          me.addPlot(style,attrs)
         };
         return;
       }
     }
+    this.addPlot(style,attrs)
+  };
+
+  addPlot = (style, attrs) => {
     if (!this.props.isModifyPlot) {
       Event.Evt.firEvent("setAttribute", {
         style: style,
@@ -353,7 +368,7 @@ export default class PlotInfoPanel extends Component {
       window.featureOperator.feature.setStyle(style);
       this.updateReduxOperatorList();
     }
-  };
+  }
 
   //标绘名称
   handlePlotNameChange = (value) => {

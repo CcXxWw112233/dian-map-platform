@@ -9,6 +9,7 @@ import { config } from "../../utils/customConfig";
 import symbolStoreServices from "../../services/symbolStore";
 import { formatSize } from "../../utils/utils";
 import { BASIC } from "../../services/config";
+import { reject } from "lodash";
 export default class SymbolStore extends Component {
   constructor(props) {
     super(props);
@@ -120,7 +121,7 @@ export default class SymbolStore extends Component {
     text = text.trim();
     console.log(size, text);
     if (+size > 1 && text === "MB") {
-      message.error("文件不能大于1MB");
+      message.error("图片不能大于1MB");
       return false;
     }
     return true;
@@ -133,14 +134,30 @@ export default class SymbolStore extends Component {
       message.error("上传失败");
     }
   };
-  beforeUpload = (file) => {
+  beforeUpload = async (file) => {
     const checked = this.checkFileSize(file);
     if (checked) {
-      const index = file.name.lastIndexOf(".");
-      this.setState({
-        uploadSymbolName: file.name.substr(0, index),
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        const me = this;
+        reader.onload = function () {
+          let tempImg = new Image();
+          tempImg.src = reader.result;
+          tempImg.onload = function () {
+            if (tempImg.width > 48 || tempImg.height > 48) {
+              message.error("图片长宽不能超过48个像素");
+              reject(false);
+            } else {
+              const index = file.name.lastIndexOf(".");
+              me.setState({
+                uploadSymbolName: file.name.substr(0, index),
+              });
+              resolve(true);
+            }
+          };
+        };
       });
-      return true;
     } else {
       return false;
     }
@@ -223,7 +240,7 @@ export default class SymbolStore extends Component {
               </div>
             </div>
           </TabPane>
-          <TabPane tab="项目符号" key="2">
+          <TabPane tab="组织符号" key="2">
             <div className={styles.body} style={{ height: "100%" }}>
               <div
                 className={`${styles.symbolPanel} ${globalStyle.autoScrollY}`}
