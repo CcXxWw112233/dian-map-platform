@@ -37,7 +37,7 @@ export default class Search extends React.Component {
         locationName: val.addressComponent?.district || this.state.locationName,
         adcode: val.addressComponent?.adcode,
       });
-      window.areaCode = `${val.addressComponent?.adcode}`;
+      window.queryStr = `districtcode='${val.addressComponent?.adcode}'`
     });
   }
   handleAreaClick = () => {

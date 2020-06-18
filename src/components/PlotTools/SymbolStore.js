@@ -61,25 +61,34 @@ export default class SymbolStore extends Component {
   getSymbol = (data) => {
     if (!data) return;
     let style = {};
-    let symbolUrl = data.value1;
+    let symbolUrl = data.value1 || data.icon_url;
     let src = null;
     if (symbolUrl) {
       if (symbolUrl.indexOf("/") > -1) {
-        symbolUrl = symbolUrl.replace("img", "");
-        src = require("../../assets" + symbolUrl);
+        if (symbolUrl.indexOf("https") === 0) {
+          src = symbolUrl;
+        } else {
+          symbolUrl = symbolUrl.replace("img", "");
+          src = require("../../assets" + symbolUrl);
+        }
+        return {
+          ...style,
+          backgroundImage: `url(${src})`,
+          backgroundColor: "rgba(255,255,255,1)",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center center",
+          backgroundSize: "100%",
+        };
+      } else if (symbolUrl.indexOf("rgb") > -1) {
+        return {
+          ...style,
+          backgroundColor: symbolUrl,
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center center",
+          backgroundSize: "100%",
+        };
       }
-    } else {
-      symbolUrl = data.icon_url;
-      src = symbolUrl;
     }
-    return {
-      ...style,
-      backgroundImage: `url(${src})`,
-      backgroundColor: "rgba(255,255,255,1)",
-      backgroundRepeat: "no-repeat",
-      backgroundPosition: "center center",
-      backgroundSize: "100%",
-    };
   };
   searchSymbol = (value) => {
     let tempArr = [];

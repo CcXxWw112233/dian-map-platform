@@ -1,4 +1,4 @@
-window.queryStr = "districtCode='440117'"
+window.queryStr = "districtcode='440117'"
 const commonStyleOption = {
   textFillColor: "#3F48CC",
   textStrokeColor: "#fff",
@@ -10,7 +10,7 @@ const commonStyleOption = {
 };
 const commonFeatureKeys = {
   typeName: "lingxi:model_statistics_polygon",
-  cql_filter: `${window.queryStr}`,
+  // cql_filter: `${window.queryStr}`,
   showName: true,
   style: {
     strokeWidth: 3,

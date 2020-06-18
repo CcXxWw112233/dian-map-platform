@@ -66,7 +66,7 @@ export default class AreaPanel extends React.Component {
           return item.code === val;
         })[0].name;
         this.props.updateLocationName(name);
-        this.updatePublicData("provinceCode", val);
+        this.updatePublicData("provincecode", val);
         const { provinceCode } = this.state;
         areaSearchAction.getCity(provinceCode).then((res) => {
           if (res.code === "0") {
@@ -96,7 +96,7 @@ export default class AreaPanel extends React.Component {
           return item.code === val;
         })[0].name;
         this.props.updateLocationName(name);
-        this.updatePublicData("cityCode", val);
+        this.updatePublicData("citycode", val);
         const { cityCode } = this.state;
         areaSearchAction.getDistrict(cityCode).then((res) => {
           if (res.code === "0") {
@@ -123,7 +123,7 @@ export default class AreaPanel extends React.Component {
         const name = this.state.districtOptions.filter((item) => {
           return item.code === val;
         })[0].name;
-        this.updatePublicData("districtCode", val);
+        this.updatePublicData("districtcode", val);
         this.props.updateLocationName(name);
         const { districtCode } = this.state;
         areaSearchAction.getTown(districtCode).then((res) => {

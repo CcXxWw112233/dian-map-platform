@@ -51,9 +51,9 @@ export default class PublicData extends React.Component {
                       key.cql_filter =
                         queryStr +
                         key.cql_filter.substring(index, key.cql_filter.length);
+                    } else {
+                      key.cql_filter = queryStr;
                     }
-                  } else {
-                    key.cql_filter = queryStr;
                   }
                   PublicDataActions.getPublicData({
                     url: "",
@@ -114,9 +114,9 @@ export default class PublicData extends React.Component {
               data.cql_filter =
                 window.queryStr +
                 data.cql_filter.substring(index, data.cql_filter.length);
+            } else {
+              data.cql_filter = window.queryStr;
             }
-          } else {
-            data.cql_filter = window.queryStr;
           }
           PublicDataActions.getPublicData({
             url: "",
