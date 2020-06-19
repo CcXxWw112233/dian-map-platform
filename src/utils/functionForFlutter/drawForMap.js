@@ -92,7 +92,7 @@ function renderAction (){
         if(features.length){
             let fs = renderFeatures(features);
             if(fs.length){
-                this.features = this.features.concat(fs);
+                // this.features = this.features.concat(fs);
                 Source.addFeatures(fs);
             }
         }
@@ -122,9 +122,9 @@ function renderAction (){
     }
     // 查找元素
     this.findFeature = (feature_id)=>{
-        if(!this.features.length) return void 0;
-        for(let i = 0; i< this.features.length; i++){
-            let item = this.features[i];
+        if(!DetailAction.features.length) return void 0;
+        for(let i = 0; i< DetailAction.features.length; i++){
+            let item = DetailAction.features[i];
             if(item.get('id') === feature_id) return item;
         }
 
