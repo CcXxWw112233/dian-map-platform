@@ -136,6 +136,8 @@ export default class ScoutingDetails extends PureComponent {
         },
         () => {
           if (!flag) this.renderAreaList();
+          let param = { board_id: this.state.current_board.board_id };
+          Action.addToListen(param);
         }
       );
     });
@@ -159,7 +161,6 @@ export default class ScoutingDetails extends PureComponent {
         });
         // 获取区域分类的数据列表
         this.fetchCollection();
-        Action.addToListen(param);
       })
       .catch((err) => {
         console.log(err);
@@ -308,13 +309,17 @@ export default class ScoutingDetails extends PureComponent {
     let params = {
       board_id: this.state.current_board.board_id,
     };
+    // 发起请求后，取消轮询
+    Action.clearListen();
+    // 再开始轮询--优化轮询机制
     Action.getCollectionList(params).then((res) => {
       let data = res.data;
       // 轮询中，加入对比更新机制
       Action.oldData = data;
       // 将重组后的数据更新,保存没有关联区域的数据
       let array = this.reSetCollection(data);
-      this.updateCollection(data, array)
+      this.updateCollection(data, array);
+      Action.addToListen(params);
     });
   };
 
