@@ -144,7 +144,7 @@ function renderAction (){
         map.addOverlay(this.overlay);
         ele.on = {
             'click':()=>{
-                window.previewFile && window.previewFile.postMessage(data.resource_url);
+                window.previewFile && window.previewFile.postMessage(data);
             }
         }
         this.overlay.setPosition(coordinate);
