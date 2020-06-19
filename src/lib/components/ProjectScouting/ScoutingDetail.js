@@ -55,7 +55,8 @@ function Action() {
     GET_DOWNLOAD_URL,
   } = config;
   this.activeFeature = {};
-  this.Layer = Layer({ id: "scoutingDetailLayer", zIndex: 11 });
+  this.layerId = "scoutingDetailLayer"
+  this.Layer = Layer({ id: this.layerId, zIndex: 11 });
   this.Source = Source();
   this.features = [];
   this.overlays = [];
@@ -69,7 +70,7 @@ function Action() {
   this.draw = null;
   this.lenged = null;
   this.oldData = [];
-  let requestTime = 10 * 1000;
+  let requestTime = 15 * 1000;
 
   // 通过范围获取坐标点
   let getBoxCoordinates = (extent) => {
