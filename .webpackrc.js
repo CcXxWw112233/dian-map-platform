@@ -1,4 +1,3 @@
-import { resolveOnChange } from "antd/lib/input/Input";
 import { resolve } from 'path'
 
 export default {
@@ -25,16 +24,14 @@ export default {
 
   },
   extraBabelPlugins: [
-    [
-      'import',
-      {
-        libraryName: 'lodash',
-        libraryDirectory: '',
-        camel2DashComponentName: false,
-      },
-      'lodash',
-    ],
+    "@babel/plugin-transform-runtime",
+    ["import", { "libraryName": "antd", "libraryDirectory": "lib", "style": "css" }]
   ],
+  env: {
+    "development": {
+      "extraBabelPlugins": ["dva-hmr"]
+    }
+  },
   // chainWebpack: function(config, { webpack }) {
   //   config.merge({
   //     optimization: {

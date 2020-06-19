@@ -10,7 +10,7 @@ import { getMyPosition } from "../utils/getMyPosition";
 import PublicData from "../pages/publicMapData/publicMapData";
 import ProjectScouting from "../pages/ProjectScouting/ScoutingList";
 import ScoutingDetails from "../pages/ProjectScouting/ScoutingDetails";
-import PlottingModal from "../pages/PlottingModal/PlottingModal";
+// import PlottingModal from "../pages/PlottingModal/PlottingModal";
 import ConfirmModal from "../pages/PlottingModal/ConfirmModal";
 import ScoutAction from "../lib/components/ProjectScouting/ScoutingList";
 import ScoutDetail from "../lib/components/ProjectScouting/ScoutingDetail";
@@ -21,7 +21,7 @@ import { Tabs, Spin, message } from "antd";
 
 import { Main } from "components";
 import {
-  ToolBar,
+  // ToolBar,
   // Location,
   // BasemapGallery,
   Sider,
@@ -34,7 +34,7 @@ import LengedList from "components/LengedList/LengedList";
 
 import BottomToolBar from "components/BottomToolBar/BottomToolBar";
 
-import TempPlottingIcon from "components/TempPlotting/TempPlottingIcon";
+// import TempPlottingIcon from "components/TempPlotting/TempPlottingIcon";
 import TempPlottingPanel from "components/TempPlotting/TempPlottingPanel";
 import PhotoSwipe from '../components/PhotoSwipe'
 import FlutterComponents from '../pages/FlutterComponents'
