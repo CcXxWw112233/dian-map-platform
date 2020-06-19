@@ -458,6 +458,7 @@ function Action() {
             operator.updateFeatueToDB = me.updateFeatueToDB.bind(me);
             me.layer.projectScoutingArr.push(operator);
             me.layer.plotEdit.plotClickCb = me.handlePlotClick.bind(me);
+            me.features.push(feature);
             return;
           };
           return;
