@@ -84,7 +84,7 @@ export default class LengedList extends PureComponent {
   componentDidMount(){
     getLocal('baseMapKey').then(({data}) => {
       this.setState({
-        selectedBaseMapIndex:data
+        selectedBaseMapIndex:data || ""
       })
     });
     
@@ -277,7 +277,7 @@ export default class LengedList extends PureComponent {
             style={{marginBottom:10}}>
               <Switch checkedChildren="开启" unCheckedChildren="关闭"
               checked={this.state.roadLine}
-              defaultChecked={true} disabled={this.state.selectedBaseMapIndex !== 'gd_img' & this.state.selectedBaseMapIndex.indexOf('td_') === -1}/>
+              defaultChecked={true} disabled={this.state.selectedBaseMapIndex !== 'gd_img' && this.state.selectedBaseMapIndex.indexOf('td_') === -1}/>
             </Form.Item>
             <Form.Item label="标绘名称" name="featureName"
             style={{marginBottom:10}}>
