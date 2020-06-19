@@ -332,6 +332,7 @@ export default class PlotInfoPanel extends Component {
           iconUrl = featureType;
           let tempImg = new Image();
           tempImg.src = iconUrl;
+          tempImg.crossorigin = "anonymous";
           const me = this;
           tempImg.onload = function () {
             options = {
@@ -440,6 +441,7 @@ export default class PlotInfoPanel extends Component {
         let context = canvas.getContext("2d");
         let img = new Image();
         img.src = iconUrl;
+        img.crossorigin = "anonymous";
         const me = this;
         img.onload = function () {
           const pat = context.createPattern(img, "repeat");

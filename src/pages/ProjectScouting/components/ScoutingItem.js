@@ -140,6 +140,7 @@ export default class ScoutingItem extends React.PureComponent {
                 let url = URL.createObjectURL(file);
                 let img = new Image();
                 img.src = url;
+                img.crossorigin = "anonymous";
                 let canvas = document.createElement('canvas');
                 let ctx = canvas.getContext('2d');
                 img.onload = ()=>{

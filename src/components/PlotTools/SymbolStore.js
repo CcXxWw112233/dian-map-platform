@@ -143,6 +143,7 @@ export default class SymbolStore extends Component {
         const me = this;
         reader.onload = function () {
           let tempImg = new Image();
+          tempImg.crossorigin = "anonymous";
           tempImg.src = reader.result;
           tempImg.onload = function () {
             if (tempImg.width > 48 || tempImg.height > 48) {

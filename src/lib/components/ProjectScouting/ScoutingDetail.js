@@ -70,7 +70,7 @@ function Action() {
   this.draw = null;
   this.lenged = null;
   this.oldData = [];
-  let requestTime = 15 * 1000;
+  let requestTime = 10 * 1000;
 
   // 通过范围获取坐标点
   let getBoxCoordinates = (extent) => {
@@ -438,6 +438,7 @@ function Action() {
           let canvas = document.createElement("canvas");
           let context = canvas.getContext("2d");
           let img = new Image();
+          img.crossorigin = "anonymous";
           img.src = iconUrl;
           const me = this;
           img.onload = function () {
@@ -922,6 +923,7 @@ function Action() {
         isLoading = true;
         message.success("加载中...", 0);
         let img = new Image();
+        img.crossorigin = "anonymous";
         img.src = target.src;
         img.onload = () => {
           console.dir(target);
@@ -1301,6 +1303,7 @@ function Action() {
     }
   };
   this.addToListen = (param) => {
+    clearTimeout(this.repeatRequst);
     this.repeatRequst = setTimeout(() => {
       this.addListenAjax(param);
       this.addToListen(param);
@@ -1357,11 +1360,17 @@ function Action() {
         window.open(message,'_blank');
       }
     }
+    if(pointType === 'unknow'){
+      let data = await GET_DOWNLOAD_URL(resource_id);
+      let message = data.message;
+      window.open(message,'_blank');
+    }
     if(pointType === 'audio' || pointType === 'video'){
       window.open(resource_url,'_blank');
     }
     if(pointType === 'pic'){
       let img = new Image();
+      img.crossorigin = "anonymous";
       img.src = resource_url;
       img.onload = ()=>{
         let w = img.width;
