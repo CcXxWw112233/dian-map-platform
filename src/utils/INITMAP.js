@@ -57,18 +57,22 @@ function(){
       }
     },
     findLayerById: function (id, layerArr = this.operationLayers) {
+      let layers = this.map.getLayers();
+      layers = layers.getArray();
+      let layer = layers.find(item => item.get('id') === id);
+      return layer;
       // layerArr.filter((layer) => {
       //   return layer.get("id") === id;
       // });
-      let layer = null;
-      for (let i = 0; i < layerArr.length; i++) {
-        const currentId = layerArr[i].get("id");
-        if (currentId === id) {
-          layer = layerArr[i];
-          break;
-        }
-      }
-      return layer;
+      // let layer = null;
+      // for (let i = 0; i < layerArr.length; i++) {
+      //   const currentId = layerArr[i].get("id");
+      //   if (currentId === id) {
+      //     layer = layerArr[i];
+      //     break;
+      //   }
+      // }
+      // return layer;
     },
     createTilelayer: function (options, zIndex) {
       return new TileLayer({
