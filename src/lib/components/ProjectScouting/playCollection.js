@@ -210,7 +210,7 @@ function action(){
             }
             // 标绘
             if(this.currentPlay.collect_type === '4'){
-                let feaure = this.features.find(item => item.get('id') === this.currentPlay.id);
+                let feaure = this.features.concat(DetailAction.features).find(item => item.get('id') === this.currentPlay.id);
                 if(feaure){
                     let type = feaure.getGeometry().getType();
                     if(type === 'Point'){
@@ -240,7 +240,7 @@ function action(){
                 // 创建一个空的范围
                 let ext = createEmpty();
                 this.currentPlay.child && this.currentPlay.child.forEach(item => {
-                    let feature = this.features.find(f => f.get('id') === item.id);
+                    let feature = this.features.concat(DetailAction.features).find(f => f.get('id') === item.id);
                     let img = DetailAction.findImgLayer(item.resource_id);
                     if(feature){
                         // console.log(feature)

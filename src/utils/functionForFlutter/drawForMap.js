@@ -46,9 +46,9 @@ function renderAction (){
     }
 
     // 渲染元素
-    const renderFeatures = (data)=>{
+    const renderFeatures = async (data)=>{
         // this.clear();
-        let feature = DetailAction.renderFeaturesCollection(data,{addSource: false});
+        let feature = await DetailAction.renderFeaturesCollection(data,{addSource: false});
         return feature;
     }
 

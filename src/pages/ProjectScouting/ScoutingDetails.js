@@ -313,7 +313,7 @@ export default class ScoutingDetails extends PureComponent {
     Action.clearListen();
     // 再开始轮询--优化轮询机制
     Action.getCollectionList(params).then((res) => {
-      let data = res.data;
+      let data = res.data.sort((a,b) => a.sort - b.sort);
       // 轮询中，加入对比更新机制
       Action.oldData = data;
       // 将重组后的数据更新,保存没有关联区域的数据
@@ -350,7 +350,7 @@ export default class ScoutingDetails extends PureComponent {
     data = this.getSameGroupIdData(data);
     let list = this.state.area_list.map((item) => {
       let f_list = data.filter((v) => v.area_type_id === item.id);
-      item.collection = f_list.sort((a,b) => (a.__index||0) - (b.__index||0));
+      item.collection = f_list.sort((a,b) => (a.__index|| a.sort ||0) - (b.__index|| b.sort || 0));
       return item;
     });
     return list;
@@ -854,6 +854,7 @@ export default class ScoutingDetails extends PureComponent {
     this.showOtherSlide();
     this.fetchCollection();
     PlayCollectionAction.stop();
+    Action.addToListen({board_id: this.state.current_board.board_id});
   }
 
   // 播放下一组
@@ -905,6 +906,7 @@ export default class ScoutingDetails extends PureComponent {
             childIds:[item.id],
             child:[item],
             create_by:{},
+            sort:item.sort,
             __index: item.__index
           }
           arr.push(obj);
@@ -989,6 +991,8 @@ export default class ScoutingDetails extends PureComponent {
     })
     let flag = PlayCollectionAction.setData(mode, arr.sort((a,b)=> (a.__index || 0) - (b.__index || 0)));
     if(flag){
+      // 发起请求后，取消轮询
+      Action.clearListen();
       PlayCollectionAction.play();
       this.hideOtherSlide();
       this.setState({

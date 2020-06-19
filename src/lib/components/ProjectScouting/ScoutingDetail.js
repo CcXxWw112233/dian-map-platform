@@ -233,7 +233,7 @@ function Action() {
         this.layer.projectScoutingArr.forEach((item) => {
           if (item && item.feature) {
             InitMap.map.removeOverlay(item.feature.overlay);
-            item && this.layer.removeFeature(item);
+            item && item.feature && this.layer.removeFeature(item);
           }
         });
     }
@@ -333,7 +333,7 @@ function Action() {
   };
 
   // 渲染标绘数据
-  this.renderFeaturesCollection = (
+  this.renderFeaturesCollection = async (
     data,
     { lenged, dispatch, addSource = true }
   ) => {
@@ -362,7 +362,10 @@ function Action() {
       this.layer.projectScoutingArr = [];
       this.layer.plotEdit.updateCb = null;
     }
-    data.forEach((item) => {
+
+    let hasImages = [];
+    for(let i = 0; i < data.length ; i++){
+      let item = data[i];
       let content = item.content;
       // console.log(item)
       if (!content) return;
@@ -441,28 +444,28 @@ function Action() {
           img.crossorigin = "anonymous";
           img.src = iconUrl;
           const me = this;
-          img.onload = function () {
-            const pat = context.createPattern(img, "repeat");
-            let options = {
-              strokeWidth: 2,
-              strokeColor: "",
-              fillColor: pat,
-              text: item.title,
-              ...commonStyleOption,
+          let promise = new Promise((resolve,reject) => {
+            img.onload = function () {
+              const pat = context.createPattern(img, "repeat");
+              let options = {
+                strokeWidth: 2,
+                strokeColor: "",
+                fillColor: pat,
+                text: item.title,
+                ...commonStyleOption,
+              };
+              myStyle = createStyle(content.geoType, options);
+              feature.setStyle(myStyle);
+              
+              resolve(feature);
+              // me.features.push(feature);
+              return;
             };
-            myStyle = createStyle(content.geoType, options);
-            feature.setStyle(myStyle);
-            let operator = me.layer._addFeature(feature);
-            operator.isScouting = true;
-            operator.data = item;
-            operator.updateFeatueToDB = me.updateFeatueToDB.bind(me);
-            me.layer.projectScoutingArr.push(operator);
-            me.layer.plotEdit.plotClickCb = me.handlePlotClick.bind(me);
-            me.features.push(feature);
-            return;
-          };
-          return;
+          })
+          hasImages.push(promise);
+          // return;
         }
+        
         myStyle = createStyle(content.geoType, {
           ...commonStyleOption,
           strokeWidth: 2,
@@ -471,6 +474,7 @@ function Action() {
           text: item.title,
         });
       }
+
       feature.setStyle(myStyle);
       if (addSource) {
         let operator = this.layer._addFeature(feature);
@@ -481,7 +485,19 @@ function Action() {
         operator.updateFeatueToDB = this.updateFeatueToDB.bind(this);
       }
       this.features.push(feature);
-    });
+    }
+
+    let lst = await Promise.all(hasImages);
+    lst.forEach(item => {
+      let obj = data.find(d => d.id === item.get('id'));
+      let operator = this.layer._addFeature(item);
+      operator.isScouting = true;
+      operator.data = obj;
+      operator.updateFeatueToDB = this.updateFeatueToDB.bind(this);
+      this.layer.projectScoutingArr.push(operator);
+      this.layer.plotEdit.plotClickCb = this.handlePlotClick.bind(this);
+    })
+    this.features = this.features.concat(lst);
 
     if (!addSource) {
       return this.features;
@@ -560,8 +576,7 @@ function Action() {
     this.Source.addFeatures(pointCollection);
 
     // 渲染标绘数据
-    const sou = this.renderFeaturesCollection(features, { lenged, dispatch });
-
+    const sou = await this.renderFeaturesCollection(features, { lenged, dispatch });
     // 渲染规划图
     let ext = await this.renderPlanPicCollection(planPic);
 

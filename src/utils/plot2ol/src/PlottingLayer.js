@@ -474,8 +474,8 @@ class PlottingLayer extends Observable {
     const curIndex = this._getFeatureOperatorIndex(feature_operator);
     feature_operator.destory();
     this.feature_operators.splice(curIndex, 1);
-    this._sortByZindex();
-    this._resetZIndex();
+    // this._sortByZindex();
+    // this._resetZIndex();
   }
   /**
    * 清空图元
