@@ -115,71 +115,111 @@ export default class PlotInfoPanel extends Component {
   componentWillUnmount() {
     this.updateProps();
   }
+  _getSymbolData = async (props) => {
+    const { plotType, selectName } = props;
+    let res = null;
+    let defaultPlotType = {
+      type: "默认",
+      items: [
+        {
+          id: "默认点",
+          value1: "rgba(155,155,155,0.7)",
+          value3: "rgba(155,155,155,1)",
+          name: "默认点",
+        },
+      ],
+    };
+    if (plotType === "Point") {
+      res = await plotServices.GET_POINTSYMBOL();
+      const res0 = await symbolStoreServices.GET_ICON();
+      res.data = [
+        defaultPlotType,
+        { type: "自定义", items: [...res0.data] },
+        ...res.data,
+      ];
+    }
+    if (plotType === "Polyline" || plotType === "LineString") {
+      res = await plotServices.GET_POLYLINESYMBOL();
+      defaultPlotType.items[0].id = "默认线";
+      defaultPlotType.items[0].name = "默认线";
+      res.data = [defaultPlotType, ...res.data];
+    }
+    if (
+      plotType === "Polygon" ||
+      plotType === "freePolygon" ||
+      plotType === "arrow" ||
+      plotType === "rect" ||
+      plotType === "circle"
+    ) {
+      res = await plotServices.GET_POLYGONSYMBOL();
+      const res0 = await symbolStoreServices.GET_ICON();
+      res.data[2].items = [
+        ...res.data[2].items,
+        ...config,
+        ...res0.data,
+      ].reverse();
+      defaultPlotType.items[0].id = "默认面";
+      defaultPlotType.items[0].name = "默认面";
+      res.data = [defaultPlotType, ...res.data.reverse()];
+    }
+    // this.symbols[plotType] = res?.data;
+    let symbols = [];
+    if (res) {
+      res.data.forEach((item) => {
+        symbols = [...symbols, ...item.items];
+      });
+    }
+    this.setState(
+      {
+        symbols: symbols || [],
+        plotType: plotType,
+      },
+      () => {
+        if (selectName) {
+          for (let i = 0; i < this.state.symbols.length; i++) {
+            if (
+              this.state.symbols[i].name === selectName ||
+              this.state.symbols[i].icon_name === selectName
+            ) {
+              this.setState({
+                selectedIndex: i,
+              });
+              break;
+            }
+          }
+        }
+      }
+    );
+  };
   getSymbolData = async (props) => {
     try {
-      const { plotType, responseData, isModifyPlot } = props;
+      const { plotType, responseData, isModifyPlot, selectName } = props;
       if (!isModifyPlot) {
-        let res = null;
-        let defaultPlotType = {
-          type: "默认",
-          items: [
-            {
-              id: "默认点",
-              value1: "rgba(155,155,155,0.7)",
-              value3: "rgba(155,155,155,1)",
-              name: "默认点",
-            },
-          ],
-        };
-        if (plotType === "Point") {
-          res = await plotServices.GET_POINTSYMBOL();
-          const res0 = await symbolStoreServices.GET_ICON();
-          res.data = [
-            defaultPlotType,
-            { type: "自定义", items: [...res0.data] },
-            ...res.data,
-          ];
-        }
-        if (plotType === "Polyline" || plotType === "LineString") {
-          res = await plotServices.GET_POLYLINESYMBOL();
-          defaultPlotType.items[0].id = "默认线";
-          defaultPlotType.items[0].name = "默认线";
-          res.data = [defaultPlotType, ...res.data];
-        }
-        if (
-          plotType === "Polygon" ||
-          plotType === "freePolygon" ||
-          plotType === "arrow" ||
-          plotType === "rect" ||
-          plotType === "circle"
-        ) {
-          res = await plotServices.GET_POLYGONSYMBOL();
-          const res0 = await symbolStoreServices.GET_ICON();
-          res.data[2].items = [
-            ...res.data[2].items,
-            ...config,
-            ...res0.data,
-          ].reverse();
-          defaultPlotType.items[0].id = "默认面";
-          defaultPlotType.items[0].name = "默认面";
-          res.data = [defaultPlotType, ...res.data.reverse()];
-        }
-        // this.symbols[plotType] = res?.data;
-        let symbols = [];
-        if (res) {
-          res.data.forEach((item) => {
-            symbols = [...symbols, ...item.items];
-          });
-        }
-        this.setState({
-          symbols: symbols || [],
-          plotType: plotType,
-        });
+        await this._getSymbolData(props);
       } else {
-        this.setState({
-          symbols: responseData || [],
-          plotType: plotType,
-        });
+        if (!responseData.length) {
+          await this._getSymbolData(props);
+        } else {
+          this.setState(
+            {
+              symbols: responseData || [],
+              plotType: plotType,
+            },
+            () => {
+              for (let i = 0; i < this.state.symbols.length; i++) {
+                if (
+                  this.state.symbols[i].name === selectName ||
+                  this.state.symbols[i].icon_name === selectName
+                ) {
+                  this.setState({
+                    selectedIndex: i,
+                  });
+                  break;
+                }
+              }
+            }
+          );
+        }
       }
     } catch (err) {
       message.error(err);
@@ -266,17 +306,24 @@ export default class PlotInfoPanel extends Component {
       this.symbolType[selectName] = 0;
     }
     let text = "";
-    if (this.props.isModifyPlot) {
-      text = this.props.featureName;
-    } else {
-      text = `${selectName}#${++this.symbolType[selectName]}`;
-      this.props.dispatch({
-        type: "modal/updateData",
-        payload: {
-          featureName: text, // 名称
-        },
-      });
-    }
+    text = `${selectName}#${++this.symbolType[selectName]}`;
+    this.props.dispatch({
+      type: "modal/updateData",
+      payload: {
+        featureName: text, // 名称
+      },
+    });
+    // if (this.props.isModifyPlot) {
+    //   text = this.props.featureName;
+    // } else {
+    //   text = `${selectName}#${++this.symbolType[selectName]}`;
+    //   this.props.dispatch({
+    //     type: "modal/updateData",
+    //     payload: {
+    //       featureName: text, // 名称
+    //     },
+    //   });
+    // }
     let remark = this.props.remarks;
     let iconUrl = "";
     if (this.state.plotType === "Point") {
@@ -426,7 +473,11 @@ export default class PlotInfoPanel extends Component {
       });
     } else {
       if (!window.featureOperator) return;
-      window.featureOperator.attrs = attrs;
+      const geometryType = window.featureOperator.attrs.geometryType;
+      window.featureOperator.attrs = {
+        ...attrs,
+        geometryType,
+      };
       window.featureOperator.setName(attrs.name);
       window.featureOperator.feature.setStyle(style);
       this.updateReduxOperatorList();
