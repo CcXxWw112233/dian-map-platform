@@ -464,6 +464,7 @@ function Action() {
           })
           hasImages.push(promise);
           // return;
+          continue;
         }
         
         myStyle = createStyle(content.geoType, {
@@ -488,6 +489,11 @@ function Action() {
     }
 
     let lst = await Promise.all(hasImages);
+    this.features = this.features.concat(lst);
+
+    if (!addSource) {
+      return this.features;
+    }
     lst.forEach(item => {
       let obj = data.find(d => d.id === item.get('id'));
       let operator = this.layer._addFeature(item);
@@ -497,12 +503,6 @@ function Action() {
       this.layer.projectScoutingArr.push(operator);
       this.layer.plotEdit.plotClickCb = this.handlePlotClick.bind(this);
     })
-    this.features = this.features.concat(lst);
-
-    if (!addSource) {
-      return this.features;
-    }
-
     let newConfig = [];
     if (!lenged) {
       lenged = [];

@@ -27,7 +27,6 @@ function renderAction (){
         
         // 删除规划图贴图
         DetailAction.removePlanPicCollection();
-
         if(this.Source && this.features.length){
             this.features.forEach(item => {
                 if(this.Source.getFeatureByUid(item.ol_uid)){
@@ -92,7 +91,7 @@ function renderAction (){
         if(features.length){
             let fs = await renderFeatures(features);
             if(fs.length){
-                // this.features = this.features.concat(fs);
+                this.features = this.features.concat(fs);
                 Source.addFeatures(fs);
             }
         }
