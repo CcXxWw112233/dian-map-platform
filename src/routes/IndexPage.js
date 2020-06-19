@@ -40,6 +40,7 @@ import PhotoSwipe from '../components/PhotoSwipe'
 import FlutterComponents from '../pages/FlutterComponents'
 import PlotTools from "../components/PlotTools/ToolBar"
 import MatrixEdit from '../components/MatrixEdit'
+import { BASIC } from '../services/config'
 
 @connect(
   ({
@@ -158,9 +159,11 @@ class IndexPage extends React.Component {
   MapOnload = ({ map, view }) => {
     this.map = map;
     this.view = view;
+    if(BASIC.getUrlParam.isMobile === '1') return ;
     let minResolution = this.view.getMinResolution();
     let tolerance = 0;
     this.map.on('moveend',()=>{
+
       let overlays = this.map.getOverlays();
       let arr = overlays.getArray();
       if(!arr.length) return ;
