@@ -117,7 +117,10 @@ export default class SymbolStore extends Component {
   handleAddOrgSymbolClick = () => {};
   checkFileSize = (file) => {
     // console.log(file);
-    if (file.type.indexOf("image") < 0) {
+    if (
+      ["image/png", "image/jpg", "image/jpeg", "image/bmp"].indexOf(file.type) <
+      -1
+    ) {
       message.error("请上传.jpg, .jpeg, .png, .bmp格式文件");
       return false;
     }
