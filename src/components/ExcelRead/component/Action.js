@@ -50,7 +50,7 @@ function action(mapId){
             firstBaseMaps = baseMapDictionary.find(item => item.key === baseMapKey) || baseMapDictionary[0];
         }
         if(firstBaseMaps) {
-            const values = firstBaseMaps.values
+            const values = firstBaseMaps.values || "";
             const currenttBaseMaps = baseMaps.filter(item => {return values.indexOf(item.id) > -1})
             currenttBaseMaps.forEach(baseMap => {
                 const layer = mapApp.createTilelayer(baseMap)
