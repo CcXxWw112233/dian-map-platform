@@ -26,7 +26,7 @@ export default class ToolBar extends Component {
         name: "符号库",
         cb: () => {
           this.handleToolClick("symbolStore");
-         this.deactivate()
+          this.deactivate();
           this.setState({
             showPlotAddpanel: false,
             showTempPlotPanel: false,
@@ -40,15 +40,20 @@ export default class ToolBar extends Component {
         name: "标记点",
         cb: () => {
           this.handleToolClick("pointPlot");
-          this.deactivate()
+          this.deactivate();
           // plotEdit.create("MARKER");
-          this.setState({
-            showPlotAddpanel: true,
-            showTempPlotPanel: false,
-            showSymbolStorePanel: false,
-            plotType: "Point",
-            isModifyPlot: false,
-          });
+          this.setState(
+            {
+              showPlotAddpanel: true,
+              showTempPlotPanel: false,
+              showSymbolStorePanel: false,
+              plotType: "Point",
+              isModifyPlot: false,
+            },
+            () => {
+              this.child.createDefaultPlot("MARKER");
+            }
+          );
         },
       },
       {
@@ -57,15 +62,20 @@ export default class ToolBar extends Component {
         name: "标记线",
         cb: () => {
           this.handleToolClick("linePlot");
-          this.deactivate()
+          this.deactivate();
           // plotEdit.create("POLYLINE");
-          this.setState({
-            showPlotAddpanel: true,
-            showTempPlotPanel: false,
-            showSymbolStorePanel: false,
-            plotType: "LineString",
-            isModifyPlot: false,
-          });
+          this.setState(
+            {
+              showPlotAddpanel: true,
+              showTempPlotPanel: false,
+              showSymbolStorePanel: false,
+              plotType: "LineString",
+              isModifyPlot: false,
+            },
+            () => {
+              this.child.createDefaultPlot("POLYLINE");
+            }
+          );
         },
       },
       {
@@ -74,15 +84,20 @@ export default class ToolBar extends Component {
         name: "标记面",
         cb: () => {
           this.handleToolClick("polygonPlot");
-          this.deactivate()
+          this.deactivate();
           // plotEdit.create("POLYGON");
-          this.setState({
-            showPlotAddpanel: true,
-            showTempPlotPanel: false,
-            showSymbolStorePanel: false,
-            plotType: "Polygon",
-            isModifyPlot: false,
-          });
+          this.setState(
+            {
+              showPlotAddpanel: true,
+              showTempPlotPanel: false,
+              showSymbolStorePanel: false,
+              plotType: "Polygon",
+              isModifyPlot: false,
+            },
+            () => {
+              this.child.createDefaultPlot("POLYGON");
+            }
+          );
         },
       },
       {
@@ -91,15 +106,20 @@ export default class ToolBar extends Component {
         name: "自由面",
         cb: () => {
           this.handleToolClick("freePlygonPlot");
-          this.deactivate()
+          this.deactivate();
           // plotEdit.create("FREEHAND_POLYGON");
-          this.setState({
-            showPlotAddpanel: true,
-            showTempPlotPanel: false,
-            showSymbolStorePanel: false,
-            plotType: "freePolygon",
-            isModifyPlot: false,
-          });
+          this.setState(
+            {
+              showPlotAddpanel: true,
+              showTempPlotPanel: false,
+              showSymbolStorePanel: false,
+              plotType: "freePolygon",
+              isModifyPlot: false,
+            },
+            () => {
+              this.child.createDefaultPlot("FREEHAND_POLYGON");
+            }
+          );
         },
       },
       {
@@ -108,15 +128,20 @@ export default class ToolBar extends Component {
         name: "箭头",
         cb: () => {
           this.handleToolClick("arrowPlot");
-          this.deactivate()
+          this.deactivate();
           // plotEdit.create("FINE_ARROW");
-          this.setState({
-            showPlotAddpanel: true,
-            showTempPlotPanel: false,
-            showSymbolStorePanel: false,
-            plotType: "arrow",
-            isModifyPlot: false,
-          });
+          this.setState(
+            {
+              showPlotAddpanel: true,
+              showTempPlotPanel: false,
+              showSymbolStorePanel: false,
+              plotType: "arrow",
+              isModifyPlot: false,
+            },
+            () => {
+              this.child.createDefaultPlot("FINE_ARROW");
+            }
+          );
         },
       },
       {
@@ -125,15 +150,20 @@ export default class ToolBar extends Component {
         name: "矩形",
         cb: () => {
           this.handleToolClick("rectPlot");
-          this.deactivate()
+          this.deactivate();
           // plotEdit.create("RECTANGLE");
-          this.setState({
-            showPlotAddpanel: true,
-            showTempPlotPanel: false,
-            showSymbolStorePanel: false,
-            plotType: "rect",
-            isModifyPlot: false,
-          });
+          this.setState(
+            {
+              showPlotAddpanel: true,
+              showTempPlotPanel: false,
+              showSymbolStorePanel: false,
+              plotType: "rect",
+              isModifyPlot: false,
+            },
+            () => {
+              this.child.createDefaultPlot("RECTANGLE");
+            }
+          );
         },
       },
       {
@@ -142,15 +172,20 @@ export default class ToolBar extends Component {
         name: "圆",
         cb: () => {
           this.handleToolClick("circlePlot");
-          this.deactivate()
+          this.deactivate();
           // plotEdit.create("CIRCLE");
-          this.setState({
-            showPlotAddpanel: true,
-            showTempPlotPanel: false,
-            showSymbolStorePanel: false,
-            plotType: "circle",
-            isModifyPlot: false,
-          });
+          this.setState(
+            {
+              showPlotAddpanel: true,
+              showTempPlotPanel: false,
+              showSymbolStorePanel: false,
+              plotType: "circle",
+              isModifyPlot: false,
+            },
+            () => {
+              this.child.createDefaultPlot("CIRCLE");
+            }
+          );
         },
       },
     ];
@@ -161,7 +196,7 @@ export default class ToolBar extends Component {
         name: "坐标",
         cb: () => {
           this.toggleActive("coordinateMeasure");
-          this.deactivate()
+          this.deactivate();
           this.setState({
             showPlotAddpanel: false,
             showTempPlotPanel: false,
@@ -176,7 +211,7 @@ export default class ToolBar extends Component {
         name: "距离",
         cb: () => {
           this.toggleActive("distanceMeasure");
-          this.deactivate()
+          this.deactivate();
           this.setState({
             showPlotAddpanel: false,
             showTempPlotPanel: false,
@@ -191,7 +226,7 @@ export default class ToolBar extends Component {
         name: "面积",
         cb: () => {
           this.toggleActive("areaMeasure");
-          this.deactivate()
+          this.deactivate();
           this.setState({
             showPlotAddpanel: false,
             showTempPlotPanel: false,
@@ -213,11 +248,11 @@ export default class ToolBar extends Component {
     };
   }
   deactivate = () => {
-    plotEdit.deactivate()
-    pointDrawing.deactivate()
-    lineDrawing.deactivate()
-    polygonDrawing.deactivate()
-  } 
+    plotEdit.deactivate();
+    pointDrawing.deactivate();
+    lineDrawing.deactivate();
+    polygonDrawing.deactivate();
+  };
   clearReduxModal = () => {
     const { dispatch } = this.props;
     dispatch({
@@ -267,6 +302,9 @@ export default class ToolBar extends Component {
       active: value,
     });
   };
+  onRef = (ref) => {
+    this.child = ref
+  }
   render() {
     return (
       <div className={styles.wrap}>
@@ -341,6 +379,7 @@ export default class ToolBar extends Component {
         ) : null}
         {this.state.showPlotAddpanel ? (
           <PlotToolPanel
+            onRef={this.onRef}
             plotType={this.state.plotType}
             isModifyPlot={this.state.isModifyPlot}
             showPlotInfoPanel={this.showPlotInfoPanel}

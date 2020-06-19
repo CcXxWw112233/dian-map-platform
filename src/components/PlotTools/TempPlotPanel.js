@@ -163,7 +163,7 @@ export default class TempPlotPanel extends React.Component {
         };
       }
       if (geometryType?.indexOf("Point") > -1) {
-        style = { ...style, borderRadius: 8 };
+        style = { ...style, borderRadius: 10 };
       }
       if (geometryType?.indexOf("LineString") > -1) {
         style = {

@@ -173,6 +173,7 @@ export const createStyle = function (
   let stroke = new Stroke({
     color: options.strokeColor || defaultColor,
     width: options.strokeWidth || 2,
+    lineDash: options.lineDash
   });
   // 文字样式
   let text = options.showName

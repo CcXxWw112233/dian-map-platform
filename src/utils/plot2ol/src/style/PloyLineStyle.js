@@ -1,6 +1,5 @@
 import FTStyle from "./Style";
-import Style from 'ol/style/Style'
-import Stroke from 'ol/style/Stroke'
+import { Fill, Stroke, Circle, Style, Text } from "ol/style";
 // import Fill from 'ol/style/Fill'
 
 class PolyLineStyle extends FTStyle {
@@ -16,7 +15,7 @@ class PolyLineStyle extends FTStyle {
         this._style = {
             //--ol.style.Stroke所有选项
             stroke: {
-                color: '#FF0000',
+                color: 'rgba(155,155,155,1)',
                 width: 3,
                 lineDash: [10, 10, 10]
             }
@@ -28,7 +27,21 @@ class PolyLineStyle extends FTStyle {
             stroke = new Stroke(this._style.stroke)
         }
         return new Style({
-            stroke: stroke
+            stroke: stroke,
+            text: new Text({
+              offsetX: 0,
+              offsetY: -25,
+              overflow: true,
+              text: "默认类型",
+              fill: new Fill({
+                color: "rgba(255,0,0,1)",
+              }),
+              font: "13px sans-serif",
+              stroke: new Stroke({
+                color: "rgba(255,255,255,0.8)",
+                width: 3,
+              }),
+            }),
         });
     }
 }

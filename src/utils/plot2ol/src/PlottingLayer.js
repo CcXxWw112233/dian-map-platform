@@ -131,12 +131,16 @@ class PlottingLayer extends Observable {
 
     this.responseData = null;
 
-    Event.Evt.on("setAttribute", ({ style, attrs, responseData, cb }) => {
-      this.style = style;
-      this.attrs = attrs;
-      this.responseData = responseData;
-      this.listCb = cb;
-    });
+    Event.Evt.on(
+      "setAttribute",
+      ({ style, attrs, responseData, cb, isDefault }) => {
+        this.style = style;
+        this.attrs = attrs;
+        this.responseData = responseData;
+        this.listCb = cb;
+        this.isDefault = isDefault;
+      }
+    );
   }
   /**
    * @ignore
@@ -309,11 +313,12 @@ class PlottingLayer extends Observable {
     if (this.attrs) {
       const newAttrs = JSON.parse(JSON.stringify(this.attrs));
       fo.setName(newAttrs.name);
+      fo.feature.getStyle().getText().setText(newAttrs.name);
       fo.attrs = {
         ...newAttrs,
         geometryType: feature.getGeometry().getType(),
       };
-      fo.responseData = this.responseData
+      fo.responseData = this.responseData;
     }
     this.feature_operators.push(fo);
     if (this.attrs) {
@@ -323,8 +328,8 @@ class PlottingLayer extends Observable {
       );
       this.listCb && this.listCb(tempList);
       this.attrs = null;
-      this.responseData = null
-      delete this.listCb
+      this.responseData = null;
+      delete this.listCb;
     }
     return fo;
   }
@@ -458,7 +463,11 @@ class PlottingLayer extends Observable {
    */
   removeFeature(feature_operator) {
     let source = this.showLayer.getSource();
-    if(source.getFeatureByUid( feature_operator.feature && feature_operator.feature.ol_uid)){
+    if (
+      source.getFeatureByUid(
+        feature_operator.feature && feature_operator.feature.ol_uid
+      )
+    ) {
       source.removeFeature(feature_operator.feature);
     }
     this.plotEdit.deactivate();

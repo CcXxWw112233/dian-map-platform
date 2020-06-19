@@ -12,6 +12,7 @@ import { config } from "../../utils/customConfig";
 import symbolStoreServices from "../../services/symbolStore";
 import { createStyle } from "@/lib/utils";
 import { connect } from "dva";
+import { indexOf } from "lodash";
 
 @connect(
   ({
@@ -44,7 +45,7 @@ export default class PlotInfoPanel extends Component {
     super(props);
     this.state = {
       symbols: [],
-      selectedSymbolId: null,
+      selectedIndex: 0,
       plotType: "",
       plotName: "",
       plotRemark: "",
@@ -76,9 +77,11 @@ export default class PlotInfoPanel extends Component {
     };
     this.strokeColorStyle = "rgba(155,155,155,1)";
     this.fillColorStyle = "rgba(155,155,155,0.7)";
+    this.symbolType = {};
   }
   componentDidMount() {
     this.getSymbolData(this.props);
+    this.props.onRef(this);
   }
   componentWillReceiveProps(nextProps) {
     this.getSymbolData(nextProps);
@@ -117,13 +120,31 @@ export default class PlotInfoPanel extends Component {
       const { plotType, responseData, isModifyPlot } = props;
       if (!isModifyPlot) {
         let res = null;
+        let defaultPlotType = {
+          type: "默认",
+          items: [
+            {
+              id: "默认点",
+              value1: "rgba(155,155,155,0.7)",
+              value3: "rgba(155,155,155,1)",
+              name: "默认点",
+            },
+          ],
+        };
         if (plotType === "Point") {
           res = await plotServices.GET_POINTSYMBOL();
           const res0 = await symbolStoreServices.GET_ICON();
-          res.data = [{ type: "自定义", items: [...res0.data] }, ...res.data];
+          res.data = [
+            defaultPlotType,
+            { type: "自定义", items: [...res0.data] },
+            ...res.data,
+          ];
         }
         if (plotType === "Polyline" || plotType === "LineString") {
           res = await plotServices.GET_POLYLINESYMBOL();
+          defaultPlotType.items[0].id = "默认线";
+          defaultPlotType.items[0].name = "默认线";
+          res.data = [defaultPlotType, ...res.data];
         }
         if (
           plotType === "Polygon" ||
@@ -139,7 +160,9 @@ export default class PlotInfoPanel extends Component {
             ...config,
             ...res0.data,
           ].reverse();
-          res.data = res.data.reverse();
+          defaultPlotType.items[0].id = "默认面";
+          defaultPlotType.items[0].name = "默认面";
+          res.data = [defaultPlotType, ...res.data.reverse()];
         }
         // this.symbols[plotType] = res?.data;
         let symbols = [];
@@ -166,6 +189,10 @@ export default class PlotInfoPanel extends Component {
     if (!data) return;
     let style = {};
     let symbolUrl = data.value1 || data.icon_url;
+    let strokeColor = "rgba(155,155,155,1)";
+    if (data.value3?.indexOf("rgb") > -1) {
+      strokeColor = data.value3;
+    }
     let src = "";
     if (symbolUrl.indexOf("/") > -1) {
       if (symbolUrl.indexOf("https") === 0) {
@@ -186,10 +213,11 @@ export default class PlotInfoPanel extends Component {
       style = {
         ...style,
         backgroundColor: symbolUrl,
+        border: `2px solid ${strokeColor}`,
       };
     }
     if (this.props.plotType === "Point") {
-      style = { ...style, borderRadius: 8 };
+      style = { ...style, borderRadius: 16 };
     }
     if (
       this.props.plotType === "Polyline" ||
@@ -215,9 +243,9 @@ export default class PlotInfoPanel extends Component {
       },
     });
   };
-  handleSymbolItemClick = (value) => {
+  handleSymbolItemClick = (value, index) => {
     this.setState({
-      selectedSymbolId: value.id,
+      selectedIndex: index,
     });
     if (!this.props.isModifyPlot) {
       plotEdit.create(
@@ -229,7 +257,26 @@ export default class PlotInfoPanel extends Component {
       style = {},
       attrs = {};
     let featureType = value.value1 || value.icon_url;
-    let text = this.props.featureName || "未命名";
+    let strokeColor = "rgba(155,155,155,1)";
+    if (value.value3?.indexOf("rgb") > -1) {
+      strokeColor = value.value3;
+    }
+    let selectName = value.name || value.icon_name;
+    if (this.symbolType[selectName] === undefined) {
+      this.symbolType[selectName] = 0;
+    }
+    let text = "";
+    if (this.props.isModifyPlot) {
+      text = this.props.featureName;
+    } else {
+      text = `${selectName}#${++this.symbolType[selectName]}`;
+      this.props.dispatch({
+        type: "modal/updateData",
+        payload: {
+          featureName: text, // 名称
+        },
+      });
+    }
     let remark = this.props.remarks;
     let iconUrl = "";
     if (this.state.plotType === "Point") {
@@ -238,24 +285,24 @@ export default class PlotInfoPanel extends Component {
           iconUrl = featureType;
           let tempImg = new Image();
           tempImg.src = iconUrl;
-          const me = this
+          const me = this;
           tempImg.onload = function () {
             options = {
               ...me.commonStyleOptions,
               iconUrl: iconUrl,
               text: text,
             };
-            options.iconScale = 32 / tempImg.width
+            options.iconScale = 32 / tempImg.width;
             attrs = {
               name: text,
               featureType: featureType,
-              selectName: value.name || value.icon_name,
+              selectName: selectName,
               remark: remark,
             };
             style = createStyle("Point", options);
-            me.addPlot(style,attrs)
+            me.addPlot(style, attrs);
           };
-          return
+          return;
         } else {
           iconUrl = featureType.replace("img", "");
           iconUrl = require("../../assets" + iconUrl);
@@ -268,11 +315,25 @@ export default class PlotInfoPanel extends Component {
         attrs = {
           name: text,
           featureType: featureType,
-          selectName: value.name || value.icon_name,
+          selectName: selectName,
           remark: remark,
         };
       } else {
+        options = {
+          ...this.commonStyleOptions,
+          iconUrl: iconUrl,
+          text: text,
+          radius: 8,
+        };
         delete options.iconUrl;
+        options.strokeColor = strokeColor;
+        options.fillColor = featureType;
+        attrs = {
+          name: text,
+          featureType: featureType,
+          selectName: selectName,
+          remark: remark,
+        };
       }
       style = createStyle("Point", options);
     }
@@ -287,11 +348,12 @@ export default class PlotInfoPanel extends Component {
           strokeWidth: 3,
           text: text,
         };
+        options.lineDash = [10, 10, 10];
         attrs = {
           name: text,
           featureType: featureType,
           strokeColor: featureType,
-          selectName: value.name || value.icon_name,
+          selectName: selectName,
           remark: remark,
         };
         style = createStyle("Polyline", options);
@@ -308,14 +370,14 @@ export default class PlotInfoPanel extends Component {
         options = {
           ...this.commonStyleOptions,
           fillColor: featureType,
-          strokeColor: featureType,
+          strokeColor: strokeColor,
           text: text,
         };
         attrs = {
           name: text,
           featureType: featureType,
           strokeColor: featureType,
-          selectName: value.name,
+          selectName: selectName,
           remark: remark,
         };
         style = createStyle("Polygon", options);
@@ -341,16 +403,16 @@ export default class PlotInfoPanel extends Component {
           attrs = {
             name: text,
             featureType: featureType,
-            selectName: value.name || value.icon_name,
+            selectName: selectName,
             remark: me.props.remarks,
           };
           style = createStyle("Polygon", options);
-          me.addPlot(style,attrs)
+          me.addPlot(style, attrs);
         };
         return;
       }
     }
-    this.addPlot(style,attrs)
+    this.addPlot(style, attrs);
   };
 
   addPlot = (style, attrs) => {
@@ -368,7 +430,63 @@ export default class PlotInfoPanel extends Component {
       window.featureOperator.feature.setStyle(style);
       this.updateReduxOperatorList();
     }
-  }
+  };
+
+  getGeometryType = (type) => {
+    let tempType = "";
+    // if (type === "MARKER") {
+    //   tempType = "点";
+    // }
+    // if (type === "POLYLINE") {
+    //   tempType = "线";
+    // }
+    // if (
+    //   type === "POLYGON" ||
+    //   type === "FREEHAND_POLYGON" ||
+    //   type === "FINE_ARROW" ||
+    //   type === "RECTANGLE" ||
+    //   type === "CIRCLE"
+    // ) {
+    //   tempType = "面";
+    // }
+    if (this.props.plotType === "Point") {
+      tempType = "点";
+    }
+    if (this.props.plotType === "LineString") {
+      tempType = "线";
+    }
+    if (
+      this.props.plotType === "Polygon" ||
+      this.props.plotType === "freePolygon" ||
+      this.props.plotType === "arrow" ||
+      this.props.plotType === "rect" ||
+      this.props.plotType === "circle"
+    ) {
+      tempType = "面";
+    }
+    return tempType;
+  };
+
+  createDefaultPlot = (type) => {
+    plotEdit.create(type);
+    let tempType = this.getGeometryType(type);
+    if (this.symbolType[`默认${tempType}`] === undefined) {
+      this.symbolType[`默认${tempType}`] = 0;
+    }
+    const name = `默认${tempType}#${++this.symbolType[`默认${tempType}`]}`;
+    Event.Evt.firEvent("setAttribute", {
+      attrs: {
+        name: name,
+        featureType:
+          type === "POLYLINE" ? "rgba(155,155,155,1)" : "rgba(155,155,155,0.7)",
+        strokeColor: "rgba(155,155,155,1)",
+        selectName: "自定义类型",
+        remark: "",
+      },
+      responseData: this.state.symbols,
+      cb: this.updateRedux.bind(this),
+    });
+  };
 
   //标绘名称
   handlePlotNameChange = (value) => {
@@ -456,7 +574,22 @@ export default class PlotInfoPanel extends Component {
     }
     let options = {},
       attrs = {};
-    let text = this.props.featureName || "未命名";
+    let text = "";
+    if (this.props.isModifyPlot) {
+      text = this.props.featureName;
+    } else {
+      let tempType = this.getGeometryType(this.plotKeyVal[this.props.plotType]);
+      if (this.symbolType[`自定义${tempType}`] === undefined) {
+        this.symbolType[`自定义${tempType}`] = 0;
+      }
+      text = `自定义${tempType}#${++this.symbolType[`自定义${tempType}`]}`;
+      this.props.dispatch({
+        type: "modal/updateData",
+        payload: {
+          featureName: text, // 名称
+        },
+      });
+    }
     let remark = this.props.remarks;
     let featureType = this.props.featureType || this.fillColorStyle;
     let style = {};
@@ -545,7 +678,22 @@ export default class PlotInfoPanel extends Component {
     }
     let options = {},
       attrs = {};
-    let text = this.props.featureName || "未命名";
+    let text = "";
+    if (this.props.isModifyPlot) {
+      text = this.props.featureName;
+    } else {
+      let tempType = this.getGeometryType(this.plotKeyVal[this.props.plotType]);
+      if (this.symbolType[`自定义${tempType}`] === undefined) {
+        this.symbolType[`自定义${tempType}`] = 0;
+      }
+      text = `自定义${tempType}#${++this.symbolType[`自定义${tempType}`]}`;
+      this.props.dispatch({
+        type: "modal/updateData",
+        payload: {
+          featureName: text, // 名称
+        },
+      });
+    }
     let strokeColor = this.props.strokeColorStyle || this.strokeColorStyle;
     let style = {};
     if (
@@ -614,6 +762,51 @@ export default class PlotInfoPanel extends Component {
   handleCloseClick = () => {
     this.props.showPlotInfoPanel && this.props.showPlotInfoPanel(false);
   };
+  getDefaultStyle = () => {
+    let style = {
+      border: "2px solid rgba(155,155,155,1)",
+      backgroundColor: "rgba(155,155,155,0.7)",
+    };
+    if (this.props.plotType === "Point") {
+      style = {
+        ...style,
+        borderRadius: 16,
+      };
+    } else if (this.props.plotType === "LineString") {
+      style = {
+        ...style,
+        height: 0,
+      };
+    } else if (
+      this.props.plotType === "Polygon" ||
+      this.props.plotType === "freePolygon" ||
+      this.props.plotType === "arrow" ||
+      this.props.plotType === "rect" ||
+      this.plotType === "circle"
+    ) {
+    }
+    return style;
+  };
+  createDefautSymbol = () => {
+    if (this.props.plotType === "Point") {
+      const item = {
+        value1: "rgba(155,155,155,0.7)",
+      };
+      return (
+        <div
+          className={styles.symbol}
+          key={`默认${this.getGeometryType()}`}
+          onClick={() => this.handleSymbolItemClick(item)}
+        >
+          <div
+            className={styles.symbolColor}
+            style={this.getDefaultStyle()}
+          ></div>
+          <span>{`默认${this.getGeometryType()}`}</span>
+        </div>
+      );
+    }
+  };
   render() {
     const { TextArea } = Input;
     const disableStyle = { color: "rgba(0,0,0,0.2)" };
@@ -634,13 +827,13 @@ export default class PlotInfoPanel extends Component {
           style={{ height: "calc(100% - 74px)" }}
         >
           <Input
-            placeholder="输入标绘名称"
+            placeholder="输入标绘名称(选填)"
             style={{ marginBottom: 6 }}
             value={this.props.featureName}
             onChange={(e) => this.handlePlotNameChange(e.target.value)}
           ></Input>
           <TextArea
-            placeholder="填写备注"
+            placeholder="填写备注(选填)"
             style={{ marginBottom: 6, height: 84 }}
             value={this.props.remarks}
             onChange={(e) => this.handlePotRemarkChange(e.target.value)}
@@ -674,57 +867,20 @@ export default class PlotInfoPanel extends Component {
             ></ColorPicker>
           </div>
           <div className={styles.symbolPanel}>
-            {/* {this.state.symbols.length > 0 ? (
-              this.state.symbols.map((symbol) => {
-                return (
-                  <div className={styles.symbolBlock} key={symbol.type}>
-                    <p
-                      style={{ margin: 0, textAlign: "left", marginBottom: 4 }}
-                    >
-                      {symbol.type}
-                    </p>
-                    <div className={styles.symbolList}>
-                      {symbol.items.map((item) => {
-                        return (
-                          <div
-                            title={item.name}
-                            className={`${styles.symbol} ${
-                              this.state.selectedSymbolId === item.id
-                                ? styles.symbolActive
-                                : ""
-                            }`}
-                            key={item.id}
-                            onClick={() => this.handleSymbolItemClick(item)}
-                          >
-                            <div
-                              className={styles.symbolColor}
-                              style={this.getSymbol(item)}
-                            ></div>
-                            <span>{item.name}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })
-            ) : (
-              <Skeleton paragraph={{ rows: 6 }} />
-            )} */}
             {this.state.symbols.length > 0 ? (
               <div className={styles.symbolBlock}>
                 <div className={styles.symbolList}>
-                  {this.state.symbols.map((item) => {
+                  {this.state.symbols.map((item, index) => {
                     return (
                       <div
                         title={item.name}
                         className={`${styles.symbol} ${
-                          this.state.selectedSymbolId === item.id
+                          this.state.selectedIndex === index
                             ? styles.symbolActive
                             : ""
                         }`}
-                        key={item.id}
-                        onClick={() => this.handleSymbolItemClick(item)}
+                        key={index}
+                        onClick={() => this.handleSymbolItemClick(item, index)}
                       >
                         <div
                           className={styles.symbolColor}
@@ -741,11 +897,13 @@ export default class PlotInfoPanel extends Component {
             )}
           </div>
         </div>
-        <div className={styles.footer}>
-          <Button type="primary" block onClick={this.handleOKClick}>
-            {this.props.isModifyPlot ? "确定" : "完成"}
-          </Button>
-        </div>
+        {this.props.isModifyPlot ? (
+          <div className={styles.footer}>
+            <Button type="primary" block onClick={this.handleOKClick}>
+              {this.props.isModifyPlot ? "确定" : "完成"}
+            </Button>
+          </div>
+        ) : null}
       </div>
     );
   }
