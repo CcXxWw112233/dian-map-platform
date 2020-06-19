@@ -180,8 +180,8 @@ let callFunctions = {
     map.un("moveend", MapMoveSearch);
   },
   // 逆编码转换坐标
-  getAddressForName: ({ address = "", offset = 1, fromCity = "" }) => {
-    if (!address) return Promise.reject({ status: 401 });
+  getAddressForName: ({ address = "", offset = 1, fromCity = "" ,types,page = 1}) => {
+    if (!address) return Promise.reject({ status: 403 });
     return new Promise((resolve, reject) => {
       let url = "https://restapi.amap.com/v3/place/text";
       let params = {
@@ -190,6 +190,8 @@ let callFunctions = {
         offset: offset || 1,
         city: fromCity || undefined,
         extensions: "base",
+        types: types,
+        page
       };
       axios
         .get(url, { params })
