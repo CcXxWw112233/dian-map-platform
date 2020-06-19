@@ -611,7 +611,7 @@ export default class PlotInfoPanel extends Component {
   handleStrokeColorOkClick = (value) => {
     this.strokeColorStyle = value;
     this.setState({
-      selectedSymbolId: -1,
+      selectedIndex: -1,
     });
     const { dispatch } = this.props;
     dispatch({
@@ -714,7 +714,7 @@ export default class PlotInfoPanel extends Component {
   // 填充颜色
   handleFillColorOkClick = (value) => {
     this.setState({
-      selectedSymbolId: -1,
+      selectedIndex: -1,
     });
     this.fillColorStyle = value;
     const { dispatch } = this.props;
