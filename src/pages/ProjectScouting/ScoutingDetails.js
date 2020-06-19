@@ -329,7 +329,7 @@ export default class ScoutingDetails extends PureComponent {
       {
         all_collection: data,
         area_list: area_list,
-        not_area_id_collection: data.filter((i) => !i.area_type_id),
+        not_area_id_collection: data.filter((i) => !i.area_type_id).sort((a,b) => b.create_time - a.create_time),
       },
       () => {
         // 之渲染选中的区域数据
