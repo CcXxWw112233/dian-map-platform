@@ -10,7 +10,7 @@ const commonStyleOption = {
 };
 const commonFeatureKeys = {
   typeName: "lingxi:model_statistics_polygon",
-  // cql_filter: `${window.queryStr}`,
+  cql_filter: `${window.queryStr}`,
   showName: true,
   style: {
     strokeWidth: 3,

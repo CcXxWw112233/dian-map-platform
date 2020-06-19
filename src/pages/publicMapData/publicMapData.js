@@ -41,10 +41,6 @@ export default class PublicData extends React.Component {
               if (data.child[j].key === checked) {
                 let loadFeatureKeys = data.child[j].loadFeatureKeys;
                 loadFeatureKeys.forEach((key) => {
-                  // key.cql_filter = key.cql_filter?.replace(
-                  //   /\%[^\%]*\%/g,
-                  //   `%${codeStr}%`
-                  // );
                   if (key.cql_filter) {
                     const index = key.cql_filter.indexOf(" AND");
                     if (index > -1) {
@@ -71,10 +67,13 @@ export default class PublicData extends React.Component {
   // 获取多出来的那些 arr1 是原数据，arr2 是对比数据，新的数据是从arr2中获取
   getItems = (arr1, arr2) => {
     let arraynew = [];
-    arr1 = new Set(arr1);
-    arr2.forEach((arr) => {
-      if (!arr1.has(arr)) {
-        arraynew.push(arr);
+    arr1 = Array.from(new Set(arr1));
+    arr2.forEach((item0) => {
+      const item = arr1.filter((item1) => {
+        return (item1 = item0);
+      })?.[0];
+      if (!item) {
+        arraynew.push(item0);
       }
     });
     return arraynew.length > 0 ? arraynew : arr2;
