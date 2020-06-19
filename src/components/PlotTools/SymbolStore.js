@@ -118,7 +118,7 @@ export default class SymbolStore extends Component {
   checkFileSize = (file) => {
     // console.log(file);
     if (file.type.indexOf("image") < 0) {
-      message.error("请上传图片格式文件");
+      message.error("请上传.jpg, .jpeg, .png, .bmp格式文件");
       return false;
     }
     let { size, text } = formatSize(file.size);
