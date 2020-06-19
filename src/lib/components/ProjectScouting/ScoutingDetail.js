@@ -576,7 +576,8 @@ function Action() {
     this.Source.addFeatures(pointCollection);
 
     // 渲染标绘数据
-    const sou = await this.renderFeaturesCollection(features, { lenged, dispatch });
+    await this.renderFeaturesCollection(features, { lenged, dispatch });
+    const sou = this.layer.showLayer.getSource()
     // 渲染规划图
     let ext = await this.renderPlanPicCollection(planPic);
 
@@ -585,7 +586,7 @@ function Action() {
     let sourceExtent = this.Source.getExtent();
     let subExtent = [Infinity, Infinity, -Infinity, -Infinity];
     let sourceFlag = getExtentIsEmpty(sourceExtent);
-    let souFlag = getExtentIsEmpty(sou.getExtent());
+    let souFlag = getExtentIsEmpty(this.layer.showLayer.getSource().getExtent());
     let extFlag = getExtentIsEmpty(ext);
     // 规划图和元素都有范围的时候
     if (!souFlag && !extFlag) {
