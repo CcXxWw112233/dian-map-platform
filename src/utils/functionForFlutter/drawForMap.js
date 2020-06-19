@@ -90,7 +90,7 @@ function renderAction (){
 
         // 标绘的列表
         if(features.length){
-            let fs = renderFeatures(features);
+            let fs = await renderFeatures(features);
             if(fs.length){
                 // this.features = this.features.concat(fs);
                 Source.addFeatures(fs);
