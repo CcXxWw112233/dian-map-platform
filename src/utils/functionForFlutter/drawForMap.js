@@ -122,9 +122,10 @@ function renderAction (){
     }
     // 查找元素
     this.findFeature = (feature_id)=>{
-        if(!DetailAction.features.length) return void 0;
-        for(let i = 0; i< DetailAction.features.length; i++){
-            let item = DetailAction.features[i];
+        let flist = this.features.concat(DetailAction.features);
+        if(!flist.length) return void 0;
+        for(let i = 0; i< flist.length; i++){
+            let item = flist[i];
             if(item.get('id') === feature_id) return item;
         }
 
