@@ -159,6 +159,7 @@ const Action = {
           let context = canvas.getContext("2d");
           let img = new Image();
           img.src = iconUrl;
+          img.crossorigin = "anonymous";
           const me = this;
           img.onload = function () {
             const pat = context.createPattern(img, "repeat");

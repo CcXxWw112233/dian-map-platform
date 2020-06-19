@@ -196,6 +196,7 @@ class IndexPage extends React.Component {
     for(let i = 0; i< arr.length;i++){
       let item = arr[i];
       let element = item.getElement().parentNode;
+      if(!element) return ;
       let style = window.getComputedStyle(element);
       let transform = style.transform;
       // 得出这个overlay的矩阵大小
@@ -210,6 +211,7 @@ class IndexPage extends React.Component {
       let flag = [];
       arr.forEach(nitem => {
         let nElement = nitem.getElement().parentNode;
+        if(!nElement) return ;
         let nstyle = window.getComputedStyle(nElement);
         let transform = nstyle.transform;
         // 得出这个overlay的矩阵大小

@@ -40,6 +40,7 @@ export default function overlay (data = {}){
             this.imgDiv = document.createElement('div');
             this.imgDiv.className = styles.pictureDiv;
             let img = new Image();
+            img.crossorigin = "anonymous";
             img.src = data.resource_url;
             img.dataset.name = data.title;
             this.imgDiv.appendChild(img);
