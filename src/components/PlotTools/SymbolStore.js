@@ -117,6 +117,10 @@ export default class SymbolStore extends Component {
   handleAddOrgSymbolClick = () => {};
   checkFileSize = (file) => {
     // console.log(file);
+    if (file.type.indexOf("image") < 0) {
+      message.error("请上传.jpg, .jpeg, .png, .bmp格式文件");
+      return false;
+    }
     let { size, text } = formatSize(file.size);
     text = text.trim();
     console.log(size, text);
@@ -147,7 +151,7 @@ export default class SymbolStore extends Component {
           tempImg.src = reader.result;
           tempImg.onload = function () {
             if (tempImg.width > 48 || tempImg.height > 48) {
-              message.error("图片长宽不能超过48个像素");
+              message.error("图片尺寸不能超过48*48像素");
               reject(false);
             } else {
               const index = file.name.lastIndexOf(".");

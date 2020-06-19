@@ -105,8 +105,8 @@ export default class TempPlotPanel extends React.Component {
         type: featureOperator.attrs.plottingType,
       },
     });
-    showPlotInfoPanel(true);
     changePlotType(featureOperator.attrs.geometryType);
+    showPlotInfoPanel(true);
   };
 
   handleDelClick = (featureOperator) => {
