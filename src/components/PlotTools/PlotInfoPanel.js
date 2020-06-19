@@ -332,6 +332,7 @@ export default class PlotInfoPanel extends Component {
           name: text,
           featureType: featureType,
           selectName: selectName,
+          strokeColor: strokeColor,
           remark: remark,
         };
       }
@@ -376,7 +377,7 @@ export default class PlotInfoPanel extends Component {
         attrs = {
           name: text,
           featureType: featureType,
-          strokeColor: featureType,
+          strokeColor: strokeColor,
           selectName: selectName,
           remark: remark,
         };
