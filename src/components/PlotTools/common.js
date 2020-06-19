@@ -158,6 +158,7 @@ const Action = {
           let canvas = document.createElement("canvas");
           let context = canvas.getContext("2d");
           let img = new Image();
+          img.crossorigin = "anonymous";
           img.src = iconUrl;
           const me = this;
           img.onload = function () {

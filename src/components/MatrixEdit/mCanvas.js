@@ -46,6 +46,7 @@ export default function(props){
     const loadImage = ()=>{
         return new Promise((resolve,reject)=>{
             let img = new Image();
+            img.crossorigin = "anonymous";
             img.src = url;
             img.onload = ()=>{
                 resolve(img);

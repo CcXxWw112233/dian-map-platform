@@ -438,6 +438,7 @@ function Action() {
           let canvas = document.createElement("canvas");
           let context = canvas.getContext("2d");
           let img = new Image();
+          img.crossorigin = "anonymous";
           img.src = iconUrl;
           const me = this;
           img.onload = function () {
@@ -922,6 +923,7 @@ function Action() {
         isLoading = true;
         message.success("加载中...", 0);
         let img = new Image();
+        img.crossorigin = "anonymous";
         img.src = target.src;
         img.onload = () => {
           console.dir(target);
@@ -1368,6 +1370,7 @@ function Action() {
     }
     if(pointType === 'pic'){
       let img = new Image();
+      img.crossorigin = "anonymous";
       img.src = resource_url;
       img.onload = ()=>{
         let w = img.width;
