@@ -35,10 +35,12 @@ const { TabPane } = Tabs;
 
 @connect((
   { controller: { mainVisible }, 
+  openswitch:{showFeatureName},
   lengedList: { config } }) => 
 ({
   mainVisible,
-  config
+  config,
+  showFeatureName
 }))
 export default class ScoutingDetails extends PureComponent {
   constructor(props) {
@@ -300,8 +302,8 @@ export default class ScoutingDetails extends PureComponent {
   }
   // 渲染带坐标的数据
   renderCollection = (data) => {
-    const { config: lenged, dispatch } = this.props;
-    Action.renderCollection(data || [], { lenged, dispatch });
+    const { config: lenged, dispatch ,showFeatureName} = this.props;
+    Action.renderCollection(data || [], { lenged, dispatch ,showFeatureName});
   };
 
   // 获取资源列表，动态分类
@@ -1166,6 +1168,7 @@ export default class ScoutingDetails extends PureComponent {
                         <ScoutingHeader
                           selected={this.state.area_selected}
                           onSelect={this.onMultipleSelectGroup}
+                          onAreaEdit={this.onAreaEdit.bind(this, true)}
                           data={item}
                           activeKey={this.state.area_active_key}
                           index={index + 1}
@@ -1223,67 +1226,71 @@ export default class ScoutingDetails extends PureComponent {
                     </Collapse.Panel>
                   );
                 })}
-                <Collapse.Panel
-                  key="other"
-                  style={{ backgroundColor: "#fff", marginBottom: "10px" }}
-                  header={
-                    <ScoutingHeader
-                      data={{ name: "未分组" ,id:'other'}}
-                      edit={false}
-                      activeKey={this.state.area_active_key}
-                      index={area_list.length + 1}
-                      onCancel={() => { }}
-                      onSave={() => { }}
-                    // onDragEnter={e => {this.setState({area_active_key: item.id})}}
-                    />
-                  }
-                >
-                  {!!not_area_id_collection.length ? (
-                    <div className={styles.norAreaIdsData}>
-                      {not_area_id_collection.map((item, index) => {
-                        let activeStyle = null;
-                        if (item.id === activeId) {
-                          activeStyle = {
-                            backgroundColor: "rgba(214,228,255,0.5)",
-                          };
-                        }
-                        return (
-                          <div
-                            key={item.id}
-                            className={`${animateCss.animated} ${animateCss.slideInRight}`}
-                            style={{
-                              animationDuration: "0.3s",
-                              animationDelay: index * 0.05 + "s",
-                            }}
-                          >
-                            <UploadItem
-                              style={activeStyle}
-                              data={item}
-                              type={Action.checkCollectionType(item.target)}
-                              areaList={area_list}
-                              onSelectGroup={this.onSelectGroup}
-                              onRemove={this.onCollectionRemove.bind(
-                                this,
-                                item
-                              )}
-                              onEditCollection={this.onEditCollection}
-                              onChangeDisplay={this.onChangeDisplay.bind(
-                                this,
-                                item
-                              )}
-                              onModifyRemark={this.onModifyRemark}
-                              onRemarkSave={this.onRemarkSave}
-                              onModifyFeature={this.onModifyFeatureInDetails}
-                              onStopMofifyFeatureInDetails={this.onStopMofifyFeatureInDetails}
-                              onToggleChangeStyle={this.onToggleChangeStyle}
-                              onCopyCollection={this.onCopyCollection}
-                            />
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : <Empty style={{textAlign:"center"}} description="暂无采集数据"/>}
-                </Collapse.Panel>
+                {/* 没有未分组数据的时候，不显示未分组 */}
+                {
+                  not_area_id_collection.length && 
+                  <Collapse.Panel
+                    key="other"
+                    style={{ backgroundColor: "#fff", marginBottom: "10px" }}
+                    header={
+                      <ScoutingHeader
+                        data={{ name: "未分组" ,id:'other'}}
+                        edit={false}
+                        activeKey={this.state.area_active_key}
+                        index={area_list.length + 1}
+                        onCancel={() => { }}
+                        onSave={() => { }}
+                      // onDragEnter={e => {this.setState({area_active_key: item.id})}}
+                      />
+                    }
+                  >
+                    {!!not_area_id_collection.length ? (
+                      <div className={styles.norAreaIdsData}>
+                        {not_area_id_collection.map((item, index) => {
+                          let activeStyle = null;
+                          if (item.id === activeId) {
+                            activeStyle = {
+                              backgroundColor: "rgba(214,228,255,0.5)",
+                            };
+                          }
+                          return (
+                            <div
+                              key={item.id}
+                              className={`${animateCss.animated} ${animateCss.slideInRight}`}
+                              style={{
+                                animationDuration: "0.3s",
+                                animationDelay: index * 0.05 + "s",
+                              }}
+                            >
+                              <UploadItem
+                                style={activeStyle}
+                                data={item}
+                                type={Action.checkCollectionType(item.target)}
+                                areaList={area_list}
+                                onSelectGroup={this.onSelectGroup}
+                                onRemove={this.onCollectionRemove.bind(
+                                  this,
+                                  item
+                                )}
+                                onEditCollection={this.onEditCollection}
+                                onChangeDisplay={this.onChangeDisplay.bind(
+                                  this,
+                                  item
+                                )}
+                                onModifyRemark={this.onModifyRemark}
+                                onRemarkSave={this.onRemarkSave}
+                                onModifyFeature={this.onModifyFeatureInDetails}
+                                onStopMofifyFeatureInDetails={this.onStopMofifyFeatureInDetails}
+                                onToggleChangeStyle={this.onToggleChangeStyle}
+                                onCopyCollection={this.onCopyCollection}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : <Empty style={{textAlign:"center"}} description="暂无采集数据"/>}
+                  </Collapse.Panel>
+                }
               </Collapse>
             </div>
             <div className={styles.addAreaBtn}>

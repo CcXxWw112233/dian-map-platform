@@ -335,7 +335,7 @@ function Action() {
   // 渲染标绘数据
   this.renderFeaturesCollection = async (
     data,
-    { lenged, dispatch, addSource = true }
+    { lenged, dispatch, addSource = true ,showFeatureName}
   ) => {
     const commonStyleOption = {
       textFillColor: "rgba(255,0,0,1)",
@@ -345,7 +345,7 @@ function Action() {
       placement: "point",
       iconScale: 1,
       pointColor: "#fff",
-      showName: true,
+      showName: showFeatureName,
     };
     this.lenged = {
       title: "项目踏勘",
@@ -537,7 +537,7 @@ function Action() {
   // 渲染feature
   this.renderCollection = async (
     data,
-    { lenged, dispatch, animation = true }
+    { lenged, dispatch, animation = true ,showFeatureName}
   ) => {
     // 删除元素
     this.removeFeatures();
@@ -576,7 +576,7 @@ function Action() {
     this.Source.addFeatures(pointCollection);
 
     // 渲染标绘数据
-    await this.renderFeaturesCollection(features, { lenged, dispatch });
+    await this.renderFeaturesCollection(features, { lenged, dispatch ,showFeatureName});
     const sou = this.layer.showLayer.getSource()
     // 渲染规划图
     let ext = await this.renderPlanPicCollection(planPic);

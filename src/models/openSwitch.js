@@ -23,6 +23,8 @@ export default {
         isShowPlanPicEdit: false,
         // 是否显示右侧的工具
         isShowTempPlot: isMobile ? false: true,
+        // 是否显示元素的text名称
+        showFeatureName:true,
     },
     effects:{
 

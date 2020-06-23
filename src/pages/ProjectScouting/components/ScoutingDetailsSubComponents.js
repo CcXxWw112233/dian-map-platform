@@ -143,7 +143,8 @@ export const ScoutingHeader = (props) => {
       onDragEnter,
       activeKey,
       multiple = false,
-      onSelect = ()=>{}
+      onSelect = ()=>{},
+      onAreaEdit = ()=>{}
     } = props;
     let [areaName, setAreaName] = useState(data.name);
     let [isEdit, setIsEdit] = useState(edit);
@@ -206,9 +207,17 @@ export const ScoutingHeader = (props) => {
               </Fragment>
             ) : (
                 <div className={styles.groupTitle}>{data.name}
-                  <span className={styles.checkBoxForHeader}>
-                    {multiple && <Checkbox checked={ selected.length && selected.indexOf(data.id) !== -1 } onChange={checkColletion} onClick={(e) => e.stopPropagation()}/>}
-                  </span>
+                  <div className={styles.headerTools}>
+                    {
+                      (!isEdit ) &&
+                      <span className={styles.editNames} onClick={(e) =>{e.stopPropagation(); onAreaEdit(data)}}>
+                        <MyIcon type='icon-bianjimingcheng'/>
+                      </span>
+                    }
+                    <span className={styles.checkBoxForHeader}>
+                      {multiple && <Checkbox checked={ selected.length && selected.indexOf(data.id) !== -1 } onChange={checkColletion} onClick={(e) => e.stopPropagation()}/>}
+                    </span>
+                  </div>
                 </div>
               )}
           </div>
@@ -442,7 +451,7 @@ export const ScoutingItem = ({
                 )} 
                 <ExcelRead id={data.id} group={data} board={board} onExcelSuccess={onExcelSuccess}/>
                 {/* 编辑按钮 */}
-                {!!onAreaEdit && (
+                {/* {!!onAreaEdit && (
                   <Button
                     onClick={onAreaEdit.bind(this, data)}
                     title="编辑分组名称"
@@ -454,7 +463,7 @@ export const ScoutingItem = ({
                     <EditOutlined />
                   </Button>
                 )}
-      
+                */}
                 {/* 删除按钮 */}
                 {!!onAreaDelete && (
                   <Popconfirm

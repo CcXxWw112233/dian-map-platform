@@ -176,15 +176,13 @@ export const createStyle = function (
     lineDash: options.lineDash
   });
   // 文字样式
-  let text = options.showName
-    ? new Text({
+  let text = new Text({
         offsetX: 0,
         offsetY: options.offsetY || -25,
         overflow: true,
-        text:
-          fillColorKeyVals && fillColorKeyVals.length
-            ? `${options.text}(${properties[fillColorKeyVals[0].property]})`
-            : options.text,
+        text:options.showName ? (
+          (fillColorKeyVals && fillColorKeyVals.length) ? `${options.text}(${properties[fillColorKeyVals[0].property]})`: options.text)
+          :"",
         fill: new Fill({
           color: options.textFillColor || defaultColor,
         }),
@@ -197,7 +195,6 @@ export const createStyle = function (
           width: options.textStrokeWidth || 2,
         }),
       })
-    : null;
   if (type === "Point") {
     let isIcon = true;
     if (!options.iconUrl) {
