@@ -35,18 +35,24 @@ import LengedList from "components/LengedList/LengedList";
 import BottomToolBar from "components/BottomToolBar/BottomToolBar";
 
 // import TempPlottingIcon from "components/TempPlotting/TempPlottingIcon";
-import TempPlottingPanel from "components/TempPlotting/TempPlottingPanel";
-import PhotoSwipe from '../components/PhotoSwipe'
-import FlutterComponents from '../pages/FlutterComponents'
-import PlotTools from "../components/PlotTools/ToolBar"
-import MatrixEdit from '../components/MatrixEdit'
-import { BASIC } from '../services/config'
+// import TempPlottingPanel from "components/TempPlotting/TempPlottingPanel";
+import PhotoSwipe from "../components/PhotoSwipe";
+import FlutterComponents from "../pages/FlutterComponents";
+import PlotTools from "../components/PlotTools/ToolBar";
+import MatrixEdit from "../components/MatrixEdit";
+import { BASIC } from "../services/config";
 
 @connect(
   ({
     controller: { mainVisible },
-    openswitch: { toolBars, bottomTools, searchTools ,isShowMobile ,isShowTempPlot},
-    editPicture:{ editShow }
+    openswitch: {
+      toolBars,
+      bottomTools,
+      searchTools,
+      isShowMobile,
+      isShowTempPlot,
+    },
+    editPicture: { editShow },
   }) => ({
     mainVisible,
     toolBars,
@@ -54,7 +60,7 @@ import { BASIC } from '../services/config'
     searchTools,
     isShowMobile,
     editShow,
-    isShowTempPlot
+    isShowTempPlot,
   })
 )
 class IndexPage extends React.Component {
@@ -64,6 +70,8 @@ class IndexPage extends React.Component {
     this.view = null;
     this.mySelfIcon = false;
     this.positionTimer = null;
+    this.queryStr = "";
+    this.publicDataChild = null
     // this.state = {
     //   draw_
     // }
@@ -80,7 +88,6 @@ class IndexPage extends React.Component {
       console.log(data);
       this.addFeatureForProject(data);
     });
-    
   }
 
   addFeatureForProject = (val) => {
@@ -159,72 +166,89 @@ class IndexPage extends React.Component {
   MapOnload = ({ map, view }) => {
     this.map = map;
     this.view = view;
-    if(BASIC.getUrlParam.isMobile === '1') return ;
+    if (BASIC.getUrlParam.isMobile === "1") return;
     let minResolution = this.view.getMinResolution();
     let tolerance = 0;
-    this.map.on('moveend',()=>{
-
+    this.map.on("moveend", () => {
       let overlays = this.map.getOverlays();
       let arr = overlays.getArray();
-      if(!arr.length) return ;
+      if (!arr.length) return;
       // 计算overlay的位置
-      this.computedOverlayPosition(arr ,minResolution,tolerance);
-    })
+      this.computedOverlayPosition(arr, minResolution, tolerance);
+    });
     // this.setCenter(map, view);
   };
 
   // 检查是否有交集
-  checkHasExtent = (data, extent)=>{
+  checkHasExtent = (data, extent) => {
     // console.log(data,extent)
-    if(
-      (data.w > extent.x && data.w < extent.w && data.h > extent.y && data.h < extent.h) 
-      || (data.h > extent.y && data.x < extent.w && data.h < extent.h && data.x > extent.x) 
-      || (data.w > extent.x && data.y < extent.h && data.w < extent.w && data.y > extent.x)
-      || (data.x > extent.x && data.x < extent.w && data.y > extent.y && data.y < extent.h)){
-        return true;
-      }
-      else if(
-        (data.w <= extent.w && data.x >= extent.x && data.y >= extent.y && data.h <= extent.h)
-         || (data.w >= extent.w && data.x <= extent.x && data.y <= extent.y && data.h >= extent.h)
-        // || (data.w <= extent.extent.w && data.y >= extent.y && data.x <= extent.x && data.h >= extent.h)
-        ){
-          return true;
-        }
-      return false;
-  }
+    if (
+      (data.w > extent.x &&
+        data.w < extent.w &&
+        data.h > extent.y &&
+        data.h < extent.h) ||
+      (data.h > extent.y &&
+        data.x < extent.w &&
+        data.h < extent.h &&
+        data.x > extent.x) ||
+      (data.w > extent.x &&
+        data.y < extent.h &&
+        data.w < extent.w &&
+        data.y > extent.x) ||
+      (data.x > extent.x &&
+        data.x < extent.w &&
+        data.y > extent.y &&
+        data.y < extent.h)
+    ) {
+      return true;
+    } else if (
+      (data.w <= extent.w &&
+        data.x >= extent.x &&
+        data.y >= extent.y &&
+        data.h <= extent.h) ||
+      (data.w >= extent.w &&
+        data.x <= extent.x &&
+        data.y <= extent.y &&
+        data.h >= extent.h)
+      // || (data.w <= extent.extent.w && data.y >= extent.y && data.x <= extent.x && data.h >= extent.h)
+    ) {
+      return true;
+    }
+    return false;
+  };
 
-  computedOverlayPosition = (arr,min ,tolerance)=>{
-    if(!arr.length) return ;
+  computedOverlayPosition = (arr, min, tolerance) => {
+    if (!arr.length) return;
     let resolution = this.view.getResolution();
-    for(let i = 0; i< arr.length;i++){
+    for (let i = 0; i < arr.length; i++) {
       let item = arr[i];
       let element = item.getElement().parentNode;
-      if(!element) return ;
+      if (!element) return;
       let style = window.getComputedStyle(element);
       let transform = style.transform;
       // 得出这个overlay的矩阵大小
-      let x = parseInt(transform.substring(7).split(',')[4])
-      let y = parseInt(transform.substring(7).split(',')[5]);
+      let x = parseInt(transform.substring(7).split(",")[4]);
+      let y = parseInt(transform.substring(7).split(",")[5]);
       let h = element.clientHeight + y;
       let w = element.clientWidth + x;
-      let visible = element.style.visibility || 'visible';
+      let visible = element.style.visibility || "visible";
       let text = element.textContent;
-      let extent = {x,y,w,h ,visible ,text};
+      let extent = { x, y, w, h, visible, text };
 
       let flag = [];
-      arr.forEach(nitem => {
+      arr.forEach((nitem) => {
         let nElement = nitem.getElement().parentNode;
-        if(!nElement) return ;
+        if (!nElement) return;
         let nstyle = window.getComputedStyle(nElement);
         let transform = nstyle.transform;
         // 得出这个overlay的矩阵大小
-        let nx = parseInt(transform.substring(7).split(',')[4])
-        let ny = parseInt(transform.substring(7).split(',')[5]);
+        let nx = parseInt(transform.substring(7).split(",")[4]);
+        let ny = parseInt(transform.substring(7).split(",")[5]);
         let nh = nElement.clientHeight + ny;
         let nw = nElement.clientWidth + nx;
         let ntext = nElement.textContent;
         // let visible = nElement.style.visibility || 'visible';
-        let ext = {x:nx,y:ny,w:nw,h:nh,text:ntext};
+        let ext = { x: nx, y: ny, w: nw, h: nh, text: ntext };
         // 检查是否与他有交际
         // 参照是对比，如果是隐藏，直接不处理
         // if(extent.text == ntext){
@@ -233,21 +257,20 @@ class IndexPage extends React.Component {
         //   }
         // }
         // 去除当前参照和对比一样的数据
-        if(extent.text != ntext){
-          if(this.checkHasExtent(ext,extent)){
+        if (extent.text != ntext) {
+          if (this.checkHasExtent(ext, extent)) {
             // console.log(extent.text,extent.visible ,ext.text)
-            if(extent.visible !== 'hidden')
-              nElement.style.visibility = 'hidden';
-            }else if(!this.checkHasExtent(ext,extent)){
-            nElement.style.visibility = 'visible';
+            if (extent.visible !== "hidden")
+              nElement.style.visibility = "hidden";
+          } else if (!this.checkHasExtent(ext, extent)) {
+            nElement.style.visibility = "visible";
           }
-        }else{
+        } else {
           // 对比项，需要检查是不是隐藏的
-
         }
-      })
+      });
     }
-  }
+  };
 
   // 通过高德地图获得自己的定位
   getMyCenter = (flag) => {
@@ -300,9 +323,29 @@ class IndexPage extends React.Component {
     }
   };
 
+  changeQueryStr = (value) => {
+    this.queryStr = value;
+    this.publicDataChild && this.publicDataChild.getAllData(this.queryStr)
+  };
+
+  getQueryStr = () => {
+    return this.queryStr;
+  };
+
+  onRef = (ref) => {
+    this.publicDataChild = ref
+  }
+
   render() {
     const { TabPane } = Tabs;
-    let { bottomTools, toolBars, searchTools ,isShowMobile ,editShow ,isShowTempPlot} = this.props;
+    let {
+      bottomTools,
+      toolBars,
+      searchTools,
+      isShowMobile,
+      editShow,
+      isShowTempPlot,
+    } = this.props;
     const SearchToolBarStyle = {
       position: "absolute",
       top: 20,
@@ -323,13 +366,8 @@ class IndexPage extends React.Component {
             isOnMap={true}
           ></SearchToolBar>
         )}
-        { isShowTempPlot && 
-          <TempPlottingPanel></TempPlottingPanel>
-        }
-        {
-          isShowTempPlot && 
-          <PlotTools></PlotTools>
-        }
+        {/* {isShowTempPlot && <TempPlottingPanel></TempPlottingPanel>} */}
+        {isShowTempPlot && <PlotTools></PlotTools>}
         <LengedList></LengedList>
         {/* <Location></Location> */}
         <Sider width={360}>
@@ -340,20 +378,23 @@ class IndexPage extends React.Component {
             >
               <Main>
                 <div style={{ flex: "0" }}>
-                  <Search onInputChange={this.handleInput}></Search>
+                  <Search
+                    onInputChange={this.handleInput}
+                    changeQueryStr={this.changeQueryStr}
+                  ></Search>
                 </div>
                 <div
                   style={{ overflow: "hidden", height: "100%" }}
                   className="panels"
                 >
                   <Tabs
-                    className='HomeTabs'
+                    className="HomeTabs"
                     defaultActiveKey="1"
                     // tabBarGutter={60}
                     animated={true}
                     onChange={this.tabChange}
                     tabBarStyle={{
-                      textAlign:"center"
+                      textAlign: "center",
                     }}
                     style={{
                       flex: "1",
@@ -367,7 +408,7 @@ class IndexPage extends React.Component {
                       <ProjectScouting></ProjectScouting>
                     </TabPane>
                     <TabPane tab={<span>公共数据</span>} key="2">
-                      <PublicData />
+                      <PublicData getQueryStr={this.getQueryStr} onRef={this.onRef}/>
                     </TabPane>
                     <TabPane tab={<span>远程协作</span>} key="3">
                       远程协作
@@ -388,15 +429,10 @@ class IndexPage extends React.Component {
         </Sider>
         {/* <CityPanel></CityPanel> */}
         <Overlay />
-        <PhotoSwipe/>
+        <PhotoSwipe />
         {/* 是否显示手机页面 */}
-        {
-          isShowMobile && <FlutterComponents/>
-        }
-        {
-          editShow && 
-          <MatrixEdit/>
-        }
+        {isShowMobile && <FlutterComponents />}
+        {editShow && <MatrixEdit />}
       </div>
     );
   }

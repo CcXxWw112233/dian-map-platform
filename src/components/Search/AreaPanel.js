@@ -43,8 +43,9 @@ export default class AreaPanel extends React.Component {
   }
 
   updatePublicData = (name, code) => {
-    window.queryStr = `${name}='${code}'`
-    Event.Evt.firEvent("updatePublicData", window.queryStr);
+    const queryStr = `${name}='${code}'`;
+    const { changeQueryStr } = this.props;
+    changeQueryStr && changeQueryStr(queryStr);
   };
   // 省份选择
   handleProvinceSelectChange = (val) => {

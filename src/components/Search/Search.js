@@ -37,7 +37,9 @@ export default class Search extends React.Component {
         locationName: val.addressComponent?.district || this.state.locationName,
         adcode: val.addressComponent?.adcode,
       });
-      window.queryStr = `districtcode='${val.addressComponent?.adcode}'`
+      const queryStr = `districtcode='${val.addressComponent?.adcode}'`;
+      const { changeQueryStr } = this.props;
+      changeQueryStr && changeQueryStr(queryStr);
     });
   }
   handleAreaClick = () => {
@@ -158,6 +160,7 @@ export default class Search extends React.Component {
       <AreaPanel
         handleClose={this.handleAreaClose}
         updateLocationName={this.updateLocationName}
+        changeQueryStr={this.props.changeQueryStr}
       ></AreaPanel>
     );
     const locationPanel = (

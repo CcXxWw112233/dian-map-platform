@@ -4,7 +4,6 @@ import { connect } from "dva";
 import styles from "./TempPlottingPanel.less";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import event from "../../lib/utils/event";
-import { draw } from "../../utils/draw";
 @connect(
   ({
     tempPlotting: { panelVisible, iconVisible },

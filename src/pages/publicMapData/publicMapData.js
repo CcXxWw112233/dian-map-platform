@@ -21,48 +21,54 @@ export default class PublicData extends React.Component {
     this.checkedParam = {};
     this.AllCheckData = MenuData.data;
     this.populationSelect = {};
+    // this.queryStr = "districtcode='440117'"
+    this.queryStr = "";
   }
   componentDidMount() {
     // console.log(m)
     PublicDataActions.init();
-    this.getAllData();
+    // this.getAllData();
+    const { getQueryStr, onRef } = this.props;
+    onRef && onRef(this);
+    if (getQueryStr) {
+      this.queryStr = getQueryStr();
+    }
   }
-  getAllData = () => {
-    Event.Evt.on("updatePublicData", (queryStr) => {
-      const { dataItemStateList: publicMapData } = this.props;
-      const list = [...publicMapData.dataItemStateList] || [];
-      const dataConf = [...publicDataConf.data] || [];
-      PublicDataActions.clear();
-      for (let i = 0; i < list.length; i++) {
-        let checkedList = list[i].checkedList;
-        checkedList.forEach((checked) => {
-          dataConf.forEach((data) => {
-            for (let j = 0; j < data.child.length; j++) {
-              if (data.child[j].key === checked) {
-                let loadFeatureKeys = data.child[j].loadFeatureKeys;
-                loadFeatureKeys.forEach((key) => {
-                  if (key.cql_filter) {
-                    const index = key.cql_filter.indexOf(" AND");
-                    if (index > -1) {
-                      key.cql_filter =
-                        queryStr +
-                        key.cql_filter.substring(index, key.cql_filter.length);
-                    } else {
-                      key.cql_filter = queryStr;
-                    }
+  getAllData = (queryStr) => {
+    this.queryStr = queryStr
+    const { dataItemStateList: publicMapData } = this.props;
+    const list = [...publicMapData.dataItemStateList] || [];
+    const dataConf = [...publicDataConf.data] || [];
+    PublicDataActions.clear();
+    for (let i = 0; i < list.length; i++) {
+      let checkedList = list[i].checkedList;
+      checkedList.forEach((checked) => {
+        dataConf.forEach((data) => {
+          for (let j = 0; j < data.child.length; j++) {
+            if (data.child[j].key === checked) {
+              let loadFeatureKeys = data.child[j].loadFeatureKeys;
+              loadFeatureKeys.forEach((key) => {
+                if (key.cql_filter) {
+                  const index = key.cql_filter.indexOf(" AND");
+                  if (index > -1) {
+                    key.cql_filter =
+                      this.queryStr +
+                      key.cql_filter.substring(index, key.cql_filter.length);
+                  } else {
+                    key.cql_filter =this.queryStr;
                   }
-                  PublicDataActions.getPublicData({
-                    url: "",
-                    data: key,
-                    fillColor: null,
-                  });
+                }
+                PublicDataActions.getPublicData({
+                  url: "",
+                  data: key,
+                  fillColor: null,
                 });
-              }
+              });
             }
-          });
+          }
         });
-      }
-    });
+      });
+    }
   };
   // 获取多出来的那些 arr1 是原数据，arr2 是对比数据，新的数据是从arr2中获取
   getItems = (arr1, arr2) => {
@@ -103,18 +109,14 @@ export default class PublicData extends React.Component {
               PublicDataActions.removeFeatures(a);
             }
           }
-          // data.cql_filter = data.cql_filter?.replace(
-          //   /\%[^\%]*\%/g,
-          //   `%${window.areaCode}%`
-          // );
           if (data.cql_filter) {
             const index = data.cql_filter.indexOf(" AND");
             if (index > -1) {
               data.cql_filter =
-                window.queryStr +
+                this.queryStr +
                 data.cql_filter.substring(index, data.cql_filter.length);
             } else {
-              data.cql_filter = window.queryStr;
+              data.cql_filter = this.queryStr;
             }
           }
           PublicDataActions.getPublicData({

@@ -9,7 +9,7 @@ import {
 } from "../../lib/utils/index";
 import axios from "axios";
 import { baseConfig } from "../../globalSet/config";
-import { draw } from "utils/draw";
+// import { draw } from "utils/draw";
 import scoutingProjectAction from "../../lib/components/ProjectScouting/ScoutingList";
 import lib from './drawForMap'
 
@@ -249,15 +249,15 @@ let callFunctions = {
   },
 
   // 绘制标绘
-  startDraw: ({ type }) => {
-    if (!type) return new Error("缺少type");
-    const plottingLayer = draw.create(type);
-    // console.log(draw)
+  // startDraw: ({ type }) => {
+  //   if (!type) return new Error("缺少type");
+  //   const plottingLayer = draw.create(type);
+  //   // console.log(draw)
 
-    draw.onActiveEventListener((e) => {
-      console.log(e);
-    });
-  },
+  //   draw.onActiveEventListener((e) => {
+  //     console.log(e);
+  //   });
+  // },
 
   // 清除踏勘项目点
   clearSoutingProjectLayer: () => {

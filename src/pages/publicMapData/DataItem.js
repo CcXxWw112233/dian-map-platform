@@ -153,31 +153,6 @@ export default class DataItem extends React.Component {
     );
   };
 
-  // getAllData = () => {
-  //   Event.Evt.on("updatePublicData", (codeStr) => {
-  //     const { dataItemStateList: publicMapData } = this.props;
-  //     const list = [...publicMapData.dataItemStateList] || [];
-  //     const dataConf = [...publicDataConf.data] || [];
-  //     for (let i = 0; i < list.length; i++) {
-  //       let checkedList = list[i].checkedList;
-  //       checkedList.forEach((checked) => {
-  //         dataConf.forEach((data) => {
-  //           for (let j = 0; j < data.child.length; j++) {
-  //             if (data.child[j].key === checked) {
-  //               let loadFeatureKeys = data.child[j].loadFeatureKeys;
-  //               loadFeatureKeys.forEach((key) => {
-  //                 key.cql_filter = key.cql_filter.replace(
-  //                   /\([^\)]*\)/g,
-  //                   `(${codeStr})`
-  //                 );
-  //               });
-  //             }
-  //           }
-  //         });
-  //       });
-  //     }
-  //   });
-  // };
   render() {
     let { data, dataItemStateList: stateListData, stateIndex } = this.props;
     // let { checkedList } = this.state;
