@@ -41,6 +41,7 @@ import FlutterComponents from '../pages/FlutterComponents'
 import PlotTools from "../components/PlotTools/ToolBar"
 import MatrixEdit from '../components/MatrixEdit'
 import { BASIC } from '../services/config'
+import UploadNotification from '../components/UploadNotification'
 
 @connect(
   ({
@@ -397,6 +398,8 @@ class IndexPage extends React.Component {
           editShow && 
           <MatrixEdit/>
         }
+        {/* 文件上传通知 */}
+        <UploadNotification/>
       </div>
     );
   }

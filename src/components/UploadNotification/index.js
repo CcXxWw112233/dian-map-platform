@@ -1,178 +1,150 @@
-// import React, { Component } from 'react'
-// import { Progress } from 'antd'
-// import styles from './index.less'
-// // import globalStyles from '../../globalSet/styles/globalClassName.less'
-// import { connect } from 'dva'
-// {/* 该组件用于上传文件时，从右侧弹出提醒框，带上传进度条 */ }
-// @connect(mapStateToProps)
-// export default class UploadNotification extends Component {
-//     constructor(props) {
-//         super(props)
-//         this.state = {
-//             minify: false,
-//         }
-//         this.scroll_ref = React.createRef()
-//     }
-//     componentDidMount() {
+import React,{Fragment } from 'react'
+import ReactDOM from 'react-dom'
+import styles from './index.less'
+import { connect } from 'dva'
+import { Progress,Card, Badge } from 'antd'
+import { MyIcon } from '../utils'
 
-//     }
-//     componentWillReceiveProps() {
-//         this.setScrollTop()
-//     }
-//     setScrollTop = () => {
-//         const ele = this.scroll_ref.current
-//         // if (ele)
-//         //     ele.scrollTop = ele.scrollHeight
-//     }
-//     renderUploadDec = () => {
-//         const { uploading_file_list = [] } = this.props
-//         const upload_props = {
-//             fileList: uploading_file_list,
-//             listType: 'picture',
-//             showUploadList: { showPreviewIcon: false, showRemoveIcon: false, showDownloadIcon: false },
-//             onRemove: () => false,
-//             onDownload: () => false,
-//             onPreview: () => false
-//         }
-//         console.log('ssssss_uploading_file_list', uploading_file_list)
-//         return (
-//             // <Upload {...upload_props}>
-//             // </Upload>
-//             <div className={styles.file_out}>
-//                 {
-//                     uploading_file_list.map(value => {
-//                         const { name, percent, status } = value
-//                         let progress_status = 'active'
-//                         let progress_percent = parseInt(Number(percent))
-//                         if (status == 'error') {
-//                             progress_status = 'exception '
-//                             progress_percent = 100
-//                         } else if (status == 'done') {
-//                             progress_percent = 100
-//                             progress_status = 'success'
-//                         }
-//                         return (
-//                             <div className={`${styles.upload_file_item} ${status == 'error' && styles.error}`}>
-//                                 <div className={styles.upload_file_item_left}>
-//                                     <div
-//                                         className={globalStyles.authTheme}
-//                                         style={{ fontSize: 30, color: 'rgb(70,166,255)' }}
-//                                     >&#xe7de;</div>
-//                                     {/* <img src='https://asd.asd.'></img> */}
-//                                 </div>
-//                                 <div className={styles.upload_file_item_right}>
-//                                     <div className={`${styles.upload_file_item_name} ${globalStyles.global_ellipsis}`}>
-//                                         {name}
-//                                     </div>
-//                                     <div className={styles.upload_file_item_percent}>
-//                                         <Progress
-//                                             percent={progress_percent}
-//                                             size="small"
-//                                             status={progress_status}
-//                                         />
-//                                     </div>
-//                                 </div>
-//                             </div>
-//                         )
-//                     })
-//                 }
-//             </div>
-//         )
-//     }
-//     renderUploadState = () => {
-//         const { uploading_file_list = [] } = this.props
-//         const is_has_uploading = uploading_file_list.length && (uploading_file_list.findIndex(item => item.status == 'uploading') != -1)
-//         const icon_loading = (
-//             <i className={globalStyles.authTheme} style={{ color: '#52C41A' }}>&#xe7fa;</i>
-//         )
-//         const icon_upload = (
-//             <i className={globalStyles.authTheme} style={{ color: '#1890FF' }}>&#xe77d;</i>
-//         )
-//         let message = ''
-//         let icon = ''
-//         if (is_has_uploading) {
-//             icon = icon_loading
-//             message = '正在上传...'
-//         } else {
-//             icon = icon_upload
-//             message = '上传完成'
-//         }
-//         const data = {
-//             icon,
-//             message
-//         }
-//         return data
-//     }
-//     close = () => {
-//         const { setUploadNotiVisible } = this.props
-//         setUploadNotiVisible()
-//     }
-//     setMinify = () => {
-//         const { minify } = this.state
-//         this.setState({
-//             minify: !minify
-//         })
-//     }
-//     renderFilePercent = () => {
-//         const { uploading_file_list = [] } = this.props
-//         const total = uploading_file_list.length
-//         let count = 0
-//         for (let val of uploading_file_list) {
-//             if (val.status == 'uploading') {
-//                 count++
-//             }
-//         }
-//         return `(${count}/${total})`
-//     }
-//     render() {
-//         const { show_upload_notification } = this.props
-//         const { minify } = this.state
-//         return (
-//             show_upload_notification ? (
-//                 <div className={`${globalStyles.global_card} ${styles.notice_out} ${minify ? styles.notice_out_mini : styles.notice_out_normal}`} >
-//                     {
-//                         minify ? (
-//                             <>
-//                                 <div className={styles.top}>
-//                                     <div className={`${globalStyles.authTheme} ${styles.info_icon}`}>
-//                                         {this.renderUploadState().icon}
-//                                     </div>
-//                                     <div className={styles.message}>{this.renderFilePercent()}</div>
-//                                     <div className={`${globalStyles.authTheme} ${styles.close}`} onClick={this.setMinify}>&#xe7f3;</div>
-//                                 </div>
-//                             </>
-//                         ) : (
-//                                 <>
-//                                     <div className={styles.top}>
-//                                         <div className={`${globalStyles.authTheme} ${styles.info_icon}`}>
-//                                             {/* &#xe847; */}
-//                                             {this.renderUploadState().icon}
-//                                         </div>
-//                                         <div className={styles.message}> {this.renderUploadState().message}</div>
-//                                         <div className={`${globalStyles.authTheme} ${styles.close}`} onClick={this.setMinify}>&#xe7f7;</div>
-//                                     </div>
-//                                     <div className={`${styles.picture_list} ${globalStyles.global_vertical_scrollbar}`} ref={this.scroll_ref}>
-//                                         {this.renderUploadDec()}
-//                                     </div>
-//                                 </>
-//                             )
-//                     }
-//                 </div>
-//             ) : (
-//                     <i />
-//                 )
-//         )
-//     }
-// }
-// function mapStateToProps({ uploadNormal: {
-//     uploading_file_list,
-//     swich_render_upload, //是否显示上传开关
-//     show_upload_notification,
-// }
-// }) {
-//     return {
-//         uploading_file_list,
-//         swich_render_upload, //是否显示上传开关
-//         show_upload_notification,
-//     }
-// }
+
+@connect(({uploadNormal:{
+    uploading_file_list,
+    swich_render_upload,
+    show_upload_notification
+}})=>({
+    uploading_file_list,
+    swich_render_upload,
+    show_upload_notification
+}))
+export default class UploadNotification extends React.Component {
+    constructor(){
+        super(...arguments);
+        this.state = {
+            fileList:[]
+        }
+        this.interval = null;
+    }
+    componentWillReceiveProps(nextProps){
+
+    }
+    toggleMini = ()=>{
+        let { dispatch ,swich_render_upload} = this.props;
+        dispatch({
+            type:"uploadNormal/updateDatas",
+            // type:"uploadNormal/updateFileList",
+            payload:{
+                // data:[],
+                swich_render_upload: !swich_render_upload
+            }
+        })
+    }
+
+    stopUpload = (val)=>{
+        console.log(val)
+    }
+
+    renderUploadItem = ()=>{
+        let { uploading_file_list } = this.props;
+        let arr = uploading_file_list.map((item,index) => {
+            const { name, percent, status } = item
+            let progress_status = 'active'
+            let progress_percent = parseInt(Number(percent))
+            if (status == 'error') {
+                progress_status = 'exception '
+                progress_percent = 100
+            } else if (status == 'done') {
+                progress_percent = 100
+                progress_status = 'success'
+            }else if(status === 'uploading' && progress_percent === 100){
+                progress_percent = 99;
+            }
+            return (
+                <div className={styles.uploadItem} key={index}>
+                    <div className={styles.uploadItem_card}>
+                        <span className={styles.meta_type}>
+                            {/* pic */}
+                        </span>
+                        <span className={styles.uploadItem_name} title={name}>
+                            {name}
+                        </span>
+                        {
+                            item.status === 'uploading'&&
+                            <span className={styles.stopUpload} onClick={this.stopUpload.bind(this,item)}>
+                                <MyIcon type="icon-shanchu"/>
+                            </span>
+                        }
+                    </div>
+                    <Progress 
+                    percent={progress_percent}
+                    status={progress_status}/>
+                </div>
+            )
+        })
+        return arr;
+    }
+    // 获取进度
+    getNotSuccessFile = ()=>{
+        let {uploading_file_list} = this.props;
+        let obj = uploading_file_list.find(item => item.status === 'uploading');
+        if(obj){
+            if(obj.status === 'uploading' && obj.percent === 100){
+                return 99;
+            }
+            return obj.percent;
+        }
+        else return 100;
+    }
+    // 获取上传的总进度
+    getUploadingStatus = ()=>{
+        let {uploading_file_list} = this.props;
+        let arr = uploading_file_list.filter(item => item.status !== 'done');
+        if(arr.length){
+            return <span>上传中({arr.length}/{uploading_file_list.length})</span>
+        }else {
+            return <span>上传完成</span>
+        }
+    }
+    render(){
+        const {
+            uploading_file_list,
+            swich_render_upload,
+            show_upload_notification 
+        } = this.props;
+        return (
+            ReactDOM.createPortal(
+                <Fragment>
+                {
+                    <div className={styles.container}>
+                        {
+                            show_upload_notification && !swich_render_upload ?
+                            <div className={styles.upload_Box}>
+                                <div className={styles.uploadItem_title}>
+                                    <MyIcon type="icon-Group"/>
+                                    <span className={styles.uploadType}>{this.getUploadingStatus()}</span>
+                                    <span className={styles.bigContainer} onClick={this.toggleMini}>
+                                        <MyIcon type="icon-fullscreen-exit"/>
+                                    </span>
+                                </div>
+                                {
+                                    this.renderUploadItem()
+                                }
+                            </div>
+                            :
+                            show_upload_notification && swich_render_upload ? 
+                            <div className={styles.miniUpload} onClick={this.toggleMini}>
+                                <Badge count={uploading_file_list.length || 0}>
+                                    <Progress type="circle" percent={this.getNotSuccessFile()} width={45} />
+                                </Badge>
+                            </div>
+                            :""
+                        }
+                        
+                    </div> 
+                }
+                </Fragment>
+                ,
+                document.body
+            )
+            
+        )
+    }
+}

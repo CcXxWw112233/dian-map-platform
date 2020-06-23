@@ -358,15 +358,29 @@ export default class ScoutingDetails extends PureComponent {
 
   // 上传中
   filesChange = (val, file, fileList, event) => {
-    // console.log("上传中...", file, fileList,event);
-    if (event) {
-      let percent = Math.floor((event.loaded / event.total) * 100);
-      console.log(percent, event.percent);
-    }
+    let { dispatch } = this.props;
+    dispatch({
+      type:"uploadNormal/updateFileList",
+      payload:{
+        show_upload_notification: true,
+        data: fileList
+      }
+    })
+    
   };
   // 上传完成
-  fileUpload = (val, resp, event) => {
+  fileUpload = (val, resp,file, event) => {
+    let { dispatch } = this.props;
     if (resp) {
+      // 清除上传完成的列表
+      setTimeout(()=>{
+        dispatch({
+          type:"uploadNormal/uploadSuccess",
+          payload:{
+            uid:file.uid
+          }
+        })
+      },2000)
       message.success("上传成功");
       let { file_resource_id, suffix, original_file_name } = resp;
 

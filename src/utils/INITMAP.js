@@ -3,6 +3,7 @@ import View from "ol/View";
 import {
   defaults as defaultInteractions,
   DragRotateAndZoom,
+  DragPan
 } from "ol/interaction";
 
 import TileLayer from "ol/layer/Tile";
