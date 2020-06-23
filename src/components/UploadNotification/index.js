@@ -66,12 +66,12 @@ export default class UploadNotification extends React.Component {
                         <span className={styles.uploadItem_name} title={name}>
                             {name}
                         </span>
-                        {
+                        {/* {
                             item.status === 'uploading'&&
                             <span className={styles.stopUpload} onClick={this.stopUpload.bind(this,item)}>
                                 <MyIcon type="icon-shanchu"/>
                             </span>
-                        }
+                        } */}
                     </div>
                     <Progress 
                     percent={progress_percent}
