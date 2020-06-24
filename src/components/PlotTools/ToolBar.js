@@ -13,6 +13,8 @@ import {
 import PlotToolPanel from "./PlotInfoPanel";
 import TempPlotPanel from "./TempPlotPanel";
 import SymbolStore from "./SymbolStore";
+import FeatureOperatorEvent from "../../utils/plot2ol/src/events/FeatureOperatorEvent";
+
 import { connect } from "dva";
 
 @connect(() => ({}))
@@ -51,6 +53,7 @@ export default class ToolBar extends Component {
               isModifyPlot: false,
             },
             () => {
+              this.child.updateProps();
               this.child.createDefaultPlot("MARKER");
             }
           );
@@ -73,6 +76,7 @@ export default class ToolBar extends Component {
               isModifyPlot: false,
             },
             () => {
+              this.child.updateProps();
               this.child.createDefaultPlot("POLYLINE");
             }
           );
@@ -95,6 +99,7 @@ export default class ToolBar extends Component {
               isModifyPlot: false,
             },
             () => {
+              this.child.updateProps();
               this.child.createDefaultPlot("POLYGON");
             }
           );
@@ -117,11 +122,14 @@ export default class ToolBar extends Component {
               isModifyPlot: false,
             },
             () => {
+              this.child.updateProps();
               this.child.createDefaultPlot("FREEHAND_POLYGON");
             }
           );
         },
       },
+    ];
+    this.otherTools = [
       {
         key: "arrowPlot",
         icon: "&#xe62d;",
@@ -139,6 +147,7 @@ export default class ToolBar extends Component {
               isModifyPlot: false,
             },
             () => {
+              this.child.updateProps();
               this.child.createDefaultPlot("FINE_ARROW");
             }
           );
@@ -161,6 +170,7 @@ export default class ToolBar extends Component {
               isModifyPlot: false,
             },
             () => {
+              this.child.updateProps();
               this.child.createDefaultPlot("RECTANGLE");
             }
           );
@@ -183,13 +193,12 @@ export default class ToolBar extends Component {
               isModifyPlot: false,
             },
             () => {
+              this.child.updateProps();
               this.child.createDefaultPlot("CIRCLE");
             }
           );
         },
       },
-    ];
-    this.otherTools = [
       {
         key: "coordinateMeasure",
         icon: "&#xe627;",
@@ -247,6 +256,59 @@ export default class ToolBar extends Component {
       transformStyle: {},
     };
   }
+  componentDidMount() {
+    if (!plotEdit.plottingLayer) {
+      this.plotLayer = plotEdit.getPlottingLayer();
+      const me = this;
+      const { dispatch } = this.props;
+      this.plotLayer.on(FeatureOperatorEvent.ACTIVATE, (e) => {
+        const featureOperator = e.feature_operator;
+        window.featureOperator = featureOperator;
+        me.child.changeOKBtnState(false)
+        dispatch({
+          type: "modal/updateData",
+          payload: {
+            responseData: featureOperator.responseData,
+            featureName: featureOperator.attrs.name,
+            selectName: featureOperator.attrs.selectName,
+            featureType: featureOperator.attrs.featureType,
+            remarks: featureOperator.attrs.remark,
+            strokeColorStyle: featureOperator.attrs.strokeColor,
+          },
+        });
+        dispatch({
+          type: "plotting/setPotting",
+          payload: {
+            operator: featureOperator,
+            type: featureOperator.attrs.plottingType,
+          },
+        });
+      });
+      this.plotLayer.on(FeatureOperatorEvent.DEACTIVATE, (e) => {
+        window.featureOperator && delete window.featureOperator;
+        me.child.changeOKBtnState(true)
+        dispatch({
+          type: "modal/updateData",
+          payload: {
+            responseData: null,
+            featureName: null,
+            selectName: null,
+            featureType: null,
+            remarks: null,
+            strokeColorStyle: null,
+          },
+        });
+        dispatch({
+          type: "plotting/setPotting",
+          payload: {
+            operator: null,
+            type: null,
+          },
+        });
+      });
+    }
+  }
+
   deactivate = () => {
     plotEdit.deactivate();
     pointDrawing.deactivate();
@@ -303,8 +365,8 @@ export default class ToolBar extends Component {
     });
   };
   onRef = (ref) => {
-    this.child = ref
-  }
+    this.child = ref;
+  };
   render() {
     return (
       <div className={styles.wrap}>
@@ -385,6 +447,7 @@ export default class ToolBar extends Component {
             showPlotInfoPanel={this.showPlotInfoPanel}
             hideTempPlotPanel={this.hideTempPlotPanel}
             changeActiveBtn={this.handleToolClick.bind(this)}
+            changeOKBtnState={this.changeOKBtnState}
           ></PlotToolPanel>
         ) : null}
         {this.state.showSymbolStorePanel ? <SymbolStore></SymbolStore> : null}

@@ -12,6 +12,8 @@ import Event from "../../lib/utils/event";
 import { config } from "../../utils/customConfig";
 import symbolStoreServices from "../../services/symbolStore";
 import { createStyle } from "@/lib/utils";
+import { setSession, getSession } from "utils/sessionManage";
+
 import { connect } from "dva";
 import { indexOf } from "lodash";
 
@@ -53,6 +55,7 @@ export default class PlotInfoPanel extends Component {
       plotStroke: "",
       plotFill: "",
       okBtnState: true,
+      showGIF: false,
     };
     this.symbols = {};
     // this.handlePlotNameChange = throttle(this.handlePlotNameChange, 1000);
@@ -80,77 +83,33 @@ export default class PlotInfoPanel extends Component {
     this.strokeColorStyle = "rgba(155,155,155,1)";
     this.fillColorStyle = "rgba(155,155,155,0.7)";
     this.symbolType = {};
-    this.plotLayer = null;
-    // this.isModifyPlot = false;
-    // this.activeFeatureOperator = null;
+    this.isModifyPlot = false;
+    this.activeFeatureOperator = null;
   }
   componentDidMount() {
     this.getSymbolData(this.props);
     this.props.onRef(this);
-    if (!plotEdit.plottingLayer) {
-      this.plotLayer = plotEdit.getPlottingLayer();
-      const me = this;
-      const { dispatch } = this.props;
-      this.plotLayer.on(FeatureOperatorEvent.ACTIVATE, (e) => {
-        me.setState({
-          okBtnState: false,
-          activeFeatureOperator: e.feature_operator,
-        });
-        dispatch({
-          type: "plotting/setPotting",
-          payload: {
-            operator: e.feature_operator,
-            type: e.feature_operator.attrs.plottingType,
-          },
-        });
-        dispatch({
-          type: "modal/updateData",
-          payload: {
-            responseData: e.feature_operator.responseData,
-            featureName: e.feature_operator.attrs.name,
-            selectName: e.feature_operator.attrs.selectName,
-            featureType: e.feature_operator.attrs.featureType,
-            remarks: e.feature_operator.attrs.remark,
-            strokeColorStyle: e.feature_operator.attrs.strokeColor,
-          },
-        });
-        me.setSelectIndex(me.props);
-      });
-      this.plotLayer.on(FeatureOperatorEvent.DEACTIVATE, (e) => {
-        me.setState({
-          okBtnState: true,
-          activeFeatureOperator: null,
-        });
-        dispatch({
-          type: "plotting/setPotting",
-          payload: {
-            operator: null,
-            type: "",
-          },
-        });
-        dispatch({
-          type: "modal/updateData",
-          payload: {
-            responseData: null,
-            featureName: "",
-            selectName: "",
-            featureType: "",
-            remarks: "",
-            strokeColorStyle: "",
-          },
-        });
-      });
-    }
+    getSession("usePlot").then((res) => {
+      if (res.code === 0) {
+        if (!res.data) {
+          this.setState({
+            showGIF: true,
+          });
+          setSession("usePlot", "1");
+        }
+      }
+    });
   }
   componentWillReceiveProps(nextProps) {
-    this.getSymbolData(nextProps);
+    if (this.props.plotType !== nextProps.plotType) {
+      this.getSymbolData(nextProps);
+    }
   }
 
   updateProps = () => {
-    //标绘编辑态
-    if (this.state.okBtnState === false) {
-
-    }
+    this.setState({
+      selectedIndex: 0,
+    });
     const { dispatch } = this.props;
     dispatch({
       type: "modal/updateData",
@@ -254,8 +213,15 @@ export default class PlotInfoPanel extends Component {
       }
     );
   };
+  setSelectIndex2 = (operator) => {
+    const selectName = operator.attrs.selectName;
+    this._setSelectIndex(selectName);
+  };
   setSelectIndex = (props) => {
     const { selectName } = props;
+    this._setSelectIndex(selectName);
+  };
+  _setSelectIndex = (selectName) => {
     for (let i = 0; i < this.state.symbols.length; i++) {
       if (
         this.state.symbols[i].name === selectName ||
@@ -270,7 +236,7 @@ export default class PlotInfoPanel extends Component {
   };
   getSymbolData = async (props) => {
     try {
-      const { plotType, responseData, isModifyPlot, selectName } = props;
+      const { plotType, responseData, isModifyPlot } = props;
       if (!isModifyPlot) {
         await this._getSymbolData(props);
       } else {
@@ -348,6 +314,20 @@ export default class PlotInfoPanel extends Component {
       },
     });
   };
+
+  //计算类型个数
+  getSymbolTypeCount = (selectName) => {
+    const { featureOperatorList } = this.props;
+    let count = 0;
+    for (let i = 0; i < featureOperatorList.length; i++) {
+      if (featureOperatorList[i].attrs.selectName === selectName) {
+        count++;
+      }
+    }
+    return count;
+  };
+
+  //图标点击事件
   handleSymbolItemClick = (value, index) => {
     this.setState({
       selectedIndex: index,
@@ -361,15 +341,26 @@ export default class PlotInfoPanel extends Component {
       strokeColor = value.value3;
     }
     let selectName = value.name || value.icon_name;
-    if (this.symbolType[selectName] === undefined) {
-      this.symbolType[selectName] = 0;
-    }
     let text = "";
-    text = `${selectName}#${++this.symbolType[selectName]}`;
+    const { operator } = this.props;
+    if (
+      !operator ||
+      this.props.isModifyPlot === true ||
+      operator?.attrs.selectName !== selectName
+    ) {
+      if (this.symbolType[selectName] === undefined) {
+        this.symbolType[selectName] = this.getSymbolTypeCount(selectName);
+      }
+      text = `${selectName}#${this.symbolType[selectName] + 1}`;
+    } else {
+      text = operator.attrs.name;
+    }
     this.props.dispatch({
       type: "modal/updateData",
       payload: {
         featureName: text, // 名称
+        selectName: selectName,
+        featureType: featureType,
       },
     });
     let remark = this.props.remarks;
@@ -445,7 +436,7 @@ export default class PlotInfoPanel extends Component {
           strokeWidth: 3,
           text: text,
         };
-        options.lineDash = [10, 10, 10];
+        // options.lineDash = [10, 10, 10];
         attrs = {
           name: text,
           featureType: featureType,
@@ -514,18 +505,16 @@ export default class PlotInfoPanel extends Component {
   };
 
   addPlot = (style, attrs) => {
+    // 新增标绘状态
     if (!this.props.isModifyPlot) {
-      const { activeFeatureOperator } = this.state;
-      if (activeFeatureOperator) {
-        activeFeatureOperator.feature.setStyle(style);
-        this.updateReduxOperatorList();
+      const { operator } = this.props;
+      if (operator) {
+        operator.feature.setStyle(style);
       } else {
-        if (!this.props.isModifyPlot) {
-          plotEdit.create(
-            this.plotKeyVal[this.props.plotType],
-            this.props.dispatch
-          );
-        }
+        plotEdit.create(
+          this.plotKeyVal[this.props.plotType],
+          this.props.dispatch
+        );
         Event.Evt.firEvent("setAttribute", {
           style: style,
           attrs: attrs,
@@ -534,11 +523,11 @@ export default class PlotInfoPanel extends Component {
         });
       }
     } else {
+      // 修改状态
       if (!this.props.operator) return;
-      this.setState({
-        okBtnState: false,
-      });
-      let currentOperator = this.props.operator;
+      this.changeOKBtnState(false);
+      let { operator: currentOperator } = this.props;
+      if (!currentOperator) return;
       const geometryType = currentOperator.attrs.geometryType;
       currentOperator.attrs = {
         ...attrs,
@@ -546,27 +535,11 @@ export default class PlotInfoPanel extends Component {
       };
       currentOperator.name = attrs.name;
       currentOperator.feature.setStyle(style);
-      this.updateReduxOperatorList();
     }
   };
 
   getGeometryType = (type) => {
     let tempType = "";
-    // if (type === "MARKER") {
-    //   tempType = "点";
-    // }
-    // if (type === "POLYLINE") {
-    //   tempType = "线";
-    // }
-    // if (
-    //   type === "POLYGON" ||
-    //   type === "FREEHAND_POLYGON" ||
-    //   type === "FINE_ARROW" ||
-    //   type === "RECTANGLE" ||
-    //   type === "CIRCLE"
-    // ) {
-    //   tempType = "面";
-    // }
     if (this.props.plotType === "Point") {
       tempType = "点";
     }
@@ -589,7 +562,9 @@ export default class PlotInfoPanel extends Component {
     plotEdit.create(type);
     let tempType = this.getGeometryType(type);
     if (this.symbolType[`默认${tempType}`] === undefined) {
-      this.symbolType[`默认${tempType}`] = 0;
+      this.symbolType[`默认${tempType}`] = this.getSymbolTypeCount(
+        `默认${tempType}`
+      );
     }
     const name = `默认${tempType}#${++this.symbolType[`默认${tempType}`]}`;
     Event.Evt.firEvent("setAttribute", {
@@ -598,20 +573,25 @@ export default class PlotInfoPanel extends Component {
         featureType:
           type === "POLYLINE" ? "rgba(155,155,155,1)" : "rgba(155,155,155,0.7)",
         strokeColor: "rgba(155,155,155,1)",
-        selectName: "自定义类型",
+        selectName: `默认${tempType}`,
         remark: "",
       },
       responseData: this.state.symbols,
       cb: this.updateRedux.bind(this),
     });
+    const { dispatch } = this.props;
+    dispatch({
+      type: "modal/updateData",
+      payload: {
+        featureName: name,
+      },
+    });
   };
 
   //标绘名称
   handlePlotNameChange = (value) => {
-    if (!this.okBtnState) {
-      this.setState({
-        okBtnState: false,
-      });
+    if (this.props.operator) {
+      this.changeOKBtnState(false);
     }
     const { dispatch } = this.props;
     dispatch({
@@ -625,17 +605,13 @@ export default class PlotInfoPanel extends Component {
   updateReduxOperatorList = () => {
     const { dispatch, operator, featureOperatorList } = this.props;
     if (!operator) return;
-    this.setState({
-      activeFeatureOperator: operator,
-    });
-    const { activeFeatureOperator } = this.state;
-    if (activeFeatureOperator) {
+    if (operator) {
       let newList = [...featureOperatorList];
       let index = newList.findIndex((item) => {
-        return item.guid === activeFeatureOperator.guid;
+        return item.guid === operator.guid;
       });
       if (index > -1) {
-        newList[index] = activeFeatureOperator;
+        newList[index] = operator;
         let newList2 = [];
         newList.forEach((item) => {
           if (item.attrs.name) {
@@ -654,10 +630,8 @@ export default class PlotInfoPanel extends Component {
 
   // 标绘备注
   handlePotRemarkChange = (value) => {
-    if (!this.okBtnState) {
-      this.setState({
-        okBtnState: false,
-      });
+    if (this.props.operator) {
+      this.changeOKBtnState(false);
     }
     const { dispatch } = this.props;
     dispatch({
@@ -670,45 +644,28 @@ export default class PlotInfoPanel extends Component {
       window.featureOperator.attrs.remark = value;
     }
   };
-  // handleOKClick = () => {
-  //   if (this.props.isModifyPlot) {
-  //     window.featureOperator.attrs.name = this.props.featureName;
-  //     window.featureOperator.setName(this.props.featureName);
-  //     window.featureOperator.attrs.remark = this.props.remarks;
-  //     let style = window.featureOperator.feature.getStyle();
-  //     let text = style.getText(this.props.featureName);
-  //     text.setText(this.props.featureName);
-  //     style.setText(text);
-  //     window.featureOperator.feature.setStyle(style);
-  //     this.updateReduxOperatorList();
-  //     this.props.showPlotInfoPanel(false);
-  //   } else {
-  //     this.props.showPlotInfoPanel(false);
-  //   }
-  //   this.props.hideTempPlotPanel(true);
-  //   this.props.changeActiveBtn("tempPlot");
-  // };
-  handleOKClick = () => {
-    this.setState({
-      okBtnState: true,
-    });
-    plotEdit.plottingLayer.plotEdit.deactivate();
-    if (this.props.isModifyPlot) {
-      this.setState({
-        activeFeatureOperator: this.props.operator,
-      });
-    }
-    const { activeFeatureOperator } = this.state;
-    if (activeFeatureOperator) {
-      activeFeatureOperator.attrs.name = this.props.featureName;
-      activeFeatureOperator.setName(this.props.featureName);
-      activeFeatureOperator.attrs.remark = this.props.remarks;
-      let style = activeFeatureOperator.feature.getStyle();
+
+  updateOperatorBeforeDeactivate = () => {
+    let { operator } = this.props;
+    if (operator) {
+      this.symbolType[this.props.selectName]++;
+      operator.attrs.name = this.props.featureName;
+      operator.attrs.selectName = this.props.selectName;
+      operator.attrs.strokeColor = this.props.strokeColorStyle;
+      operator.attrs.featureType = this.props.featureType;
+      operator.setName(this.props.featureName);
+      operator.attrs.remark = this.props.remarks;
+      let style = operator.feature.getStyle();
       let text = style.getText(this.props.featureName);
       text.setText(this.props.featureName);
       style.setText(text);
-      activeFeatureOperator.feature.setStyle(style);
+      operator.feature.setStyle(style);
+      this.updateReduxOperatorList();
     }
+  };
+  handleOKClick = () => {
+    this.updateOperatorBeforeDeactivate();
+    plotEdit.plottingLayer.plotEdit.deactivate();
   };
   // 线框颜色
   handleStrokeColorOkClick = (value) => {
@@ -729,21 +686,33 @@ export default class PlotInfoPanel extends Component {
     if (this.props.isModifyPlot) {
       text = this.props.featureName;
     } else {
+      const { operator } = this.props;
       let tempType = this.getGeometryType(this.plotKeyVal[this.props.plotType]);
-      if (this.symbolType[`自定义${tempType}`] === undefined) {
-        this.symbolType[`自定义${tempType}`] = 0;
+      if (
+        !operator ||
+        this.props.isModifyPlot === true ||
+        operator?.attrs.selectName !== `自定义${tempType}`
+      ) {
+        if (this.symbolType[`自定义${tempType}`] === undefined) {
+          this.symbolType[`自定义${tempType}`] = this.getSymbolTypeCount(
+            `自定义${tempType}`
+          );
+        }
+        text = `自定义${tempType}#${this.symbolType[`自定义${tempType}`] + 1}`;
+      } else {
+        text = operator.attrs.featureName;
       }
-      text = `自定义${tempType}#${++this.symbolType[`自定义${tempType}`]}`;
       this.props.dispatch({
         type: "modal/updateData",
         payload: {
           featureName: text, // 名称
+          selectName: "自定义类型",
         },
       });
     }
     let remark = this.props.remarks;
-    let featureType = this.props.featureType;
-    if (this.props.featureType.indexOf("rgb") < 0) {
+    let { featureType } = this.props;
+    if (!featureType || featureType?.indexOf("rgb") < 0) {
       featureType = this.fillColorStyle;
     }
     let style = {};
@@ -824,20 +793,32 @@ export default class PlotInfoPanel extends Component {
     if (this.props.isModifyPlot) {
       text = this.props.featureName;
     } else {
+      const { operator } = this.props;
       let tempType = this.getGeometryType(this.plotKeyVal[this.props.plotType]);
-      if (this.symbolType[`自定义${tempType}`] === undefined) {
-        this.symbolType[`自定义${tempType}`] = 0;
+      if (
+        !operator ||
+        this.props.isModifyPlot === true ||
+        operator?.attrs.selectName !== `自定义${tempType}`
+      ) {
+        if (this.symbolType[`自定义${tempType}`] === undefined) {
+          this.symbolType[`自定义${tempType}`] = this.getSymbolTypeCount(
+            `自定义${tempType}`
+          );
+        }
+        text = `自定义${tempType}#${this.symbolType[`自定义${tempType}`] + 1}`;
+      } else {
+        text = operator.attrs.featureName;
       }
-      text = `自定义${tempType}#${++this.symbolType[`自定义${tempType}`]}`;
       this.props.dispatch({
         type: "modal/updateData",
         payload: {
           featureName: text, // 名称
+          selectName: "自定义类型",
         },
       });
     }
     let strokeColor = this.props.strokeColorStyle;
-    if (strokeColor.indexOf("rgb") < 0) {
+    if (!strokeColor || strokeColor.indexOf("rgb") < 0) {
       strokeColor = this.strokeColorStyle;
     }
     let style = {};
@@ -940,25 +921,34 @@ export default class PlotInfoPanel extends Component {
       );
     }
   };
+  createGIF = () => {
+    if (this.state.showGIF) {
+      const gifUrl = require("../../assets/plot/remind.gif");
+      return (
+        <div style={{ width: "100%" }}>
+          <img alt="" src={gifUrl} />
+          <p>您可以开始绘制了哟！</p>
+        </div>
+      );
+    } else {
+      return null;
+    }
+  };
+  changeOKBtnState = (value = true) => {
+    this.setState({
+      okBtnState: value,
+    });
+  };
   render() {
     const { TextArea } = Input;
     const disableStyle = { color: "rgba(0,0,0,0.2)" };
     return (
       <div className={`${styles.panel} ${globalStyle.autoScrollY}`}>
-        {/* <div className={styles.header}>
-          <span>{!this.props.isModifyPlot ? "新增标绘" : "修改标绘"}</span>
-          <i
-            className={`${globalStyle.global_icon} ${globalStyle.btn}`}
-            style={{ fontSize: 14, float: "right" }}
-            onClick={this.handleCloseClick}
-          >
-            &#xe632;
-          </i>
-        </div> */}
         <div
           className={`${styles.body}`}
           // style={{ height: "calc(100% - 74px)" }}
         >
+          {this.createGIF()}
           <p className={styles.title}>选择符号</p>
           <div className={styles.row}>
             <span className={styles.rowspan}>线框颜色</span>

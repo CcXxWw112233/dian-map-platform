@@ -17,7 +17,7 @@ class PolyLineStyle extends FTStyle {
             stroke: {
                 color: 'rgba(155,155,155,1)',
                 width: 3,
-                lineDash: [10, 10, 10]
+                // lineDash: [10, 10, 10]
             }
         }
     }
