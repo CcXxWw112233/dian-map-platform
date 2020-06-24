@@ -35,7 +35,7 @@ import LengedList from "components/LengedList/LengedList";
 import BottomToolBar from "components/BottomToolBar/BottomToolBar";
 
 // import TempPlottingIcon from "components/TempPlotting/TempPlottingIcon";
-import TempPlottingPanel from "components/TempPlotting/TempPlottingPanel";
+// import TempPlottingPanel from "components/TempPlotting/TempPlottingPanel";
 import PhotoSwipe from '../components/PhotoSwipe'
 import FlutterComponents from '../pages/FlutterComponents'
 import PlotTools from "../components/PlotTools/ToolBar"
