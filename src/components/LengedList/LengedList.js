@@ -65,8 +65,8 @@ const Lenged = ({ data }) => {
 @connect(
   ({
     lengedList: { config },
-    openswitch: { lengedSwitch, showLengedButton },
-  }) => ({ config, lengedSwitch, showLengedButton })
+    openswitch: { lengedSwitch, showLengedButton ,showFeatureName},
+  }) => ({ config, lengedSwitch, showLengedButton ,showFeatureName})
 )
 export default class LengedList extends PureComponent {
   constructor(props) {
@@ -130,12 +130,20 @@ export default class LengedList extends PureComponent {
     // if(flag){
     layer && layer.setVisible(flag);
     // }
-  };
-  changeConfig = (changedValues, allChange) => {
+  }
+  changeConfig = (changedValues,allChange)=>{
+    let { dispatch } = this.props;
     this.setState({
-      roadLine: allChange.roadLine,
-      featureName: allChange.featureName,
-    });
+      roadLine:allChange.roadLine,
+      featureName: allChange.featureName
+    })
+    // 更新全局的是否显示元素名称开关
+    dispatch({
+      type:"openswitch/updateDatas",
+      payload:{
+        showFeatureName: allChange.featureName
+      }
+    })
     let key = Object.keys(changedValues)[0];
     if (key === "roadLine") {
       // 切换隐藏路网

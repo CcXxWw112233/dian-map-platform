@@ -35,12 +35,13 @@ import LengedList from "components/LengedList/LengedList";
 import BottomToolBar from "components/BottomToolBar/BottomToolBar";
 
 // import TempPlottingIcon from "components/TempPlotting/TempPlottingIcon";
-// import TempPlottingPanel from "components/TempPlotting/TempPlottingPanel";
-import PhotoSwipe from "../components/PhotoSwipe";
-import FlutterComponents from "../pages/FlutterComponents";
-import PlotTools from "../components/PlotTools/ToolBar";
-import MatrixEdit from "../components/MatrixEdit";
-import { BASIC } from "../services/config";
+import TempPlottingPanel from "components/TempPlotting/TempPlottingPanel";
+import PhotoSwipe from '../components/PhotoSwipe'
+import FlutterComponents from '../pages/FlutterComponents'
+import PlotTools from "../components/PlotTools/ToolBar"
+import MatrixEdit from '../components/MatrixEdit'
+import { BASIC } from '../services/config'
+import UploadNotification from '../components/UploadNotification'
 
 @connect(
   ({
@@ -431,8 +432,15 @@ class IndexPage extends React.Component {
         <Overlay />
         <PhotoSwipe />
         {/* 是否显示手机页面 */}
-        {isShowMobile && <FlutterComponents />}
-        {editShow && <MatrixEdit />}
+        {
+          isShowMobile && <FlutterComponents/>
+        }
+        {
+          editShow && 
+          <MatrixEdit/>
+        }
+        {/* 文件上传通知 */}
+        <UploadNotification/>
       </div>
     );
   }

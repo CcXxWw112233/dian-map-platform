@@ -5,6 +5,7 @@ import { request } from "../services/index";
 import { config } from "./customConfig";
 import { BASIC } from "../services/config";
 import Event from "../lib/utils/event";
+import { DragPan } from 'ol/interaction'
 // import Overlay from 'ol/Overlay'
 // import * as DomUtils from './plot2ol/util/dom_util'
 // import { connectEvent, disconnectEvent } from './plot2ol/util/core'
@@ -47,6 +48,12 @@ export const plotEdit = {
       this.type = "POINT";
     }
     if (type === "FREEHAND_POLYGON") {
+      let interactions = this.map.getInteractions();
+      interactions.forEach(item => {
+        if(item instanceof DragPan){
+          item.setActive(false);
+        }
+      })
       this.type = "FREEHANDPOLYGON";
     }
     const PlotTypes = {
@@ -81,6 +88,15 @@ export const plotEdit = {
     const me = this;
     // 标绘激活事件
     this.plottingLayer.on(FeatureOperatorEvent.ACTIVATE, (e) => {
+      if(this.type === 'FREEHANDPOLYGON'){
+        let interactions = this.map.getInteractions();
+        interactions.forEach(item => {
+          if(item instanceof DragPan){
+            item.setActive(true);
+          }
+        });
+      }
+      
       if (!e.feature_operator.isScouting) {
         me.target.style.cursor = "default";
         window.featureOperator = e.feature_operator;
