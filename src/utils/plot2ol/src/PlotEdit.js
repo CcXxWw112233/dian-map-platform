@@ -74,14 +74,14 @@ class PlotEdit extends Observable {
         dom,
         "mousedown",
         () => {
-          if (!this.activePlot.isScouting) {
-            // 标绘回调更新redux
-            const tempList = this.layer.getArrDifference(
-              this.layer.feature_operators,
-              this.layer.projectScoutingArr
-            );
-            this.layer.listCb && this.layer.listCb(tempList);
-          }
+          // if (!this.activePlot.isScouting) {
+          //   // 标绘回调更新redux
+          //   const tempList = this.layer.getArrDifference(
+          //     this.layer.feature_operators,
+          //     this.layer.projectScoutingArr
+          //   );
+          //   this.layer.listCb && this.layer.listCb(tempList);
+          // }
         },
         this
       );
@@ -180,6 +180,40 @@ class PlotEdit extends Observable {
     delOvely && delOvely.setPosition(pt);
   }
 
+  // 创建标绘的overlay
+  createPlotOverlay(imgUrl, operator) {
+    operator.feature.set("overlayId", operator.guid);
+    const extent = operator.feature.getGeometry().getExtent();
+    const center = [
+      extent[0] + (extent[2] - extent[0]) / 2,
+      extent[1] + (extent[3] - extent[1]) / 2,
+    ];
+    const ele = document.createElement("img");
+    ele.src = imgUrl;
+    ele.alt = "";
+    const overlay = new Overlay({
+      id: operator.guid,
+      element: ele,
+      position: center,
+      positioning: "bottom-center",
+    });
+    this.map.addOverlay(overlay);
+  }
+
+  // 更新overlay
+  updatePlotOverlay() {
+    const extent = this.activePlot.getGeometry().getExtent();
+    const center = [
+      extent[0] + (extent[2] - extent[0]) / 2,
+      extent[1] + (extent[3] - extent[1]) / 2,
+    ];
+    const id = this.activePlot.get("overlayId");
+    if (id) {
+      const plotOverlay = this.map.getOverlayById(id);
+      plotOverlay && plotOverlay.setPosition(center);
+    }
+  }
+
   initControlPoints(isScouting) {
     if (!this.map) {
       return;
@@ -258,16 +292,12 @@ class PlotEdit extends Observable {
       if (index === len - 1) {
         this.updateDelBtn && this.updateDelBtn(coordinate);
       }
+
+      // 更新overlay
+      this.updatePlotOverlay();
+
       var overlay = this.map.getOverlayById(this.activeControlPointId);
       overlay && overlay.setPosition(coordinate);
-      if (!this.activePlot.isScouting) {
-        // 标绘回调更新redux
-        const tempList = this.layer.getArrDifference(
-          this.layer.feature_operators,
-          this.layer.projectScoutingArr
-        );
-        this.layer.listCb && this.layer.listCb(tempList);
-      }
     }
   }
 
@@ -411,8 +441,13 @@ class PlotEdit extends Observable {
       overlay.setPosition(coordinate);
       overlay.setPositioning("center-center");
     }
+    // 更新删除按钮
     const delOverlay = this.map.getOverlayById("featureDelBtn");
     delOverlay && delOverlay.setPosition(lastPoi);
+
+    // 更新overlay
+    this.updatePlotOverlay();
+
     var plot = this.activePlot.getGeometry();
     plot.setPoints(newPoints);
   }

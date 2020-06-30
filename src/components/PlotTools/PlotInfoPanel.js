@@ -13,6 +13,7 @@ import { config } from "../../utils/customConfig";
 import symbolStoreServices from "../../services/symbolStore";
 import { createStyle } from "@/lib/utils";
 import { setSession, getSession } from "utils/sessionManage";
+import { plotImage } from "./lib";
 
 import { connect } from "dva";
 import { indexOf } from "lodash";
@@ -85,6 +86,8 @@ export default class PlotInfoPanel extends Component {
     this.symbolType = {};
     this.isModifyPlot = false;
     this.activeFeatureOperator = null;
+    this.sigleImage = null;
+    this.imgArr = [];
   }
   componentDidMount() {
     this.getSymbolData(this.props);
@@ -284,7 +287,7 @@ export default class PlotInfoPanel extends Component {
       style = {
         ...style,
         backgroundColor: symbolUrl,
-        border: `2px solid ${strokeColor}`,
+        // border: `2px solid ${strokeColor}`,
       };
     }
     if (this.props.plotType === "Point") {
@@ -298,10 +301,28 @@ export default class PlotInfoPanel extends Component {
     }
     return style;
   };
-  createAttr = () => {};
+
+  createImage = (operator) => {
+    if (this.sigleImage) {
+      let iconUrl = "";
+      if (this.sigleImage.indexOf("https") === 0) {
+        iconUrl = this.sigleImage;
+      } else {
+        iconUrl = this.sigleImage.replace("img", "");
+        iconUrl = require("../../assets" + iconUrl);
+      }
+      plotEdit.plottingLayer.plotEdit.createPlotOverlay(iconUrl, operator);
+      this.sigleImage = null;
+    }
+  };
+
   updateRedux = (list) => {
+    this.createImage(list[list.length - 1]);
     const { dispatch } = this.props;
     let newList = [];
+    if (this.selectName) {
+      this.symbolType[this.selectName]++;
+    }
     list.forEach((item) => {
       if (item.attrs.name) {
         newList.push(item);
@@ -340,7 +361,9 @@ export default class PlotInfoPanel extends Component {
     if (value.value3?.indexOf("rgb") > -1) {
       strokeColor = value.value3;
     }
+    this.sigleImage = null;
     let selectName = value.name || value.icon_name;
+    this.selectName = null;
     let text = "";
     const { operator } = this.props;
     if (
@@ -352,6 +375,7 @@ export default class PlotInfoPanel extends Component {
         this.symbolType[selectName] = this.getSymbolTypeCount(selectName);
       }
       text = `${selectName}#${this.symbolType[selectName] + 1}`;
+      this.selectName = selectName;
     } else {
       text = operator.attrs.name;
     }
@@ -413,13 +437,14 @@ export default class PlotInfoPanel extends Component {
           radius: 8,
         };
         delete options.iconUrl;
-        options.strokeColor = strokeColor;
+        // options.strokeColor = strokeColor;
         options.fillColor = featureType;
         attrs = {
           name: text,
           featureType: featureType,
           selectName: selectName,
-          strokeColor: strokeColor,
+          // strokeColor: strokeColor,
+          strokeColor: featureType,
           remark: remark,
         };
       }
@@ -458,47 +483,87 @@ export default class PlotInfoPanel extends Component {
         options = {
           ...this.commonStyleOptions,
           fillColor: featureType,
-          strokeColor: strokeColor,
+          // strokeColor: strokeColor,
+          strokeColor: featureType,
           text: text,
         };
         attrs = {
           name: text,
           featureType: featureType,
-          strokeColor: strokeColor,
+          // strokeColor: strokeColor,
+          strokeColor: featureType,
           selectName: selectName,
           remark: remark,
         };
+        // iconUrl = require("../../assets/mark/gegen.png");
+        // let options0 = {
+        //   ...this.commonStyleOptions,
+        //   iconUrl: iconUrl,
+        //   text: text,
+        // };
+        // options0.showName = false;
+        // const style0 = createStyle("Point", options0);
         style = createStyle("Polygon", options);
+        // style = [style0, style];
       } else if (featureType.indexOf("/") > -1) {
-        if (featureType.indexOf("https") === 0) {
-          iconUrl = featureType;
-        } else {
-          iconUrl = featureType.replace("img", "");
-          iconUrl = require("../../assets" + iconUrl);
+        // 展示单个图标的多边形
+        if (value.sigle && value.value4) {
+          this.sigleImage = value.value1;
         }
-        let canvas = document.createElement("canvas");
-        let context = canvas.getContext("2d");
-        let img = new Image();
-        img.src = iconUrl;
-        img.crossorigin = "anonymous";
-        const me = this;
-        img.onload = function () {
-          const pat = context.createPattern(img, "repeat");
-          options = {
-            ...me.commonStyleOptions,
-            fillColor: pat,
+        if (this.sigleImage) {
+          let options0 = {
+            ...this.commonStyleOptions,
+            fillColor: value.value4,
             text: text,
           };
+          options0.showName = false;
+          style = createStyle("Polygon", options0);
           attrs = {
             name: text,
-            featureType: featureType,
+            featureType: value.value4,
+            sigleImage: value.value1,
             selectName: selectName,
-            remark: me.props.remarks,
+            remark: this.props.remarks,
           };
-          style = createStyle("Polygon", options);
-          me.addPlot(style, attrs);
-        };
-        return;
+          this.addPlot(style, attrs);
+        } else {
+          if (featureType.indexOf("https") === 0) {
+            iconUrl = featureType;
+          } else {
+            iconUrl = featureType.replace("img", "");
+            iconUrl = require("../../assets" + iconUrl);
+          }
+          let canvas = document.createElement("canvas");
+          let context = canvas.getContext("2d");
+          let img = new Image();
+          img.src = iconUrl;
+          img.crossorigin = "anonymous";
+          const me = this;
+          img.onload = function () {
+            const pat = context.createPattern(img, "repeat");
+            options = {
+              ...me.commonStyleOptions,
+              fillColor: pat,
+              text: text,
+            };
+            attrs = {
+              name: text,
+              featureType: featureType,
+              selectName: selectName,
+              remark: me.props.remarks,
+            };
+            let options0 = {
+              ...me.commonStyleOptions,
+              fillColor: "rgba(255,255,255,1)",
+              text: text,
+            };
+            options0.showName = false;
+            const style0 = createStyle("Polygon", options0);
+            style = createStyle("Polygon", options);
+            me.addPlot([style0, style], attrs);
+          };
+          return;
+        }
       }
     }
     this.addPlot(style, attrs);
@@ -566,8 +631,48 @@ export default class PlotInfoPanel extends Component {
         `默认${tempType}`
       );
     }
-    const name = `默认${tempType}#${++this.symbolType[`默认${tempType}`]}`;
+    const name = `默认${tempType}#${this.symbolType[`默认${tempType}`] + 1}`;
+    let style = null,
+      options = {};
+    this.selectName = `默认${tempType}`;
+    switch (type) {
+      case "MARKER":
+        options = {
+          ...this.commonStyleOptions,
+          fillColor: "rgba(155,155,155,0.7)",
+          // strokeColor: strokeColor,
+          strokeColor: "rgba(155,155,155,1)",
+          text: name,
+          radius: 8,
+        };
+        style = createStyle("Point", options);
+        break;
+      case "POLYLINE":
+        options = {
+          ...this.commonStyleOptions,
+          // fillColor: "rgba(155,155,155,0.7)",
+          strokeColor: "rgba(155,155,155,1)",
+          text: name,
+        };
+        style = createStyle("Polyline", options);
+        break;
+      case "POLYGON":
+      case "FREEHAND_POLYGON":
+      case "FINE_ARROW":
+      case "RECTANGLE":
+      case "CIRCLE":
+        options = {
+          ...this.commonStyleOptions,
+          fillColor: "rgba(155,155,155,0.7)",
+          strokeColor: "rgba(155,155,155,1)",
+          text: name,
+        };
+        style = createStyle("Polygon", options);
+        break;
+      default:
+    }
     Event.Evt.firEvent("setAttribute", {
+      style: style,
       attrs: {
         name: name,
         featureType:
@@ -656,16 +761,26 @@ export default class PlotInfoPanel extends Component {
       operator.setName(this.props.featureName);
       operator.attrs.remark = this.props.remarks;
       let style = operator.feature.getStyle();
-      let text = style.getText(this.props.featureName);
-      text.setText(this.props.featureName);
-      style.setText(text);
-      operator.feature.setStyle(style);
+      let text = null;
+      if (Array.isArray(style)) {
+        style.forEach((item, index) => {
+          text = item.getText().getText();
+          if (text) {
+            style[index].getText().setText(this.props.featureName);
+          }
+        });
+        operator.feature.setStyle(style);
+      } else {
+        text = style.getText(this.props.featureName);
+        text.setText(this.props.featureName);
+        style.setText(text);
+        operator.feature.setStyle(style);
+      }
       this.updateReduxOperatorList();
     }
   };
   handleOKClick = () => {
     this.updateOperatorBeforeDeactivate();
-    plotEdit.plottingLayer.plotEdit.deactivate();
   };
   // 线框颜色
   handleStrokeColorOkClick = (value) => {
@@ -876,51 +991,7 @@ export default class PlotInfoPanel extends Component {
   handleCloseClick = () => {
     this.props.showPlotInfoPanel && this.props.showPlotInfoPanel(false);
   };
-  getDefaultStyle = () => {
-    let style = {
-      border: "2px solid rgba(155,155,155,1)",
-      backgroundColor: "rgba(155,155,155,0.7)",
-    };
-    if (this.props.plotType === "Point") {
-      style = {
-        ...style,
-        borderRadius: 16,
-      };
-    } else if (this.props.plotType === "LineString") {
-      style = {
-        ...style,
-        height: 0,
-      };
-    } else if (
-      this.props.plotType === "Polygon" ||
-      this.props.plotType === "freePolygon" ||
-      this.props.plotType === "arrow" ||
-      this.props.plotType === "rect" ||
-      this.plotType === "circle"
-    ) {
-    }
-    return style;
-  };
-  createDefautSymbol = () => {
-    if (this.props.plotType === "Point") {
-      const item = {
-        value1: "rgba(155,155,155,0.7)",
-      };
-      return (
-        <div
-          className={styles.symbol}
-          key={`默认${this.getGeometryType()}`}
-          onClick={() => this.handleSymbolItemClick(item)}
-        >
-          <div
-            className={styles.symbolColor}
-            style={this.getDefaultStyle()}
-          ></div>
-          <span>{`默认${this.getGeometryType()}`}</span>
-        </div>
-      );
-    }
-  };
+
   createGIF = () => {
     if (this.state.showGIF) {
       const gifUrl = require("../../assets/plot/remind.gif");

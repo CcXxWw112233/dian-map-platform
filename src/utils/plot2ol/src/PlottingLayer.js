@@ -254,6 +254,7 @@ class PlottingLayer extends Observable {
    */
   _createShowLayer() {
     const showlayer = new VectorLayer({
+      zIndex: 20,
       source: new VectorSource(),
     });
     // showlayer.setStyle(drawStyle);
@@ -313,7 +314,20 @@ class PlottingLayer extends Observable {
     if (this.attrs) {
       const newAttrs = JSON.parse(JSON.stringify(this.attrs));
       fo.setName(newAttrs.name);
-      fo.feature.getStyle().getText().setText(newAttrs.name);
+      let styles_ = fo.feature.getStyle();
+      if (Array.isArray(styles_)) {
+        styles_.forEach((style, index) => {
+          if (style.getText()?.getText()) {
+            style.getText().setText(newAttrs.name);
+            styles_[index] = style;
+          }
+        });
+      } else {
+        styles_ &&
+          styles_.getText() &&
+          styles_.getText().setText(newAttrs.name);
+      }
+      fo.feature.setStyle(styles_);
       fo.attrs = {
         ...newAttrs,
         geometryType: feature.getGeometry().getType(),
@@ -329,7 +343,7 @@ class PlottingLayer extends Observable {
       this.listCb && this.listCb(tempList);
       this.attrs = null;
       this.responseData = null;
-      delete this.listCb;
+      // delete this.listCb;
     }
     return fo;
   }
@@ -468,6 +482,7 @@ class PlottingLayer extends Observable {
         feature_operator.feature && feature_operator.feature.ol_uid
       )
     ) {
+      this.removePlotOverlay(feature_operator)
       source.removeFeature(feature_operator.feature);
     }
     this.plotEdit.deactivate();
@@ -476,6 +491,13 @@ class PlottingLayer extends Observable {
     this.feature_operators.splice(curIndex, 1);
     // this._sortByZindex();
     // this._resetZIndex();
+  }
+
+  removePlotOverlay(feature_operator) {
+    const overlayId = feature_operator.feature.get("overlayId")
+    if (!overlayId) return
+    const overlay = this.map.getOverlayById(overlayId)
+    this.map.removeOverlay(overlay)
   }
   /**
    * 清空图元

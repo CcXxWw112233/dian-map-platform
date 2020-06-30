@@ -23,6 +23,7 @@ export const plotEdit = {
   deactivate() {
     if (this.plottingLayer) {
       this.plottingLayer.plotDraw.deactivate();
+      this.plottingLayer.plotEdit.deactivate();
       this.target.style.cursor = "default";
     }
   },

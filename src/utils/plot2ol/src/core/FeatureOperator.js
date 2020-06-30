@@ -55,10 +55,20 @@ class FeatureOperator {
    */
   _initStyle(zindex) {
     const ft_style = StyleFactory.createFTStyle(this.getType());
-    const style = this.feature.getStyle() || ft_style.parse();
-    style.setZIndex(zindex);
-    this.feature.setStyle(style);
     this.ft_style = ft_style;
+    const style = this.feature.getStyle() || ft_style.parse();
+    if (Array.isArray(style)) {
+      style.forEach((item, index) => {
+        this.setStyleIndex(item, index + zindex)
+      })
+    } else {
+      this.setStyleIndex(style, zindex)
+    }
+  }
+
+  setStyleIndex(obj, zindex) {
+    obj.setZIndex(zindex);
+    this.feature.setStyle(obj);
   }
 
   /**
