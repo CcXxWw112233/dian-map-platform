@@ -35,7 +35,7 @@ export default class PublicData extends React.Component {
     }
   }
   getAllData = (queryStr) => {
-    this.queryStr = queryStr
+    this.queryStr = queryStr;
     const { dataItemStateList: publicMapData } = this.props;
     const list = [...publicMapData.dataItemStateList] || [];
     const dataConf = [...publicDataConf.data] || [];
@@ -55,7 +55,7 @@ export default class PublicData extends React.Component {
                       this.queryStr +
                       key.cql_filter.substring(index, key.cql_filter.length);
                   } else {
-                    key.cql_filter =this.queryStr;
+                    key.cql_filter = this.queryStr;
                   }
                 }
                 PublicDataActions.getPublicData({
@@ -146,6 +146,25 @@ export default class PublicData extends React.Component {
       // 取出所有的child
       this.AllCheckData.forEach((item) => {
         let child = item.child;
+        for (let i = 0; i < child.length; i++) {
+          let loadFeatureKeys = child[i].loadFeatureKeys;
+          if (loadFeatureKeys) {
+            for (let j = 0; j < loadFeatureKeys.length; j++) {
+              let cql_filter = loadFeatureKeys[j].cql_filter;
+              if (cql_filter) {
+                const index = cql_filter.indexOf(" AND");
+                if (index > -1) {
+                  cql_filter =
+                    this.queryStr +
+                    cql_filter.substring(index, cql_filter.length);
+                } else {
+                  cql_filter = this.queryStr;
+                }
+                child[i].loadFeatureKeys[j].cql_filter = cql_filter;
+              }
+            }
+          }
+        }
         allChild = allChild.concat(child);
       });
       // 根据传过来的数据，进行整合，获取到数据中保存的wfs数据接口对应的key

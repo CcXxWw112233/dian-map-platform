@@ -1,4 +1,5 @@
-const queryStr = "districtcode='440117'"
+
+let queryStr = "districtcode='440117'"
 const commonStyleOption = {
   textFillColor: "#3F48CC",
   textStrokeColor: "#fff",

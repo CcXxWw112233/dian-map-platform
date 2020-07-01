@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>编组 40备份</title>
+    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="编组-40备份" fill="#000000">
+            <g id="编组-38备份" fill-rule="nonzero">
+                <rect id="矩形" opacity="0" x="0" y="0" width="32" height="32"></rect>
+                <polygon id="路径" points="16 3 19.6729223 9.23934375 27 9.25 23.3458128 15.5 27 21.7500312 19.6729223 21.760625 16 28 12.3270777 21.760625 5 21.7500312 8.65418723 15.5 5 9.25 12.3270777 9.23934375"></polygon>
+            </g>
+            <g id="编组-39" transform="translate(14.000000, 1.000000)">
+                <circle id="椭圆形" cx="2" cy="2" r="2"></circle>
+                <circle id="椭圆形备份-52" cx="2" cy="28" r="2"></circle>
+            </g>
+            <g id="编组-39" transform="translate(16.000000, 22.000000) rotate(90.000000) translate(-16.000000, -22.000000) translate(14.000000, 9.000000)">
+                <circle id="椭圆形" cx="2" cy="2" r="2"></circle>
+                <circle id="椭圆形备份-52" cx="2" cy="24" r="2"></circle>
+            </g>
+            <g id="编组-39备份" transform="translate(16.000000, 10.000000) rotate(90.000000) translate(-16.000000, -10.000000) translate(14.000000, -3.000000)">
+                <circle id="椭圆形" cx="2" cy="2" r="2"></circle>
+                <circle id="椭圆形备份-52" cx="2" cy="24" r="2"></circle>
+            </g>
+        </g>
+    </g>
+</svg>

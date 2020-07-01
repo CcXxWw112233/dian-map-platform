@@ -14,6 +14,7 @@ import PlotToolPanel from "./PlotInfoPanel";
 import TempPlotPanel from "./TempPlotPanel";
 import SymbolStore from "./SymbolStore";
 import FeatureOperatorEvent from "../../utils/plot2ol/src/events/FeatureOperatorEvent";
+import mapApp from "utils/INITMAP";
 
 import { connect } from "dva";
 
@@ -311,12 +312,24 @@ export default class ToolBar extends Component {
           });
         }
       });
+
+      // 控制标绘字体大小
+      mapApp.map.on("moveend", (e) => {
+        const zoom = mapApp.map.getView().getZoom();
+        this.plotLayer.feature_operators.forEach((operator, index) => {
+          let style = operator.feature?.getStyle();
+          const text = style.getText();
+          if (zoom > 12) {
+            text.setFont("16px sans-serif");
+          } else {
+            text.setFont("14px sans-serif");
+          }
+          style.setText(text);
+          this.plotLayer.feature_operators[index].feature.setStyle(style);
+        });
+      });
     }
   }
-
-  unEventListener = () => {
-    this.plotLayer && this.plotLayer.un();
-  };
 
   deactivate = () => {
     // this.plotLayer && this.plotLayer.plotDraw.deactivate();

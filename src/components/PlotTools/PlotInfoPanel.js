@@ -9,7 +9,7 @@ import plotServices from "../../services/plot";
 import { plotEdit } from "../../utils/plotEdit";
 import FeatureOperatorEvent from "../../utils/plot2ol/src/events/FeatureOperatorEvent";
 import Event from "../../lib/utils/event";
-import { config } from "../../utils/customConfig";
+import { config, planConf } from "../../utils/customConfig";
 import symbolStoreServices from "../../services/symbolStore";
 import { createStyle } from "@/lib/utils";
 import { setSession, getSession } from "utils/sessionManage";
@@ -65,7 +65,7 @@ export default class PlotInfoPanel extends Component {
       textFillColor: "rgba(255,0,0,1)",
       textStrokeColor: "#fff",
       textStrokeWidth: 3,
-      font: "13px sans-serif",
+      font: "14px sans-serif",
       placement: "Point",
       iconScale: 1,
       PointColor: "#fff",
@@ -186,6 +186,7 @@ export default class PlotInfoPanel extends Component {
       defaultPlotType.items[0].id = "默认面";
       defaultPlotType.items[0].name = "默认面";
       res.data = [defaultPlotType, ...res.data.reverse()];
+      res.data = [planConf, ...res.data];
     }
     // this.symbols[plotType] = res?.data;
     let symbols = [];
@@ -283,6 +284,9 @@ export default class PlotInfoPanel extends Component {
         backgroundPosition: "center",
         backgroundSize: "100%",
       };
+      if (data.sigle) {
+        style.backgroundColor = data.value4;
+      }
     } else if (data.value1.indexOf("rgb") > -1) {
       style = {
         ...style,

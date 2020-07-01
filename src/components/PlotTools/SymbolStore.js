@@ -5,7 +5,7 @@ import throttle from "lodash/throttle";
 import styles from "./Styles.less";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import plotServices from "../../services/plot";
-import { config } from "../../utils/customConfig";
+import { config, planConf } from "../../utils/customConfig";
 import symbolStoreServices from "../../services/symbolStore";
 import { formatSize } from "../../utils/utils";
 import { BASIC } from "../../services/config";
@@ -43,6 +43,7 @@ export default class SymbolStore extends Component {
         });
         tempArr = [...tempArr, ...item.data];
       });
+      tempArr = [planConf, ...tempArr];
       this.setState({
         publicSymbolStore: tempArr,
       });
@@ -72,7 +73,7 @@ export default class SymbolStore extends Component {
           symbolUrl = symbolUrl.replace("img", "");
           src = require("../../assets" + symbolUrl);
         }
-        return {
+        style = {
           ...style,
           backgroundImage: `url(${src})`,
           backgroundColor: "rgba(255,255,255,1)",
@@ -80,14 +81,19 @@ export default class SymbolStore extends Component {
           backgroundPosition: "center center",
           backgroundSize: "100%",
         };
+        if (data.sigle) {
+          style.backgroundColor = data.value4;
+        }
+        return style;
       } else if (symbolUrl.indexOf("rgb") > -1) {
-        return {
+        style = {
           ...style,
           backgroundColor: symbolUrl,
           backgroundRepeat: "no-repeat",
           backgroundPosition: "center center",
           backgroundSize: "100%",
         };
+        return style;
       }
     }
   };

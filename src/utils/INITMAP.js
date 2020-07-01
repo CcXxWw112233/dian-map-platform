@@ -41,7 +41,7 @@ function(){
       this.view = new View({
         center: center,
         projection: "EPSG:3857",
-        minZoom: 3,
+        minZoom: 5,
         zoom: 10,
         maxZoom: 18,
         enableRotation:false,

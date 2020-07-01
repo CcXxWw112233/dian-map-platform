@@ -341,7 +341,7 @@ function Action() {
       textFillColor: "rgba(255,0,0,1)",
       textStrokeColor: "#fff",
       textStrokeWidth: 3,
-      font: "13px sans-serif",
+      font: "14px sans-serif",
       placement: "point",
       iconScale: 1,
       pointColor: "#fff",
@@ -411,6 +411,11 @@ function Action() {
                 : content.selectName,
             type: featureLowerType,
           };
+          if (content.sigleImage) {
+            let sigleImage = content.sigleImage.replace("img", "");
+            sigleImage = require("../../../assets" + sigleImage);
+            obj.sigleImage = sigleImage;
+          }
           this.lenged.content.push(obj);
         }
       }
@@ -465,7 +470,7 @@ function Action() {
           hasImages.push(promise);
           // return;
           continue;
-        } 
+        }
 
         myStyle = createStyle(content.geoType, {
           ...commonStyleOption,
@@ -494,10 +499,7 @@ function Action() {
             iconUrl = content.sigleImage.replace("img", "");
             iconUrl = require("../../../assets" + iconUrl);
           }
-          plotEdit.plottingLayer.plotEdit.createPlotOverlay(
-            iconUrl,
-            operator
-          );
+          plotEdit.plottingLayer.plotEdit.createPlotOverlay(iconUrl, operator);
         }
       }
       this.features.push(feature);

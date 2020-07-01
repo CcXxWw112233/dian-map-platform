@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>编组 49备份</title>
+    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="编组-49备份">
+            <rect id="Rectangle-path" fill="#000000" fill-rule="nonzero" opacity="0" x="-1.59872116e-14" y="-1.59872116e-14" width="31.030303" height="31.030303"></rect>
+            <path d="M16,3.0823922 L6.86587193,6.86587193 L3.0823922,16 L6.86587193,25.1341281 L16,28.9176078 L25.1341281,25.1341281 L28.9176078,16 L25.1341281,6.86587193 L16,3.0823922 Z" id="多边形" stroke="#000000" stroke-width="2" transform="translate(16.000000, 16.000000) scale(1, -1) translate(-16.000000, -16.000000) "></path>
+            <polygon id="三角形" fill="#000000" points="16 4 27 21.53125 5 21.53125"></polygon>
+        </g>
+    </g>
+</svg>

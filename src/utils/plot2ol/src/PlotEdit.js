@@ -184,10 +184,7 @@ class PlotEdit extends Observable {
   createPlotOverlay(imgUrl, operator) {
     operator.feature.set("overlayId", operator.guid);
     const extent = operator.feature.getGeometry().getExtent();
-    const center = [
-      extent[0] + (extent[2] - extent[0]) / 2,
-      extent[1] + (extent[3] - extent[1]) / 2,
-    ];
+    const center = [(extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2];
     const ele = document.createElement("img");
     ele.src = imgUrl;
     ele.alt = "";

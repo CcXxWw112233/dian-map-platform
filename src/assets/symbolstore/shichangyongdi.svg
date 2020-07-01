@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>编组 56</title>
+    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="编组-56">
+            <g id="icon-yiliao备份-14" transform="translate(16.000000, 16.000000) scale(1, -1) translate(-16.000000, -16.000000) " fill="#000000" fill-rule="nonzero" opacity="0">
+                <rect id="Rectangle-path" x="0" y="0" width="32" height="32"></rect>
+            </g>
+            <path d="M16,2 L25.8994949,6.10050506 L30,16 L25.8994949,25.8994949 L16,30 L6.10050506,25.8994949 L2,16 L6.10050506,6.10050506 L16,2 Z M10.86,8 L8,8 L8,23.708 L9.98,23.708 L9.98,10.64 L10.024,10.64 L14.93,23.708 L16.712,23.708 L21.618,10.64 L21.662,10.64 L21.662,23.708 L23.642,23.708 L23.642,8 L20.782,8 L15.81,21.2 L10.86,8 Z" id="形状结合" fill="#FFFFFF"></path>
+        </g>
+    </g>
+</svg>
