@@ -2,7 +2,7 @@ import React,{Fragment } from 'react'
 import ReactDOM from 'react-dom'
 import styles from './index.less'
 import { connect } from 'dva'
-import { Progress,Card, Badge } from 'antd'
+import { Progress, Badge } from 'antd'
 import { MyIcon } from '../utils'
 
 
@@ -22,9 +22,6 @@ export default class UploadNotification extends React.Component {
             fileList:[]
         }
         this.interval = null;
-    }
-    componentWillReceiveProps(nextProps){
-
     }
     toggleMini = ()=>{
         let { dispatch ,swich_render_upload} = this.props;
@@ -47,11 +44,11 @@ export default class UploadNotification extends React.Component {
         let arr = uploading_file_list.map((item,index) => {
             const { name, percent, status } = item
             let progress_status = 'active'
-            let progress_percent = parseInt(Number(percent))
-            if (status == 'error') {
-                progress_status = 'exception '
+            let progress_percent = parseInt(Number(percent),10)
+            if (status === 'error') {
+                progress_status = 'exception'
                 progress_percent = 100
-            } else if (status == 'done') {
+            } else if (status === 'done') {
                 progress_percent = 100
                 progress_status = 'success'
             }else if(status === 'uploading' && progress_percent === 100){
@@ -73,7 +70,7 @@ export default class UploadNotification extends React.Component {
                             </span>
                         } */}
                     </div>
-                    <Progress 
+                    <Progress
                     percent={progress_percent}
                     status={progress_status}/>
                 </div>
@@ -89,7 +86,7 @@ export default class UploadNotification extends React.Component {
             if(obj.status === 'uploading' && obj.percent === 100){
                 return 99;
             }
-            return obj.percent;
+            return parseInt(obj.percent,10);
         }
         else return 100;
     }
@@ -107,7 +104,7 @@ export default class UploadNotification extends React.Component {
         const {
             uploading_file_list,
             swich_render_upload,
-            show_upload_notification 
+            show_upload_notification
         } = this.props;
         return (
             ReactDOM.createPortal(
@@ -129,7 +126,7 @@ export default class UploadNotification extends React.Component {
                                 }
                             </div>
                             :
-                            show_upload_notification && swich_render_upload ? 
+                            show_upload_notification && swich_render_upload ?
                             <div className={styles.miniUpload} onClick={this.toggleMini}>
                                 <Badge count={uploading_file_list.length || 0}>
                                     <Progress type="circle" percent={this.getNotSuccessFile()} width={45} />
@@ -137,14 +134,14 @@ export default class UploadNotification extends React.Component {
                             </div>
                             :""
                         }
-                        
-                    </div> 
+
+                    </div>
                 }
                 </Fragment>
                 ,
                 document.body
             )
-            
+
         )
     }
 }
