@@ -78,7 +78,7 @@ export const Title = ({ name, date, cb, data }) => {
       </div>
     );
   };
-  
+
 const checkFileSize = (file) => {
     // console.log(file);
     let { size, text } = formatSize(file.size);
@@ -89,15 +89,20 @@ const checkFileSize = (file) => {
     }
     return true;
   }
-  
+
 const UploadBtn = ({ onChange }) => {
     let [file, setFiles] = useState([]);
     const onupload = (e)=>{
-      setFiles(e.fileList);
-      onChange(e);
-      // 清空上传列表
-      if(e.file.response){
-        setFiles([]);
+      let { size, text } = formatSize(e.file.size);
+      text = text.trim();
+      if (!(+size > 60 && text === 'MB')) {
+        setFiles(e.fileList);
+        onChange(e);
+        // 清空上传列表
+        if(e.file.response){
+          let fFile = file.filter(item => item.uid !== e.file.uid);
+          setFiles(fFile);
+        }
       }
     }
     // const customRequest = (val)=>{
@@ -129,7 +134,7 @@ const UploadBtn = ({ onChange }) => {
       </Upload>
     );
   };
-  
+
 export const ScoutingHeader = (props) => {
     let {
       selected,
@@ -153,12 +158,12 @@ export const ScoutingHeader = (props) => {
       onSave && onSave(areaName);
       setIsEdit(false);
     };
-  
+
     const checkColletion = (val)=>{
       // console.log(val);
       onSelect(val,data.id)
     }
-  
+
     return (
       <div
         style={{
@@ -209,7 +214,7 @@ export const ScoutingHeader = (props) => {
                 <div className={styles.groupTitle}>{data.name}
                   <div className={styles.headerTools}>
                     {
-                      (!isEdit ) &&
+                      (!isEdit && data.id !=='other') &&
                       <span className={styles.editNames} onClick={(e) =>{e.stopPropagation(); onAreaEdit(data)}}>
                         <MyIcon type='icon-bianjimingcheng'/>
                       </span>
@@ -225,7 +230,7 @@ export const ScoutingHeader = (props) => {
       </div>
     );
   };
-  
+
 export const ScoutingItem = ({
     dispatch,
     data,
@@ -260,7 +265,7 @@ export const ScoutingItem = ({
     let [planExtent, setPlanExtent] = useState("");
     let [transparency, setTransparency] = useState("1");
     let [transformFile ,setTransformFile] = useState(null);
-  
+
     // 开始上传
     const startUpload = ({ file, fileList, event }) => {
       // console.log({ file, fileList, event })
@@ -269,29 +274,29 @@ export const ScoutingItem = ({
       if (response) {
         BASIC.checkResponse(response)
           ? onUpload && onUpload(response.data,file, fileList, event)
-          : onError && onError(response);
+          : onError && onError(response,file);
       } else {
         // onError && onError(file)
       }
     };
-  
+
     const onStartUploadPlan = ({ file, fileList }) => {
       let { response } = file;
       onUploadPlan && onUploadPlan(null, fileList);
       if (response) {
         BASIC.checkResponse(response)
           ? onUploadPlan && onUploadPlan(response.data, fileList)
-          : onError && onError(response);
+          : onError && onError(response,file);
       } else {
         // onError && onError(file)
       }
     };
-  
+
     // 设置更新的文件
     const beforeTransformFile = ()=>{
       return Promise.resolve(transformFile)
     }
-  
+
     // 上传规划图
     const beforeUploadPlan = (val) => {
       onUploadPlanStart && onUploadPlanStart(val);
@@ -326,14 +331,14 @@ export const ScoutingItem = ({
           });
       });
     };
-  
+
     return (
       <DragDropContext onDragEnd={onDragEnd.bind(this,data)}>
         <Droppable droppableId="droppable">
           {(provided, snapshot)=>(
             <div
               {...provided.droppableProps}
-              ref={provided.innerRef}>  
+              ref={provided.innerRef}>
               {dataSource.length ? dataSource.map((item, index) => {
                 return (
                   <Draggable key={item.id} draggableId={item.id} index={index}>
@@ -378,7 +383,7 @@ export const ScoutingItem = ({
                               :
                               <div className={styles.groupCollection} >
                                 {
-                                  item.child && item.child.map((child,i) => 
+                                  item.child && item.child.map((child,i) =>
                                     (
                                        <UploadItem
                                         group_id={item.gid}
@@ -408,7 +413,7 @@ export const ScoutingItem = ({
                                 }
                                </div>
                             }
-                            
+
                           </div>
                         </div>
                       )}
@@ -448,7 +453,7 @@ export const ScoutingItem = ({
                       &#xe6ee;
                     </Button>
                   </Upload>
-                )} 
+                )}
                 <ExcelRead id={data.id} group={data} board={board} onExcelSuccess={onExcelSuccess}/>
                 {/* 编辑按钮 */}
                 {/* {!!onAreaEdit && (
@@ -490,7 +495,7 @@ export const ScoutingItem = ({
                   </Popconfirm>
                 )}
               </Space>
-              
+
             </div>
           </div>
           )}
@@ -529,7 +534,7 @@ export const UploadItem = ({
     if (suffix && reg.test(suffix)) {
       obj.title = obj.title.replace(suffix, '');
     }
-  
+
     let [visible, setVisible] = useState(false);
     let [groupVisible, setGroupVisible] = useState(false);
     let [copyVisible, setCopyVisible] = useState(false);
@@ -562,9 +567,9 @@ export const UploadItem = ({
     let { create_by, title, create_time } = data;
     let time = Action.dateFormat(create_time, "yyyy/MM/dd");
     let hours = Action.dateFormat(create_time, "HH:mm");
-  
+
     let secondSetType = type;
-  
+
     const onHandleMenu = ({ key }) => {
       // 添加坐标点
       if (key === "editCollection") {
@@ -573,7 +578,7 @@ export const UploadItem = ({
       }
       if (key === "selectGroup") {
       }
-  
+
       if (key === "eidtTitle") {
         setIsEdit(!isEdit);
         setVisible(false);
@@ -650,7 +655,7 @@ export const UploadItem = ({
       if (list.length) return list;
       else return "暂无分组可以选择";
     };
-  
+
     const menu = (
       <Menu onClick={onHandleMenu}>
         {data.collect_type !== "4" && data.collect_type != "5" && (
@@ -730,16 +735,16 @@ export const UploadItem = ({
               <div style={{ width: "100%" }}>移动到分组</div>
             </Popover>
           </Menu.Item>
-        }        
+        }
         {
-          (( index !== 0 && onMergeUp && subIndex === undefined) || 
+          (( index !== 0 && onMergeUp && subIndex === undefined) ||
           (index !== 0 && onMergeUp && subIndex === 0 ))
-           && 
+           &&
           <Menu.Item key="mergeUp">
             向上组合
           </Menu.Item>
         }
-        { 
+        {
           ((index < length - 1 && onMergeDown && subIndex === undefined) ||
           (index < length - 1 && onMergeDown && subIndex === group_length - 1) )
            &&
@@ -774,12 +779,12 @@ export const UploadItem = ({
         </Menu.Item>
       </Menu>
     );
-  
+
     const setSuffix = (name) => {
       if (suffix) return name + suffix;
       else return name;
     }
-  
+
     const itemClick = (val) => {
       if (val.is_display === "0") return;
       if (
@@ -791,7 +796,7 @@ export const UploadItem = ({
         Action.editZIndexOverlay(val.id);
         Action.toCenter({ center: coor });
       }
-  
+
       // 标注
       if (val.collect_type === "4") {
         let feature = Action.findFeature(val.id);
@@ -800,7 +805,7 @@ export const UploadItem = ({
           Action.toCenter({ type: "extent", center: extent });
         }
       }
-  
+
       // 规划图
       if (val.collect_type === "5") {
         let layer = Action.findImgLayer(val.resource_id);
@@ -840,7 +845,7 @@ export const UploadItem = ({
       >
         <div style={{ width: "100%", display: "flex" }}>
           <div className={styles.uploadIcon + ` ${styles[secondSetType]}`}
-          onClick={(e)=> 
+          onClick={(e)=>
           {
             e.stopPropagation();
             Action.handleCollection(data)
@@ -992,7 +997,7 @@ export const UploadItem = ({
       </div>
     );
   };
-  
+
 export const areaScouting = () => {
     return (
       <div className={globalStyle.autoScrollY} style={{ height: "75vh" }}>
