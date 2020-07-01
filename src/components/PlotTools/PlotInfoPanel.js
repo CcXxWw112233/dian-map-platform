@@ -65,7 +65,7 @@ export default class PlotInfoPanel extends Component {
       textFillColor: "rgba(255,0,0,1)",
       textStrokeColor: "#fff",
       textStrokeWidth: 3,
-      font: "14px sans-serif",
+      font: "13px sans-serif",
       placement: "Point",
       iconScale: 1,
       PointColor: "#fff",

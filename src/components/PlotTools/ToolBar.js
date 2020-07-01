@@ -320,9 +320,11 @@ export default class ToolBar extends Component {
           let style = operator.feature?.getStyle();
           const text = style.getText();
           if (zoom > 12) {
-            text.setFont("16px sans-serif");
+            text.setFont("15px sans-serif");
+            text.setOffsetY(-40);
           } else {
-            text.setFont("14px sans-serif");
+            text.setFont("13px sans-serif");
+            text.setOffsetY(-30);
           }
           style.setText(text);
           this.plotLayer.feature_operators[index].feature.setStyle(style);

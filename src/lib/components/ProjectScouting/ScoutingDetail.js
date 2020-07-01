@@ -341,7 +341,7 @@ function Action() {
       textFillColor: "rgba(255,0,0,1)",
       textStrokeColor: "#fff",
       textStrokeWidth: 3,
-      font: "14px sans-serif",
+      font: "13px sans-serif",
       placement: "point",
       iconScale: 1,
       pointColor: "#fff",
