@@ -537,7 +537,7 @@ export default class ScoutingDetails extends PureComponent {
         // console.log(res);
         this.cancelEditCollection();
         this.fetchCollection();
-        let f = editType == "editCoordinate" ? "关联坐标完成" : "修改名称完成";
+        let f = editType === "editCoordinate" ? "关联坐标完成" : "修改名称完成";
         message.success(f);
       })
       .catch((err) => {
@@ -1184,6 +1184,18 @@ export default class ScoutingDetails extends PureComponent {
                           onSave={this.saveArea.bind(this, item)}
                           onRemarkSave={() => this.saveRemark(item)}
                           multiple={this.state.multipleGroup}
+                          onUploadPlanStart={this.onUploadPlanStart.bind(
+                            this,
+                            item
+                          )}
+                          onChange={this.filesChange.bind(this, item)}
+                          onUpload={this.fileUpload.bind(this, item)}
+                          onUploadPlan={this.onUploadPlan.bind(this, item)}
+                          onUploadPlanCancel={this.onUploadPlanCancel}
+                          onError={this.onAddError}
+                          onAreaDelete={this.onAreaDelete}
+                          onExcelSuccess={this.onExcelSuccess}
+                          dispatch={dispatch}
                         // onDragEnter={e => {this.setState({area_active_key: item.id})}}
                         />
                       }
@@ -1196,25 +1208,14 @@ export default class ScoutingDetails extends PureComponent {
                         // onDrop={()=> console.log(item)}
                         style={activeStyle}
                         data={item}
-                        onAreaEdit={this.onAreaEdit.bind(this, true)}
-                        onAreaDelete={this.onAreaDelete}
                         onSelectGroup={this.onSelectGroup}
-                        onChange={this.filesChange.bind(this, item)}
-                        onUpload={this.fileUpload.bind(this, item)}
                         dataSource={item.collection}
-                        onError={this.onAddError}
                         areaList={area_list}
-                        onUploadPlan={this.onUploadPlan.bind(this, item)}
                         onCollectionRemove={this.onCollectionRemove.bind(
                           this,
                           item
                         )}
                         onEditCollection={this.onEditCollection}
-                        onUploadPlanStart={this.onUploadPlanStart.bind(
-                          this,
-                          item
-                        )}
-                        onUploadPlanCancel={this.onUploadPlanCancel}
                         onChangeDisplay={this.onChangeDisplay.bind(this, item)}
                         onEditPlanPic={this.onEditPlanPic.bind(this, item)}
                         onRemarkSave={this.onRemarkSave}
@@ -1223,7 +1224,7 @@ export default class ScoutingDetails extends PureComponent {
                         onStopMofifyFeatureInDetails={() => this.onStopMofifyFeatureInDetails()}
                         onToggleChangeStyle={this.onToggleChangeStyle}
                         onCopyCollection={this.onCopyCollection}
-                        onExcelSuccess={this.onExcelSuccess}
+
                         onDragEnd={this.onCollectionDragEnd}
                         onMergeDown={this.CollectionMerge.bind(this,'down',item)}
                         onMergeUp={this.CollectionMerge.bind(this,'up',item)}
