@@ -38,7 +38,7 @@ export default class ExcelRead extends React.Component{
     }
 
     createUid = () => {
-        return Math.floor(Math.random() * 10000000 + 1); 
+        return Math.floor(Math.random() * 10000000 + 1);
     }
     // 转换表格需要用的数据
     transformJson = (data)=>{
@@ -69,7 +69,7 @@ export default class ExcelRead extends React.Component{
                 visible:true
             })
         }
-        
+
     }
     readFile = (val)=>{
         let {target} = val;
@@ -199,7 +199,7 @@ export default class ExcelRead extends React.Component{
             placeholder="字段绑定"
             style={{width:100}}
             onChange={this.selectText.bind(this,text)}
-            >   
+            >
                 {
                     this.state.tableDefaultKeys.map(item => {
                         return (
@@ -294,16 +294,17 @@ export default class ExcelRead extends React.Component{
         let { group } = this.props;
         return (
             <div className={styles.excelContainer}>
-                <Button onClick={this.addFile} 
+                <span onClick={this.addFile}>导入表格数据</span>
+                {/* <Button onClick={this.addFile}
                 shape="circle"
                 size="large"
                 title="导入表格数据"
                 type='primary'
                 ghost>
                     <MyIcon type='icon-daorubiaoge'/>
-                </Button>
+                </Button> */}
 
-                <Modal 
+                <Modal
                 width="80%"
                 visible={visible}
                 title="编辑数据"
@@ -320,7 +321,7 @@ export default class ExcelRead extends React.Component{
                         <Button type="danger" disabled={!hasSelected} onClick={this.removeSelectValue}>删除</Button>
                         </Col>
                     </Row>
-                    
+
                     <Table dataSource={data} columns={columns} bordered rowKey="id"
                     rowSelection={{
                         hideSelectAll:true,
@@ -329,7 +330,7 @@ export default class ExcelRead extends React.Component{
 
                     </Table>
                 </Modal>
-                <Modal 
+                <Modal
                 wrapClassName="getAddressModal"
                 width="80%"
                 visible={importDataVisible}

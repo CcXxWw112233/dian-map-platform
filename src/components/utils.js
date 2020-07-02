@@ -1,5 +1,5 @@
 import { createFromIconfontCN } from '@ant-design/icons';
 
 export const MyIcon = createFromIconfontCN({
-  scriptUrl:"//at.alicdn.com/t/font_830998_hy6vx5dv9pn.js"
+  scriptUrl:"//at.alicdn.com/t/font_830998_heuzje99bet.js"
 })
