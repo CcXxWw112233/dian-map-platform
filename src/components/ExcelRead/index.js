@@ -4,7 +4,7 @@ import { Modal, Table,Button ,Select ,message ,Row,Col} from 'antd';
 import FormatAddress from './component/formatAddress'
 import XLSX from 'xlsx'
 import config from "../../services/scouting";
-import { MyIcon } from '../../components/utils'
+// import { MyIcon } from '../../components/utils'
 
 const { ADD_COLLECTION } = config;
 export default class ExcelRead extends React.Component{
@@ -271,6 +271,8 @@ export default class ExcelRead extends React.Component{
             }
             if(item.name)
             return ADD_COLLECTION(obj);
+
+            return void 0;
         })
 
         // 过滤部分没有名称的数据

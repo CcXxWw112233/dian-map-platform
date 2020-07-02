@@ -182,7 +182,7 @@ export const ScoutingHeader = (props) => {
     }
 
     const handleClick = ({ key })=>{
-      console.log(key)
+      // console.log(key)
       if(key !== 'delete'){
         setMenuShow(false);
       }
