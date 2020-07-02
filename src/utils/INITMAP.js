@@ -11,7 +11,7 @@ import XYZ from "ol/source/XYZ";
 
 import { baseMaps, baseMapDictionary } from "utils/mapSource";
 
-const initMap = 
+const initMap =
 function(){
   return {
     status: null,
@@ -33,6 +33,8 @@ function(){
         });
         this.status = "renderend";
         window.map = this.map;
+        // 屏蔽右键菜单
+        this.map.getViewport().oncontextmenu = ()=>{ return false}
         // 回调
         resolve({ map: this.map, view: this.view });
       });

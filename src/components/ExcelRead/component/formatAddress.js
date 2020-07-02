@@ -104,7 +104,7 @@ export default class FormatAddress extends React.Component{
         if(index > -1){
             let current = dataSource[index + 1];
             if(current){
-             this.handleClickProject(current);  
+             this.handleClickProject(current);
             }
         }
 
@@ -140,12 +140,12 @@ export default class FormatAddress extends React.Component{
                                     return (
                                         <div className={`${styles.project_item} ${item.uid === this.state.currentObj.uid ? styles.active: ''}`} key={item.uid}>
                                             <Checkbox value={item.uid} onClick={()=> message.warn('暂不能选择')}></Checkbox>
-                                            <div className={styles.project_item_detail} 
+                                            <div className={styles.project_item_detail}
                                             onClick={this.handleClickProject.bind(this,item)}>
                                                 <div className={styles.project_detail_title}>
                                                     {item.name}
                                                     <span className={styles.tips}>
-                                                        {item.isLocation ? 
+                                                        {item.isLocation ?
                                                         <Tag color="success">已确认</Tag>
                                                         :<Tag color="warning">点击预览</Tag>}
                                                     </span>
@@ -163,25 +163,25 @@ export default class FormatAddress extends React.Component{
                 </div>
                 <div className={styles.chooseMaps}>
                     <div className={styles.searchAddress}>
-                        <Input.Search  
+                        <Input.Search
                         allowClear
-                        placeholder="请输入地名" 
-                        value={searchValue} 
-                        onChange={this.onChange} 
+                        placeholder="请输入地名"
+                        value={searchValue}
+                        onChange={this.onChange}
                         onSearch={this.searchAddress}/>
                     </div>
                     <div className={styles.addressName}>
-                        <img src={require('../../../assets/location.png')} width='20px'/>
+                        <img src={require('../../../assets/location.png')} width='20px' alt=""/>
                         <span>{address}</span>
                         {this.state.currentObj.uid
-                         && <Button size='small' 
+                         && <Button size='small'
                          type='link'
                          onClick={this.enterPosition}>确定</Button>
                         }
-                        
+
                     </div>
                     <div className={styles.pointCenter}>
-                        <img src={require('../../../assets/addPointLocation.png')}/>
+                        <img src={require('../../../assets/addPointLocation.png')} alt=""/>
                     </div>
                     <div id="getAddressMap"></div>
                 </div>

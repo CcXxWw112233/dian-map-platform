@@ -27,7 +27,7 @@ export default class LayerMap extends React.Component{
   initMap = ()=>{
     let { onLoad } = this.props ;
     mapApp.init('MapsView').then( async _ =>{
-      let {map} = _;
+      // let {map} = _;
       // let arr = this.getBaseMapLayer();
       // !Array.isArray(arr) && (arr = [arr]);
       // arr.forEach(item => {
@@ -69,7 +69,7 @@ export default class LayerMap extends React.Component{
   // }
   render(){
     return (
-      <div style={styles.mapView} id="MapsView" onClick={e => {e.stopPropagation();e.preventDefault()}} 
+      <div style={styles.mapView} id="MapsView" onClick={e => {e.stopPropagation();e.preventDefault()}}
       onTouchStart={e => {e.stopPropagation();e.preventDefault()}}>
 
       </div>
