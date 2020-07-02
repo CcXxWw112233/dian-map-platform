@@ -1,15 +1,17 @@
 import React, { Component } from "react";
-import { Tabs, Skeleton, Input, Button, Upload, message } from "antd";
+import { Tabs, Skeleton, Input, Button, Upload, message, Collapse } from "antd";
+
 import throttle from "lodash/throttle";
 
 import styles from "./Styles.less";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import plotServices from "../../services/plot";
-import { config, planConf } from "../../utils/customConfig";
+import { config, planConf, electricPowerConf } from "../../utils/customConfig";
 import symbolStoreServices from "../../services/symbolStore";
 import { formatSize } from "../../utils/utils";
 import { BASIC } from "../../services/config";
-import { reject } from "lodash";
+
+const { Panel } = Collapse;
 export default class SymbolStore extends Component {
   constructor(props) {
     super(props);
@@ -21,6 +23,7 @@ export default class SymbolStore extends Component {
       uploadSymbolName: "",
       startDelete: false,
       finishDelete: false,
+      selectedIndex: -1,
     };
     this.symbols = [];
     this.handleSearchInputChange = throttle(this.handleSearchInputChange, 500);
@@ -43,7 +46,7 @@ export default class SymbolStore extends Component {
         });
         tempArr = [...tempArr, ...item.data];
       });
-      tempArr = [planConf, ...tempArr];
+      tempArr = [planConf, electricPowerConf, ...tempArr];
       this.setState({
         publicSymbolStore: tempArr,
       });
@@ -200,56 +203,60 @@ export default class SymbolStore extends Component {
       <div className={styles.panel} style={{ paddingRight: 4 }}>
         <Tabs defaultActiveKey="1">
           <TabPane tab="系统符号" key="1">
-            <div className={styles.body} style={{ height: "100%" }}>
+            <div
+              className={styles.body}
+              style={{ height: "100%", margin: 0, marginLeft: 8 }}
+            >
               <div
                 className={`${styles.symbolPanel} ${globalStyle.autoScrollY}`}
-                style={{ height: 410 }}
+                style={{ height: 430 }}
               >
                 {this.state.publicSymbolStore.length > 0 ? (
-                  this.state.publicSymbolStore.map((symbol, index) => {
-                    return (
-                      <div
-                        className={styles.symbolBlock}
-                        key={index}
-                        title="系统符号仅支持查看"
-                      >
-                        <p
-                          style={{
-                            margin: 0,
-                            textAlign: "left",
-                            marginBottom: 4,
-                          }}
-                        >
-                          {symbol.type}
-                        </p>
-                        <div
-                          className={styles.symbolList}
-                          style={{ pointerEvents: "none" }}
-                        >
-                          {symbol.items.map((item) => {
-                            return (
-                              <div
-                                title={item.name}
-                                className={`${styles.symbol} ${
-                                  this.state.selectedSymbolId === item.id
-                                    ? styles.symbolActive
-                                    : ""
-                                }`}
-                                key={item.id}
-                                // onClick={() => this.handleSymbolItemClick(item)}
-                              >
-                                <div
-                                  className={styles.symbolColor}
-                                  style={this.getSymbol(item)}
-                                ></div>
-                                <span>{item.name}</span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  })
+                  <div
+                    className={styles.symbolBlock}
+                    title="系统符号仅支持查看"
+                  >
+                    <Collapse
+                      defaultActiveKey={
+                        this.state.publicSymbolStore[0].type + 0
+                      }
+                    >
+                      {this.state.publicSymbolStore.map((symbol, index0) => {
+                        return (
+                          <Panel
+                            header={symbol.type}
+                            key={symbol.type + index0}
+                          >
+                            <div
+                              className={styles.symbolList}
+                              style={{ pointerEvents: "none" }}
+                            >
+                              {symbol.items.map((item, index1) => {
+                                return (
+                                  <div
+                                    title={item.name}
+                                    className={`${styles.symbol} ${
+                                      this.state.selectedIndex === index1
+                                        ? styles.symbolActive
+                                        : ""
+                                    }`}
+                                    key={item.name + index1}
+                                    // onClick={() => this.handleSymbolItemClick(item)}
+                                  >
+                                    <div
+                                      className={styles.symbolColor}
+                                      style={this.getSymbol(item)}
+                                    ></div>
+                                    <span>{item.name}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </Panel>
+                        );
+                      })}
+                    </Collapse>
+                  </div>
                 ) : (
                   <Skeleton paragraph={{ rows: 10 }} />
                 )}
@@ -275,16 +282,16 @@ export default class SymbolStore extends Component {
                 >
                   {this.state.orgSymbols.length > 0 ? (
                     <div className={styles.symbolList}>
-                      {this.state.orgSymbols.map((item) => {
+                      {this.state.orgSymbols.map((item, index) => {
                         return (
                           <div
                             title={item.icon_name}
                             className={`${styles.symbol} ${
-                              this.state.selectedSymbolId === item.id
+                              this.state.selectedIndex === index
                                 ? styles.symbolActive
                                 : ""
                             }`}
-                            key={item.id}
+                            key={index}
                             // onClick={() => this.handleSymbolItemClick(item)}
                           >
                             <div

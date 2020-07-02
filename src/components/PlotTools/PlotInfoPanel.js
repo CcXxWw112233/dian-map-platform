@@ -9,7 +9,7 @@ import plotServices from "../../services/plot";
 import { plotEdit } from "../../utils/plotEdit";
 import FeatureOperatorEvent from "../../utils/plot2ol/src/events/FeatureOperatorEvent";
 import Event from "../../lib/utils/event";
-import { config, planConf } from "../../utils/customConfig";
+import { config, planConf, electricPowerConf } from "../../utils/customConfig";
 import symbolStoreServices from "../../services/symbolStore";
 import { createStyle } from "@/lib/utils";
 import { setSession, getSession } from "utils/sessionManage";
@@ -160,6 +160,7 @@ export default class PlotInfoPanel extends Component {
       res.data = [
         defaultPlotType,
         { type: "自定义", items: [...res0.data] },
+        electricPowerConf,
         ...res.data,
       ];
     }
@@ -178,26 +179,26 @@ export default class PlotInfoPanel extends Component {
     ) {
       res = await plotServices.GET_POLYGONSYMBOL();
       const res0 = await symbolStoreServices.GET_ICON();
-      res.data[2].items = [
-        ...res.data[2].items,
-        ...config,
-        ...res0.data,
-      ].reverse();
+
+      // 自定义类型的
+      const custom = { type: "自定义", items: [...res0.data] };
+      res.data[2].items = [...res.data[2].items, ...config];
       defaultPlotType.items[0].id = "默认面";
       defaultPlotType.items[0].name = "默认面";
-      res.data = [defaultPlotType, ...res.data.reverse()];
-      res.data = [planConf, ...res.data];
+      res.data = [defaultPlotType, custom, planConf, ...res.data];
+      // res.data = [planConf, ...res.data];
     }
     // this.symbols[plotType] = res?.data;
-    let symbols = [];
-    if (res) {
-      res.data.forEach((item) => {
-        symbols = [...symbols, ...item.items];
-      });
-    }
+    // let symbols = [];
+    // if (res) {
+    //   res.data.forEach((item) => {
+    //     symbols = [...symbols, ...item.items];
+    //   });
+    // }
     this.setState(
       {
-        symbols: symbols || [],
+        // symbols: symbols || [],
+        symbols: res.data,
         plotType: plotType,
       },
       () => {
@@ -520,7 +521,7 @@ export default class PlotInfoPanel extends Component {
             fillColor: value.value4,
             text: text,
           };
-          options0.showName = false;
+          options0.showName = true;
           style = createStyle("Polygon", options0);
           attrs = {
             name: text,
@@ -579,6 +580,7 @@ export default class PlotInfoPanel extends Component {
       const { operator } = this.props;
       if (operator) {
         operator.feature.setStyle(style);
+        this.createImage(operator);
       } else {
         plotEdit.create(
           this.plotKeyVal[this.props.plotType],
@@ -784,7 +786,8 @@ export default class PlotInfoPanel extends Component {
     }
   };
   handleOKClick = () => {
-    this.updateOperatorBeforeDeactivate();
+    // this.updateOperatorBeforeDeactivate();
+    plotEdit.plottingLayer.plotEdit.deactivate();
   };
   // 线框颜色
   handleStrokeColorOkClick = (value) => {
@@ -1054,7 +1057,7 @@ export default class PlotInfoPanel extends Component {
             ></ColorPicker>
           </div>
           <div className={styles.symbolPanel}>
-            {this.state.symbols.length > 0 ? (
+            {/* {this.state.symbols.length > 0 ? (
               <div className={styles.symbolBlock}>
                 <div className={styles.symbolList}>
                   {this.state.symbols.map((item, index) => {
@@ -1078,6 +1081,43 @@ export default class PlotInfoPanel extends Component {
                     );
                   })}
                 </div>
+              </div>
+            ) : (
+              <Skeleton paragraph={{ rows: 6 }} />
+            )} */}
+            {this.state.symbols.length > 0 ? (
+              <div className={styles.symbolBlock}>
+                {this.state.symbols.map((item0, index) => {
+                  return (
+                    <div className={styles.symbolBlock} key={item0.type}>
+                      <p>{item0.type}</p>
+                      <div className={styles.symbolList}>
+                        {item0.items.map((item, index) => {
+                          return (
+                            <div
+                              title={item.name}
+                              className={`${styles.symbol} ${
+                                this.state.selectedIndex === index
+                                  ? styles.symbolActive
+                                  : ""
+                              }`}
+                              key={index}
+                              onClick={() =>
+                                this.handleSymbolItemClick(item, index)
+                              }
+                            >
+                              <div
+                                className={styles.symbolColor}
+                                style={this.getSymbol(item)}
+                              ></div>
+                              <span>{item.name || item.icon_name}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             ) : (
               <Skeleton paragraph={{ rows: 6 }} />

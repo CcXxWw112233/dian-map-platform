@@ -182,7 +182,13 @@ class PlotEdit extends Observable {
 
   // 创建标绘的overlay
   createPlotOverlay(imgUrl, operator) {
-    operator.feature.set("overlayId", operator.guid);
+    const overlayId = operator.feature.get("overlayId");
+    if (overlayId) {
+      const lastOverlay = this.map.getOverlayById(overlayId);
+      this.map.removeOverlay(lastOverlay);
+    } else {
+      operator.feature.set("overlayId", operator.guid);
+    }
     const extent = operator.feature.getGeometry().getExtent();
     const center = [(extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2];
     const ele = document.createElement("img");
