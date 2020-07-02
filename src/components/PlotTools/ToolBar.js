@@ -403,6 +403,7 @@ export default class ToolBar extends Component {
               this.state.active === "tempPlot" ? styles.active : ""
             }`}
             onClick={() => {
+              this.deactivate();
               this.handleToolClick("tempPlot");
               this.setState({
                 showTempPlotPanel: true,

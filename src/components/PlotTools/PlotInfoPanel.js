@@ -13,10 +13,9 @@ import { config, planConf, electricPowerConf } from "../../utils/customConfig";
 import symbolStoreServices from "../../services/symbolStore";
 import { createStyle } from "@/lib/utils";
 import { setSession, getSession } from "utils/sessionManage";
-import { plotImage } from "./lib";
+import InitMap from "utils/INITMAP";
 
 import { connect } from "dva";
-import { indexOf } from "lodash";
 
 @connect(
   ({

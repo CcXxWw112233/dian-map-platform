@@ -96,15 +96,6 @@ const planConf = {
       value4: "rgba(0,95,127,0.7)",
     },
     {
-      id: "交通设施用地",
-      name: "交通设施用地",
-      sigle: true,
-      value1: "img/symbolstore/jiaotongsheshiyongdi.svg",
-      value2: "城市规划",
-      value3: "icon",
-      value4: "rgba(0,95,127,0.7)",
-    },
-    {
       id: "货物流通用地",
       name: "货物流通用地",
       sigle: true,

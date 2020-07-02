@@ -8,6 +8,7 @@ import FeatureEvent from "./events/FeatureEvent";
 import { connectEvent, disconnectEvent } from "../util/core";
 
 import douglasPeucker from "../../douglasPeucker";
+import { over } from "lodash";
 
 class PlotEdit extends Observable {
   /**
@@ -180,12 +181,22 @@ class PlotEdit extends Observable {
     delOvely && delOvely.setPosition(pt);
   }
 
+  removePlotOverlay(operator) {
+    const overlayId = operator.feature.get("overlayId");
+    if (overlayId) {
+      const lastOverlay = this.map.getOverlayById(overlayId);
+      this.map.removeOverlay(lastOverlay);
+    }
+  }
+
   // 创建标绘的overlay
   createPlotOverlay(imgUrl, operator) {
     const overlayId = operator.feature.get("overlayId");
     if (overlayId) {
       const lastOverlay = this.map.getOverlayById(overlayId);
-      this.map.removeOverlay(lastOverlay);
+      if (lastOverlay) {
+        this.map.removeOverlay(lastOverlay);
+      }
     } else {
       operator.feature.set("overlayId", operator.guid);
     }
