@@ -188,7 +188,7 @@ let callFunctions = {
         key: baseConfig.GAODE_SERVER_APP_KEY,
         keywords: address,
         offset: offset || 1,
-        city: fromCity || undefined,
+        city: fromCity,
         extensions: "base",
         types: types,
         page
@@ -200,8 +200,12 @@ let callFunctions = {
           if (res.status === 200) {
             let data = res.data;
             if (data.info === "OK") {
-              if (offset === 1) resolve(data.pois[0]);
-              else resolve(data.pois);
+              if (offset === 1) {resolve(data.pois[0]) ; return }
+              else {
+                resolve(data.pois);
+                window.getAddress && window.getAddress.postMessage(JSON.stringify(data.pois));
+                return ;
+              }
             } else {
               reject(data);
             }
@@ -282,6 +286,26 @@ let callFunctions = {
     })
   },
 
+  // 搜索地址
+  searchAddress:({address,city})=>{
+    return new Promise((resolve,reject) => {
+      let url = "https://restapi.amap.com/v3/geocode/geo";
+      let params = {
+        key: baseConfig.GAODE_SERVER_APP_KEY,
+        address: address,
+        city: city || undefined,
+      };
+      axios.get(url,{ params }).then(res => {
+        if (res.status === 200) {
+          let data = res.data;
+          resolve(data.geocodes)
+        }else{
+          reject(res)
+        }
+      })
+    })
+
+  },
   // 渲染项目列表
   renderProjectList: ()=>{
     lib.showProjectPoint();
@@ -295,7 +319,7 @@ let callFunctions = {
     callFunctions.addLayer();
     if(data.length) lib.renderCollection(data,callFunctions.source);
     else lib.getCollectionData(callFunctions.source)
-    
+
   },
   // 清除渲染的元素
   clearCollection:()=>{
@@ -308,7 +332,7 @@ let callFunctions = {
   viewFitById: ({id})=>{
     lib.fitCenter(id);
   }
-  
+
 };
 
 window.CallWebMapFunction = CallWebFunction;

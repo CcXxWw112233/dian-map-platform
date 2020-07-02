@@ -21,8 +21,8 @@ import {
 import {
   CheckCircleOutlined,
   CloseCircleOutlined,
-  DeleteOutlined,
-  EditOutlined,
+  // DeleteOutlined,
+  // EditOutlined,
   CloseOutlined,
   CheckOutlined,
 } from "@ant-design/icons";
@@ -32,14 +32,14 @@ import { formatSize } from '../../../utils/utils';
 import ExcelRead from '../../../components/ExcelRead'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
 import { MyIcon } from '../../../components/utils'
-import { UploadFile } from '../../../utils/XhrUploadFile'
+// import { UploadFile } from '../../../utils/XhrUploadFile'
 
 export const Title = ({ name, date, cb, data }) => {
     return (
       <div className={`${styles.title}`}>
         {data.bg_image && (
           <div className={styles.boardBgImg}>
-            <img src={data.bg_image} />
+            <img src={data.bg_image} alt=""/>
           </div>
         )}
         <div className={styles.projectModal}></div>
@@ -120,7 +120,8 @@ const UploadBtn = ({ onChange }) => {
         fileList={file}
         // customRequest={customRequest}
       >
-        <Button
+        <span>上传采集资料</span>
+        {/* <Button
           title="上传采集数据"
           shape="circle"
           type="primary"
@@ -130,21 +131,31 @@ const UploadBtn = ({ onChange }) => {
           <i className={globalStyle.global_icon} style={{ color: "#0D4FF7" }}>
             &#xe628;
           </i>
-        </Button>
+        </Button> */}
       </Upload>
     );
   };
 
 export const ScoutingHeader = (props) => {
     let {
+      onUpload,
+      onChange,
+      onError,
+      dispatch,
+      board,
+      onUploadPlan = () => { },
+      onUploadPlanStart = () => { },
+      onUploadPlanCancel = () => { },
+      onAreaDelete = () => { },
+      onExcelSuccess =()=>{},
       selected,
       edit,
-      remarkEdit,
+      // remarkEdit,
       onCancel,
       onSave,
-      onRemarkSave,
+      // onRemarkSave,
       data,
-      index,
+      // index,
       onDragEnter,
       activeKey,
       multiple = false,
@@ -153,6 +164,12 @@ export const ScoutingHeader = (props) => {
     } = props;
     let [areaName, setAreaName] = useState(data.name);
     let [isEdit, setIsEdit] = useState(edit);
+    let [showTips, setShowTips] = useState(false);
+    let [menuShow , setMenuShow] = useState(false);
+
+    let [planExtent, setPlanExtent] = useState("");
+    let [transparency, setTransparency] = useState("1");
+    let [transformFile ,setTransformFile] = useState(null);
     // 保存事件
     const saveItem = () => {
       onSave && onSave(areaName);
@@ -164,107 +181,12 @@ export const ScoutingHeader = (props) => {
       onSelect(val,data.id)
     }
 
-    return (
-      <div
-        style={{
-          display: "flex",
-        }}
-        onClick={(e) => {
-          edit ? e.stopPropagation() : "";
-        }}
-        onDragEnter={onDragEnter}
-      >
-        <Fragment>
-          <div className={styles.numberIcon}>
-            <span><MyIcon type={activeKey === data.id ?"icon-wenjianzhankai":"icon-wenjianshouqi"}/></span>
-          </div>
-          <div className={styles.text}>
-            {isEdit || edit ? (
-              <Fragment>
-                <Input
-                  placeholder="请输入名称"
-                  value={areaName}
-                  style={{ width: "70%", marginRight: "2%" }}
-                  allowClear
-                  onPressEnter={(e) => {
-                    e.stopPropagation();
-                    saveItem();
-                  }}
-                  onClick={(e) => e.stopPropagation()}
-                  onChange={(e) => {
-                    setAreaName(e.target.value.trim());
-                  }}
-                />
-                <Button
-                  onClick={() => saveItem()}
-                  size="middle"
-                  type="primary"
-                  icon={<CheckCircleOutlined />}
-                ></Button>
-                <Button
-                  onClick={() => {
-                    setIsEdit(false);
-                    onCancel && onCancel(data);
-                  }}
-                  size="middle"
-                  icon={<CloseCircleOutlined />}
-                ></Button>
-              </Fragment>
-            ) : (
-                <div className={styles.groupTitle}>{data.name}
-                  <div className={styles.headerTools}>
-                    {
-                      (!isEdit && data.id !=='other') &&
-                      <span className={styles.editNames} onClick={(e) =>{e.stopPropagation(); onAreaEdit(data)}}>
-                        <MyIcon type='icon-bianjimingcheng'/>
-                      </span>
-                    }
-                    <span className={styles.checkBoxForHeader}>
-                      {multiple && <Checkbox checked={ selected.length && selected.indexOf(data.id) !== -1 } onChange={checkColletion} onClick={(e) => e.stopPropagation()}/>}
-                    </span>
-                  </div>
-                </div>
-              )}
-          </div>
-        </Fragment>
-      </div>
-    );
-  };
-
-export const ScoutingItem = ({
-    dispatch,
-    data,
-    onError,
-    onUpload,
-    onChange,
-    dataSource = [],
-    onCollectionRemove,
-    onEditCollection,
-    onDrop,
-    board,
-    areaList,
-    onSelectGroup,
-    onAreaEdit = () => { },
-    onAreaDelete = () => { },
-    onUploadPlan = () => { },
-    onUploadPlanStart = () => { },
-    onUploadPlanCancel = () => { },
-    onChangeDisplay = () => { },
-    onEditPlanPic = () => { },
-    onCopyCollection,
-    onModifyFeature = () => { },
-    onModifyRemark = () => { },
-    onRemarkSave = () => { },
-    onStopMofifyFeatureInDetails,
-    onExcelSuccess =()=>{},
-    onDragEnd = ()=>{},
-    onMergeUp,
-    onMergeDown,
-    onMergeCancel
-  }) => {
-    let [planExtent, setPlanExtent] = useState("");
-    let [transparency, setTransparency] = useState("1");
-    let [transformFile ,setTransformFile] = useState(null);
+    const handleClick = ({ key })=>{
+      // console.log(key)
+      if(key !== 'delete'){
+        setMenuShow(false);
+      }
+    }
 
     // 开始上传
     const startUpload = ({ file, fileList, event }) => {
@@ -280,6 +202,7 @@ export const ScoutingItem = ({
       }
     };
 
+    // 上传规划图
     const onStartUploadPlan = ({ file, fileList }) => {
       let { response } = file;
       onUploadPlan && onUploadPlan(null, fileList);
@@ -332,6 +255,163 @@ export const ScoutingItem = ({
       });
     };
 
+    const menu = (
+      <Menu onClick={handleClick}>
+        <Menu.Item key="upload">
+          {/* 上传采集资料 */}
+          <UploadBtn onChange={startUpload} />
+        </Menu.Item>
+        <Menu.Item key="uploadPlan">
+          <Upload
+            action={`/api/map/ght/${data.id}`}
+            accept=".jpg, .jpeg, .png, .bmp"
+            headers={{ Authorization: BASIC.getUrlParam.token }}
+            beforeUpload={beforeUploadPlan}
+            transformFile={beforeTransformFile}
+            data={{ extent: planExtent, transparency }}
+            onChange={onStartUploadPlan}
+            showUploadList={false}
+          >
+            <div>
+              上传规划图
+            </div>
+          </Upload>
+        </Menu.Item>
+        <Menu.Item key="uploadExcel">
+          {/* 导入数据 */}
+          <ExcelRead id={data.id} group={data} board={board} onExcelSuccess={onExcelSuccess}/>
+        </Menu.Item>
+        <Menu.Item key="delete">
+          <Popconfirm
+            title={
+              <span>
+                确定删除分组[{data.name}]吗？
+                <br />
+                此操作不可逆(请确认分组内无任何资料)
+              </span>
+            }
+            okText="确定"
+            cancelText="取消"
+            overlayStyle={{zIndex:1065}}
+            placement="bottomLeft"
+            onConfirm={()=> {setMenuShow(false);onAreaDelete.call(this, data)}}
+          >
+            <div className="danger">删除</div>
+          </Popconfirm>
+        </Menu.Item>
+      </Menu>
+    )
+
+    return (
+      <div
+        style={{
+          display: "flex",
+        }}
+        onClick={(e) => {
+          edit ? e.stopPropagation() : void 0;
+        }}
+        onDragEnter={onDragEnter}
+      >
+        <Fragment>
+          <div className={styles.numberIcon}>
+            <span><MyIcon type={activeKey === data.id ?"icon-wenjianzhankai":"icon-wenjianshouqi"}/></span>
+          </div>
+          <div className={styles.text}>
+            {isEdit || edit ? (
+              <Fragment>
+                <Input
+                  placeholder="请输入名称"
+                  value={areaName}
+                  style={{ width: "70%", marginRight: "2%" }}
+                  allowClear
+                  onPressEnter={(e) => {
+                    e.stopPropagation();
+                    saveItem();
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                  onChange={(e) => {
+                    setAreaName(e.target.value.trim());
+                  }}
+                />
+                <Button
+                  onClick={() => saveItem()}
+                  size="middle"
+                  type="primary"
+                  icon={<CheckCircleOutlined />}
+                ></Button>
+                <Button
+                  onClick={() => {
+                    setIsEdit(false);
+                    onCancel && onCancel(data);
+                  }}
+                  size="middle"
+                  icon={<CloseCircleOutlined />}
+                ></Button>
+              </Fragment>
+            ) : (
+                <div className={styles.groupTitle}>{data.name}
+                  {data.id === 'other' &&
+                  (
+                    !showTips ?
+                    <MyIcon tip="点击查看帮助" type="icon-wenhao" onClick={(e)=> {e.stopPropagation(); setShowTips(true)}} style={{marginLeft:15,color:"#1769FF"}}/>:
+                    <span tip="点击关闭帮助" style={{color:"#1769FF",fontSize:"12px",}} onClick={(e)=> {e.stopPropagation(); setShowTips(false)}}>
+                    （来自手机端采集的资料或者转存的标绘）
+                    </span>)
+                  }
+
+                  <div className={styles.headerTools}>
+                    {
+                      (!isEdit && data.id !=='other') &&
+                      <span className={styles.editNames} onClick={(e) =>{e.stopPropagation(); onAreaEdit(data)}}>
+                        <MyIcon type='icon-bianjimingcheng'/>
+                      </span>
+                    }
+                    <span className={styles.checkBoxForHeader}>
+                      {multiple && <Checkbox checked={ selected.length && selected.indexOf(data.id) !== -1 } onChange={checkColletion} onClick={(e) => e.stopPropagation()}/>}
+                    </span>
+                    {/* 只有不是未分组的才可以显示 */}
+                    {
+                      data.id !=='other' &&
+                      <span className={styles.moreOperations}
+                      onClick={e => e.stopPropagation()}>
+                        <Dropdown
+                        visible={menuShow}
+                        overlay={menu}
+                        onVisibleChange={(val)=>{ setMenuShow(val) }}
+                        trigger="click">
+                          <MyIcon type="icon-gengduo1" />
+                        </Dropdown>
+                      </span>
+                    }
+
+                  </div>
+                </div>
+              )}
+          </div>
+        </Fragment>
+      </div>
+    );
+  };
+
+export const ScoutingItem = ({
+    data,
+    dataSource = [],
+    onCollectionRemove,
+    onEditCollection,
+    areaList,
+    onSelectGroup,
+    onChangeDisplay = () => { },
+    onEditPlanPic = () => { },
+    onCopyCollection,
+    onModifyFeature = () => { },
+    onModifyRemark = () => { },
+    onRemarkSave = () => { },
+    onStopMofifyFeatureInDetails,
+    onDragEnd = ()=>{},
+    onMergeUp,
+    onMergeDown,
+    onMergeCancel
+  }) => {
     return (
       <DragDropContext onDragEnd={onDragEnd.bind(this,data)}>
         <Droppable droppableId="droppable">
@@ -421,7 +501,7 @@ export const ScoutingItem = ({
                 );
               }): <Empty style={{textAlign:"center"}} description="暂无采集数据"/>}
               {provided.placeholder}
-            <div
+            {/* <div
               style={{
                 width: "100%",
                 margin: "5px 0",
@@ -429,74 +509,7 @@ export const ScoutingItem = ({
                 borderTop: "1px solid rgba(0,0,0,0.15)",
               }}
             >
-              <Space size={8}>
-                {!!onUpload && <UploadBtn onChange={startUpload} />}
-                {!!onUploadPlan && (
-                  <Upload
-                    action={`/api/map/ght/${data.id}`}
-                    accept=".jpg, .jpeg, .png, .bmp"
-                    headers={{ Authorization: BASIC.getUrlParam.token }}
-                    beforeUpload={beforeUploadPlan}
-                    transformFile={beforeTransformFile}
-                    data={{ extent: planExtent, transparency }}
-                    onChange={onStartUploadPlan}
-                    showUploadList={false}
-                  >
-                    <Button
-                      title="上传规划图"
-                      type="primary"
-                      shape="circle"
-                      size="large"
-                      ghost
-                      className={globalStyle.global_icon}
-                    >
-                      &#xe6ee;
-                    </Button>
-                  </Upload>
-                )}
-                <ExcelRead id={data.id} group={data} board={board} onExcelSuccess={onExcelSuccess}/>
-                {/* 编辑按钮 */}
-                {/* {!!onAreaEdit && (
-                  <Button
-                    onClick={onAreaEdit.bind(this, data)}
-                    title="编辑分组名称"
-                    type="primary"
-                    shape="circle"
-                    size="large"
-                    ghost
-                  >
-                    <EditOutlined />
-                  </Button>
-                )}
-                */}
-                {/* 删除按钮 */}
-                {!!onAreaDelete && (
-                  <Popconfirm
-                    title={
-                      <span>
-                        确定删除分组[{data.name}]吗？
-                        <br />
-                        此操作不可逆(请确认分组内无任何资料)
-                      </span>
-                    }
-                    okText="确定"
-                    cancelText="取消"
-                    onConfirm={onAreaDelete.bind(this, data)}
-                  >
-                    <Button
-                      title="删除分组"
-                      type="danger"
-                      shape="circle"
-                      size="large"
-                      ghost
-                    >
-                      <DeleteOutlined />
-                    </Button>
-                  </Popconfirm>
-                )}
-              </Space>
-
-            </div>
+            </div> */}
           </div>
           )}
         </Droppable>
@@ -651,6 +664,7 @@ export const UploadItem = ({
           );
           return dom;
         }
+        return void 0;
       });
       if (list.length) return list;
       else return "暂无分组可以选择";
@@ -658,7 +672,7 @@ export const UploadItem = ({
 
     const menu = (
       <Menu onClick={onHandleMenu}>
-        {data.collect_type !== "4" && data.collect_type != "5" && (
+        {data.collect_type !== "4" && data.collect_type !== "5" && (
           <Menu.Item key="editCollection">关联坐标</Menu.Item>
         )}
         <Menu.Item key="eidtTitle">修改名称</Menu.Item>
@@ -927,23 +941,27 @@ export const UploadItem = ({
             </Row>
           </div>
           <div
+            className={styles.uploadItemOperation}
             style={{
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
               paddingRight: "5px",
               flexDirection: "column",
+              fontSize:"1.2rem",
+              lineHeight:"normal",
+              marginLeft:5
             }}
           >
             <span
               className={`${styles.eyes} ${globalStyle.global_icon}`}
-              style={{ color: "#1769FF" }}
+              // style={{ color: "#1769FF" }}
               onClick={(e) => {
                 e.stopPropagation();
                 onChangeDisplay && onChangeDisplay(data);
               }}
             >
-              {data.is_display === "0" ? "显示" : "隐藏"}
+              {data.is_display === "0" ?<MyIcon type="icon-yincang"/>  : <MyIcon type='icon-xianshi'/> }
             </span>
             <Dropdown
               overlay={menu}
@@ -951,7 +969,11 @@ export const UploadItem = ({
               onVisibleChange={(val) => setVisible(val)}
               visible={visible}
             >
-              <span style={{ color: "#1769FF" }}>更多</span>
+              <span
+              // style={{ color: "#1769FF" }}
+              >
+                <MyIcon type="icon-gengduo1"/>
+              </span>
             </Dropdown>
           </div>
         </div>
