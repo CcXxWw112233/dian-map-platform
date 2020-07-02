@@ -22,6 +22,8 @@ const _getMap = (key) => {
   }
 };
 
+const protocol = window.location.protocol;
+
 // 全局的针对Flutter APP进行交互的方法
 const CallWebFunction = (function_name, message, msgType = "objct") => {
   // 需要有调用方法
@@ -183,7 +185,7 @@ let callFunctions = {
   getAddressForName: ({ address = "", offset = 1, fromCity = "" ,types,page = 1}) => {
     if (!address) return Promise.reject({ status: 403 });
     return new Promise((resolve, reject) => {
-      let url = "https://restapi.amap.com/v3/place/text";
+      let url = protocol + "//restapi.amap.com/v3/place/text";
       let params = {
         key: baseConfig.GAODE_SERVER_APP_KEY,
         keywords: address,
@@ -289,7 +291,7 @@ let callFunctions = {
   // 搜索地址
   searchAddress:({address,city})=>{
     return new Promise((resolve,reject) => {
-      let url = "https://restapi.amap.com/v3/geocode/geo";
+      let url = protocol + "//restapi.amap.com/v3/geocode/geo";
       let params = {
         key: baseConfig.GAODE_SERVER_APP_KEY,
         address: address,
