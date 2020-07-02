@@ -10,7 +10,7 @@
     display: flex;
     -ms-flex-direction: column;
     flex-direction: column;
-    width: 250px;
+    width: 254px;
     height: 500px;
     background-color: #fff;
     position: absolute;
@@ -32,7 +32,7 @@
     .body {
       // width: 100%;
       // padding: 0 12px;
-      margin: 10px;
+      margin: 8px;
       // padding-top: 0px;
       .title {
         font-size: 16px;
@@ -61,15 +61,16 @@
           .symbolList {
             display: flex;
             flex-flow: row wrap;
-            justify-content: center;
+            justify-content: left;
             .symbol {
               width: 72px;
-              height: 60px;
+              height: fit-content;
               overflow: hidden;
               white-space: nowrap;
               text-overflow: ellipsis;
               font-size: 12px;
               border-radius: 4px;
+              margin: 2px;
               cursor: pointer;
               .symbolColor {
                 width: 32px;
@@ -104,13 +105,27 @@
           }
         }
       }
-      :global(.ant-upload-list) {
-        display: none;
+      // :global(.ant-upload-list) {
+      //   display: none;
+      // }
+      :global {
+        .ant-upload-list {
+          display: none;
+        }
+        .ant-collapse-content > .ant-collapse-content-box {
+          padding: 0;
+        }
       }
     }
     .footer {
       // margin-right: 4px;
       margin: 0 12px 0 10px;
+    }
+    :global {
+      .ant-tabs-nav {
+        margin: 0;
+        margin-bottom: 4px;
+      }
     }
   }
   .siderbar {

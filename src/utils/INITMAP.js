@@ -11,7 +11,7 @@ import XYZ from "ol/source/XYZ";
 
 import { baseMaps, baseMapDictionary } from "utils/mapSource";
 
-const initMap = 
+const initMap =
 function(){
   return {
     status: null,
@@ -33,6 +33,8 @@ function(){
         });
         this.status = "renderend";
         window.map = this.map;
+        // 屏蔽右键菜单
+        this.map.getViewport().oncontextmenu = ()=>{ return false}
         // 回调
         resolve({ map: this.map, view: this.view });
       });
@@ -41,7 +43,7 @@ function(){
       this.view = new View({
         center: center,
         projection: "EPSG:3857",
-        minZoom: 3,
+        minZoom: 5,
         zoom: 10,
         maxZoom: 18,
         enableRotation:false,

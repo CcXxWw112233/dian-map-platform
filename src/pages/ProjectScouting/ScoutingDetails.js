@@ -21,7 +21,7 @@ import {
 } from "antd";
 import {
   PlusCircleOutlined,
-  CaretRightOutlined 
+  CaretRightOutlined
 } from "@ant-design/icons";
 import Event from "../../lib/utils/event";
 import AudioControl from "./components/audioPlayControl";
@@ -34,9 +34,9 @@ const { TabPane } = Tabs;
 
 
 @connect((
-  { controller: { mainVisible }, 
+  { controller: { mainVisible },
   openswitch:{showFeatureName},
-  lengedList: { config } }) => 
+  lengedList: { config } }) =>
 ({
   mainVisible,
   config,
@@ -100,7 +100,7 @@ export default class ScoutingDetails extends PureComponent {
     Evt.on('CollectionUpdate:remove',this.onCollectionUpdate.bind(this,'remove'))
     Evt.on('CollectionUpdate:add',this.onCollectionUpdate.bind(this,'add'))
     Evt.on('CollectionUpdate:reload',this.onCollectionUpdate.bind(this,'reload'))
-    
+
   }
 
   // 设置正在播放的数据
@@ -360,6 +360,7 @@ export default class ScoutingDetails extends PureComponent {
 
   // 上传中
   filesChange = (val, file, fileList, event) => {
+    // console.log(fileList)
     let { dispatch } = this.props;
     dispatch({
       type:"uploadNormal/updateFileList",
@@ -368,21 +369,25 @@ export default class ScoutingDetails extends PureComponent {
         data: fileList
       }
     })
-    
+
   };
+  removeUploadItem = (file)=>{
+    let { dispatch } = this.props;
+    // 清除上传完成的列表
+    setTimeout(()=>{
+      dispatch({
+        type:"uploadNormal/uploadSuccess",
+        payload:{
+          uid:file.uid
+        }
+      })
+    },2000)
+  }
   // 上传完成
   fileUpload = (val, resp,file, event) => {
-    let { dispatch } = this.props;
     if (resp) {
-      // 清除上传完成的列表
-      setTimeout(()=>{
-        dispatch({
-          type:"uploadNormal/uploadSuccess",
-          payload:{
-            uid:file.uid
-          }
-        })
-      },2000)
+      // 清除上传完成的数据
+      this.removeUploadItem(file);
       message.success("上传成功");
       let { file_resource_id, suffix, original_file_name } = resp;
 
@@ -407,8 +412,10 @@ export default class ScoutingDetails extends PureComponent {
     }
   };
 
-  onAddError = () => {
-    // message.error('添加失败，请稍后重试')
+  onAddError = (resp,file) => {
+    // console.dir(resp)
+    message.error(file.name + '上传失败，请稍后重试');
+    this.removeUploadItem(file)
   };
 
   // 删除采集的资料
@@ -530,7 +537,7 @@ export default class ScoutingDetails extends PureComponent {
         // console.log(res);
         this.cancelEditCollection();
         this.fetchCollection();
-        let f = editType == "editCoordinate" ? "关联坐标完成" : "修改名称完成";
+        let f = editType === "editCoordinate" ? "关联坐标完成" : "修改名称完成";
         message.success(f);
       })
       .catch((err) => {
@@ -769,7 +776,7 @@ export default class ScoutingDetails extends PureComponent {
     });
   };
 
-  // 
+  //
   onBeforeUploadPlan = ()=>{
 
   }
@@ -1039,7 +1046,7 @@ export default class ScoutingDetails extends PureComponent {
         reject(err);
       })
     })
-    
+
   }
 
   // 上下合并,取消合并
@@ -1147,7 +1154,6 @@ export default class ScoutingDetails extends PureComponent {
               ref={this.scrollView}
             >
               <Collapse
-                expandIconPosition="right"
                 onChange={(e) => {
                   this.setActiveCollapse(e);
                 }}
@@ -1178,6 +1184,18 @@ export default class ScoutingDetails extends PureComponent {
                           onSave={this.saveArea.bind(this, item)}
                           onRemarkSave={() => this.saveRemark(item)}
                           multiple={this.state.multipleGroup}
+                          onUploadPlanStart={this.onUploadPlanStart.bind(
+                            this,
+                            item
+                          )}
+                          onChange={this.filesChange.bind(this, item)}
+                          onUpload={this.fileUpload.bind(this, item)}
+                          onUploadPlan={this.onUploadPlan.bind(this, item)}
+                          onUploadPlanCancel={this.onUploadPlanCancel}
+                          onError={this.onAddError}
+                          onAreaDelete={this.onAreaDelete}
+                          onExcelSuccess={this.onExcelSuccess}
+                          dispatch={dispatch}
                         // onDragEnter={e => {this.setState({area_active_key: item.id})}}
                         />
                       }
@@ -1190,25 +1208,14 @@ export default class ScoutingDetails extends PureComponent {
                         // onDrop={()=> console.log(item)}
                         style={activeStyle}
                         data={item}
-                        onAreaEdit={this.onAreaEdit.bind(this, true)}
-                        onAreaDelete={this.onAreaDelete}
                         onSelectGroup={this.onSelectGroup}
-                        onChange={this.filesChange.bind(this, item)}
-                        onUpload={this.fileUpload.bind(this, item)}
                         dataSource={item.collection}
-                        onError={this.onAddError}
                         areaList={area_list}
-                        onUploadPlan={this.onUploadPlan.bind(this, item)}
                         onCollectionRemove={this.onCollectionRemove.bind(
                           this,
                           item
                         )}
                         onEditCollection={this.onEditCollection}
-                        onUploadPlanStart={this.onUploadPlanStart.bind(
-                          this,
-                          item
-                        )}
-                        onUploadPlanCancel={this.onUploadPlanCancel}
                         onChangeDisplay={this.onChangeDisplay.bind(this, item)}
                         onEditPlanPic={this.onEditPlanPic.bind(this, item)}
                         onRemarkSave={this.onRemarkSave}
@@ -1217,7 +1224,7 @@ export default class ScoutingDetails extends PureComponent {
                         onStopMofifyFeatureInDetails={() => this.onStopMofifyFeatureInDetails()}
                         onToggleChangeStyle={this.onToggleChangeStyle}
                         onCopyCollection={this.onCopyCollection}
-                        onExcelSuccess={this.onExcelSuccess}
+
                         onDragEnd={this.onCollectionDragEnd}
                         onMergeDown={this.CollectionMerge.bind(this,'down',item)}
                         onMergeUp={this.CollectionMerge.bind(this,'up',item)}
@@ -1228,7 +1235,7 @@ export default class ScoutingDetails extends PureComponent {
                 })}
                 {/* 没有未分组数据的时候，不显示未分组 */}
                 {
-                  not_area_id_collection.length && 
+                  not_area_id_collection.length &&
                   <Collapse.Panel
                     key="other"
                     style={{ backgroundColor: "#fff", marginBottom: "10px" }}
@@ -1305,7 +1312,7 @@ export default class ScoutingDetails extends PureComponent {
                 >
                   新增
                 </Button>
-                <Button 
+                <Button
                 shape="round"
                 type="primary"
                 disabled={area_list.length < 2}
@@ -1331,7 +1338,7 @@ export default class ScoutingDetails extends PureComponent {
                       }
                     }>
                       <Form.Item label="播放模式" name='mode'>
-                        <Radio.Group buttonStyle="solid" 
+                        <Radio.Group buttonStyle="solid"
                         size="small">
                           <Radio.Button value="hand">手动</Radio.Button>
                           <Radio.Button value='auto'>自动</Radio.Button>
@@ -1343,7 +1350,7 @@ export default class ScoutingDetails extends PureComponent {
                         {({getFieldValue }) => {
                           return (
                             <Form.Item name="time" label="播放间隔">
-                              <InputNumber value={PlayCollectionAction.autoPlayTime} size="small" 
+                              <InputNumber value={PlayCollectionAction.autoPlayTime} size="small"
                               max={60}
                               formatter={value => `${value}s`}
                               parser={value => value.replace('s', '')}
@@ -1366,7 +1373,7 @@ export default class ScoutingDetails extends PureComponent {
                     </Form>
                   </div>
                 }>
-                  <Button shape="round" 
+                  <Button shape="round"
                   icon={<MyIcon type="icon-bofang"/>}
                   ghost
                   size="small"
@@ -1375,7 +1382,7 @@ export default class ScoutingDetails extends PureComponent {
                     演播
                   </Button>
                 </Popover>
-                
+
               </Space>
             </div>
           </TabPane>

@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "./Panel.less";
 import areaSearchAction from "@/lib/components/Search/AreaSearch";
-import Event from "../../lib/utils/event";
+import { setSession } from "utils/sessionManage";
 
 import { Select, Button } from "antd";
 
@@ -42,11 +42,13 @@ export default class AreaPanel extends React.Component {
     });
   }
 
-  updatePublicData = (name, code) => {
-    const queryStr = `${name}='${code}'`;
+  updatePublicData = (type, code, name) => {
+    const queryStr = `${type}='${code}'`;
     const { changeQueryStr } = this.props;
+    setSession("xzqhCode", `${type}|${code}|${name}`);
     changeQueryStr && changeQueryStr(queryStr);
   };
+
   // 省份选择
   handleProvinceSelectChange = (val) => {
     this.setState(
@@ -67,7 +69,7 @@ export default class AreaPanel extends React.Component {
           return item.code === val;
         })[0].name;
         this.props.updateLocationName(name);
-        this.updatePublicData("provincecode", val);
+        this.updatePublicData("provincecode", val, name);
         const { provinceCode } = this.state;
         areaSearchAction.getCity(provinceCode).then((res) => {
           if (res.code === "0") {
@@ -97,7 +99,7 @@ export default class AreaPanel extends React.Component {
           return item.code === val;
         })[0].name;
         this.props.updateLocationName(name);
-        this.updatePublicData("citycode", val);
+        this.updatePublicData("citycode", val, name);
         const { cityCode } = this.state;
         areaSearchAction.getDistrict(cityCode).then((res) => {
           if (res.code === "0") {
@@ -123,8 +125,8 @@ export default class AreaPanel extends React.Component {
         const name = this.state.districtOptions.filter((item) => {
           return item.code === val;
         })[0].name;
-        this.updatePublicData("districtcode", val);
         this.props.updateLocationName(name);
+        this.updatePublicData("districtcode", val, name);
         const { districtCode } = this.state;
         areaSearchAction.getTown(districtCode).then((res) => {
           if (res.code === "0") {
@@ -150,6 +152,7 @@ export default class AreaPanel extends React.Component {
           return item.code === val;
         })[0].name;
         this.props.updateLocationName(name);
+        this.updateXZQHSession(val, name);
         const { townCode } = this.state;
         areaSearchAction.getVillige(townCode).then((res) => {
           if (res.code === "0") {

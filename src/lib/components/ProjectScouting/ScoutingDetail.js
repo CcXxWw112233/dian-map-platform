@@ -55,7 +55,7 @@ function Action() {
     GET_DOWNLOAD_URL,
   } = config;
   this.activeFeature = {};
-  this.layerId = "scoutingDetailLayer"
+  this.layerId = "scoutingDetailLayer";
   this.Layer = Layer({ id: this.layerId, zIndex: 11 });
   this.Source = Source();
   this.features = [];
@@ -335,7 +335,7 @@ function Action() {
   // 渲染标绘数据
   this.renderFeaturesCollection = async (
     data,
-    { lenged, dispatch, addSource = true ,showFeatureName}
+    { lenged, dispatch, addSource = true, showFeatureName }
   ) => {
     const commonStyleOption = {
       textFillColor: "rgba(255,0,0,1)",
@@ -364,7 +364,7 @@ function Action() {
     }
 
     let hasImages = [];
-    for(let i = 0; i < data.length ; i++){
+    for (let i = 0; i < data.length; i++) {
       let item = data[i];
       let content = item.content;
       // console.log(item)
@@ -382,7 +382,7 @@ function Action() {
       if (featureType.indexOf("/") > -1) {
         isImage = true;
         if (featureType.indexOf("https") === 0) {
-          iconUrl = featureType
+          iconUrl = featureType;
         } else {
           featureType = featureType.replace("img", "");
           iconUrl = require("../../../assets" + featureType);
@@ -411,6 +411,11 @@ function Action() {
                 : content.selectName,
             type: featureLowerType,
           };
+          if (content.sigleImage) {
+            let sigleImage = content.sigleImage.replace("img", "");
+            sigleImage = require("../../../assets" + sigleImage);
+            obj.sigleImage = sigleImage;
+          }
           this.lenged.content.push(obj);
         }
       }
@@ -444,7 +449,7 @@ function Action() {
           img.crossorigin = "anonymous";
           img.src = iconUrl;
           const me = this;
-          let promise = new Promise((resolve,reject) => {
+          let promise = new Promise((resolve, reject) => {
             img.onload = function () {
               const pat = context.createPattern(img, "repeat");
               let options = {
@@ -456,17 +461,17 @@ function Action() {
               };
               myStyle = createStyle(content.geoType, options);
               feature.setStyle(myStyle);
-              
+
               resolve(feature);
               // me.features.push(feature);
               return;
             };
-          })
+          });
           hasImages.push(promise);
           // return;
           continue;
         }
-        
+
         myStyle = createStyle(content.geoType, {
           ...commonStyleOption,
           strokeWidth: 2,
@@ -484,6 +489,18 @@ function Action() {
         this.layer.plotEdit.plotClickCb = this.handlePlotClick.bind(this);
         operator.data = item;
         operator.updateFeatueToDB = this.updateFeatueToDB.bind(this);
+
+        // 单个图片的多边形
+        if (content.sigleImage) {
+          let iconUrl = "";
+          if (content.sigleImage.indexOf("https") === 0) {
+            iconUrl = content.sigleImage;
+          } else {
+            iconUrl = content.sigleImage.replace("img", "");
+            iconUrl = require("../../../assets" + iconUrl);
+          }
+          plotEdit.plottingLayer.plotEdit.createPlotOverlay(iconUrl, operator);
+        }
       }
       this.features.push(feature);
     }
@@ -494,15 +511,15 @@ function Action() {
     if (!addSource) {
       return this.features;
     }
-    lst.forEach(item => {
-      let obj = data.find(d => d.id === item.get('id'));
+    lst.forEach((item) => {
+      let obj = data.find((d) => d.id === item.get("id"));
       let operator = this.layer._addFeature(item);
       operator.isScouting = true;
       operator.data = obj;
       operator.updateFeatueToDB = this.updateFeatueToDB.bind(this);
       this.layer.projectScoutingArr.push(operator);
       this.layer.plotEdit.plotClickCb = this.handlePlotClick.bind(this);
-    })
+    });
     let newConfig = [];
     if (!lenged) {
       lenged = [];
@@ -537,7 +554,7 @@ function Action() {
   // 渲染feature
   this.renderCollection = async (
     data,
-    { lenged, dispatch, animation = true ,showFeatureName}
+    { lenged, dispatch, animation = true, showFeatureName }
   ) => {
     // 删除元素
     this.removeFeatures();
@@ -552,21 +569,23 @@ function Action() {
     }
     // 取出有子集的数据，合并到列表展示中
     let arr = [];
-    data.forEach(item => {
-      if(item.type !== 'groupCollection'){
+    data.forEach((item) => {
+      if (item.type !== "groupCollection") {
         arr.push(item);
-      }
-      else {
+      } else {
         arr = arr.concat(item.child);
       }
-    })
+    });
     // 将所有数据更新
-    data = arr ;
+    data = arr;
     // 过滤不显示的数据
     data = data.filter((item) => item.is_display === "1");
 
     let ponts = data.filter(
-      (item) => item.collect_type !== "4" && item.collect_type !== "5" && item.collect_type !== 'group'
+      (item) =>
+        item.collect_type !== "4" &&
+        item.collect_type !== "5" &&
+        item.collect_type !== "group"
     );
     let features = data.filter((item) => item.collect_type === "4");
     let planPic = data.filter((item) => item.collect_type === "5");
@@ -576,8 +595,12 @@ function Action() {
     this.Source.addFeatures(pointCollection);
 
     // 渲染标绘数据
-    await this.renderFeaturesCollection(features, { lenged, dispatch ,showFeatureName});
-    const sou = this.layer.showLayer.getSource()
+    await this.renderFeaturesCollection(features, {
+      lenged,
+      dispatch,
+      showFeatureName,
+    });
+    const sou = this.layer.showLayer.getSource();
     // 渲染规划图
     let ext = await this.renderPlanPicCollection(planPic);
 
@@ -586,7 +609,9 @@ function Action() {
     let sourceExtent = this.Source.getExtent();
     let subExtent = [Infinity, Infinity, -Infinity, -Infinity];
     let sourceFlag = getExtentIsEmpty(sourceExtent);
-    let souFlag = getExtentIsEmpty(this.layer.showLayer.getSource().getExtent());
+    let souFlag = getExtentIsEmpty(
+      this.layer.showLayer.getSource().getExtent()
+    );
     let extFlag = getExtentIsEmpty(ext);
     // 规划图和元素都有范围的时候
     if (!souFlag && !extFlag) {
@@ -893,9 +918,9 @@ function Action() {
 
     let element = overlay.getElement();
     element.parentNode && element.parentNode.classList.add(className);
-    setTimeout(()=>{
-      element.parentNode && (element.parentNode.style.visibility = 'visible');
-    },850)
+    setTimeout(() => {
+      element.parentNode && (element.parentNode.style.visibility = "visible");
+    }, 850);
     return element;
   };
 
@@ -958,21 +983,21 @@ function Action() {
           isLoading = false;
         };
       },
-      preview: async (val)=>{
+      preview: async (val) => {
         // console.log(val)
-        let { target , resource_url, resource_id} = val;
+        let { target, resource_url, resource_id } = val;
         let ty = this.checkCollectionType(target);
-        if(ty === 'word'){
-          if(target === 'pdf'){
+        if (ty === "word") {
+          if (target === "pdf") {
             // pdf只需要打开
-            window.open(resource_url ,'_blank');
-          }else {
+            window.open(resource_url, "_blank");
+          } else {
             let data = await GET_DOWNLOAD_URL(resource_id);
             let message = data.message;
-            window.open(message,'_blank');
+            window.open(message, "_blank");
           }
         }
-      }
+      },
     };
   };
 
@@ -982,8 +1007,7 @@ function Action() {
     this.removeFeatures();
     this.removeAreaSelect();
     this.removePlanPicCollection();
-    if(!flag)
-    InitMap.map.removeLayer(this.Layer);
+    if (!flag) InitMap.map.removeLayer(this.Layer);
   };
   this.RemoveArea = async (id) => {
     return await DELETE_AREA(id);
@@ -1353,50 +1377,49 @@ function Action() {
 
   // 保存排序操作
   this.saveSortCollection = async (data) => {
-    return await SORT_COLLECTION_DATA(data)
-  }
+    return await SORT_COLLECTION_DATA(data);
+  };
   // 保存合并操作
-  this.saveMergeCollection = async (data)=>{
+  this.saveMergeCollection = async (data) => {
     return await MERGE_COLLECTION(data);
-  }
+  };
   // 取消合并操作
-  this.cancelMergeCollection = async (data)=>{
+  this.cancelMergeCollection = async (data) => {
     return await CANCEL_COLLECTION_MERGE(data);
-  }
+  };
   // 采集资料的点击事件
-  this.handleCollection = async (val)=>{
-    let { target ,resource_url,title ,resource_id} = val;
+  this.handleCollection = async (val) => {
+    let { target, resource_url, title, resource_id } = val;
     let pointType = this.checkCollectionType(target);
-    if(pointType === 'word'){
-      if(target === 'pdf'){
+    if (pointType === "word") {
+      if (target === "pdf") {
         // pdf只需要打开
-        window.open(resource_url ,'_blank');
-      }else {
+        window.open(resource_url, "_blank");
+      } else {
         let data = await GET_DOWNLOAD_URL(resource_id);
         let message = data.message;
-        window.open(message,'_blank');
+        window.open(message, "_blank");
       }
     }
-    if(pointType === 'unknow'){
+    if (pointType === "unknow") {
       let data = await GET_DOWNLOAD_URL(resource_id);
       let message = data.message;
-      window.open(message,'_blank');
+      window.open(message, "_blank");
     }
-    if(pointType === 'audio' || pointType === 'video'){
-      window.open(resource_url,'_blank');
+    if (pointType === "audio" || pointType === "video") {
+      window.open(resource_url, "_blank");
     }
-    if(pointType === 'pic'){
+    if (pointType === "pic") {
       let img = new Image();
       img.crossorigin = "anonymous";
       img.src = resource_url;
-      img.onload = ()=>{
+      img.onload = () => {
         let w = img.width;
         let h = img.height;
-        PhotoSwipe.show([{ w, h, src:img.src, title }]);
-      }
+        PhotoSwipe.show([{ w, h, src: img.src, title }]);
+      };
     }
-
-  }
+  };
 }
 
 let action = new Action();

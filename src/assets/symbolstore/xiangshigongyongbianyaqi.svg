@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="64px" height="36px" viewBox="0 0 64 36" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>编组 11</title>
+    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="符号库颜色" transform="translate(-912.000000, -117.000000)">
+            <g id="编组-11" transform="translate(912.000000, 117.000000)">
+                <rect id="矩形备份-86" stroke="#FF0000" stroke-width="2" x="1" y="1" width="62" height="34"></rect>
+                <g id="编组备份" transform="translate(13.000000, 7.000000)">
+                    <path d="M21.0010007,2.51515075 C23.4434318,4.53274107 25,7.58459255 25,11 C25,14.4154075 23.4434318,17.4672589 21.0010007,19.4848492 C18.5569908,17.4680874 17,14.4158711 17,11 C17,7.62492653 18.5200209,4.60487296 20.91284,2.58706209 Z" id="形状结合备份-10" fill="#FF0000" style="mix-blend-mode: overlay;"></path>
+                    <circle id="椭圆形备份-2" stroke="#FF0000" stroke-width="2" style="mix-blend-mode: overlay;" cx="14" cy="11" r="10"></circle>
+                    <rect id="矩形备份" fill="#FF0000" x="0" y="10" width="4" height="2"></rect>
+                    <circle id="椭圆形备份-3" stroke="#FF0000" stroke-width="2" style="mix-blend-mode: overlay;" cx="28" cy="11" r="10"></circle>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

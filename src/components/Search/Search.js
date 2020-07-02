@@ -10,6 +10,7 @@ import AreaPanel from "./AreaPanel";
 import LocationPanel from "./LocationPanel";
 import { getMyPosition } from "utils/getMyPosition";
 import { BASIC } from "../../services/config";
+import { setSession, getSession } from "utils/sessionManage";
 
 import { connect } from "dva";
 
@@ -31,17 +32,44 @@ export default class Search extends React.Component {
     this.handleSearch = throttle(this.handleSearch, 1000);
   }
   componentDidMount() {
-    getMyPosition.getPosition().then((val) => {
-      if (!val) return;
-      this.setState({
-        locationName: val.addressComponent?.district || this.state.locationName,
-        adcode: val.addressComponent?.adcode,
-      });
-      const queryStr = `districtcode='${val.addressComponent?.adcode}'`;
-      const { changeQueryStr } = this.props;
-      changeQueryStr && changeQueryStr(queryStr);
+    getSession("xzqhCode").then((res) => {
+      if (res.code === 0) {
+        if (!res.data) {
+          getMyPosition.getPosition().then((val) => {
+            if (!val) return;
+            setSession(
+              "xzqhCode",
+              `districtcode|${val.addressComponent?.adcode}|${val.addressComponent?.district}`
+            );
+            const options = {
+              type: "districtcode",
+              adcode: val.addressComponent?.adcode,
+              locationName: val.addressComponent?.district,
+            };
+            this.updateState(options);
+          });
+        } else {
+          const tempArr = res.data.split("|");
+          const options = {
+            type: tempArr[0],
+            adcode: tempArr[1],
+            locationName: tempArr[2],
+          };
+          this.updateState(options);
+        }
+      }
     });
   }
+
+  updateState = (val) => {
+    this.setState({
+      locationName: val.locationName,
+      adcode: val.adcode,
+    });
+    const queryStr = `${val.type}='${val.adcode}'`;
+    const { changeQueryStr } = this.props;
+    changeQueryStr && changeQueryStr(queryStr);
+  };
   handleAreaClick = () => {
     this.setState({
       showArea: true,

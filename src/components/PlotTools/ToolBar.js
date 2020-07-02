@@ -14,6 +14,7 @@ import PlotToolPanel from "./PlotInfoPanel";
 import TempPlotPanel from "./TempPlotPanel";
 import SymbolStore from "./SymbolStore";
 import FeatureOperatorEvent from "../../utils/plot2ol/src/events/FeatureOperatorEvent";
+import mapApp from "utils/INITMAP";
 
 import { connect } from "dva";
 
@@ -262,55 +263,81 @@ export default class ToolBar extends Component {
       const me = this;
       const { dispatch } = this.props;
       this.plotLayer.on(FeatureOperatorEvent.ACTIVATE, (e) => {
-        const featureOperator = e.feature_operator;
-        window.featureOperator = featureOperator;
-        me.child.changeOKBtnState(false)
-        dispatch({
-          type: "modal/updateData",
-          payload: {
-            responseData: featureOperator.responseData,
-            featureName: featureOperator.attrs.name,
-            selectName: featureOperator.attrs.selectName,
-            featureType: featureOperator.attrs.featureType,
-            remarks: featureOperator.attrs.remark,
-            strokeColorStyle: featureOperator.attrs.strokeColor,
-          },
-        });
-        dispatch({
-          type: "plotting/setPotting",
-          payload: {
-            operator: featureOperator,
-            type: featureOperator.attrs.plottingType,
-          },
-        });
+        if (!e.feature_operator.isScouting) {
+          const featureOperator = e.feature_operator;
+          window.featureOperator = featureOperator;
+          me.child.changeOKBtnState(false);
+          dispatch({
+            type: "modal/updateData",
+            payload: {
+              responseData: featureOperator.responseData,
+              featureName: featureOperator.attrs.name,
+              selectName: featureOperator.attrs.selectName,
+              featureType: featureOperator.attrs.featureType,
+              remarks: featureOperator.attrs.remark,
+              strokeColorStyle: featureOperator.attrs.strokeColor,
+            },
+          });
+          dispatch({
+            type: "plotting/setPotting",
+            payload: {
+              operator: featureOperator,
+              type: featureOperator.attrs.plottingType,
+            },
+          });
+        }
       });
       this.plotLayer.on(FeatureOperatorEvent.DEACTIVATE, (e) => {
-        window.featureOperator && delete window.featureOperator;
-        me.child.changeOKBtnState(true)
-        dispatch({
-          type: "modal/updateData",
-          payload: {
-            responseData: null,
-            featureName: null,
-            selectName: null,
-            featureType: null,
-            remarks: null,
-            strokeColorStyle: null,
-          },
-        });
-        dispatch({
-          type: "plotting/setPotting",
-          payload: {
-            operator: null,
-            type: null,
-          },
+        if (!e.feature_operator.isScouting) {
+          window.featureOperator && delete window.featureOperator;
+          me.child.changeOKBtnState(true);
+          me.child.updateOperatorBeforeDeactivate();
+          dispatch({
+            type: "modal/updateData",
+            payload: {
+              responseData: null,
+              featureName: null,
+              selectName: null,
+              featureType: null,
+              remarks: null,
+              strokeColorStyle: null,
+            },
+          });
+          dispatch({
+            type: "plotting/setPotting",
+            payload: {
+              operator: null,
+              type: null,
+            },
+          });
+        }
+      });
+
+      // 控制标绘字体大小
+      mapApp.map.on("moveend", (e) => {
+        const zoom = mapApp.map.getView().getZoom();
+        this.plotLayer.feature_operators.forEach((operator, index) => {
+          let style = operator.feature?.getStyle();
+          const text = style.getText();
+          if (zoom > 12) {
+            text.setFont("15px sans-serif");
+            text.setOffsetY(-40);
+          } else {
+            text.setFont("13px sans-serif");
+            text.setOffsetY(-30);
+          }
+          style.setText(text);
+          this.plotLayer.feature_operators[index].feature.setStyle(style);
         });
       });
     }
   }
 
   deactivate = () => {
+    // this.plotLayer && this.plotLayer.plotDraw.deactivate();
+    // this.plotLayer && this.plotLayer.plotEdit.deactivate();
     plotEdit.deactivate();
+    this.child && this.child.handleOKClick();
     pointDrawing.deactivate();
     lineDrawing.deactivate();
     polygonDrawing.deactivate();
@@ -441,6 +468,7 @@ export default class ToolBar extends Component {
         ) : null}
         {this.state.showPlotAddpanel ? (
           <PlotToolPanel
+            parent={this}
             onRef={this.onRef}
             plotType={this.state.plotType}
             isModifyPlot={this.state.isModifyPlot}

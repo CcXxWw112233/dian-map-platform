@@ -172,6 +172,20 @@ export default class TempPlotPanel extends React.Component {
           border: `1px solid ${attrs.featureType}`,
         };
       }
+      if (geometryType?.indexOf("Polygon") > -1) {
+        let sigleImage = featureOperator.attrs.sigleImage;
+        if (sigleImage) {
+          sigleImage = sigleImage.replace("img", "");
+          sigleImage = require("../../assets" + sigleImage);
+          style = {
+            ...style,
+            backgroundImage: `url(${sigleImage})`,
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+            backgroundSize: "100%",
+          };
+        }
+      }
       return style;
     }
     return null;
