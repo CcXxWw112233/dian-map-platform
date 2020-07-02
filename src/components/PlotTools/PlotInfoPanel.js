@@ -111,7 +111,7 @@ export default class PlotInfoPanel extends Component {
 
   updateProps = () => {
     this.setState({
-      selectedIndex: 0,
+      selectedIndex: "0|0",
     });
     const { dispatch } = this.props;
     dispatch({
@@ -1087,23 +1087,27 @@ export default class PlotInfoPanel extends Component {
             )} */}
             {this.state.symbols.length > 0 ? (
               <div className={styles.symbolBlock}>
-                {this.state.symbols.map((item0, index) => {
+                {this.state.symbols.map((item0, index0) => {
                   return (
                     <div className={styles.symbolBlock} key={item0.type}>
                       <p>{item0.type}</p>
                       <div className={styles.symbolList}>
-                        {item0.items.map((item, index) => {
+                        {item0.items.map((item, index1) => {
                           return (
                             <div
                               title={item.name}
                               className={`${styles.symbol} ${
-                                this.state.selectedIndex === index
+                                this.state.selectedIndex ===
+                                `${index0}|${index1}`
                                   ? styles.symbolActive
                                   : ""
                               }`}
-                              key={index}
+                              key={`${index0}|${index1}`}
                               onClick={() =>
-                                this.handleSymbolItemClick(item, index)
+                                this.handleSymbolItemClick(
+                                  item,
+                                  `${index0}|${index1}`
+                                )
                               }
                             >
                               <div
