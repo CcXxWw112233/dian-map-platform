@@ -312,6 +312,7 @@ export default class PlotInfoPanel extends Component {
   };
 
   createImage = (operator) => {
+    if (!operator) return
     if (this.sigleImage) {
       let iconUrl = "";
       if (this.sigleImage.indexOf("https") === 0) {
@@ -336,7 +337,7 @@ export default class PlotInfoPanel extends Component {
   };
 
   updateRedux = (list) => {
-    this.createImage(list[list.length - 1]);
+    this.createImage(window.featureOperator);
     const { dispatch } = this.props;
     let newList = [];
     if (this.selectName) {
