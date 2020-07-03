@@ -355,7 +355,7 @@ export const ScoutingHeader = (props) => {
                     !showTips ?
                     <MyIcon tip="点击查看帮助" type="icon-wenhao" onClick={(e)=> {e.stopPropagation(); setShowTips(true)}} style={{marginLeft:15,color:"#1769FF"}}/>:
                     <span tip="点击关闭帮助" style={{color:"#1769FF",fontSize:"12px",}} onClick={(e)=> {e.stopPropagation(); setShowTips(false)}}>
-                    （来自手机端采集的资料或者转存的标绘）
+                    （来自手机端采集的资料或转存的标绘）
                     </span>)
                   }
 
