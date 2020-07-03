@@ -317,6 +317,14 @@ export default class PlotInfoPanel extends Component {
       }
       plotEdit.plottingLayer.plotEdit.createPlotOverlay(iconUrl, operator);
       this.sigleImage = null;
+    } else {
+      const overlayId = operator.feature.get("overlayId");
+      if (overlayId) {
+        const lastOverlay = InitMap.map.getOverlayById(overlayId);
+        if (lastOverlay) {
+          InitMap.map.removeOverlay(lastOverlay);
+        }
+      }
     }
   };
 
@@ -529,7 +537,6 @@ export default class PlotInfoPanel extends Component {
             selectName: selectName,
             remark: this.props.remarks,
           };
-          this.addPlot(style, attrs);
         } else {
           if (featureType.indexOf("https") === 0) {
             iconUrl = featureType;
@@ -1056,34 +1063,6 @@ export default class PlotInfoPanel extends Component {
             ></ColorPicker>
           </div>
           <div className={styles.symbolPanel}>
-            {/* {this.state.symbols.length > 0 ? (
-              <div className={styles.symbolBlock}>
-                <div className={styles.symbolList}>
-                  {this.state.symbols.map((item, index) => {
-                    return (
-                      <div
-                        title={item.name}
-                        className={`${styles.symbol} ${
-                          this.state.selectedIndex === index
-                            ? styles.symbolActive
-                            : ""
-                        }`}
-                        key={index}
-                        onClick={() => this.handleSymbolItemClick(item, index)}
-                      >
-                        <div
-                          className={styles.symbolColor}
-                          style={this.getSymbol(item)}
-                        ></div>
-                        <span>{item.name || item.icon_name}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ) : (
-              <Skeleton paragraph={{ rows: 6 }} />
-            )} */}
             {this.state.symbols.length > 0 ? (
               <div className={styles.symbolBlock}>
                 {this.state.symbols.map((item0, index0) => {
@@ -1102,12 +1081,13 @@ export default class PlotInfoPanel extends Component {
                                   : ""
                               }`}
                               key={`${index0}|${index1}`}
-                              onClick={() =>
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 this.handleSymbolItemClick(
                                   item,
                                   `${index0}|${index1}`
-                                )
-                              }
+                                );
+                              }}
                             >
                               <div
                                 className={styles.symbolColor}

@@ -368,7 +368,7 @@ function Action() {
       let item = data[i];
       let content = item.content;
       // console.log(item)
-      if (!content) return;
+      if (!content) continue;
       content = content && JSON.parse(content);
       let featureType = content.featureType || "";
       let strokeColor = content.strokeColor || "";
