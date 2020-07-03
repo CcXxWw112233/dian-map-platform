@@ -263,7 +263,7 @@ const planConf = {
       name: "市政共用设施用地",
       value1: "rgba(80,157,255)",
       value2: "城市规划",
-      value3: "icon",
+      value3: "rgba(80,157,255)",
     },
     {
       id: "供电用地",
