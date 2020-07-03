@@ -181,9 +181,8 @@ let callFunctions = {
     let map = _getMap("map");
     map.un("moveend", MapMoveSearch);
   },
-  // 逆编码转换坐标
-  getAddressForName: ({ address = "", offset = 1, fromCity = "" ,types,page = 1}) => {
-    if (!address) return Promise.reject({ status: 403 });
+  // 搜索地址
+  getAddressPublicFunction:({ address = "", offset = 1, fromCity = "" ,types,page = 1})=>{
     return new Promise((resolve, reject) => {
       let url = protocol + "//restapi.amap.com/v3/place/text";
       let params = {
@@ -205,7 +204,6 @@ let callFunctions = {
               if (offset === 1) {resolve(data.pois[0]) ; return }
               else {
                 resolve(data.pois);
-                window.getAddress && window.getAddress.postMessage(JSON.stringify(data.pois));
                 return ;
               }
             } else {
@@ -220,6 +218,23 @@ let callFunctions = {
         });
     });
   },
+  // 逆编码转换坐标
+  getAddressForName: async ({ address = "", offset = 1, fromCity = "" ,types,page = 1}) => {
+    if (!address) return Promise.reject({ status: 403 });
+    let pois = await callFunctions.getAddressPublicFunction({ address, offset, fromCity ,types,page});
+    if(window.getAddress){
+      let p = pois;
+      p = p.map(item => {
+        let splitLocation = item.location && item.location.split(',');
+        let location = {lng: splitLocation && splitLocation[0],lat: splitLocation && splitLocation[1]};
+        item.location = location;
+        return item;
+      })
+      window.getAddress.postMessage(JSON.stringify(p));
+    }
+    return pois;
+  },
+
   // 通过点搜索周围数据
   SearchForPoint: async (val) => {
     let { position, radius = 200, locationName } = val;
@@ -252,6 +267,19 @@ let callFunctions = {
       callFunctions.StartMove();
     })
     return data;
+  },
+
+  // 通过坐标获取信息数据并且启动地图监听
+  getAddressForLocation:({location,city,offset = 15,radius})=>{
+    // 通过GPS地址查询当前位置
+    callFunctions.SearchPoint({position: location,city ,radius}).then(res => {
+      // 通过GPS的地址查询附近的poi数据
+      callFunctions.getAddressPublicFunction({address:res, offset}).then(pois => {
+        window.getNearbyAddressInfo && window.getNearbyAddressInfo.postMessage(
+          JSON.stringify(pois)
+        );
+      })
+    })
   },
 
   // 绘制标绘
