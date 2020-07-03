@@ -621,15 +621,6 @@ const planConf = {
       value3: "icon",
       value4: "img/symbolstore/shehuitingchechagyongdi.svg",
     },
-    {
-      id: "医疗卫生用地",
-      name: "医疗卫生用地",
-      sigle: true,
-      value1: "rgba(244,0,0, 0.7)",
-      value2: "城市规划",
-      value3: "icon",
-      value4: "img/symbolstore/yiliaoweishengyongdi.svg",
-    },
   ],
 };
 
@@ -727,14 +718,15 @@ const electricPowerConf = {
       value1: "img/symbolstore/10kVzhuxian.svg",
       value2: "电力",
       value3: "icon",
-    },    {
+    },
+    {
       id: "10kV支线",
       name: "10kV支线",
       value1: "img/symbolstore/10kVzhixian.svg",
       value2: "电力",
       value3: "icon",
     },
-  ]
-}
+  ],
+};
 
 export { config, planConf, electricPowerConf };
