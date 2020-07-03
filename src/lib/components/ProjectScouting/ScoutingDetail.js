@@ -448,7 +448,7 @@ function Action() {
           let img = new Image();
           img.crossorigin = "anonymous";
           img.src = iconUrl;
-          const me = this;
+          // const me = this;
           let promise = new Promise((resolve, reject) => {
             img.onload = function () {
               const pat = context.createPattern(img, "repeat");
@@ -699,6 +699,9 @@ function Action() {
   this.setEditPlanPicLayer = (staticImg) => {
     return new Promise((resolve, reject) => {
       if (staticImg) {
+        // console.log(staticImg)
+        let oldZindex = staticImg.getZIndex();
+        staticImg.setZIndex(50);
         this.hideCollectionOverlay();
         // 保存老的source源
         let oldSource = staticImg.getSource();
@@ -779,6 +782,7 @@ function Action() {
             let ext = staticImg.getSource().getImageExtent();
             let opacity = val.opacity;
             let obj = { extent: ext, opacity };
+            staticImg.setZIndex(oldZindex);
             this.showCollectionOverlay();
             resolve(obj);
           },
@@ -786,6 +790,7 @@ function Action() {
             // 更新回原来的数据源
             staticImg.setSource(oldSource);
             staticImg.setOpacity(oldOpacity);
+            staticImg.setZIndex(oldZindex)
             reject({ code: -1, message: "取消编辑" });
             closeAll();
             this.showCollectionOverlay();
