@@ -264,7 +264,6 @@ const planConf = {
       value1: "rgba(80,157,255)",
       value2: "城市规划",
       value3: "icon",
-      value4: "rgba(80,157,255)",
     },
     {
       id: "供电用地",
