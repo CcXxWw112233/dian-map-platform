@@ -84,9 +84,6 @@ export default class SymbolStore extends Component {
           backgroundPosition: "center center",
           backgroundSize: "100%",
         };
-        if (data.sigle) {
-          style.backgroundColor = data.value4;
-        }
         return style;
       } else if (symbolUrl.indexOf("rgb") > -1) {
         style = {
@@ -96,6 +93,11 @@ export default class SymbolStore extends Component {
           backgroundPosition: "center center",
           backgroundSize: "100%",
         };
+        if (data.sigle) {
+          let sigleImage = data.value4.replace("img", "");
+          sigleImage = require("../../assets" + sigleImage);
+          style.backgroundImage = `url(${sigleImage}`;
+        }
         return style;
       }
     }

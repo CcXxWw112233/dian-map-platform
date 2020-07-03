@@ -269,12 +269,17 @@ export default class PlotInfoPanel extends Component {
       strokeColor = data.value3;
     }
     let src = "";
-    if (symbolUrl.indexOf("/") > -1) {
-      if (symbolUrl.indexOf("https") === 0) {
-        src = symbolUrl;
+    if (symbolUrl.indexOf("/") > -1 || data.sigle) {
+      if (!data.sigle) {
+        if (symbolUrl.indexOf("https") === 0) {
+          src = symbolUrl;
+        } else {
+          symbolUrl = symbolUrl.replace("img", "");
+          src = require("../../assets" + symbolUrl);
+        }
       } else {
-        symbolUrl = symbolUrl.replace("img", "");
-        src = require("../../assets" + symbolUrl);
+        let sigleImage = data.value4.replace("img", "");
+        src = require("../../assets" + sigleImage);
       }
       style = {
         ...style,
@@ -285,7 +290,7 @@ export default class PlotInfoPanel extends Component {
         backgroundSize: "100%",
       };
       if (data.sigle) {
-        style.backgroundColor = data.value4;
+        style.backgroundColor = symbolUrl;
       }
     } else if (data.value1.indexOf("rgb") > -1) {
       style = {
@@ -322,6 +327,8 @@ export default class PlotInfoPanel extends Component {
       if (overlayId) {
         const lastOverlay = InitMap.map.getOverlayById(overlayId);
         if (lastOverlay) {
+          delete operator.attrs.sigleImage;
+          delete operator.attrs.strokeColor;
           InitMap.map.removeOverlay(lastOverlay);
         }
       }
@@ -373,7 +380,7 @@ export default class PlotInfoPanel extends Component {
     if (value.value3?.indexOf("rgb") > -1) {
       strokeColor = value.value3;
     }
-    this.sigleImage = null;
+    this.sigleImage = value.value4;
     let selectName = value.name || value.icon_name;
     this.selectName = null;
     let text = "";
@@ -507,74 +514,48 @@ export default class PlotInfoPanel extends Component {
           selectName: selectName,
           remark: remark,
         };
-        // iconUrl = require("../../assets/mark/gegen.png");
-        // let options0 = {
-        //   ...this.commonStyleOptions,
-        //   iconUrl: iconUrl,
-        //   text: text,
-        // };
-        // options0.showName = false;
-        // const style0 = createStyle("Point", options0);
+        if (this.sigleImage) {
+          attrs.sigleImage = this.sigleImage;
+        }
         style = createStyle("Polygon", options);
         // style = [style0, style];
       } else if (featureType.indexOf("/") > -1) {
-        // 展示单个图标的多边形
-        if (value.sigle && value.value4) {
-          this.sigleImage = value.value1;
+        if (featureType.indexOf("https") === 0) {
+          iconUrl = featureType;
+        } else {
+          iconUrl = featureType.replace("img", "");
+          iconUrl = require("../../assets" + iconUrl);
         }
-        if (this.sigleImage) {
-          let options0 = {
-            ...this.commonStyleOptions,
-            fillColor: value.value4,
+        let canvas = document.createElement("canvas");
+        let context = canvas.getContext("2d");
+        let img = new Image();
+        img.src = iconUrl;
+        img.crossorigin = "anonymous";
+        const me = this;
+        img.onload = function () {
+          const pat = context.createPattern(img, "repeat");
+          options = {
+            ...me.commonStyleOptions,
+            fillColor: pat,
             text: text,
           };
-          options0.showName = true;
-          style = createStyle("Polygon", options0);
           attrs = {
             name: text,
-            featureType: value.value4,
-            sigleImage: value.value1,
+            featureType: featureType,
             selectName: selectName,
-            remark: this.props.remarks,
+            remark: me.props.remarks,
           };
-        } else {
-          if (featureType.indexOf("https") === 0) {
-            iconUrl = featureType;
-          } else {
-            iconUrl = featureType.replace("img", "");
-            iconUrl = require("../../assets" + iconUrl);
-          }
-          let canvas = document.createElement("canvas");
-          let context = canvas.getContext("2d");
-          let img = new Image();
-          img.src = iconUrl;
-          img.crossorigin = "anonymous";
-          const me = this;
-          img.onload = function () {
-            const pat = context.createPattern(img, "repeat");
-            options = {
-              ...me.commonStyleOptions,
-              fillColor: pat,
-              text: text,
-            };
-            attrs = {
-              name: text,
-              featureType: featureType,
-              selectName: selectName,
-              remark: me.props.remarks,
-            };
-            let options0 = {
-              ...me.commonStyleOptions,
-              fillColor: "rgba(255,255,255,1)",
-              text: text,
-            };
-            options0.showName = false;
-            const style0 = createStyle("Polygon", options0);
-            style = createStyle("Polygon", options);
-            me.addPlot([style0, style], attrs);
+          let options0 = {
+            ...me.commonStyleOptions,
+            fillColor: "rgba(255,255,255,1)",
+            text: text,
           };
-          return;
-        }
+          options0.showName = false;
+          const style0 = createStyle("Polygon", options0);
+          style = createStyle("Polygon", options);
+          me.addPlot([style0, style], attrs);
+        };
+        return;
       }
     }
     this.addPlot(style, attrs);
