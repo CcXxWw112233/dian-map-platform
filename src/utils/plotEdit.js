@@ -130,7 +130,7 @@ export const plotEdit = {
           JSON.stringify(JSON.parse(operator.data.content)?.coordinates)
         ) {
           const data = operator.data;
-          delete data.sort;
+          data.sort && delete data.sort;
           operator.updateFeatueToDB(data, feature).then((res) => {
             Event.Evt.firEvent("updatePlotFeature", res);
           });
