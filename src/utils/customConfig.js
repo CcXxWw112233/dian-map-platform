@@ -363,8 +363,8 @@ const planConf = {
       value4: "img/symbolstore/yiliaoweishengyongdi.svg",
     },
     {
-      id: "文化娱乐用地",
-      name: "党政机关",
+      id: "教育科研设计用地",
+      name: "教育科研设计用地",
       value1: "rgba(248,155,185, 0.7)",
       value2: "城市规划",
       value3: "rgba(248,155,185, 0.7)",
