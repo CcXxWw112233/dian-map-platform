@@ -2,6 +2,7 @@ import Observable from "ol/Observable";
 import DragPan from "ol/interaction/DragPan";
 import Overlay from "ol/Overlay";
 import Feature from "ol/Feature";
+
 import Constants from "./Constants";
 import * as DomUtils from "../util/dom_util";
 import FeatureEvent from "./events/FeatureEvent";
@@ -10,6 +11,7 @@ import { connectEvent, disconnectEvent } from "../util/core";
 import douglasPeucker from "../../douglasPeucker";
 import { over } from "lodash";
 
+const turf = require("@turf/turf");
 class PlotEdit extends Observable {
   /**
    * @classdesc 图元进行编辑的基类。用来创建控制点，绑定控制点事件，对feature的数据进行处理
@@ -201,7 +203,24 @@ class PlotEdit extends Observable {
       operator.feature.set("overlayId", operator.guid);
     }
     const extent = operator.feature.getGeometry().getExtent();
-    const center = [(extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2];
+    let center = [(extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2];
+    let pt1 = turf.point([-180, 0]);
+    const converted1 = turf.toMercator(pt1);
+
+    let pt2 = turf.point([180, 0]);
+    const converted2 = turf.toMercator(pt2);
+
+    const line1 = turf.lineString([
+      [converted1.geometry.coordinates[0], center[1]],
+      [converted2.geometry.coordinates[0], center[1]],
+    ]);
+    const line2 = turf.lineString(
+      operator.feature.getGeometry().getCoordinates()[0]
+    );
+    const intersects = turf.lineIntersect(line1, line2);
+    pt1 = intersects.features[0].geometry.coordinates;
+    pt2 = intersects.features[1].geometry.coordinates;
+    center = [(pt1[0] + pt2[0]) / 2, (pt1[1] + pt2[1]) / 2];
     const ele = document.createElement("img");
     ele.src = imgUrl;
     ele.alt = "";
@@ -209,6 +228,7 @@ class PlotEdit extends Observable {
       id: operator.guid,
       element: ele,
       position: center,
+      offset: [0, 10],
       positioning: "bottom-center",
     });
     this.map.addOverlay(overlay);

@@ -10,7 +10,7 @@ import {
   polygonDrawing,
   // arrowDrawing,textDrawing
 } from "utils/drawing";
-import PlotToolPanel from "./PlotInfoPanel";
+import PlotInfoPanel from "./PlotInfoPanel";
 import TempPlotPanel from "./TempPlotPanel";
 import SymbolStore from "./SymbolStore";
 import FeatureOperatorEvent from "../../utils/plot2ol/src/events/FeatureOperatorEvent";
@@ -33,7 +33,7 @@ export default class ToolBar extends Component {
           this.setState({
             showPlotAddpanel: false,
             showTempPlotPanel: false,
-            showSymbolStorePanel: true,
+            showSymbolStorePanel: !this.state.showSymbolStorePanel,
           });
         },
       },
@@ -52,10 +52,17 @@ export default class ToolBar extends Component {
               showSymbolStorePanel: false,
               plotType: "Point",
               isModifyPlot: false,
+              pointActive: !this.state.pointActive,
             },
             () => {
-              this.child.updateProps();
-              this.child.createDefaultPlot("MARKER");
+              if (this.state.pointActive) {
+                this.child.updateProps();
+                this.child.createDefaultPlot("MARKER");
+              } else {
+                this.setState({
+                  showPlotAddpanel: false,
+                });
+              }
             }
           );
         },
@@ -75,10 +82,17 @@ export default class ToolBar extends Component {
               showSymbolStorePanel: false,
               plotType: "LineString",
               isModifyPlot: false,
+              polylineActive: !this.state.polylineActive
             },
             () => {
-              this.child.updateProps();
-              this.child.createDefaultPlot("POLYLINE");
+              if (this.state.polylineActive) {
+                this.child.updateProps();
+                this.child.createDefaultPlot("POLYLINE");
+              } else {
+                this.setState({
+                  showPlotAddpanel: false
+                })
+              }
             }
           );
         },
@@ -98,10 +112,17 @@ export default class ToolBar extends Component {
               showSymbolStorePanel: false,
               plotType: "Polygon",
               isModifyPlot: false,
+              polygonActive: !this.state.polygonActive
             },
             () => {
-              this.child.updateProps();
-              this.child.createDefaultPlot("POLYGON");
+              if (this.state.polygonActive) {
+                this.child.updateProps();
+                this.child.createDefaultPlot("POLYGON");
+              } else {
+                this.setState({
+                  showPlotAddpanel: false
+                })
+              }
             }
           );
         },
@@ -121,10 +142,17 @@ export default class ToolBar extends Component {
               showSymbolStorePanel: false,
               plotType: "freePolygon",
               isModifyPlot: false,
+              freePolygonActive: !this.state.freePolygonActive
             },
             () => {
-              this.child.updateProps();
-              this.child.createDefaultPlot("FREEHAND_POLYGON");
+              if (this.state.freePolygonActive) {
+                this.child.updateProps();
+                this.child.createDefaultPlot("FREEHAND_POLYGON");
+              } else {
+                this.setState({
+                  showPlotAddpanel: false
+                })
+              }
             }
           );
         },
@@ -255,6 +283,10 @@ export default class ToolBar extends Component {
       isModifyPlot: false,
       tools: this.tools,
       transformStyle: {},
+      pointActive: false,
+      polylineActive: false,
+      polygonActive: false,
+      freePolygonActive: false,
     };
   }
   componentDidMount() {
@@ -321,7 +353,7 @@ export default class ToolBar extends Component {
           const text = style.getText();
           if (zoom > 12) {
             text.setFont("15px sans-serif");
-            text.setOffsetY(-40);
+            text.setOffsetY(-30);
           } else {
             text.setFont("13px sans-serif");
             text.setOffsetY(-30);
@@ -468,7 +500,7 @@ export default class ToolBar extends Component {
           ></TempPlotPanel>
         ) : null}
         {this.state.showPlotAddpanel ? (
-          <PlotToolPanel
+          <PlotInfoPanel
             parent={this}
             onRef={this.onRef}
             plotType={this.state.plotType}
@@ -477,7 +509,7 @@ export default class ToolBar extends Component {
             hideTempPlotPanel={this.hideTempPlotPanel}
             changeActiveBtn={this.handleToolClick.bind(this)}
             changeOKBtnState={this.changeOKBtnState}
-          ></PlotToolPanel>
+          ></PlotInfoPanel>
         ) : null}
         {this.state.showSymbolStorePanel ? <SymbolStore></SymbolStore> : null}
       </div>

@@ -58,8 +58,8 @@ export default class PlotInfoPanel extends Component {
       showGIF: false,
     };
     this.symbols = {};
-    // this.handlePlotNameChange = throttle(this.handlePlotNameChange, 1000);
-    // this.handlePotRemarkChange = throttle(this.handlePotRemarkChange, 1000);
+    this.handlePlotNameChange = throttle(this.handlePlotNameChange, 100);
+    this.handlePotRemarkChange = throttle(this.handlePotRemarkChange, 100);
     this.commonStyleOptions = {
       textFillColor: "rgba(255,0,0,1)",
       textStrokeColor: "#fff",
@@ -109,9 +109,9 @@ export default class PlotInfoPanel extends Component {
   }
 
   updateProps = () => {
-    this.setState({
-      selectedIndex: "0|0",
-    });
+    // this.setState({
+    //   selectedIndex: "0|0",
+    // });
     const { dispatch } = this.props;
     dispatch({
       type: "modal/updateData",
@@ -142,22 +142,22 @@ export default class PlotInfoPanel extends Component {
   _getSymbolData = async (props) => {
     const { plotType, selectName } = props;
     let res = null;
-    let defaultPlotType = {
-      type: "默认",
-      items: [
-        {
-          id: "默认点",
-          value1: "rgba(155,155,155,0.7)",
-          value3: "rgba(155,155,155,1)",
-          name: "默认点",
-        },
-      ],
-    };
+    // let defaultPlotType = {
+    //   type: "默认",
+    //   items: [
+    //     {
+    //       id: "默认点",
+    //       value1: "rgba(155,155,155,0.7)",
+    //       value3: "rgba(155,155,155,1)",
+    //       name: "默认点",
+    //     },
+    //   ],
+    // };
     if (plotType === "Point") {
       res = await plotServices.GET_POINTSYMBOL();
       const res0 = await symbolStoreServices.GET_ICON();
       res.data = [
-        defaultPlotType,
+        // defaultPlotType,
         { type: "自定义", items: [...res0.data] },
         electricPowerConf,
         ...res.data,
@@ -165,9 +165,10 @@ export default class PlotInfoPanel extends Component {
     }
     if (plotType === "Polyline" || plotType === "LineString") {
       res = await plotServices.GET_POLYLINESYMBOL();
-      defaultPlotType.items[0].id = "默认线";
-      defaultPlotType.items[0].name = "默认线";
-      res.data = [defaultPlotType, ...res.data];
+      // defaultPlotType.items[0].id = "默认线";
+      // defaultPlotType.items[0].name = "默认线";
+      // res.data = [defaultPlotType, ...res.data];
+      res.data = [ ...res.data];
     }
     if (
       plotType === "Polygon" ||
@@ -182,10 +183,10 @@ export default class PlotInfoPanel extends Component {
       // 自定义类型的
       const custom = { type: "自定义", items: [...res0.data] };
       res.data[2].items = [...res.data[2].items, ...config];
-      defaultPlotType.items[0].id = "默认面";
-      defaultPlotType.items[0].name = "默认面";
-      res.data = [defaultPlotType, custom, planConf, ...res.data];
-      // res.data = [planConf, ...res.data];
+      // defaultPlotType.items[0].id = "默认面";
+      // defaultPlotType.items[0].name = "默认面";
+      // res.data = [defaultPlotType, custom, planConf, ...res.data];
+      res.data = [custom, planConf, ...res.data];
     }
     // this.symbols[plotType] = res?.data;
     // let symbols = [];
@@ -574,6 +575,7 @@ export default class PlotInfoPanel extends Component {
           this.plotKeyVal[this.props.plotType],
           this.props.dispatch
         );
+        Event.Evt.firEvent("setPlotDrawStyle", style)
         Event.Evt.firEvent("setAttribute", {
           style: style,
           attrs: attrs,
@@ -665,6 +667,7 @@ export default class PlotInfoPanel extends Component {
         break;
       default:
     }
+    Event.Evt.firEvent("setPlotDrawStyle", style)
     Event.Evt.firEvent("setAttribute", {
       style: style,
       attrs: {
