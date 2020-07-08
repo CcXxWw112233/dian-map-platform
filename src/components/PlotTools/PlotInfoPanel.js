@@ -140,7 +140,7 @@ export default class PlotInfoPanel extends Component {
     this.updateProps();
   }
   _getSymbolData = async (props) => {
-    const { plotType, selectName } = props;
+    const { plotType, selectName, parent } = props;
     let res = null;
     // let defaultPlotType = {
     //   type: "默认",
@@ -154,21 +154,33 @@ export default class PlotInfoPanel extends Component {
     //   ],
     // };
     if (plotType === "Point") {
-      res = await plotServices.GET_POINTSYMBOL();
-      const res0 = await symbolStoreServices.GET_ICON();
-      res.data = [
-        // defaultPlotType,
-        { type: "自定义", items: [...res0.data] },
-        electricPowerConf,
-        ...res.data,
-      ];
+      if (parent.pointSymbols) {
+        res = {};
+        res.data = parent.pointSymbols;
+      } else {
+        res = await plotServices.GET_POINTSYMBOL();
+        const res0 = await symbolStoreServices.GET_ICON();
+        res.data = [
+          // defaultPlotType,
+          { type: "自定义", items: [...res0.data] },
+          electricPowerConf,
+          ...res.data,
+        ];
+        parent.pointSymbols = res.data;
+      }
     }
     if (plotType === "Polyline" || plotType === "LineString") {
-      res = await plotServices.GET_POLYLINESYMBOL();
-      // defaultPlotType.items[0].id = "默认线";
-      // defaultPlotType.items[0].name = "默认线";
-      // res.data = [defaultPlotType, ...res.data];
-      res.data = [ ...res.data];
+      if (parent.polylineSymbols) {
+        res = {};
+        res.data = parent.polylineSymbols;
+      } else {
+        res = await plotServices.GET_POLYLINESYMBOL();
+        // defaultPlotType.items[0].id = "默认线";
+        // defaultPlotType.items[0].name = "默认线";
+        // res.data = [defaultPlotType, ...res.data];
+        res.data = [...res.data];
+        parent.polylineSymbols = res.data;
+      }
     }
     if (
       plotType === "Polygon" ||
@@ -177,16 +189,22 @@ export default class PlotInfoPanel extends Component {
       plotType === "rect" ||
       plotType === "circle"
     ) {
-      res = await plotServices.GET_POLYGONSYMBOL();
-      const res0 = await symbolStoreServices.GET_ICON();
+      if (parent.polygonSymbols) {
+        res = {};
+        res.data = parent.polygonSymbols;
+      } else {
+        res = await plotServices.GET_POLYGONSYMBOL();
+        const res0 = await symbolStoreServices.GET_ICON();
 
-      // 自定义类型的
-      const custom = { type: "自定义", items: [...res0.data] };
-      res.data[2].items = [...res.data[2].items, ...config];
-      // defaultPlotType.items[0].id = "默认面";
-      // defaultPlotType.items[0].name = "默认面";
-      // res.data = [defaultPlotType, custom, planConf, ...res.data];
-      res.data = [custom, planConf, ...res.data];
+        // 自定义类型的
+        const custom = { type: "自定义", items: [...res0.data] };
+        res.data[2].items = [...res.data[2].items, ...config];
+        // defaultPlotType.items[0].id = "默认面";
+        // defaultPlotType.items[0].name = "默认面";
+        // res.data = [defaultPlotType, custom, planConf, ...res.data];
+        res.data = [custom, planConf, ...res.data];
+        parent.polygonSymbols = res.data;
+      }
     }
     // this.symbols[plotType] = res?.data;
     // let symbols = [];
@@ -313,7 +331,7 @@ export default class PlotInfoPanel extends Component {
   };
 
   createImage = (operator) => {
-    if (!operator) return
+    if (!operator) return;
     if (this.sigleImage) {
       let iconUrl = "";
       if (this.sigleImage.indexOf("https") === 0) {
@@ -575,7 +593,7 @@ export default class PlotInfoPanel extends Component {
           this.plotKeyVal[this.props.plotType],
           this.props.dispatch
         );
-        Event.Evt.firEvent("setPlotDrawStyle", style)
+        Event.Evt.firEvent("setPlotDrawStyle", style);
         Event.Evt.firEvent("setAttribute", {
           style: style,
           attrs: attrs,
@@ -667,7 +685,7 @@ export default class PlotInfoPanel extends Component {
         break;
       default:
     }
-    Event.Evt.firEvent("setPlotDrawStyle", style)
+    Event.Evt.firEvent("setPlotDrawStyle", style);
     Event.Evt.firEvent("setAttribute", {
       style: style,
       attrs: {

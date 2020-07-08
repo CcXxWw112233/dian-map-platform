@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "./DataItem.less";
-import { Collapse, Checkbox, Row, Col } from "antd";
+import { Collapse, Checkbox, Row, Col, Radio } from "antd";
 import { MyIcon } from "../../components/utils";
 // import Event from "../../lib/utils/event";
 // import publicDataConf from "./public_data";
@@ -139,18 +139,20 @@ export default class DataItem extends React.Component {
     const indeterminate =
       newDataItemStateList[newStateIndex].indeterminate || false;
     const checkAll = newDataItemStateList[newStateIndex].checkAll || false;
-    return (
-      <Checkbox
-        onChange={this.checkAllBox}
-        indeterminate={indeterminate}
-        name={data.key}
-        checked={checkAll}
-        onClick={(event) => {
-          event.stopPropagation();
-        }}
-        disabled={data.key === "1" ? true : false}
-      />
-    );
+    if (stateIndex !== 0) {
+      return (
+        <Checkbox
+          onChange={this.checkAllBox}
+          indeterminate={indeterminate}
+          name={data.key}
+          checked={checkAll}
+          onClick={(event) => {
+            event.stopPropagation();
+          }}
+          disabled={data.key === "1" ? true : false}
+        />
+      );
+    } else return null;
   };
 
   render() {
@@ -191,7 +193,7 @@ export default class DataItem extends React.Component {
                       </Col>
                     );
                   })
-                : ""}
+                : null}
             </Row>
             {/* </Checkbox.Group> */}
           </Panel>

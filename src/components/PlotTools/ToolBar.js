@@ -30,6 +30,7 @@ export default class ToolBar extends Component {
         cb: () => {
           this.handleToolClick("symbolStore");
           this.deactivate();
+          this.updatePlotTypeState()
           this.setState({
             showPlotAddpanel: false,
             showTempPlotPanel: false,
@@ -53,6 +54,12 @@ export default class ToolBar extends Component {
               plotType: "Point",
               isModifyPlot: false,
               pointActive: !this.state.pointActive,
+              polylineActive: false,
+              polygonActive: false,
+              freePolygonActive: false,
+              arrowActive: false,
+              rectActive: false,
+              cirleActive: false,
             },
             () => {
               if (this.state.pointActive) {
@@ -82,7 +89,13 @@ export default class ToolBar extends Component {
               showSymbolStorePanel: false,
               plotType: "LineString",
               isModifyPlot: false,
-              polylineActive: !this.state.polylineActive
+              polylineActive: !this.state.polylineActive,
+              pointActive: false,
+              polygonActive: false,
+              freePolygonActive: false,
+              arrowActive: false,
+              rectActive: false,
+              cirleActive: false,
             },
             () => {
               if (this.state.polylineActive) {
@@ -90,8 +103,8 @@ export default class ToolBar extends Component {
                 this.child.createDefaultPlot("POLYLINE");
               } else {
                 this.setState({
-                  showPlotAddpanel: false
-                })
+                  showPlotAddpanel: false,
+                });
               }
             }
           );
@@ -112,7 +125,13 @@ export default class ToolBar extends Component {
               showSymbolStorePanel: false,
               plotType: "Polygon",
               isModifyPlot: false,
-              polygonActive: !this.state.polygonActive
+              polygonActive: !this.state.polygonActive,
+              polylineActive: false,
+              pointActive: false,
+              freePolygonActive: false,
+              arrowActive: false,
+              rectActive: false,
+              cirleActive: false,
             },
             () => {
               if (this.state.polygonActive) {
@@ -120,8 +139,8 @@ export default class ToolBar extends Component {
                 this.child.createDefaultPlot("POLYGON");
               } else {
                 this.setState({
-                  showPlotAddpanel: false
-                })
+                  showPlotAddpanel: false,
+                });
               }
             }
           );
@@ -142,7 +161,13 @@ export default class ToolBar extends Component {
               showSymbolStorePanel: false,
               plotType: "freePolygon",
               isModifyPlot: false,
-              freePolygonActive: !this.state.freePolygonActive
+              freePolygonActive: !this.state.freePolygonActive,
+              polygonActive: false,
+              polylineActive: false,
+              pointActive: false,
+              arrowActive: false,
+              rectActive: false,
+              cirleActive: false,
             },
             () => {
               if (this.state.freePolygonActive) {
@@ -150,8 +175,8 @@ export default class ToolBar extends Component {
                 this.child.createDefaultPlot("FREEHAND_POLYGON");
               } else {
                 this.setState({
-                  showPlotAddpanel: false
-                })
+                  showPlotAddpanel: false,
+                });
               }
             }
           );
@@ -174,10 +199,23 @@ export default class ToolBar extends Component {
               showSymbolStorePanel: false,
               plotType: "arrow",
               isModifyPlot: false,
+              arrowActive: !this.state.arrowActive,
+              freePolygonActive: false,
+              polygonActive: false,
+              polylineActive: false,
+              pointActive: false,
+              rectActive: false,
+              cirleActive: false,
             },
             () => {
-              this.child.updateProps();
-              this.child.createDefaultPlot("FINE_ARROW");
+              if (this.state.arrowActive) {
+                this.child.updateProps();
+                this.child.createDefaultPlot("FINE_ARROW");
+              } else {
+                this.setState({
+                  showPlotAddpanel: false,
+                });
+              }
             }
           );
         },
@@ -197,10 +235,23 @@ export default class ToolBar extends Component {
               showSymbolStorePanel: false,
               plotType: "rect",
               isModifyPlot: false,
+              rectActive: !this.state.rectActive,
+              arrowActive: false,
+              freePolygonActive: false,
+              polygonActive: false,
+              polylineActive: false,
+              pointActive: false,
+              cirleActive: false,
             },
             () => {
-              this.child.updateProps();
-              this.child.createDefaultPlot("RECTANGLE");
+              if (this.state.rectActive) {
+                this.child.updateProps();
+                this.child.createDefaultPlot("RECTANGLE");
+              } else {
+                this.setState({
+                  showPlotAddpanel: false,
+                });
+              }
             }
           );
         },
@@ -220,10 +271,23 @@ export default class ToolBar extends Component {
               showSymbolStorePanel: false,
               plotType: "circle",
               isModifyPlot: false,
+              cirleActive: !this.state.cirleActive,
+              rectActive: false,
+              arrowActive: false,
+              freePolygonActive: false,
+              polygonActive: false,
+              polylineActive: false,
+              pointActive: false,
             },
             () => {
-              this.child.updateProps();
-              this.child.createDefaultPlot("CIRCLE");
+              if (this.state.cirleActive) {
+                this.child.updateProps();
+                this.child.createDefaultPlot("CIRCLE");
+              } else {
+                this.setState({
+                  showPlotAddpanel: false,
+                });
+              }
             }
           );
         },
@@ -235,6 +299,7 @@ export default class ToolBar extends Component {
         cb: () => {
           this.toggleActive("coordinateMeasure");
           this.deactivate();
+          this.updatePlotTypeState()
           this.setState({
             showPlotAddpanel: false,
             showTempPlotPanel: false,
@@ -250,6 +315,7 @@ export default class ToolBar extends Component {
         cb: () => {
           this.toggleActive("distanceMeasure");
           this.deactivate();
+          this.updatePlotTypeState()
           this.setState({
             showPlotAddpanel: false,
             showTempPlotPanel: false,
@@ -265,6 +331,7 @@ export default class ToolBar extends Component {
         cb: () => {
           this.toggleActive("areaMeasure");
           this.deactivate();
+          this.updatePlotTypeState()
           this.setState({
             showPlotAddpanel: false,
             showTempPlotPanel: false,
@@ -274,6 +341,9 @@ export default class ToolBar extends Component {
         },
       },
     ];
+    this.pointSymbols = null
+    this.polylineSymbols = null
+    this.polygonSymbols = null
     this.state = {
       active: "",
       showPlotAddpanel: false,
@@ -287,8 +357,24 @@ export default class ToolBar extends Component {
       polylineActive: false,
       polygonActive: false,
       freePolygonActive: false,
+      arrowActive: false,
+      rectActive: false,
+      cirleActive: false,
     };
   }
+
+  // 讲单个标绘类型状态改为false
+  updatePlotTypeState = () => {
+    this.setState({
+      pointActive: false,
+      polylineActive: false,
+      polygonActive: false,
+      freePolygonActive: false,
+      arrowActive: false,
+      rectActive: false,
+      cirleActive: false,
+    });
+  };
   componentDidMount() {
     if (!plotEdit.plottingLayer) {
       this.plotLayer = plotEdit.getPlottingLayer();
@@ -437,6 +523,7 @@ export default class ToolBar extends Component {
             onClick={() => {
               this.deactivate();
               this.handleToolClick("tempPlot");
+              this.updatePlotTypeState()
               this.setState({
                 showTempPlotPanel: true,
                 showPlotAddpanel: false,

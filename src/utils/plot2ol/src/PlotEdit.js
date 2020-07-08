@@ -218,9 +218,38 @@ class PlotEdit extends Observable {
       operator.feature.getGeometry().getCoordinates()[0]
     );
     const intersects = turf.lineIntersect(line1, line2);
-    pt1 = intersects.features[0].geometry.coordinates;
-    pt2 = intersects.features[1].geometry.coordinates;
-    center = [(pt1[0] + pt2[0]) / 2, (pt1[1] + pt2[1]) / 2];
+    //x从小到大排序
+    intersects.features.sort(
+      (a, b) => a.geometry.coordinates[0] - b.geometry.coordinates[0]
+    );
+    let result = 0;
+    for (let i = 0; i < intersects.features.length; i++) {
+      if (intersects.features[i + 1]) {
+        // 计算交点的距离
+        let temp = Math.abs(
+          intersects.features[i].geometry.coordinates[0] -
+            intersects.features[i + 1].geometry.coordinates[0]
+        );
+        if (temp > result) {
+          let tempCenter = [
+            (intersects.features[i].geometry.coordinates[0] +
+              intersects.features[i + 1].geometry.coordinates[0]) /
+              2,
+            (intersects.features[i].geometry.coordinates[1] +
+              intersects.features[i + 1].geometry.coordinates[1]) /
+              2,
+          ];
+          result = temp;
+          center = tempCenter;
+          // const tempPoint = turf.point(center);
+          // const tempPolygon = turf.lineToPolygon(line2);
+          // if (turf.booleanPointInPolygon(tempPoint, tempPolygon) === true) {
+          //   result = temp;
+          //   center = tempCenter
+          // }
+        }
+      }
+    }
     const ele = document.createElement("img");
     ele.src = imgUrl;
     ele.alt = "";
