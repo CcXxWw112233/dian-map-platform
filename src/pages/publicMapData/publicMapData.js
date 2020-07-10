@@ -23,6 +23,7 @@ export default class PublicData extends React.Component {
     this.populationSelect = {};
     // this.queryStr = "districtcode='440117'"
     this.queryStr = "";
+    this.fillColor = null
   }
   componentDidMount() {
     // console.log(m)
@@ -61,7 +62,7 @@ export default class PublicData extends React.Component {
                 PublicDataActions.getPublicData({
                   url: "",
                   data: key,
-                  fillColor: null,
+                  fillColor: this.fillColor,
                 });
               });
             }
@@ -76,7 +77,7 @@ export default class PublicData extends React.Component {
     arr1 = Array.from(new Set(arr1));
     arr2.forEach((item0) => {
       const item = arr1.filter((item1) => {
-        return (item1 = item0);
+        return item1 === item0;
       })?.[0];
       if (!item) {
         arraynew.push(item0);
@@ -91,6 +92,7 @@ export default class PublicData extends React.Component {
   };
   // 选项更新，获取更新的那些数据
   changeData = (oldVal = [], newVal = [], fillColor) => {
+    this.fillColor = fillColor
     // 新增了选项需要显示
     if (newVal.length > oldVal.length || newVal.length === oldVal.length) {
       let arr = this.getItems(oldVal, newVal);

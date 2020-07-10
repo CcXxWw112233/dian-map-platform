@@ -217,13 +217,13 @@ const jsons = {
           ],
         },
         {
-          name: "停车场",
+          name: "公交车站",
           icon: "",
-          key: "map:transport:parking",
+          key: "map:transport:busstop",
           loadFeatureKeys: [
             {
               typeName: "lingxi:ggss_point",
-              cql_filter:  `${queryStr} AND type2='停车场'`,
+              cql_filter:  `${queryStr} AND type2='公交车站'`,
               showName: true,
               style: {
                 iconUrl: require("../../assets/img/chengshi.png"),
