@@ -49,6 +49,11 @@ const jsons = {
               fillColor: "rgba(68,0,10,0.8)",
               property: "population",
             },
+            {
+              scope: ">15",
+              fillColor: "rgba(68,0,10,0.8)",
+              property: "population",
+            },
           ],
         },
         {
@@ -187,6 +192,54 @@ const jsons = {
             {
               typeName: "lingxi:ggss_point",
               cql_filter:  `${queryStr} AND type='1'`,
+              showName: true,
+              style: {
+                iconUrl: require("../../assets/img/chengshi.png"),
+                ...commonStyleOption,
+              },
+            },
+          ],
+        },
+        {
+          name: "停车场",
+          icon: "",
+          key: "map:transport:parking ",
+          loadFeatureKeys: [
+            {
+              typeName: "lingxi:ggss_point",
+              cql_filter:  `${queryStr} AND type2='停车场'`,
+              showName: true,
+              style: {
+                iconUrl: require("../../assets/img/chengshi.png"),
+                ...commonStyleOption,
+              },
+            },
+          ],
+        },
+        {
+          name: "停车场",
+          icon: "",
+          key: "map:transport:parking",
+          loadFeatureKeys: [
+            {
+              typeName: "lingxi:ggss_point",
+              cql_filter:  `${queryStr} AND type2='停车场'`,
+              showName: true,
+              style: {
+                iconUrl: require("../../assets/img/chengshi.png"),
+                ...commonStyleOption,
+              },
+            },
+          ],
+        },
+        {
+          name: "地铁站",
+          icon: "",
+          key: "map:transport:metroStation",
+          loadFeatureKeys: [
+            {
+              typeName: "lingxi:ggss_point",
+              cql_filter:  `${queryStr} AND type2='地铁站'`,
               showName: true,
               style: {
                 iconUrl: require("../../assets/img/chengshi.png"),

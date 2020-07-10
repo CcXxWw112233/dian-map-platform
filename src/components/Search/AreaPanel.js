@@ -152,11 +152,10 @@ export default class AreaPanel extends React.Component {
           return item.code === val;
         })[0].name;
         this.props.updateLocationName(name);
-        this.updateXZQHSession(val, name);
         const { townCode } = this.state;
         areaSearchAction.getVillige(townCode).then((res) => {
           if (res.code === "0") {
-            this.updatePublicData(res);
+            // this.updatePublicData(res);
             this.setState({
               villageOptions: res.data,
             });
