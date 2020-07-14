@@ -29,6 +29,7 @@ export const polygonDrawing = {
       mapApp.map.removeInteraction(this.drawing);
       this.isActive = false;
     }
+    return this.drawing;
   },
 
   getOverlays() {

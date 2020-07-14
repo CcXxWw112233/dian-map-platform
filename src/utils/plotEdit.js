@@ -43,18 +43,12 @@ export const plotEdit = {
   create(type, dispatch) {
     this.drawDispatch = dispatch;
     this.getPlottingLayer(dispatch);
-    this.target.style.cursor = "crosshair";
+    // this.target.style.cursor = "crosshair";
     this.type = type;
     if (type === "MARKER") {
       this.type = "POINT";
     }
     if (type === "FREEHAND_POLYGON") {
-      let interactions = this.map.getInteractions();
-      interactions.forEach((item) => {
-        if (item instanceof DragPan) {
-          item.setActive(false);
-        }
-      });
       this.type = "FREEHANDPOLYGON";
     }
     const PlotTypes = {
@@ -89,14 +83,14 @@ export const plotEdit = {
     const me = this;
     // 标绘激活事件
     this.plottingLayer.on(FeatureOperatorEvent.ACTIVATE, (e) => {
-      if (this.type === "FREEHANDPOLYGON") {
-        let interactions = this.map.getInteractions();
-        interactions.forEach((item) => {
-          if (item instanceof DragPan) {
-            item.setActive(true);
-          }
-        });
-      }
+      // if (this.type === "FREEHANDPOLYGON") {
+      //   let interactions = this.map.getInteractions();
+      //   interactions.forEach((item) => {
+      //     if (item instanceof DragPan) {
+      //       item.setActive(true);
+      //     }
+      //   });
+      // }
 
       if (!e.feature_operator.isScouting) {
         me.target.style.cursor = "default";

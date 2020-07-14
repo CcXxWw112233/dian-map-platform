@@ -554,7 +554,7 @@ function Action() {
   // 渲染feature
   this.renderCollection = async (
     data,
-    { lenged, dispatch, animation = true, showFeatureName }
+    { lenged, dispatch, animation = true, showFeatureName = true }
   ) => {
     // 删除元素
     this.removeFeatures();
@@ -1057,39 +1057,39 @@ function Action() {
   // 添加select选择器
   this.addAreaSelect = () => {
     return;
-    this.removeAreaSelect();
-    this.areaSelect = setSelectInteraction({
-      filter: (feature, layer) => {
-        if (layer && layer.get("id") !== "scoutingDetailLayer") {
-          return false;
-        }
-        if (
-          (feature && !feature.get("collect_type")) ||
-          !feature.get("remark")
-        ) {
-          return false;
-        }
+    // this.removeAreaSelect();
+    // this.areaSelect = setSelectInteraction({
+    //   filter: (feature, layer) => {
+    //     if (layer && layer.get("id") !== "scoutingDetailLayer") {
+    //       return false;
+    //     }
+    //     if (
+    //       (feature && !feature.get("collect_type")) ||
+    //       !feature.get("remark")
+    //     ) {
+    //       return false;
+    //     }
 
-        return true;
-      },
-    });
-    InitMap.map.addInteraction(this.areaSelect);
+    //     return true;
+    //   },
+    // });
+    // InitMap.map.addInteraction(this.areaSelect);
 
-    this.areaSelect.on("select", (e) => {
-      let selected = e.selected[0];
-      if (selected) {
-        if (this.polygonOverlay) {
-          this.polygonOverlay.setPosition(null);
-          InitMap.map.removeOverlay(this.polygonOverlay);
-        }
-        this.addSelectOverlay(selected);
-      } else {
-        if (this.polygonOverlay) {
-          this.polygonOverlay.setPosition(null);
-          InitMap.map.removeOverlay(this.polygonOverlay);
-        }
-      }
-    });
+    // this.areaSelect.on("select", (e) => {
+    //   let selected = e.selected[0];
+    //   if (selected) {
+    //     if (this.polygonOverlay) {
+    //       this.polygonOverlay.setPosition(null);
+    //       InitMap.map.removeOverlay(this.polygonOverlay);
+    //     }
+    //     this.addSelectOverlay(selected);
+    //   } else {
+    //     if (this.polygonOverlay) {
+    //       this.polygonOverlay.setPosition(null);
+    //       InitMap.map.removeOverlay(this.polygonOverlay);
+    //     }
+    //   }
+    // });
     //
   };
 
@@ -1171,7 +1171,7 @@ function Action() {
   };
   // 添加规划图范围
   this.addPlanPictureDraw = (url, files, dispatch) => {
-    console.log(files);
+    // console.log(files);
     // 删除已有的select事件，防止冲突
     this.removeAreaSelect();
     this.hideCollectionOverlay();

@@ -14,6 +14,7 @@ import symbolStoreServices from "../../services/symbolStore";
 import { createStyle } from "@/lib/utils";
 import { setSession, getSession } from "utils/sessionManage";
 import InitMap from "utils/INITMAP";
+import { MyIcon } from '../utils'
 
 import { connect } from "dva";
 
@@ -55,7 +56,8 @@ export default class PlotInfoPanel extends Component {
       plotStroke: "",
       plotFill: "",
       okBtnState: true,
-      showGIF: false,
+      showGIF: true,
+      isOpen: true
     };
     this.symbols = {};
     this.handlePlotNameChange = throttle(this.handlePlotNameChange, 100);
@@ -91,16 +93,19 @@ export default class PlotInfoPanel extends Component {
   componentDidMount() {
     this.getSymbolData(this.props);
     this.props.onRef(this);
-    getSession("usePlot").then((res) => {
-      if (res.code === 0) {
-        if (!res.data) {
-          this.setState({
-            showGIF: true,
-          });
-          setSession("usePlot", "1");
-        }
-      }
-    });
+    // this.setState({
+    //   showGIF: true,
+    // });
+    // getSession("usePlot").then((res) => {
+    //   if (res.code === 0) {
+    //     if (!res.data) {
+    //       this.setState({
+    //         showGIF: true,
+    //       });
+    //       setSession("usePlot", "1");
+    //     }
+    //   }
+    // });
   }
   componentWillReceiveProps(nextProps) {
     if (this.props.plotType !== nextProps.plotType) {
@@ -706,6 +711,7 @@ export default class PlotInfoPanel extends Component {
         featureName: name,
       },
     });
+    return plotEdit.plottingLayer?.plotDraw;
   };
 
   //标绘名称
@@ -1029,109 +1035,119 @@ export default class PlotInfoPanel extends Component {
   render() {
     const { TextArea } = Input;
     const disableStyle = { color: "rgba(0,0,0,0.2)" };
+    const { isOpen } = this.state;
     return (
-      <div className={`${styles.panel} ${globalStyle.autoScrollY}`}>
-        <div
-          className={`${styles.body}`}
-          // style={{ height: "calc(100% - 74px)" }}
-        >
-          {this.createGIF()}
-          <p className={styles.title}>选择符号</p>
-          <div className={styles.row}>
-            <span className={styles.rowspan}>线框颜色</span>
-            <ColorPicker
-              position="bottomRight"
-              colorStyle={
-                this.props.selectName === "自定义类型"
-                  ? this.props.strokeColorStyle
-                  : this.strokeColorStyle
-              }
-              handleOK={this.handleStrokeColorOkClick}
-            ></ColorPicker>
-            <span
-              className={styles.rowspan}
-              style={this.state.plotType === "LineString" ? disableStyle : {}}
-            >
-              填充颜色
-            </span>
-            <ColorPicker
-              position="bottomRight"
-              colorStyle={
-                this.props.selectName === "自定义类型"
-                  ? this.props.featureType
-                  : this.fillColorStyle
-              }
-              disable={this.state.plotType === "LineString" ? true : false}
-              handleOK={this.handleFillColorOkClick}
-            ></ColorPicker>
-          </div>
-          <div className={styles.symbolPanel}>
-            {this.state.symbols.length > 0 ? (
-              <div className={styles.symbolBlock}>
-                {this.state.symbols.map((item0, index0) => {
-                  return (
-                    <div className={styles.symbolBlock} key={item0.type}>
-                      <p>{item0.type}</p>
-                      <div className={styles.symbolList}>
-                        {item0.items.map((item, index1) => {
-                          return (
-                            <div
-                              title={item.name}
-                              className={`${styles.symbol} ${
-                                this.state.selectedIndex ===
-                                `${index0}|${index1}`
-                                  ? styles.symbolActive
-                                  : ""
-                              }`}
-                              key={`${index0}|${index1}`}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                this.handleSymbolItemClick(
-                                  item,
-                                  `${index0}|${index1}`
-                                );
-                              }}
-                            >
-                              <div
-                                className={styles.symbolColor}
-                                style={this.getSymbol(item)}
-                              ></div>
-                              <span>{item.name || item.icon_name}</span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <Skeleton paragraph={{ rows: 6 }} />
-            )}
-          </div>
-          <p className={styles.title} style={{ margin: "10px 0" }}>
-            填写信息
-          </p>
-          <Input
-            placeholder="输入标绘名称(选填)"
-            style={{ marginBottom: 6 }}
-            value={this.props.featureName}
-            onChange={(e) => this.handlePlotNameChange(e.target.value)}
-          ></Input>
-          <TextArea
-            placeholder="填写备注(选填)"
-            style={{ marginBottom: 6, height: 84 }}
-            value={this.props.remarks}
-            onChange={(e) => this.handlePotRemarkChange(e.target.value)}
-          ></TextArea>
-          <Button
-            type="primary"
-            block
-            onClick={this.handleOKClick}
-            disabled={this.state.okBtnState}
+      <div className={`${styles.plotpanel} ${isOpen ? styles.plotpanelActive : styles.plotpanelHide}`} 
+      style={{overflowX:"visible"}}>
+        <div className={`${styles.panel} ${globalStyle.autoScrollY}`}
+        style={{opacity: isOpen ? 1: 0}}>
+          <div
+            className={`${styles.body}`}
+            // style={{ height: "calc(100% - 74px)" }}
           >
-            确定
-          </Button>
+            {this.createGIF()}
+            <p className={styles.title}>选择符号</p>
+            <div className={styles.row}>
+              <span className={styles.rowspan}>线框颜色</span>
+              <ColorPicker
+                position="bottomRight"
+                colorStyle={
+                  this.props.selectName === "自定义类型"
+                    ? this.props.strokeColorStyle
+                    : this.strokeColorStyle
+                }
+                handleOK={this.handleStrokeColorOkClick}
+              ></ColorPicker>
+              <span
+                className={styles.rowspan}
+                style={this.state.plotType === "LineString" ? disableStyle : {}}
+              >
+                填充颜色
+              </span>
+              <ColorPicker
+                position="bottomRight"
+                colorStyle={
+                  this.props.selectName === "自定义类型"
+                    ? this.props.featureType
+                    : this.fillColorStyle
+                }
+                disable={this.state.plotType === "LineString" ? true : false}
+                handleOK={this.handleFillColorOkClick}
+              ></ColorPicker>
+            </div>
+            <div className={styles.symbolPanel}>
+              {this.state.symbols.length > 0 ? (
+                <div className={styles.symbolBlock}>
+                  {this.state.symbols.map((item0, index0) => {
+                    return (
+                      <div className={styles.symbolBlock} key={item0.type}>
+                        <p>{item0.type}</p>
+                        <div className={styles.symbolList}>
+                          {item0.items.map((item, index1) => {
+                            return (
+                              <div
+                                title={item.name}
+                                className={`${styles.symbol} ${
+                                  this.state.selectedIndex ===
+                                  `${index0}|${index1}`
+                                    ? styles.symbolActive
+                                    : ""
+                                }`}
+                                key={`${index0}|${index1}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  this.handleSymbolItemClick(
+                                    item,
+                                    `${index0}|${index1}`
+                                  );
+                                }}
+                              >
+                                <div
+                                  className={styles.symbolColor}
+                                  style={this.getSymbol(item)}
+                                ></div>
+                                <span>{item.name || item.icon_name}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <Skeleton paragraph={{ rows: 6 }} />
+              )}
+            </div>
+            <p className={styles.title} style={{ margin: "10px 0" }}>
+              填写信息
+            </p>
+            <Input
+              placeholder="输入标绘名称(选填)"
+              style={{ marginBottom: 6 }}
+              value={this.props.featureName}
+              onChange={(e) => this.handlePlotNameChange(e.target.value)}
+            ></Input>
+            <TextArea
+              placeholder="填写备注(选填)"
+              style={{ marginBottom: 6, height: 84 }}
+              value={this.props.remarks}
+              onChange={(e) => this.handlePotRemarkChange(e.target.value)}
+            ></TextArea>
+            <Button
+              type="primary"
+              block
+              onClick={this.handleOKClick}
+              disabled={this.state.okBtnState}
+            >
+              确定
+            </Button>
+          </div>
+        </div>
+        <div className={styles.slideToggle} onClick={() => this.setState({isOpen: !isOpen})}>
+          <span style={{transform: isOpen ? 'rotate(-90deg)': 'rotate(90deg)'}} className={styles.slideToggleIcon}>
+              <MyIcon type="icon-kuaisuxinjian_xiala"/>
+          </span>
         </div>
       </div>
     );
