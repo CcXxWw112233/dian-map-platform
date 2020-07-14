@@ -706,6 +706,7 @@ export default class PlotInfoPanel extends Component {
         featureName: name,
       },
     });
+    return plotEdit.plottingLayer?.plotDraw;
   };
 
   //标绘名称

@@ -39,6 +39,7 @@ export const pointDrawing = {
       mapApp.map.removeInteraction(this.drawing);
       this.isActive = false;
     }
+    return this.drawing;
   },
 
   getOverlays() {
