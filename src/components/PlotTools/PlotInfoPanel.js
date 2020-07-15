@@ -78,6 +78,7 @@ export default class PlotInfoPanel extends Component {
       LineString: "POLYLINE",
       Polygon: "POLYGON",
       freePolygon: "FREEHAND_POLYGON",
+      freeLine:"FREEHAND_LINE",
       arrow: "FINE_ARROW",
       rect: "RECTANGLE",
       circle: "CIRCLE",
@@ -174,7 +175,7 @@ export default class PlotInfoPanel extends Component {
         parent.pointSymbols = res.data;
       }
     }
-    if (plotType === "Polyline" || plotType === "LineString") {
+    if (plotType === "Polyline" || plotType === "LineString" || plotType === 'freeLine') {
       if (parent.polylineSymbols) {
         res = {};
         res.data = parent.polylineSymbols;
@@ -281,7 +282,8 @@ export default class PlotInfoPanel extends Component {
         }
       }
     } catch (err) {
-      message.error(err);
+      // message.error(err);
+      console.error(err)
     }
   };
   getSymbol = (data) => {
@@ -328,7 +330,8 @@ export default class PlotInfoPanel extends Component {
     }
     if (
       this.props.plotType === "Polyline" ||
-      this.props.plotType === "LineString"
+      this.props.plotType === "LineString" || 
+      this.props.plotType === "freeLine"
     ) {
       style = { ...style, height: 0, border: `1px solid ${symbolUrl}` };
     }
@@ -496,7 +499,8 @@ export default class PlotInfoPanel extends Component {
     }
     if (
       this.state.plotType === "Polyline" ||
-      this.state.plotType === "LineString"
+      this.state.plotType === "LineString" ||
+      this.state.plotType === "freeLine"
     ) {
       if (featureType.indexOf("rgb") > -1) {
         options = {
@@ -627,7 +631,7 @@ export default class PlotInfoPanel extends Component {
     if (this.props.plotType === "Point") {
       tempType = "点";
     }
-    if (this.props.plotType === "LineString") {
+    if (this.props.plotType === "LineString" || this.props.plotType === 'freeLine') {
       tempType = "线";
     }
     if (
@@ -666,6 +670,7 @@ export default class PlotInfoPanel extends Component {
         };
         style = createStyle("Point", options);
         break;
+      case "FREEHAND_LINE":
       case "POLYLINE":
         options = {
           ...this.commonStyleOptions,
@@ -877,7 +882,7 @@ export default class PlotInfoPanel extends Component {
       };
       delete options.iconUrl;
     }
-    if (this.props.plotType === "LineString") {
+    if (this.props.plotType === "LineString" || this.props.plotType === 'freeLine') {
       options = {
         ...this.commonStyleOptions,
         fillColor: value,
@@ -983,7 +988,7 @@ export default class PlotInfoPanel extends Component {
       };
       delete options.iconUrl;
     }
-    if (this.props.plotType === "LineString") {
+    if (this.props.plotType === "LineString" || this.props.plotType === 'freeLine') {
       options = {
         ...this.commonStyleOptions,
         fillColor: value,
@@ -1045,7 +1050,7 @@ export default class PlotInfoPanel extends Component {
             className={`${styles.body}`}
             // style={{ height: "calc(100% - 74px)" }}
           >
-            {this.createGIF()}
+            {/* {this.createGIF()} */}
             <p className={styles.title}>选择符号</p>
             <div className={styles.row}>
               <span className={styles.rowspan}>线框颜色</span>
@@ -1060,7 +1065,7 @@ export default class PlotInfoPanel extends Component {
               ></ColorPicker>
               <span
                 className={styles.rowspan}
-                style={this.state.plotType === "LineString" ? disableStyle : {}}
+                style={(this.state.plotType === "LineString" || this.state.plotType === "freeLine") ? disableStyle : {}}
               >
                 填充颜色
               </span>
@@ -1071,7 +1076,7 @@ export default class PlotInfoPanel extends Component {
                     ? this.props.featureType
                     : this.fillColorStyle
                 }
-                disable={this.state.plotType === "LineString" ? true : false}
+                disable={(this.state.plotType === "LineString" || this.state.plotType === "freeLine") ? true : false}
                 handleOK={this.handleFillColorOkClick}
               ></ColorPicker>
             </div>
