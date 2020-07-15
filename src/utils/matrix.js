@@ -2,6 +2,7 @@
  * Created by wanghx on 2015/7/12.
  * 矩阵计算组件
  */
+// eslint-disable-next-line no-unused-expressions
 !function(root , fatory){
     if(typeof module === "object" && module.exports){
         module.exports = fatory();

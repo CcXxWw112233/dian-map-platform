@@ -80,7 +80,7 @@ class PlotFactory {
 				return new TailedAttackArrow(points);
 			case PlotTypes.TAILED_SQUAD_COMBAT:
 				return new TailedSquadCombat(points);
-
+			default:;
 		}
 		return null;
 	}

@@ -604,11 +604,13 @@ export default class ToolBar extends Component {
       setTimeout(()=>{
         if(this.activeDraw){
           this.activeDraw.once('draw_end',()=>{
+            // val.cb();
             this.drawEnd();
             this.toggleFreePlygonAndLine(true)
           })
           this.activeDraw.once('drawend',() => {
             this.drawEnd();
+            // val.cb();
           })
         }
         
