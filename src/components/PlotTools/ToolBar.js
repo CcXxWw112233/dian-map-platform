@@ -16,11 +16,11 @@ import SymbolStore from "./SymbolStore";
 import FeatureOperatorEvent from "../../utils/plot2ol/src/events/FeatureOperatorEvent";
 import mapApp from "utils/INITMAP";
 import { Draw ,DragPan} from 'ol/interaction'
-import { message } from 'antd'
+import { message, Badge } from 'antd'
 
 import { connect } from "dva";
 
-@connect(() => ({}))
+@connect(({featureOperatorList: { featureOperatorList }}) => ({ featureOperatorList }))
 export default class ToolBar extends Component {
   constructor(props) {
     super(props);
@@ -149,6 +149,26 @@ export default class ToolBar extends Component {
             }
           );
         },
+      },
+      {
+        key:"freeLine",
+        icon: "&#xe63b;",
+        name:"自由线",
+        cb : ()=>{
+          this.handleToolClick("freeLine");
+          this.updatePlotTypeState();
+          this.setState({
+            showPlotAddpanel: true,
+            showTempPlotPanel: false,
+            showSymbolStorePanel: false,
+            plotType:"freeLine",
+            isModifyPlot: false,
+          }, () => {
+            this.deactivate();
+            this.child.updateProps();
+            this.activeDraw = this.child.createDefaultPlot("FREEHAND_LINE");
+          })
+        }
       },
       {
         key: "freePlygonPlot",
@@ -546,7 +566,9 @@ export default class ToolBar extends Component {
     if(this.activeDraw && this.activeDraw instanceof Draw){
       mapApp.map.removeInteraction(this.activeDraw);
     }
+    this.toggleFreePlygonAndLine(true);
   }
+
   // 切换自由笔画
   toggleFreePlygonAndLine = (flag = true) => {
     let interactions = mapApp.map.getInteractions();
@@ -561,6 +583,7 @@ export default class ToolBar extends Component {
     const { dispatch } = this.props;
     if(val.key === this.activeKey){
       val.key === 'freePlygonPlot' && this.toggleFreePlygonAndLine(true);
+      val.key === 'freeLine' && this.toggleFreePlygonAndLine(true);
       return this.drawEnd();
     }
     this.activeKey = val.key;
@@ -573,7 +596,7 @@ export default class ToolBar extends Component {
           slideSwitch: false
         }
       })
-      if(val.key === 'freePlygonPlot'){
+      if(val.key === 'freePlygonPlot' || val.key === 'freeLine'){
         this.toggleFreePlygonAndLine(false)
       }else{
         this.toggleFreePlygonAndLine(true)
@@ -581,7 +604,6 @@ export default class ToolBar extends Component {
       setTimeout(()=>{
         if(this.activeDraw){
           this.activeDraw.once('draw_end',()=>{
-            // console.log('画完了')
             this.drawEnd();
             this.toggleFreePlygonAndLine(true)
           })
@@ -597,6 +619,7 @@ export default class ToolBar extends Component {
     }
   }
   render() {
+    const { featureOperatorList = [] } = this.props;
     return (
       <div className={styles.wrap}>
         <div className={styles.siderbar}>
@@ -616,8 +639,14 @@ export default class ToolBar extends Component {
               });
             }}
           >
-            <span>临时</span>
-            <span>标绘</span>
+            <Badge count={featureOperatorList.length}
+            dot
+            offset={[-8,0]}
+            title="临时标绘列表">
+              <span>临时</span>
+              <br/>
+              <span>标绘</span>
+            </Badge>
           </div>
           {this.state.tools.map((tool) => {
             return (

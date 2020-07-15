@@ -234,6 +234,7 @@ export default class ScoutingList extends PureComponent {
     e && e.preventDefault();
     Action.removeDraw();
     this.showOtherSlide();
+    Action.showOverlay();
     message.destroy();
   }
 
@@ -255,7 +256,6 @@ export default class ScoutingList extends PureComponent {
       }).catch(err => {
         // 取消新增
         this.cancelAdd();
-        Action.showOverlay();
         message.warn('已取消新建操作');
       });
     })
