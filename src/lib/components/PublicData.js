@@ -32,6 +32,25 @@ const publicData = {
     } else {
       this.layer.setSource(this.source);
       mapApp.addLayer(this.layer);
+      mapApp.map.on("click", (e) => {
+        const feature = mapApp.map.forEachFeatureAtPixel(
+          e.pixel,
+          (feature, layer) => {
+            return feature;
+          }
+        );
+        if (!feature) return;
+        const properties = feature.getProperties();
+        if (
+          properties.price &&
+          properties.pre_salepe &&
+          properties.x &&
+          properties.y
+        ) {
+          // 调动周边配套面板请求数据
+          window.housePoi = `${properties.x},${properties.y}`;
+        }
+      });
     }
   },
   // 获取数据 传入参数为url 和data， data = { @required typeName ,}
@@ -113,7 +132,10 @@ const publicData = {
             ...item.properties,
           });
           if (option.style) {
-            let name = feature.get("name") || feature.get("text");
+            let name =
+              feature.get("name") ||
+              feature.get("text") ||
+              feature.get("title");
             option.style.text = name;
             option.style.showName = option.showName;
             // 创建样式

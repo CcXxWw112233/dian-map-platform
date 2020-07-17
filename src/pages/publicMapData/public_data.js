@@ -281,7 +281,7 @@ const jsons = {
               cql_filter: `${queryStr} AND type='4'`,
               showName: true,
               style: {
-                iconUrl: require("../../assets/img/icon-drop-shangye.png"),
+                iconUrl: require("../../assets/img/icon-drop-yiliao.png"),
                 ...commonStyleOption,
               },
             },

@@ -1,54 +1,133 @@
 import React from "react";
+
+import globalStyle from "@/globalSet/styles/globalStyles.less";
+import styles from "./index.less";
 import { Tabs } from "antd";
 const { TabPane } = Tabs;
 export default class HouseDetail extends React.Component {
+  constructor(props) {
+    super(props);
+    this.setting = [
+      {
+        name: "交通",
+        children: [
+          { name: "地铁站", icon: "&#xe671;" },
+          { name: "公交站", icon: "&#xe672;" },
+        ],
+      },
+      {
+        name: "教育",
+        children: [
+          { name: "幼儿园", icon: "&#xe63f;" },
+          { name: "小学", icon: "&#xe63f;" },
+          { name: "中学", icon: "&#xe675;" },
+          { name: "大学", icon: "&#xe676;" },
+        ],
+      },
+      {
+        name: "医疗",
+        children: [
+          { name: "医院", icon: "&#xe677;" },
+          { name: "药店", icon: "&#xe678;" },
+        ],
+      },
+      {
+        name: "购物",
+        children: [
+          { name: "商场", icon: "&#xe679;" },
+          { name: "超市", icon: "&#xe67a;" },
+          { name: "市场", icon: "&#xe67b;" },
+        ],
+      },
+      {
+        name: "生活",
+        children: [
+          { name: "银行", icon: "&#xe67c;" },
+          { name: "ATM", icon: "&#xe67d;" },
+          { name: "餐厅", icon: "&#xe67e;" },
+          { name: "咖啡馆", icon: "&#xe67f;" },
+        ],
+      },
+      {
+        name: "娱乐",
+        children: [
+          { name: "公园", icon: "&#xe680;" },
+          { name: "电影院", icon: "&#xe681;" },
+          { name: "健身房", icon: "&#xe682;" },
+          { name: "体育馆", icon: "&#xe683;" },
+        ],
+      },
+    ];
+    this.state = {
+      pois: [],
+    };
+  }
+  handleTabChange = (e) => {
+    window
+      .CallWebMapFunction("searchNearByXY", {
+        xy: window.housePoi,
+        keywords: e,
+        radius: 5000,
+      })
+      .then((res) => {
+        if (Array.isArray(res)) {
+          this.setState({
+            pois: res,
+          });
+        }
+      });
+  };
   render() {
     return (
-      <Tabs type="card">
-        <TabPane tab="交通" key="1">
-          <Tabs>
-            <TabPane tab="地铁站" key="1-1"></TabPane>
-            <TabPane tab="公交站" key="1-2"></TabPane>
-          </Tabs>
-        </TabPane>
-        <TabPane tab="教育" key="2">
-          <Tabs>
-            <TabPane tab="幼儿园" key="2-1"></TabPane>
-            <TabPane tab="小学" key="2-2"></TabPane>
-            <TabPane tab="中学" key="2-2"></TabPane>
-            <TabPane tab="大学" key="2-2"></TabPane>
-          </Tabs>
-        </TabPane>
-        <TabPane tab="医疗" key="3">
-          <Tabs>
-            <TabPane tab="医院" key="3-1"></TabPane>
-            <TabPane tab="药店" key="3-2"></TabPane>
-          </Tabs>
-        </TabPane>
-        <TabPane tab="购物" key="4">
-          <Tabs>
-            <TabPane tab="商场" key="4-1"></TabPane>
-            <TabPane tab="超市" key="4-2"></TabPane>
-            <TabPane tab="市场" key="4-3"></TabPane>
-          </Tabs>
-        </TabPane>
-        <TabPane tab="生活" key="5">
-          <Tabs>
-            <TabPane tab="银行" key="5-1"></TabPane>
-            <TabPane tab="ATM" key="5-2"></TabPane>
-            <TabPane tab="餐厅" key="5-3"></TabPane>
-            <TabPane tab="咖啡馆" key="5-4"></TabPane>
-          </Tabs>
-        </TabPane>
-        <TabPane tab="娱乐" key="6">
-          <Tabs>
-            <TabPane tab="公园" key="6-1"></TabPane>
-            <TabPane tab="电影院" key="6-2"></TabPane>
-            <TabPane tab="健身房" key="6-3"></TabPane>
-            <TabPane tab="体育馆" key="4-4"></TabPane>
-          </Tabs>
-        </TabPane>
-      </Tabs>
+      <div className={styles.wrap}>
+        <Tabs type="card">
+          {this.setting.map((item, index) => {
+            return (
+              <TabPane tab={item.name} key={index}>
+                <Tabs onChange={(e) => this.handleTabChange(e)}>
+                  {item.children &&
+                    item.children.map((item2) => {
+                      return (
+                        <TabPane tab={item2.name} key={item2.name}>
+                          <ul
+                            style={{ height: "390px" }}
+                            className={globalStyle.autoScrollY}
+                          >
+                            {this.state.pois.map((item3) => {
+                              return (
+                                <li>
+                                  <p>
+                                    <i
+                                      style={{
+                                        color: "rgba(24,155,255,1)",
+                                        marginRight: 6,
+                                      }}
+                                      className={globalStyle.global_icon}
+                                      dangerouslySetInnerHTML={{
+                                        __html: item2.icon,
+                                      }}
+                                    ></i>
+                                    <span>{item3.name}</span>
+                                    <span>333m</span>
+                                  </p>
+                                  <p style={{ marginLeft: 36 }}>
+                                    <span style={{ color: "rgba(0,0,0,0.45)" }}>
+                                      {item3.address}
+                                    </span>
+                                  </p>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </TabPane>
+                      );
+                    })}
+                </Tabs>
+              </TabPane>
+            );
+          })}
+        </Tabs>
+      </div>
     );
   }
 }

@@ -336,6 +336,27 @@ let callFunctions = {
     })
 
   },
+
+  // 通过经纬度、关键字查询
+  searchNearByXY: ({xy, keywords, radius}) => {
+    return new Promise((resolve, reject) => {
+      let url = protocol + "//restapi.amap.com/v3/place/around";
+      let params = {
+        key: baseConfig.GAODE_SERVER_APP_KEY,
+        location: xy,
+        keywords: keywords,
+        radius: radius
+      }
+      axios.get(url,{ params }).then(res => {
+        if (res.status === 200) {
+          let data = res.data;
+          resolve(data.pois)
+        }else{
+          reject(res)
+        }
+      })
+    })
+  },
   // 渲染项目列表
   renderProjectList: ()=>{
     lib.showProjectPoint();
