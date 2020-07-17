@@ -15,12 +15,14 @@ import TempPlotPanel from "./TempPlotPanel";
 import SymbolStore from "./SymbolStore";
 import FeatureOperatorEvent from "../../utils/plot2ol/src/events/FeatureOperatorEvent";
 import mapApp from "utils/INITMAP";
-import { Draw ,DragPan} from 'ol/interaction'
-import { message, Badge } from 'antd'
+import { Draw, DragPan } from "ol/interaction";
+import { message, Badge } from "antd";
 
 import { connect } from "dva";
 
-@connect(({featureOperatorList: { featureOperatorList }}) => ({ featureOperatorList }))
+@connect(({ featureOperatorList: { featureOperatorList } }) => ({
+  featureOperatorList,
+}))
 export default class ToolBar extends Component {
   constructor(props) {
     super(props);
@@ -34,7 +36,7 @@ export default class ToolBar extends Component {
         cb: () => {
           this.handleToolClick("symbolStore");
           this.deactivate();
-          this.updatePlotTypeState()
+          this.updatePlotTypeState();
           this.setState({
             showPlotAddpanel: false,
             showTempPlotPanel: false,
@@ -49,7 +51,7 @@ export default class ToolBar extends Component {
         cb: () => {
           this.handleToolClick("pointPlot");
           this.deactivate();
-          // plotEdit.create("MARKER");
+          this.updatePlotTypeState();
           this.setState(
             {
               showPlotAddpanel: true,
@@ -58,12 +60,6 @@ export default class ToolBar extends Component {
               plotType: "Point",
               isModifyPlot: false,
               pointActive: !this.state.pointActive,
-              polylineActive: false,
-              polygonActive: false,
-              freePolygonActive: false,
-              arrowActive: false,
-              rectActive: false,
-              cirleActive: false,
             },
             () => {
               if (this.state.pointActive) {
@@ -85,7 +81,7 @@ export default class ToolBar extends Component {
         cb: () => {
           this.handleToolClick("linePlot");
           this.deactivate();
-          // plotEdit.create("POLYLINE");
+          this.updatePlotTypeState();
           this.setState(
             {
               showPlotAddpanel: true,
@@ -94,12 +90,6 @@ export default class ToolBar extends Component {
               plotType: "LineString",
               isModifyPlot: false,
               polylineActive: !this.state.polylineActive,
-              pointActive: false,
-              polygonActive: false,
-              freePolygonActive: false,
-              arrowActive: false,
-              rectActive: false,
-              cirleActive: false,
             },
             () => {
               if (this.state.polylineActive) {
@@ -121,7 +111,7 @@ export default class ToolBar extends Component {
         cb: () => {
           this.handleToolClick("polygonPlot");
           this.deactivate();
-          // plotEdit.create("POLYGON");
+          this.updatePlotTypeState();
           this.setState(
             {
               showPlotAddpanel: true,
@@ -130,12 +120,6 @@ export default class ToolBar extends Component {
               plotType: "Polygon",
               isModifyPlot: false,
               polygonActive: !this.state.polygonActive,
-              polylineActive: false,
-              pointActive: false,
-              freePolygonActive: false,
-              arrowActive: false,
-              rectActive: false,
-              cirleActive: false,
             },
             () => {
               if (this.state.polygonActive) {
@@ -151,24 +135,34 @@ export default class ToolBar extends Component {
         },
       },
       {
-        key:"freeLine",
+        key: "freeLine",
         icon: "&#xe63b;",
-        name:"自由线",
-        cb : ()=>{
+        name: "自由线",
+        cb: () => {
+          this.deactivate();
           this.handleToolClick("freeLine");
           this.updatePlotTypeState();
-          this.setState({
-            showPlotAddpanel: true,
-            showTempPlotPanel: false,
-            showSymbolStorePanel: false,
-            plotType:"freeLine",
-            isModifyPlot: false,
-          }, () => {
-            this.deactivate();
-            this.child.updateProps();
-            this.activeDraw = this.child.createDefaultPlot("FREEHAND_LINE");
-          })
-        }
+          this.setState(
+            {
+              freeLineActive: !this.state.freeLineActive,
+              showPlotAddpanel: true,
+              showTempPlotPanel: false,
+              showSymbolStorePanel: false,
+              plotType: "freeLine",
+              isModifyPlot: false,
+            },
+            () => {
+              if (this.state.freeLineActive) {
+                this.child.updateProps();
+                this.activeDraw = this.child.createDefaultPlot("FREEHAND_LINE");
+              } else {
+                this.setState({
+                  showPlotAddpanel: false,
+                });
+              }
+            }
+          );
+        },
       },
       {
         key: "freePlygonPlot",
@@ -177,7 +171,7 @@ export default class ToolBar extends Component {
         cb: () => {
           this.handleToolClick("freePlygonPlot");
           this.deactivate();
-          // plotEdit.create("FREEHAND_POLYGON");
+          this.updatePlotTypeState();
           this.setState(
             {
               showPlotAddpanel: true,
@@ -186,17 +180,13 @@ export default class ToolBar extends Component {
               plotType: "freePolygon",
               isModifyPlot: false,
               freePolygonActive: !this.state.freePolygonActive,
-              polygonActive: false,
-              polylineActive: false,
-              pointActive: false,
-              arrowActive: false,
-              rectActive: false,
-              cirleActive: false,
             },
             () => {
               if (this.state.freePolygonActive) {
                 this.child.updateProps();
-                this.activeDraw = this.child.createDefaultPlot("FREEHAND_POLYGON");
+                this.activeDraw = this.child.createDefaultPlot(
+                  "FREEHAND_POLYGON"
+                );
               } else {
                 this.setState({
                   showPlotAddpanel: false,
@@ -215,7 +205,7 @@ export default class ToolBar extends Component {
         cb: () => {
           this.handleToolClick("arrowPlot");
           this.deactivate();
-          // plotEdit.create("FINE_ARROW");
+          this.updatePlotTypeState();
           this.setState(
             {
               showPlotAddpanel: true,
@@ -224,12 +214,6 @@ export default class ToolBar extends Component {
               plotType: "arrow",
               isModifyPlot: false,
               arrowActive: !this.state.arrowActive,
-              freePolygonActive: false,
-              polygonActive: false,
-              polylineActive: false,
-              pointActive: false,
-              rectActive: false,
-              cirleActive: false,
             },
             () => {
               if (this.state.arrowActive) {
@@ -252,6 +236,7 @@ export default class ToolBar extends Component {
           this.handleToolClick("rectPlot");
           this.deactivate();
           // plotEdit.create("RECTANGLE");
+          this.updatePlotTypeState();
           this.setState(
             {
               showPlotAddpanel: true,
@@ -260,12 +245,6 @@ export default class ToolBar extends Component {
               plotType: "rect",
               isModifyPlot: false,
               rectActive: !this.state.rectActive,
-              arrowActive: false,
-              freePolygonActive: false,
-              polygonActive: false,
-              polylineActive: false,
-              pointActive: false,
-              cirleActive: false,
             },
             () => {
               if (this.state.rectActive) {
@@ -288,6 +267,7 @@ export default class ToolBar extends Component {
           this.handleToolClick("circlePlot");
           this.deactivate();
           // plotEdit.create("CIRCLE");
+          this.updatePlotTypeState();
           this.setState(
             {
               showPlotAddpanel: true,
@@ -296,12 +276,6 @@ export default class ToolBar extends Component {
               plotType: "circle",
               isModifyPlot: false,
               cirleActive: !this.state.cirleActive,
-              rectActive: false,
-              arrowActive: false,
-              freePolygonActive: false,
-              polygonActive: false,
-              polylineActive: false,
-              pointActive: false,
             },
             () => {
               if (this.state.cirleActive) {
@@ -323,7 +297,7 @@ export default class ToolBar extends Component {
         cb: () => {
           this.toggleActive("coordinateMeasure");
           this.deactivate();
-          this.updatePlotTypeState()
+          this.updatePlotTypeState();
           this.setState({
             showPlotAddpanel: false,
             showTempPlotPanel: false,
@@ -339,12 +313,7 @@ export default class ToolBar extends Component {
         cb: () => {
           this.toggleActive("distanceMeasure");
           this.deactivate();
-          this.updatePlotTypeState()
-          this.setState({
-            showPlotAddpanel: false,
-            showTempPlotPanel: false,
-            showSymbolStorePanel: false,
-          });
+          this.updatePlotTypeState();
           this.activeDraw = lineDrawing.createDrawing();
         },
       },
@@ -355,7 +324,7 @@ export default class ToolBar extends Component {
         cb: () => {
           this.toggleActive("areaMeasure");
           this.deactivate();
-          this.updatePlotTypeState()
+          this.updatePlotTypeState();
           this.setState({
             showPlotAddpanel: false,
             showTempPlotPanel: false,
@@ -365,9 +334,9 @@ export default class ToolBar extends Component {
         },
       },
     ];
-    this.pointSymbols = null
-    this.polylineSymbols = null
-    this.polygonSymbols = null
+    this.pointSymbols = null;
+    this.polylineSymbols = null;
+    this.polygonSymbols = null;
     this.state = {
       active: "",
       showPlotAddpanel: false,
@@ -379,6 +348,7 @@ export default class ToolBar extends Component {
       transformStyle: {},
       pointActive: false,
       polylineActive: false,
+      freeLineActive: false,
       polygonActive: false,
       freePolygonActive: false,
       arrowActive: false,
@@ -392,6 +362,7 @@ export default class ToolBar extends Component {
     this.setState({
       pointActive: false,
       polylineActive: false,
+      freeLineActive: false,
       polygonActive: false,
       freePolygonActive: false,
       arrowActive: false,
@@ -513,11 +484,11 @@ export default class ToolBar extends Component {
   hideTempPlotPanel = (value = false) => {
     const { dispatch } = this.props;
     dispatch({
-      type:"openswitch/updateDatas",
-      payload:{
-        slideSwitch: true
-      }
-    })
+      type: "openswitch/updateDatas",
+      payload: {
+        slideSwitch: true,
+      },
+    });
     this.setState({
       showTempPlotPanel: value,
     });
@@ -540,34 +511,30 @@ export default class ToolBar extends Component {
     this.child = ref;
   };
   // 画完之后的回调
-  drawEnd = ()=>{
+  drawEnd = () => {
     const { dispatch } = this.props;
     message.destroy();
     dispatch({
-      type:"openswitch/updateDatas",
-      payload:{
-        slideSwitch: true
-      }
+      type: "openswitch/updateDatas",
+      payload: {
+        slideSwitch: true,
+      },
     });
     this.activeKey = null;
     this.toggleActive(this.activeKey);
+    this.updatePlotTypeState();
     this.setState({
       showPlotAddpanel: false,
       isModifyPlot: false,
-      pointActive: false,
-      polylineActive: false,
-      polygonActive: false,
-      freePolygonActive: false,
-      arrowActive: false,
-      rectActive: false,
-      cirleActive: false,
-    })
-    this.activeDraw && this.activeDraw.deactivate && this.activeDraw.deactivate();
-    if(this.activeDraw && this.activeDraw instanceof Draw){
+    });
+    this.activeDraw &&
+      this.activeDraw.deactivate &&
+      this.activeDraw.deactivate();
+    if (this.activeDraw && this.activeDraw instanceof Draw) {
       mapApp.map.removeInteraction(this.activeDraw);
     }
     this.toggleFreePlygonAndLine(true);
-  }
+  };
 
   // 切换自由笔画
   toggleFreePlygonAndLine = (flag = true) => {
@@ -577,49 +544,53 @@ export default class ToolBar extends Component {
         item.setActive(flag);
       }
     });
-  }
+  };
   // 切换active状态，开始绘制的时候，隐藏左侧的页面，使操作不受干扰
-  setActive = (val)=>{
+  setActive = (val) => {
     const { dispatch } = this.props;
-    if(val.key === this.activeKey){
-      val.key === 'freePlygonPlot' && this.toggleFreePlygonAndLine(true);
-      val.key === 'freeLine' && this.toggleFreePlygonAndLine(true);
+    if (val.key === this.activeKey) {
+      val.key === "freePlygonPlot" && this.toggleFreePlygonAndLine(true);
+      val.key === "freeLine" && this.toggleFreePlygonAndLine(true);
       return this.drawEnd();
     }
     this.activeKey = val.key;
-    if(val.key !== 'symbolStore'){
+    if (val.key !== "symbolStore") {
       message.destroy();
-      message.success(<span>您可以在地图上开始绘制或者{<a onClick={this.drawEnd}>取消绘制</a>}</span>,0)
+      message.success(
+        <span>
+          您可以在地图上开始绘制或者{<a onClick={this.drawEnd}>取消绘制</a>}
+        </span>,
+        0
+      );
       dispatch({
-        type:"openswitch/updateDatas",
-        payload:{
-          slideSwitch: false
-        }
-      })
-      if(val.key === 'freePlygonPlot' || val.key === 'freeLine'){
-        this.toggleFreePlygonAndLine(false)
-      }else{
-        this.toggleFreePlygonAndLine(true)
+        type: "openswitch/updateDatas",
+        payload: {
+          slideSwitch: false,
+        },
+      });
+      if (val.key === "freePlygonPlot" || val.key === "freeLine") {
+        this.toggleFreePlygonAndLine(false);
+      } else {
+        this.toggleFreePlygonAndLine(true);
       }
-      setTimeout(()=>{
-        if(this.activeDraw){
-          this.activeDraw.once('draw_end',()=>{
+      setTimeout(() => {
+        if (this.activeDraw) {
+          this.activeDraw.once("draw_end", () => {
             // val.cb();
             this.drawEnd();
-            this.toggleFreePlygonAndLine(true)
-          })
-          this.activeDraw.once('drawend',() => {
+            this.toggleFreePlygonAndLine(true);
+          });
+          this.activeDraw.once("drawend", () => {
             this.drawEnd();
             // val.cb();
-          })
+          });
         }
-        
-      })
-    }else {
+      });
+    } else {
       this.drawEnd();
       this.toggleActive(val.key);
     }
-  }
+  };
   render() {
     const { featureOperatorList = [] } = this.props;
     return (
@@ -633,7 +604,7 @@ export default class ToolBar extends Component {
               this.drawEnd();
               this.deactivate();
               this.handleToolClick("tempPlot");
-              this.updatePlotTypeState()
+              this.updatePlotTypeState();
               this.setState({
                 showTempPlotPanel: !this.state.showTempPlotPanel,
                 showPlotAddpanel: false,
@@ -641,12 +612,14 @@ export default class ToolBar extends Component {
               });
             }}
           >
-            <Badge count={featureOperatorList.length}
-            dot
-            offset={[-8,0]}
-            title="临时标绘列表">
+            <Badge
+              count={featureOperatorList.length}
+              dot
+              offset={[-8, 0]}
+              title="临时标绘列表"
+            >
               <span>临时</span>
-              <br/>
+              <br />
               <span>标绘</span>
             </Badge>
           </div>
@@ -657,7 +630,10 @@ export default class ToolBar extends Component {
                 className={`${styles.tool} ${
                   this.state.active === tool.key ? styles.active : ""
                 }`}
-                onClick={()=> { tool.cb(); this.setActive(tool) }}
+                onClick={() => {
+                  tool.cb();
+                  this.setActive(tool);
+                }}
               >
                 <i
                   className={globalStyle.global_icon + ` ${styles.icon}`}

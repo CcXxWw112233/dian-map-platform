@@ -210,7 +210,7 @@ const jsons = {
               cql_filter:  `${queryStr} AND type2='停车场'`,
               showName: true,
               style: {
-                iconUrl: require("../../assets/img/chengshi.png"),
+                iconUrl: require("../../assets/img/parking.svg"),
                 ...commonStyleOption,
               },
             },
@@ -226,7 +226,7 @@ const jsons = {
               cql_filter:  `${queryStr} AND type2='公交车站'`,
               showName: true,
               style: {
-                iconUrl: require("../../assets/img/chengshi.png"),
+                iconUrl: require("../../assets/img/busStation.svg"),
                 ...commonStyleOption,
               },
             },
@@ -242,7 +242,7 @@ const jsons = {
               cql_filter:  `${queryStr} AND type2='地铁站'`,
               showName: true,
               style: {
-                iconUrl: require("../../assets/img/chengshi.png"),
+                iconUrl: require("../../assets/img/metro.svg"),
                 ...commonStyleOption,
               },
             },
@@ -509,7 +509,29 @@ const jsons = {
       icon: "icon-icon-xianzai",
       key: "7",
       child: [],
-    },
+    },{
+      name: "地产楼盘",
+      icon: "icon-loupan",
+      key: "8",
+      child:[
+        {
+          name: "新房",
+          icon: "",
+          key: "map:loupan:newHouse",
+          loadFeatureKeys: [
+            {
+              typeName: "lingxi:dichan_loupan_point",
+              // cql_filter:  `${queryStr} AND type='13'`,
+              showName: true,
+              style: {
+                iconUrl: require("../../assets/img/qiche.png"),
+                ...commonStyleOption,
+              },
+            },
+          ],
+        },
+      ]
+    }
   ],
 };
 

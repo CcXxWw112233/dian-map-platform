@@ -8,6 +8,7 @@ import globalStyle from "@/globalSet/styles/globalStyles.less";
 import { connect } from "dva";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import { setLocal, getLocal } from "../../utils/sessionManage";
+import HouseDetail from "../HouseDetail";
 import { Row } from "antd";
 const Lenged = ({ data }) => {
   let activeKeys = [];
@@ -82,6 +83,9 @@ export default class LengedList extends PureComponent {
       selectedBaseMapIndex: "",
       roadLine: true,
       featureName: true,
+      active: -1,
+      houseActive: false,
+      baseMapActive: false,
     };
     this.lastConfig = [];
     this.map = mapApp.map;
@@ -206,106 +210,171 @@ export default class LengedList extends PureComponent {
     }
     return (
       <div style={style} className={styles.wrap + " transform"}>
-        <div
-          style={{
-            width: "100%",
-            height: "100%",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <div className={styles.layerItems + ` ${globalStyle.autoScrollX}`}>
-            {baseMapDictionary.map((item, index) => {
-              let activeStyle = {};
-              if (item.key === this.state.selectedBaseMapIndex) {
-                activeStyle = { border: "2px solid rgba(0,0,255,0.7)" };
-              }
-              if (item.name && item.key) {
-                return (
-                  <div
-                    className={styles.lengedItem}
-                    style={activeStyle}
-                    key={item.key}
-                    onClick={() => this.changeBaseMap(item, index)}
-                  >
-                    <div style={{ backgroundImage: `url(${item.img})` }}></div>
-                    <span>
-                      {item.name}
-                      {item.type}
-                    </span>
-                  </div>
-                );
-              } else {
-                return null;
-              }
-            })}
-          </div>
+        {this.state.active === 0 ? (
+          <HouseDetail></HouseDetail>
+        ) : (
           <div
-            style={{ height: "calc(100% - 200px)" }}
-            className={globalStyle.autoScrollY}
+            style={{
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              flexDirection: "column",
+            }}
           >
-            {newConfig.length > 0 ? (
-              <Lenged data={newConfig}></Lenged>
-            ) : (
-              this.createNULL()
-            )}
-          </div>
-          <div className={styles.configContainer}>
-            <p className={styles.configTitle}>地图配置</p>
-            <Form
-              labelAlign="right"
-              size="small"
-              initialValues={{
-                roadLine: true,
-                featureName: true,
-              }}
-              onValuesChange={this.changeConfig}
-              labelCol={{ span: 8 }}
+            <div className={styles.layerItems + ` ${globalStyle.autoScrollX}`}>
+              {baseMapDictionary.map((item, index) => {
+                let activeStyle = {};
+                if (item.key === this.state.selectedBaseMapIndex) {
+                  activeStyle = { border: "2px solid rgba(0,0,255,0.7)" };
+                }
+                if (item.name && item.key) {
+                  return (
+                    <div
+                      className={styles.lengedItem}
+                      style={activeStyle}
+                      key={item.key}
+                      onClick={() => this.changeBaseMap(item, index)}
+                    >
+                      <div
+                        style={{ backgroundImage: `url(${item.img})` }}
+                      ></div>
+                      <span>
+                        {item.name}
+                        {item.type}
+                      </span>
+                    </div>
+                  );
+                } else {
+                  return null;
+                }
+              })}
+            </div>
+            <div
+              style={{ height: "calc(100% - 200px)" }}
+              className={globalStyle.autoScrollY}
             >
-              <Form.Item
-                label="路网"
-                name="roadLine"
-                style={{ marginBottom: 10 }}
+              {newConfig.length > 0 ? (
+                <Lenged data={newConfig}></Lenged>
+              ) : (
+                this.createNULL()
+              )}
+            </div>
+            <div className={styles.configContainer}>
+              <p className={styles.configTitle}>地图配置</p>
+              <Form
+                labelAlign="right"
+                size="small"
+                initialValues={{
+                  roadLine: true,
+                  featureName: true,
+                }}
+                onValuesChange={this.changeConfig}
+                labelCol={{ span: 8 }}
               >
-                <Switch
-                  checkedChildren="开启"
-                  unCheckedChildren="关闭"
-                  checked={this.state.roadLine}
-                  defaultChecked={true}
-                  disabled={
-                    this.state.selectedBaseMapIndex !== "gd_img" &&
-                    this.state.selectedBaseMapIndex.indexOf("td_") === -1
-                  }
-                />
-              </Form.Item>
-              <Form.Item
-                label="标绘名称"
-                name="featureName"
-                style={{ marginBottom: 10 }}
-              >
-                <Switch
-                  checkedChildren="开启"
-                  checked={this.state.featureName}
-                  defaultChecked={true}
-                  unCheckedChildren="关闭"
-                />
-              </Form.Item>
-            </Form>
+                <Form.Item
+                  label="路网"
+                  name="roadLine"
+                  style={{ marginBottom: 10 }}
+                >
+                  <Switch
+                    checkedChildren="开启"
+                    unCheckedChildren="关闭"
+                    checked={this.state.roadLine}
+                    defaultChecked={true}
+                    disabled={
+                      this.state.selectedBaseMapIndex !== "gd_img" &&
+                      this.state.selectedBaseMapIndex.indexOf("td_") === -1
+                    }
+                  />
+                </Form.Item>
+                <Form.Item
+                  label="标绘名称"
+                  name="featureName"
+                  style={{ marginBottom: 10 }}
+                >
+                  <Switch
+                    checkedChildren="开启"
+                    checked={this.state.featureName}
+                    defaultChecked={true}
+                    unCheckedChildren="关闭"
+                  />
+                </Form.Item>
+              </Form>
+            </div>
           </div>
-        </div>
+        )}
         {showLengedButton ? (
-          <div
-            className={styles.controller}
-            onClick={this.handleLengedListClick}
-            style={{ height: 120 }}
-          >
-            {lengedSwitch === false ? (
-              <LeftOutlined className={styles.myDirection} />
-            ) : (
-              <RightOutlined className={styles.myDirection} />
-            )}
-            <span style={{ borderBottom: "1px solid" }}>底图</span>
-            <span>图例</span>
+          <div>
+            <div
+              className={`${styles.controller} ${
+                this.state.active === 0 ? styles.activePanel : ""
+              }`}
+              style={{ height: 120, bottom: 106 }}
+              onClick={() => {
+                let { dispatch } = this.props;
+                let { houseActive } = this.state;
+                this.setState({
+                  active: 0,
+                  houseActive: !houseActive,
+                  baseMapActive: false,
+                });
+                if (houseActive === true) {
+                  dispatch({
+                    type: "openswitch/updateDatas",
+                    payload: {
+                      lengedSwitch: false,
+                    },
+                  });
+                } else {
+                  dispatch({
+                    type: "openswitch/updateDatas",
+                    payload: {
+                      lengedSwitch: true,
+                    },
+                  });
+                }
+              }}
+            >
+              <span>周边配套</span>
+            </div>
+            <div
+              className={`${styles.controller} ${
+                this.state.active === 1 ? styles.activePanel : ""
+              }`}
+              onClick={() => {
+                let { dispatch } = this.props;
+                let { baseMapActive } = this.state;
+                this.setState({
+                  active: 1,
+                  houseActive: false,
+                  baseMapActive: !baseMapActive,
+                });
+                if (baseMapActive === true) {
+                  dispatch({
+                    type: "openswitch/updateDatas",
+                    payload: {
+                      lengedSwitch: false,
+                    },
+                  });
+                } else {
+                  dispatch({
+                    type: "openswitch/updateDatas",
+                    payload: {
+                      lengedSwitch: true,
+                    },
+                  });
+                }
+              }}
+              style={{ height: 120 }}
+            >
+              <span style={{ borderBottom: "1px solid" }}>底图</span>
+              <span>图例</span>
+              {lengedSwitch === false ? (
+                <LeftOutlined className={styles.myDirection} />
+              ) : (
+                <RightOutlined className={styles.myDirection} />
+              )}
+            </div>
           </div>
         ) : (
           ""

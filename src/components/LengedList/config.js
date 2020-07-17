@@ -56,6 +56,18 @@ const config = [
         imgSrc: require("../../assets/img/lenged-chengshijiaotong.png"),
         font: "邻近城市",
       },
+      {
+        imgSrc: require("../../assets/img/parking.svg"),
+        font: "停车场",
+      },
+      {
+        imgSrc: require("../../assets/img/busStation.svg"),
+        font: "公交车站",
+      },
+      {
+        imgSrc: require("../../assets/img/metro.svg"),
+        font: "地铁站",
+      },
     ],
   },
   {

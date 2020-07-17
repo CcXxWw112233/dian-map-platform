@@ -905,6 +905,8 @@ export default class PlotInfoPanel extends Component {
       newPlotType === "circle"
     ) {
       newPlotType = "Polygon";
+    } else if (newPlotType  === "freeLine") {
+      newPlotType = "LineString"
     }
     style = createStyle(newPlotType, options);
     this.addPlot(style, attrs);
@@ -988,21 +990,21 @@ export default class PlotInfoPanel extends Component {
       };
       delete options.iconUrl;
     }
-    if (this.props.plotType === "LineString" || this.props.plotType === 'freeLine') {
-      options = {
-        ...this.commonStyleOptions,
-        fillColor: value,
-        strokeColor: value,
-        text: text,
-      };
-      attrs = {
-        name: text,
-        featureType: value,
-        strokeColor: strokeColor,
-        selectName: "自定义类型",
-        remark: this.props.remarks,
-      };
-    }
+    // if (this.props.plotType === "LineString" || this.props.plotType === 'freeLine') {
+    //   options = {
+    //     ...this.commonStyleOptions,
+    //     fillColor: value,
+    //     strokeColor: value,
+    //     text: text,
+    //   };
+    //   attrs = {
+    //     name: text,
+    //     featureType: value,
+    //     strokeColor: strokeColor,
+    //     selectName: "自定义类型",
+    //     remark: this.props.remarks,
+    //   };
+    // }
     let newPlotType = this.props.plotType;
     if (
       newPlotType === "freePolygon" ||
