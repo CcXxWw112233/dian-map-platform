@@ -10,6 +10,7 @@ import {
 } from "../../lib/utils";
 import { publicDataUrl } from "../../services/publicData";
 import mapApp from "../../utils/INITMAP";
+import event from "../../lib/utils/event";
 const { getFeature, GET_GEO_DATA } = publicDataUrl;
 const publicData = {
   // 图层
@@ -48,7 +49,13 @@ const publicData = {
           properties.y
         ) {
           // 调动周边配套面板请求数据
+          mapApp.map.getView().fit(feature.getGeometry().getExtent(), {
+            size: mapApp.map.getSize(),
+            maxZoom: 15,
+            duration: 1000,
+          });
           window.housePoi = `${properties.x},${properties.y}`;
+          event.Evt.firEvent("HouseDetailGetPoi")
         }
       });
     }

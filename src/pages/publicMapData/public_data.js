@@ -203,14 +203,14 @@ const jsons = {
         {
           name: "停车场",
           icon: "",
-          key: "map:transport:parking ",
+          key: "map:transport:parking",
           loadFeatureKeys: [
             {
               typeName: "lingxi:ggss_point",
               cql_filter:  `${queryStr} AND type2='停车场'`,
               showName: true,
               style: {
-                iconUrl: require("../../assets/img/parking.svg"),
+                iconUrl: require("../../assets/img/tingchechang.svg"),
                 ...commonStyleOption,
               },
             },
@@ -226,7 +226,7 @@ const jsons = {
               cql_filter:  `${queryStr} AND type2='公交车站'`,
               showName: true,
               style: {
-                iconUrl: require("../../assets/img/busStation.svg"),
+                iconUrl: require("../../assets/img/gongjiaozhan.svg"),
                 ...commonStyleOption,
               },
             },
@@ -242,7 +242,7 @@ const jsons = {
               cql_filter:  `${queryStr} AND type2='地铁站'`,
               showName: true,
               style: {
-                iconUrl: require("../../assets/img/metro.svg"),
+                iconUrl: require("../../assets/img/ditiezhan.svg"),
                 ...commonStyleOption,
               },
             },
@@ -511,7 +511,7 @@ const jsons = {
       child: [],
     },{
       name: "地产楼盘",
-      icon: "icon-loupan",
+      icon: "icon-loufang2",
       key: "8",
       child:[
         {
@@ -524,7 +524,7 @@ const jsons = {
               // cql_filter:  `${queryStr} AND type='13'`,
               showName: true,
               style: {
-                iconUrl: require("../../assets/img/qiche.png"),
+                iconUrl: require("../../assets/img/loupan.svg"),
                 ...commonStyleOption,
               },
             },
