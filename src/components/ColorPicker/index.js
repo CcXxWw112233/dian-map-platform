@@ -22,8 +22,8 @@ export default class ColorPicker extends Component {
       colorStyle: this.defaultColorStyle,
     };
   }
-  updateProps = () => {
-    const colorStr = this.props.colorStyle?.match(/\(([^)]*)\)/);
+  updateProps = (props) => {
+    const colorStr = props.colorStyle?.match(/\(([^)]*)\)/);
     if (colorStr) {
       const colorArr = colorStr[1].split(",");
       const colorObj = {
@@ -32,22 +32,22 @@ export default class ColorPicker extends Component {
         b: colorArr[2] || 255,
         a: colorArr[3] || 1,
       };
-      this.defaultColorStyle = this.props.colorStyle;
+      this.defaultColorStyle = props.colorStyle;
       this.defaultColor = colorObj;
       this.setState({
-        colorStyle: this.props.colorStyle,
+        colorStyle: props.colorStyle,
         color: colorObj,
       });
     }
   };
   componentDidMount() {
-    this.updateProps();
+    this.updateProps(this.props);
   }
   componentWillUnmount() {
-    this.updateProps();
+    this.updateProps(this.props);
   }
-  componentWillReceiveProps() {
-    this.updateProps();
+  componentWillReceiveProps(nextProps) {
+    this.updateProps(nextProps);
   }
   handleCancelClick = () => {
     this.setState(

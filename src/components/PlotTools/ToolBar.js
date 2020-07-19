@@ -345,7 +345,9 @@ export default class ToolBar extends Component {
       plotType: "",
       isModifyPlot: false,
       tools: this.tools,
+      toolbarToggle: 0,
       transformStyle: {},
+
       pointActive: false,
       polylineActive: false,
       freeLineActive: false,
@@ -370,7 +372,7 @@ export default class ToolBar extends Component {
       cirleActive: false,
     });
   };
-  componentDidMount() {
+  componentDidMount () {
     if (!plotEdit.plottingLayer) {
       this.plotLayer = plotEdit.getPlottingLayer();
       const me = this;
@@ -591,7 +593,7 @@ export default class ToolBar extends Component {
       this.toggleActive(val.key);
     }
   };
-  render() {
+  render () {
     const { featureOperatorList = [] } = this.props;
     return (
       <div className={styles.wrap}>
@@ -599,7 +601,7 @@ export default class ToolBar extends Component {
           <div
             className={`${styles.tool} ${styles.tempPlot} ${
               this.state.active === "tempPlot" ? styles.active : ""
-            }`}
+              }`}
             onClick={() => {
               this.drawEnd();
               this.deactivate();
@@ -629,7 +631,7 @@ export default class ToolBar extends Component {
                 key={tool.key}
                 className={`${styles.tool} ${
                   this.state.active === tool.key ? styles.active : ""
-                }`}
+                  }`}
                 onClick={() => {
                   tool.cb();
                   this.setActive(tool);
@@ -649,17 +651,16 @@ export default class ToolBar extends Component {
             className={`${styles.tool}`}
             style={{ height: 30, ...this.state.transformStyle }}
             onClick={() => {
-              if (
-                this.state.tools.length <
-                this.tools.length + this.otherTools.length
-              ) {
+              if (this.state.toolbarToggle === 0) {
                 this.setState({
-                  tools: [...this.tools, ...this.otherTools],
+                  tools: this.otherTools,
+                  toolbarToggle: 1,
                   transformStyle: { transform: "rotateX(180deg)" },
                 });
               } else {
                 this.setState({
                   tools: this.tools,
+                  toolbarToggle: 0,
                   transformStyle: {},
                 });
               }
