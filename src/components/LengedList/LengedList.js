@@ -202,7 +202,7 @@ export default class LengedList extends PureComponent {
       height: 510,
       bottom: 0,
       right: 0,
-      width: 290,
+      width: 382,
     };
     let style = baseStyle;
     if (!lengedSwitch) {

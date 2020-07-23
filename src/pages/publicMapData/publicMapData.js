@@ -23,9 +23,9 @@ export default class PublicData extends React.Component {
     this.populationSelect = {};
     // this.queryStr = "districtcode='440117'"
     this.queryStr = "";
-    this.fillColor = null
+    this.fillColor = null;
   }
-  componentDidMount () {
+  componentDidMount() {
     // console.log(m)
     PublicDataActions.init();
     // this.getAllData();
@@ -92,7 +92,7 @@ export default class PublicData extends React.Component {
   };
   // 选项更新，获取更新的那些数据
   changeData = (oldVal = [], newVal = [], fillColor) => {
-    this.fillColor = fillColor
+    this.fillColor = fillColor;
     // 新增了选项需要显示
     if (newVal.length > oldVal.length || newVal.length === oldVal.length) {
       let arr = this.getItems(oldVal, newVal);
@@ -136,10 +136,13 @@ export default class PublicData extends React.Component {
       if (keys.length) {
         // 删除勾选的选项-这里只需要传key，剔除其他属性
         let a = keys.map((item) => item.typeName + (item.cql_filter || ""));
-        if (a.indexOf("lingxi:dichan_loupan_point") > -1) {
-          Event.Evt.firEvent("removeHousePOI")
-          window.housePoi = ""
-        }
+        a.forEach((item) => {
+          if (item.indexOf("lingxi:dichan_loupan_point") > -1) {
+            PublicDataActions.removeLpInfo();
+            Event.Evt.firEvent("removeHousePOI");
+            window.housePoi = "";
+          }
+        });
         PublicDataActions.removeFeatures(a);
       }
     }
@@ -215,7 +218,7 @@ export default class PublicData extends React.Component {
 
     // PublicDataActions.getPublicData()
   };
-  render () {
+  render() {
     const { dispatch } = this.props;
     return (
       <div className={styles.publicBox + ` ${globalStyle.autoScrollY}`}>

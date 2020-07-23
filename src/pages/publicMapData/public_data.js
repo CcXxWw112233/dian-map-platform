@@ -521,8 +521,8 @@ const jsons = {
           loadFeatureKeys: [
             {
               typeName: "lingxi:dichan_loupan_point",
-              // cql_filter:  `${queryStr} AND type='13'`,
-              showName: true,
+              cql_filter:  `${queryStr} AND type=0`,
+              showName: false,
               style: {
                 iconUrl: require("../../assets/img/loupan.svg"),
                 ...commonStyleOption,
