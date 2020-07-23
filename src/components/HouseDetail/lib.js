@@ -9,21 +9,12 @@ import { createOverlay } from "../../lib/utils";
 
 // 计算poi点到楼盘的距离
 export const getDistance2 = (pt1, pt2) => {
-  // const projPt1 = olProj.fromLonLat(pt1, "EPSG:3857");
-  // const projPt2 = olProj.fromLonLat(pt2, "EPSG:3857");
-  // return (
-  //   Math.round(
-  //     Math.sqrt(
-  //       Math.pow(projPt1[0] - projPt2[0], 2) +
-  //         Math.pow(projPt1[1] - projPt2[1], 2)
-  //     )
-  //   ) + "米"
-  // );
   const dis = Math.round(getDistance(pt1, pt2));
   return dis + "米";
 };
 
-export const jumpToPoi = (ptStr) => {
+export const jumpToPoi = (data, keywords) => {
+  const ptStr = data.location;
   const pt = ptStr.split(",");
   let newFeature = addFeature("Point", {
     coordinates: olProj.fromLonLat(pt, "EPSG:3857"),
@@ -32,6 +23,29 @@ export const jumpToPoi = (ptStr) => {
     size: mapApp.map.getSize(),
     duration: 1000,
   });
+  poiLayer.poi2Overlay && mapApp.map.removeOverlay(poiLayer.poi2Overlay);
+  const data2 = {
+    name: data.name,
+    address: data.address,
+    keywords: keywords,
+    distance: data.distance + "米",
+    cb: function() {
+      mapApp.map.removeOverlay(poiLayer.poi2Overlay);
+    }
+  };
+  let poi2Ele = new LPPoiOverlay(data2);
+  poi2Ele = new baseOverlay(poi2Ele, {
+    angleColor: "#fff",
+    width: "auto",
+  });
+  const poi2Overlay = createOverlay(poi2Ele, {
+    offset: [-10, -90],
+  });
+  poiLayer.poi2Overlay = poi2Overlay
+  newFeature.overlay = poi2Overlay;
+  mapApp.map.addOverlay(newFeature.overlay);
+  newFeature.overlay &&
+    newFeature.overlay.setPosition(newFeature.getGeometry().getCoordinates());
 };
 
 // 展示poi
@@ -64,6 +78,7 @@ export const poiLayer = {
                 name: properties.name,
                 address: properties.address,
                 keywords: properties.keywords,
+                distance: properties.distance,
                 cb: function () {
                   mapApp.map.removeOverlay(this.poi2Overlay);
                   this.poi2Overlay = null;

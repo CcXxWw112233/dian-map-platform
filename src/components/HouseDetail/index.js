@@ -139,11 +139,17 @@ export default class HouseDetail extends React.Component {
               poiLayer.init();
               poiLayer.removePoi();
               res.forEach((item) => {
+                const distance = this.getDistance(item.location);
                 poiLayer.addPoiToMap(
                   item.location.split(","),
                   this.poiKeyVal[keywords],
                   item.name,
-                  { name: item.name, address: item.address, keywords: keywords }
+                  {
+                    name: item.name,
+                    address: item.address,
+                    keywords: keywords,
+                    distance: distance,
+                  }
                 );
               });
             }
@@ -161,7 +167,7 @@ export default class HouseDetail extends React.Component {
 
   handleRowClick = (data) => {
     if (!data) return;
-    jumpToPoi(data.location);
+    jumpToPoi(data, this.selectTabPanel);
   };
 
   removePoi = () => {
@@ -180,7 +186,7 @@ export default class HouseDetail extends React.Component {
                       return (
                         <TabPane tab={item2.name} key={item2.name}>
                           <ul
-                            style={{ height: "390px" }}
+                            style={{ height: "424px" }}
                             className={globalStyle.autoScrollY}
                           >
                             {this.state.pois.length > 0 ? (

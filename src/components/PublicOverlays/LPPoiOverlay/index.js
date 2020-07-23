@@ -37,14 +37,25 @@ export default class LPPoiOverlay {
       let nameDiv = document.createElement("div");
       nameDiv.style.margin = "0 10px";
       let span = document.createElement("span");
+      span.style.color = "rgba(0,0,0,1)";
       span.innerHTML = data.name || "";
       nameDiv.appendChild(span);
       row.appendChild(nameDiv);
+      if (data.distance) {
+        let disDiv = document.createElement("div");
+        disDiv.style.margin = "0 10px";
+        let span2 = document.createElement("span");
+        span2.style.color = "rgba(0,0,0,1)";
+        span2.innerHTML = data.distance
+        disDiv.appendChild(span2);
+        row.appendChild(disDiv);
+      }
       context.appendChild(row);
     }
     if (data.address) {
       const row = this.createRow();
       const span = document.createElement("span");
+      span.style.color = "rgba(0,0,0,0.6)";
       span.innerHTML = data.address;
       row.appendChild(span);
       context.appendChild(row);
