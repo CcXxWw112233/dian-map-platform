@@ -60,6 +60,9 @@ const publicData = {
           const data = {
             name: properties.title,
             cb: function () {
+              event.Evt.firEvent("removeHousePOI");
+              me.circleFeature && me.source.removeFeature(me.circleFeature);
+              me.circleFeature = null;
               mapApp.map.removeOverlay(me.lpOverlay);
               this.lpOverlay = null;
               feature.hasPopup = false;
