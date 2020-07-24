@@ -282,6 +282,11 @@ export const TransformCoordinate = (
 };
 
 export const Fit = (view, extent, option, duration = 1000) => {
+  if (Array.isArray(extent)) {
+    if (extent[0] === Infinity) {
+      return;
+    }
+  }
   return new Promise((resolve, reject) => {
     if (view && extent[0] !== Infinity) {
       view.cancelAnimations();

@@ -56,12 +56,12 @@ const publicData = {
           properties.y
         ) {
           this.lpOverlay && mapApp.map.removeOverlay(this.lpOverlay);
-          const me = this
+          const me = this;
           const data = {
             name: properties.title,
             cb: function () {
               mapApp.map.removeOverlay(me.lpOverlay);
-              this.lpOverlay = null
+              this.lpOverlay = null;
               feature.hasPopup = false;
             },
           };
@@ -92,12 +92,48 @@ const publicData = {
           });
         }
       });
+      const that = this;
+      mapApp.map.on("moveend", (e) => {
+        const keys = Object.keys(that.features);
+        let key = null;
+        for (let i = 0; i < keys.length; i++) {
+          if (keys[i].indexOf("lingxi:dichan_loupan_point") > -1) {
+            key = keys[i];
+            break;
+          }
+        }
+        const lpFeature = that.features[key];
+        if (lpFeature) {
+          lpFeature.forEach((item) => {
+            const zoom = mapApp.map.getView().getZoom();
+            const properties = item.getProperties();
+            if (
+              properties.price &&
+              properties.pre_salepe &&
+              properties.x &&
+              properties.y
+            ) {
+              let style = item.getStyle();
+              const text = style.getText();
+              if (zoom > 12) {
+                text.setText(properties.title);
+                style.setText(text);
+              } else {
+                text.setText("");
+                style.setText(text);
+              }
+              item.setStyle(style);
+            }
+          });
+        }
+      });
     }
   },
 
   removeLpInfo: function () {
-    mapApp.map.removeOverlay(this.lpOverlay);
-    this.source.removeFeature(this.circleFeature);
+    this.lpOverlay && mapApp.map.removeOverlay(this.lpOverlay);
+    this.circleFeature && this.source.removeFeature(this.circleFeature);
+    this.lpOverlay = null;
     this.circleFeature = null;
   },
 
