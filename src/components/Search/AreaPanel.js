@@ -1,11 +1,50 @@
 import React from "react";
 import styles from "./Panel.less";
 import areaSearchAction from "@/lib/components/Search/AreaSearch";
-import { setSession } from "utils/sessionManage";
+import { setSession, getSession } from "utils/sessionManage";
 
 import { Select, Button } from "antd";
+import { connect } from "dva";
 
 const { Option } = Select;
+
+@connect(
+  ({
+    areaSearch: {
+      provinceOptions,
+      cityOptions,
+      districtOptions,
+      townOptions,
+      villageOptions,
+      provinceCode,
+      cityCode,
+      districtCode,
+      townCode,
+      villageCode,
+      cityDisabled,
+      districtDisabled,
+      townDisabled,
+      villageDisabled,
+      okDisabled,
+    },
+  }) => ({
+    provinceOptions,
+    cityOptions,
+    districtOptions,
+    townOptions,
+    villageOptions,
+    provinceCode,
+    cityCode,
+    districtCode,
+    townCode,
+    villageCode,
+    cityDisabled,
+    districtDisabled,
+    townDisabled,
+    villageDisabled,
+    okDisabled,
+  })
+)
 export default class AreaPanel extends React.Component {
   constructor(props) {
     super(props);
@@ -28,19 +67,61 @@ export default class AreaPanel extends React.Component {
       townDisabled: true,
       villageDisabled: true,
       okDisabled: true,
-
-      locationName: "",
     };
   }
   componentDidMount() {
     areaSearchAction.getProvince().then((res) => {
       if (res.code === "0") {
-        this.setState({
-          provinceOptions: res.data,
+        const { dispatch } = this.props;
+        dispatch({
+          type: "areaSearch/update",
+          payload: {
+            provinceOptions: res.data,
+          },
         });
+        // getSession("province").then((res) => {
+        //   if (res.code === 0) {
+        //     if (res.data) {
+        //       const arr = res.data?.split("|");
+        //       if (arr) {
+        //         this.handleProvinceSelectChange(arr[0], 1);
+        //         getSession("city").then((res) => {
+        //           if (res.code === 0) {
+        //             if (res.data) {
+        //               const arr = res.data?.split("|");
+        //               if (arr) {
+        //                 this.handleCitySelectChange(arr[0], 1);
+        //                 getSession("district").then((res) => {
+        //                   if (res.code === 0) {
+        //                     if (res.data) {
+        //                       const arr = res.data?.split("|");
+        //                       if (arr) {
+        //                         this.handleTownSelectChange(arr[0], 1);
+        //                       }
+        //                     }
+        //                   }
+        //                 });
+        //               }
+        //             }
+        //           }
+        //         });
+        //       }
+        //     }
+        //   }
+        // });
       }
     });
   }
+
+  updateSession = (type, code, name) => {
+    if (type === "province") {
+      setSession("city", "");
+      setSession("district", "");
+    } else if (type === "city") {
+      setSession("district", "");
+    }
+    setSession(type, `${code}|${name}`);
+  };
 
   updatePublicData = (type, code, name) => {
     const queryStr = `${type}='${code}'`;
@@ -50,9 +131,19 @@ export default class AreaPanel extends React.Component {
   };
 
   // 省份选择
-  handleProvinceSelectChange = (val) => {
-    this.setState(
-      {
+  handleProvinceSelectChange = async (val, flag) => {
+    const { dispatch, provinceOptions } = this.props;
+    const name = provinceOptions?.filter((item) => {
+      return item.code === val;
+    })[0]?.name;
+    this.props.updateLocationName(name);
+    this.updatePublicData("provincecode", val, name);
+    if (!flag) {
+      this.updateSession("province", val, name);
+    }
+    dispatch({
+      type: "areaSearch/update",
+      payload: {
         provinceCode: val,
         cityCode: null,
         districtCode: null,
@@ -64,28 +155,32 @@ export default class AreaPanel extends React.Component {
         villageDisabled: true,
         okDisabled: false,
       },
-      () => {
-        const name = this.state.provinceOptions.filter((item) => {
-          return item.code === val;
-        })[0].name;
-        this.props.updateLocationName(name);
-        this.updatePublicData("provincecode", val, name);
-        const { provinceCode } = this.state;
-        areaSearchAction.getCity(provinceCode).then((res) => {
-          if (res.code === "0") {
-            this.setState({
-              cityOptions: res.data,
-            });
-          }
-        });
-      }
-    );
+    });
+    const res = await areaSearchAction.getCity(val);
+    if (res.code === "0") {
+      dispatch({
+        type: "areaSearch/update",
+        payload: {
+          cityOptions: res.data,
+        },
+      });
+    }
   };
 
   // 地市选择
-  handleCitySelectChange = (val) => {
-    this.setState(
-      {
+  handleCitySelectChange = async (val, flag) => {
+    const { dispatch, cityOptions } = this.props;
+    const name = cityOptions?.filter((item) => {
+      return item.code === val;
+    })[0]?.name;
+    this.props.updateLocationName(name);
+    this.updatePublicData("citycode", val, name);
+    if (!flag) {
+      this.updateSession("city", val, name);
+    }
+    dispatch({
+      type: "areaSearch/update",
+      payload: {
         cityCode: val,
         districtCode: null,
         townCode: null,
@@ -94,81 +189,84 @@ export default class AreaPanel extends React.Component {
         townDisabled: true,
         villageDisabled: true,
       },
-      () => {
-        const name = this.state.cityOptions.filter((item) => {
-          return item.code === val;
-        })[0].name;
-        this.props.updateLocationName(name);
-        this.updatePublicData("citycode", val, name);
-        const { cityCode } = this.state;
-        areaSearchAction.getDistrict(cityCode).then((res) => {
-          if (res.code === "0") {
-            this.setState({
-              districtOptions: res.data,
-            });
-          }
-        });
-      }
-    );
+    });
+    const res = await areaSearchAction.getDistrict(val);
+    if (res.code === "0") {
+      dispatch({
+        type: "areaSearch/update",
+        payload: {
+          districtOptions: res.data,
+        },
+      });
+    }
   };
   // 区县选择
-  handleDistrictSelectChange = (val) => {
-    this.setState(
-      {
+  handleDistrictSelectChange = async (val, flag) => {
+    const { dispatch, districtOptions } = this.props;
+    const name = districtOptions?.filter((item) => {
+      return item.code === val;
+    })[0]?.name;
+    this.props.updateLocationName(name);
+    this.updatePublicData("districtcode", val, name);
+    if (!flag) {
+      this.updateSession("district", val, name);
+    }
+    dispatch({
+      type: "areaSearch/update",
+      payload: {
         districtCode: val,
         townCode: null,
         villageCode: null,
         townDisabled: false,
         villageDisabled: true,
       },
-      () => {
-        const name = this.state.districtOptions.filter((item) => {
-          return item.code === val;
-        })[0].name;
-        this.props.updateLocationName(name);
-        this.updatePublicData("districtcode", val, name);
-        const { districtCode } = this.state;
-        areaSearchAction.getTown(districtCode).then((res) => {
-          if (res.code === "0") {
-            this.setState({
-              townOptions: res.data,
-            });
-          }
-        });
-      }
-    );
+    });
+    const res = await areaSearchAction.getTown(val);
+    if (res.code === "0") {
+      dispatch({
+        type: "areaSearch/update",
+        payload: {
+          townOptions: res.data,
+        },
+      });
+    }
   };
 
   // 乡镇选择
-  handleTownSelectChange = (val) => {
-    this.setState(
-      {
+  handleTownSelectChange = async (val) => {
+    const { dispatch, townOptions } = this.props;
+    const name = townOptions?.filter((item) => {
+      return item.code === val;
+    })[0]?.name;
+    this.props.updateLocationName(name);
+    dispatch({
+      type: "areaSearch/update",
+      payload: {
         townCode: val,
         villageCode: null,
         villageDisabled: false,
       },
-      () => {
-        const name = this.state.townOptions.filter((item) => {
-          return item.code === val;
-        })[0].name;
-        this.props.updateLocationName(name);
-        const { townCode } = this.state;
-        areaSearchAction.getVillige(townCode).then((res) => {
-          if (res.code === "0") {
-            // this.updatePublicData(res);
-            this.setState({
-              villageOptions: res.data,
-            });
-          }
-        });
-      }
-    );
+    });
+    const res = await areaSearchAction.getVillige(val);
+    if (res.code === "0") {
+      // this.updatePublicData(res);
+      dispatch({
+        type: "areaSearch/update",
+        payload: {
+          villageOptions: res.data,
+        },
+      });
+    }
   };
 
   // 村、社区选择
   handleVillageSelectChange = (val) => {
-    this.setState({
-      villageCode: val,
+    const { dispatch } = this.props;
+    dispatch({
+      type: "areaSearch/update",
+      payload: {
+        villageCode: val,
+      },
     });
   };
 
@@ -202,7 +300,7 @@ export default class AreaPanel extends React.Component {
       districtOptions,
       townOptions,
       villageOptions,
-    } = this.state;
+    } = this.props;
     let currentCode = 0;
     let currentLocation = "";
     let currentOptions = null;
@@ -251,7 +349,7 @@ export default class AreaPanel extends React.Component {
       townDisabled,
       villageDisabled,
       okDisabled,
-    } = this.state;
+    } = this.props;
     return (
       <div className={styles.locatePanel} style={{ padding: 10 }}>
         <div className={styles.locatePanelBody}>

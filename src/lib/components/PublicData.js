@@ -294,7 +294,9 @@ const publicData = {
   },
   clear: function () {
     this.source.clear();
-    // mapApp.removeLayer(this.layer);
+    this.circleFeature = null;
+    this.removeLpInfo();
+    event.Evt.firEvent("removeHousePOI")
   },
 };
 export default publicData;
