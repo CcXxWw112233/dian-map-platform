@@ -38,6 +38,7 @@ export default class LocationPanel extends React.Component {
       this.props.updateSearchValue(item);
     } else {
       if (item.id) {
+        this.props.updateSearchValue(item.name);
         commonSearchAction.addPOIToMap(item);
       } else {
         this.props.cb(item);

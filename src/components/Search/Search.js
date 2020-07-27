@@ -67,10 +67,6 @@ export default class Search extends React.Component {
   }
 
   updateState = (val) => {
-    // this.setState({
-    //   locationName: val.locationName,
-    //   adcode: val.adcode,
-    // });
     const { dispatch } = this.props;
     dispatch({
       type: "areaSearch/update",
@@ -94,9 +90,6 @@ export default class Search extends React.Component {
     });
   };
   updateLocationName = (name) => {
-    // this.setState({
-    //   locationName: name,
-    // });
     const { dispatch } = this.props;
     dispatch({
       type: "areaSearch/update",
@@ -111,7 +104,6 @@ export default class Search extends React.Component {
         searchVal: val,
       },
       () => {
-        // const { locationName } = this.state;
         const { locationName } = this.props
         this.handleSearch(val, locationName, 10);
       }
@@ -126,7 +118,6 @@ export default class Search extends React.Component {
         showLocation: true,
         searchVal: address,
       });
-      // const { locationName } = this.state;
       const { locationName } = this.props
       if (address === "") {
         commonSearchAction.removePOI();
