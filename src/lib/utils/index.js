@@ -38,6 +38,11 @@ import {
   // MultiPolygon as MultiPolygonStyle,
   Icon,
 } from "ol/style";
+
+import * as olProj from "ol/proj";
+
+import { circular as circularPolygon } from "ol/geom/Polygon";
+
 import INITMAP from "../../utils/INITMAP";
 
 // 新建feature
@@ -61,6 +66,12 @@ export const addFeature = function (type, data) {
     }
     if (type === "MultiPolygon") {
       return new MultiPolygon(data ? data.coordinates : []);
+    }
+    if (type === "Circle") {
+      const projPt = olProj.toLonLat(data.coordinates, "EPSG:3857");
+      const circle4326 = circularPolygon(data ? projPt : [], data.radius);
+      const circle3857 = circle4326.clone().transform("EPSG:4326", "EPSG:3857");
+      return circle3857;
     }
   };
 
@@ -173,28 +184,30 @@ export const createStyle = function (
   let stroke = new Stroke({
     color: options.strokeColor || defaultColor,
     width: options.strokeWidth || 2,
-    lineDash: options.lineDash
+    lineDash: options.lineDash,
   });
   // 文字样式
   let text = new Text({
-        offsetX: 0,
-        offsetY: options.offsetY || -25,
-        overflow: true,
-        text:options.showName ? (
-          (fillColorKeyVals && fillColorKeyVals.length) ? `${options.text}(${properties[fillColorKeyVals[0].property]})`: options.text)
-          :"",
-        fill: new Fill({
-          color: options.textFillColor || defaultColor,
-        }),
-        font:
-          typeof options.font === "number"
-            ? options.font + "px sans-serif"
-            : options.font,
-        stroke: new Stroke({
-          color: options.textStrokeColor || defaultColor,
-          width: options.textStrokeWidth || 2,
-        }),
-      })
+    offsetX: 0,
+    offsetY: options.offsetY || -25,
+    overflow: true,
+    text: options.showName
+      ? fillColorKeyVals && fillColorKeyVals.length
+        ? `${options.text}(${properties[fillColorKeyVals[0].property]})`
+        : options.text
+      : "",
+    fill: new Fill({
+      color: options.textFillColor || defaultColor,
+    }),
+    font:
+      typeof options.font === "number"
+        ? options.font + "px sans-serif"
+        : options.font,
+    stroke: new Stroke({
+      color: options.textStrokeColor || defaultColor,
+      width: options.textStrokeWidth || 2,
+    }),
+  });
   if (type === "Point") {
     let isIcon = true;
     if (!options.iconUrl) {
@@ -269,6 +282,11 @@ export const TransformCoordinate = (
 };
 
 export const Fit = (view, extent, option, duration = 1000) => {
+  if (Array.isArray(extent)) {
+    if (extent[0] === Infinity) {
+      return;
+    }
+  }
   return new Promise((resolve, reject) => {
     if (view && extent[0] !== Infinity) {
       view.cancelAnimations();

@@ -14,7 +14,12 @@ import { setSession, getSession } from "utils/sessionManage";
 
 import { connect } from "dva";
 
-@connect(({ scoutingProject: { projectList } }) => ({ projectList }))
+@connect(
+  ({
+    scoutingProject: { projectList },
+    areaSearch: { locationName, adcode },
+  }) => ({ projectList, locationName, adcode })
+)
 export default class Search extends React.Component {
   constructor(props) {
     super(props);
@@ -62,9 +67,13 @@ export default class Search extends React.Component {
   }
 
   updateState = (val) => {
-    this.setState({
-      locationName: val.locationName,
-      adcode: val.adcode,
+    const { dispatch } = this.props;
+    dispatch({
+      type: "areaSearch/update",
+      payload: {
+        locationName: val.locationName,
+        adcode: val.adcode,
+      },
     });
     const queryStr = `${val.type}='${val.adcode}'`;
     const { changeQueryStr } = this.props;
@@ -81,8 +90,12 @@ export default class Search extends React.Component {
     });
   };
   updateLocationName = (name) => {
-    this.setState({
-      locationName: name,
+    const { dispatch } = this.props;
+    dispatch({
+      type: "areaSearch/update",
+      payload: {
+        locationName: name,
+      },
     });
   };
   updateSearchValue = (val) => {
@@ -91,7 +104,7 @@ export default class Search extends React.Component {
         searchVal: val,
       },
       () => {
-        const { locationName } = this.state;
+        const { locationName } = this.props
         this.handleSearch(val, locationName, 10);
       }
     );
@@ -105,7 +118,7 @@ export default class Search extends React.Component {
         showLocation: true,
         searchVal: address,
       });
-      const { locationName } = this.state;
+      const { locationName } = this.props
       if (address === "") {
         commonSearchAction.removePOI();
         this.setState({
@@ -161,7 +174,8 @@ export default class Search extends React.Component {
     });
   };
   onSearch = (value, event) => {
-    const { locationName } = this.state;
+    // const { locationName } = this.state;
+    const { locationName } = this.props
     this.handleSearch(value, locationName, 10);
     commonSearchAction.setSession(value);
   };
@@ -204,7 +218,7 @@ export default class Search extends React.Component {
       <div className={styles.wrap} style={this.props.style}>
         <Dropdown overlay={areaPanel} trigger="click">
           <Button style={{ borderRadius: 0 }}>
-            {this.state.locationName}
+            {this.props.locationName}
             <DownOutlined />
           </Button>
         </Dropdown>

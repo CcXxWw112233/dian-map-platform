@@ -2,13 +2,16 @@ import Observable from "ol/Observable";
 import DragPan from "ol/interaction/DragPan";
 import Overlay from "ol/Overlay";
 import Feature from "ol/Feature";
+
 import Constants from "./Constants";
 import * as DomUtils from "../util/dom_util";
 import FeatureEvent from "./events/FeatureEvent";
 import { connectEvent, disconnectEvent } from "../util/core";
 
 import douglasPeucker from "../../douglasPeucker";
+import { over } from "lodash";
 
+const turf = require("@turf/turf");
 class PlotEdit extends Observable {
   /**
    * @classdesc 图元进行编辑的基类。用来创建控制点，绑定控制点事件，对feature的数据进行处理
@@ -140,7 +143,7 @@ class PlotEdit extends Observable {
   }
   // 删除按钮
   createDelBtn(pt) {
-    return;
+    // return;
     const delBtnEle = document.createElement("div");
     delBtnEle.title = "删除图斑";
     delBtnEle.classList.add("p-helper-control-feature-del");
@@ -180,17 +183,73 @@ class PlotEdit extends Observable {
     delOvely && delOvely.setPosition(pt);
   }
 
+  removePlotOverlay(operator) {
+    const overlayId = operator.feature.get("overlayId");
+    if (overlayId) {
+      const lastOverlay = this.map.getOverlayById(overlayId);
+      this.map.removeOverlay(lastOverlay);
+    }
+  }
+
   // 创建标绘的overlay
   createPlotOverlay(imgUrl, operator) {
     const overlayId = operator.feature.get("overlayId");
     if (overlayId) {
       const lastOverlay = this.map.getOverlayById(overlayId);
-      this.map.removeOverlay(lastOverlay);
+      if (lastOverlay) {
+        this.map.removeOverlay(lastOverlay);
+      }
     } else {
       operator.feature.set("overlayId", operator.guid);
     }
     const extent = operator.feature.getGeometry().getExtent();
-    const center = [(extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2];
+    let center = [(extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2];
+    let pt1 = turf.point([-180, 0]);
+    const converted1 = turf.toMercator(pt1);
+
+    let pt2 = turf.point([180, 0]);
+    const converted2 = turf.toMercator(pt2);
+
+    const line1 = turf.lineString([
+      [converted1.geometry.coordinates[0], center[1]],
+      [converted2.geometry.coordinates[0], center[1]],
+    ]);
+    const line2 = turf.lineString(
+      operator.feature.getGeometry().getCoordinates()[0]
+    );
+    const intersects = turf.lineIntersect(line1, line2);
+    //x从小到大排序
+    intersects.features.sort(
+      (a, b) => a.geometry.coordinates[0] - b.geometry.coordinates[0]
+    );
+    let result = 0;
+    for (let i = 0; i < intersects.features.length; i++) {
+      if (intersects.features[i + 1]) {
+        // 计算交点的距离
+        let temp = Math.abs(
+          intersects.features[i].geometry.coordinates[0] -
+            intersects.features[i + 1].geometry.coordinates[0]
+        );
+        if (temp > result) {
+          let tempCenter = [
+            (intersects.features[i].geometry.coordinates[0] +
+              intersects.features[i + 1].geometry.coordinates[0]) /
+              2,
+            (intersects.features[i].geometry.coordinates[1] +
+              intersects.features[i + 1].geometry.coordinates[1]) /
+              2,
+          ];
+          result = temp;
+          center = tempCenter;
+          // const tempPoint = turf.point(center);
+          // const tempPolygon = turf.lineToPolygon(line2);
+          // if (turf.booleanPointInPolygon(tempPoint, tempPolygon) === true) {
+          //   result = temp;
+          //   center = tempCenter
+          // }
+        }
+      }
+    }
     const ele = document.createElement("img");
     ele.src = imgUrl;
     ele.alt = "";
@@ -198,6 +257,7 @@ class PlotEdit extends Observable {
       id: operator.guid,
       element: ele,
       position: center,
+      offset: [0, 10],
       positioning: "bottom-center",
     });
     this.map.addOverlay(overlay);

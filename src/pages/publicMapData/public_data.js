@@ -49,6 +49,11 @@ const jsons = {
               fillColor: "rgba(68,0,10,0.8)",
               property: "population",
             },
+            {
+              scope: ">15",
+              fillColor: "rgba(68,0,10,0.8)",
+              property: "population",
+            },
           ],
         },
         {
@@ -195,6 +200,54 @@ const jsons = {
             },
           ],
         },
+        {
+          name: "停车场",
+          icon: "",
+          key: "map:transport:parking",
+          loadFeatureKeys: [
+            {
+              typeName: "lingxi:ggss_point",
+              cql_filter:  `${queryStr} AND type2='停车场'`,
+              showName: true,
+              style: {
+                iconUrl: require("../../assets/img/tingchechang.svg"),
+                ...commonStyleOption,
+              },
+            },
+          ],
+        },
+        {
+          name: "公交车站",
+          icon: "",
+          key: "map:transport:busstop",
+          loadFeatureKeys: [
+            {
+              typeName: "lingxi:ggss_point",
+              cql_filter:  `${queryStr} AND type2='公交车站'`,
+              showName: true,
+              style: {
+                iconUrl: require("../../assets/img/gongjiaozhan.svg"),
+                ...commonStyleOption,
+              },
+            },
+          ],
+        },
+        {
+          name: "地铁站",
+          icon: "",
+          key: "map:transport:metroStation",
+          loadFeatureKeys: [
+            {
+              typeName: "lingxi:ggss_point",
+              cql_filter:  `${queryStr} AND type2='地铁站'`,
+              showName: true,
+              style: {
+                iconUrl: require("../../assets/img/ditiezhan.svg"),
+                ...commonStyleOption,
+              },
+            },
+          ],
+        },
       ],
     },
     {
@@ -228,7 +281,7 @@ const jsons = {
               cql_filter: `${queryStr} AND type='4'`,
               showName: true,
               style: {
-                iconUrl: require("../../assets/img/icon-drop-shangye.png"),
+                iconUrl: require("../../assets/img/icon-drop-yiliao.png"),
                 ...commonStyleOption,
               },
             },
@@ -456,7 +509,29 @@ const jsons = {
       icon: "icon-icon-xianzai",
       key: "7",
       child: [],
-    },
+    },{
+      name: "地产楼盘",
+      icon: "icon-loufang2",
+      key: "8",
+      child:[
+        {
+          name: "新房",
+          icon: "",
+          key: "map:loupan:newHouse",
+          loadFeatureKeys: [
+            {
+              typeName: "lingxi:dichan_loupan_point",
+              cql_filter:  `${queryStr} AND type=0`,
+              showName: false,
+              style: {
+                iconUrl: require("../../assets/img/loupan.svg"),
+                ...commonStyleOption,
+              },
+            },
+          ],
+        },
+      ]
+    }
   ],
 };
 

@@ -1,0 +1,41 @@
+.wrap {
+  padding: 0;
+  margin: 0;
+  :global(.ant-tabs-nav) {
+    margin: 0;
+  }
+  ul {
+    padding: 0;
+    li {
+      list-style: none;
+      list-style-type: none;
+      margin: 5px 0;
+      .row {
+        cursor: default;
+        margin: 0 16px;
+        text-align: left;
+        font-size: 14px;
+        font-family: PingFangSC-Medium, PingFang SC;
+        font-weight: 500;
+        color: rgba(0, 0, 0, 0.85);
+        line-height: 24px;
+        display: flex;
+        flex-direction: row;
+        .firstDiv {
+          text-align: left;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          width: 69%;
+        }
+        .secondDiv {
+          width: 31%;
+          text-align: center;
+        }
+      }
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+      }
+    }
+  }
+}

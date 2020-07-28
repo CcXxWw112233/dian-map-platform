@@ -25,6 +25,7 @@ export const lineDrawing = {
       mapApp.map.removeInteraction(this.drawing)
       this.isActive = false
     }
+    return this.drawing;
   },
 
   getOverlays() {

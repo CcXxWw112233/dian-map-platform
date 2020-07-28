@@ -63,7 +63,7 @@ export const createPopupOverlay = (feature, coordinate) => {
   let popupEle = new PopupOverlay(data);
   popupEle = new baseOverlay(popupEle, {angleColor: "#fff"});
   overlay = createOverlay(popupEle, {
-    positioning: "bottom-left",
+    // positioning: "bottom-left",
     offset: [-10, -15],
   });
   if (feature.overlay) {

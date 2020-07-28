@@ -9,6 +9,7 @@ export default {
       { indeterminate: false, checkAll: false, checkedList: [] },
       { indeterminate: false, checkAll: false, checkedList: [] },
       { indeterminate: false, checkAll: false, checkedList: [] },
+      { indeterminate: false, checkAll: false, checkedList: [] },
     ],
   },
   effects: {

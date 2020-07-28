@@ -14,7 +14,6 @@ import ScoutingDetails from "../pages/ProjectScouting/ScoutingDetails";
 import ConfirmModal from "../pages/PlottingModal/ConfirmModal";
 import ScoutAction from "../lib/components/ProjectScouting/ScoutingList";
 import ScoutDetail from "../lib/components/ProjectScouting/ScoutingDetail";
-import SearchToolBar from "../components/Search/Search";
 import Event from "../lib/utils/event";
 // import { PublicData, ProjectScouting } from 'pages/index'
 import { Tabs, Spin, message } from "antd";
@@ -36,12 +35,12 @@ import BottomToolBar from "components/BottomToolBar/BottomToolBar";
 
 // import TempPlottingIcon from "components/TempPlotting/TempPlottingIcon";
 // import TempPlottingPanel from "components/TempPlotting/TempPlottingPanel";
-import PhotoSwipe from '../components/PhotoSwipe'
-import FlutterComponents from '../pages/FlutterComponents'
-import PlotTools from "../components/PlotTools/ToolBar"
-import MatrixEdit from '../components/MatrixEdit'
-import { BASIC } from '../services/config'
-import UploadNotification from '../components/UploadNotification'
+import PhotoSwipe from "../components/PhotoSwipe";
+import FlutterComponents from "../pages/FlutterComponents";
+import PlotTools from "../components/PlotTools/ToolBar";
+import MatrixEdit from "../components/MatrixEdit";
+import { BASIC } from "../services/config";
+import UploadNotification from "../components/UploadNotification";
 
 @connect(
   ({
@@ -72,7 +71,7 @@ class IndexPage extends React.Component {
     this.mySelfIcon = false;
     this.positionTimer = null;
     this.queryStr = "";
-    this.publicDataChild = null
+    this.publicDataChild = null;
     // this.state = {
     //   draw_
     // }
@@ -326,7 +325,7 @@ class IndexPage extends React.Component {
 
   changeQueryStr = (value) => {
     this.queryStr = value;
-    this.publicDataChild && this.publicDataChild.getAllData(this.queryStr)
+    this.publicDataChild && this.publicDataChild.getAllData(this.queryStr);
   };
 
   getQueryStr = () => {
@@ -334,8 +333,8 @@ class IndexPage extends React.Component {
   };
 
   onRef = (ref) => {
-    this.publicDataChild = ref
-  }
+    this.publicDataChild = ref;
+  };
 
   render() {
     const { TabPane } = Tabs;
@@ -362,10 +361,11 @@ class IndexPage extends React.Component {
         {/* {toolBars && <ToolBar></ToolBar>} */}
         {bottomTools && <BottomToolBar></BottomToolBar>}
         {searchTools && (
-          <SearchToolBar
+          <Search
             style={SearchToolBarStyle}
+            changeQueryStr={this.changeQueryStr}
             isOnMap={true}
-          ></SearchToolBar>
+          ></Search>
         )}
         {/* {isShowTempPlot && <TempPlottingPanel></TempPlottingPanel>} */}
         {isShowTempPlot && <PlotTools></PlotTools>}
@@ -379,10 +379,7 @@ class IndexPage extends React.Component {
             >
               <Main>
                 <div style={{ flex: "0" }}>
-                  <Search
-                    onInputChange={this.handleInput}
-                    changeQueryStr={this.changeQueryStr}
-                  ></Search>
+                  <Search changeQueryStr={this.changeQueryStr}></Search>
                 </div>
                 <div
                   style={{ overflow: "hidden", height: "100%" }}
@@ -409,7 +406,10 @@ class IndexPage extends React.Component {
                       <ProjectScouting></ProjectScouting>
                     </TabPane>
                     <TabPane tab={<span>公共数据</span>} key="2">
-                      <PublicData getQueryStr={this.getQueryStr} onRef={this.onRef}/>
+                      <PublicData
+                        getQueryStr={this.getQueryStr}
+                        onRef={this.onRef}
+                      />
                     </TabPane>
                     <TabPane tab={<span>远程协作</span>} key="3">
                       远程协作
@@ -432,15 +432,10 @@ class IndexPage extends React.Component {
         <Overlay />
         <PhotoSwipe />
         {/* 是否显示手机页面 */}
-        {
-          isShowMobile && <FlutterComponents/>
-        }
-        {
-          editShow && 
-          <MatrixEdit/>
-        }
+        {isShowMobile && <FlutterComponents />}
+        {editShow && <MatrixEdit />}
         {/* 文件上传通知 */}
-        <UploadNotification/>
+        <UploadNotification />
       </div>
     );
   }

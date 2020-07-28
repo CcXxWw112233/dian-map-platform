@@ -42,7 +42,7 @@ const config = [
   },
   {
     title: "交通设施",
-    key: "map:transport:road|map:transport:rail|map:transport:city",
+    key: "map:transport:road|map:transport:rail|map:transport:city|map:transport:parking|map:transport:busstop|map:transport:metroStation",
     content: [
       {
         imgSrc: require("../../assets/img/lenged-daolujiaotong.png"),
@@ -55,6 +55,18 @@ const config = [
       {
         imgSrc: require("../../assets/img/lenged-chengshijiaotong.png"),
         font: "邻近城市",
+      },
+      {
+        imgSrc: require("../../assets/img/tingchechang.svg"),
+        font: "停车场",
+      },
+      {
+        imgSrc: require("../../assets/img/gongjiaozhan.svg"),
+        font: "公交车站",
+      },
+      {
+        imgSrc: require("../../assets/img/ditiezhan.svg"),
+        font: "地铁站",
       },
     ],
   },
@@ -141,6 +153,16 @@ const config = [
       {
         imgSrc: require("../../assets/img/legend-farm.png"),
         font: "农田用地",
+      },
+    ],
+  },
+  {
+    title: "地产楼盘",
+    key: "map:loupan:newHouse",
+    content: [
+      {
+        imgSrc: require("../../assets/img/loupan.svg"),
+        font: "新房",
       },
     ],
   },

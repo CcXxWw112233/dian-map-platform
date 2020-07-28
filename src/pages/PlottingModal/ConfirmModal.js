@@ -7,9 +7,9 @@ import Event from "../../lib/utils/event";
 
 @connect(({ modal: { confirmVidible } }) => ({ confirmVidible }))
 export default class ConfirmModal extends Component {
-  constructor(props) {
-    super(props);
-  }
+  // constructor(props) {
+  //   super(props);
+  // }
 
   handleOk = () => {
     Event.Evt.firEvent("saveFeatureToDB", true);

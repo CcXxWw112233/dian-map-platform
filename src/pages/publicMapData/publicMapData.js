@@ -23,6 +23,7 @@ export default class PublicData extends React.Component {
     this.populationSelect = {};
     // this.queryStr = "districtcode='440117'"
     this.queryStr = "";
+    this.fillColor = null;
   }
   componentDidMount() {
     // console.log(m)
@@ -61,7 +62,7 @@ export default class PublicData extends React.Component {
                 PublicDataActions.getPublicData({
                   url: "",
                   data: key,
-                  fillColor: null,
+                  fillColor: this.fillColor,
                 });
               });
             }
@@ -76,7 +77,7 @@ export default class PublicData extends React.Component {
     arr1 = Array.from(new Set(arr1));
     arr2.forEach((item0) => {
       const item = arr1.filter((item1) => {
-        return (item1 = item0);
+        return item1 === item0;
       })?.[0];
       if (!item) {
         arraynew.push(item0);
@@ -92,6 +93,7 @@ export default class PublicData extends React.Component {
   };
   // 选项更新，获取更新的那些数据
   changeData = (oldVal = [], newVal = [], fillColor) => {
+    this.fillColor = fillColor;
     // 新增了选项需要显示
 
     let arr = [],
@@ -138,6 +140,13 @@ export default class PublicData extends React.Component {
       if (keys.length) {
         // 删除勾选的选项-这里只需要传key，剔除其他属性
         let a = keys.map((item) => item.typeName + (item.cql_filter || ""));
+        a.forEach((item) => {
+          if (item.indexOf("lingxi:dichan_loupan_point") > -1) {
+            PublicDataActions.removeLpInfo();
+            Event.Evt.firEvent("removeHousePOI");
+            window.housePoi = "";
+          }
+        });
         PublicDataActions.removeFeatures(a);
       }
     }

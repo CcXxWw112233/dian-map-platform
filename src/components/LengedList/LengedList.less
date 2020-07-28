@@ -64,7 +64,7 @@
       margin-bottom: 4px;
       background-repeat: no-repeat;
       background-position: center center;
-      background-size: 100% 100%
+      background-size: 100% 100%;
     }
   }
   .layerName {
@@ -102,12 +102,16 @@
     -ms-flex-direction: column;
     flex-direction: column;
     padding: 7px 8px;
+    &.activePanel {
+      background-color: rgba(21, 133, 255, 1);
+      color: rgba(255, 255, 255, 1);
+    }
   }
-  .configContainer{
+  .configContainer {
     border-top: 1px solid rgba(0, 0, 0, 0.1);
     margin-top: 10px;
     padding: 5px 8px;
-    .configTitle{
+    .configTitle {
       text-align: left;
       color: rgba(0, 0, 0, 0.8);
     }
