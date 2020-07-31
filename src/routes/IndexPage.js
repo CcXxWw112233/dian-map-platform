@@ -42,7 +42,7 @@ import UploadNotification from "../components/UploadNotification";
 // new ui
 import BasemapGallery from "../components/BasemapGallery/BasemapGallery";
 import RightTools from "../components/RightTools/index"
-import Zoom from "../components/Zoom/index"
+// import Zoom from "../components/Zoom/index"
 
 @connect(
   ({
@@ -374,7 +374,7 @@ class IndexPage extends React.Component {
         {/* <Location></Location> */}
         <BasemapGallery></BasemapGallery>
         <RightTools></RightTools>
-        <Zoom></Zoom>
+        {/* <Zoom></Zoom> */}
         <Sider width={360}>
           {this.props.mainVisible === "list" ? (
             <div

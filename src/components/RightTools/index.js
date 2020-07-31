@@ -6,6 +6,7 @@ import styles from "./RightTools.less";
 import { getMyCenter } from "./lib";
 import LengedList from "../LengedList/index";
 import LocalPOI from "../LocalPOI/index";
+import Zoom from "../Zoom/index";
 
 export default class RightTools extends React.Component {
   constructor(props) {
@@ -68,6 +69,9 @@ export default class RightTools extends React.Component {
     return (
       <div className={styles.wrapper}>
         <ul>
+          <li>
+            <Zoom></Zoom>
+          </li>
           {this.tools.map((item, index) => {
             const icon = item.iconfont ? (
               <i

@@ -11,7 +11,7 @@ export default class Zoom extends React.Component {
     super(props);
     this.state = {
       showSlider: false,
-      translateY: 0,
+      translateY: -115,
     };
     this.moving = false;
     this.lastY = null;
@@ -23,6 +23,9 @@ export default class Zoom extends React.Component {
   }
   componentDidMount() {
     this.defaultZoom = mapApp.map.getView().getZoom();
+    const zoomBtn = this.refs.zoomBtn
+    const zoomBtnRect = zoomBtn.getBoundingClientRect()
+    this.lastY = zoomBtnRect.y
   }
   onMouseDown(e) {
     e.preventDefault();
@@ -32,9 +35,9 @@ export default class Zoom extends React.Component {
 
   onMouseUp() {
     this.moving = false;
-    this.lastY = null;
+    // this.lastY = null;
     this.setState({
-      translateY: 0,
+      translateY: -115,
       showSlider: false,
     });
   }
@@ -51,7 +54,7 @@ export default class Zoom extends React.Component {
       if (dy > 130 || dy < -120) {
         this.setState(
           {
-            translateY: dy > 0 ? 130 : -120,
+            translateY: dy > 0 ? 0 : -250,
           },
           () => {
             if (dy > 130) {
@@ -65,7 +68,7 @@ export default class Zoom extends React.Component {
       } else {
         this.setState(
           {
-            translateY: dy,
+            translateY: dy - 115,
           },
           () => {
             if (dy > 0) {
@@ -80,6 +83,7 @@ export default class Zoom extends React.Component {
       }
       mapApp.map.getView().setZoom(zoom);
     }
+    // this.lastY = e.clientY;
   }
 
   render() {
@@ -92,13 +96,13 @@ export default class Zoom extends React.Component {
           style={{
             transform: `translateY(${this.state.translateY}px)`,
           }}
+          ref="zoomBtn"
           onPointerDown={(e) => this.onMouseDown(e)}
-          onPointerEnter={(e) => {
+          onPointerOver={(e) => {
             this.setState({
               showSlider: true,
             });
-            this.lastX = 23;
-            this.lastY = document.body.clientHeight - 500;
+            // this.lastY = document.body.clientHeight - 500;
           }}
           onPointerLeave={() => {
             if (!this.moving) {
