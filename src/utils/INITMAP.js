@@ -3,7 +3,7 @@ import View from "ol/View";
 import {
   defaults as defaultInteractions,
   DragRotateAndZoom,
-  DragPan
+  DragPan,
 } from "ol/interaction";
 
 import TileLayer from "ol/layer/Tile";
@@ -11,15 +11,14 @@ import XYZ from "ol/source/XYZ";
 
 import { baseMaps, baseMapDictionary } from "utils/mapSource";
 
-const initMap =
-function(){
+const initMap = function () {
   return {
     status: null,
     map: null,
     view: null,
     drawing: {},
     baseMaps: [],
-    mapId:"",
+    mapId: "",
     operationLayers: [],
     init: function (mapId) {
       this.mapId = mapId;
@@ -34,7 +33,9 @@ function(){
         this.status = "renderend";
         window.map = this.map;
         // 屏蔽右键菜单
-        this.map.getViewport().oncontextmenu = ()=>{ return false}
+        this.map.getViewport().oncontextmenu = () => {
+          return false;
+        };
         // 回调
         resolve({ map: this.map, view: this.view });
       });
@@ -46,7 +47,7 @@ function(){
         minZoom: 5,
         zoom: 10,
         maxZoom: 18,
-        enableRotation:false,
+        enableRotation: false,
       });
       return this.view;
     },
@@ -62,7 +63,7 @@ function(){
     findLayerById: function (id, layerArr = this.operationLayers) {
       let layers = this.map.getLayers();
       layers = layers.getArray();
-      let layer = layers.find(item => item.get('id') === id);
+      let layer = layers.find((item) => item.get("id") === id);
       return layer;
       // layerArr.filter((layer) => {
       //   return layer.get("id") === id;
@@ -80,7 +81,7 @@ function(){
     createTilelayer: function (options, zIndex) {
       return new TileLayer({
         id: options.id,
-        zIndex: zIndex ,
+        zIndex: zIndex,
         source: new XYZ({
           crossOrigin: "anonymous",
           url: options.url,
@@ -98,20 +99,20 @@ function(){
       }
     },
     changeBaseMap: function (key) {
-      let baseMapKey = null
+      let baseMapKey = null;
       if (baseMapDictionary && baseMapDictionary.length) {
-        baseMapKey = baseMapDictionary.filter(item => {
-          return item.key === key
-        })[0]
+        baseMapKey = baseMapDictionary.filter((item) => {
+          return item.key === key;
+        })[0];
       }
       if (baseMapKey && baseMapKey.values.length > 0) {
-        this.baseMaps.forEach(layer => {
-          layer.setVisible(false)
-        })
+        this.baseMaps.forEach((layer) => {
+          layer.setVisible(false);
+        });
         baseMapKey.values.forEach((key, index) => {
           let layer = this.findLayerById(key, this.baseMaps);
           if (!layer) {
-            let zIndex = index
+            let zIndex = index;
             const baseMapItem = baseMaps.filter((baseMap) => {
               return baseMap.id === key;
             })[0];
@@ -121,6 +122,32 @@ function(){
             layer.setVisible(true);
           }
         });
+      }
+    },
+
+    // 路网显示隐藏
+    showRoadLabel: function (key, value = false) {
+      let baseMapKey = null;
+      if (baseMapDictionary && baseMapDictionary.length) {
+        baseMapKey = baseMapDictionary.filter((item) => {
+          return item.key === key;
+        })[0];
+      }
+      if (baseMapKey && baseMapKey.values.length > 0) {
+        if (value === false) {
+          this.baseMaps.forEach((layer) => {
+            if (layer.get("id")?.indexOf("_roadLabel_tile") > -1) {
+              layer.setVisible(false);
+            }
+          });
+        } else {
+          baseMapKey.values.forEach((key, index) => {
+            let layer = this.findLayerById(key, this.baseMaps);
+            if (layer.get("id")?.indexOf("_roadLabel_tile") > -1) {
+              layer.setVisible(true);
+            }
+          });
+        }
       }
     },
     removeLayer: function (layer) {
@@ -143,6 +170,6 @@ function(){
     //   }
     // }
   };
-}
+};
 
 export default new initMap();

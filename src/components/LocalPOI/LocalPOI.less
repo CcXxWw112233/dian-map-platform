@@ -1,0 +1,108 @@
+.wrapper {
+  padding: 0;
+  margin: 0;
+  :global(
+    // .ant-tabs-card.ant-tabs-top > .ant-tabs-nav .ant-tabs-tab, .ant-tabs-card.ant-tabs-top > div > .ant-tabs-nav 
+    .ant-tabs-tab) {
+    border-radius: 20px;
+  }
+  ul {
+    padding: 0;
+    li {
+      list-style: none;
+      list-style-type: none;
+      margin: 5px 15px;
+      .row {
+        cursor: default;
+        margin: 0 16px;
+        text-align: left;
+        font-size: 14px;
+        font-family: PingFangSC-Medium, PingFang SC;
+        font-weight: 500;
+        line-height: 24px;
+        display: flex;
+        flex-direction: row;
+        span {
+          color: #fff;
+        }
+        .firstDiv {
+          text-align: left;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          width: 80%;
+        }
+        .secondDiv {
+          // width: 31%;
+          text-align: center;
+        }
+      }
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+      }
+    }
+  }
+}
+:global {
+  .LocalPOI {
+    &.ant-tabs-card.ant-tabs-top > .ant-tabs-nav .ant-tabs-tab {
+      height: 32px;
+      border: none;
+      background: none;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 1);
+      line-height: 14px;
+      &.ant-tabs-tab-active {
+        background: rgba(70, 75, 108, 0.5);
+        border-radius: 16px;
+        border: #8fc2ff 2px solid;
+      }
+    }
+    &.ant-tabs-card.ant-tabs-top > .ant-tabs-nav::before {
+      border-bottom: none;
+    }
+    .ant-tabs-nav-wrap {
+      // margin-bottom: 20px;
+    }
+    .ant-tabs-nav-list {
+      border-bottom: 1px solid rgb(255, 255, 255);
+      height: 50px;
+    }
+    .LocalPOI2 {
+      .ant-tabs-tab {
+        height: 32px;
+        border: none;
+        background: none;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 1);
+        line-height: 14px;
+        &.ant-tabs-tab-active {
+          border-bottom: 1px solid #8fc2ff;
+        }
+      }
+      .ant-tabs-nav {
+        margin-bottom: 0px;
+        height: 34px;
+      }
+      .ant-tabs-content-holder {
+        margin-top: 0;
+      }
+      .ant-tabs-nav::before {
+        border-bottom: none;
+      }
+      .ant-tabs-nav-list {
+        border-bottom: none;
+        margin: 0px 35px;
+      }
+      .ant-tabs-ink-bar-animated {
+        background: none;
+      }
+      .ant-tabs-nav-wrap {
+        margin-bottom: 0px;
+      }
+      .ant-tabs > .ant-tabs-nav, .ant-tabs > div > .ant-tabs-nav {
+        margin-bottom: 10px;
+      }
+    }
+  }
+}

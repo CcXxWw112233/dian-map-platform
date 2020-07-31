@@ -29,18 +29,20 @@ import {
 } from "components/index";
 import Overlay from "components/Overlay/Overlay";
 
-import LengedList from "components/LengedList/LengedList";
-
 import BottomToolBar from "components/BottomToolBar/BottomToolBar";
 
 // import TempPlottingIcon from "components/TempPlotting/TempPlottingIcon";
 // import TempPlottingPanel from "components/TempPlotting/TempPlottingPanel";
 import PhotoSwipe from "../components/PhotoSwipe";
 import FlutterComponents from "../pages/FlutterComponents";
-import PlotTools from "../components/PlotTools/ToolBar";
 import MatrixEdit from "../components/MatrixEdit";
 import { BASIC } from "../services/config";
 import UploadNotification from "../components/UploadNotification";
+
+// new ui
+import BasemapGallery from "../components/BasemapGallery/BasemapGallery";
+import RightTools from "../components/RightTools/index"
+import Zoom from "../components/Zoom/index"
 
 @connect(
   ({
@@ -367,10 +369,12 @@ class IndexPage extends React.Component {
             isOnMap={true}
           ></Search>
         )}
-        {/* {isShowTempPlot && <TempPlottingPanel></TempPlottingPanel>} */}
-        {isShowTempPlot && <PlotTools></PlotTools>}
-        <LengedList></LengedList>
+        {/* {isShowTempPlot && <PlotTools></PlotTools>} */}
+        {/* <LengedList></LengedList> */}
         {/* <Location></Location> */}
+        <BasemapGallery></BasemapGallery>
+        <RightTools></RightTools>
+        <Zoom></Zoom>
         <Sider width={360}>
           {this.props.mainVisible === "list" ? (
             <div
