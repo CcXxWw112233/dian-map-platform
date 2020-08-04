@@ -41,7 +41,9 @@ import UploadNotification from "../components/UploadNotification";
 
 // new ui
 import BasemapGallery from "../components/BasemapGallery/BasemapGallery";
-import RightTools from "../components/RightTools/index"
+import RightTools from "../components/RightTools/index";
+
+import LeftToolBar from "../components/LeftToolBar/index";
 // import Zoom from "../components/Zoom/index"
 
 @connect(
@@ -361,21 +363,22 @@ class IndexPage extends React.Component {
         <ConfirmModal />
         {/* <SketchPicker></SketchPicker> */}
         {/* {toolBars && <ToolBar></ToolBar>} */}
-        {bottomTools && <BottomToolBar></BottomToolBar>}
-        {searchTools && (
+        {/* {bottomTools && <BottomToolBar></BottomToolBar>} */}
+        {/* {searchTools && (
           <Search
             style={SearchToolBarStyle}
             changeQueryStr={this.changeQueryStr}
             isOnMap={true}
           ></Search>
-        )}
+        )} */}
         {/* {isShowTempPlot && <PlotTools></PlotTools>} */}
         {/* <LengedList></LengedList> */}
         {/* <Location></Location> */}
         <BasemapGallery></BasemapGallery>
         <RightTools></RightTools>
+        <LeftToolBar></LeftToolBar>
         {/* <Zoom></Zoom> */}
-        <Sider width={360}>
+        {/* <Sider width={360}>
           {this.props.mainVisible === "list" ? (
             <div
               className={`${animateCss.animated} ${animateCss.slideInLeft}`}
@@ -431,7 +434,7 @@ class IndexPage extends React.Component {
               <ScoutingDetails></ScoutingDetails>
             </Main>
           )}
-        </Sider>
+        </Sider> */}
         {/* <CityPanel></CityPanel> */}
         <Overlay />
         <PhotoSwipe />

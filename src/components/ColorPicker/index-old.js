@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Dropdown, Button } from "antd";
-import { CaretUpOutlined, CaretDownOutlined } from "@ant-design/icons";
+import { UpOutlined, DownOutlined } from "@ant-design/icons";
 import { SketchPicker } from "react-color";
 
 import btnStyles from "./btn.less";
@@ -122,25 +122,14 @@ export default class ColorPicker extends Component {
         onVisibleChange={this.onVisibleChange}
         placement={position}
       >
-        {this.state.visible === false ? (
-          <CaretDownOutlined
-            style={{ margin: "auto" }}
-            onClick={() => {
-              this.setState({
-                visible: true,
-              });
-            }}
-          />
-        ) : (
-          <CaretUpOutlined
-            style={{ margin: "auto" }}
-            onClick={() => {
-              this.setState({
-                visible: false,
-              });
-            }}
-          />
-        )}
+        <div
+          className={btnStyles.wrap + disable}
+          onClick={this.handleColorPickerBtnClick}
+        >
+          <div style={{ backgroundColor: backgroundColor }}>
+            {this.state.visible ? <UpOutlined /> : <DownOutlined />}
+          </div>
+        </div>
       </Dropdown>
     );
   }
