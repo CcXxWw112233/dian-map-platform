@@ -24,6 +24,17 @@ export default class Project extends React.Component {
     this.checkListCach();
   }
 
+  tabChange = (val) => {
+    if (val === "1") {
+      ScoutAction.fitToCenter();
+    }
+  };
+
+  changeQueryStr = (value) => {
+    this.queryStr = value;
+    this.publicDataChild && this.publicDataChild.getAllData(this.queryStr);
+  };
+
   getQueryStr = () => {
     return this.queryStr;
   };
