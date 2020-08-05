@@ -2,9 +2,14 @@ import React from "react";
 
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import styles from "./LeftToolBar.less";
-
 import Plot from "./panels/Plot";
 import Project from "./panels/Project";
+
+import {
+  lineDrawing,
+  pointDrawing,
+  polygonDrawing,
+} from "utils/drawing";
 
 export default class LeftToolBar extends React.Component {
   constructor(props) {
@@ -37,6 +42,13 @@ export default class LeftToolBar extends React.Component {
         name: "坐标",
         displayText: true,
         iconfont: "&#xe620;",
+        cb: () => {
+          this.setState({
+            displayPlot: false,
+            displayProject: false,
+          });
+          pointDrawing.createDrawing()
+        }
       },
       {
         name: "描绘",
@@ -65,6 +77,13 @@ export default class LeftToolBar extends React.Component {
         name: "距离",
         displayText: true,
         iconfont: "&#xe62a;",
+        cb: () => {
+          this.setState({
+            displayPlot: false,
+            displayProject: false,
+          });
+          lineDrawing.createDrawing();
+        }
       },
       {
         name: "自由面",
@@ -94,6 +113,13 @@ export default class LeftToolBar extends React.Component {
         name: "面积",
         displayText: true,
         iconfont: "&#xe62c;",
+        cb: () => {
+          this.setState({
+            displayPlot: false,
+            displayProject: false,
+          });
+          polygonDrawing.createDrawing();
+        }
       },
       {
         name: "矩形",

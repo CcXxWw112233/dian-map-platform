@@ -83,8 +83,7 @@ export const pointDrawing = {
 
     this.linsteners["drawend"] = this.drawing.on("drawend", (e) => {
       me.el.appendChild(me.icon);
-      mapApp.map.removeInteraction(me.drawing);
-      me.isActive = false;
+      this.deactivate()
     });
   },
   deactivate() {

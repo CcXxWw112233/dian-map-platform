@@ -57,8 +57,7 @@ export const lineDrawing = {
     const end = this.drawing.on('drawend', e => {
       this.el.appendChild(this.icon)
       this.geometry.un("change", this.geoChange)
-      mapApp.map.removeInteraction(this.drawing)
-      this.isActive = false
+      this.deactivate()
     })
 
     this.linsteners['drawend'] = end
