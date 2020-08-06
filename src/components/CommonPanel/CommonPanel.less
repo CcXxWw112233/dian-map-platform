@@ -7,16 +7,16 @@
   background: rgba(106, 113, 145, 0.8);
   font-family: PingFangSC-Medium, PingFang SC;
   border-radius: 16px;
-  &:before{
-    content: "";/* 必须包括 */
-    position: absolute;/* 固定模糊层位置 */
-    width:300%;
-    height:300%;
-    left: -100%;/* 回调模糊层位置 */
-    top: -100%;/* 回调模糊层位置 */
-    background:rgba(106, 113, 145, 0.8);/* 与上面的bg中的background设置一样 */
-    filter: blur(20px);/* 值越大越模糊 */
-    z-index: -2;/* 模糊层在最下面 */
+  &::after {
+    content: ""; /* 必须包括 */
+    position: absolute; /* 固定模糊层位置 */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(106, 113, 145, 0.8); /* 与上面的bg中的background设置一样 */
+    filter: blur(20px); /* 值越大越模糊 */
+    z-index: -2; /* 模糊层在最下面 */
   }
   .title {
     width: 100%;

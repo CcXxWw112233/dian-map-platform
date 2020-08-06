@@ -1,38 +1,16 @@
-import React, { Fragment } from "react";
+import React from "react";
 import { connect } from "dva";
 import styles from "./IndexPage.css";
-import animateCss from "../assets/css/animate.min.css";
 import "antd/dist/antd.css";
 import LayerMap from "../components/maps";
-import { ChangeMap } from "../utils/utils";
 
 import { getMyPosition } from "../utils/getMyPosition";
-import PublicData from "../pages/publicMapData/publicMapData";
-import ProjectScouting from "../pages/ProjectScouting/ScoutingList";
-import ScoutingDetails from "../pages/ProjectScouting/ScoutingDetails";
-// import PlottingModal from "../pages/PlottingModal/PlottingModal";
-import ConfirmModal from "../pages/PlottingModal/ConfirmModal";
 import ScoutAction from "../lib/components/ProjectScouting/ScoutingList";
 import ScoutDetail from "../lib/components/ProjectScouting/ScoutingDetail";
 import Event from "../lib/utils/event";
 // import { PublicData, ProjectScouting } from 'pages/index'
-import { Tabs, Spin, message } from "antd";
+import { message } from "antd";
 
-import { Main } from "components";
-import {
-  // ToolBar,
-  // Location,
-  // BasemapGallery,
-  Sider,
-  Search,
-  // CityPanel,
-} from "components/index";
-import Overlay from "components/Overlay/Overlay";
-
-import BottomToolBar from "components/BottomToolBar/BottomToolBar";
-
-// import TempPlottingIcon from "components/TempPlotting/TempPlottingIcon";
-// import TempPlottingPanel from "components/TempPlotting/TempPlottingPanel";
 import PhotoSwipe from "../components/PhotoSwipe";
 import FlutterComponents from "../pages/FlutterComponents";
 import MatrixEdit from "../components/MatrixEdit";
@@ -44,27 +22,26 @@ import BasemapGallery from "../components/BasemapGallery/BasemapGallery";
 import RightTools from "../components/RightTools/index";
 
 import LeftToolBar from "../components/LeftToolBar/index";
-// import Zoom from "../components/Zoom/index"
 
 @connect(
   ({
     controller: { mainVisible },
     openswitch: {
-      toolBars,
-      bottomTools,
-      searchTools,
       isShowMobile,
-      isShowTempPlot,
+      isShowBasemapGallery,
+      isShowRightTools,
+      isShowLeftToolBar,
+      isShowPhotoSwipe,
     },
     editPicture: { editShow },
   }) => ({
     mainVisible,
-    toolBars,
-    bottomTools,
-    searchTools,
     isShowMobile,
     editShow,
-    isShowTempPlot,
+    isShowBasemapGallery,
+    isShowRightTools,
+    isShowLeftToolBar,
+    isShowPhotoSwipe,
   })
 )
 class IndexPage extends React.Component {
@@ -314,135 +291,28 @@ class IndexPage extends React.Component {
     }, 5 * 1000);
   };
 
-  // 切换底图
-  changeMap = (val, showkeys) => {
-    let map = this.map;
-    let layers = map.getLayers();
-    // 进行切换
-    ChangeMap(val, layers, map, showkeys);
-  };
-  tabChange = (val) => {
-    if (val === "1") {
-      ScoutAction.fitToCenter();
-    }
-  };
-
-  changeQueryStr = (value) => {
-    this.queryStr = value;
-    this.publicDataChild && this.publicDataChild.getAllData(this.queryStr);
-  };
-
-  getQueryStr = () => {
-    return this.queryStr;
-  };
-
-  onRef = (ref) => {
-    this.publicDataChild = ref;
-  };
-
   render() {
-    const { TabPane } = Tabs;
     let {
-      bottomTools,
-      toolBars,
-      searchTools,
       isShowMobile,
       editShow,
-      isShowTempPlot,
+      isShowBasemapGallery,
+      isShowRightTools,
+      isShowLeftToolBar,
+      isShowPhotoSwipe,
     } = this.props;
-    const SearchToolBarStyle = {
-      position: "absolute",
-      top: 20,
-      boxShadow: "0px 2px 16px 0px rgba(0, 0, 0, 0.09)",
-    };
     return (
       <div className={styles.normal}>
         {/* 地图主体 */}
         <LayerMap onLoad={this.MapOnload} />
-        {/* <PlottingModal /> */}
-        <ConfirmModal />
-        {/* <SketchPicker></SketchPicker> */}
-        {/* {toolBars && <ToolBar></ToolBar>} */}
-        {/* {bottomTools && <BottomToolBar></BottomToolBar>} */}
-        {/* {searchTools && (
-          <Search
-            style={SearchToolBarStyle}
-            changeQueryStr={this.changeQueryStr}
-            isOnMap={true}
-          ></Search>
-        )} */}
-        {/* {isShowTempPlot && <PlotTools></PlotTools>} */}
-        {/* <LengedList></LengedList> */}
-        {/* <Location></Location> */}
-        <BasemapGallery></BasemapGallery>
-        <RightTools></RightTools>
-        <LeftToolBar></LeftToolBar>
-        {/* <Zoom></Zoom> */}
-        {/* <Sider width={360}>
-          {this.props.mainVisible === "list" ? (
-            <div
-              className={`${animateCss.animated} ${animateCss.slideInLeft}`}
-              style={{ animationDuration: "0.3s", height: "100%" }}
-            >
-              <Main>
-                <div style={{ flex: "0" }}>
-                  <Search changeQueryStr={this.changeQueryStr}></Search>
-                </div>
-                <div
-                  style={{ overflow: "hidden", height: "100%" }}
-                  className="panels"
-                >
-                  <Tabs
-                    className="HomeTabs"
-                    defaultActiveKey="1"
-                    // tabBarGutter={60}
-                    animated={true}
-                    onChange={this.tabChange}
-                    tabBarStyle={{
-                      textAlign: "center",
-                    }}
-                    style={{
-                      flex: "1",
-                      display: "flex",
-                      flexDirection: "column",
-                      overflow: "hidden",
-                      height: "100%",
-                    }}
-                  >
-                    <TabPane tab={<span>项目踏勘</span>} key="1">
-                      <ProjectScouting></ProjectScouting>
-                    </TabPane>
-                    <TabPane tab={<span>公共数据</span>} key="2">
-                      <PublicData
-                        getQueryStr={this.getQueryStr}
-                        onRef={this.onRef}
-                      />
-                    </TabPane>
-                    <TabPane tab={<span>远程协作</span>} key="3">
-                      远程协作
-                    </TabPane>
-                  </Tabs>
-                </div>
-              </Main>
-            </div>
-          ) : this.props.mainVisible === "loading" ? (
-            <div className={styles.loadingPage}>
-              <Spin />
-            </div>
-          ) : (
-            <Main>
-              <ScoutingDetails></ScoutingDetails>
-            </Main>
-          )}
-        </Sider> */}
-        {/* <CityPanel></CityPanel> */}
-        <Overlay />
-        <PhotoSwipe />
+        {isShowBasemapGallery && <BasemapGallery />}
+        {isShowRightTools && <RightTools />}
+        {isShowLeftToolBar && <LeftToolBar />}
+        {isShowPhotoSwipe && <PhotoSwipe />}
         {/* 是否显示手机页面 */}
         {isShowMobile && <FlutterComponents />}
         {editShow && <MatrixEdit />}
         {/* 文件上传通知 */}
-        <UploadNotification />
+        {!isShowMobile && <UploadNotification />}
       </div>
     );
   }

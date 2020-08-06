@@ -5,11 +5,7 @@ import styles from "./LeftToolBar.less";
 import Plot from "./panels/Plot";
 import Project from "./panels/Project";
 
-import {
-  lineDrawing,
-  pointDrawing,
-  polygonDrawing,
-} from "utils/drawing";
+import { lineDrawing, pointDrawing, polygonDrawing } from "utils/drawing";
 
 export default class LeftToolBar extends React.Component {
   constructor(props) {
@@ -24,6 +20,7 @@ export default class LeftToolBar extends React.Component {
             displayPlot: false,
             displayProject: true,
           });
+          this.deactivate();
         },
       },
       {
@@ -36,20 +33,22 @@ export default class LeftToolBar extends React.Component {
             displayProject: false,
             plotType: "point",
           });
+          this.deactivate();
         },
       },
-      {
-        name: "坐标",
-        displayText: true,
-        iconfont: "&#xe620;",
-        cb: () => {
-          this.setState({
-            displayPlot: false,
-            displayProject: false,
-          });
-          pointDrawing.createDrawing()
-        }
-      },
+      // {
+      //   name: "坐标",
+      //   displayText: true,
+      //   iconfont: "&#xe620;",
+      //   cb: () => {
+      //     this.setState({
+      //       displayPlot: false,
+      //       displayProject: false,
+      //     });
+      //     this.deactivate();
+      //     pointDrawing.createDrawing();
+      //   },
+      // },
       {
         name: "描绘",
         displayText: true,
@@ -60,6 +59,7 @@ export default class LeftToolBar extends React.Component {
             displayProject: false,
             plotType: "freeLine",
           });
+          this.deactivate();
         },
       },
       {
@@ -70,21 +70,24 @@ export default class LeftToolBar extends React.Component {
           this.setState({
             displayPlot: true,
             displayProject: false,
+            plotType: "line",
           });
+          this.deactivate();
         },
       },
-      {
-        name: "距离",
-        displayText: true,
-        iconfont: "&#xe62a;",
-        cb: () => {
-          this.setState({
-            displayPlot: false,
-            displayProject: false,
-          });
-          lineDrawing.createDrawing();
-        }
-      },
+      // {
+      //   name: "距离",
+      //   displayText: true,
+      //   iconfont: "&#xe62a;",
+      //   cb: () => {
+      //     this.setState({
+      //       displayPlot: false,
+      //       displayProject: false,
+      //     });
+      //     this.deactivate();
+      //     lineDrawing.createDrawing();
+      //   },
+      // },
       {
         name: "自由面",
         displayText: true,
@@ -95,6 +98,7 @@ export default class LeftToolBar extends React.Component {
             displayProject: false,
             plotType: "freePolygon",
           });
+          this.deactivate();
         },
       },
       {
@@ -107,20 +111,22 @@ export default class LeftToolBar extends React.Component {
             displayProject: false,
             plotType: "polygon",
           });
+          this.deactivate();
         },
       },
-      {
-        name: "面积",
-        displayText: true,
-        iconfont: "&#xe62c;",
-        cb: () => {
-          this.setState({
-            displayPlot: false,
-            displayProject: false,
-          });
-          polygonDrawing.createDrawing();
-        }
-      },
+      // {
+      //   name: "面积",
+      //   displayText: true,
+      //   iconfont: "&#xe62c;",
+      //   cb: () => {
+      //     this.setState({
+      //       displayPlot: false,
+      //       displayProject: false,
+      //     });
+      //     this.deactivate();
+      //     polygonDrawing.createDrawing();
+      //   },
+      // },
       {
         name: "矩形",
         displayText: true,
@@ -131,6 +137,7 @@ export default class LeftToolBar extends React.Component {
             displayProject: false,
             plotType: "rect",
           });
+          this.deactivate();
         },
       },
       {
@@ -143,6 +150,7 @@ export default class LeftToolBar extends React.Component {
             displayProject: false,
             plotType: "circle",
           });
+          this.deactivate();
         },
       },
       {
@@ -155,6 +163,7 @@ export default class LeftToolBar extends React.Component {
             displayProject: false,
             plotType: "arrow",
           });
+          this.deactivate();
         },
       },
     ];
@@ -165,6 +174,12 @@ export default class LeftToolBar extends React.Component {
       plotType: "point",
     };
   }
+
+  deactivate = () => {
+    pointDrawing.deactivate();
+    lineDrawing.deactivate();
+    polygonDrawing.deactivate();
+  };
 
   render() {
     return (
@@ -220,10 +235,11 @@ export default class LeftToolBar extends React.Component {
         {this.state.displayPlot ? (
           <Plot
             plotType={this.state.plotType}
-            closePanel={() => {
+            goBackProject={() => {
               this.setState({
                 displayPlot: false,
-                selectedIndex: -1,
+                displayProject: true,
+                selectedIndex: 0,
               });
             }}
           ></Plot>

@@ -460,12 +460,10 @@ export default class ScoutingDetails extends PureComponent {
     dispatch({
       type: "openswitch/updateDatas",
       payload: {
-        slideSwitch: false,
-        showSlideButton: false,
-        lengedSwitch: false,
-        showLengedButton: false,
-        bottomTools:false,
-        isShowTempPlot:false
+        isShowBasemapGallery: false,
+        isShowRightTools: false,
+        isShowLeftToolBar: false,
+        isShowPhotoSwipe: false,
       },
     });
   };
@@ -477,12 +475,10 @@ export default class ScoutingDetails extends PureComponent {
     dispatch({
       type: "openswitch/updateDatas",
       payload: {
-        slideSwitch: true,
-        showSlideButton: true,
-        lengedSwitch: false,
-        showLengedButton: true,
-        bottomTools:true,
-        isShowTempPlot:true
+        isShowBasemapGallery: true,
+        isShowRightTools: true,
+        isShowLeftToolBar: true,
+        isShowPhotoSwipe: true,
       },
     });
   };
