@@ -1,0 +1,113 @@
+.container{
+    *{
+        outline: none;
+    }
+    background-color: #fff;
+    padding: 8px 10px;
+    .header{
+        font-size: 1rem;
+        font-weight: bold;
+        text-align: left;
+        width: 100%;
+        margin-bottom: 10px;
+        .close{
+            float: right;
+            // margin-right: 10px;
+            // font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    }
+    .content{
+        position: relative;
+        .nameInput,.selectInput{
+            display: block;
+            margin-bottom: 10px;
+            width: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+            border: 1px solid rgba(0,0,0,0.15);
+            padding: 5px 8px;
+            border-radius: 3px;
+            transition: all 0.2s linear;
+            &:focus{
+                border-color: #6A9AFF;
+            }
+        }
+        .selectionsOption{
+            padding: 6px 8px;
+            background-color: #fff;
+            text-align: left;
+            color: #828AA9;
+            &:hover{
+                background-color: #86B3FF;
+                color: #fff;
+            }
+            &.addSelect{
+                color: #86B3FF;
+                &:hover{
+                    background-color: #86B3FF;
+                    color: #fff;
+                }
+            }
+            .addSelectIcon{
+                margin-right: 10px;
+            }
+        }
+        .selectDiv{
+            .menuMore{
+                position: absolute;
+                right: 10px;
+                top: 8px;
+                font-size: 0.6rem;
+                color: rgba(0,0,0,0.25);
+            }
+            position: relative;
+            p{
+                margin-bottom: 0;
+            }
+            .menus{
+                box-shadow: 0 1px 16px rgba(0,0,0,0.2);
+                display: none;
+                position: absolute;
+                z-index: 10;
+                left: 0;
+                width: 100%;
+                top: 35px;
+                .selectActive{
+                    background-color: #86B3FF;
+                    color: #fff;
+                }
+            }
+        }
+    }
+    .footer{
+        margin: 10px 0;
+        margin-top: 30px;
+        display: flex;
+        text-align: center;
+        justify-content: space-between;
+        .btn{
+            width: 45%;
+            border: 0;
+            border-radius: 3px;
+            padding: 5px 0;
+            cursor: pointer;
+            &:focus{
+                border: 1px solid #86B3FF;
+            }
+        }
+        .okBtn{
+            color: #fff;
+            background-color: #86B3FF;
+            
+        }
+        .cancelBtn{
+            border: 1px solid #7FA7FF;
+            background-color: rgba(127, 168, 255, 0.144);
+            color: #6690FF;
+        }
+    }
+}
+.addFeaturesOverlay{
+    border-radius: 5px;
+}

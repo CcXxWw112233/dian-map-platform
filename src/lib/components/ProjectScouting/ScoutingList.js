@@ -17,6 +17,8 @@ import {
   drawPoint,
 } from "../../utils";
 
+// import addFeaturesOverlay from '../../../components/PublicOverlays/addFeaturesOverlay'
+
 const action = function () {
   const {
     GET_SCOUTING_LIST,
@@ -41,7 +43,11 @@ const action = function () {
     this.Source = Source();
     this.Layer.setSource(this.Source);
     InitMap.map.addLayer(this.Layer);
-
+    // let el = new addFeaturesOverlay({dataSource:[{text:"123",key:"1"},{text:'测试项目2',key:'2'}],activeKey:"2",width:300},'group')
+    // InitMap.map.addOverlay(createOverlay(el.element,{
+    //   positioning:"bottom-left",
+    //   position: InitMap.view.getCenter()
+    // }))
     return InitMap.map;
   };
   // 获取项目列表
