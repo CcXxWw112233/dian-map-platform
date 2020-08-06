@@ -8,10 +8,18 @@ import ColorPicker from "../../ColorPicker/index";
 import { guid } from "./lib";
 import { symbols } from "./data";
 import { plotEdit } from "../../../utils/plotEdit";
+import FeatureOperatorEvent from "../../../utils/plot2ol/src/events/FeatureOperatorEvent";
 import { createStyle } from "../../../lib/utils/index";
 import Event from "../../../lib/utils/event";
 
-const SymbolBlock = ({ data, indexStr, cb }) => {
+const SymbolBlock = ({
+  data,
+  indexStr,
+  strokeColor,
+  fillColor,
+  plotType,
+  cb,
+}) => {
   let [show, toggle] = useState(true);
   const style = {
     transform: "translateX(-10px)",
@@ -47,7 +55,11 @@ const SymbolBlock = ({ data, indexStr, cb }) => {
                 Number(indexArr[0]) === data.index &&
                 Number(indexArr[1]) === index
               ) {
-                style = { color: "rgb(80, 130, 255)" };
+                if (plotType === "point") {
+                  style = { color: fillColor };
+                } else {
+                  style = { color: "rgb(80, 130, 255)" };
+                }
               }
             }
             return (
@@ -79,21 +91,30 @@ export default class Plot extends React.Component {
     this.state = {
       name: "",
       remark: "",
+      featureType: "",
+      strokeColor: "",
       fillSelectedIndex: -1,
       strokeSelectedIndex: -1,
-      customFillSelectedColor: "rgba(255,255,255,1)",
-      customStrokeSelectedColor: "rgba(255,255,255,1)",
+      customFillSelectedColor: "rgba(106, 154, 255, 1)",
+      customStrokeSelectedColor: "rgba(106, 154, 255, 1)",
       symbolSelectedIndex: "",
       strokePercent: "1",
       fillPercent: "1",
     };
-    this.fillColor = "rgb(208, 211, 226)";
-    this.strokeColor = "rgb(130, 138, 169)";
+    this.fillColor = "rgba(106, 154, 255, 1)";
+    this.strokeColor = "rgba(106, 154, 255, 1)";
+    this.nextProps = null;
+    this.defaultSymbol = null;
+    this.plotLayer = null;
+    this.symbol = "";
+    this.sigleImage = null;
+    this.selectName = "自定义类型";
     this.defeaultColors = [
       { fill: "rgba(255,84,86,1)", border: "rgba(255,84,86,1)" },
       { fill: "rgba(157, 104, 255, 1)", border: "rgba(157, 104, 255, 1)" },
       { fill: "rgba(126, 213, 255, 1)", border: "rgba(126, 213, 255, 1)" },
       { fill: "rgba(80, 130, 255, 1)", border: "rgba(80, 130, 255, 1)" },
+      { fill: "rgba(106, 154, 255, 1)", border: "rgba(106, 154, 255, 1)" },
       { fill: "rgba(2, 121, 107, 1)", border: "rgba(2, 121, 107, 1)" },
       { fill: "rgba(255, 201, 0, 1)", border: "rgba(255, 201, 0, 1)" },
       { fill: "rgba(245, 124, 0, 1)", border: "rgba(245, 124, 0, 1)" },
@@ -101,11 +122,6 @@ export default class Plot extends React.Component {
       { fill: "rgba(106, 113, 145, 1)", border: "rgba(106, 113, 145, 1)" },
       { fill: "rgba(130, 138, 169, 1)", border: "rgba(130, 138, 169, 1)" },
       { fill: "rgba(208, 211, 226, 1)", border: "rgba(208, 211, 226, 1)" },
-      {
-        fill: "rgba(255, 255, 255, 1)",
-        border: "rgba(208,211,226,1)",
-        selectedColor: "rgb(130, 138, 169)",
-      },
       { fill: "rgba(93, 64, 55, 1)", border: "rgba(93, 64, 55, 1)" },
       { fill: "rgba(141, 110, 99, 1)", border: "rgba(141, 110, 99, 1)" },
     ];
@@ -115,6 +131,9 @@ export default class Plot extends React.Component {
       freeLine: "Polyline",
       polygon: "Polygon",
       freePolygon: "Polygon",
+      rect: "Polygon",
+      circle: "Polygon",
+      arrow: "Polygon",
     };
     this.plotDic = {
       point: "MARKER",
@@ -138,8 +157,59 @@ export default class Plot extends React.Component {
       commonFunc: null,
     };
   }
+  componentDidMount() {
+    if (!plotEdit.plottingLayer) {
+      this.plotLayer = plotEdit.getPlottingLayer();
+      const me = this;
+      this.plotLayer.on(FeatureOperatorEvent.ACTIVATE, (e) => {
+        if (!e.feature_operator.isScouting) {
+          let operator = e.feature_operator;
+          switch (me.props.plotType) {
+            case "freePolygon":
+            case "polygon":
+            case "rect":
+            case "circle":
+            case "arrow":
+              if (this.symbol) {
+                let iconUrl = this.getCurrentIcon(this.symbol, {
+                  fontSize: 38,
+                  fillColor: "rgba(80, 130, 255, 1)",
+                  strokeColor: "rgba(80, 130, 255, 1)",
+                });
+                plotEdit.plottingLayer.plotEdit.createPlotOverlay(
+                  iconUrl,
+                  operator
+                );
+                this.sigleImage = null;
+              }
+              break;
+            default:
+              break;
+          }
+        }
+      });
+      this.plotLayer.on(FeatureOperatorEvent.DEACTIVATE, (e) => {
+        if (!e.feature_operator.isScouting) {
+          console.log(e.feature_operator);
+        }
+      });
+    }
+    if (this.props.plotType === "point") {
+      this.symbol = this.refs.defaultSymbol.innerText;
+      this.getPointDefaultSymbol();
+    } else {
+      this.updateStateCallbackFunc();
+    }
+  }
   componentWillReceiveProps(nextProps) {
     this.handleResetClick();
+    this.nextProps = nextProps;
+    if (nextProps.plotType === "point") {
+      this.defaultSymbol = this.refs.defaultSymbol.innerText;
+      this.getPointDefaultSymbol();
+    } else {
+      this.updateStateCallbackFunc();
+    }
   }
   handleInputChange = (val) => {
     this.setState({
@@ -162,7 +232,6 @@ export default class Plot extends React.Component {
         this.state.strokePercent +
         ")";
       this.setState({
-        symbolSelectedIndex: "",
         customStrokeSelectedColor: this.strokeColor,
       });
     }
@@ -176,31 +245,61 @@ export default class Plot extends React.Component {
         this.state.fillPercent +
         ")";
       this.setState({
-        symbolSelectedIndex: "",
         customFillSelectedColor: this.fillColor,
       });
     }
-    this.updateStateCallbackFunc();
+    if (this.props.plotType === "point") {
+      this.getPointDefaultSymbol();
+    }
+    switch (this.props.plotType) {
+      case "point":
+        this.state.symbolSelectedIndex === ""
+          ? this.getPointDefaultSymbol()
+          : this.getFillSymbol();
+        break;
+      case "line":
+      case "freeLine":
+      case "freePolygon":
+      case "polygon":
+      case "rect":
+      case "circle":
+      case "arrow":
+        this.updateStateCallbackFunc();
+        break;
+      default:
+        break;
+    }
   };
 
   updateStateCallbackFunc = () => {
-    const options = {
+    let options = {
       ...this.commonStyleOptions,
-      radius: 8,
-      fillColor: this.fillColor,
       strokeColor: this.strokeColor,
       text: this.state.name,
       showName: true,
     };
-    const attrs = {
+    let attrs = {
       name: this.state.name,
-      featureType: this.fillColor,
-      strokeColor: this.strokeColor,
+      featureType:
+        this.dic[this.nextProps?.plotType || this.props.plotType] === "Polygon"
+          ? this.fillColor
+          : this.strokeColor,
       remark: this.state.remark,
       selectName: "自定义类型",
     };
-    const style = createStyle(this.dic[this.props.plotType], options);
-    plotEdit.create(this.plotDic[this.props.plotType]);
+    if (
+      this.dic[this.nextProps?.plotType || this.props.plotType] === "Polygon"
+    ) {
+      options = { ...options, fillColor: this.fillColor };
+      attrs = { ...attrs, strokeColor: this.strokeColor };
+    }
+    const style = createStyle(
+      this.dic[this.nextProps?.plotType || this.props.plotType],
+      options
+    );
+    plotEdit.create(
+      this.plotDic[this.nextProps?.plotType || this.props.plotType]
+    );
     Event.Evt.firEvent("setPlotDrawStyle", style);
     Event.Evt.firEvent("setAttribute", {
       style: style,
@@ -238,35 +337,55 @@ export default class Plot extends React.Component {
     return canvas.toDataURL("image/png");
   };
 
-  getFillSymbol = (data, index, index2) => {
-    this.setState({
-      fillSelectedIndex: -1,
-      strokeSelectedIndex: -1,
-      symbolSelectedIndex: `${index}|${index2}`,
-    });
-    let iconUrl = this.getCurrentIcon(data.target.textContent, {
-      fontSize: 40,
-      fillColor: "rgba(106, 154, 255, 1)",
-      strokeColor: "rgba(106, 154, 255, 1)",
+  getPointDefaultSymbol = () => {
+    let iconUrl = this.getCurrentIcon(this.symbol, {
+      fontSize: 38,
+      fillColor: this.fillColor,
+      strokeColor: this.strokeColor,
     });
     let options = {
       ...this.commonStyleOptions,
       text: this.state.name,
       showName: true,
     };
-    switch (this.props.plotType) {
-      case "polygon":
-      case "freePolygon":
-        let canvas = document.createElement("canvas");
-        let context = canvas.getContext("2d");
-        let img = new Image();
-        img.src = iconUrl;
-        img.crossorigin = "anonymous";
-        const me = this;
-        img.onload = function () {
-          const pat = context.createPattern(img, "repeat");
-          options = { ...options, fillColor: pat };
-          me.createPlot(options, data, iconUrl);
+    options = {
+      ...options,
+      iconUrl: iconUrl,
+    };
+    this.featureType = "&#xe75d;";
+    this.selectName = "自定义类型";
+    this.createPlot(options, iconUrl);
+  };
+
+  getFillSymbol = (data, index, index2) => {
+    if (index !== undefined && index2 !== undefined) {
+      this.setState({
+        symbolSelectedIndex: `${index}|${index2}`,
+      });
+    }
+    if (data) {
+      this.featureType = data.iconfont;
+      this.selectName = data.typeName;
+      this.symbol = data.target.textContent;
+    }
+    let iconUrl = this.getCurrentIcon(this.symbol, {
+      fontSize: 38,
+      fillColor:
+        this.props.plotType === "point"
+          ? this.fillColor
+          : "rgba(80, 130, 255, 1)",
+    });
+    let options = {
+      ...this.commonStyleOptions,
+      text: this.state.name,
+      showName: true,
+    };
+    switch (this.dic[this.props.plotType]) {
+      case "Polygon":
+        options = {
+          ...options,
+          strokeColor: this.strokeColor,
+          fillColor: this.fillColor,
         };
         break;
       default:
@@ -274,39 +393,41 @@ export default class Plot extends React.Component {
           ...options,
           iconUrl: iconUrl,
         };
-        this.createPlot(options, data, iconUrl);
         break;
     }
+    this.createPlot(options, iconUrl);
   };
 
-  createPlot = (options, data, iconUrl) => {
-    const style = createStyle(this.dic[this.props.plotType], options);
+  createPlot = (options, iconUrl) => {
+    const plotType = this.nextProps?.plotType || this.props.plotType;
+    const style = createStyle(this.dic[plotType], options);
     let attrs = {
       name: this.state.name,
-      featureType: data.iconfont,
+      featureType: this.featureType,
       strokeColor: "",
       remark: this.state.remark,
-      selectName: data.typeName,
+      selectName: this.selectName,
     };
     if (
-      this.props.plotType === "polygon" ||
-      this.props.plotType === "freePolygon"
+      this.dic[this.props.plotType] === "Polygon"
     ) {
-      attrs = {...attrs, sigleImage: iconUrl}
+      attrs = { ...attrs, sigleImage: iconUrl };
     }
-    plotEdit.create(this.plotDic[this.props.plotType]);
+    plotEdit.create(this.plotDic[plotType]);
     Event.Evt.firEvent("setPlotDrawStyle", style);
     Event.Evt.firEvent("setAttribute", {
       style: style,
       attrs: attrs,
     });
   };
+
   handleCustomStrokeColorOkClick = (value) => {
     this.setState({
       strokeSelectedIndex: -1,
       customStrokeSelectedColor: value,
     });
   };
+
   handleCustomFillColorOkClick = (value) => {
     this.setState({
       fillSelectedIndex: -1,
@@ -337,19 +458,27 @@ export default class Plot extends React.Component {
   };
 
   handleResetClick = () => {
-    this.fillColor = "rgb(208, 211, 226)";
-    this.strokeColor = "rgb(130, 138, 169)";
+    this.fillColor = "rgba(106, 154, 255, 1)";
+    this.strokeColor = "rgba(106, 154, 255, 1)";
+    this.nextProps = null;
+    this.defaultSymbol = null;
+    this.plotLayer = null;
+    this.symbol = "";
+    this.selectName = "自定义类型";
     this.setState({
       name: "",
       remark: "",
+      featureType: "",
+      strokeColor: "",
       fillSelectedIndex: -1,
       strokeSelectedIndex: -1,
-      customFillSelectedColor: "rgba(255,255,255,1)",
-      customStrokeSelectedColor: "rgba(255,255,255,1)",
+      customFillSelectedColor: "rgba(106, 154, 255, 1)",
+      customStrokeSelectedColor: "rgba(106, 154, 255, 1)",
       symbolSelectedIndex: "",
       strokePercent: "1",
       fillPercent: "1",
     });
+    plotEdit.deactivate();
   };
   render() {
     const { TextArea } = Input;
@@ -400,116 +529,128 @@ export default class Plot extends React.Component {
               value={this.state.remark}
               onChange={(e) => this.onTextAreaChange(e.target.value)}
             />
-            <div className={styles.header} style={{ marginTop: 20 }}>
-              <span>自定义轮廓色</span>
-              <ColorPicker
-                style={{ margin: "auto" }}
-                handleOK={this.handleCustomStrokeColorOkClick}
-              ></ColorPicker>
-              <div
-                className={styles.colorbar}
-                style={{
-                  background: this.state.customStrokeSelectedColor,
-                  margin: "auto",
-                }}
-              ></div>
-              <Select
-                value={this.state.strokePercent}
-                style={{ width: 120 }}
-                bordered={false}
-                onChange={(e) => this.handleCustomStrokeColorSelectChange(e)}
-              >
-                <Option value="1">100%</Option>
-                <Option value="0.75">75%</Option>
-                <Option value="0.5">50%</Option>
-                <Option value="0.25">25%</Option>
-                <Option value="0">0%</Option>
-              </Select>
-            </div>
-            <div className={styles.block}>
-              {this.defeaultColors.map((item, index) => {
-                const style = item.selectedColor
-                  ? { color: item.selectedColor }
-                  : {};
-                return (
-                  <div
-                    className={styles.symbol}
-                    key={guid(false)}
-                    style={{
-                      background: item.fill,
-                      border: `1px solid ${item.border}`,
-                    }}
-                    onClick={() => {
-                      this.setState(
-                        { strokeSelectedIndex: index },
-                        this.handleColorClick(item, 0)
-                      );
-                    }}
-                  >
-                    {this.state.strokeSelectedIndex === index && (
-                      <i className={globalStyle.global_icon} style={style}>
-                        &#xe75b;
-                      </i>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-            <div className={styles.header} style={{ marginTop: 20 }}>
-              <span>自定义填充色</span>
-              <ColorPicker
-                style={{ margin: "auto" }}
-                handleOK={this.handleCustomFillColorOkClick}
-              ></ColorPicker>
-              <div
-                className={styles.colorbar}
-                style={{
-                  background: this.state.customFillSelectedColor,
-                  margin: "auto",
-                }}
-              ></div>
-              <Select
-                value={this.state.fillPercent}
-                style={{ width: 120 }}
-                bordered={false}
-                onChange={(e) => this.handleCustomFillColorSelectChange(e)}
-              >
-                <Option value="1">100%</Option>
-                <Option value="0.75">75%</Option>
-                <Option value="0.5">50%</Option>
-                <Option value="0.25">25%</Option>
-                <Option value="0">0%</Option>
-              </Select>
-            </div>
-            <div className={styles.block}>
-              {this.defeaultColors.map((item, index) => {
-                const style = item.selectedColor
-                  ? { color: item.selectedColor }
-                  : {};
-                return (
-                  <div
-                    className={styles.symbol}
-                    key={guid(false)}
-                    style={{
-                      background: item.fill,
-                      border: `1px solid ${item.border}`,
-                    }}
-                    onClick={() => {
-                      this.setState(
-                        { fillSelectedIndex: index },
-                        this.handleColorClick(item, 1)
-                      );
-                    }}
-                  >
-                    {this.state.fillSelectedIndex === index && (
-                      <i className={globalStyle.global_icon} style={style}>
-                        &#xe75b;
-                      </i>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+            <i
+              className={globalStyle.global_icon}
+              ref="defaultSymbol"
+              style={{ display: "none" }}
+            >
+              &#xe75d;
+            </i>
+            {this.props.plotType !== "point" ? (
+              <div className={styles.header} style={{ marginTop: 20 }}>
+                <span>自定义轮廓色</span>
+                <ColorPicker
+                  style={{ margin: "auto" }}
+                  handleOK={this.handleCustomStrokeColorOkClick}
+                ></ColorPicker>
+                <div
+                  className={styles.colorbar}
+                  style={{
+                    background: this.state.customStrokeSelectedColor,
+                    margin: "auto",
+                  }}
+                ></div>
+                <Select
+                  value={this.state.strokePercent}
+                  style={{ width: 120 }}
+                  bordered={false}
+                  onChange={(e) => this.handleCustomStrokeColorSelectChange(e)}
+                >
+                  <Option value="1">100%</Option>
+                  <Option value="0.75">75%</Option>
+                  <Option value="0.5">50%</Option>
+                  <Option value="0.25">25%</Option>
+                  <Option value="0">0%</Option>
+                </Select>
+              </div>
+            ) : null}
+            {this.props.plotType !== "point" ? (
+              <div className={styles.block}>
+                {this.defeaultColors.map((item, index) => {
+                  const style = item.selectedColor
+                    ? { color: item.selectedColor }
+                    : {};
+                  return (
+                    <div
+                      className={styles.symbol}
+                      key={guid(false)}
+                      style={{
+                        background: item.fill,
+                        border: `1px solid ${item.border}`,
+                      }}
+                      onClick={() => {
+                        this.setState(
+                          { strokeSelectedIndex: index },
+                          this.handleColorClick(item, 0)
+                        );
+                      }}
+                    >
+                      {this.state.strokeSelectedIndex === index && (
+                        <i className={globalStyle.global_icon} style={style}>
+                          &#xe75b;
+                        </i>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : null}
+            {this.props.plotType === "line" ||
+            this.props.plotType === "freeLine" ? null : (
+              <div className={styles.header} style={{ marginTop: 20 }}>
+                <span>自定义填充色</span>
+                <ColorPicker
+                  style={{ margin: "auto" }}
+                  handleOK={this.handleCustomFillColorOkClick}
+                ></ColorPicker>
+                <div
+                  className={styles.colorbar}
+                  style={{
+                    background: this.state.customFillSelectedColor,
+                    margin: "auto",
+                  }}
+                ></div>
+                <Select
+                  value={this.state.fillPercent}
+                  style={{ width: 120 }}
+                  bordered={false}
+                  onChange={(e) => this.handleCustomFillColorSelectChange(e)}
+                >
+                  <Option value="1">100%</Option>
+                  <Option value="0.75">75%</Option>
+                  <Option value="0.5">50%</Option>
+                  <Option value="0.25">25%</Option>
+                  <Option value="0">0%</Option>
+                </Select>
+              </div>
+            )}
+            {this.props.plotType === "line" ||
+            this.props.plotType === "freeLine" ? null : (
+              <div className={styles.block}>
+                {this.defeaultColors.map((item, index) => {
+                  return (
+                    <div
+                      className={styles.symbol}
+                      key={guid(false)}
+                      style={{
+                        background: item.fill,
+                        border: `1px solid ${item.border}`,
+                      }}
+                      onClick={() => {
+                        this.setState(
+                          { fillSelectedIndex: index },
+                          this.handleColorClick(item, 1)
+                        );
+                      }}
+                    >
+                      {this.state.fillSelectedIndex === index && (
+                        <i className={globalStyle.global_icon}>&#xe75b;</i>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
             {/* <div className={styles.header}>
               <span>图标</span>
             </div> */}
@@ -520,6 +661,9 @@ export default class Plot extends React.Component {
                     key={guid(false)}
                     data={{ item: item, index: index }}
                     indexStr={this.state.symbolSelectedIndex}
+                    plotType={this.props.plotType}
+                    strokeColor={this.state.customStrokeSelectedColor}
+                    fillColor={this.state.customFillSelectedColor}
                     cb={this.getFillSymbol}
                   ></SymbolBlock>
                 );
