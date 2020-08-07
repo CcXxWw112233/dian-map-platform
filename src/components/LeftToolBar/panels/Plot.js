@@ -9,12 +9,12 @@ import { guid } from "./lib";
 import { symbols } from "./data";
 import { plotEdit } from "../../../utils/plotEdit";
 import FeatureOperatorEvent from "../../../utils/plot2ol/src/events/FeatureOperatorEvent";
-import { createStyle, createOverlay, getPoint} from "../../../lib/utils/index";
+import { createStyle, createOverlay, getPoint } from "../../../lib/utils/index";
 import Event from "../../../lib/utils/event";
 
 import addFeatureOverlay from "../../PublicOverlays/addFeaturesOverlay/index";
 import ListAction from "../../../lib/components/ProjectScouting/ScoutingList";
-import DetailAction from '../../../lib/components/ProjectScouting/ScoutingDetail'
+import DetailAction from "../../../lib/components/ProjectScouting/ScoutingDetail";
 
 const SymbolBlock = ({
   data,
@@ -164,44 +164,42 @@ export default class Plot extends React.Component {
   componentDidMount() {
     // console.log(DetailAction.CollectionGroup)
     // console.log(ListAction.projects)
-    if (!plotEdit.plottingLayer) {
-      this.plotLayer = plotEdit.getPlottingLayer();
-      const me = this;
-      this.plotLayer.on(FeatureOperatorEvent.ACTIVATE, (e) => {
-        if (!e.feature_operator.isScouting) {
-          let operator = e.feature_operator;
-          let { feature } = operator;
-          this.addDrawFeature(feature,operator);
-          switch (me.props.plotType) {
-            case "freePolygon":
-            case "polygon":
-            case "rect":
-            case "circle":
-            case "arrow":
-              if (this.symbol) {
-                let iconUrl = this.getCurrentIcon(this.symbol, {
-                  fontSize: 38,
-                  fillColor: "rgba(80, 130, 255, 1)",
-                  strokeColor: "rgba(80, 130, 255, 1)",
-                });
-                plotEdit.plottingLayer.plotEdit.createPlotOverlay(
-                  iconUrl,
-                  operator
-                );
-                this.sigleImage = null;
-              }
-              break;
-            default:
-              break;
-          }
+    this.plotLayer = plotEdit.getPlottingLayer();
+    const me = this;
+    this.plotLayer.on(FeatureOperatorEvent.ACTIVATE, (e) => {
+      if (!e.feature_operator.isScouting) {
+        let operator = e.feature_operator;
+        let { feature } = operator;
+        this.addDrawFeature(feature, operator);
+        switch (me.props.plotType) {
+          case "freePolygon":
+          case "polygon":
+          case "rect":
+          case "circle":
+          case "arrow":
+            if (this.symbol) {
+              let iconUrl = this.getCurrentIcon(this.symbol, {
+                fontSize: 38,
+                fillColor: "rgba(80, 130, 255, 1)",
+                strokeColor: "rgba(80, 130, 255, 1)",
+              });
+              plotEdit.plottingLayer.plotEdit.createPlotOverlay(
+                iconUrl,
+                operator
+              );
+              this.sigleImage = null;
+            }
+            break;
+          default:
+            break;
         }
-      });
-      this.plotLayer.on(FeatureOperatorEvent.DEACTIVATE, (e) => {
-        if (!e.feature_operator.isScouting) {
-          console.log(e.feature_operator);
-        }
-      });
-    }
+      }
+    });
+    this.plotLayer.on(FeatureOperatorEvent.DEACTIVATE, (e) => {
+      if (!e.feature_operator.isScouting) {
+        console.log(e.feature_operator);
+      }
+    });
     if (this.props.plotType === "point") {
       this.symbol = this.refs.defaultSymbol.innerText;
       this.getPointDefaultSymbol();
@@ -219,114 +217,144 @@ export default class Plot extends React.Component {
       this.updateStateCallbackFunc();
     }
   }
-  getMap = ()=>{
-    return require('../../../utils/INITMAP').default;
-  }
+  getMap = () => {
+    return require("../../../utils/INITMAP").default;
+  };
   addDrawFeature = async (feature, operator) => {
     let geo = feature.getGeometry();
     let type = geo.getType();
     let position = null;
-    switch(type){
-      case "Point": position = geo.getCoordinates(); break;
-      case "Polygon" : position = getPoint(geo.getExtent(),'center') ; break;
-      case "LineString": position = geo.getLastCoordinate(); break;
-      default:;
+    switch (type) {
+      case "Point":
+        position = geo.getCoordinates();
+        break;
+      case "Polygon":
+        position = getPoint(geo.getExtent(), "center");
+        break;
+      case "LineString":
+        position = geo.getLastCoordinate();
+        break;
+      default:
     }
-    if(position){
-      let map = this.getMap().map
-      let overlay = null, t = 'project',data = [];
-      let res = await ListAction.checkItem().catch(err => {});
-      if(res){
-        if(res.code === 0){
-          t = 'project'
+    if (position) {
+      let map = this.getMap().map;
+      let overlay = null,
+        t = "project",
+        data = [];
+      let res = await ListAction.checkItem().catch((err) => {});
+      if (res) {
+        if (res.code === 0) {
+          t = "project";
         }
-      }else {
-        t = 'project';
+      } else {
+        t = "project";
       }
-      data = t === 'project' ? ListAction.projects.map(item => {
-        return {...item, text: item.board_name, key: item.board_id}
-      }):
-      DetailAction.CollectionGroup.map(item => {
-        return {...item, text: item.name, key: item.id}
-      })
+      data =
+        t === "project"
+          ? ListAction.projects.map((item) => {
+              return { ...item, text: item.board_name, key: item.board_id };
+            })
+          : DetailAction.CollectionGroup.map((item) => {
+              return { ...item, text: item.name, key: item.id };
+            });
 
-      let ele = new addFeatureOverlay({dataSource: data, width: 300}, t);
-      overlay = createOverlay(ele.element,{
-        positioning: 'bottom-left',
-        position: position
-      })
+      let ele = new addFeatureOverlay({ dataSource: data, width: 300 }, t);
+      overlay = createOverlay(ele.element, {
+        positioning: "bottom-left",
+        position: position,
+        offset: [-10, -30],
+      });
       map.addOverlay(overlay);
       ele.on = {
-        onClose: (tp)=>{
+        onClose: (tp) => {
           // ele.close();
-          if(tp === 'close'){
+          if (tp === "close") {
             overlay.setPosition(null);
-          }else{
+          } else {
             map.removeOverlay(overlay);
             overlay.setPosition(null);
-            this.plotLayer.removeFeature(operator)
+            this.plotLayer.removeFeature(operator);
           }
-          Event.Evt.un('FeatureOnAddCalcel');
-          Event.Evt.un('FeatureOnAddSure');
+          Event.Evt.un("FeatureOnAddCalcel");
+          Event.Evt.un("FeatureOnAddSure");
         },
-        onConfirm: (val)=>{
-          if(!val.name) return message.warn('请输入名称');
-          if(t === 'project')
-          this.save2Project(val, feature ,operator, ele ,overlay);
-          if(t === 'group')
-          this.save2Group(val,feature, operator, ele, overlay);
+        onInput: (val) => {},
+        onConfirm: (val) => {
+          if (!val.name) return message.warn("请输入名称");
+          if (t === "project")
+            this.save2Project(val, feature, operator, ele, overlay);
+          if (t === "group")
+            this.save2Group(val, feature, operator, ele, overlay);
         },
-        onAdd: (type)=>{
-          if(type === 'project'){
+        onAdd: (type) => {
+          if (type === "project") {
             overlay.setPosition(null);
-            ListAction.addDrawBoard().then(f => {
-              let ft = f.feature;
-              let coor = ft.getGeometry().getCoordinates();
-              ListAction.addBoardOverlay(coor,{viewToCenter:1}).then(obj => {
-                // console.log(obj);
-                let param = {
-                  board_name: obj.name,
-                  remark: obj.remark,
-                  lng: coor[0], lat: coor[1]
-                }
-                ListAction.addBoard(param).then(resp => {
-                  overlay.setPosition(position);
-                  message.success('新建项目成功');
-                  ListAction.projects.push(resp.data);
-                  ele.data && (ele.data.dataSource = ListAction.projects.map(item => {return {...item, text: item.board_name, key: item.board_id}}));
-                  ele.updateMenus();
-                }).catch(err => {
-                  overlay.setPosition(position);
-                  message.error('新建项目失败，请稍后再试');
-                })
-                ListAction.removeDraw();
-              }).catch(er => {
-                // 取消绘制了
-                ListAction.removeDraw();
-                overlay.setPosition(position);
+            ListAction.addDrawBoard()
+              .then((f) => {
+                let ft = f.feature;
+                let coor = ft.getGeometry().getCoordinates();
+                ListAction.addBoardOverlay(coor, { viewToCenter: 1 })
+                  .then((obj) => {
+                    // console.log(obj);
+                    let param = {
+                      board_name: obj.name,
+                      remark: obj.remark,
+                      lng: coor[0],
+                      lat: coor[1],
+                    };
+                    ListAction.addBoard(param)
+                      .then((resp) => {
+                        overlay.setPosition(position);
+                        message.success("新建项目成功");
+                        ListAction.projects.push(resp.data);
+                        ele.data &&
+                          (ele.data.dataSource = ListAction.projects.map(
+                            (item) => {
+                              return {
+                                ...item,
+                                text: item.board_name,
+                                key: item.board_id,
+                              };
+                            }
+                          ));
+                        ele.updateMenus();
+                      })
+                      .catch((err) => {
+                        overlay.setPosition(position);
+                        message.error("新建项目失败，请稍后再试");
+                      });
+                    ListAction.removeDraw();
+                  })
+                  .catch((er) => {
+                    // 取消绘制了
+                    ListAction.removeDraw();
+                    overlay.setPosition(position);
+                  });
               })
-            }).catch(err => {
-              overlay.setPosition(position);
-            })
-          }else if(type === 'group'){
+              .catch((err) => {
+                overlay.setPosition(position);
+              });
+          } else if (type === "group") {
             overlay.setPosition(null);
-            Event.Evt.firEvent('FeatureOnAddBtn',type);
-            Event.Evt.on('FeatureOnAddCalcel',()=>{
+            Event.Evt.firEvent("FeatureOnAddBtn", type);
+            Event.Evt.on("FeatureOnAddCalcel", () => {
               overlay.setPosition(position);
-            })
-            Event.Evt.on('FeatureOnAddSure',()=>{
-              let list = DetailAction.CollectionGroup.map(item => {return {...item, text: item.name, key: item.id}});
+            });
+            Event.Evt.on("FeatureOnAddSure", () => {
+              let list = DetailAction.CollectionGroup.map((item) => {
+                return { ...item, text: item.name, key: item.id };
+              });
               ele.data.dataSource = list;
               ele.updateMenus();
               overlay.setPosition(position);
-            })
+            });
           }
-        }
-      }
+        },
+      };
     }
-  }
+  };
   // 保存到项目
-  save2Project = (board, feature ,operator, ele, overlay)=>{
+  save2Project = (board, feature, operator, ele, overlay) => {
     let param = {
       coordinates: feature.getGeometry().getCoordinates(),
       geoType: feature.getGeometry().getType(),
@@ -340,17 +368,19 @@ export default class Plot extends React.Component {
       board_id: board.selection.board_id,
       content: JSON.stringify(param),
     };
-    DetailAction.addCollection(obj).then(res => {
-      message.success('保存成功,请进入项目查看');
-      overlay.setPosition(null);
-      this.getMap().map.removeOverlay(overlay);
-      this.plotLayer.removeFeature(operator)
-    }).catch(err => {
-      console.log(err);
-      message.error('保存失败，请稍后再试');
-    })
-  }
-  save2Group = (board, feature ,operator, ele, overlay)=>{
+    DetailAction.addCollection(obj)
+      .then((res) => {
+        message.success("保存成功,请进入项目查看");
+        overlay.setPosition(null);
+        this.getMap().map.removeOverlay(overlay);
+        this.plotLayer.removeFeature(operator);
+      })
+      .catch((err) => {
+        console.log(err);
+        message.error("保存失败，请稍后再试");
+      });
+  };
+  save2Group = (board, feature, operator, ele, overlay) => {
     let param = {
       coordinates: feature.getGeometry().getCoordinates(),
       geoType: feature.getGeometry().getType(),
@@ -364,7 +394,7 @@ export default class Plot extends React.Component {
       board_id: board.selection.board_id,
       content: JSON.stringify(param),
     };
-    console.log(board)
+    console.log(board);
     // DetailAction.addCollection(obj).then(res => {
     //   message.success('保存成功,请进入项目查看');
     //   overlay.setPosition(null);
@@ -374,7 +404,7 @@ export default class Plot extends React.Component {
     //   console.log(err);
     //   message.error('保存失败，请稍后再试');
     // })
-  }
+  };
   handleInputChange = (val) => {
     this.setState({
       name: val,
@@ -516,7 +546,7 @@ export default class Plot extends React.Component {
       ...options,
       iconUrl: iconUrl,
     };
-    this.featureType = "&#xe75d;";
+    this.featureType = iconUrl;
     this.selectName = "自定义类型";
     this.createPlot(options, iconUrl);
   };
@@ -528,7 +558,6 @@ export default class Plot extends React.Component {
       });
     }
     if (data) {
-      this.featureType = data.iconfont;
       this.selectName = data.typeName;
       this.symbol = data.target.textContent;
     }
@@ -539,6 +568,7 @@ export default class Plot extends React.Component {
           ? this.fillColor
           : "rgba(80, 130, 255, 1)",
     });
+    this.featureType = iconUrl;
     let options = {
       ...this.commonStyleOptions,
       text: this.state.name,
@@ -550,6 +580,7 @@ export default class Plot extends React.Component {
           ...options,
           strokeColor: this.strokeColor,
           fillColor: this.fillColor,
+          sigleImage: this.featureType
         };
         break;
       default:

@@ -143,7 +143,7 @@ class PlotEdit extends Observable {
   }
   // 删除按钮
   createDelBtn(pt) {
-    // return;
+    return;
     const delBtnEle = document.createElement("div");
     delBtnEle.title = "删除图斑";
     delBtnEle.classList.add("p-helper-control-feature-del");

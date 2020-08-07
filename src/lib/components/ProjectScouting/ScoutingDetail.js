@@ -380,9 +380,17 @@ function Action() {
         (item0) => item0.font === content.selectName
       );
       const featureLowerType = content.geoType.toLowerCase();
-      if (featureType.indexOf("/") > -1) {
+      if (featureType.indexOf("&#") > -1) {
+        continue;
+      }
+      if (
+        featureType.indexOf("/") > -1 ||
+        featureType.indexOf("data:image/png;base64") > -1
+      ) {
         isImage = true;
         if (featureType.indexOf("https") === 0) {
+          iconUrl = featureType;
+        } else if (featureType.indexOf("data:image/png;base64") > -1) {
           iconUrl = featureType;
         } else {
           featureType = featureType.replace("img", "");
@@ -791,7 +799,7 @@ function Action() {
             // 更新回原来的数据源
             staticImg.setSource(oldSource);
             staticImg.setOpacity(oldOpacity);
-            staticImg.setZIndex(oldZindex)
+            staticImg.setZIndex(oldZindex);
             reject({ code: -1, message: "取消编辑" });
             closeAll();
             this.showCollectionOverlay();
