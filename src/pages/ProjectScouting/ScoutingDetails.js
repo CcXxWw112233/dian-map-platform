@@ -355,6 +355,7 @@ export default class ScoutingDetails extends PureComponent {
       item.collection = f_list.sort((a,b) => (a.__index|| a.sort ||0) - (b.__index|| b.sort || 0));
       return item;
     });
+    Action.CollectionGroup = list;
     return list;
   };
 

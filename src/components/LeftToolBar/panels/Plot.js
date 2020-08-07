@@ -12,6 +12,10 @@ import FeatureOperatorEvent from "../../../utils/plot2ol/src/events/FeatureOpera
 import { createStyle } from "../../../lib/utils/index";
 import Event from "../../../lib/utils/event";
 
+import addFeatureOverlay from "../../PublicOverlays/addFeaturesOverlay/index";
+import ListAction from "../../../lib/components/ProjectScouting/ScoutingList";
+import DetailAction from '../../../lib/components/ProjectScouting/ScoutingDetail'
+
 const SymbolBlock = ({
   data,
   indexStr,
@@ -158,12 +162,22 @@ export default class Plot extends React.Component {
     };
   }
   componentDidMount() {
+    // console.log(DetailAction.CollectionGroup)
+    // console.log(ListAction.projects)
     if (!plotEdit.plottingLayer) {
       this.plotLayer = plotEdit.getPlottingLayer();
       const me = this;
       this.plotLayer.on(FeatureOperatorEvent.ACTIVATE, (e) => {
         if (!e.feature_operator.isScouting) {
           let operator = e.feature_operator;
+          // ListAction.addDrawBoard().then(res => {
+          //   let { feature } = res;
+          //   ListAction.addBoardOverlay(feature.position,{viewToCenter: 0}).then(obj => {
+          //     ListAction.addBoard(obj).then(success => {
+
+          //     })
+          //   })
+          // })
           switch (me.props.plotType) {
             case "freePolygon":
             case "polygon":
@@ -205,7 +219,7 @@ export default class Plot extends React.Component {
     this.handleResetClick();
     this.nextProps = nextProps;
     if (nextProps.plotType === "point") {
-      this.defaultSymbol = this.refs.defaultSymbol.innerText;
+      this.symbol = this.refs.defaultSymbol.innerText;
       this.getPointDefaultSymbol();
     } else {
       this.updateStateCallbackFunc();
@@ -408,9 +422,7 @@ export default class Plot extends React.Component {
       remark: this.state.remark,
       selectName: this.selectName,
     };
-    if (
-      this.dic[this.props.plotType] === "Polygon"
-    ) {
+    if (this.dic[this.props.plotType] === "Polygon") {
       attrs = { ...attrs, sigleImage: iconUrl };
     }
     plotEdit.create(this.plotDic[plotType]);
@@ -480,6 +492,7 @@ export default class Plot extends React.Component {
     });
     plotEdit.deactivate();
   };
+  
   render() {
     const { TextArea } = Input;
     const { Option } = Select;

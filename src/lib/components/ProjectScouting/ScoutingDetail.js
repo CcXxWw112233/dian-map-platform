@@ -70,6 +70,7 @@ function Action() {
   this.draw = null;
   this.lenged = null;
   this.oldData = [];
+  this.CollectionGroup = [];
   let requestTime = 10 * 1000;
 
   // 通过范围获取坐标点
