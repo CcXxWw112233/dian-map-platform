@@ -7,6 +7,7 @@ import { getMyCenter } from "./lib";
 import LengedList from "../LengedList/index";
 import LocalPOI from "../LocalPOI/index";
 import Zoom from "../Zoom/index";
+import ToolBox from "../ToolBox/index";
 
 export default class RightTools extends React.Component {
   constructor(props) {
@@ -15,6 +16,7 @@ export default class RightTools extends React.Component {
       selectedIndex: -1,
       lengedListPanelVisible: false,
       POIPanelVisible: false,
+      toolBoxPanelVisible: false,
     };
     this.tools = [
       {
@@ -24,14 +26,6 @@ export default class RightTools extends React.Component {
         cb: (args) => {
           this.toggleButtonStyle(args);
           getMyCenter();
-        },
-      },
-      {
-        name: "工具箱",
-        iconfont: "&#xe6b4;",
-        hasPanel: true,
-        cb: (args) => {
-          this.toggleButtonStyle(args);
         },
       },
       {
@@ -56,6 +50,27 @@ export default class RightTools extends React.Component {
           });
         },
       },
+      {
+        name: "工具箱",
+        iconfont: "&#xe763;",
+        hasPanel: true,
+        cb: (args) => {
+          this.toggleButtonStyle(args);
+          this.setState(
+            {
+              toolBoxPanelVisible: !this.state.toolBoxPanelVisible,
+            },
+            () => {
+              if (!this.state.toolBoxPanelVisible) {
+                this.child.deactivate();
+                this.setState({
+                  selectedIndex: -1,
+                });
+              }
+            }
+          );
+        },
+      },
     ];
   }
 
@@ -64,6 +79,9 @@ export default class RightTools extends React.Component {
     this.setState({
       selectedIndex: index,
     });
+  };
+  onRef = (ref) => {
+    this.child = ref;
   };
   render() {
     return (
@@ -125,6 +143,9 @@ export default class RightTools extends React.Component {
               });
             }}
           ></LocalPOI>
+        ) : null}
+        {this.state.toolBoxPanelVisible ? (
+          <ToolBox onRef={this.onRef}></ToolBox>
         ) : null}
       </div>
     );
