@@ -1331,7 +1331,7 @@ export default class ScoutingDetails extends PureComponent {
                 icon={<MyIcon type="icon-duoxuan"/>}>
                   {this.state.multipleGroup ? '分组展示':'组合展示'}
                 </Button>
-                <Popover
+                {/* <Popover
                 title="选择播放模式"
                 trigger="click"
                 visible={this.state.playCollectionVisible}
@@ -1390,7 +1390,7 @@ export default class ScoutingDetails extends PureComponent {
                   disabled={!all_collection.length}>
                     演播
                   </Button>
-                </Popover>
+                </Popover> */}
 
               </Space>
             </div>

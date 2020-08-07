@@ -160,25 +160,27 @@ export default class Plot extends React.Component {
       showName: true,
       commonFunc: null,
     };
+    this.operatorActive = null;
+    this.operatorDeactive = null;
   }
   componentDidMount() {
     // console.log(DetailAction.CollectionGroup)
     // console.log(ListAction.projects)
     this.plotLayer = plotEdit.getPlottingLayer();
     const me = this;
-    this.plotLayer.on(FeatureOperatorEvent.ACTIVATE, (e) => {
+    this.operatorActive = function (e) {
       if (!e.feature_operator.isScouting) {
         let operator = e.feature_operator;
         let { feature } = operator;
-        this.addDrawFeature(feature, operator);
+        me.addDrawFeature(feature, operator);
         switch (me.props.plotType) {
           case "freePolygon":
           case "polygon":
           case "rect":
           case "circle":
           case "arrow":
-            if (this.symbol) {
-              let iconUrl = this.getCurrentIcon(this.symbol, {
+            if (me.symbol) {
+              let iconUrl = me.getCurrentIcon(me.symbol, {
                 fontSize: 38,
                 fillColor: "rgba(80, 130, 255, 1)",
                 strokeColor: "rgba(80, 130, 255, 1)",
@@ -187,19 +189,23 @@ export default class Plot extends React.Component {
                 iconUrl,
                 operator
               );
-              this.sigleImage = null;
+              me.sigleImage = null;
             }
             break;
           default:
             break;
         }
       }
-    });
-    this.plotLayer.on(FeatureOperatorEvent.DEACTIVATE, (e) => {
-      if (!e.feature_operator.isScouting) {
-        console.log(e.feature_operator);
-      }
-    });
+    };
+    this.operatorDeactive = this.plotLayer.on(
+      FeatureOperatorEvent.ACTIVATE,
+      this.operatorActive
+    );
+    // this.plotLayer.on(FeatureOperatorEvent.DEACTIVATE, (e) => {
+    //   if (!e.feature_operator.isScouting) {
+    //     console.log(e.feature_operator);
+    //   }
+    // });
     if (this.props.plotType === "point") {
       this.symbol = this.refs.defaultSymbol.innerText;
       this.getPointDefaultSymbol();
@@ -207,6 +213,10 @@ export default class Plot extends React.Component {
       this.updateStateCallbackFunc();
     }
   }
+  componentWillUnmount() {
+    this.plotLayer.un(FeatureOperatorEvent.ACTIVATE, this.operatorActive);
+  }
+
   componentWillReceiveProps(nextProps) {
     this.handleResetClick();
     this.nextProps = nextProps;
@@ -244,7 +254,7 @@ export default class Plot extends React.Component {
       let res = await ListAction.checkItem().catch((err) => {});
       if (res) {
         if (res.code === 0) {
-          t = "project";
+          t = "group";
         }
       } else {
         t = "project";
@@ -265,26 +275,26 @@ export default class Plot extends React.Component {
         offset: [-10, -30],
       });
       map.addOverlay(overlay);
+      ele.change("name", this.state.name);
       ele.on = {
         onClose: (tp) => {
           // ele.close();
-          if (tp === "close") {
-            overlay.setPosition(null);
-          } else {
-            map.removeOverlay(overlay);
-            overlay.setPosition(null);
-            this.plotLayer.removeFeature(operator);
-          }
+          overlay.setPosition(null);
+          map.removeOverlay(overlay);
+          overlay.setPosition(null);
+          this.plotLayer && this.plotLayer.removeFeature(operator);
           Event.Evt.un("FeatureOnAddCalcel");
           Event.Evt.un("FeatureOnAddSure");
         },
         onInput: (val) => {},
         onConfirm: (val) => {
-          if (!val.name) return message.warn("请输入名称");
+          let newName = val.name.replace(/\s+/g, "");
+          if (!newName) return message.warn("请输入名称");
           if (t === "project")
             this.save2Project(val, feature, operator, ele, overlay);
-          if (t === "group")
+          if (t === "group") {
             this.save2Group(val, feature, operator, ele, overlay);
+          }
         },
         onAdd: (type) => {
           if (type === "project") {
@@ -373,7 +383,7 @@ export default class Plot extends React.Component {
         message.success("保存成功,请进入项目查看");
         overlay.setPosition(null);
         this.getMap().map.removeOverlay(overlay);
-        this.plotLayer.removeFeature(operator);
+        this.plotLayer && this.plotLayer.removeFeature(operator);
       })
       .catch((err) => {
         console.log(err);
@@ -394,20 +404,21 @@ export default class Plot extends React.Component {
       board_id: board.selection.board_id,
       content: JSON.stringify(param),
     };
-    console.log(board);
-    // DetailAction.addCollection(obj).then(res => {
-    //   message.success('保存成功,请进入项目查看');
-    //   overlay.setPosition(null);
-    //   this.getMap().map.removeOverlay(overlay);
-    //   this.plotLayer.removeFeature(operator)
-    // }).catch(err => {
-    //   console.log(err);
-    //   message.error('保存失败，请稍后再试');
-    // })
+    // console.log(board);
+    DetailAction.addCollection(obj).then(res => {
+      message.success('保存成功,请进入项目查看');
+      overlay.setPosition(null);
+      this.getMap().map.removeOverlay(overlay);
+      this.plotLayer.removeFeature(operator)
+    }).catch(err => {
+      console.log(err);
+      message.error('保存失败，请稍后再试');
+    })
   };
   handleInputChange = (val) => {
+    let newVal = val.replace(/\s+/g, "");
     this.setState({
-      name: val,
+      name: newVal,
     });
   };
   onTextAreaChange = (val) => {
@@ -657,7 +668,6 @@ export default class Plot extends React.Component {
     this.strokeColor = "rgba(106, 154, 255, 1)";
     this.nextProps = null;
     this.defaultSymbol = null;
-    this.plotLayer = null;
     this.symbol = "";
     this.selectName = "自定义类型";
     this.setState({

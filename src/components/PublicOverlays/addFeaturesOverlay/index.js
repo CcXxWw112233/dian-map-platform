@@ -150,6 +150,11 @@ export default function Init(data, type = 'project'){
     cancelBtn.onclick = ()=>{
         this.on.onClose && this.on.onClose.call(this,'cancel');
     }
+    this.change = (type,val)=>{
+      if(type === 'name'){
+        nameInput.value = val;
+      }
+    }
     okBtn.onclick = ()=>{
         let obj = {
             name: nameInput.value,
