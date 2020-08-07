@@ -14,6 +14,7 @@ instance.interceptors.request.use(config => {
     config.headers['Authorization'] = token;
   }
   else {
+    if(BASIC.getUrlParam.isMobile === "1") return ;
     clearTimeout(requestTimer);
     requestTimer = setTimeout(()=>{
       message.error('缺少权限，无法试用地图');

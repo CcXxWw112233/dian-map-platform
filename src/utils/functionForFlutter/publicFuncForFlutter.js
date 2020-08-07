@@ -382,6 +382,32 @@ let callFunctions = {
   // 视图根据元素显示中间位置
   viewFitById: ({id})=>{
     lib.fitCenter(id);
+  },
+  // zoomIn 放大
+  zoomIn:()=>{
+    let view = _getMap('view');
+    let zoom = view.getZoom();
+    let maxZoom = view.getMaxZoom();
+    if(zoom >= maxZoom) return ;
+    zoom += 1;
+    view.animate({
+      center: view.getCenter(),
+      zoom: zoom,
+      duration:200
+    });
+  },
+  // zoomOut 缩小
+  zoomOut:()=>{
+    let view = _getMap('view');
+    let zoom = view.getZoom();
+    let minZoom = view.getMinZoom();
+    if(zoom <= minZoom) return ;
+    zoom -= 1;
+    view.animate({
+      center: view.getCenter(),
+      zoom: zoom,
+      duration:200
+    });
   }
 
 };
