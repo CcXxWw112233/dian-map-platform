@@ -8,7 +8,7 @@ function Event(){
             func.call(this,data)
         }
     }
-    
+
     let on = (evtName, callback) => {
         if(evtName)
         this.events[evtName] = callback;
@@ -16,6 +16,9 @@ function Event(){
 
     this.firEvent = fireEvent;
     this.on = on;
+    this.un = (evtName)=>{
+      this.events[evtName] = null;
+    }
 }
 
 export default {

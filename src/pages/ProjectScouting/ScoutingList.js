@@ -122,6 +122,7 @@ export default class ScoutingList extends PureComponent {
           });
           // 重新渲染
           Action.renderProjectPoint(this.state.projects);
+          Action.projects = this.state.projects;
         }
       );
     });
@@ -148,6 +149,7 @@ export default class ScoutingList extends PureComponent {
           },
           () => {
             Action.renderProjectPoint(projects);
+            Action.projects = projects
             dispatch({
               type: "scoutingProject/updateList",
               payload: {
