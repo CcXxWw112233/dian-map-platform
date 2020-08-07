@@ -9,7 +9,7 @@ import { downloadCapture } from "../../utils/captureMap";
 export default class ToolBox extends React.Component {
   constructor(props) {
     super(props);
-    this.props.onRef(this)
+    this.props.onRef(this);
     this.tools = [
       {
         name: "坐标",
@@ -35,9 +35,7 @@ export default class ToolBox extends React.Component {
       {
         name: "拉框放大",
         iconfont: "&#xe75f;",
-        cb: () => {
-          myDragZoom.setVal.bind(myDragZoom);
-        },
+        cb: myDragZoom.setVal.bind(myDragZoom),
       },
       {
         name: "全屏",
