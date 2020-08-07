@@ -421,9 +421,13 @@ function Action() {
             type: featureLowerType,
           };
           if (content.sigleImage) {
-            let sigleImage = content.sigleImage.replace("img", "");
-            sigleImage = require("../../../assets" + sigleImage);
-            obj.sigleImage = sigleImage;
+            if (content.sigleImage.indexOf("data:image/png;base64") > -1) {
+              obj.sigleImage = content.sigleImage;
+            } else if (content.sigleImage.indexOf("/") > -1) {
+              let sigleImage = content.sigleImage.replace("img", "");
+              sigleImage = require("../../../assets" + sigleImage);
+              obj.sigleImage = sigleImage;
+            }
           }
           this.lenged.content.push(obj);
         }
@@ -503,6 +507,8 @@ function Action() {
         if (content.sigleImage) {
           let iconUrl = "";
           if (content.sigleImage.indexOf("https") === 0) {
+            iconUrl = content.sigleImage;
+          } else if (content.sigleImage.indexOf("data:image/png;base64") > -1) {
             iconUrl = content.sigleImage;
           } else {
             iconUrl = content.sigleImage.replace("img", "");

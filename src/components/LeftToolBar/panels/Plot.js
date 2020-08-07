@@ -568,7 +568,9 @@ export default class Plot extends React.Component {
           ? this.fillColor
           : "rgba(80, 130, 255, 1)",
     });
-    this.featureType = iconUrl;
+    if (this.props.plotType === "point") {
+      this.featureType = iconUrl;
+    }
     let options = {
       ...this.commonStyleOptions,
       text: this.state.name,
@@ -580,7 +582,6 @@ export default class Plot extends React.Component {
           ...options,
           strokeColor: this.strokeColor,
           fillColor: this.fillColor,
-          sigleImage: this.featureType
         };
         break;
       default:
@@ -598,13 +599,14 @@ export default class Plot extends React.Component {
     const style = createStyle(this.dic[plotType], options);
     let attrs = {
       name: this.state.name,
-      featureType: this.featureType,
       strokeColor: "",
       remark: this.state.remark,
       selectName: this.selectName,
     };
     if (this.dic[this.props.plotType] === "Polygon") {
-      attrs = { ...attrs, sigleImage: iconUrl };
+      attrs = { ...attrs, sigleImage: iconUrl, featureType: this.fillColor };
+    } else {
+      attrs = { ...attrs, featureType: this.featureType };
     }
     plotEdit.create(this.plotDic[plotType]);
     Event.Evt.firEvent("setPlotDrawStyle", style);
