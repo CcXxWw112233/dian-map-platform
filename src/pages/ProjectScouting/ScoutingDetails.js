@@ -73,6 +73,7 @@ export default class ScoutingDetails extends PureComponent {
     this.scrollView = React.createRef();
     this.saveSortTimer = null;
     this.saveSortTime = 2 * 1000;// 秒
+    this.isAddAreaBtn = false ; //是否外部调用了新增分类按钮
   }
   componentDidMount () {
     const { Evt } = Event;
@@ -100,7 +101,10 @@ export default class ScoutingDetails extends PureComponent {
     Evt.on('CollectionUpdate:remove',this.onCollectionUpdate.bind(this,'remove'))
     Evt.on('CollectionUpdate:add',this.onCollectionUpdate.bind(this,'add'))
     Evt.on('CollectionUpdate:reload',this.onCollectionUpdate.bind(this,'reload'))
-
+    Evt.on('FeatureOnAddBtn', ()=>{
+      this.isAddAreaBtn = true;
+      this.pushAreaItem();
+    })
   }
 
   // 设置正在播放的数据
@@ -245,6 +249,10 @@ export default class ScoutingDetails extends PureComponent {
     this.setState({
       area_list: this.state.area_list.filter((val) => val.id !== item.id),
     });
+    if(this.isAddAreaBtn){
+      Evt.firEvent('FeatureOnAddCancel',false);
+      this.isAddAreaBtn = false;
+    }
   };
 
   // 保存新增的区域
@@ -356,6 +364,10 @@ export default class ScoutingDetails extends PureComponent {
       return item;
     });
     Action.CollectionGroup = list;
+    if(this.isAddAreaBtn){
+      Evt.firEvent('FeatureOnAddSure',true);
+      this.isAddAreaBtn = false;
+    }
     return list;
   };
 

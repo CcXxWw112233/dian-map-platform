@@ -44,7 +44,7 @@ export default function Init(data, type = 'project'){
             this.active = obj;
         }
     }
-    
+
     let selectDiv = document.createElement('div');
     selectDiv.className = styles.selectDiv;
     let sp = document.createElement('span');
@@ -110,6 +110,7 @@ export default function Init(data, type = 'project'){
         addSelect.onclick = ()=>{
             optionSelect('_add')
         }
+        this.menuShow = true;
     }
     // 设定默认值的选项
     if(this.data.dataSource && this.data.dataSource.length){
@@ -119,8 +120,8 @@ export default function Init(data, type = 'project'){
             this.active = obj;
         }
     }
-    
-    
+
+
 
     // 添加底部
     let footer = document.createElement('footer');
@@ -158,8 +159,17 @@ export default function Init(data, type = 'project'){
     }
 
     document.body.appendChild(this.element);
+    this.hide = ()=>{
+        if(this.element)
+        this.element.display = 'none';
+    }
+    this.show = ()=>{
+        if(this.element)
+        this.element.display = 'block';
+    }
 
     this.close = ()=>{
-        document.body.removeChild(this.element);
+        this.element && this.element.parentNode.removeChild(this.element);
+        this.element = "";
     }
 }
