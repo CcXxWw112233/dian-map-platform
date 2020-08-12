@@ -1,4 +1,5 @@
 import React from "react";
+import {  Badge } from "antd";
 
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import styles from "./LeftToolBar.less";
@@ -157,23 +158,30 @@ export default class LeftToolBar extends React.Component {
       displayProject: true,
       displayTempPlot: false,
       displayCustomSymbolStore: false,
+      displayTempPlotIcon: false,
       plotType: "point",
     };
     this.featureOperatorList = [];
     this.selectFeatureOperatorList = [];
-    ListAction.checkItem().then((res) => {
-      if (res) {
-        if (res.code === 0) {
-          this.setState({
-            displayTempPlot: false,
-          });
+    ListAction.checkItem()
+      .then((res) => {
+        if (res) {
+          if (res.code === 0) {
+            this.setState({
+              displayTempPlotIcon: false,
+            });
+          } else {
+            this.setState({
+              displayTempPlotIcon: true,
+            });
+          }
         }
-      } else {
+      })
+      .catch((e) => {
         this.setState({
-          displayTempPlot: true,
+          displayTempPlotIcon: true,
         });
-      }
-    });
+      });
   }
 
   deactivate = () => {
@@ -184,10 +192,21 @@ export default class LeftToolBar extends React.Component {
 
   updateFeatureOperatorList = (list) => {
     this.featureOperatorList = list;
+    if (!this.state.displayTempPlotIcon) {
+      this.setState({
+        displayTempPlotIcon: true,
+      });
+    }
   };
 
   updateSelectFeatureOperatorList = (list) => {
     this.selectFeatureOperatorList = list;
+  };
+
+  getArrDifference = (arr1, arr2) => {
+    return arr1.concat(arr2).filter((v, i, arr) => {
+      return arr.indexOf(v) === arr.lastIndexOf(v);
+    });
   };
 
   // 编辑标绘回调
@@ -269,27 +288,30 @@ export default class LeftToolBar extends React.Component {
             );
           })}
         </ul>
-        <div
-          className={`${styles.circle} ${styles.temp}`}
-          onClick={() => {
-            this.setState({
-              selectedIndex: -1,
-              displayPlot: false,
-              displayProject: false,
-              displayTempPlot: true,
-              displayCustomSymbolStore: false,
-              plotType: "",
-            });
-          }}
-          style={tempPlotItemStyle}
-        >
-          <i
-            className={globalStyle.global_icon}
-            style={{ fontSize: 30, color: "#fff" }}
+        {this.state.displayTempPlotIcon ? (
+          <div
+            className={`${styles.circle} ${styles.temp}`}
+            onClick={() => {
+              this.setState({
+                selectedIndex: -1,
+                displayPlot: false,
+                displayProject: false,
+                displayTempPlot: true,
+                displayCustomSymbolStore: false,
+                plotType: "",
+              });
+            }}
+            style={tempPlotItemStyle}
           >
-            &#xe765;
-          </i>
-        </div>
+            
+            <i
+              className={globalStyle.global_icon}
+              style={{ fontSize: 30, color: "#fff" }}
+            >
+              &#xe765;
+            </i>
+          </div>
+        ) : null}
         <div
           className={`${styles.circle} ${styles.temp}`}
           onClick={() => {
@@ -347,6 +369,10 @@ export default class LeftToolBar extends React.Component {
             featureOperatorList={this.featureOperatorList}
             selectFeatureOperatorList={this.selectFeatureOperatorList}
             goBackTempPlot={(list) => {
+              this.featureOperatorList = this.getArrDifference(
+                list,
+                this.featureOperatorList
+              );
               this.setState({
                 displayProjectList: false,
                 displayTempPlot: true,

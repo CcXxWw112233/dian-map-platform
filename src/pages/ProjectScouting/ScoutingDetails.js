@@ -32,6 +32,8 @@ import {
 } from "./components/ScoutingDetailsSubComponents";
 import PlayCollectionControl from "./components/playCollectionControl";
 
+import { setSession } from "utils/sessionManage";
+
 const { Evt } = Event;
 const { TabPane } = Tabs;
 
@@ -70,7 +72,7 @@ export default class ScoutingDetails extends PureComponent {
       playCollectionVisible: false,
 
       visible: true,
-      activeKey: panes[0].key,
+      activeKey: panes[panes.length - 1].key,
       panes,
       activeId: -1,
       audioData: {},
@@ -662,6 +664,7 @@ export default class ScoutingDetails extends PureComponent {
 
   // 点击panel时的回调
   setActiveCollapse = (key) => {
+    window.ProjectGroupId = key;
     this.setState({ area_active_key: key });
     if (this.state.multipleGroup) return;
     // 关闭的时候，全部清空
@@ -672,6 +675,7 @@ export default class ScoutingDetails extends PureComponent {
     if (key) {
       let obj = this.state.area_list.find((item) => item.id === key);
       if (obj) {
+        window.ProjectGroupName = obj.name;
         this.renderCollection(obj.collection || []);
       } else {
         this.renderCollection(this.state.not_area_id_collection || []);

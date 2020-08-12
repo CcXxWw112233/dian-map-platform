@@ -76,7 +76,7 @@ export default class ProjectList extends React.Component {
         >
           <i
             className={globalStyle.global_icon}
-            onClick={() => this.props.goBackTempPlot()}
+            onClick={() => this.props.goBackTempPlot([])}
           >
             &#xe758;
           </i>

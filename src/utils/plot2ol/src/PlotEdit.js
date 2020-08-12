@@ -141,18 +141,47 @@ class PlotEdit extends Observable {
   setPopupOvelay(overlay) {
     this.popupOverlay = overlay;
   }
+  // 保存按钮
+  createSaveBtn(pt) {
+    const delBtnEle = document.createElement("div");
+    delBtnEle.title = "保存标绘";
+    delBtnEle.classList.add("p-helper-control-feature-save");
+    const delBtnOverlay = new Overlay({
+      id: "featureSaveBtn",
+      element: delBtnEle,
+      position: pt,
+      positioning: "bottom-center",
+      offset: [36, 0],
+    });
+    this.layer.plotEdit.controlPoints &&
+      this.layer.plotEdit.controlPoints.push(delBtnOverlay);
+    this.map.addOverlay(delBtnOverlay);
+    DomUtils.addListener(
+      delBtnEle,
+      "mousedown",
+      () => {
+        this.layer.saveCb && this.layer.saveCb(window.featureOperator);
+        window.featureOperator &&
+          this.layer.removeFeature(window.featureOperator);
+        window.featureOperator && delete window.featureOperator;
+      },
+      this
+    );
+    //--mobile
+    DomUtils.addListener(delBtnEle, "touchstart", () => {}, this);
+  }
+
   // 删除按钮
   createDelBtn(pt) {
-    return;
     const delBtnEle = document.createElement("div");
-    delBtnEle.title = "删除图斑";
+    delBtnEle.title = "删除标绘";
     delBtnEle.classList.add("p-helper-control-feature-del");
     const delBtnOverlay = new Overlay({
       id: "featureDelBtn",
       element: delBtnEle,
       position: pt,
       positioning: "bottom-center",
-      offset: [20, -10],
+      offset: [70, 0],
     });
     this.layer.plotEdit.controlPoints &&
       this.layer.plotEdit.controlPoints.push(delBtnOverlay);
@@ -170,7 +199,7 @@ class PlotEdit extends Observable {
           this.layer.feature_operators,
           this.layer.projectScoutingArr
         );
-        this.layer.listCb && this.layer.listCb(tempList);
+        this.layer.deleteCb && this.layer.deleteCb(tempList);
       },
       this
     );
@@ -178,8 +207,10 @@ class PlotEdit extends Observable {
     DomUtils.addListener(delBtnEle, "touchstart", () => {}, this);
   }
 
-  updateDelBtn(pt) {
+  updateBtn(pt) {
+    const saveOvelay = this.map.getOverlayById("featureSaveBtn");
     const delOvely = this.map.getOverlayById("featureDelBtn");
+    saveOvelay && saveOvelay.setPosition(pt);
     delOvely && delOvely.setPosition(pt);
   }
 
@@ -285,6 +316,7 @@ class PlotEdit extends Observable {
     var cPnts = this.getControlPoints();
     // cPnts = douglasPeucker(cPnts, 100);
     if (!isScouting) {
+      this.createSaveBtn(cPnts[cPnts.length - 1]);
       this.createDelBtn(cPnts[cPnts.length - 1]);
     }
     for (var i = 0; i < cPnts.length; i++) {
@@ -353,7 +385,7 @@ class PlotEdit extends Observable {
       plot.updatePoint(coordinate, index);
       const len = Object.keys(this.elementTable).length;
       if (index === len - 1) {
-        this.updateDelBtn && this.updateDelBtn(coordinate);
+        this.updateBtn && this.updateBtn(coordinate);
       }
 
       // 更新overlay
