@@ -5,6 +5,7 @@ import globalStyle from "@/globalSet/styles/globalStyles.less";
 import { lineDrawing, pointDrawing, polygonDrawing } from "utils/drawing";
 import { myFullScreen, myDragZoom } from "utils/drawing/public";
 import { downloadCapture } from "../../utils/captureMap";
+import { plotEdit } from "../../utils/plotEdit";
 
 export default class ToolBox extends React.Component {
   constructor(props) {
@@ -74,6 +75,7 @@ export default class ToolBox extends React.Component {
     };
   }
   deactivate = () => {
+    plotEdit.deactivate();
     pointDrawing.deactivate();
     lineDrawing.deactivate();
     polygonDrawing.deactivate();

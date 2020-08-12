@@ -63,7 +63,13 @@ function Action() {
   this.drawBox = null;
   this.init = (dispatch) => {
     this.Layer.setSource(this.Source);
-    InitMap.map.addLayer(this.Layer);
+    const layers = InitMap.map.getLayers().getArray();
+    const layer = layers.filter(layer => {
+      return layer.get("id") === this.Layer.get("id")
+    })
+    if (!layer){
+      InitMap.map.addLayer(this.Layer);
+    }
     this.layer = plotEdit.getPlottingLayer(dispatch);
   };
   this.boxFeature = {};

@@ -1,10 +1,10 @@
-import React, { PureComponent} from "react";
+import React, { PureComponent } from "react";
 import globalStyle from "../../globalSet/styles/globalStyles.less";
 import animateCss from "../../assets/css/animate.min.css";
 import styles from "./ScoutingDetails.less";
 import Action from "../../lib/components/ProjectScouting/ScoutingDetail";
 import ScouListAction from "../../lib/components/ProjectScouting/ScoutingList";
-import PlayCollectionAction from '../../lib/components/ProjectScouting/playCollection'
+import PlayCollectionAction from "../../lib/components/ProjectScouting/playCollection";
 import { connect } from "dva";
 import {
   Collapse,
@@ -17,31 +17,36 @@ import {
   Radio,
   Form,
   Input,
-  InputNumber
+  InputNumber,
 } from "antd";
-import {
-  PlusCircleOutlined,
-  CaretRightOutlined
-} from "@ant-design/icons";
+import { PlusCircleOutlined, CaretRightOutlined } from "@ant-design/icons";
 import Event from "../../lib/utils/event";
 import AudioControl from "./components/audioPlayControl";
-import { MyIcon } from '../../components/utils'
-import { Title, ScoutingHeader, ScoutingItem, UploadItem,  areaScouting} from './components/ScoutingDetailsSubComponents'
-import PlayCollectionControl from './components/playCollectionControl'
+import { MyIcon } from "../../components/utils";
+import {
+  Title,
+  ScoutingHeader,
+  ScoutingItem,
+  UploadItem,
+  areaScouting,
+} from "./components/ScoutingDetailsSubComponents";
+import PlayCollectionControl from "./components/playCollectionControl";
 
 const { Evt } = Event;
 const { TabPane } = Tabs;
 
-
-@connect((
-  { controller: { mainVisible },
-  openswitch:{showFeatureName},
-  lengedList: { config } }) =>
-({
-  mainVisible,
-  config,
-  showFeatureName
-}))
+@connect(
+  ({
+    controller: { mainVisible, lastPageState },
+    openswitch: { showFeatureName },
+    lengedList: { config },
+  }) => ({
+    mainVisible,
+    lastPageState,
+    config,
+    showFeatureName,
+  })
+)
 export default class ScoutingDetails extends PureComponent {
   constructor(props) {
     super(props);
@@ -55,14 +60,14 @@ export default class ScoutingDetails extends PureComponent {
       all_collection: [],
       not_area_id_collection: [],
       area_active_key: null,
-      multipleGroup:false,
-      area_selected:[],
-      isPlay:false,
+      multipleGroup: false,
+      area_selected: [],
+      isPlay: false,
       playing: false,
-      currentGroup:null,
-      notNextGroup:false,
-      notPrevGroup:false,
-      playCollectionVisible:false,
+      currentGroup: null,
+      notNextGroup: false,
+      notPrevGroup: false,
+      playCollectionVisible: false,
 
       visible: true,
       activeKey: panes[0].key,
@@ -72,12 +77,15 @@ export default class ScoutingDetails extends PureComponent {
     };
     this.scrollView = React.createRef();
     this.saveSortTimer = null;
-    this.saveSortTime = 2 * 1000;// 秒
-    this.isAddAreaBtn = false ; //是否外部调用了新增分类按钮
+    this.saveSortTime = 2 * 1000; // 秒
+    this.isAddAreaBtn = false; //是否外部调用了新增分类按钮
+    this.isGoBack = false;
   }
-  componentDidMount () {
+  componentDidMount() {
+    this.isGoBack = false;
     const { Evt } = Event;
-    this.getDetails();
+    const { mainVisible } = this.props;
+    if (mainVisible) this.getDetails();
     // 删除存在与页面中的项目点和元素
     Action.removeListPoint();
     // 构建地图组件
@@ -98,13 +106,42 @@ export default class ScoutingDetails extends PureComponent {
     Event.Evt.on("updatePlotFeature", (data) => {
       this.fetchCollection();
     });
-    Evt.on('CollectionUpdate:remove',this.onCollectionUpdate.bind(this,'remove'))
-    Evt.on('CollectionUpdate:add',this.onCollectionUpdate.bind(this,'add'))
-    Evt.on('CollectionUpdate:reload',this.onCollectionUpdate.bind(this,'reload'))
-    Evt.on('FeatureOnAddBtn', ()=>{
+    Evt.on(
+      "CollectionUpdate:remove",
+      this.onCollectionUpdate.bind(this, "remove")
+    );
+    Evt.on("CollectionUpdate:add", this.onCollectionUpdate.bind(this, "add"));
+    Evt.on(
+      "CollectionUpdate:reload",
+      this.onCollectionUpdate.bind(this, "reload")
+    );
+    Evt.on("FeatureOnAddBtn", () => {
       this.isAddAreaBtn = true;
       this.pushAreaItem();
-    })
+    });
+  }
+
+  componentWillUnmount() {
+    const { dispatch, config: lengedList } = this.props;
+    if (this.isGoBack) {
+      let newLengedList = [...lengedList];
+      if (!Array.isArray(lengedList)) {
+        newLengedList = [lengedList];
+      }
+      const key = Action.lenged?.key;
+      const index = newLengedList.findIndex((item) => {
+        return item.key === key;
+      });
+      newLengedList.splice(index, 1);
+      dispatch({
+        type: "lengedList/updateLengedList",
+        payload: {
+          config: newLengedList,
+        },
+      });
+      Action.removeLayer();
+      Action.clearListen();
+    }
   }
 
   // 设置正在播放的数据
@@ -116,20 +153,20 @@ export default class ScoutingDetails extends PureComponent {
   };
 
   // 轮询中的数据监听
-  onCollectionUpdate = (type,collections)=>{
+  onCollectionUpdate = (type, collections) => {
     let arr = Array.from(this.state.all_collection);
-    if(type === 'add'){
+    if (type === "add") {
       arr = arr.concat(collections);
     }
-    if(type === 'remove'){
-      let key = collections.map(item => item.id);
-      arr = arr.filter(item => !key.includes(item.id));
+    if (type === "remove") {
+      let key = collections.map((item) => item.id);
+      arr = arr.filter((item) => !key.includes(item.id));
     }
     // 重组所有数据
     let list = this.reSetCollection(arr);
     // 更新分组列表和所有collection
-    this.updateCollection(arr ,list)
-  }
+    this.updateCollection(arr, list);
+  };
 
   // 获取缓存中选定的项目
   getDetails = (flag) => {
@@ -157,13 +194,14 @@ export default class ScoutingDetails extends PureComponent {
         // console.log(resp)
         let respData = resp.data;
         // 当前激活的区域
-        let active = this.state.area_active_key || ( respData[0] && respData[0].id);
+        let active =
+          this.state.area_active_key || (respData[0] && respData[0].id);
         this.setState({
           area_list: respData.map((item) =>
             Object.assign(item, { _edit: false, _remarkEdit: false })
           ),
           area_active_key: active,
-          area_selected:active,
+          area_selected: active,
         });
         // 获取区域分类的数据列表
         this.fetchCollection();
@@ -176,7 +214,7 @@ export default class ScoutingDetails extends PureComponent {
   handleGoBackClick = () => {
     const { dispatch } = this.props;
     Action.onBack();
-
+    this.isGoBack = true;
     dispatch({
       type: "controller/updateMainVisible",
       payload: {
@@ -228,7 +266,7 @@ export default class ScoutingDetails extends PureComponent {
     this.setState(
       {
         area_list: this.state.area_list.concat([obj]),
-        area_active_key: ""
+        area_active_key: "",
       },
       () => {
         // 将新增的顶上去
@@ -249,15 +287,15 @@ export default class ScoutingDetails extends PureComponent {
     this.setState({
       area_list: this.state.area_list.filter((val) => val.id !== item.id),
     });
-    if(this.isAddAreaBtn){
-      Evt.firEvent('FeatureOnAddCancel',false);
+    if (this.isAddAreaBtn) {
+      Evt.firEvent("FeatureOnAddCancel", false);
       this.isAddAreaBtn = false;
     }
   };
 
   // 保存新增的区域
   saveArea = (data, name) => {
-    if (!name) return message.warn('分组名称不能为空');
+    if (!name) return message.warn("分组名称不能为空");
     // 编辑状态
     if (data.board_id) {
       Action.editAreaName(data.id, { name }).then((res) => {
@@ -278,40 +316,23 @@ export default class ScoutingDetails extends PureComponent {
     Action.addArea({ board_id: current_board.board_id, name: name }).then(
       (res) => {
         message.success("新增操作成功");
-        this.setState({
-          area_active_key: res.data || ""
-        },()=>{
-          // console.log(res);
-          this.renderAreaList();
-        })
+        this.setState(
+          {
+            area_active_key: res.data || "",
+          },
+          () => {
+            // console.log(res);
+            this.renderAreaList();
+          }
+        );
       }
     );
   };
 
-  componentWillUnmount () {
-    const { dispatch, config: lengedList } = this.props;
-    let newLengedList = [...lengedList];
-    if (!Array.isArray(lengedList)) {
-      newLengedList = [lengedList];
-    }
-    const key = Action.lenged?.key;
-    const index = newLengedList.findIndex((item) => {
-      return item.key === key;
-    });
-    newLengedList.splice(index, 1);
-    dispatch({
-      type: "lengedList/updateLengedList",
-      payload: {
-        config: newLengedList,
-      },
-    });
-    Action.removeLayer();
-    Action.clearListen();
-  }
   // 渲染带坐标的数据
   renderCollection = (data) => {
-    const { config: lenged, dispatch ,showFeatureName} = this.props;
-    Action.renderCollection(data || [], { lenged, dispatch ,showFeatureName});
+    const { config: lenged, dispatch, showFeatureName } = this.props;
+    Action.renderCollection(data || [], { lenged, dispatch, showFeatureName });
   };
 
   // 获取资源列表，动态分类
@@ -323,7 +344,7 @@ export default class ScoutingDetails extends PureComponent {
     Action.clearListen();
     // 再开始轮询--优化轮询机制
     Action.getCollectionList(params).then((res) => {
-      let data = res.data.sort((a,b) => a.sort - b.sort);
+      let data = res.data.sort((a, b) => a.sort - b.sort);
       // 轮询中，加入对比更新机制
       Action.oldData = data;
       // 将重组后的数据更新,保存没有关联区域的数据
@@ -334,12 +355,14 @@ export default class ScoutingDetails extends PureComponent {
   };
 
   // 更新数据
-  updateCollection = (data ,area_list)=>{
+  updateCollection = (data, area_list) => {
     this.setState(
       {
         all_collection: data,
         area_list: area_list,
-        not_area_id_collection: data.filter((i) => !i.area_type_id).sort((a,b) => a.create_time - b.create_time),
+        not_area_id_collection: data
+          .filter((i) => !i.area_type_id)
+          .sort((a, b) => a.create_time - b.create_time),
       },
       () => {
         // 之渲染选中的区域数据
@@ -353,19 +376,21 @@ export default class ScoutingDetails extends PureComponent {
         this.renderCollection(arr || []);
       }
     );
-  }
+  };
   // 将数据分类，更新到区域列表
   reSetCollection = (val) => {
     let data = val || [];
     data = this.getSameGroupIdData(data);
     let list = this.state.area_list.map((item) => {
       let f_list = data.filter((v) => v.area_type_id === item.id);
-      item.collection = f_list.sort((a,b) => (a.__index|| a.sort ||0) - (b.__index|| b.sort || 0));
+      item.collection = f_list.sort(
+        (a, b) => (a.__index || a.sort || 0) - (b.__index || b.sort || 0)
+      );
       return item;
     });
     Action.CollectionGroup = list;
-    if(this.isAddAreaBtn){
-      Evt.firEvent('FeatureOnAddSure',true);
+    if (this.isAddAreaBtn) {
+      Evt.firEvent("FeatureOnAddSure", true);
       this.isAddAreaBtn = false;
     }
     return list;
@@ -376,28 +401,27 @@ export default class ScoutingDetails extends PureComponent {
     // console.log(fileList)
     let { dispatch } = this.props;
     dispatch({
-      type:"uploadNormal/updateFileList",
-      payload:{
+      type: "uploadNormal/updateFileList",
+      payload: {
         show_upload_notification: true,
-        data: fileList
-      }
-    })
-
+        data: fileList,
+      },
+    });
   };
-  removeUploadItem = (file)=>{
+  removeUploadItem = (file) => {
     let { dispatch } = this.props;
     // 清除上传完成的列表
-    setTimeout(()=>{
+    setTimeout(() => {
       dispatch({
-        type:"uploadNormal/uploadSuccess",
-        payload:{
-          uid:file.uid
-        }
-      })
-    },2000)
-  }
+        type: "uploadNormal/uploadSuccess",
+        payload: {
+          uid: file.uid,
+        },
+      });
+    }, 2000);
+  };
   // 上传完成
-  fileUpload = (val, resp,file, event) => {
+  fileUpload = (val, resp, file, event) => {
     if (resp) {
       // 清除上传完成的数据
       this.removeUploadItem(file);
@@ -425,10 +449,10 @@ export default class ScoutingDetails extends PureComponent {
     }
   };
 
-  onAddError = (resp,file) => {
+  onAddError = (resp, file) => {
     // console.dir(resp)
-    message.error(file.name + '上传失败，请稍后重试');
-    this.removeUploadItem(file)
+    message.error(file.name + "上传失败，请稍后重试");
+    this.removeUploadItem(file);
   };
 
   // 删除采集的资料
@@ -561,7 +585,7 @@ export default class ScoutingDetails extends PureComponent {
       id: data.id,
       area_type_id: group.id,
     };
-    if(data.group_id){
+    if (data.group_id) {
       await this.CollectionReMerge(data);
     }
     Action.editCollection(params).then((res) => {
@@ -578,27 +602,30 @@ export default class ScoutingDetails extends PureComponent {
   };
 
   // 多选数据进行展示
-  onMultipleSelectGroup = (val,id)=>{
-    let arr = Array.from(this.state.area_selected)
-    if(val.target.checked){
+  onMultipleSelectGroup = (val, id) => {
+    let arr = Array.from(this.state.area_selected);
+    if (val.target.checked) {
       arr.push(id);
-    }else{
-      arr = arr.filter(item => item !== id);
+    } else {
+      arr = arr.filter((item) => item !== id);
     }
-    this.setState({
-      area_selected:arr
-    },()=>{
-      let data = [...this.state.area_list];
-      let selectData = [];
-      arr.forEach(item => {
-        let obj = data.find(d => d.id === item);
-        if(obj){
-          selectData = selectData.concat(obj.collection || [])
-        }
-      })
-      this.renderCollection(selectData)
-    })
-  }
+    this.setState(
+      {
+        area_selected: arr,
+      },
+      () => {
+        let data = [...this.state.area_list];
+        let selectData = [];
+        arr.forEach((item) => {
+          let obj = data.find((d) => d.id === item);
+          if (obj) {
+            selectData = selectData.concat(obj.collection || []);
+          }
+        });
+        this.renderCollection(selectData);
+      }
+    );
+  };
 
   onAreaDelete = (val) => {
     if (val.collection && val.collection.length) {
@@ -610,7 +637,7 @@ export default class ScoutingDetails extends PureComponent {
         let arr = this.state.area_list.filter((item) => item.id !== val.id);
         this.setState({
           area_list: arr,
-          multipleGroup: this.state.multipleGroup ? arr.length > 1 :false
+          multipleGroup: this.state.multipleGroup ? arr.length > 1 : false,
         });
       })
       .catch((err) => {
@@ -636,10 +663,12 @@ export default class ScoutingDetails extends PureComponent {
   // 点击panel时的回调
   setActiveCollapse = (key) => {
     this.setState({ area_active_key: key });
-    if(this.state.multipleGroup) return;
+    if (this.state.multipleGroup) return;
     // 关闭的时候，全部清空
-    if(!key){this.renderCollection([])};
-    this.setState({area_selected:[key]})
+    if (!key) {
+      this.renderCollection([]);
+    }
+    this.setState({ area_selected: [key] });
     if (key) {
       let obj = this.state.area_list.find((item) => item.id === key);
       if (obj) {
@@ -730,8 +759,9 @@ export default class ScoutingDetails extends PureComponent {
         });
       })
       .catch((err) => {
-        if (err.code === -1) { /**message.warn(err.message)*/ }
-        else message.error(err.message);
+        if (err.code === -1) {
+          /**message.warn(err.message)*/
+        } else message.error(err.message);
         this.showOtherSlide();
       });
   };
@@ -753,8 +783,8 @@ export default class ScoutingDetails extends PureComponent {
 
   //停止编辑几何图形
   onStopMofifyFeatureInDetails = () => {
-    Action.stopModifyFeature()
-  }
+    Action.stopModifyFeature();
+  };
 
   onToggleChangeStyle = (val) => {
     this.setState({
@@ -786,24 +816,24 @@ export default class ScoutingDetails extends PureComponent {
   };
 
   //
-  onBeforeUploadPlan = ()=>{
-
-  }
-  onExcelSuccess = (arr)=>{
+  onBeforeUploadPlan = () => {};
+  onExcelSuccess = (arr) => {
     this.fetchCollection();
-  }
-
+  };
 
   // 设置多选
-  setMultipleCheck = ()=>{
-    this.setState({multipleGroup:!this.state.multipleGroup});
-  }
+  setMultipleCheck = () => {
+    this.setState({ multipleGroup: !this.state.multipleGroup });
+  };
 
   // 拖拽排序
-  onCollectionDragEnd = (data,result)=>{
+  onCollectionDragEnd = (data, result) => {
     let ondragId = data.id;
     // return message.warn('排序功能暂未开放');
-    if (!result.destination || (result.source.index === (result.destination && result.destination.index))) {
+    if (
+      !result.destination ||
+      result.source.index === (result.destination && result.destination.index)
+    ) {
       return;
     }
     // 重新记录数组顺序
@@ -813,292 +843,320 @@ export default class ScoutingDetails extends PureComponent {
       const [removed] = result.splice(startIndex, 1);
       //将原来的元素添加进数组
       result.splice(endIndex, 0, removed);
-      result = result.map((item, index) => {item.__index = index + 1; return item;})
+      result = result.map((item, index) => {
+        item.__index = index + 1;
+        return item;
+      });
       return result;
     };
 
     let area_list = Array.from(this.state.area_list);
 
     // 找到当前拖拽的分组
-    let obj = area_list.find(item => item.id === ondragId);
+    let obj = area_list.find((item) => item.id === ondragId);
     const items = reorder(
       obj ? obj.collection : [],
       result.source.index,
       result.destination.index
     );
     // 重组
-    area_list = area_list.map(item => {
-      if(item.id === ondragId){
-        item.collection = items.sort((a,b)=> a.__index - b.__index);
+    area_list = area_list.map((item) => {
+      if (item.id === ondragId) {
+        item.collection = items.sort((a, b) => a.__index - b.__index);
       }
       return item;
-    })
+    });
     // 清除定时器
     clearTimeout(this.saveSortTimer);
-    this.setState({
-      area_list
-    },()=>{
-      this.saveSortTimer = setTimeout(()=>{
-        this.saveSort(items);
-      },this.saveSortTime)
-    })
-  }
+    this.setState(
+      {
+        area_list,
+      },
+      () => {
+        this.saveSortTimer = setTimeout(() => {
+          this.saveSort(items);
+        }, this.saveSortTime);
+      }
+    );
+  };
   // 保存排序列表
-  saveSort = (data)=>{
+  saveSort = (data) => {
     let ids = [];
     // 合并所有的id
-    data.forEach(item => {
-      if(item.type === 'groupCollection'){
-        ids = ids.concat(item.childIds)
-      }else{
-        ids.push(item.id)
+    data.forEach((item) => {
+      if (item.type === "groupCollection") {
+        ids = ids.concat(item.childIds);
+      } else {
+        ids.push(item.id);
       }
     });
     let param = {
-      board_id : this.state.current_board.board_id,
-      sort: ids
-    }
+      board_id: this.state.current_board.board_id,
+      sort: ids,
+    };
     // 调用保存
     Action.saveSortCollection(param);
-  }
+  };
   // 查询最近一组中含有采集数据的分组,添加选中，默认播放选中分组
-  getFirstAreaCollection = (index)=>{
-    for(let i = index; i< this.state.area_list.length; i++){
+  getFirstAreaCollection = (index) => {
+    for (let i = index; i < this.state.area_list.length; i++) {
       let item = this.state.area_list[i];
-      if(this.state.area_active_key){
-        if(this.state.area_active_key === item.id){
+      if (this.state.area_active_key) {
+        if (this.state.area_active_key === item.id) {
           return item;
         }
-      }else
-      if((item.collection && item.collection.length)){
+      } else if (item.collection && item.collection.length) {
         return item;
       }
     }
-  }
+  };
 
   // 停止播放
-  StopPlay = ()=>{
+  StopPlay = () => {
     this.setState({
-      isPlay:false,
-      playing:false,
-      currentGroup:{}
-    })
+      isPlay: false,
+      playing: false,
+      currentGroup: {},
+    });
     this.showOtherSlide();
     this.fetchCollection();
     PlayCollectionAction.stop();
-    Action.addToListen({board_id: this.state.current_board.board_id});
-  }
+    Action.addToListen({ board_id: this.state.current_board.board_id });
+  };
 
   // 播放下一组
-  playNextGroup = ()=>{
+  playNextGroup = () => {
     PlayCollectionAction.stop();
     // 如果有下一组
     let next = this.checkHasNextGroup();
-    if(next){
-      this.startPlayCollection("",next)
-      Evt.firEvent('autoPlayChange');
+    if (next) {
+      this.startPlayCollection("", next);
+      Evt.firEvent("autoPlayChange");
     }
-  }
+  };
 
   // 播放上一组
-  playPrevGroup = ()=>{
+  playPrevGroup = () => {
     PlayCollectionAction.stop();
     let prev = this.checkHasPrevGroup();
-    if(prev){
-      this.startPlayCollection("",prev);
-      Evt.firEvent('autoPlayChange');
+    if (prev) {
+      this.startPlayCollection("", prev);
+      Evt.firEvent("autoPlayChange");
     }
-  }
+  };
   // 检查是否有goupId，有的话就合并
-  getSameGroupIdData = (data)=>{
-    if(!data.length) return [];
+  getSameGroupIdData = (data) => {
+    if (!data.length) return [];
     let arr = [];
-    data.forEach(item => {
-      if(item.group_id){
+    data.forEach((item) => {
+      if (item.group_id) {
         // 查找有没有已经存在同一个group_id的数据，如果有，就添加到子集
-        let hasGroup = arr.find(a => a.gid === item.group_id);
+        let hasGroup = arr.find((a) => a.gid === item.group_id);
         // 如果存在一个groupid，就添加
-        if(hasGroup && hasGroup.child){
+        if (hasGroup && hasGroup.child) {
           hasGroup.child.push(item);
           // 保存存在的子集id
           hasGroup.childIds.push(item.id);
-        }else if(hasGroup){
+        } else if (hasGroup) {
           hasGroup.child = [item];
-          hasGroup.childIds = [item.id]
-        }else {
+          hasGroup.childIds = [item.id];
+        } else {
           // 如果不存在，就创建
           let obj = {
             gid: item.group_id,
-            title:"",
-            id:item.id,
+            title: "",
+            id: item.id,
             area_type_id: item.area_type_id,
-            collect_type:"group",
-            target:"none",
-            type:"groupCollection",
-            childIds:[item.id],
-            child:[item],
-            create_by:{},
-            sort:item.sort,
-            __index: item.__index
-          }
+            collect_type: "group",
+            target: "none",
+            type: "groupCollection",
+            childIds: [item.id],
+            child: [item],
+            create_by: {},
+            sort: item.sort,
+            __index: item.__index,
+          };
           arr.push(obj);
         }
-      }else arr.push(item);
-    })
+      } else arr.push(item);
+    });
 
     // 过滤只有一个分组的情况
-    arr = arr.map(item => {
-      if(item.gid && item.child.length === 1){
+    arr = arr.map((item) => {
+      if (item.gid && item.child.length === 1) {
         return item.child[0];
-      }else return item;
-    })
-    return arr ;
-  }
+      } else return item;
+    });
+    return arr;
+  };
 
   // 检查有没有下一个
   checkHasNextGroup = () => {
-    let current = this.state.currentGroup ? {...this.state.currentGroup} : {};
-    let index = this.state.area_list.findIndex(item => item.id === current.id);
-    if(index !== -1){
+    let current = this.state.currentGroup ? { ...this.state.currentGroup } : {};
+    let index = this.state.area_list.findIndex(
+      (item) => item.id === current.id
+    );
+    if (index !== -1) {
       let next = this.state.area_list[index + 1];
-      if(next){
-        if(next.collection && next.collection.length)
-        return next;
+      if (next) {
+        if (next.collection && next.collection.length) return next;
         else {
-          for(let i = index + 1; i< this.state.area_list.length; i++){
+          for (let i = index + 1; i < this.state.area_list.length; i++) {
             let item = this.state.area_list[i];
-            if(item.collection && item.collection.length){
+            if (item.collection && item.collection.length) {
               return item;
             }
           }
         }
-      }else return undefined;
-    }
-    else return undefined;
-  }
+      } else return undefined;
+    } else return undefined;
+  };
   // 检查有没有上一个
-  checkHasPrevGroup = ()=>{
-    let current = this.state.currentGroup ? {...this.state.currentGroup} : {};
-    let index = this.state.area_list.findIndex(item => item.id === current.id);
-    if(index !== -1){
-      if(index === 0){
+  checkHasPrevGroup = () => {
+    let current = this.state.currentGroup ? { ...this.state.currentGroup } : {};
+    let index = this.state.area_list.findIndex(
+      (item) => item.id === current.id
+    );
+    if (index !== -1) {
+      if (index === 0) {
         return undefined;
       }
       let prev = this.state.area_list[index - 1];
-      if(prev){
-        if(prev.collection.length)
-        return prev;
+      if (prev) {
+        if (prev.collection.length) return prev;
         else {
-          for(let i = index - 1; i >= 0;i--){
+          for (let i = index - 1; i >= 0; i--) {
             let item = this.state.area_list[i];
-            if(item.collection && item.collection.length){
+            if (item.collection && item.collection.length) {
               return item;
             }
           }
         }
-      }else return undefined;
-    }else return undefined;
-  }
+      } else return undefined;
+    } else return undefined;
+  };
   // 开始播放
-  startPlayCollection = (mode , areaData ,index = 0)=>{
+  startPlayCollection = (mode, areaData, index = 0) => {
     // 获取有数据的分组，不包含未分组区域
     let data = [];
-    if(areaData && areaData.collection.length){
+    if (areaData && areaData.collection.length) {
       data = areaData;
-    }else{
+    } else {
       data = this.getFirstAreaCollection(index);
       !data && (data = {});
     }
     // 过滤空坐标信息
-    let collection = data.collection && data.collection.filter(item => (item.is_display === '1' || item.type === 'groupCollection'));
-    if(!collection || collection && !collection.length) return message.warn('当前分组没有数据可以进行播放');
+    let collection =
+      data.collection &&
+      data.collection.filter(
+        (item) => item.is_display === "1" || item.type === "groupCollection"
+      );
+    if (!collection || (collection && !collection.length))
+      return message.warn("当前分组没有数据可以进行播放");
     let arr = [];
-    collection.forEach(item => {
-      if(item.collect_type !== '4' && item.collect_type !== '5' && item.collect_type !== 'group'){
-        if(item.location && item.location.hasOwnProperty('latitude')){
+    collection.forEach((item) => {
+      if (
+        item.collect_type !== "4" &&
+        item.collect_type !== "5" &&
+        item.collect_type !== "group"
+      ) {
+        if (item.location && item.location.hasOwnProperty("latitude")) {
           arr.push(item);
         }
-      }else
-      arr.push(item);
-    })
-    let flag = PlayCollectionAction.setData(mode, arr.sort((a,b)=> (a.__index || 0) - (b.__index || 0)));
-    if(flag){
+      } else arr.push(item);
+    });
+    let flag = PlayCollectionAction.setData(
+      mode,
+      arr.sort((a, b) => (a.__index || 0) - (b.__index || 0))
+    );
+    if (flag) {
       // 发起请求后，取消轮询
       Action.clearListen();
       PlayCollectionAction.play();
       this.hideOtherSlide();
-      this.setState({
-        isPlay:true,
-        playing:true,
-        currentGroup: data,
-      },()=>{
-        // 检查是不是有上一个和下一个，自动过滤没有任何数据的
-        let next = this.checkHasNextGroup();
-        let prev = this.checkHasPrevGroup();
-        this.setState({
-          notNextGroup: !next,
-          notPrevGroup: !prev
-        })
-      })
+      this.setState(
+        {
+          isPlay: true,
+          playing: true,
+          currentGroup: data,
+        },
+        () => {
+          // 检查是不是有上一个和下一个，自动过滤没有任何数据的
+          let next = this.checkHasNextGroup();
+          let prev = this.checkHasPrevGroup();
+          this.setState({
+            notNextGroup: !next,
+            notPrevGroup: !prev,
+          });
+        }
+      );
     }
-  }
+  };
   // 退出合并
-  CollectionReMerge = (collection)=>{
-    return new Promise((resolve,reject) => {
+  CollectionReMerge = (collection) => {
+    return new Promise((resolve, reject) => {
       let param = {
-        data_id: collection.id
-      }
-      Action.cancelMergeCollection(param).then(res => {
-        resolve(res);
-      }).catch(err => {
-        message.warn(err.message);
-        reject(err);
-      })
-    })
-
-  }
+        data_id: collection.id,
+      };
+      Action.cancelMergeCollection(param)
+        .then((res) => {
+          resolve(res);
+        })
+        .catch((err) => {
+          message.warn(err.message);
+          reject(err);
+        });
+    });
+  };
 
   // 上下合并,取消合并
-  CollectionMerge = async (type,data,collection,index)=>{
+  CollectionMerge = async (type, data, collection, index) => {
     let current = data.collection;
     let other = null;
     let ids = [];
-    if(type === 'up'){
+    if (type === "up") {
       other = current[index - 1];
-      ids = [other.id, collection.id]
+      ids = [other.id, collection.id];
     }
-    if(type === 'down'){
+    if (type === "down") {
       other = current[index + 1];
-      ids = [collection.id ,other.id]
+      ids = [collection.id, other.id];
     }
     // 保存
-    if(ids.length)
-    Action.saveMergeCollection({data_ids: ids}).then(res => {
-      message.success('操作成功');
-      this.fetchCollection();
-    });
+    if (ids.length)
+      Action.saveMergeCollection({ data_ids: ids }).then((res) => {
+        message.success("操作成功");
+        this.fetchCollection();
+      });
     // 退出这个组合
-    if(type === 'cancel'){
+    if (type === "cancel") {
       await this.CollectionReMerge(collection);
-      message.success('操作成功');
+      message.success("操作成功");
       this.fetchCollection();
     }
-  }
+  };
 
-  toPlayCollection = (data)=>{
+  toPlayCollection = (data) => {
     // console.log(data)
-    let {mode ,time , showone} = data;
+    let { mode, time, showone } = data;
     PlayCollectionAction.playMode = mode;
     PlayCollectionAction.autoPlayTime = time;
     PlayCollectionAction.justShowOne = showone;
 
     // 开始播放
     this.startPlayCollection(mode);
-    this.setState({playCollectionVisible: false})
-  }
+    this.setState({ playCollectionVisible: false });
+  };
 
-  render () {
-    const { current_board, area_list, not_area_id_collection ,all_collection ,isPlay, playing} = this.state;
+  render() {
+    const {
+      current_board,
+      area_list,
+      not_area_id_collection,
+      all_collection,
+      isPlay,
+      playing,
+    } = this.state;
     const panelStyle = {
       height: "90%",
     };
@@ -1170,9 +1228,11 @@ export default class ScoutingDetails extends PureComponent {
                 accordion={true}
                 activeKey={this.state.area_active_key}
                 expandIconPosition="left"
-                expandIcon={({ isActive }) => <CaretRightOutlined rotate={isActive ? 90 : 0} />}
+                expandIcon={({ isActive }) => (
+                  <CaretRightOutlined rotate={isActive ? 90 : 0} />
+                )}
               >
-                { area_list.map((item, index) => {
+                {area_list.map((item, index) => {
                   let activeStyle = null;
                   if (item.id === activeId) {
                     activeStyle = { backgroundColor: "rgba(214,228,255,0.5)" };
@@ -1205,7 +1265,7 @@ export default class ScoutingDetails extends PureComponent {
                           onAreaDelete={this.onAreaDelete}
                           onExcelSuccess={this.onExcelSuccess}
                           dispatch={dispatch}
-                        // onDragEnter={e => {this.setState({area_active_key: item.id})}}
+                          // onDragEnter={e => {this.setState({area_active_key: item.id})}}
                         />
                       }
                       key={item.id}
@@ -1230,33 +1290,41 @@ export default class ScoutingDetails extends PureComponent {
                         onRemarkSave={this.onRemarkSave}
                         onModifyRemark={this.onModifyRemark}
                         onModifyFeature={this.onModifyFeatureInDetails}
-                        onStopMofifyFeatureInDetails={() => this.onStopMofifyFeatureInDetails()}
+                        onStopMofifyFeatureInDetails={() =>
+                          this.onStopMofifyFeatureInDetails()
+                        }
                         onToggleChangeStyle={this.onToggleChangeStyle}
                         onCopyCollection={this.onCopyCollection}
-
                         onDragEnd={this.onCollectionDragEnd}
-                        onMergeDown={this.CollectionMerge.bind(this,'down',item)}
-                        onMergeUp={this.CollectionMerge.bind(this,'up',item)}
-                        onMergeCancel={this.CollectionMerge.bind(this,'cancel',item)}
+                        onMergeDown={this.CollectionMerge.bind(
+                          this,
+                          "down",
+                          item
+                        )}
+                        onMergeUp={this.CollectionMerge.bind(this, "up", item)}
+                        onMergeCancel={this.CollectionMerge.bind(
+                          this,
+                          "cancel",
+                          item
+                        )}
                       />
                     </Collapse.Panel>
                   );
                 })}
                 {/* 没有未分组数据的时候，不显示未分组 */}
-                {
-                  not_area_id_collection.length &&
+                {not_area_id_collection.length && (
                   <Collapse.Panel
                     key="other"
                     style={{ backgroundColor: "#fff", marginBottom: "10px" }}
                     header={
                       <ScoutingHeader
-                        data={{ name: "未分组" ,id:'other'}}
+                        data={{ name: "未分组", id: "other" }}
                         edit={false}
                         activeKey={this.state.area_active_key}
                         index={area_list.length + 1}
-                        onCancel={() => { }}
-                        onSave={() => { }}
-                      // onDragEnter={e => {this.setState({area_active_key: item.id})}}
+                        onCancel={() => {}}
+                        onSave={() => {}}
+                        // onDragEnter={e => {this.setState({area_active_key: item.id})}}
                       />
                     }
                   >
@@ -1296,7 +1364,9 @@ export default class ScoutingDetails extends PureComponent {
                                 onModifyRemark={this.onModifyRemark}
                                 onRemarkSave={this.onRemarkSave}
                                 onModifyFeature={this.onModifyFeatureInDetails}
-                                onStopMofifyFeatureInDetails={this.onStopMofifyFeatureInDetails}
+                                onStopMofifyFeatureInDetails={
+                                  this.onStopMofifyFeatureInDetails
+                                }
                                 onToggleChangeStyle={this.onToggleChangeStyle}
                                 onCopyCollection={this.onCopyCollection}
                               />
@@ -1304,13 +1374,18 @@ export default class ScoutingDetails extends PureComponent {
                           );
                         })}
                       </div>
-                    ) : <Empty style={{textAlign:"center"}} description="暂无采集数据"/>}
+                    ) : (
+                      <Empty
+                        style={{ textAlign: "center" }}
+                        description="暂无采集数据"
+                      />
+                    )}
                   </Collapse.Panel>
-                }
+                )}
               </Collapse>
             </div>
             <div className={styles.addAreaBtn}>
-              <Space style={{paddingBottom:10}}>
+              <Space style={{ paddingBottom: 10 }}>
                 <Button
                   type="primary"
                   ghost
@@ -1322,14 +1397,15 @@ export default class ScoutingDetails extends PureComponent {
                   新增
                 </Button>
                 <Button
-                shape="round"
-                type="primary"
-                disabled={area_list.length < 2}
-                onClick={()=> this.setMultipleCheck()}
-                ghost
-                size="small"
-                icon={<MyIcon type="icon-duoxuan"/>}>
-                  {this.state.multipleGroup ? '分组展示':'组合展示'}
+                  shape="round"
+                  type="primary"
+                  disabled={area_list.length < 2}
+                  onClick={() => this.setMultipleCheck()}
+                  ghost
+                  size="small"
+                  icon={<MyIcon type="icon-duoxuan" />}
+                >
+                  {this.state.multipleGroup ? "分组展示" : "组合展示"}
                 </Button>
                 {/* <Popover
                 title="选择播放模式"
@@ -1391,17 +1467,21 @@ export default class ScoutingDetails extends PureComponent {
                     演播
                   </Button>
                 </Popover> */}
-
               </Space>
             </div>
           </TabPane>
         </Tabs>
-        {playing && <PlayCollectionControl isPlay={isPlay} onExit={this.StopPlay}
-        currentGroup={this.state.currentGroup}
-        onNextGroup={this.playNextGroup}
-        onPrevGroup={this.playPrevGroup}
-        hasNextGroup={!this.state.notNextGroup}
-        hasPrevGroup={!this.state.notPrevGroup}/> }
+        {playing && (
+          <PlayCollectionControl
+            isPlay={isPlay}
+            onExit={this.StopPlay}
+            currentGroup={this.state.currentGroup}
+            onNextGroup={this.playNextGroup}
+            onPrevGroup={this.playPrevGroup}
+            hasNextGroup={!this.state.notNextGroup}
+            hasPrevGroup={!this.state.notPrevGroup}
+          />
+        )}
       </div>
     );
   }
