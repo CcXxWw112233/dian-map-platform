@@ -1,4 +1,4 @@
-import React, { PureComponent} from "react";
+import React, { PureComponent, Fragment} from "react";
 import globalStyle from "../../globalSet/styles/globalStyles.less";
 import animateCss from "../../assets/css/animate.min.css";
 import styles from "./ScoutingDetails.less";
@@ -48,6 +48,9 @@ export default class ScoutingDetails extends PureComponent {
     this.newTabIndex = 0;
     const panes = [
       { title: "按区域", content: areaScouting(), key: "1", closable: false },
+      { title: "回看", content :(<div>正在加紧开发中...</div>),key:"2", closable: 0},
+      { title: "协作", content :(<div>正在加紧开发中...</div>),key:"3", closable: 0},
+      { title: "计划", content :(<div>正在加紧开发中...</div>),key:"4", closable: 0}
     ];
     this.state = {
       current_board: {},
@@ -1085,6 +1088,8 @@ export default class ScoutingDetails extends PureComponent {
     }
   }
 
+
+
   toPlayCollection = (data)=>{
     // console.log(data)
     let {mode ,time , showone} = data;
@@ -1097,71 +1102,17 @@ export default class ScoutingDetails extends PureComponent {
     this.setState({playCollectionVisible: false})
   }
 
-  render () {
-    const { current_board, area_list, not_area_id_collection ,all_collection ,isPlay, playing} = this.state;
-    const panelStyle = {
-      height: "90%",
-    };
-    const { activeId } = this.state;
+  renderForActive = (key)=>{
+    const { area_list, not_area_id_collection ,all_collection ,activeId} = this.state;
     const { dispatch } = this.props;
-    return (
-      <div
-        className={`${styles.wrap} ${animateCss.animated} ${animateCss.slideInLeft}`}
-        style={{ animationDuration: "0.3s" }}
-      >
-        {this.state.audioData.ele && !this.state.audioData.ele.paused && (
-          <AudioControl
-            audioEle={this.state.audioData.ele}
-            onDistory={this.audioDistory}
-            data={this.state.audioData}
-            onClose={() => this.setState({ audioData: {} })}
-          />
-        )}
-
-        <Title
-          name={current_board.board_name}
-          date={""}
-          id={current_board.board_id}
-          data={current_board}
-          cb={this.handleGoBackClick.bind(this)}
-        ></Title>
-        <Tabs
-          onChange={this.onChange}
-          activeKey={this.state.activeKey}
-          // type="editable-card"
-          onEdit={this.onEdit}
-          tabBarGutter={10}
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            overflow: "hidden",
-            position: "absolute",
-            top: 207,
-            left: 0,
-            bottom: 2,
-            width: "100%",
-          }}
-        >
-          {/* {this.state.panes.map((pane) => (
-            <TabPane
-              tab={<span>{pane.title}</span>}
-              key={pane.key}
-              closable={pane.closable}
-              style={pane.key === "1" ? panelStyle : null}
-            >
-              {pane.content}
-            </TabPane>
-          ))} */}
-          <TabPane
-            tab={<span style={{ visibility: "hidden" }}>按区域</span>}
-            key="1"
-            style={panelStyle}
-          >
-            <div
+    switch(key){
+      case "1":
+        return (
+          <Fragment>
+          <div
               className={globalStyle.autoScrollY}
               style={{ height: "100%", paddingBottom: "40px" }}
-              ref={this.scrollView}
-            >
+              ref={this.scrollView}>
               <Collapse
                 onChange={(e) => {
                   this.setActiveCollapse(e);
@@ -1170,8 +1121,7 @@ export default class ScoutingDetails extends PureComponent {
                 accordion={true}
                 activeKey={this.state.area_active_key}
                 expandIconPosition="left"
-                expandIcon={({ isActive }) => <CaretRightOutlined rotate={isActive ? 90 : 0} />}
-              >
+                expandIcon={({ isActive }) => <CaretRightOutlined rotate={isActive ? 90 : 0} />}>
                 { area_list.map((item, index) => {
                   let activeStyle = null;
                   if (item.id === activeId) {
@@ -1275,7 +1225,8 @@ export default class ScoutingDetails extends PureComponent {
                               className={`${animateCss.animated} ${animateCss.slideInRight}`}
                               style={{
                                 animationDuration: "0.3s",
-                                animationDelay: index * 0.05 + "s",
+                                animationDelay: index * 0.02 + "s",
+                                width:"100%"
                               }}
                             >
                               <UploadItem
@@ -1394,7 +1345,77 @@ export default class ScoutingDetails extends PureComponent {
 
               </Space>
             </div>
-          </TabPane>
+          </Fragment>
+        );
+      case "2" :
+      case "3" :
+      case "4" :
+        return (
+          <div style={{display:'flex',justifyContent:"center",alignItems:'center',height:400}}>
+            <span>正在加紧开发中...</span>
+          </div>
+        );
+      default:;
+    }
+  }
+
+  render () {
+    const { current_board,isPlay, playing} = this.state;
+    const panelStyle = {
+      height: "100%",
+    };
+    return (
+      <div
+        className={`${styles.wrap} ${animateCss.animated} ${animateCss.slideInLeft}`}
+        style={{ animationDuration: "0.3s" }}
+      >
+        {this.state.audioData.ele && !this.state.audioData.ele.paused && (
+          <AudioControl
+            audioEle={this.state.audioData.ele}
+            onDistory={this.audioDistory}
+            data={this.state.audioData}
+            onClose={() => this.setState({ audioData: {} })}
+          />
+        )}
+
+        <Title
+          name={current_board.board_name}
+          date={""}
+          id={current_board.board_id}
+          data={current_board}
+          cb={this.handleGoBackClick.bind(this)}
+        ></Title>
+        <Tabs
+          className="detailTabs"
+          onChange={this.onChange}
+          activeKey={this.state.activeKey}
+          onEdit={this.onEdit}
+          tabBarGutter={10}
+          style={{
+            background:"#FFF",
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+            width: "100%",
+            height: "69vh"
+          }}
+        >
+          {this.state.panes.map((pane) => (
+            <TabPane
+              tab={<span>{pane.title}</span>}
+              key={pane.key}
+              closable={pane.closable}
+              style={pane.key === "1" ? panelStyle : null}>
+              {this.renderForActive(pane.key)}
+            </TabPane>
+          ))}
+          {/* <TabPane
+            tab={<span>按区域</span>}
+            key="1"
+            style={panelStyle}
+          >
+
+          </TabPane> */}
         </Tabs>
         {playing && <PlayCollectionControl isPlay={isPlay} onExit={this.StopPlay}
         currentGroup={this.state.currentGroup}

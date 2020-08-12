@@ -3,6 +3,7 @@ import globalStyle from "../../../globalSet/styles/globalStyles.less";
 import animateCss from "../../../assets/css/animate.min.css";
 import styles from "../ScoutingDetails.less";
 import Action from "../../../lib/components/ProjectScouting/ScoutingDetail";
+import PhotoSwipe from "../../../components/PhotoSwipe/action";
 import {
   Row,
   Input,
@@ -34,50 +35,95 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
 import { MyIcon } from '../../../components/utils'
 // import { UploadFile } from '../../../utils/XhrUploadFile'
 
-export const Title = ({ name, date, cb, data }) => {
-    return (
-      <div className={`${styles.title}`}>
-        {data.bg_image && (
-          <div className={styles.boardBgImg}>
-            <img src={data.bg_image} alt=""/>
-          </div>
-        )}
-        <div className={styles.projectModal}></div>
-        <div
-          style={{
-            position: "relative",
-            zIndex: 5,
-            width: "100%",
-            height: "100%",
-          }}
-        >
-          <p style={{ marginTop: 8 }}>
-            <i
-              className={globalStyle.global_icon + ` ${globalStyle.btn}`}
-              style={{
-                color: "#fff",
-                fontSize: 22,
-              }}
-              onClick={cb}
-            >
-              &#xe602;
-            </i>
-          </p>
-          <p className={styles.name} style={{ marginTop: 90 }}>
-            <span>{name}</span>
-          </p>
-          <p
-            className={styles.date}
-            style={{
-              marginTop: 5,
-            }}
-          >
-            <span className={styles.title_remark}> 备注: {data.remark || '暂无备注'}</span>
-          </p>
+export const  Title = ({ name, date, cb, data = {} })=>{
+  // 预览图片
+  const previewImg = (e)=>{
+    let url = e.target.src;
+    let img = new Image();
+    img.src = url;
+    img.onload = ()=>{
+      let w = img.width;
+      let h = img.height;
+      PhotoSwipe.show([{ w, h, src: img.src, title:name }]);
+    }
+  }
+  return (
+    <div className={styles.title}>
+      <div className={styles.title_goBack} onClick={cb}>
+        <MyIcon type="icon-fanhuijiantou"/>
+        {/* <span className={styles.back_name}>返回</span> */}
+      </div>
+      <div className={styles.title_name}>
+        <span>{name}</span>
+      </div>
+      <div className={styles.title_remark}>
+        <div style={{textIndent:"1rem"}}>
+          {data.remark || '暂无备注信息'}
         </div>
       </div>
-    );
-  };
+      <div className={styles.title_boardBgImg}>
+        {data.bg_image ? (
+          <div className={styles.boardBgImg}>
+            <img src={data.bg_image} alt="" onClick={previewImg}/>
+          </div>
+        )
+        :
+        <div className={styles.boardBgImg}>
+          <span>暂未设置图片~~
+          {/**<a>点击设置</a> */}
+          </span>
+        </div>
+        }
+
+      </div>
+    </div>
+  )
+}
+
+// export const Title = ({ name, date, cb, data }) => {
+//     return (
+//       <div className={`${styles.title}`}>
+//         {data.bg_image && (
+//           <div className={styles.boardBgImg}>
+//             <img src={data.bg_image} alt=""/>
+//           </div>
+//         )}
+//         <div className={styles.projectModal}></div>
+//         <div
+//           style={{
+//             position: "relative",
+//             zIndex: 5,
+//             width: "100%",
+//             height: "100%",
+//           }}
+//         >
+//           <p style={{ marginTop: 8 }}>
+//             <i
+//               className={globalStyle.global_icon + ` ${globalStyle.btn}`}
+//               style={{
+//                 color: "#fff",
+//                 fontSize: 22,
+//               }}
+//               onClick={cb}
+//             >
+//               &#xe602;
+//             </i>
+//           </p>
+//           <p className={styles.name} style={{ marginTop: 90 }}>
+//             <span>{name}</span>
+//           </p>
+//           <p
+//             className={styles.date}
+//             style={{
+//               marginTop: 5,
+//             }}
+//           >
+//             <span className={styles.title_remark}> 备注: {data.remark || '暂无备注'}</span>
+//           </p>
+//         </div>
+//       </div>
+//     );
+//   };
 
 const checkFileSize = (file) => {
     // console.log(file);
@@ -360,15 +406,15 @@ export const ScoutingHeader = (props) => {
                   }
 
                   <div className={styles.headerTools}>
+                    <span className={styles.checkBoxForHeader}>
+                      {multiple && <Checkbox checked={ selected.length && selected.indexOf(data.id) !== -1 } onChange={checkColletion} onClick={(e) => e.stopPropagation()}/>}
+                    </span>
                     {
                       (!isEdit && data.id !=='other') &&
                       <span className={styles.editNames} onClick={(e) =>{e.stopPropagation(); onAreaEdit(data)}}>
                         <MyIcon type='icon-bianjimingcheng'/>
                       </span>
                     }
-                    <span className={styles.checkBoxForHeader}>
-                      {multiple && <Checkbox checked={ selected.length && selected.indexOf(data.id) !== -1 } onChange={checkColletion} onClick={(e) => e.stopPropagation()}/>}
-                    </span>
                     {/* 只有不是未分组的才可以显示 */}
                     {
                       data.id !=='other' &&
@@ -431,9 +477,10 @@ export const ScoutingItem = ({
                             className={`${animateCss.animated} ${animateCss.slideInRight}`}
                             style={{
                               animationDuration: "0.3s",
-                              animationDelay: index * 0.05 + "s",
+                              animationDelay: index * 0.02 + "s",
                               position:"relative",
-                              paddingLeft:"8px"
+                              paddingLeft:"8px",
+                              width:"100%"
                             }}
                             key={item.id}
                           >
@@ -566,16 +613,16 @@ export const UploadItem = ({
       setIsRemarkEdit(false);
     };
     const itemKeyVals = {
-      paper: "图纸",
-      interview: "访谈",
-      pic: "图片",
-      video: "视频",
-      word: "文档",
-      annotate: "批注",
-      plotting: "标绘",
-      unknow: "未知",
-      planPic: "规划",
-      address:"地址"
+      paper: {text:"图纸",icon:"icon-tupian"},
+      interview: {text:"访谈",icon:"icon-yinpin"},
+      pic: {text:"图片",icon:"icon-tupian"},
+      video: {text:"视频",icon:"icon-shipin"},
+      word: {text:"文档",icon:"icon-wenjian"},
+      annotate: {text:"批注",icon:"icon-pizhu1"},
+      plotting: {text:"标绘",icon:"icon-biaohui2"},
+      unknow: {text:"未知",icon:"icon-bianzu612"},
+      planPic: {text:"规划",icon:"icon-bianzu581"},
+      address:{text:"地址",icon:"icon-zuobiao2"}
     };
     let { create_by, title, create_time } = data;
     let time = Action.dateFormat(create_time, "yyyy/MM/dd");
@@ -854,17 +901,19 @@ export const UploadItem = ({
       <div
         className={styles.uploadItem + ` ${globalStyle.btn}`}
         draggable={true}
-        style={myStyle}
+        // style={myStyle}
         onClick={() => itemClick(data)}
       >
-        <div style={{ width: "100%", display: "flex" }}>
-          <div className={styles.uploadIcon + ` ${styles[secondSetType]}`}
+        <div style={{ width: "100%", display: "flex" ,alignItems: "center", height:'100%'}}
+        title={`${itemKeyVals[secondSetType].text} ${data.title}`}>
+          <div className={styles.uploadIcon}
           onClick={(e)=>
           {
             e.stopPropagation();
             Action.handleCollection(data)
           }}>
-            <span>
+          <MyIcon type={itemKeyVals[secondSetType] && itemKeyVals[secondSetType].icon}/>
+            {/* <span>
               {secondSetType === "pic" ? (
                 <img
                   src={data.resource_url}
@@ -878,7 +927,7 @@ export const UploadItem = ({
               ) : (
                   itemKeyVals[secondSetType]
                 )}
-            </span>
+            </span> */}
           </div>
           <div className={styles.uploadDetail}>
             <Row style={{ textAlign: "left" }} align="middle" justify="center">
@@ -924,34 +973,24 @@ export const UploadItem = ({
                 </Fragment>
               ) : (
                   <span
-                    style={{ minHeight: "1rem" }}
-                    title={title}
+                    // style={{ minHeight: "1rem" }}
+                    // title={title}
                     className={`${styles.firstRow} ${styles.text_overflow} text_ellipsis`}
                   >
                     {title}
                   </span>
                 )}
             </Row>
-            <Row>
+            {/* <Row>
               <Space size={8} style={{ fontSize: 12 }}>
                 <span>{create_by.name}</span>
                 <span>{time}</span>
                 <span>{hours}</span>
               </Space>
-            </Row>
+            </Row> */}
           </div>
           <div
             className={styles.uploadItemOperation}
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              paddingRight: "5px",
-              flexDirection: "column",
-              fontSize:"1.2rem",
-              lineHeight:"normal",
-              marginLeft:5
-            }}
           >
             <span
               className={`${styles.eyes} ${globalStyle.global_icon}`}
@@ -961,7 +1000,7 @@ export const UploadItem = ({
                 onChangeDisplay && onChangeDisplay(data);
               }}
             >
-              {data.is_display === "0" ?<MyIcon type="icon-yincang"/>  : <MyIcon type='icon-xianshi'/> }
+              {data.is_display === "0" ?<MyIcon type="icon-yanjing_yincang"/>  : <MyIcon type='icon-yanjing_xianshi'/> }
             </span>
             <Dropdown
               overlay={menu}
@@ -972,12 +1011,12 @@ export const UploadItem = ({
               <span
               // style={{ color: "#1769FF" }}
               >
-                <MyIcon type="icon-gengduo1"/>
+                <MyIcon type="icon-gengduo2"/>
               </span>
             </Dropdown>
           </div>
         </div>
-        {oldRemark || isAddMark === true ? (
+        {/* {oldRemark || isAddMark === true ? (
           <div style={{ width: "100%", display: "flex" }}>
             <div
               className={styles.uploadIcon + ` ${styles[secondSetType]}`}
@@ -1015,7 +1054,7 @@ export const UploadItem = ({
                 </div>
               )}
           </div>
-        ) : null}
+        ) : null} */}
       </div>
     );
   };
