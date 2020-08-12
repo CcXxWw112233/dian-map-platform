@@ -60,7 +60,7 @@ export default class Zoom extends React.Component {
     // let { translateY } = this.state;
     let moveClient = this.transfromClient(e);
     let step = this.startEvent.y - moveClient.y;
-    this.startEvent = moveClient;
+
     // console.log(this.startEvent.y - moveClient.y);
     // step 大于0 放大
     if(Math.abs(this.state.translateY) >= 250  && step > 0){
@@ -69,11 +69,11 @@ export default class Zoom extends React.Component {
     if(this.state.translateY >= 0 && step < 0){
       return ;
     }
-
+    this.startEvent = moveClient;
     this.setState({
       translateY: this.state.translateY + (-step)
     })
-    
+
     // step < 0 说明向下移动，是缩小， 反之
     let zoom = mapApp.map.getView().getZoom();
     if(step > 0){
