@@ -1267,13 +1267,11 @@ export default class ScoutingDetails extends PureComponent {
                   ghost
                   icon={<PlusCircleOutlined />}
                   onClick={this.pushAreaItem}
-                  shape="round"
                   size="small"
                 >
-                  新增
+                  新增分类
                 </Button>
                 <Button
-                shape="round"
                 type="primary"
                 disabled={area_list.length < 2}
                 onClick={()=> this.setMultipleCheck()}
@@ -1333,7 +1331,7 @@ export default class ScoutingDetails extends PureComponent {
                     </Form>
                   </div>
                 }>
-                  <Button shape="round"
+                  <Button
                   icon={<MyIcon type="icon-bofang"/>}
                   ghost
                   size="small"
