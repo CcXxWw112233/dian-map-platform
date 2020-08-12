@@ -47,7 +47,7 @@ export default class ScoutingDetails extends PureComponent {
     super(props);
     this.newTabIndex = 0;
     const panes = [
-      { title: "按区域", content: areaScouting(), key: "1", closable: false },
+      { title: "整理", content: areaScouting(), key: "1", closable: false },
       { title: "回看", content :(<div>正在加紧开发中...</div>),key:"2", closable: 0},
       { title: "协作", content :(<div>正在加紧开发中...</div>),key:"3", closable: 0},
       { title: "计划", content :(<div>正在加紧开发中...</div>),key:"4", closable: 0}
