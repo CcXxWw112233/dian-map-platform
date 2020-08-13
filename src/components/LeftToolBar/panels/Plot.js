@@ -6,6 +6,7 @@ import globalStyle from "@/globalSet/styles/globalStyles.less";
 import styles from "../LeftToolBar.less";
 import ColorPicker from "../../ColorPicker/index";
 import { guid } from "./lib";
+import { connect } from 'dva';
 import { symbols } from "./data";
 import { plotEdit } from "../../../utils/plotEdit";
 import FeatureOperatorEvent from "../../../utils/plot2ol/src/events/FeatureOperatorEvent";
@@ -144,6 +145,12 @@ const SymbolBlock = ({
   );
 };
 
+
+@connect(({
+  lengedList: { config },
+})=>({
+  config
+}))
 export default class Plot extends React.Component {
   constructor(props) {
     super(props);
@@ -390,22 +397,23 @@ export default class Plot extends React.Component {
   };
   // 保存标绘到分组
   save2Group = (operator) => {
-    const { feature } = operator;
-    let param = {
-      coordinates: feature.getGeometry().getCoordinates(),
-      geoType: feature.getGeometry().getType(),
-      ...operator.attrs,
-    };
-    let obj = {
-      collect_type: 4,
-      title: operator.attrs.name || operator.attrs.title,
-      target: "feature",
-      area_type_id: window.ProjectGroupId || "",
-      board_id: this.projectId,
-      content: JSON.stringify(param),
-    };
-    // console.log(board);
-    DetailAction.addCollection(obj)
+    return new Promise((resolve,reject) =>{
+      const { feature } = operator;
+      let param = {
+        coordinates: feature.getGeometry().getCoordinates(),
+        geoType: feature.getGeometry().getType(),
+        ...operator.attrs,
+      };
+      let obj = {
+        collect_type: 4,
+        title: operator.attrs.name || operator.attrs.title,
+        target: "feature",
+        area_type_id: window.ProjectGroupId || "",
+        board_id: this.projectId,
+        content: JSON.stringify(param),
+      };
+      // console.log(board);
+      DetailAction.addCollection(obj)
       .then((res) => {
         message.success(
           `标绘已成功保存到${this.projectName}的${
@@ -413,11 +421,14 @@ export default class Plot extends React.Component {
           }分组`
         );
         this.plotLayer.removeFeature(operator);
+        resolve(res);
       })
       .catch((err) => {
+        reject(err)
         console.log(err);
         message.error("保存失败，请稍后再试");
       });
+    })
   };
   handleInputChange = (val) => {
     let newVal = val.replace(/\s+/g, "");
@@ -794,10 +805,27 @@ export default class Plot extends React.Component {
   };
 
   handleSaveClick = () => {
-    plotEdit.deactivate();
     if (window.featureOperator) {
       // 选择了项目
-      if (this.projectId !== "") {
+      if (this.projectId) {
+        this.save2Group(window.featureOperator).then(resp => {
+          if(window.ProjectGroupId){
+            let collections = DetailAction.CollectionGroup;
+            let obj = collections.find(item => item.id === window.ProjectGroupId);
+            if(obj){
+              let data = resp.data;
+              let coll = data && data[0];
+              if(coll){
+                coll.is_display = '1';
+                obj.collection.push(coll);
+                let arr = obj.collection;
+                DetailAction.renderCollection(arr,{lenged:this.props.config,dispatch: this.props.dispatch})
+              }
+            }
+          }
+        }).catch(err => {
+          console.log(err)
+        });
       }
       // 未选择项目
       else {
@@ -805,6 +833,7 @@ export default class Plot extends React.Component {
       }
     } else {
     }
+    plotEdit.deactivate();
   };
 
   handleDelClick = () => {};
