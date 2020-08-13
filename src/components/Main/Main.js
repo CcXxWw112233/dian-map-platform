@@ -23,9 +23,9 @@ export default class Main extends React.Component {
     if (!visible) {
       visibleStyle.display = 'none'
     }
-    return ( 
-    <div className={[styles.wrap].join(" ")} 
-    style={{...mainStyle}}>
+    return (
+    <div className={[styles.wrap].join(" ")}
+    style={{...mainStyle,background: "rgba(238,248,255,1)"}}>
       {children}
     </div>
     )

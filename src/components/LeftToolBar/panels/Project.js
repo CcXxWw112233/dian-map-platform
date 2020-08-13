@@ -70,7 +70,7 @@ export default class Project extends React.Component {
     return (
       <div
         className={styles.panel}
-        style={{ position: "absolute", left: 56, top: 0 }}
+        style={{ position: "absolute", left: 56, top: 0 ,height:'100%'}}
       >
         {this.props.mainVisible === "list" ? (
           <div
@@ -116,7 +116,7 @@ export default class Project extends React.Component {
             </Main>
           </div>
         ) : this.props.mainVisible === "loading" ? (
-          <div className={styles.loadingPage}>
+          <div className={styles.loadingPage} style={{height:'100vh'}}>
             <Spin />
           </div>
         ) : (

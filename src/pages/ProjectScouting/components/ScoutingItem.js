@@ -8,6 +8,7 @@ import animateCss from '../../../assets/css/animate.min.css'
 import globalStyle from '../../../globalSet/styles/globalStyles.less'
 import { keepLastIndex } from '../../../utils/utils'
 import { BASIC } from '../../../services/config'
+import { MyIcon } from '../../../components/utils';
 export default class ScoutingItem extends React.PureComponent {
     constructor(props){
         super(props);
@@ -15,7 +16,7 @@ export default class ScoutingItem extends React.PureComponent {
             visible:false,
             editName: false,
             name:"",
-            // hidden 隐藏 small 跟多按钮 full 全部展开 
+            // hidden 隐藏 small 跟多按钮 full 全部展开
             remarkStatus:"small",
             isEdit: false,
             remark:"暂无备注信息",
@@ -100,7 +101,7 @@ export default class ScoutingItem extends React.PureComponent {
             current.focus()
             keepLastIndex(current);
         })
-    }   
+    }
 
     // 编写备注
     setRemark = ()=>{
@@ -190,38 +191,22 @@ export default class ScoutingItem extends React.PureComponent {
     render(){
         let { visible ,editName ,remarkStatus , isEdit } = this.state;
         let { onRemove , cb , name, date , remarkText = '暂无备注信息',bgImage} = this.props;
-        const menu = (
-            <Menu onClick={this.onHandleMenu}>
-              <Menu.Item key="editBoard">
-                重命名
-              </Menu.Item>
-              <Menu.Item key="editRemark">
-                编辑备注
-              </Menu.Item>
-              <Menu.Item key="setBgImg">
-                <Upload
-                action='/api/map/file/upload/public'
-                showUploadList={false}
-                accept=".jpg, .jpeg, .png, .bmp"
-                beforeUpload={()=>{message.success('正在上传'); return true}}
-                headers={{ Authorization: BASIC.getUrlParam.token }}
-                onChange={this.onUploadImg}
-                >
-                    <span>设置背景图片</span>
-                </Upload>
-              </Menu.Item>
-              <Menu.Item key="removeBoard">
-                <Popconfirm title='确定删除这个项目吗?'
-                okText='删除'
-                cancelText="取消"
-                overlayStyle={{zIndex:10000}}
-                onConfirm={()=> {this.setState({visible: false});onRemove && onRemove();}}
-                placement="topRight">
-                  <div style={{width:"100%"}} className='danger'>删除项目</div>
-                </Popconfirm>
-              </Menu.Item>
-            </Menu>
-        );
+        // const menu = (
+        //     <Menu onClick={this.onHandleMenu}>
+        //       <Menu.Item key="editBoard">
+        //         重命名
+        //       </Menu.Item>
+        //       <Menu.Item key="editRemark">
+        //         编辑备注
+        //       </Menu.Item>
+        //       <Menu.Item key="setBgImg">
+
+        //       </Menu.Item>
+        //       <Menu.Item key="removeBoard">
+
+        //       </Menu.Item>
+        //     </Menu>
+        // );
         return (
             <div
                 className={
@@ -237,27 +222,51 @@ export default class ScoutingItem extends React.PureComponent {
             >
                 {
                     bgImage && <div className={styles.itemBgImage}>
-                        <img src={bgImage}/>
+                        <img src={bgImage} alt=""/>
                     </div>
                 }
                 <div className={`${remarkStatus === 'full' ? styles.nameHidden : styles.nameShow } ${styles.nameBox}`}>
-                    <div className={styles.settings} onClick={e => e.stopPropagation()}>
-                        <Dropdown overlay={menu} 
-                        trigger="click"
-                        onVisibleChange={(val)=> this.setState({visible:val})}
-                        visible={visible}>
-                            <SettingOutlined onClick={e => { e.preventDefault();this.setState({visible: !visible})}}/>
-                        </Dropdown>
-                    </div>
+                    { !this.state.editName &&
+                        <div className={styles.settings} onClick={e => e.stopPropagation()}>
+                          <span className={`${styles.settings_item}`} title='修改项目名称'
+                          onClick={()=>this.ToEdit()}>
+                            <MyIcon type='icon-bianzu46'/>
+                          </span>
+
+                          <Upload
+                          action='/api/map/file/upload/public'
+                          showUploadList={false}
+                          accept=".jpg, .jpeg, .png, .bmp"
+                          beforeUpload={()=>{message.success('正在上传'); return true}}
+                          headers={{ Authorization: BASIC.getUrlParam.token }}
+                          onChange={this.onUploadImg}
+                          >
+                            <span className={`${styles.settings_item}`} title="上传背景图">
+                              <MyIcon type="icon-bianzu45"/>
+                            </span>
+                          </Upload>
+
+                          <Popconfirm title='确定删除这个项目吗?'
+                          okText='删除'
+                          cancelText="取消"
+                          overlayStyle={{zIndex:10000}}
+                          onConfirm={()=> {this.setState({visible: false});onRemove && onRemove();}}
+                          placement="topRight">
+                            <span className={`${styles.settings_item} ${styles.removeBtn}`} title='删除项目'>
+                              <MyIcon type="icon-bianzu52"/>
+                            </span>
+                          </Popconfirm>
+                        </div>
+                    }
                     <div className={styles.projectModal}></div>
                     <div className={styles.name} onClick={e => {editName && e.stopPropagation();}}>
-                        { editName ? 
+                        { editName ?
                             <Fragment>
-                                <Input defaultValue={name} placeholder='请输入项目名称' 
-                                onBlur={this.SureName.bind(this,name)} 
+                                <Input defaultValue={name} placeholder='请输入项目名称'
+                                onBlur={this.SureName.bind(this,name)}
                                 onPressEnter={this.SureName.bind(this,name)}
-                                onChange={(val) => this.setState({name: val.target.value.trim()})} 
-                                style={{width:"70%",borderRadius:'4px'}} 
+                                onChange={(val) => this.setState({name: val.target.value.trim()})}
+                                style={{width:"70%",borderRadius:'4px'}}
                                 onClick={e => e.stopPropagation()}
                                 allowClear={true}
                                 />
@@ -271,18 +280,18 @@ export default class ScoutingItem extends React.PureComponent {
                             :
                             <span>{name}</span>
                         }
-                        
+
                     </div>
                     <p className={styles.date}>
                         <span>{date}</span>
                     </p>
                 </div>
-                
+
                 <div className={
                     [
                         styles.remarksBox,
-                        remarkStatus === 'small' ? 
-                            styles.remarkNormal : remarkStatus === 'full' ? 
+                        remarkStatus === 'small' ?
+                            styles.remarkNormal : remarkStatus === 'full' ?
                             styles.remarkFull : styles.remarkHidden
                     ].join(" ")
                 } onClick={(e) => e.stopPropagation()}>
@@ -299,7 +308,7 @@ export default class ScoutingItem extends React.PureComponent {
                                     </div>
                                 :
                                 <div className={styles.normalTitle}>
-                                    <span onClick={()=> this.setState({remarkStatus:'small'})} title={name} 
+                                    <span onClick={()=> this.setState({remarkStatus:'small'})} title={name}
                                     className={styles.remarkProjectName}>
                                         <span className={globalStyle.global_icon}
                                         dangerouslySetInnerHTML={{__html:'&#xe7ef;'}}></span>
@@ -318,10 +327,10 @@ export default class ScoutingItem extends React.PureComponent {
                         onPaste={this.textFormat}
                         ref={this.content}
                         >
-                            
+
                         </div>
                         {
-                            isEdit && 
+                            isEdit &&
                             <div className={styles.remarkBtn}>
                                 <Button type='default' ghost size='small'
                                 style={{marginRight:"8px",borderRadius:'3px'}}
@@ -335,6 +344,9 @@ export default class ScoutingItem extends React.PureComponent {
                                 </Button>
                             </div>
                         }
+                    </div>
+                    <div className={styles.blurBg}>
+
                     </div>
                 </div>
             </div>
