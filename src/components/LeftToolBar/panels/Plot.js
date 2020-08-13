@@ -278,16 +278,25 @@ export default class Plot extends React.Component {
       }
     };
     this.operatorDeactive = function () {
+      const { parent } = me.props;
+      if (parent.isModify) {
+        parent.isModify = false;
+      }
       me.savePlot2TempPlot(window.featureOperator);
       window.featureOperator = null;
     };
     this.plotLayer.on(FeatureOperatorEvent.ACTIVATE, this.operatorActive);
     this.plotLayer.on(FeatureOperatorEvent.DEACTIVATE, this.operatorDeactive);
-    if (this.props.plotType === "point") {
-      this.symbol = this.refs.defaultSymbol.innerText;
-      this.getPointDefaultSymbol();
+    const { parent } = this.props;
+    this.symbol = this.refs.defaultSymbol.innerText;
+    if (!parent.isModify) {
+      if (this.props.plotType === "point") {
+        this.getPointDefaultSymbol();
+      } else {
+        this.updateStateCallbackFunc();
+      }
     } else {
-      this.updateStateCallbackFunc();
+      plotEdit.plottingLayer.plotEdit.activate(window.featureOperator.feature);
     }
   }
   componentWillUnmount() {
@@ -298,6 +307,7 @@ export default class Plot extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     this.handleResetClick();
+    this.createPlotName();
     this.nextProps = nextProps;
     if (nextProps.plotType === "point") {
       this.symbol = this.refs.defaultSymbol.innerText;
@@ -317,39 +327,45 @@ export default class Plot extends React.Component {
 
   // 获取自定义图标符号
   getCustomSymbol = () => {
-    this.customSymbols = {
-      typeName: "自定义图标",
-      type: "point|polygon|freePolygon|rect|circle|arrow",
-      content: [],
-    };
-    symbolStoreServices
-      .GET_ICON()
-      .then((res) => {
-        if (res.code === "0") {
-          const data = res.data;
-          if (Array.isArray(data)) {
-            data.forEach((item) => {
-              const temp = { name: item.icon_name, imageUrl: item.icon_url };
-              this.customSymbols.content.push(temp);
-            });
-            this.setState(
-              {
-                symbols: [this.customSymbols, ...symbols],
-              },
-              () => {
-                const { parent } = this.props;
-                parent.customSymbols = this.customSymbols;
-              }
-            );
-          }
-        }
-      })
-      .catch((err) => {
-        this.setState({
-          symbols: symbols,
-        });
-        console.log(err);
+    const { parent } = this.props;
+    if (parent.customSymbols) {
+      this.setState({
+        symbols: [parent.customSymbols, ...symbols],
       });
+    } else {
+      this.customSymbols = {
+        typeName: "自定义图标",
+        type: "point|polygon|freePolygon|rect|circle|arrow",
+        content: [],
+      };
+      symbolStoreServices
+        .GET_ICON()
+        .then((res) => {
+          if (res.code === "0") {
+            const data = res.data;
+            if (Array.isArray(data)) {
+              data.forEach((item) => {
+                const temp = { name: item.icon_name, imageUrl: item.icon_url };
+                this.customSymbols.content.push(temp);
+              });
+              this.setState(
+                {
+                  symbols: [this.customSymbols, ...symbols],
+                },
+                () => {
+                  parent.customSymbols = this.customSymbols;
+                }
+              );
+            }
+          }
+        })
+        .catch((err) => {
+          this.setState({
+            symbols: symbols,
+          });
+          console.log(err);
+        });
+    }
   };
 
   savePlot2TempPlot = (operator) => {
@@ -482,6 +498,7 @@ export default class Plot extends React.Component {
   };
 
   updateStateCallbackFunc = () => {
+    this.createPlotName();
     let options = {
       ...this.commonStyleOptions,
       strokeColor: this.strokeColor,
@@ -568,12 +585,12 @@ export default class Plot extends React.Component {
   };
 
   getPointDefaultSymbol = () => {
+    this.createPlotName();
     let iconUrl = this.getCurrentIcon(this.symbol, {
       fontSize: 38,
       fillColor: this.fillColor,
       strokeColor: this.strokeColor,
     });
-    this.createPlotName();
     let options = {
       ...this.commonStyleOptions,
       text: this.plotName,
@@ -607,10 +624,12 @@ export default class Plot extends React.Component {
         }
       } else if (this.dic[this.props.plotType] === "Point") {
         if (index === 0) {
+          this.fillColor = "rgba(106, 154, 255, 1)";
           this.setState({
             symbolSelectedIndex: `${index}|${index2}`,
             fillSelectedIndex: -1,
             strokeSelectedIndex: -1,
+            customFillSelectedColor: "rgba(106, 154, 255, 1)",
           });
         } else {
           this.setState({
@@ -647,8 +666,10 @@ export default class Plot extends React.Component {
             : "rgba(80, 130, 255, 1)",
       });
     }
-    if (this.props.plotType === "point") {
+    if (this.dic[this.props.plotType] === "Point") {
       this.featureType = iconUrl;
+    } else if (this.dic[this.props.plotType] === "Polyline") {
+      this.featureType = this.strokeColor;
     }
     let options = {
       ...this.commonStyleOptions,
@@ -684,6 +705,7 @@ export default class Plot extends React.Component {
       strokeColor: this.strokeColor,
       remark: this.state.remark,
       selectName: this.selectName,
+      plotType: this.props.plotType,
     };
     if (this.dic[this.props.plotType] === "Polygon") {
       attrs = {

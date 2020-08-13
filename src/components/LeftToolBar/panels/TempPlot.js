@@ -6,6 +6,7 @@ import styles from "../LeftToolBar.less";
 import event from "../../../lib/utils/event";
 import { plotEdit } from "../../../utils/plotEdit";
 import ListAction from "../../../lib/components/ProjectScouting/ScoutingList";
+import FeatureOperatorEvent from "../../../utils/plot2ol/src/events/FeatureOperatorEvent";
 
 export default class TempPlot extends React.Component {
   constructor(props) {
@@ -18,11 +19,26 @@ export default class TempPlot extends React.Component {
       featureOperatorList: [],
       displayCreateProject: false,
     };
+    this.plotLayer = null;
   }
   componentDidMount() {
-    // this.setState({
-    //   featureOperatorList: this.props.featureOperatorList,
-    // });
+    this.plotLayer = plotEdit.getPlottingLayer();
+    const me = this;
+    this.operatorDeactive = function (e) {
+      if (!e.feature_operator.isScouting) {
+        let operator = e.feature_operator;
+        me.props.updateFeatureOperatorList(operator);
+        window.featureOperator = null;
+      }
+    };
+    this.plotLayer &&
+      this.plotLayer.on(FeatureOperatorEvent.DEACTIVATE, this.operatorDeactive);
+    this.props.featureOperatorList.forEach((operator) => {
+      operator.feature.getGeometry().updatePlot(false);
+    });
+    this.setState({
+      featureOperatorList: this.props.featureOperatorList,
+    });
     const projects = ListAction.projects;
     if (projects.length > 0) {
       this.setState({
@@ -33,6 +49,13 @@ export default class TempPlot extends React.Component {
         displayCreateProject: false,
       });
     }
+  }
+  componentWillUnmount() {
+    plotEdit.deactivate();
+    this.plotLayer.un(FeatureOperatorEvent.DEACTIVATE, this.operatorDeactive);
+    this.state.featureOperatorList.forEach((operator) => {
+      operator.feature.getGeometry().updatePlot(true);
+    });
   }
   onChange = (e) => {
     const oldCheckedList = [...this.state.checkedList];
@@ -75,7 +98,7 @@ export default class TempPlot extends React.Component {
   };
 
   saveToProject = () => {
-    let arr = this.getSelectedData()
+    let arr = this.getSelectedData();
     this.props.updateSelectFeatureOperatorList(arr);
     this.props.displayProjctList();
   };
@@ -106,27 +129,28 @@ export default class TempPlot extends React.Component {
 
   handleEditClick = (featureOperator) => {
     window.featureOperator = featureOperator;
-    plotEdit.plottingLayer.plotEdit.activate(featureOperator.feature);
+    this.props.displayPlotPanel(featureOperator.attrs.plotType);
   };
 
   handleDelClick = (featureOperator) => {
-    const { updateFeatureOperatorList } = this.props;
-    let newList = [...this.state.featureOperatorList];
-    const index = newList.findIndex((item) => {
-      return featureOperator.guid === item.guid;
-    });
-    plotEdit.plottingLayer.removeFeature(newList[index]);
-    newList.splice(index, 1);
-    let newList2 = [];
-    newList.forEach((item) => {
-      if (item.attrs.name) {
-        newList2.push(item);
-      }
-    });
-    this.setState({
-      featureOperatorList: newList2,
-    });
-    updateFeatureOperatorList(newList2);
+    if (featureOperator && featureOperator.guid) {
+      let newList = [...this.state.featureOperatorList];
+      const index = newList.findIndex((item) => {
+        return featureOperator.guid === item.guid;
+      });
+      plotEdit.plottingLayer.removeFeature(newList[index]);
+      newList.splice(index, 1);
+      let newList2 = [];
+      newList.forEach((item) => {
+        if (item.attrs.name) {
+          newList2.push(item);
+        }
+      });
+      this.setState({
+        featureOperatorList: newList2,
+      });
+      this.props.updateFeatureOperatorList2(newList2);
+    }
   };
 
   getStyle = (featureOperator) => {
@@ -203,16 +227,18 @@ export default class TempPlot extends React.Component {
   };
 
   handleRowClick = (featureOperator) => {
-    this.setState({
-      selectedGuid: featureOperator.guid,
-    });
-    if (featureOperator.feature) {
-      plotEdit.map
-        .getView()
-        .fit(featureOperator.feature?.getGeometry().getExtent(), {
-          size: plotEdit.map.getSize(),
-          duration: 1000,
-        });
+    if (featureOperator && featureOperator.guid) {
+      this.setState({
+        selectedGuid: featureOperator.guid,
+      });
+      if (featureOperator.feature) {
+        plotEdit.map
+          .getView()
+          .fit(featureOperator.feature?.getGeometry().getExtent(), {
+            size: plotEdit.map.getSize(),
+            duration: 1000,
+          });
+      }
     }
   };
 
@@ -234,7 +260,7 @@ export default class TempPlot extends React.Component {
             height: "calc(100% - 30px)",
           }}
         >
-          {this.props.featureOperatorList.length > 0 ? (
+          {this.state.featureOperatorList.length > 0 ? (
             <div
               className={styles.content}
               style={{ height: "calc(100% - 70px)", padding: 0 }}
@@ -250,7 +276,7 @@ export default class TempPlot extends React.Component {
                   全选
                 </Checkbox>
               </div>
-              {this.props.featureOperatorList.map((featureOperator, index) => {
+              {this.state.featureOperatorList.map((featureOperator, index) => {
                 return (
                   <Row
                     key={featureOperator.guid}
@@ -278,10 +304,7 @@ export default class TempPlot extends React.Component {
                     <div className={styles.text}>
                       <span>{featureOperator.attrs.name}</span>
                     </div>
-                    <div
-                      className={styles.edit}
-                      onClick={() => this.handleEditClick(featureOperator)}
-                    >
+                    <div className={styles.edit}>
                       <i
                         className={globalStyle.global_icon}
                         style={{
@@ -293,10 +316,7 @@ export default class TempPlot extends React.Component {
                         &#xe759;
                       </i>
                     </div>
-                    <div
-                      className={styles.edit}
-                      onClick={() => this.handleDelClick(featureOperator)}
-                    >
+                    <div className={styles.edit}>
                       <i
                         className={globalStyle.global_icon}
                         style={{
@@ -313,14 +333,14 @@ export default class TempPlot extends React.Component {
               })}
             </div>
           ) : null}
-          {this.props.featureOperatorList.length > 0 ? (
+          {this.state.featureOperatorList.length > 0 ? (
             <div className={styles.footer}>
               <Button type="primary" block onClick={this.saveToProject}>
                 转存到项目
               </Button>
             </div>
           ) : null}
-          {this.props.featureOperatorList.length === 0 ? (
+          {this.state.featureOperatorList.length === 0 ? (
             <div style={{ margin: "120% auto" }}>
               <p style={{ margin: 0 }}>您还未创建标绘</p>
               <p>请选择相应工具开始创建</p>

@@ -160,10 +160,12 @@ export default class LeftToolBar extends React.Component {
       displayCustomSymbolStore: false,
       displayTempPlotIcon: false,
       plotType: "point",
+      featureOperatorList: [],
     };
     this.featureOperatorList = [];
     this.selectFeatureOperatorList = [];
     this.customSymbols = null;
+    this.modifyPlot = false;
     ListAction.checkItem()
       .then((res) => {
         if (res) {
@@ -378,14 +380,22 @@ export default class LeftToolBar extends React.Component {
         {this.state.displayProject ? <Project></Project> : null}
         {this.state.displayTempPlot ? (
           <TempPlot
+            parent={this}
             featureOperatorList={this.featureOperatorList}
+            updateSelectFeatureOperatorList={this.updateSelectFeatureOperatorList}
             updateFeatureOperatorList={this.updateFeatureOperatorList}
-            updateSelectFeatureOperatorList={
-              this.updateSelectFeatureOperatorList
-            }
+            updateFeatureOperatorList2={this.updateFeatureOperatorList2}
             displayProjctList={() => {
               this.setState({
                 displayProjectList: true,
+                displayTempPlot: false,
+              });
+            }}
+            displayPlotPanel={(plotType) => {
+              this.isModify = true;
+              this.setState({
+                plotType: plotType,
+                displayPlot: true,
                 displayTempPlot: false,
               });
             }}
