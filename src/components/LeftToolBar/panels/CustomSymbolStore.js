@@ -1,5 +1,4 @@
 import React, { Fragment } from "react";
-import ReactDOM from 'react-dom';
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import styles from "../LeftToolBar.less";
 import { Input, Button, Tooltip, Upload, message, Popconfirm } from "antd";
