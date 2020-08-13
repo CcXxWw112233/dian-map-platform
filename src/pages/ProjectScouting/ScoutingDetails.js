@@ -75,7 +75,7 @@ export default class ScoutingDetails extends PureComponent {
       playCollectionVisible: false,
 
       visible: true,
-      activeKey: panes[panes.length - 1].key,
+      activeKey: "1",
       panes,
       activeId: -1,
       audioData: {},
