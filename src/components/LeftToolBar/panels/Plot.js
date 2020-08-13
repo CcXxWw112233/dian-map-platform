@@ -17,6 +17,7 @@ import ListAction from "../../../lib/components/ProjectScouting/ScoutingList";
 import DetailAction from "../../../lib/components/ProjectScouting/ScoutingDetail";
 import { getSession } from "utils/sessionManage";
 import { MyIcon } from "../../utils";
+import symbolStoreServices from "../../../services/symbolStore";
 
 const SymbolBlock = ({
   data,
@@ -55,17 +56,26 @@ const SymbolBlock = ({
         <div className={styles.block}>
           {data.item.content.map((item, index) => {
             let style = {};
+            let index0 = -1,
+              index1 = -1;
+            let divStyle = {
+              margin: 2,
+              borderRadius: 10,
+              border: "2px solid #fff",
+            };
             if (indexStr !== "") {
               const indexArr = indexStr.split("|");
-              if (
-                Number(indexArr[0]) === data.index &&
-                Number(indexArr[1]) === index
-              ) {
+              index0 = Number(indexArr[0]);
+              index1 = Number(indexArr[1]);
+              if (index0 === data.index && index1 === index) {
                 if (plotType === "point") {
                   style = { color: fillColor };
-                } else {
-                  style = { color: "rgb(80, 130, 255)" };
                 }
+                divStyle = {
+                  margin: 2,
+                  borderRadius: 10,
+                  border: "2px solid #7FA7FF",
+                };
               }
             }
             return (
@@ -75,35 +85,56 @@ const SymbolBlock = ({
                 trigger={["hover", "focus", "click"]}
                 placement="top"
               >
-                {item.iconfont && item.iconfont.indexOf("&#") > -1 ? (
-                  <i
-                    style={style}
-                    onClick={(e) => {
-                      cb(e, data.index, index, item);
-                    }}
-                    className={globalStyle.global_icon}
-                    dangerouslySetInnerHTML={{ __html: item.iconfont }}
-                  ></i>
-                ) : null}
-                {item.iconfont && item.iconfont.indexOf("icon-") > -1 ? (
-                  <MyIcon
-                    type={item.iconfont}
-                    style={{ fontSize: 32, background: "none" }}
-                    className={styles.symbol}
-                    onClick={(e) => {
-                      cb(e, data.index, index, item);
-                    }}
-                  ></MyIcon>
-                ) : null}
-                {item.color && item.color.length > 0 ? (
-                  <div
-                    className={styles.symbol}
-                    style={{ background: item.color }}
-                    onClick={(e) => {
-                      cb(e, data.index, index, item);
-                    }}
-                  ></div>
-                ) : null}
+                <div style={divStyle}>
+                  {item.iconfont && item.iconfont.indexOf("&#") > -1 ? (
+                    <i
+                      style={style}
+                      onClick={(e) => {
+                        cb(e, data.index, index, item);
+                      }}
+                      className={globalStyle.global_icon}
+                      dangerouslySetInnerHTML={{ __html: item.iconfont }}
+                    ></i>
+                  ) : null}
+                  {item.iconfont && item.iconfont.indexOf("icon-") > -1 ? (
+                    <MyIcon
+                      type={item.iconfont}
+                      style={{ fontSize: 32, background: "none" }}
+                      className={styles.symbol}
+                      onClick={(e) => {
+                        cb(e, data.index, index, item);
+                      }}
+                    ></MyIcon>
+                  ) : null}
+                  {item.color && item.color.length > 0 ? (
+                    <div
+                      className={styles.symbol}
+                      style={{
+                        background: item.color,
+                        border: item.line ? `1px solid ${item.color}` : "",
+                        height: item.line ? 0 : "",
+                      }}
+                      onClick={(e) => {
+                        cb(e, data.index, index, item);
+                      }}
+                    ></div>
+                  ) : null}
+                  {item.imageUrl ? (
+                    <div
+                      className={styles.symbol}
+                      style={{
+                        backgroundImage: `url(${item.imageUrl})`,
+                        backgroundColor: "rgba(255,255,255,1)",
+                        backgroundRepeat: "no-repeat",
+                        backgroundPosition: "center",
+                        backgroundSize: "100%",
+                      }}
+                      onClick={(e) => {
+                        cb(e, data.index, index, item);
+                      }}
+                    ></div>
+                  ) : null}
+                </div>
               </Tooltip>
             );
           })}
@@ -128,6 +159,7 @@ export default class Plot extends React.Component {
       symbolSelectedIndex: "",
       strokePercent: "1",
       fillPercent: "1",
+      symbols: [],
     };
     this.fillColor = "rgba(106, 154, 255, 1)";
     this.strokeColor = "rgba(106, 154, 255, 1)";
@@ -187,12 +219,12 @@ export default class Plot extends React.Component {
     };
     this.operatorActive = null;
     this.operatorDeactive = null;
-    this.featureOperatorList = [];
     this.projectId = "";
     this.projectName = "";
     this.activeOperator = null;
   }
   componentDidMount() {
+    this.getCustomSymbol();
     this.plotLayer = plotEdit.getPlottingLayer();
     const me = this;
     this.operatorActive = function (e) {
@@ -220,7 +252,6 @@ export default class Plot extends React.Component {
             me.projectName = "";
             me.savePlot2TempPlot(operator);
           });
-        me.props.updateFeatureOperatorList(me.featureOperatorList);
         switch (me.props.plotType) {
           case "freePolygon":
           case "polygon":
@@ -237,6 +268,7 @@ export default class Plot extends React.Component {
                 iconUrl,
                 operator
               );
+              me.symbol = null;
               me.sigleImage = null;
             }
             break;
@@ -273,28 +305,67 @@ export default class Plot extends React.Component {
     } else {
       this.updateStateCallbackFunc();
     }
+    const { parent } = nextProps;
+    if (parent.customSymbols) {
+      this.setState({
+        symbols: [parent.customSymbols, ...symbols],
+      });
+    } else {
+      this.getCustomSymbol();
+    }
   }
 
+  // 获取自定义图标符号
+  getCustomSymbol = () => {
+    this.customSymbols = {
+      typeName: "自定义图标",
+      type: "point|polygon|freePolygon|rect|circle|arrow",
+      content: [],
+    };
+    symbolStoreServices
+      .GET_ICON()
+      .then((res) => {
+        if (res.code === "0") {
+          const data = res.data;
+          if (Array.isArray(data)) {
+            data.forEach((item) => {
+              const temp = { name: item.icon_name, imageUrl: item.icon_url };
+              this.customSymbols.content.push(temp);
+            });
+            this.setState(
+              {
+                symbols: [this.customSymbols, ...symbols],
+              },
+              () => {
+                const { parent } = this.props;
+                parent.customSymbols = this.customSymbols;
+              }
+            );
+          }
+        }
+      })
+      .catch((err) => {
+        this.setState({
+          symbols: symbols,
+        });
+        console.log(err);
+      });
+  };
+
   savePlot2TempPlot = (operator) => {
-    let index = this.findOperatorFromList(operator);
-    if (index > -1) {
-      this.featureOperatorList[index] = operator;
-    } else {
-      this.featureOperatorList = [...this.featureOperatorList, operator];
-    }
-    this.props.updateFeatureOperatorList(this.featureOperatorList);
+    this.props.updateFeatureOperatorList(operator);
   };
 
   updatePlotList = (list) => {
-    this.featureOperatorList = list;
-    this.props.updateFeatureOperatorList(list);
+    this.props.updateFeatureOperatorList2(list);
   };
 
   // 从数组中找到operator
   findOperatorFromList = (id) => {
+    const { parent } = this.props;
     let index = -1;
-    for (let i = 0; i < this.featureOperatorList.length; i++) {
-      if (this.featureOperatorList[i].guid === id) {
+    for (let i = 0; i < parent.featureOperatorList.length; i++) {
+      if (parent.featureOperatorList[i].guid === id) {
         index = i;
         break;
       }
@@ -304,7 +375,8 @@ export default class Plot extends React.Component {
 
   // 创建标绘名称
   createPlotName = () => {
-    let count = this.featureOperatorList.filter((operator) => {
+    const { parent } = this.props;
+    let count = parent.featureOperatorList.filter((operator) => {
       return operator.attrs.selectName?.indexOf(this.selectName) > -1;
     }).length;
     this.plotName = this.selectName + "#" + (count + 1);
@@ -456,7 +528,10 @@ export default class Plot extends React.Component {
   };
 
   getCurrentIcon = (fontContent, { fontSize, fillColor, strokeColor }) => {
-    if (fontContent.indexOf("data:image") > -1) {
+    if (
+      fontContent.indexOf("data:image") > -1 ||
+      fontContent.indexOf("http") > -1
+    ) {
       return fontContent;
     }
     let canvas = document.createElement("canvas");
@@ -514,14 +589,38 @@ export default class Plot extends React.Component {
   };
 
   getFillSymbol = (data, index, index2, typeItem) => {
-    const { name: typeName } = typeItem;
     if (index !== undefined && index2 !== undefined) {
-      this.setState({
-        symbolSelectedIndex: `${index}|${index2}`,
-      });
+      if (
+        this.dic[this.props.plotType] === "Polygon" ||
+        this.dic[this.props.plotType] === "Polyline"
+      ) {
+        if (index !== 0) {
+          this.setState({
+            symbolSelectedIndex: `${index}|${index2}`,
+            fillSelectedIndex: -1,
+            strokeSelectedIndex: -1,
+          });
+        } else {
+          this.setState({
+            symbolSelectedIndex: `${index}|${index2}`,
+          });
+        }
+      } else if (this.dic[this.props.plotType] === "Point") {
+        if (index === 0) {
+          this.setState({
+            symbolSelectedIndex: `${index}|${index2}`,
+            fillSelectedIndex: -1,
+            strokeSelectedIndex: -1,
+          });
+        } else {
+          this.setState({
+            symbolSelectedIndex: `${index}|${index2}`,
+          });
+        }
+      }
     }
     if (data) {
-      this.selectName = typeName;
+      this.selectName = typeItem.name;
       if (data.target.textContent) {
         this.symbol = data.target.textContent;
       } else if (data.currentTarget && typeItem.iconfont) {
@@ -531,7 +630,7 @@ export default class Plot extends React.Component {
           this.selectName +
           ".svg");
       } else {
-        this.symbol = typeItem.color;
+        this.symbol = typeItem.color || typeItem.imageUrl;
       }
       this.createPlotName();
     }
@@ -558,6 +657,7 @@ export default class Plot extends React.Component {
     };
     switch (this.dic[this.props.plotType]) {
       case "Polygon":
+      case "Polyline":
         options = {
           ...options,
           // strokeColor: this.strokeColor,
@@ -880,10 +980,7 @@ export default class Plot extends React.Component {
                 })}
               </div>
             )}
-            {/* <div className={styles.header}>
-              <span>图标</span>
-            </div> */}
-            {symbols.map((item, index) => {
+            {this.state.symbols.map((item, index) => {
               if (item.type.indexOf(this.props.plotType) >= 0) {
                 return (
                   <SymbolBlock
