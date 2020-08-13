@@ -139,7 +139,7 @@ export default class CustomSymbolStore extends React.Component {
     param.append('org_id',data.org_id);
     param.append('icon_name',data.icon_name);
     axios.post('/api/map/icon', param, {headers}).then(res => {
-      console.log(BASIC.checkResponse(res.data),res.data);
+      // console.log(BASIC.checkResponse(res.data),res.data);
       this.setState({
         showRename: false,
         uploadingIcon:{},
