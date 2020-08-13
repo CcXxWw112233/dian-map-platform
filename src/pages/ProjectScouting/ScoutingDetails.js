@@ -209,6 +209,7 @@ export default class ScoutingDetails extends PureComponent {
           area_selected: active,
         });
         // 获取区域分类的数据列表
+        window.ProjectGroupId = active;
         this.fetchCollection();
       })
       .catch((err) => {
