@@ -5,11 +5,12 @@ import globalStyle from "@/globalSet/styles/globalStyles.less";
 import { lineDrawing, pointDrawing, polygonDrawing } from "utils/drawing";
 import { myFullScreen, myDragZoom } from "utils/drawing/public";
 import { downloadCapture } from "../../utils/captureMap";
+import { plotEdit } from "../../utils/plotEdit";
 
 export default class ToolBox extends React.Component {
   constructor(props) {
     super(props);
-    this.props.onRef(this)
+    this.props.onRef(this);
     this.tools = [
       {
         name: "坐标",
@@ -35,9 +36,7 @@ export default class ToolBox extends React.Component {
       {
         name: "拉框放大",
         iconfont: "&#xe75f;",
-        cb: () => {
-          myDragZoom.setVal.bind(myDragZoom);
-        },
+        cb: myDragZoom.setVal.bind(myDragZoom),
       },
       {
         name: "全屏",
@@ -76,6 +75,7 @@ export default class ToolBox extends React.Component {
     };
   }
   deactivate = () => {
+    plotEdit.deactivate();
     pointDrawing.deactivate();
     lineDrawing.deactivate();
     polygonDrawing.deactivate();

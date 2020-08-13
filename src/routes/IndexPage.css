@@ -73,3 +73,6 @@ li {
   list-style: none;
   list-style-type: none;
 }
+/* :global(.ol-overlay-container .ol-selectable) {
+  z-index: 99 !important;
+} */

@@ -15,6 +15,7 @@ import event from "../../lib/utils/event";
 import PopupOverlay from "../../components/PublicOverlays/PopupOverlay/index";
 import baseOverlay from "../../components/PublicOverlays/baseOverlay/index";
 import { createOverlay } from "../../lib/utils/index";
+import { getLocal } from "../../utils/sessionManage";
 
 const { getFeature, GET_GEO_DATA } = publicDataUrl;
 const publicData = {
@@ -32,9 +33,14 @@ const publicData = {
   loadKey: [],
   circleFeature: null,
   lpOverlay: null,
+  lastBaseMap: null, // 上一个底图
+  baseMapKeys: ["gd_vec|gd_img|gg_img", "td_vec|td_img|td_ter"],
   init: function () {
     // 如果有layer，就不addlayer
     let layer = mapApp.findLayerById(this.layer.get("id"));
+    getLocal("baseMapKey").then((res) => {
+      this.lastBaseMap = res.data;
+    });
     if (layer) {
       this.layer.setVisible(true);
     } else {
@@ -207,6 +213,8 @@ const publicData = {
       }
     }
   },
+  // 切换坐标
+  transCoordinateSystems: function () {},
   // 渲染获取到的数据
   renderFeatures: function (data, option, fillColor) {
     if (data) {
@@ -296,7 +304,7 @@ const publicData = {
     this.source.clear();
     this.circleFeature = null;
     this.removeLpInfo();
-    event.Evt.firEvent("removeHousePOI")
+    event.Evt.firEvent("removeHousePOI");
   },
 };
 export default publicData;

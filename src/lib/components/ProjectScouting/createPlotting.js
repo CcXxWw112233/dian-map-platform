@@ -31,7 +31,7 @@ export const createPlottingFeature = (data) => {
 
 export const createPopupOverlay = (feature, coordinate) => {
   const geometry = feature.getGeometry();
-  let len, area, xy,remark;
+  let len, area, xy, remark;
   if (geometry.type === "polygon") {
     // len = formatLength(geometry);
     area = formatArea(geometry);
@@ -46,11 +46,11 @@ export const createPopupOverlay = (feature, coordinate) => {
     xy = `${coordinate4326[0].toFixed(6)},${coordinate4326[1].toFixed(6)}`;
   }
   if (feature.values_ && feature.values_.content) {
-    remark = JSON.parse(feature.values_.content).remark || ""
+    remark = JSON.parse(feature.values_.content).remark || "";
   }
   let overlay;
   const data = {
-    name: feature.values_.name,
+    name: feature.values_.name || feature.values_.title,
     len: len,
     area: area,
     xy: xy,
@@ -61,10 +61,10 @@ export const createPopupOverlay = (feature, coordinate) => {
     },
   };
   let popupEle = new PopupOverlay(data);
-  popupEle = new baseOverlay(popupEle, {angleColor: "#fff"});
+  popupEle = new baseOverlay(popupEle, { angleColor: "#fff" });
   overlay = createOverlay(popupEle, {
     // positioning: "bottom-left",
-    offset: [-10, -15],
+    // offset: [-10, -15],
   });
   if (feature.overlay) {
     InitMap.map.removeOverlay(feature.overlay);

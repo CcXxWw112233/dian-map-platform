@@ -56,6 +56,7 @@ export default function Init(data, type = 'project'){
     selectInput.className = styles.selectInput;
     let placeholder = type === 'project' ? '请选择项目' : '请选择分类';
     selectInput.placeholder = placeholder;
+    selectInput.readOnly = true
     let menus = document.createElement('div');
     let removeMenu = ()=>{
         this.menuShow = false;
@@ -149,6 +150,11 @@ export default function Init(data, type = 'project'){
     }
     cancelBtn.onclick = ()=>{
         this.on.onClose && this.on.onClose.call(this,'cancel');
+    }
+    this.change = (type,val)=>{
+      if(type === 'name'){
+        nameInput.value = val;
+      }
     }
     okBtn.onclick = ()=>{
         let obj = {

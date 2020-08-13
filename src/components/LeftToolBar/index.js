@@ -1,11 +1,16 @@
 import React from "react";
+import {  Badge } from "antd";
 
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import styles from "./LeftToolBar.less";
 import Plot from "./panels/Plot";
 import Project from "./panels/Project";
+import TempPlot from "./panels/TempPlot";
+import ProjectList from "./panels/ProjectList";
+import CustomSymbolStore from "./panels/CustomSymbolStore";
 
 import { lineDrawing, pointDrawing, polygonDrawing } from "utils/drawing";
+import ListAction from "@/lib/components/ProjectScouting/ScoutingList";
 
 export default class LeftToolBar extends React.Component {
   constructor(props) {
@@ -19,6 +24,9 @@ export default class LeftToolBar extends React.Component {
           this.setState({
             displayPlot: false,
             displayProject: true,
+            displayTempPlot: false,
+            displayCustomSymbolStore: false,
+            displayProjectList: false,
           });
           this.deactivate();
         },
@@ -31,24 +39,13 @@ export default class LeftToolBar extends React.Component {
           this.setState({
             displayPlot: true,
             displayProject: false,
+            displayTempPlot: false,
+            displayCustomSymbolStore: false,
             plotType: "point",
           });
           this.deactivate();
         },
       },
-      // {
-      //   name: "坐标",
-      //   displayText: true,
-      //   iconfont: "&#xe620;",
-      //   cb: () => {
-      //     this.setState({
-      //       displayPlot: false,
-      //       displayProject: false,
-      //     });
-      //     this.deactivate();
-      //     pointDrawing.createDrawing();
-      //   },
-      // },
       {
         name: "描绘",
         displayText: true,
@@ -57,6 +54,8 @@ export default class LeftToolBar extends React.Component {
           this.setState({
             displayPlot: true,
             displayProject: false,
+            displayTempPlot: false,
+            displayCustomSymbolStore: false,
             plotType: "freeLine",
           });
           this.deactivate();
@@ -70,24 +69,13 @@ export default class LeftToolBar extends React.Component {
           this.setState({
             displayPlot: true,
             displayProject: false,
+            displayTempPlot: false,
+            displayCustomSymbolStore: false,
             plotType: "line",
           });
           this.deactivate();
         },
       },
-      // {
-      //   name: "距离",
-      //   displayText: true,
-      //   iconfont: "&#xe62a;",
-      //   cb: () => {
-      //     this.setState({
-      //       displayPlot: false,
-      //       displayProject: false,
-      //     });
-      //     this.deactivate();
-      //     lineDrawing.createDrawing();
-      //   },
-      // },
       {
         name: "自由面",
         displayText: true,
@@ -96,6 +84,8 @@ export default class LeftToolBar extends React.Component {
           this.setState({
             displayPlot: true,
             displayProject: false,
+            displayTempPlot: false,
+            displayCustomSymbolStore: false,
             plotType: "freePolygon",
           });
           this.deactivate();
@@ -104,29 +94,18 @@ export default class LeftToolBar extends React.Component {
       {
         name: "标面",
         displayText: true,
-        iconfont: "&#xe625;",
+        iconfont: "&#xe7cc;",
         cb: () => {
           this.setState({
             displayPlot: true,
             displayProject: false,
+            displayTempPlot: false,
+            displayCustomSymbolStore: false,
             plotType: "polygon",
           });
           this.deactivate();
         },
       },
-      // {
-      //   name: "面积",
-      //   displayText: true,
-      //   iconfont: "&#xe62c;",
-      //   cb: () => {
-      //     this.setState({
-      //       displayPlot: false,
-      //       displayProject: false,
-      //     });
-      //     this.deactivate();
-      //     polygonDrawing.createDrawing();
-      //   },
-      // },
       {
         name: "矩形",
         displayText: true,
@@ -135,6 +114,8 @@ export default class LeftToolBar extends React.Component {
           this.setState({
             displayPlot: true,
             displayProject: false,
+            displayTempPlot: false,
+            displayCustomSymbolStore: false,
             plotType: "rect",
           });
           this.deactivate();
@@ -148,6 +129,8 @@ export default class LeftToolBar extends React.Component {
           this.setState({
             displayPlot: true,
             displayProject: false,
+            displayTempPlot: false,
+            displayCustomSymbolStore: false,
             plotType: "circle",
           });
           this.deactivate();
@@ -161,6 +144,8 @@ export default class LeftToolBar extends React.Component {
           this.setState({
             displayPlot: true,
             displayProject: false,
+            displayTempPlot: false,
+            displayCustomSymbolStore: false,
             plotType: "arrow",
           });
           this.deactivate();
@@ -171,8 +156,32 @@ export default class LeftToolBar extends React.Component {
       selectedIndex: 0,
       displayPlot: false,
       displayProject: true,
+      displayTempPlot: false,
+      displayCustomSymbolStore: false,
+      displayTempPlotIcon: false,
       plotType: "point",
     };
+    this.featureOperatorList = [];
+    this.selectFeatureOperatorList = [];
+    ListAction.checkItem()
+      .then((res) => {
+        if (res) {
+          if (res.code === 0) {
+            this.setState({
+              displayTempPlotIcon: false,
+            });
+          } else {
+            this.setState({
+              displayTempPlotIcon: true,
+            });
+          }
+        }
+      })
+      .catch((e) => {
+        this.setState({
+          displayTempPlotIcon: true,
+        });
+      });
   }
 
   deactivate = () => {
@@ -181,14 +190,60 @@ export default class LeftToolBar extends React.Component {
     polygonDrawing.deactivate();
   };
 
+  updateFeatureOperatorList = (list) => {
+    this.featureOperatorList = list;
+    if (!this.state.displayTempPlotIcon) {
+      this.setState({
+        displayTempPlotIcon: true,
+      });
+    }
+  };
+
+  updateSelectFeatureOperatorList = (list) => {
+    this.selectFeatureOperatorList = list;
+  };
+
+  getArrDifference = (arr1, arr2) => {
+    return arr1.concat(arr2).filter((v, i, arr) => {
+      return arr.indexOf(v) === arr.lastIndexOf(v);
+    });
+  };
+
+  // 编辑标绘回调
+  editPlot = (operator) => {
+    const geometryType = operator.feature?.getGeometry().getType();
+    switch (geometryType) {
+      case "Point":
+        break;
+      case "LineString":
+        break;
+      case "Polygon":
+        break;
+      default:
+        break;
+    }
+  };
+
   render() {
+    let tempPlotItemStyle = { bottom: 60, left: 4, background: "none" };
+    let customSymbolStoreStyle = { bottom: 0, left: 4, background: "none" };
+    const selectStyle = { background: "#3863d0" };
+    if (this.state.displayTempPlot) {
+      tempPlotItemStyle = { ...tempPlotItemStyle, ...selectStyle };
+    }
+    if (this.state.displayCustomSymbolStore) {
+      customSymbolStoreStyle = { ...customSymbolStoreStyle, ...selectStyle };
+    }
     return (
       <div
         className={styles.wrapper}
         style={{ position: "absolute", top: 0, left: 0 }}
       >
-        <div className={styles.user}>
-          <img alt="" src=""></img>
+        <div className={styles.circle}>
+          {/* <img alt="" src=""></img> */}
+          <i className={globalStyle.global_icon} style={{ fontSize: 26 }}>
+            &#xe764;
+          </i>
         </div>
         <ul>
           {this.leftTools.map((item, index) => {
@@ -213,6 +268,7 @@ export default class LeftToolBar extends React.Component {
                   onClick={() => {
                     this.setState({
                       selectedIndex: index,
+                      displayTempPlot: false,
                     });
                     item.cb && item.cb();
                   }}
@@ -232,9 +288,56 @@ export default class LeftToolBar extends React.Component {
             );
           })}
         </ul>
+        {this.state.displayTempPlotIcon ? (
+          <div
+            className={`${styles.circle} ${styles.temp}`}
+            onClick={() => {
+              this.setState({
+                selectedIndex: -1,
+                displayPlot: false,
+                displayProject: false,
+                displayTempPlot: true,
+                displayCustomSymbolStore: false,
+                plotType: "",
+              });
+            }}
+            style={tempPlotItemStyle}
+          >
+            
+            <i
+              className={globalStyle.global_icon}
+              style={{ fontSize: 30, color: "#fff" }}
+            >
+              &#xe765;
+            </i>
+          </div>
+        ) : null}
+        <div
+          className={`${styles.circle} ${styles.temp}`}
+          onClick={() => {
+            this.setState({
+              selectedIndex: -1,
+              displayPlot: false,
+              displayProject: false,
+              displayTempPlot: false,
+              displayCustomSymbolStore: true,
+              plotType: "",
+            });
+          }}
+          style={customSymbolStoreStyle}
+        >
+          <i
+            className={globalStyle.global_icon}
+            style={{ fontSize: 30, color: "#fff" }}
+          >
+            &#xe7b6;
+          </i>
+        </div>
         {this.state.displayPlot ? (
           <Plot
             plotType={this.state.plotType}
+            featureOperatorList={this.featureOperatorList}
+            updateFeatureOperatorList={this.updateFeatureOperatorList}
             goBackProject={() => {
               this.setState({
                 displayPlot: false,
@@ -245,6 +348,41 @@ export default class LeftToolBar extends React.Component {
           ></Plot>
         ) : null}
         {this.state.displayProject ? <Project></Project> : null}
+        {this.state.displayTempPlot ? (
+          <TempPlot
+            featureOperatorList={this.featureOperatorList}
+            updateFeatureOperatorList={this.updateFeatureOperatorList}
+            updateSelectFeatureOperatorList={
+              this.updateSelectFeatureOperatorList
+            }
+            displayProjctList={() => {
+              this.setState({
+                displayProjectList: true,
+                displayTempPlot: false,
+              });
+            }}
+            editPlot={this.editPlot}
+          ></TempPlot>
+        ) : null}
+        {this.state.displayProjectList ? (
+          <ProjectList
+            featureOperatorList={this.featureOperatorList}
+            selectFeatureOperatorList={this.selectFeatureOperatorList}
+            goBackTempPlot={(list) => {
+              this.featureOperatorList = this.getArrDifference(
+                list,
+                this.featureOperatorList
+              );
+              this.setState({
+                displayProjectList: false,
+                displayTempPlot: true,
+              });
+            }}
+          ></ProjectList>
+        ) : null}
+        {this.state.displayCustomSymbolStore ? (
+          <CustomSymbolStore></CustomSymbolStore>
+        ) : null}
       </div>
     );
   }

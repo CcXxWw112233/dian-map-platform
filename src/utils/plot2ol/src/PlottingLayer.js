@@ -133,11 +133,12 @@ class PlottingLayer extends Observable {
 
     Event.Evt.on(
       "setAttribute",
-      ({ style, attrs, responseData, cb, isDefault }) => {
+      ({ style, attrs, responseData, saveCb, delCb, isDefault }) => {
         this.style = style;
         this.attrs = attrs;
         this.responseData = responseData;
-        this.listCb = cb;
+        this.saveCb = saveCb;
+        this.deleteCb = delCb;
         this.isDefault = isDefault;
       }
     );
@@ -336,16 +337,15 @@ class PlottingLayer extends Observable {
     }
     window.featureOperator = fo
     this.feature_operators.push(fo);
-    if (this.attrs) {
-      const tempList = this.getArrDifference(
-        this.feature_operators,
-        this.projectScoutingArr
-      );
-      this.listCb && this.listCb(tempList);
-      this.attrs = null;
-      this.responseData = null;
-      // delete this.listCb;
-    }
+    // if (this.attrs) {
+    //   const tempList = this.getArrDifference(
+    //     this.feature_operators,
+    //     this.projectScoutingArr
+    //   );
+    //   this.listCb && this.listCb(tempList);
+    //   this.attrs = null;
+    //   this.responseData = null;
+    // }
     return fo;
   }
   /**
