@@ -94,7 +94,7 @@ export default class LeftToolBar extends React.Component {
       {
         name: "标面",
         displayText: true,
-        iconfont: "&#xe625;",
+        iconfont: "&#xe7cc;",
         cb: () => {
           this.setState({
             displayPlot: true,

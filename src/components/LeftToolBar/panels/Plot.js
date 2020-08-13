@@ -79,19 +79,29 @@ const SymbolBlock = ({
                   <i
                     style={style}
                     onClick={(e) => {
-                      cb(e, data.index, index, item.name);
+                      cb(e, data.index, index, item);
                     }}
                     className={globalStyle.global_icon}
                     dangerouslySetInnerHTML={{ __html: item.iconfont }}
                   ></i>
                 ) : null}
                 {item.iconfont && item.iconfont.indexOf("icon-") > -1 ? (
-                  <MyIcon type={item.iconfont}></MyIcon>
+                  <MyIcon
+                    type={item.iconfont}
+                    style={{ fontSize: 32, background: "none" }}
+                    className={styles.symbol}
+                    onClick={(e) => {
+                      cb(e, data.index, index, item);
+                    }}
+                  ></MyIcon>
                 ) : null}
                 {item.color && item.color.length > 0 ? (
                   <div
                     className={styles.symbol}
                     style={{ background: item.color }}
+                    onClick={(e) => {
+                      cb(e, data.index, index, item);
+                    }}
                   ></div>
                 ) : null}
               </Tooltip>
@@ -217,7 +227,7 @@ export default class Plot extends React.Component {
           case "rect":
           case "circle":
           case "arrow":
-            if (me.symbol) {
+            if (me.symbol && me.symbol.indexOf("rgb") < 0) {
               let iconUrl = me.getCurrentIcon(me.symbol, {
                 fontSize: 38,
                 fillColor: "rgba(80, 130, 255, 1)",
@@ -446,6 +456,9 @@ export default class Plot extends React.Component {
   };
 
   getCurrentIcon = (fontContent, { fontSize, fillColor, strokeColor }) => {
+    if (fontContent.indexOf("data:image") > -1) {
+      return fontContent;
+    }
     let canvas = document.createElement("canvas");
     canvas.width = fontSize;
     canvas.height = fontSize;
@@ -455,11 +468,15 @@ export default class Plot extends React.Component {
     context.textBaseline = "top";
     if (fillColor && fillColor !== "") {
       context.fillStyle = fillColor;
-      context.fillText(fontContent, 0, 0);
+      if (fontContent) {
+        context.fillText(fontContent, 0, 0);
+      }
     }
     if (strokeColor && strokeColor !== "") {
       context.strokeStyle = strokeColor;
-      context.strokeText(fontContent, 0, 0);
+      if (fontContent) {
+        context.strokeText(fontContent, 0, 0);
+      }
     }
     // let imageData = context.getImageData(0, 0, canvas.width, canvas.height);
     // for (let i = 0; i < imageData.data.length; i += 4) {
@@ -496,7 +513,8 @@ export default class Plot extends React.Component {
     this.createPlot(options, iconUrl);
   };
 
-  getFillSymbol = (data, index, index2, typeName) => {
+  getFillSymbol = (data, index, index2, typeItem) => {
+    const { name: typeName } = typeItem;
     if (index !== undefined && index2 !== undefined) {
       this.setState({
         symbolSelectedIndex: `${index}|${index2}`,
@@ -504,16 +522,32 @@ export default class Plot extends React.Component {
     }
     if (data) {
       this.selectName = typeName;
-      this.symbol = data.target.textContent;
+      if (data.target.textContent) {
+        this.symbol = data.target.textContent;
+      } else if (data.currentTarget && typeItem.iconfont) {
+        this.fillColor = typeItem.fillColor;
+        this.strokeColor = typeItem.fillColor;
+        this.symbol = require("../../../assets/plot/marks/" +
+          this.selectName +
+          ".svg");
+      } else {
+        this.symbol = typeItem.color;
+      }
       this.createPlotName();
     }
-    let iconUrl = this.getCurrentIcon(this.symbol, {
-      fontSize: 38,
-      fillColor:
-        this.props.plotType === "point"
-          ? this.fillColor
-          : "rgba(80, 130, 255, 1)",
-    });
+    let iconUrl = "";
+    if (this.symbol.indexOf("rgb") > -1) {
+      this.fillColor = this.symbol;
+      this.strokeColor = this.symbol;
+    } else {
+      iconUrl = this.getCurrentIcon(this.symbol, {
+        fontSize: 38,
+        fillColor:
+          this.props.plotType === "point"
+            ? this.fillColor
+            : "rgba(80, 130, 255, 1)",
+      });
+    }
     if (this.props.plotType === "point") {
       this.featureType = iconUrl;
     }
@@ -733,7 +767,7 @@ export default class Plot extends React.Component {
             </i>
             {this.props.plotType !== "point" ? (
               <div className={styles.header} style={{ marginTop: 20 }}>
-                <span>自定义轮廓色</span>
+                <span>轮廓色</span>
                 <ColorPicker
                   style={{ margin: "auto" }}
                   handleOK={this.handleCustomStrokeColorOkClick}
@@ -793,7 +827,7 @@ export default class Plot extends React.Component {
             {this.props.plotType === "line" ||
             this.props.plotType === "freeLine" ? null : (
               <div className={styles.header} style={{ marginTop: 20 }}>
-                <span>自定义填充色</span>
+                <span>填充色</span>
                 <ColorPicker
                   style={{ margin: "auto" }}
                   handleOK={this.handleCustomFillColorOkClick}
