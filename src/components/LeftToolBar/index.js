@@ -1,5 +1,5 @@
 import React from "react";
-import {  Badge } from "antd";
+import { Badge } from "antd";
 
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import styles from "./LeftToolBar.less";
@@ -163,6 +163,7 @@ export default class LeftToolBar extends React.Component {
     };
     this.featureOperatorList = [];
     this.selectFeatureOperatorList = [];
+    this.customSymbols = null;
     ListAction.checkItem()
       .then((res) => {
         if (res) {
@@ -182,6 +183,9 @@ export default class LeftToolBar extends React.Component {
           displayTempPlotIcon: true,
         });
       });
+    // if (this.customSymbols === null) {
+    //   this.getCustomSymbol();
+    // }
   }
 
   deactivate = () => {
@@ -190,13 +194,35 @@ export default class LeftToolBar extends React.Component {
     polygonDrawing.deactivate();
   };
 
-  updateFeatureOperatorList = (list) => {
-    this.featureOperatorList = list;
+  updateFeatureOperatorList = (operator) => {
+    this.featureOperatorList = Array.from(new Set(this.featureOperatorList));
+    const index = this.findOperatorFromList(operator.guid);
+    if (index < 0) {
+      this.featureOperatorList.push(operator);
+    } else {
+      this.featureOperatorList[index] = operator;
+    }
     if (!this.state.displayTempPlotIcon) {
       this.setState({
         displayTempPlotIcon: true,
       });
     }
+  };
+
+  updateFeatureOperatorList2 = (list) => {
+    this.featureOperatorList = Array.from(new Set(list));
+  };
+
+  // 从数组中找到operator
+  findOperatorFromList = (id) => {
+    let index = -1;
+    for (let i = 0; i < this.featureOperatorList.length; i++) {
+      if (this.featureOperatorList[i].guid === id) {
+        index = i;
+        break;
+      }
+    }
+    return index;
   };
 
   updateSelectFeatureOperatorList = (list) => {
@@ -303,7 +329,6 @@ export default class LeftToolBar extends React.Component {
             }}
             style={tempPlotItemStyle}
           >
-            
             <i
               className={globalStyle.global_icon}
               style={{ fontSize: 30, color: "#fff" }}
@@ -335,9 +360,12 @@ export default class LeftToolBar extends React.Component {
         </div>
         {this.state.displayPlot ? (
           <Plot
+            parent={this}
             plotType={this.state.plotType}
+            customSymbols={this.customSymbols}
             featureOperatorList={this.featureOperatorList}
             updateFeatureOperatorList={this.updateFeatureOperatorList}
+            updateFeatureOperatorList2={this.updateFeatureOperatorList2}
             goBackProject={() => {
               this.setState({
                 displayPlot: false,

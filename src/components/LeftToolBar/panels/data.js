@@ -73,6 +73,20 @@ export const symbols = [
     content: [{ name: "规划能源项目", iconfont: "&#xe6cc;" }],
   },
   {
+    typeName: "范围线",
+    type: "line|freeLine",
+    content: [
+      { name: "新村建设用地范围", color: "rgb(195, 165, 157)", line: true },
+      { name: "村经济发展范围线", color: "rgb(125, 121, 142)", line: true },
+      { name: "保留村庄用地范围线", color: "rgb(171, 148, 166)", line: true },
+    ],
+  },
+  {
+    typeName: "边界",
+    type: "line|freeLine",
+    content: [{ name: "村界", color: "rgb(162, 124, 132)", line: true }],
+  },
+  {
     typeName: "常用",
     type: "polygon|freePolygon|rect|circle|arrow",
     content: [
@@ -164,12 +178,12 @@ export const symbols = [
       {
         name: "长途客运站",
         iconfont: "icon-bianzu147",
-        fillColor: "rgba(61, 168, 171, 0.7)",
+        fillColor: "rgba(163, 127, 255, 0.7)",
       },
       {
         name: "港口用地",
         iconfont: "icon-bianzu148",
-        fillColor: "rgba(61, 168, 171, 0.7)",
+        fillColor: "rgba(0, 95, 127, 0.7)",
       },
       {
         name: "机场用地",
@@ -179,14 +193,14 @@ export const symbols = [
       {
         name: "广场用地",
         iconfont: "icon-bianzu149",
-        fillColor: "rgba(61, 168, 171, 0.7)",
+        fillColor: "rgba(0, 95, 127, 0.7)",
       },
       {
         name: "社会停车场用地",
         iconfont: "icon-bianzu150",
-        fillColor: "rgba(61, 168, 171, 0.7)",
+        fillColor: "rgba(0, 95, 127, 0.7)",
       },
-      { name: "市政公用设施用地", color: "rgb(80, 157, 255)" }, //
+      { name: "市政公用设施用地", color: "rgba(80, 157, 255, 0.7)" }, //
       {
         name: "供电用地",
         iconfont: "icon-bianzu151",
@@ -276,7 +290,7 @@ export const symbols = [
       {
         name: "重要建筑",
         iconfont: "icon-bianzu168",
-        fillColor: "rgba(255, 255, 255, 0.7)",
+        fillColor: "rgba(106, 154, 255, 0.7)",
       },
       {
         name: "公厕",
@@ -300,7 +314,7 @@ export const symbols = [
       },
       {
         name: "储蓄所银行",
-        iconfont: "icon-bianzu174",
+        iconfont: "icon-bianzu173",
         fillColor: "rgba(106, 154, 255, 0.7)",
       },
       {

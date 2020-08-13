@@ -20,9 +20,9 @@ export default class TempPlot extends React.Component {
     };
   }
   componentDidMount() {
-    this.setState({
-      featureOperatorList: this.props.featureOperatorList,
-    });
+    // this.setState({
+    //   featureOperatorList: this.props.featureOperatorList,
+    // });
     const projects = ListAction.projects;
     if (projects.length > 0) {
       this.setState({
@@ -140,7 +140,7 @@ export default class TempPlot extends React.Component {
       if (attrs.featureType.indexOf("/") > -1) {
         if (
           attrs.featureType.indexOf("https") === 0 ||
-          attrs.featureType.indexOf("data:image/png;base64") > -1
+          attrs.featureType.indexOf("data:image") > -1
         ) {
           image = attrs.featureType;
         } else {
@@ -175,8 +175,8 @@ export default class TempPlot extends React.Component {
       if (geometryType?.indexOf("Polygon") > -1) {
         let sigleImage = featureOperator.attrs.sigleImage;
         if (sigleImage) {
-          sigleImage = sigleImage.replace("img", "");
-          sigleImage = require("../../assets" + sigleImage);
+          // sigleImage = sigleImage.replace("img", "");
+          // sigleImage = require(sigleImage);
           style = {
             ...style,
             backgroundImage: `url(${sigleImage})`,
@@ -234,7 +234,7 @@ export default class TempPlot extends React.Component {
             height: "calc(100% - 30px)",
           }}
         >
-          {this.state.featureOperatorList.length > 0 ? (
+          {this.props.featureOperatorList.length > 0 ? (
             <div
               className={styles.content}
               style={{ height: "calc(100% - 70px)", padding: 0 }}
@@ -250,7 +250,7 @@ export default class TempPlot extends React.Component {
                   全选
                 </Checkbox>
               </div>
-              {this.state.featureOperatorList.map((featureOperator, index) => {
+              {this.props.featureOperatorList.map((featureOperator, index) => {
                 return (
                   <Row
                     key={featureOperator.guid}
@@ -313,14 +313,14 @@ export default class TempPlot extends React.Component {
               })}
             </div>
           ) : null}
-          {this.state.featureOperatorList.length > 0 ? (
+          {this.props.featureOperatorList.length > 0 ? (
             <div className={styles.footer}>
               <Button type="primary" block onClick={this.saveToProject}>
                 转存到项目
               </Button>
             </div>
           ) : null}
-          {this.state.featureOperatorList.length === 0 ? (
+          {this.props.featureOperatorList.length === 0 ? (
             <div style={{ margin: "120% auto" }}>
               <p style={{ margin: 0 }}>您还未创建标绘</p>
               <p>请选择相应工具开始创建</p>
