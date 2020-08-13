@@ -44,8 +44,8 @@ export default class Search extends React.Component {
             if (!val) return;
             setSession(
               "xzqhCode",
-              `districtcode|${val.addressComponent?.adcode}|${val.addressComponent?.district}`
-            );
+              `districtcode|${val.addressComponent?.adcode}|${val.addressComponent?.district}`);
+
             const options = {
               type: "districtcode",
               adcode: val.addressComponent?.adcode,

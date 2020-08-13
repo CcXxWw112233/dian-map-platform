@@ -1,12 +1,26 @@
 .wrap {
-  width: 310px;
+  border-radius: 50px;
+  overflow: hidden;
+  // width: 310px;
   display: flex;
   flex-direction: row;
   margin: 24px 16px 16px 16px;
+  button{
+    border: 0;
+  }
+  input{
+    border: 0;
+  }
   :global {
     .ant-input-affix-wrapper {
       border-left: unset;
       border-radius: 0;
+    }
+    .ant-input-search{
+      border: 0;
+    }
+    .ant-input-search-icon::before{
+      border-left: 0;
     }
   }
   .searchWrap {
