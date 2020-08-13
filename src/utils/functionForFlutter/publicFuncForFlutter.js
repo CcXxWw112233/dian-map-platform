@@ -12,6 +12,7 @@ import { baseConfig } from "../../globalSet/config";
 // import { draw } from "utils/draw";
 import scoutingProjectAction from "../../lib/components/ProjectScouting/ScoutingList";
 import lib from './drawForMap'
+import { setLocal } from "../sessionManage";
 
 // 获取地图和视图
 const _getMap = (key) => {
@@ -170,6 +171,7 @@ let callFunctions = {
     if (!key) return;
     const initMap = require("../INITMAP").default;
     initMap.changeBaseMap(key);
+    setLocal("baseMapKey", key);
   },
   // 监听地图移动
   StartMove: () => {
