@@ -64,12 +64,12 @@ function Action() {
   this.init = (dispatch) => {
     this.Layer.setSource(this.Source);
     const layers = InitMap.map.getLayers().getArray();
-    const layer = layers.filter(layer => {
-      return layer.get("id") === this.Layer.get("id")
-    })
+    const layer = layers.filter((layer) => {
+      return layer.get("id") === this.Layer.get("id");
+    });
     this.layer = plotEdit.getPlottingLayer(dispatch);
 
-    if (!layer[0]){
+    if (!layer[0]) {
       InitMap.map.addLayer(this.Layer);
     }
   };
@@ -235,13 +235,13 @@ function Action() {
       }
     });
     // 删除绘制的元素
-    console.log(this.layer,'77777777777777777777')
+    console.log(this.layer, "77777777777777777777");
     if (this.layer) {
       this.layer.projectScoutingArr &&
-      this.layer.projectScoutingArr.forEach((item) => {
-        INITMAP.map.removeOverlay(item.feature && item.feature.overlay);
-        if (item.feature) this.layer.removeFeature(item);
-      });
+        this.layer.projectScoutingArr.forEach((item) => {
+          INITMAP.map.removeOverlay(item.feature && item.feature.overlay);
+          if (item.feature) this.layer.removeFeature(item);
+        });
       this.layer.projectScoutingArr = [];
     }
 
@@ -262,7 +262,7 @@ function Action() {
         iconUrl: require("../../../assets/mark/collectionIcon.png"),
         strokeWidth: 2,
         strokeColor: "#fff",
-        zIndex:10,
+        zIndex: 10,
         icon: { anchorOrigin: "bottom-left", anchor: [0.35, 0.25] },
       });
 
@@ -612,6 +612,13 @@ function Action() {
     let features = data.filter((item) => item.collect_type === "4");
     let planPic = data.filter((item) => item.collect_type === "5");
 
+    // 清除变量
+    this.layer.style = null;
+    this.layer.attrs = null;
+    this.layer.responseData = null;
+    this.layer.saveCb = null;
+    this.layer.deleteCb = null;
+    this.layer.isDefault = null;
     // 渲染标绘数据
     await this.renderFeaturesCollection(features, {
       lenged,
