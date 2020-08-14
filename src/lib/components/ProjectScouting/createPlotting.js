@@ -71,5 +71,7 @@ export const createPopupOverlay = (feature, coordinate) => {
   }
   feature.overlay = overlay;
   InitMap.map.addOverlay(overlay);
+  let extent = feature.getGeometry().getExtent();
+  coordinate = [(extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2];
   overlay.setPosition(coordinate);
 };

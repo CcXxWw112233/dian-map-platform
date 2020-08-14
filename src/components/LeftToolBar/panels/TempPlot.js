@@ -28,7 +28,7 @@ export default class TempPlot extends React.Component {
       if (!e.feature_operator.isScouting) {
         let operator = e.feature_operator;
         parent.updateFeatureOperatorList(operator);
-        window.featureOperator = null;
+        window.featureOperator && delete window.featureOperator;
       }
     };
     this.plotLayer &&

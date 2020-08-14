@@ -304,7 +304,7 @@ export default class Plot extends React.Component {
         parent.oldRemark = "";
         let operator = e.feature_operator;
         me.savePlot2TempPlot(operator);
-        window.featureOperator = null;
+        window.featureOperator && delete window.featureOperator;
       }
     };
     this.plotLayer.on(FeatureOperatorEvent.ACTIVATE, this.operatorActive);
@@ -602,6 +602,8 @@ export default class Plot extends React.Component {
       Event.Evt.firEvent("setAttribute", {
         style: style,
         attrs: attrs,
+        // saveCb: this.handleSaveClick.bind(this),
+        // delCb: this.updatePlotList.bind(this),
       });
     } else if (parent.isModifyPlot === true && window.featureOperator) {
       window.featureOperator.feature.setStyle(style);
@@ -894,7 +896,6 @@ export default class Plot extends React.Component {
   };
 
   handleSaveClick = () => {
-    console.log(this);
     // 有标绘被选择
     if (window.featureOperator) {
       // 更新style
