@@ -139,15 +139,20 @@ export default class CustomSymbolStore extends React.Component {
     param.append('org_id',data.org_id);
     param.append('icon_name',data.icon_name);
     axios.post('/api/map/icon', param, {headers}).then(res => {
-      // console.log(BASIC.checkResponse(res.data),res.data);
-      this.setState({
-        showRename: false,
-        uploadingIcon:{},
-        fileList:[],
-      })
-      this.transfromUploadIcon = null;
-      message.success('上传成功');
-      this.fetchIcons();
+      if(BASIC.checkResponse(res.data)){
+        this.setState({
+          showRename: false,
+          uploadingIcon:{},
+          fileList:[],
+        })
+        this.transfromUploadIcon = null;
+        message.success('上传成功');
+        this.fetchIcons();
+      }else {
+        message.error('上传出现错误,请检查后再试');
+      }
+    }).catch(err => {
+      message.error('网络错误，上传失败，请检查网络状态');
     })
   }
   cancelUpload = ()=>{
@@ -192,9 +197,10 @@ export default class CustomSymbolStore extends React.Component {
   }
 
   toRemove = ()=>{
-    let { removeActives, allIcons } = this.state;
+    let { removeActives, allIcons, dataIcons } = this.state;
     let arr = Array.from(allIcons);
     let rArr = Array.from(removeActives);
+    let dArr = Array.from(dataIcons);
     ( async ()=>{
       for(let i = 0; i < removeActives.length; i++){
         let item = removeActives[i];
@@ -202,13 +208,15 @@ export default class CustomSymbolStore extends React.Component {
         if(res){
           arr = arr.filter(n => n.id !== item);
           rArr = rArr.filter(v => v !== item);
+          dArr = dArr.filter(d => d.id !== item);
         }
       }
       this.setState({
         removeActives: rArr,
-        allIcons: arr
+        allIcons: arr,
+        dataIcons: dArr
       },()=>{
-        this.updateData(arr)
+        this.updateData(dArr)
       })
     })()
   }

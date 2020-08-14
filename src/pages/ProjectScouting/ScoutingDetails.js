@@ -54,10 +54,10 @@ export default class ScoutingDetails extends PureComponent {
     super(props);
     this.newTabIndex = 0;
     const panes = [
-      { title: "整理", content: areaScouting(), key: "1", closable: false },
-      { title: "回看", content :(<div>正在加紧开发中...</div>),key:"2", closable: 0},
-      { title: "协作", content :(<div>正在加紧开发中...</div>),key:"3", closable: 0},
-      { title: "计划", content :(<div>正在加紧开发中...</div>),key:"4", closable: 0}
+      { title: "整理", content: areaScouting(), key: "1", closable: false ,className:styles.tab_tab1},
+      { title: "回看", content :(<div>正在加紧开发中...</div>),key:"2", closable: 0,className:styles.tab_tab2},
+      { title: "协作", content :(<div>正在加紧开发中...</div>),key:"3", closable: 0,className:styles.tab_tab3},
+      { title: "计划", content :(<div>正在加紧开发中...</div>),key:"4", closable: 0,className:styles.tab_tab4}
     ];
     this.state = {
       current_board: {},
@@ -144,7 +144,7 @@ export default class ScoutingDetails extends PureComponent {
           config: newLengedList,
         },
       });
-      Action.removeLayer();
+      Action.removeLayer(true);
       Action.clearListen();
     }
   }
@@ -1165,7 +1165,7 @@ export default class ScoutingDetails extends PureComponent {
           <Fragment>
           <div
               className={globalStyle.autoScrollY}
-              style={{ height: "100%", paddingBottom: "40px" }}
+              style={{ flex:1,display:"flex",flexDirection:"column"}}
               ref={this.scrollView}>
               <Collapse
                 onChange={(e) => {
@@ -1431,7 +1431,7 @@ export default class ScoutingDetails extends PureComponent {
   render () {
     const { current_board,isPlay, playing} = this.state;
     const panelStyle = {
-      height: "100%",
+      // height: "100%",
     };
     return (
       <div
@@ -1455,24 +1455,17 @@ export default class ScoutingDetails extends PureComponent {
           cb={this.handleGoBackClick.bind(this)}
         ></Title>
         <Tabs
-          className="detailTabs"
           onChange={this.onChange}
           activeKey={this.state.activeKey}
           onEdit={this.onEdit}
           tabBarGutter={10}
-          style={{
-            background:"#FFF",
-            display: "flex",
-            flexDirection: "column",
-            overflow: "hidden",
-            width: "100%",
-            height: "69vh"
-          }}
+          className={`${styles.detailContentTabs} detailTabs`}
         >
           {this.state.panes.map((pane) => (
             <TabPane
               tab={<span>{pane.title}</span>}
               key={pane.key}
+              className={pane.className}
               closable={pane.closable}
               style={pane.key === "1" ? panelStyle : null}>
               {this.renderForActive(pane.key)}

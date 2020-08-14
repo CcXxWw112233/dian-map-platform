@@ -212,7 +212,7 @@ export const createStyle = function (
     let isIcon = true;
     if (!options.iconUrl) {
       isIcon = false;
-    }
+    }else
     if (!options.icon && !options.icon.hasOwnProperty("src")) {
       isIcon = false;
     }

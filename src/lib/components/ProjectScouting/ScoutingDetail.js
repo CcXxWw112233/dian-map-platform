@@ -67,10 +67,11 @@ function Action() {
     const layer = layers.filter(layer => {
       return layer.get("id") === this.Layer.get("id")
     })
-    if (!layer){
+    this.layer = plotEdit.getPlottingLayer(dispatch);
+
+    if (!layer[0]){
       InitMap.map.addLayer(this.Layer);
     }
-    this.layer = plotEdit.getPlottingLayer(dispatch);
   };
   this.boxFeature = {};
   this.draw = null;
@@ -262,6 +263,7 @@ function Action() {
         iconUrl: require("../../../assets/mark/collectionIcon.png"),
         strokeWidth: 2,
         strokeColor: "#fff",
+        zIndex:10,
         icon: { anchorOrigin: "bottom-left", anchor: [0.35, 0.25] },
       });
 
@@ -610,10 +612,6 @@ function Action() {
     );
     let features = data.filter((item) => item.collect_type === "4");
     let planPic = data.filter((item) => item.collect_type === "5");
-    // 渲染点的数据
-    let pointCollection = this.renderPointCollection(ponts);
-    this.features = this.features.concat(pointCollection);
-    this.Source.addFeatures(pointCollection);
 
     // 渲染标绘数据
     await this.renderFeaturesCollection(features, {
@@ -624,6 +622,10 @@ function Action() {
     const sou = this.layer.showLayer.getSource();
     // 渲染规划图
     let ext = await this.renderPlanPicCollection(planPic);
+    // 渲染点的数据
+    let pointCollection = this.renderPointCollection(ponts);
+    this.features = this.features.concat(pointCollection);
+    this.Source.addFeatures(pointCollection);
 
     if (!animation) return this.features;
 
@@ -1028,12 +1030,12 @@ function Action() {
   };
 
   //   删除元素坐标的overlay
-  this.removeLayer = (flag) => {
+  this.removeLayer = (flag = 1) => {
     this.removeOverlay();
     this.removeFeatures();
     this.removeAreaSelect();
     this.removePlanPicCollection();
-    if (!flag) InitMap.map.removeLayer(this.Layer);
+    // if (!flag) InitMap.map.removeLayer(this.Layer);
   };
   this.RemoveArea = async (id) => {
     return await DELETE_AREA(id);
