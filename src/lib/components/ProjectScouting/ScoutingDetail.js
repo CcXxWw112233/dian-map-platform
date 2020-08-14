@@ -1397,7 +1397,7 @@ function Action() {
     if (arr.length && oldData.length === data.length) {
       // 这里是删除之后又新增了，所以长度一致，但是ID不同，会有更新的数据，要调用刷新的监听
       // console.log(arr,'刷新');
-      Event.Evt.firEvent("CollectionUpdate:reload", arr);
+      Event.Evt.firEvent("CollectionUpdate:reload", data);
     }
     // 将最新的数据更新到本地。用来对比
     this.oldData = data;

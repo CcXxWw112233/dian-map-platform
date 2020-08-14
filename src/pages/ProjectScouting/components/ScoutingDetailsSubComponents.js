@@ -456,7 +456,8 @@ export const ScoutingItem = ({
     onDragEnd = ()=>{},
     onMergeUp,
     onMergeDown,
-    onMergeCancel
+    onMergeCancel,
+    onCheckItem = ()=>{}
   }) => {
     return (
       <DragDropContext onDragEnd={onDragEnd.bind(this,data)}>
@@ -489,6 +490,7 @@ export const ScoutingItem = ({
                             </span>
                             { item.type !== 'groupCollection' ?
                               <UploadItem
+                                onCheckItem={onCheckItem}
                                 onCopyCollection={onCopyCollection}
                                 onChangeDisplay={onChangeDisplay}
                                 onEditPlanPic={onEditPlanPic}
@@ -513,6 +515,7 @@ export const ScoutingItem = ({
                                   item.child && item.child.map((child,i) =>
                                     (
                                        <UploadItem
+                                        onCheckItem={onCheckItem}
                                         group_id={item.gid}
                                         subIndex={i}
                                         group_length={item.child.length}
@@ -585,6 +588,7 @@ export const UploadItem = ({
     subIndex,
     group_length,
     group_id,
+    onCheckItem = ()=>{},
     onMergeCancel = ()=>{}
   }) => {
     let obj = { ...data };
@@ -847,6 +851,13 @@ export const UploadItem = ({
     }
 
     const itemClick = (val) => {
+      let ty = Action.checkCollectionType(val.target);
+      if(ty === 'pic'){
+        // 点击的是图片
+        onCheckItem(val);
+      }else {
+        onCheckItem(null);
+      }
       if (val.is_display === "0") return;
       if (
         val.location &&
