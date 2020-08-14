@@ -1,5 +1,6 @@
 import React from "react";
 import { Radio, Row, message } from "antd";
+import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import styles from "../LeftToolBar.less";
 import ScoutAction from "../../../lib/components/ProjectScouting/ScoutingList";
@@ -15,6 +16,7 @@ export default class ProjectList extends React.Component {
       projectList: ListAction.projects,
       projectId: "",
       projectName: "",
+      openPanel: true,
     };
   }
   onChange = (value) => {
@@ -65,46 +67,65 @@ export default class ProjectList extends React.Component {
   };
 
   render() {
+    const panelStyle = this.state.openPanel
+      ? {}
+      : { transform: "translateX(-100%)" };
+    const directionStyle = { display: "table-cell", verticalAlign: "middle" };
     return (
-      <div
-        className={styles.panel}
-        style={{ position: "absolute", left: 56, top: 0 }}
-      >
-        <div
-          className={styles.header}
-          style={{ padding: "0 20px", marginBottom: 10 }}
-        >
-          <i
-            className={globalStyle.global_icon}
-            onClick={() => this.props.goBackTempPlot([])}
+      <div className={styles.panel} style={panelStyle}>
+        <div style={{ width: "100%", height: "100%" }}>
+          <div
+            className={styles.header}
+            style={{ padding: "0 20px", marginBottom: 10 }}
           >
-            &#xe758;
-          </i>
+            <i
+              className={globalStyle.global_icon}
+              onClick={() => this.props.goBackTempPlot([])}
+            >
+              &#xe758;
+            </i>
+          </div>
+          <div
+            className={`${styles.body} ${globalStyle.autoScrollY}`}
+            style={{
+              height: "calc(100% - 50px)",
+            }}
+          >
+            <div className={styles.content}>
+              <Radio.Group
+                onChange={(e) => this.onChange(e.target.value)}
+                value={this.state.projectId}
+                style={{ width: "100%", textAlign: "left" }}
+              >
+                {this.state.projectList.map((project) => {
+                  return (
+                    <Row
+                      style={{ width: "100%", height: 30, lineHeight: 20 }}
+                      key={project.board_id}
+                    >
+                      <Radio value={project.board_id}>
+                        {project.board_name}
+                      </Radio>
+                    </Row>
+                  );
+                })}
+              </Radio.Group>
+            </div>
+          </div>
         </div>
         <div
-          className={`${styles.body} ${globalStyle.autoScrollY}`}
-          style={{
-            height: "calc(100% - 50px)",
+          className={styles.controller}
+          onClick={() => {
+            this.setState({
+              openPanel: !this.state.openPanel,
+            });
           }}
         >
-          <div className={styles.content}>
-            <Radio.Group
-              onChange={(e) => this.onChange(e.target.value)}
-              value={this.state.projectId}
-              style={{ width: "100%", textAlign: "left" }}
-            >
-              {this.state.projectList.map((project) => {
-                return (
-                  <Row
-                    style={{ width: "100%", height: 30, lineHeight: 20 }}
-                    key={project.board_id}
-                  >
-                    <Radio value={project.board_id}>{project.board_name}</Radio>
-                  </Row>
-                );
-              })}
-            </Radio.Group>
-          </div>
+          {this.state.openPanel ? (
+            <LeftOutlined style={directionStyle} />
+          ) : (
+            <RightOutlined style={directionStyle} />
+          )}
         </div>
       </div>
     );

@@ -283,56 +283,79 @@ export default class LeftToolBar extends React.Component {
         className={styles.wrapper}
         style={{ position: "absolute", top: 0, left: 0 }}
       >
-        <div className={styles.circle}>
-          {/* <img alt="" src=""></img> */}
-          <i className={globalStyle.global_icon} style={{ fontSize: 26 }}>
-            &#xe764;
-          </i>
-        </div>
-        <ul>
-          {this.leftTools.map((item, index) => {
-            let displayText = true;
-            if (
-              item.displayText === false ||
-              this.state.selectedIndex === index
-            ) {
-              displayText = false;
-            }
-            const divStyle = displayText ? {} : { display: "table" };
-            const iStyle = displayText
-              ? {}
-              : { display: "table-cell", verticalAlign: "middle" };
-            return (
-              <li key={`${item.iconfont}-${index}`}>
-                <div
-                  className={`${styles.item} ${
-                    this.state.selectedIndex === index ? styles.active : ""
-                  }`}
-                  style={divStyle}
-                  onClick={() => {
-                    this.setState({
-                      selectedIndex: index,
-                      displayTempPlot: false,
-                    });
-                    item.cb && item.cb();
-                  }}
-                >
-                  <i
-                    className={globalStyle.global_icon}
-                    dangerouslySetInnerHTML={{ __html: item.iconfont }}
-                    style={iStyle}
-                  ></i>
-                  {displayText ? (
-                    <p>
-                      <span>{item.name}</span>
-                    </p>
-                  ) : null}
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-        {this.state.displayTempPlotIcon ? (
+        <div style={{ width: "100%", height: "100%", background: "#6a9aff", zIndex: 9 }}>
+          <div className={styles.circle}>
+            {/* <img alt="" src=""></img> */}
+            <i className={globalStyle.global_icon} style={{ fontSize: 26 }}>
+              &#xe764;
+            </i>
+          </div>
+          <ul>
+            {this.leftTools.map((item, index) => {
+              let displayText = true;
+              if (
+                item.displayText === false ||
+                this.state.selectedIndex === index
+              ) {
+                displayText = false;
+              }
+              const divStyle = displayText ? {} : { display: "table" };
+              const iStyle = displayText
+                ? {}
+                : { display: "table-cell", verticalAlign: "middle" };
+              return (
+                <li key={`${item.iconfont}-${index}`}>
+                  <div
+                    className={`${styles.item} ${
+                      this.state.selectedIndex === index ? styles.active : ""
+                    }`}
+                    style={divStyle}
+                    onClick={() => {
+                      this.setState({
+                        selectedIndex: index,
+                        displayTempPlot: false,
+                      });
+                      item.cb && item.cb();
+                    }}
+                  >
+                    <i
+                      className={globalStyle.global_icon}
+                      dangerouslySetInnerHTML={{ __html: item.iconfont }}
+                      style={iStyle}
+                    ></i>
+                    {displayText ? (
+                      <p>
+                        <span>{item.name}</span>
+                      </p>
+                    ) : null}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+          {this.state.displayTempPlotIcon ? (
+            <div
+              className={`${styles.circle} ${styles.temp}`}
+              onClick={() => {
+                this.setState({
+                  selectedIndex: -1,
+                  displayPlot: false,
+                  displayProject: false,
+                  displayTempPlot: true,
+                  displayCustomSymbolStore: false,
+                  plotType: "",
+                });
+              }}
+              style={tempPlotItemStyle}
+            >
+              <i
+                className={globalStyle.global_icon}
+                style={{ fontSize: 30, color: "#fff" }}
+              >
+                &#xe765;
+              </i>
+            </div>
+          ) : null}
           <div
             className={`${styles.circle} ${styles.temp}`}
             onClick={() => {
@@ -340,41 +363,20 @@ export default class LeftToolBar extends React.Component {
                 selectedIndex: -1,
                 displayPlot: false,
                 displayProject: false,
-                displayTempPlot: true,
-                displayCustomSymbolStore: false,
+                displayTempPlot: false,
+                displayCustomSymbolStore: true,
                 plotType: "",
               });
             }}
-            style={tempPlotItemStyle}
+            style={customSymbolStoreStyle}
           >
             <i
               className={globalStyle.global_icon}
               style={{ fontSize: 30, color: "#fff" }}
             >
-              &#xe765;
+              &#xe7b6;
             </i>
           </div>
-        ) : null}
-        <div
-          className={`${styles.circle} ${styles.temp}`}
-          onClick={() => {
-            this.setState({
-              selectedIndex: -1,
-              displayPlot: false,
-              displayProject: false,
-              displayTempPlot: false,
-              displayCustomSymbolStore: true,
-              plotType: "",
-            });
-          }}
-          style={customSymbolStoreStyle}
-        >
-          <i
-            className={globalStyle.global_icon}
-            style={{ fontSize: 30, color: "#fff" }}
-          >
-            &#xe7b6;
-          </i>
         </div>
         {this.state.displayPlot ? (
           <Plot

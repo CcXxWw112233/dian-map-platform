@@ -393,12 +393,12 @@ function Action() {
       }
       if (
         featureType.indexOf("/") > -1 ||
-        featureType.indexOf("data:image/png;base64") > -1
+        featureType.indexOf("data:image") > -1
       ) {
         isImage = true;
         if (featureType.indexOf("https") === 0) {
           iconUrl = featureType;
-        } else if (featureType.indexOf("data:image/png;base64") > -1) {
+        } else if (featureType.indexOf("data:image") > -1) {
           iconUrl = featureType;
         } else {
           featureType = featureType.replace("img", "");
@@ -429,7 +429,7 @@ function Action() {
             type: featureLowerType,
           };
           if (content.sigleImage) {
-            if (content.sigleImage.indexOf("data:image/png;base64") > -1) {
+            if (content.sigleImage.indexOf("data:image") > -1) {
               obj.sigleImage = content.sigleImage;
             } else if (content.sigleImage.indexOf("/") > -1) {
               let sigleImage = content.sigleImage.replace("img", "");
@@ -516,7 +516,7 @@ function Action() {
           let iconUrl = "";
           if (content.sigleImage.indexOf("https") === 0) {
             iconUrl = content.sigleImage;
-          } else if (content.sigleImage.indexOf("data:image/png;base64") > -1) {
+          } else if (content.sigleImage.indexOf("data:image") > -1) {
             iconUrl = content.sigleImage;
           } else {
             iconUrl = content.sigleImage.replace("img", "");

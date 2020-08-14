@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import { Input, Select, Button, Tooltip, message } from "antd";
-import { CaretUpOutlined, CaretDownOutlined } from "@ant-design/icons";
+import {
+  CaretUpOutlined,
+  CaretDownOutlined,
+  LeftOutlined,
+  RightOutlined,
+} from "@ant-design/icons";
 
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import styles from "../LeftToolBar.less";
@@ -164,6 +169,7 @@ export default class Plot extends React.Component {
       strokePercent: "1",
       fillPercent: "1",
       symbols: [],
+      openPanel: true,
     };
     this.fillColor = "rgba(106, 154, 255, 1)";
     this.strokeColor = "rgba(106, 154, 255, 1)";
@@ -961,233 +967,251 @@ export default class Plot extends React.Component {
   render() {
     const { TextArea } = Input;
     const { Option } = Select;
-
+    const panelStyle = this.state.openPanel
+      ? {}
+      : { transform: "translateX(-100%)" };
+    const directionStyle = { display: "table-cell", verticalAlign: "middle" };
     return (
-      <div
-        className={styles.panel}
-        style={{ position: "absolute", left: 56, top: 0 }}
-      >
-        <div
-          className={styles.header}
-          style={{ padding: "0 20px", marginBottom: 10 }}
-        >
-          <i
-            className={globalStyle.global_icon}
-            onClick={() => this.props.goBackProject()}
-            title="返回到项目(列表)"
+      <div className={styles.panel} style={panelStyle}>
+        <div style={{ width: "100%", height: "100%" }}>
+          <div
+            className={styles.header}
+            style={{ padding: "0 20px", marginBottom: 10 }}
           >
-            &#xe758;
-          </i>
-          <i
-            className={globalStyle.global_icon}
-            title="重置"
-            onClick={this.handleResetClick}
-          >
-            &#xe7ce;
-          </i>
-        </div>
-        <div
-          className={`${styles.body} ${globalStyle.autoScrollY}`}
-          style={{
-            height: "calc(100% - 110px)",
-          }}
-        >
-          <div className={styles.content}>
-            <Input
-              style={{
-                width: "100%",
-                height: 40,
-                marginBottom: 20,
-              }}
-              placeholder="输入名称"
-              allowClear
-              value={this.state.name}
-              onChange={(e) => this.handleInputChange(e.target.value)}
-            />
-            <TextArea
-              style={{
-                width: "100%",
-                height: 120,
-              }}
-              placeholder="填写备注"
-              allowClear
-              value={this.state.remark}
-              onChange={(e) => this.onTextAreaChange(e.target.value)}
-            />
             <i
               className={globalStyle.global_icon}
-              ref="defaultSymbol"
-              style={{ display: "none" }}
+              onClick={() => this.props.goBackProject()}
+              title="返回到项目(列表)"
             >
-              &#xe75d;
+              &#xe758;
             </i>
-            {this.props.plotType !== "point" ? (
-              <div className={styles.header} style={{ marginTop: 20 }}>
-                <span>轮廓色</span>
-                <ColorPicker
-                  style={{ margin: "auto" }}
-                  handleOK={this.handleCustomStrokeColorOkClick}
-                ></ColorPicker>
-                <div
-                  className={styles.colorbar}
-                  style={{
-                    background: this.state.customStrokeSelectedColor,
-                    margin: "auto",
-                  }}
-                ></div>
-                <Select
-                  value={this.state.strokePercent}
-                  style={{ width: 120 }}
-                  bordered={false}
-                  onChange={(e) => this.handleCustomStrokeColorSelectChange(e)}
-                >
-                  <Option value="1">100%</Option>
-                  <Option value="0.75">75%</Option>
-                  <Option value="0.5">50%</Option>
-                  <Option value="0.25">25%</Option>
-                  <Option value="0">0%</Option>
-                </Select>
-              </div>
-            ) : null}
-            {this.props.plotType !== "point" ? (
-              <div className={styles.block}>
-                {this.defeaultColors.map((item, index) => {
-                  const style = item.selectedColor
-                    ? { color: item.selectedColor }
-                    : {};
+            <i
+              className={globalStyle.global_icon}
+              title="重置"
+              onClick={this.handleResetClick}
+            >
+              &#xe7ce;
+            </i>
+          </div>
+          <div
+            className={`${styles.body} ${globalStyle.autoScrollY}`}
+            style={{
+              height: "calc(100% - 110px)",
+            }}
+          >
+            <div className={styles.content}>
+              <Input
+                style={{
+                  width: "100%",
+                  height: 40,
+                  marginBottom: 20,
+                }}
+                placeholder="输入名称"
+                allowClear
+                value={this.state.name}
+                onChange={(e) => this.handleInputChange(e.target.value)}
+              />
+              <TextArea
+                style={{
+                  width: "100%",
+                  height: 120,
+                }}
+                placeholder="填写备注"
+                allowClear
+                value={this.state.remark}
+                onChange={(e) => this.onTextAreaChange(e.target.value)}
+              />
+              <i
+                className={globalStyle.global_icon}
+                ref="defaultSymbol"
+                style={{ display: "none" }}
+              >
+                &#xe75d;
+              </i>
+              {this.props.plotType !== "point" ? (
+                <div className={styles.header} style={{ marginTop: 20 }}>
+                  <span>轮廓色</span>
+                  <ColorPicker
+                    style={{ margin: "auto" }}
+                    handleOK={this.handleCustomStrokeColorOkClick}
+                  ></ColorPicker>
+                  <div
+                    className={styles.colorbar}
+                    style={{
+                      background: this.state.customStrokeSelectedColor,
+                      margin: "auto",
+                    }}
+                  ></div>
+                  <Select
+                    value={this.state.strokePercent}
+                    style={{ width: 120 }}
+                    bordered={false}
+                    onChange={(e) =>
+                      this.handleCustomStrokeColorSelectChange(e)
+                    }
+                  >
+                    <Option value="1">100%</Option>
+                    <Option value="0.75">75%</Option>
+                    <Option value="0.5">50%</Option>
+                    <Option value="0.25">25%</Option>
+                    <Option value="0">0%</Option>
+                  </Select>
+                </div>
+              ) : null}
+              {this.props.plotType !== "point" ? (
+                <div className={styles.block}>
+                  {this.defeaultColors.map((item, index) => {
+                    const style = item.selectedColor
+                      ? { color: item.selectedColor }
+                      : {};
+                    return (
+                      <div
+                        className={styles.symbol}
+                        key={guid(false)}
+                        style={{
+                          background: item.fill,
+                          border: `1px solid ${item.border}`,
+                        }}
+                        onClick={() => {
+                          this.setState(
+                            { strokeSelectedIndex: index },
+                            this.handleColorClick(item, 0)
+                          );
+                        }}
+                      >
+                        {this.state.strokeSelectedIndex === index && (
+                          <i className={globalStyle.global_icon} style={style}>
+                            &#xe75b;
+                          </i>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : null}
+              {this.props.plotType === "line" ||
+              this.props.plotType === "freeLine" ? null : (
+                <div className={styles.header} style={{ marginTop: 20 }}>
+                  <span>填充色</span>
+                  <ColorPicker
+                    style={{ margin: "auto" }}
+                    handleOK={this.handleCustomFillColorOkClick}
+                  ></ColorPicker>
+                  <div
+                    className={styles.colorbar}
+                    style={{
+                      background: this.state.customFillSelectedColor,
+                      margin: "auto",
+                    }}
+                  ></div>
+                  <Select
+                    value={this.state.fillPercent}
+                    style={{ width: 120 }}
+                    bordered={false}
+                    onChange={(e) => this.handleCustomFillColorSelectChange(e)}
+                  >
+                    <Option value="1">100%</Option>
+                    <Option value="0.75">75%</Option>
+                    <Option value="0.5">50%</Option>
+                    <Option value="0.25">25%</Option>
+                    <Option value="0">0%</Option>
+                  </Select>
+                </div>
+              )}
+              {this.props.plotType === "line" ||
+              this.props.plotType === "freeLine" ? null : (
+                <div className={styles.block}>
+                  {this.defeaultColors.map((item, index) => {
+                    return (
+                      <div
+                        className={styles.symbol}
+                        key={guid(false)}
+                        style={{
+                          background: item.fill,
+                          border: `1px solid ${item.border}`,
+                        }}
+                        onClick={() => {
+                          this.setState(
+                            { fillSelectedIndex: index },
+                            this.handleColorClick(item, 1)
+                          );
+                        }}
+                      >
+                        {this.state.fillSelectedIndex === index && (
+                          <i className={globalStyle.global_icon}>&#xe75b;</i>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+              {this.state.symbols.map((item, index) => {
+                if (item.type.indexOf(this.props.plotType) >= 0) {
                   return (
-                    <div
-                      className={styles.symbol}
+                    <SymbolBlock
                       key={guid(false)}
-                      style={{
-                        background: item.fill,
-                        border: `1px solid ${item.border}`,
-                      }}
-                      onClick={() => {
-                        this.setState(
-                          { strokeSelectedIndex: index },
-                          this.handleColorClick(item, 0)
-                        );
-                      }}
-                    >
-                      {this.state.strokeSelectedIndex === index && (
-                        <i className={globalStyle.global_icon} style={style}>
-                          &#xe75b;
-                        </i>
-                      )}
-                    </div>
+                      data={{ item: item, index: index }}
+                      indexStr={this.state.symbolSelectedIndex}
+                      plotType={this.props.plotType}
+                      strokeColor={this.state.customStrokeSelectedColor}
+                      fillColor={this.state.customFillSelectedColor}
+                      cb={this.getFillSymbol}
+                    ></SymbolBlock>
                   );
-                })}
-              </div>
-            ) : null}
-            {this.props.plotType === "line" ||
-            this.props.plotType === "freeLine" ? null : (
-              <div className={styles.header} style={{ marginTop: 20 }}>
-                <span>填充色</span>
-                <ColorPicker
-                  style={{ margin: "auto" }}
-                  handleOK={this.handleCustomFillColorOkClick}
-                ></ColorPicker>
-                <div
-                  className={styles.colorbar}
-                  style={{
-                    background: this.state.customFillSelectedColor,
-                    margin: "auto",
-                  }}
-                ></div>
-                <Select
-                  value={this.state.fillPercent}
-                  style={{ width: 120 }}
-                  bordered={false}
-                  onChange={(e) => this.handleCustomFillColorSelectChange(e)}
-                >
-                  <Option value="1">100%</Option>
-                  <Option value="0.75">75%</Option>
-                  <Option value="0.5">50%</Option>
-                  <Option value="0.25">25%</Option>
-                  <Option value="0">0%</Option>
-                </Select>
-              </div>
-            )}
-            {this.props.plotType === "line" ||
-            this.props.plotType === "freeLine" ? null : (
-              <div className={styles.block}>
-                {this.defeaultColors.map((item, index) => {
-                  return (
-                    <div
-                      className={styles.symbol}
-                      key={guid(false)}
-                      style={{
-                        background: item.fill,
-                        border: `1px solid ${item.border}`,
-                      }}
-                      onClick={() => {
-                        this.setState(
-                          { fillSelectedIndex: index },
-                          this.handleColorClick(item, 1)
-                        );
-                      }}
-                    >
-                      {this.state.fillSelectedIndex === index && (
-                        <i className={globalStyle.global_icon}>&#xe75b;</i>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-            {this.state.symbols.map((item, index) => {
-              if (item.type.indexOf(this.props.plotType) >= 0) {
-                return (
-                  <SymbolBlock
-                    key={guid(false)}
-                    data={{ item: item, index: index }}
-                    indexStr={this.state.symbolSelectedIndex}
-                    plotType={this.props.plotType}
-                    strokeColor={this.state.customStrokeSelectedColor}
-                    fillColor={this.state.customFillSelectedColor}
-                    cb={this.getFillSymbol}
-                  ></SymbolBlock>
-                );
-              }
-              return null;
-            })}
+                }
+                return null;
+              })}
+            </div>
+          </div>
+          <div
+            className={styles.footer}
+            style={{ display: "flex", flexDirection: "row" }}
+          >
+            <Button
+              block
+              style={{
+                width: 140,
+                height: 36,
+                margin: "12px auto",
+                background: "rgba(163,205,255,0.2)",
+                borderRadius: 4,
+                border: "2px solid rgba(127,167,255,1)",
+                color: "rgba(102, 144, 255, 1)",
+              }}
+              onClick={this.handleSaveClick}
+            >
+              保存
+            </Button>
+            <Button
+              block
+              style={{
+                width: 140,
+                height: 36,
+                margin: "12px auto",
+                background: "rgba(255,85,85,0.2)",
+                borderRadius: 4,
+                border: "2px solid rgba(255,85,85,0.2)",
+                color: "rgba(255, 85, 85, 1)",
+              }}
+              onClick={this.handleDelClick}
+            >
+              删除
+            </Button>
           </div>
         </div>
         <div
-          className={styles.footer}
-          style={{ display: "flex", flexDirection: "row" }}
+          className={styles.controller}
+          onClick={() => {
+            this.setState({
+              openPanel: !this.state.openPanel,
+            });
+          }}
         >
-          <Button
-            block
-            style={{
-              width: 140,
-              height: 36,
-              margin: "12px auto",
-              background: "rgba(163,205,255,0.2)",
-              borderRadius: 4,
-              border: "2px solid rgba(127,167,255,1)",
-              color: "rgba(102, 144, 255, 1)",
-            }}
-            onClick={this.handleSaveClick}
-          >
-            保存
-          </Button>
-          <Button
-            block
-            style={{
-              width: 140,
-              height: 36,
-              margin: "12px auto",
-              background: "rgba(255,85,85,0.2)",
-              borderRadius: 4,
-              border: "2px solid rgba(255,85,85,0.2)",
-              color: "rgba(255, 85, 85, 1)",
-            }}
-            onClick={this.handleDelClick}
-          >
-            删除
-          </Button>
+          {this.state.openPanel ? (
+            <LeftOutlined style={directionStyle} />
+          ) : (
+            <RightOutlined style={directionStyle} />
+          )}
         </div>
       </div>
     );

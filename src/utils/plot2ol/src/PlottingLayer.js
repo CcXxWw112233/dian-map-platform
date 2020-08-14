@@ -134,12 +134,24 @@ class PlottingLayer extends Observable {
     Event.Evt.on(
       "setAttribute",
       ({ style, attrs, responseData, saveCb, delCb, isDefault }) => {
-        this.style = style;
-        this.attrs = attrs;
-        this.responseData = responseData;
-        this.saveCb = saveCb;
-        this.deleteCb = delCb;
-        this.isDefault = isDefault;
+        if (style) {
+          this.style = style;
+        }
+        if (attrs) {
+          this.attrs = attrs;
+        }
+        if (responseData) {
+          this.responseData = responseData;
+        }
+        if (saveCb) {
+          this.saveCb = saveCb;
+        }
+        if (delCb) {
+          this.deleteCb = delCb;
+        }
+        if (isDefault) {
+          this.isDefault = isDefault;
+        }
       }
     );
   }
@@ -482,7 +494,7 @@ class PlottingLayer extends Observable {
         feature_operator.feature && feature_operator.feature.ol_uid
       )
     ) {
-      this.removePlotOverlay(feature_operator)
+      this.removePlotOverlay(feature_operator);
       source.removeFeature(feature_operator.feature);
     }
     this.plotEdit.deactivate();
@@ -494,10 +506,10 @@ class PlottingLayer extends Observable {
   }
 
   removePlotOverlay(feature_operator) {
-    const overlayId = feature_operator.feature.get("overlayId")
-    if (!overlayId) return
-    const overlay = this.map.getOverlayById(overlayId)
-    this.map.removeOverlay(overlay)
+    const overlayId = feature_operator.feature.get("overlayId");
+    if (!overlayId) return;
+    const overlay = this.map.getOverlayById(overlayId);
+    this.map.removeOverlay(overlay);
   }
   /**
    * 清空图元
