@@ -63,15 +63,15 @@ export const createPopupOverlay = (feature, coordinate) => {
   let popupEle = new PopupOverlay(data);
   popupEle = new baseOverlay(popupEle, { angleColor: "#fff" });
   overlay = createOverlay(popupEle, {
-    // positioning: "bottom-left",
-    // offset: [-10, -15],
+    positioning: "bottom-left",
+    offset: [-10, -15],
   });
   if (feature.overlay) {
     InitMap.map.removeOverlay(feature.overlay);
   }
   feature.overlay = overlay;
   InitMap.map.addOverlay(overlay);
-  let extent = feature.getGeometry().getExtent();
-  coordinate = [(extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2];
+  // let extent = feature.getGeometry().getExtent();
+  // coordinate = [(extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2];
   overlay.setPosition(coordinate);
 };
