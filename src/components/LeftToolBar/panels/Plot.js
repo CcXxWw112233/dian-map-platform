@@ -937,80 +937,80 @@ export default class Plot extends React.Component {
       window.featureOperator.attrs.name = this.plotName;
       window.featureOperator.setName(this.plotName);
       window.featureOperator.attrs.remark = this.plotRemark;
-      ListAction.checkItem()
-        .then((res) => {
-          if (res) {
-            // 项目内
-            if (res.code === 0) {
-              if (this.projectId) {
-                this.save2Group(window.featureOperator)
-                  .then((resp) => {
-                    if (window.ProjectGroupId) {
-                      let collections = DetailAction.CollectionGroup;
-                      let obj = collections.find(
-                        (item) => item.id === window.ProjectGroupId
-                      );
-                      if (obj) {
-                        let data = resp.data;
-                        let coll = data && data[0];
-                        if (coll) {
-                          coll.is_display = "1";
-                          obj.collection.push(coll);
-                          let arr = obj.collection;
-                          DetailAction.renderCollection(arr, {
-                            lenged: this.props.config,
-                            dispatch: this.props.dispatch,
-                          });
-                        }
-                      }
-                      this.props.goBackProject();
-                    }
-                  })
-                  .catch((err) => {
-                    console.log(err);
-                  });
-              }
-            } else {
-              this.savePlot2TempPlot(window.featureOperator);
-            }
-          }
-        })
-        .catch((err) => {
-          this.savePlot2TempPlot(window.featureOperator);
-        });
-      // 选择了项目
-      // if (this.projectId) {
-      //   this.save2Group(window.featureOperator)
-      //     .then((resp) => {
-      //       if (window.ProjectGroupId) {
-      //         let collections = DetailAction.CollectionGroup;
-      //         let obj = collections.find(
-      //           (item) => item.id === window.ProjectGroupId
-      //         );
-      //         if (obj) {
-      //           let data = resp.data;
-      //           let coll = data && data[0];
-      //           if (coll) {
-      //             coll.is_display = "1";
-      //             obj.collection.push(coll);
-      //             let arr = obj.collection;
-      //             DetailAction.renderCollection(arr, {
-      //               lenged: this.props.config,
-      //               dispatch: this.props.dispatch,
+      // ListAction.checkItem()
+      //   .then((res) => {
+      //     if (res) {
+      //       // 项目内
+      //       if (res.code === 0) {
+      //         if (this.projectId) {
+      //           this.save2Group(window.featureOperator)
+      //             .then((resp) => {
+      //               if (window.ProjectGroupId) {
+      //                 let collections = DetailAction.CollectionGroup;
+      //                 let obj = collections.find(
+      //                   (item) => item.id === window.ProjectGroupId
+      //                 );
+      //                 if (obj) {
+      //                   let data = resp.data;
+      //                   let coll = data && data[0];
+      //                   if (coll) {
+      //                     coll.is_display = "1";
+      //                     obj.collection.push(coll);
+      //                     let arr = obj.collection;
+      //                     DetailAction.renderCollection(arr, {
+      //                       lenged: this.props.config,
+      //                       dispatch: this.props.dispatch,
+      //                     });
+      //                   }
+      //                 }
+      //                 this.props.goBackProject();
+      //               }
+      //             })
+      //             .catch((err) => {
+      //               console.log(err);
       //             });
-      //           }
       //         }
-      //         this.props.goBackProject();
+      //       } else {
+      //         this.savePlot2TempPlot(window.featureOperator);
       //       }
-      //     })
-      //     .catch((err) => {
-      //       console.log(err);
-      //     });
-      // }
-      // // 未选择项目
-      // else {
-      //   this.savePlot2TempPlot(window.featureOperator);
-      // }
+      //     }
+      //   })
+      //   .catch((err) => {
+      //     this.savePlot2TempPlot(window.featureOperator);
+      //   });
+      // 选择了项目
+      if (this.projectId) {
+        this.save2Group(window.featureOperator)
+          .then((resp) => {
+            if (window.ProjectGroupId) {
+              let collections = DetailAction.CollectionGroup;
+              let obj = collections.find(
+                (item) => item.id === window.ProjectGroupId
+              );
+              if (obj) {
+                let data = resp.data;
+                let coll = data && data[0];
+                if (coll) {
+                  coll.is_display = "1";
+                  obj.collection.push(coll);
+                  let arr = obj.collection;
+                  DetailAction.renderCollection(arr, {
+                    lenged: this.props.config,
+                    dispatch: this.props.dispatch,
+                  });
+                }
+              }
+              this.props.goBackProject();
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      }
+      // 未选择项目
+      else {
+        this.savePlot2TempPlot(window.featureOperator);
+      }
     } else {
       message.info("请先标绘");
     }

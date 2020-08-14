@@ -226,6 +226,7 @@ export default class LeftToolBar extends React.Component {
         displayTempPlotIcon: true,
       });
     }
+    window.featureOperator && delete window.featureOperator
   };
 
   updateFeatureOperatorList2 = (list) => {
