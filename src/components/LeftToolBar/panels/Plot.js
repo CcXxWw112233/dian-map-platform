@@ -471,15 +471,22 @@ export default class Plot extends React.Component {
   };
   handleInputChange = (val) => {
     let newVal = val.replace(/\s+/g, "");
-    if (!newVal) {
-      message.info("标绘名称不能空白！");
-      return;
-    }
+    // if (!newVal) {
+    //   message.info("标绘名称不能空白！");
+    //   return;
+    // }
     this.plotName = newVal;
     this.setState({
       name: newVal,
     });
     if (window.featureOperator) {
+      if (!this.plotName) {
+        const { parent } = this.props;
+        let count = parent.featureOperatorList.filter((operator) => {
+          return operator.attrs.selectName?.indexOf(this.selectName) > -1;
+        }).length;
+        this.plotName = this.selectName + "#" + (count + 1);
+      }
       // 更新style
       let style = window.featureOperator.feature.getStyle();
       style.getText().setText(this.plotName);
