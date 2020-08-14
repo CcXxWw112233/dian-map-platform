@@ -225,7 +225,6 @@ function Action() {
       InitMap.map.removeOverlay(this.polygonOverlay);
     }
   };
-
   this.removeFeatures = () => {
     this.removeOverlay();
     this.removePlanPicCollection();
@@ -236,14 +235,14 @@ function Action() {
       }
     });
     // 删除绘制的元素
+    console.log(this.layer,'77777777777777777777')
     if (this.layer) {
       this.layer.projectScoutingArr &&
-        this.layer.projectScoutingArr.forEach((item) => {
-          if (item && item.feature) {
-            InitMap.map.removeOverlay(item.feature.overlay);
-            item && item.feature && this.layer.removeFeature(item);
-          }
-        });
+      this.layer.projectScoutingArr.forEach((item) => {
+        INITMAP.map.removeOverlay(item.feature && item.feature.overlay);
+        if (item.feature) this.layer.removeFeature(item);
+      });
+      this.layer.projectScoutingArr = [];
     }
 
     this.features = [];

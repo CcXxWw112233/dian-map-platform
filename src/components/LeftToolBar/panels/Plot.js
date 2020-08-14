@@ -462,9 +462,10 @@ export default class Plot extends React.Component {
       // console.log(board);
       DetailAction.addCollection(obj)
         .then((res) => {
+          let obj = DetailAction.CollectionGroup.find(item => item.id === window.ProjectGroupId);
           message.success(
             `标绘已成功保存到${this.projectName}的${
-              window.ProjectGroupName || "未"
+              obj ? obj.name : "未"
             }分组`
           );
           this.plotLayer.removeFeature(operator);
@@ -922,16 +923,17 @@ export default class Plot extends React.Component {
     // 有标绘被选择
     if (window.featureOperator) {
       // 更新style
-      let style = window.featureOperator.feature.getStyle();
-      style.getText().setText(this.plotName);
-      window.featureOperator.feature.setStyle(style);
+      let tstyle = window.featureOperator.feature.getStyle();
+      let textStyle = tstyle.getText();
+      textStyle.setText(this.plotName);
+      window.featureOperator.feature.setStyle(tstyle);
       // 更新attrs
       window.featureOperator.attrs.name = this.plotName;
       window.featureOperator.setName(this.plotName);
       window.featureOperator.attrs.remark = this.plotRemark;
       // 选择了项目
       if (this.projectId) {
-        this.save2Group(window.featureOperator)
+       this.save2Group(window.featureOperator)
           .then((resp) => {
             if (window.ProjectGroupId) {
               let collections = DetailAction.CollectionGroup;
