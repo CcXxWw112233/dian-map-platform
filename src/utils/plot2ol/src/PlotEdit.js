@@ -146,7 +146,7 @@ class PlotEdit extends Observable {
     const delBtnEle = document.createElement("div");
     delBtnEle.title = "保存标绘";
     delBtnEle.classList.add("p-helper-control-feature-save");
-    const delBtnOverlay = new Overlay({
+    const saveBtnOverlay = new Overlay({
       id: "featureSaveBtn",
       element: delBtnEle,
       position: pt,
@@ -154,14 +154,14 @@ class PlotEdit extends Observable {
       offset: [36, 0],
     });
     this.layer.plotEdit.controlPoints &&
-      this.layer.plotEdit.controlPoints.push(delBtnOverlay);
-    this.map.addOverlay(delBtnOverlay);
+      this.layer.plotEdit.controlPoints.push(saveBtnOverlay);
+    this.map.addOverlay(saveBtnOverlay);
     DomUtils.addListener(
       delBtnEle,
       "mousedown",
       () => {
         this.layer.saveCb && this.layer.saveCb(window.featureOperator);
-        this.deactivate()
+        this.deactivate();
       },
       this
     );
@@ -537,6 +537,10 @@ class PlotEdit extends Observable {
     // 更新删除按钮
     const delOverlay = this.map.getOverlayById("featureDelBtn");
     delOverlay && delOverlay.setPosition(lastPoi);
+
+    // 更新保存按钮
+    const saveOverlay = this.map.getOverlayById("featureSaveBtn");
+    saveOverlay && saveOverlay.setPosition(lastPoi);
 
     // 更新overlay
     this.updatePlotOverlay();
