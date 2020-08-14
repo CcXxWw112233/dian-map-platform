@@ -1165,7 +1165,7 @@ export default class ScoutingDetails extends PureComponent {
           <Fragment>
           <div
               className={globalStyle.autoScrollY}
-              style={{ height: "100%", paddingBottom: "40px" }}
+              style={{ height: "calc(100% - 96px)" }}
               ref={this.scrollView}>
               <Collapse
                 onChange={(e) => {

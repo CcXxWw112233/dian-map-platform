@@ -335,7 +335,6 @@ class PlottingLayer extends Observable {
       };
       fo.responseData = this.responseData;
     }
-    window.featureOperator = fo
     this.feature_operators.push(fo);
     // if (this.attrs) {
     //   const tempList = this.getArrDifference(

@@ -23,21 +23,27 @@ export default class TempPlot extends React.Component {
   }
   componentDidMount() {
     this.plotLayer = plotEdit.getPlottingLayer();
-    const me = this;
+    const { parent } = this.props;
     this.operatorDeactive = function (e) {
       if (!e.feature_operator.isScouting) {
         let operator = e.feature_operator;
-        me.props.updateFeatureOperatorList(operator);
+        parent.updateFeatureOperatorList(operator);
         window.featureOperator = null;
       }
     };
     this.plotLayer &&
       this.plotLayer.on(FeatureOperatorEvent.DEACTIVATE, this.operatorDeactive);
-    this.props.featureOperatorList.forEach((operator) => {
-      operator.feature.getGeometry().updatePlot(false);
+    let newFeatureOperatorList = [];
+    parent.featureOperatorList.forEach((operator, index) => {
+      let feature = operator.feature;
+      if (feature && feature.getGeometry()) {
+        feature.getGeometry().updatePlot(false);
+        newFeatureOperatorList.push(operator);
+      }
     });
+    parent.updateFeatureOperatorList2(newFeatureOperatorList);
     this.setState({
-      featureOperatorList: this.props.featureOperatorList,
+      featureOperatorList: newFeatureOperatorList,
     });
     const projects = ListAction.projects;
     if (projects.length > 0) {
@@ -76,8 +82,8 @@ export default class TempPlot extends React.Component {
         checkedList: newCheckedList,
       },
       () => {
-        const { featureOperatorList } = this.props;
-        if (newCheckedList.length === featureOperatorList.length) {
+        const { parent } = this.props;
+        if (newCheckedList.length === parent.featureOperatorList.length) {
           this.setState({
             checkAll: true,
             indeterminate: false,
@@ -99,14 +105,15 @@ export default class TempPlot extends React.Component {
 
   saveToProject = () => {
     let arr = this.getSelectedData();
-    this.props.updateSelectFeatureOperatorList(arr);
+    const { parent } = this.props;
+    parent.updateSelectFeatureOperatorList(arr);
     this.props.displayProjctList();
   };
   onCheckAllChange = (e) => {
     if (e.target.checked) {
       let newCheckedList = [];
-      const { featureOperatorList } = this.props;
-      featureOperatorList.forEach((item) => {
+      const { parent } = this.props;
+      parent.featureOperatorList.forEach((item) => {
         newCheckedList.push(item.guid);
       });
       this.setState({
@@ -123,13 +130,13 @@ export default class TempPlot extends React.Component {
     }
   };
   handleCloseClick = () => {
-    const { hideTempPlotPanel } = this.props;
-    hideTempPlotPanel();
+    const { parent } = this.props;
+    parent.hideTempPlotPanel();
   };
 
   handleEditClick = (featureOperator) => {
     window.featureOperator = featureOperator;
-    this.props.displayPlotPanel(featureOperator.attrs.plotType);
+    this.props.displayPlotPanel(featureOperator.attrs);
   };
 
   handleDelClick = (featureOperator) => {
@@ -149,7 +156,8 @@ export default class TempPlot extends React.Component {
       this.setState({
         featureOperatorList: newList2,
       });
-      this.props.updateFeatureOperatorList2(newList2);
+      const { parent } = this.props;
+      parent.updateFeatureOperatorList2(newList2);
     }
   };
 
@@ -216,11 +224,13 @@ export default class TempPlot extends React.Component {
   };
 
   getSelectedData = () => {
-    let { featureOperatorList } = this.props;
+    let { parent } = this.props;
     let { checkedList } = this.state;
 
     let list = checkedList.map((item) => {
-      let obj = featureOperatorList.find((feature) => feature.guid === item);
+      let obj = parent.featureOperatorList.find(
+        (feature) => feature.guid === item
+      );
       return obj;
     });
     return list;
@@ -255,14 +265,14 @@ export default class TempPlot extends React.Component {
           <span>临时标绘</span>
         </div>
         <div
-          className={`${styles.body} ${globalStyle.autoScrollY}`}
+          className={styles.body}
           style={{
             height: "calc(100% - 30px)",
           }}
         >
           {this.state.featureOperatorList.length > 0 ? (
             <div
-              className={styles.content}
+              className={`${styles.content} ${globalStyle.autoScrollY}`}
               style={{ height: "calc(100% - 70px)", padding: 0 }}
             >
               <div className={styles.checkAll} style={{ marginLeft: 10 }}>
