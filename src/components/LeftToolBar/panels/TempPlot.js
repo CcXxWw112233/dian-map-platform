@@ -338,8 +338,6 @@ export default class TempPlot extends React.Component {
                           >
                             &#xe759;
                           </i>
-                        </div>
-                        <div className={styles.edit}>
                           <i
                             className={globalStyle.global_icon}
                             style={{

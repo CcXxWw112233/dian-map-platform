@@ -817,22 +817,27 @@ export default class Plot extends React.Component {
         attrs: attrs,
       });
     } else {
-      window.featureOperator.feature.setStyle(style);
-      window.featureOperator.setName(attrs.name);
-      window.featureOperator.attrs = attrs;
-      if (this.dic[this.props.plotType] === "Polygon") {
-        if (iconUrl) {
-          plotEdit.plottingLayer.plotEdit.createPlotOverlay(
-            iconUrl,
-            window.featureOperator
-          );
-        } else {
-          plotEdit.plottingLayer.plotEdit.removePlotOverlay(
-            window.featureOperator
-          );
+      if (window.featureOperator.feature) {
+        window.featureOperator.feature.setStyle(style);
+        window.featureOperator.setName(attrs.name);
+        window.featureOperator.attrs = attrs;
+        if (this.dic[this.props.plotType] === "Polygon") {
+          if (iconUrl) {
+            plotEdit.plottingLayer.plotEdit.createPlotOverlay(
+              iconUrl,
+              window.featureOperator
+            );
+          } else {
+            plotEdit.plottingLayer.plotEdit.removePlotOverlay(
+              window.featureOperator
+            );
+          }
+          this.symbol = null;
+          this.sigleImage = null;
         }
-        this.symbol = null;
-        this.sigleImage = null;
+      } else {
+        delete window.featureOperator;
+        this.createPlot(options, iconUrl);
       }
     }
   };
