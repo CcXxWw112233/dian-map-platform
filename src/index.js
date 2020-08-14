@@ -31,6 +31,7 @@ app.model(require("./models/scoutingProject").default);
 app.model(require("./models/flutterPage").default);
 app.model(require("./models/editPicture").default);
 app.model(require("./models/areaSearch").default);
+app.model(require("./models/collectionDetail").default);
 // 4. Router
 app.router(require("./router").default);
 

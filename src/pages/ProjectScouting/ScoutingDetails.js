@@ -33,6 +33,7 @@ import {
 import PlayCollectionControl from "./components/playCollectionControl";
 
 import { setSession } from "utils/sessionManage";
+import CollectionDetail from "./components/CollectionDetail";
 
 const { Evt } = Event;
 const { TabPane } = Tabs;
@@ -42,11 +43,13 @@ const { TabPane } = Tabs;
     controller: { mainVisible, lastPageState },
     openswitch: { showFeatureName },
     lengedList: { config },
+    collectionDetail: {selectData}
   }) => ({
     mainVisible,
     lastPageState,
     config,
     showFeatureName,
+    selectData
   })
 )
 export default class ScoutingDetails extends PureComponent {
@@ -54,10 +57,10 @@ export default class ScoutingDetails extends PureComponent {
     super(props);
     this.newTabIndex = 0;
     const panes = [
-      { title: "整理", content: areaScouting(), key: "1", closable: false },
-      { title: "回看", content :(<div>正在加紧开发中...</div>),key:"2", closable: 0},
-      { title: "协作", content :(<div>正在加紧开发中...</div>),key:"3", closable: 0},
-      { title: "计划", content :(<div>正在加紧开发中...</div>),key:"4", closable: 0}
+      { title: "整理", content: areaScouting(), key: "1", closable: false ,className:styles.tab_tab1},
+      { title: "回看", content :(<div>正在加紧开发中...</div>),key:"2", closable: 0,className:styles.tab_tab2},
+      { title: "协作", content :(<div>正在加紧开发中...</div>),key:"3", closable: 0,className:styles.tab_tab3},
+      { title: "计划", content :(<div>正在加紧开发中...</div>),key:"4", closable: 0,className:styles.tab_tab4}
     ];
     this.state = {
       current_board: {},
@@ -144,7 +147,7 @@ export default class ScoutingDetails extends PureComponent {
           config: newLengedList,
         },
       });
-      Action.removeLayer();
+      Action.removeLayer(true);
       Action.clearListen();
     }
   }
@@ -166,6 +169,9 @@ export default class ScoutingDetails extends PureComponent {
     if (type === "remove") {
       let key = collections.map((item) => item.id);
       arr = arr.filter((item) => !key.includes(item.id));
+    }
+    if(type === 'reload'){
+      arr = collections;
     }
     // 重组所有数据
     let list = this.reSetCollection(arr);
@@ -527,6 +533,7 @@ export default class ScoutingDetails extends PureComponent {
   };
 
   onEditCollection = async (editType, val, name) => {
+    let { dispatch, selectData } = this.props;
     let res = "",
       params = {};
     let { id } = val;
@@ -578,6 +585,14 @@ export default class ScoutingDetails extends PureComponent {
         this.fetchCollection();
         let f = editType === "editCoordinate" ? "关联坐标完成" : "修改名称完成";
         message.success(f);
+        if(selectData && editType === 'editName'){
+          selectData.id === id && (dispatch({
+            type:'collectionDetail/updateDatas',
+            payload:{
+              selectData: {...selectData, title: name}
+            }
+          }))
+        }
       })
       .catch((err) => {
         console.log(err);
@@ -1155,9 +1170,20 @@ export default class ScoutingDetails extends PureComponent {
     this.startPlayCollection(mode);
     this.setState({ playCollectionVisible: false });
   };
+  // 选中采集资料，可以打开右上角的详情
+  checkItem = (val)=>{
+    const { dispatch } = this.props;
+    // console.log(val)
+    dispatch({
+      type:"collectionDetail/updateDatas",
+      payload:{
+        selectData: val
+      }
+    })
+  }
 
   renderForActive = (key)=>{
-    const { area_list, not_area_id_collection ,all_collection ,activeId} = this.state;
+    const { area_list, not_area_id_collection ,activeId} = this.state;
     const { dispatch } = this.props;
     switch(key){
       case "1":
@@ -1165,7 +1191,7 @@ export default class ScoutingDetails extends PureComponent {
           <Fragment>
           <div
               className={globalStyle.autoScrollY}
-              style={{ height: "calc(100% - 96px)" }}
+              style={{ flex:1,display:"flex",flexDirection:"column"}}
               ref={this.scrollView}>
               <Collapse
                 onChange={(e) => {
@@ -1220,7 +1246,8 @@ export default class ScoutingDetails extends PureComponent {
                     >
                       <ScoutingItem
                         board={this.state.current_board}
-                        dispatch={dispatch}
+                        // dispatch={dispatch}
+                        onCheckItem={this.checkItem}
                         // onDrop={()=> console.log(item)}
                         style={activeStyle}
                         data={item}
@@ -1295,6 +1322,7 @@ export default class ScoutingDetails extends PureComponent {
                               }}
                             >
                               <UploadItem
+                                onCheckItem={this.checkItem}
                                 style={activeStyle}
                                 data={item}
                                 type={Action.checkCollectionType(item.target)}
@@ -1430,8 +1458,9 @@ export default class ScoutingDetails extends PureComponent {
 
   render () {
     const { current_board,isPlay, playing} = this.state;
+    const { selectData } = this.props;
     const panelStyle = {
-      height: "100%",
+      // height: "100%",
     };
     return (
       <div
@@ -1455,24 +1484,17 @@ export default class ScoutingDetails extends PureComponent {
           cb={this.handleGoBackClick.bind(this)}
         ></Title>
         <Tabs
-          className="detailTabs"
           onChange={this.onChange}
           activeKey={this.state.activeKey}
           onEdit={this.onEdit}
           tabBarGutter={10}
-          style={{
-            background:"#FFF",
-            display: "flex",
-            flexDirection: "column",
-            overflow: "hidden",
-            width: "100%",
-            height: "69vh"
-          }}
+          className={`${styles.detailContentTabs} detailTabs`}
         >
           {this.state.panes.map((pane) => (
             <TabPane
               tab={<span>{pane.title}</span>}
               key={pane.key}
+              className={pane.className}
               closable={pane.closable}
               style={pane.key === "1" ? panelStyle : null}>
               {this.renderForActive(pane.key)}
@@ -1497,6 +1519,9 @@ export default class ScoutingDetails extends PureComponent {
             hasPrevGroup={!this.state.notPrevGroup}
           />
         )}
+        { selectData &&
+          <CollectionDetail />
+        }
       </div>
     );
   }
