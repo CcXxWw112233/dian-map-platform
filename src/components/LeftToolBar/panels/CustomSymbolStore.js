@@ -240,7 +240,7 @@ export default class CustomSymbolStore extends React.Component {
               height: "calc(100% - 30px)",
             }}>
             <div className={styles.searchInput}>
-              <Input.Search placeholder="搜索关键字或标绘名称" allowClear className={styles.input} onChange={this.serchForIconName}/>
+              <Input.Search placeholder="搜索关键字或标绘名称" size='small' allowClear className={styles.input} onChange={this.serchForIconName}/>
             </div>
             <div className={styles.searchKeywords}>
               {keywords && <span>搜索关键字: <span className={styles.keywords}>{keywords}</span></span>}
