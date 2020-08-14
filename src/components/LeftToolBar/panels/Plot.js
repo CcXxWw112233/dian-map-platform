@@ -928,6 +928,7 @@ export default class Plot extends React.Component {
                   coll.is_display = "1";
                   obj.collection.push(coll);
                   let arr = obj.collection;
+                  this.props.goBackProject();
                   DetailAction.renderCollection(arr, {
                     lenged: this.props.config,
                     dispatch: this.props.dispatch,

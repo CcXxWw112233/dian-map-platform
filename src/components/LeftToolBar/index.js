@@ -283,7 +283,14 @@ export default class LeftToolBar extends React.Component {
         className={styles.wrapper}
         style={{ position: "absolute", top: 0, left: 0 }}
       >
-        <div style={{ width: "100%", height: "100%", background: "#6a9aff", zIndex: 9 }}>
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            background: "#6a9aff",
+            zIndex: 9,
+          }}
+        >
           <div className={styles.circle}>
             {/* <img alt="" src=""></img> */}
             <i className={globalStyle.global_icon} style={{ fontSize: 26 }}>
@@ -378,6 +385,7 @@ export default class LeftToolBar extends React.Component {
             </i>
           </div>
         </div>
+        {this.state.displayProject ? <Project></Project> : null}
         {this.state.displayPlot ? (
           <Plot
             parent={this}
@@ -394,7 +402,6 @@ export default class LeftToolBar extends React.Component {
             }}
           ></Plot>
         ) : null}
-        {this.state.displayProject ? <Project></Project> : null}
         {this.state.displayTempPlot ? (
           <TempPlot
             parent={this}
