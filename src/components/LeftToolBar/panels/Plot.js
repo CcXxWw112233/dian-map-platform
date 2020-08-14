@@ -229,6 +229,10 @@ export default class Plot extends React.Component {
     this.activeOperator = null;
   }
   componentDidMount() {
+    Event.Evt.firEvent("setAttribute", {
+      saveCb: this.handleSaveClick.bind(this),
+      delCb: this.updatePlotList.bind(this),
+    });
     this.getCustomSymbol();
     this.plotLayer = plotEdit.getPlottingLayer();
     const me = this;
@@ -305,9 +309,9 @@ export default class Plot extends React.Component {
     };
     this.plotLayer.on(FeatureOperatorEvent.ACTIVATE, this.operatorActive);
     this.plotLayer.on(FeatureOperatorEvent.DEACTIVATE, this.operatorDeactive);
-    this.symbol = this.refs.defaultSymbol.innerText;
     if (!parent.isModifyPlot) {
       if (this.props.plotType === "point") {
+        this.symbol = this.refs.defaultSymbol.innerText;
         this.getPointDefaultSymbol();
       } else {
         this.updateStateCallbackFunc();
@@ -669,7 +673,6 @@ export default class Plot extends React.Component {
 
   // 点选图标后获取符号的回调
   getFillSymbol = (data, index, index2, typeItem) => {
-    const { parent } = this.props;
     if (index !== undefined && index2 !== undefined) {
       if (
         this.dic[this.props.plotType] === "Polygon" ||
@@ -785,8 +788,6 @@ export default class Plot extends React.Component {
       Event.Evt.firEvent("setAttribute", {
         style: style,
         attrs: attrs,
-        saveCb: this.handleSaveClick.bind(this),
-        delCb: this.updatePlotList.bind(this),
       });
     } else {
       window.featureOperator.feature.setStyle(style);
@@ -874,6 +875,8 @@ export default class Plot extends React.Component {
     this.defaultSymbol = null;
     this.symbol = "";
     this.selectName = "自定义类型";
+    this.plotName = "";
+    this.plotRemark = "";
     this.setState({
       name: "",
       remark: "",
@@ -891,6 +894,7 @@ export default class Plot extends React.Component {
   };
 
   handleSaveClick = () => {
+    console.log(this);
     // 有标绘被选择
     if (window.featureOperator) {
       // 更新style
@@ -969,10 +973,17 @@ export default class Plot extends React.Component {
           <i
             className={globalStyle.global_icon}
             onClick={() => this.props.goBackProject()}
+            title="返回到项目(列表)"
           >
             &#xe758;
           </i>
-          <i className={globalStyle.global_icon}>&#xe759;</i>
+          <i
+            className={globalStyle.global_icon}
+            title="重置"
+            onClick={this.handleResetClick}
+          >
+            &#xe7ce;
+          </i>
         </div>
         <div
           className={`${styles.body} ${globalStyle.autoScrollY}`}

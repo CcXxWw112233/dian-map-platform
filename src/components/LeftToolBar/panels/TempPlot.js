@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Checkbox, Row, Button } from "antd";
+import { Checkbox, Row, Button, message } from "antd";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import styles from "../LeftToolBar.less";
 import event from "../../../lib/utils/event";
@@ -105,9 +105,13 @@ export default class TempPlot extends React.Component {
 
   saveToProject = () => {
     let arr = this.getSelectedData();
-    const { parent } = this.props;
-    parent.updateSelectFeatureOperatorList(arr);
-    this.props.displayProjctList();
+    if (arr.length > 0) {
+      const { parent } = this.props;
+      parent.updateSelectFeatureOperatorList(arr);
+      this.props.displayProjctList();
+    } else {
+      message.info("请先选择需要保存的标绘。")
+    }
   };
   onCheckAllChange = (e) => {
     if (e.target.checked) {
