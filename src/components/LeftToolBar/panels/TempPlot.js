@@ -1,6 +1,8 @@
 import React from "react";
 
 import { Checkbox, Row, Button, message } from "antd";
+import { LeftOutlined, RightOutlined } from "@ant-design/icons";
+
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import styles from "../LeftToolBar.less";
 import event from "../../../lib/utils/event";
@@ -18,6 +20,7 @@ export default class TempPlot extends React.Component {
       selectedGuid: -1,
       featureOperatorList: [],
       displayCreateProject: false,
+      openPanel: true,
     };
     this.plotLayer = null;
   }
@@ -28,7 +31,7 @@ export default class TempPlot extends React.Component {
       if (!e.feature_operator.isScouting) {
         let operator = e.feature_operator;
         parent.updateFeatureOperatorList(operator);
-        window.featureOperator = null;
+        window.featureOperator && delete window.featureOperator;
       }
     };
     this.plotLayer &&
@@ -110,7 +113,7 @@ export default class TempPlot extends React.Component {
       parent.updateSelectFeatureOperatorList(arr);
       this.props.displayProjctList();
     } else {
-      message.info("请先选择需要保存的标绘。")
+      message.info("请先选择需要保存的标绘。");
     }
   };
   onCheckAllChange = (e) => {
@@ -257,109 +260,131 @@ export default class TempPlot extends React.Component {
   };
 
   render() {
+    const panelStyle = this.state.openPanel
+      ? {}
+      : { transform: "translateX(-100%)" };
+    const directionStyle = { display: "table-cell", verticalAlign: "middle" };
     return (
-      <div
-        className={styles.panel}
-        style={{ position: "absolute", left: 56, top: 0 }}
-      >
-        <div
-          className={styles.header}
-          style={{ padding: "0 20px", marginBottom: 10 }}
-        >
-          <span>临时标绘</span>
+      <div className={styles.panel} style={panelStyle}>
+        <div style={{ width: "100%", height: "100%" }}>
+          <div
+            className={styles.header}
+            style={{ padding: "0 20px", marginBottom: 10 }}
+          >
+            <span>临时标绘</span>
+          </div>
+          <div
+            className={styles.body}
+            style={{
+              height: "calc(100% - 30px)",
+            }}
+          >
+            {this.state.featureOperatorList.length > 0 ? (
+              <div
+                className={`${styles.content} ${globalStyle.autoScrollY}`}
+                style={{ height: "calc(100% - 70px)", padding: 0 }}
+              >
+                <div className={styles.checkAll} style={{ marginLeft: 10 }}>
+                  <Checkbox
+                    className={styles.row}
+                    onChange={this.onCheckAllChange}
+                    indeterminate={this.state.indeterminate}
+                    checked={this.state.checkAll}
+                    style={{ textAlign: "left" }}
+                  >
+                    全选
+                  </Checkbox>
+                </div>
+                {this.state.featureOperatorList.map(
+                  (featureOperator, index) => {
+                    return (
+                      <Row
+                        key={featureOperator.guid}
+                        className={`${styles.myRow} ${
+                          this.state.selectedGuid === featureOperator.guid
+                            ? styles.active
+                            : ""
+                        }`}
+                        onClick={() => this.handleRowClick(featureOperator)}
+                      >
+                        <Checkbox
+                          key={featureOperator.guid}
+                          value={featureOperator.guid}
+                          onChange={this.onChange}
+                          style={{ marginLeft: 10 }}
+                          checked={
+                            this.state.checkedList.indexOf(
+                              featureOperator.guid
+                            ) > -1
+                          }
+                        ></Checkbox>
+                        <div
+                          className={styles.icon}
+                          style={this.getStyle(featureOperator)}
+                        ></div>
+                        <div className={styles.text}>
+                          <span>{featureOperator.attrs.name}</span>
+                        </div>
+                        <div className={styles.edit}>
+                          <i
+                            className={globalStyle.global_icon}
+                            style={{
+                              fontSize: 18,
+                              color: "rgba(134,140,164,1)",
+                            }}
+                            onClick={() =>
+                              this.handleEditClick(featureOperator)
+                            }
+                          >
+                            &#xe759;
+                          </i>
+                        </div>
+                        <div className={styles.edit}>
+                          <i
+                            className={globalStyle.global_icon}
+                            style={{
+                              fontSize: 18,
+                              color: "rgba(134,140,164,1)",
+                            }}
+                            onClick={() => this.handleDelClick(featureOperator)}
+                          >
+                            &#xe75a;
+                          </i>
+                        </div>
+                      </Row>
+                    );
+                  }
+                )}
+              </div>
+            ) : null}
+            {this.state.featureOperatorList.length > 0 ? (
+              <div className={styles.footer}>
+                <Button type="primary" block onClick={this.saveToProject}>
+                  转存到项目
+                </Button>
+              </div>
+            ) : null}
+            {this.state.featureOperatorList.length === 0 ? (
+              <div style={{ margin: "120% auto" }}>
+                <p style={{ margin: 0 }}>您还未创建标绘</p>
+                <p>请选择相应工具开始创建</p>
+              </div>
+            ) : null}
+          </div>
         </div>
         <div
-          className={styles.body}
-          style={{
-            height: "calc(100% - 30px)",
+          className={styles.controller}
+          onClick={() => {
+            this.setState({
+              openPanel: !this.state.openPanel,
+            });
           }}
         >
-          {this.state.featureOperatorList.length > 0 ? (
-            <div
-              className={`${styles.content} ${globalStyle.autoScrollY}`}
-              style={{ height: "calc(100% - 70px)", padding: 0 }}
-            >
-              <div className={styles.checkAll} style={{ marginLeft: 10 }}>
-                <Checkbox
-                  className={styles.row}
-                  onChange={this.onCheckAllChange}
-                  indeterminate={this.state.indeterminate}
-                  checked={this.state.checkAll}
-                  style={{ textAlign: "left" }}
-                >
-                  全选
-                </Checkbox>
-              </div>
-              {this.state.featureOperatorList.map((featureOperator, index) => {
-                return (
-                  <Row
-                    key={featureOperator.guid}
-                    className={`${styles.myRow} ${
-                      this.state.selectedGuid === featureOperator.guid
-                        ? styles.active
-                        : ""
-                    }`}
-                    onClick={() => this.handleRowClick(featureOperator)}
-                  >
-                    <Checkbox
-                      key={featureOperator.guid}
-                      value={featureOperator.guid}
-                      onChange={this.onChange}
-                      style={{ marginLeft: 10 }}
-                      checked={
-                        this.state.checkedList.indexOf(featureOperator.guid) >
-                        -1
-                      }
-                    ></Checkbox>
-                    <div
-                      className={styles.icon}
-                      style={this.getStyle(featureOperator)}
-                    ></div>
-                    <div className={styles.text}>
-                      <span>{featureOperator.attrs.name}</span>
-                    </div>
-                    <div className={styles.edit}>
-                      <i
-                        className={globalStyle.global_icon}
-                        style={{
-                          fontSize: 18,
-                          color: "rgba(134,140,164,1)",
-                        }}
-                        onClick={() => this.handleEditClick(featureOperator)}
-                      >
-                        &#xe759;
-                      </i>
-                    </div>
-                    <div className={styles.edit}>
-                      <i
-                        className={globalStyle.global_icon}
-                        style={{
-                          fontSize: 18,
-                          color: "rgba(134,140,164,1)",
-                        }}
-                        onClick={() => this.handleDelClick(featureOperator)}
-                      >
-                        &#xe75a;
-                      </i>
-                    </div>
-                  </Row>
-                );
-              })}
-            </div>
-          ) : null}
-          {this.state.featureOperatorList.length > 0 ? (
-            <div className={styles.footer}>
-              <Button type="primary" block onClick={this.saveToProject}>
-                转存到项目
-              </Button>
-            </div>
-          ) : null}
-          {this.state.featureOperatorList.length === 0 ? (
-            <div style={{ margin: "120% auto" }}>
-              <p style={{ margin: 0 }}>您还未创建标绘</p>
-              <p>请选择相应工具开始创建</p>
-            </div>
-          ) : null}
+          {this.state.openPanel ? (
+            <LeftOutlined style={directionStyle} />
+          ) : (
+            <RightOutlined style={directionStyle} />
+          )}
         </div>
       </div>
     );
