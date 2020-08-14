@@ -77,54 +77,53 @@ export default class CollectionDetail extends React.Component{
   toEdit = ()=>{
     let { isEdit } = this.state;
     if(!isEdit){
-      this.editEnd();
+      this.editEnd(true);
     }
   }
   // 编辑
-  editEnd = ()=>{
-    let { isEdit } = this.state;
-    const { selectData, dispatch } = this.props;
-    if(!isEdit){
-      this.setState({
-        isEdit: true
-      },()=>{
+  editEnd = (flag)=>{
+    console.log(flag)
+    this.setState({
+      isEdit: flag
+    },()=>{
+      if(flag){
         setTimeout(()=>{
           let { current } = this.content;
           current.focus();
           keepLastIndex(current);
         }, 50)
-      })
-    }else{
-      // 保存
-      this.setState({
-        isEdit: false
-      },()=>{
-        let { current } = this.content;
-        let text = current.textContent
-        if(selectData.description === text) return ;
-        let param = {
-          id: selectData.id,
-          description:text,
-        }
-        DetailAction.editCollection(param).then(res => {
-          message.success('保存成功');
-          dispatch({
-            type:"collectionDetail/updateDatas",
-            payload:{
-              selectData: {...selectData, description: text}
-            }
-          })
-          let datas = DetailAction.oldData;
-          let data = datas.map(item => {
-            if(item.id === selectData.id){
-              item.description = text;
-            }
-            return item;
-          })
-          Event.Evt.firEvent("CollectionUpdate:reload", data);
-        })
-      })
+      }else{
+        this.saveEdit();
+      }
+    })
+  }
+  saveEdit = ()=>{
+    const { selectData, dispatch} = this.props;
+    let { current } = this.content;
+    if(!current) return;
+    let text = current.textContent
+    if(selectData.description === text) return ;
+    let param = {
+      id: selectData.id,
+      description:text,
     }
+    DetailAction.editCollection(param).then(res => {
+      message.success('保存成功');
+      dispatch({
+        type:"collectionDetail/updateDatas",
+        payload:{
+          selectData: {...selectData, description: text}
+        }
+      })
+      let datas = DetailAction.oldData;
+      let data = datas.map(item => {
+        if(item.id === selectData.id){
+          item.description = text;
+        }
+        return item;
+      })
+      Event.Evt.firEvent("CollectionUpdate:reload", data);
+    })
   }
 
   render(){
@@ -141,8 +140,9 @@ export default class CollectionDetail extends React.Component{
       ReactDOM.createPortal(
         <div className={`${styles.collection_detail} ${animateCss.animated} ${animateCss.slideInRight} ${animateCss.fadeIn}`}>
           <div className={styles.detail_title}>
-            <span className={styles.edit} onClick={this.editEnd}>
-              {isEdit ? <MyIcon type='icon-bianzu7beifen'/> : <MyIcon type="icon-bianzu7beifen4"/>}
+            <span className={styles.edit}>
+              {isEdit ? <MyIcon type='icon-bianzu7beifen' onClick={(e)=> this.editEnd(false)}/> :
+              <MyIcon type="icon-bianzu7beifen4" onClick={()=> this.editEnd(true)}/>}
             </span>
             <span className={styles.close}>
               <MyIcon type="icon-guanbi2" onClick={()=> dispatch({type:'collectionDetail/updateDatas',payload:{selectData:null}})}/>
@@ -160,7 +160,7 @@ export default class CollectionDetail extends React.Component{
               onPaste={this.textFormat}
               ref={this.content}
               placeholder="未添加备注哦"
-              onBlur={this.editEnd}
+              onBlur={() => setTimeout(()=> {this.editEnd(false)},100)}
               onDoubleClick={this.toEdit}
               contentEditable={isEdit}>
                 {oldRemark}
