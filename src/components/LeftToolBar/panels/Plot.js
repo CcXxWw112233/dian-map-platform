@@ -233,6 +233,7 @@ export default class Plot extends React.Component {
     this.projectId = "";
     this.projectName = "";
     this.activeOperator = null;
+    this.selectedPlotZIndex = 0;
   }
   componentDidMount() {
     Event.Evt.firEvent("setAttribute", {
@@ -257,6 +258,10 @@ export default class Plot extends React.Component {
         parent.isModifyPlot = true;
         let operator = e.feature_operator;
         window.featureOperator = operator;
+        me.selectedPlotZIndex = operator.feature.getStyle().getZIndex();
+        let style = operator.feature.getStyle();
+        style.setZIndex(parent.maxZIndex + 1);
+        window.featureOperator.feature.setStyle(style);
         ListAction.checkItem()
           .then((res) => {
             if (res) {
@@ -309,6 +314,9 @@ export default class Plot extends React.Component {
         parent.oldPlotName = "";
         parent.oldRemark = "";
         let operator = e.feature_operator;
+        // let style = operator.feature.getStyle();
+        // style.setZIndex(me.selectedPlotZIndex);
+        // operator.feature.setStyle(style);
         me.savePlot2TempPlot(operator);
         window.featureOperator && delete window.featureOperator;
       }
@@ -456,7 +464,7 @@ export default class Plot extends React.Component {
         .then((res) => {
           message.success(
             `标绘已成功保存到${this.projectName}的${
-              this.ProjectGroupName || "未"
+              window.ProjectGroupName || "未"
             }分组`
           );
           this.plotLayer.removeFeature(operator);
@@ -779,6 +787,7 @@ export default class Plot extends React.Component {
 
   // 创建标绘唯一入口
   createPlot = (options, iconUrl) => {
+    const { parent } = this.props;
     const plotType = this.nextProps?.plotType || this.props.plotType;
     const style = createStyle(this.dic[plotType], options);
     let attrs = {
@@ -798,6 +807,7 @@ export default class Plot extends React.Component {
       attrs = { ...attrs, featureType: this.featureType };
     }
     if (!window.featureOperator) {
+      parent.maxZIndex++;
       plotEdit.create(this.plotDic[plotType]);
       Event.Evt.firEvent("setPlotDrawStyle", style);
       Event.Evt.firEvent("setAttribute", {

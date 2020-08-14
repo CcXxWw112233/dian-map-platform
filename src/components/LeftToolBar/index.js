@@ -168,6 +168,7 @@ export default class LeftToolBar extends React.Component {
     this.isModifyPlot = false;
     this.oldPlotName = "";
     this.oldRemark = "";
+    this.maxZIndex = 0;
     ListAction.checkItem()
       .then((res) => {
         if (res) {
