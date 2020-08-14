@@ -455,18 +455,19 @@ export default class Plot extends React.Component {
         collect_type: 4,
         title: operator.attrs.name || operator.attrs.title,
         target: "feature",
-        area_type_id: window.ProjectGroupId || "",
+        area_type_id:
+          window.ProjectGroupId === "other" ? "" : window.ProjectGroupId,
         board_id: this.projectId,
         content: JSON.stringify(param),
       };
       // console.log(board);
       DetailAction.addCollection(obj)
         .then((res) => {
-          let obj = DetailAction.CollectionGroup.find(item => item.id === window.ProjectGroupId);
+          let obj = DetailAction.CollectionGroup.find(
+            (item) => item.id === window.ProjectGroupId
+          );
           message.success(
-            `标绘已成功保存到${this.projectName}的${
-              obj ? obj.name : "未"
-            }分组`
+            `标绘已成功保存到${this.projectName}的${obj ? obj.name : "未"}分组`
           );
           this.plotLayer.removeFeature(operator);
           resolve(res);
@@ -933,7 +934,7 @@ export default class Plot extends React.Component {
       window.featureOperator.attrs.remark = this.plotRemark;
       // 选择了项目
       if (this.projectId) {
-       this.save2Group(window.featureOperator)
+        this.save2Group(window.featureOperator)
           .then((resp) => {
             if (window.ProjectGroupId) {
               let collections = DetailAction.CollectionGroup;
@@ -947,13 +948,13 @@ export default class Plot extends React.Component {
                   coll.is_display = "1";
                   obj.collection.push(coll);
                   let arr = obj.collection;
-                  this.props.goBackProject();
                   DetailAction.renderCollection(arr, {
                     lenged: this.props.config,
                     dispatch: this.props.dispatch,
                   });
                 }
               }
+              this.props.goBackProject();
             }
           })
           .catch((err) => {
