@@ -441,7 +441,7 @@ export const symbols = [
         fillColor: "rgba(161,135,131,0.7)",
       },
       {
-        name: "栗子",
+        name: "板栗",
         iconfont: "icon-bianzu194",
         fillColor: "rgba(161,135,131,0.7)",
       },

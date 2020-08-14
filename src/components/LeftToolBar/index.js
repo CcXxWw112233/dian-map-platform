@@ -160,10 +160,14 @@ export default class LeftToolBar extends React.Component {
       displayCustomSymbolStore: false,
       displayTempPlotIcon: false,
       plotType: "point",
+      featureOperatorList: [],
     };
     this.featureOperatorList = [];
     this.selectFeatureOperatorList = [];
     this.customSymbols = null;
+    this.isModifyPlot = false;
+    this.oldPlotName = "";
+    this.oldRemark = "";
     ListAction.checkItem()
       .then((res) => {
         if (res) {
@@ -195,6 +199,20 @@ export default class LeftToolBar extends React.Component {
   };
 
   updateFeatureOperatorList = (operator) => {
+    ListAction.checkItem()
+      .then((res) => {
+        if (res) {
+          if (res.code !== 0) {
+            this._updateFeatureOperatorList(operator);
+          }
+        }
+      })
+      .catch((e) => {
+        this._updateFeatureOperatorList(operator);
+      });
+  };
+
+  _updateFeatureOperatorList = (operator) => {
     this.featureOperatorList = Array.from(new Set(this.featureOperatorList));
     const index = this.findOperatorFromList(operator.guid);
     if (index < 0) {
@@ -363,7 +381,6 @@ export default class LeftToolBar extends React.Component {
             parent={this}
             plotType={this.state.plotType}
             customSymbols={this.customSymbols}
-            featureOperatorList={this.featureOperatorList}
             updateFeatureOperatorList={this.updateFeatureOperatorList}
             updateFeatureOperatorList2={this.updateFeatureOperatorList2}
             goBackProject={() => {
@@ -378,14 +395,20 @@ export default class LeftToolBar extends React.Component {
         {this.state.displayProject ? <Project></Project> : null}
         {this.state.displayTempPlot ? (
           <TempPlot
-            featureOperatorList={this.featureOperatorList}
-            updateFeatureOperatorList={this.updateFeatureOperatorList}
-            updateSelectFeatureOperatorList={
-              this.updateSelectFeatureOperatorList
-            }
+            parent={this}
             displayProjctList={() => {
               this.setState({
                 displayProjectList: true,
+                displayTempPlot: false,
+              });
+            }}
+            displayPlotPanel={(attrs) => {
+              this.isModifyPlot = true;
+              this.oldPlotName = attrs.name;
+              this.oldRemark = attrs.remark;
+              this.setState({
+                plotType: attrs.plotType,
+                displayPlot: true,
                 displayTempPlot: false,
               });
             }}

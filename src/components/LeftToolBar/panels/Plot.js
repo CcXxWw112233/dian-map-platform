@@ -6,7 +6,7 @@ import globalStyle from "@/globalSet/styles/globalStyles.less";
 import styles from "../LeftToolBar.less";
 import ColorPicker from "../../ColorPicker/index";
 import { guid } from "./lib";
-import { connect } from 'dva';
+import { connect } from "dva";
 import { symbols } from "./data";
 import { plotEdit } from "../../../utils/plotEdit";
 import FeatureOperatorEvent from "../../../utils/plot2ol/src/events/FeatureOperatorEvent";
@@ -145,11 +145,8 @@ const SymbolBlock = ({
   );
 };
 
-
-@connect(({
-  lengedList: { config },
-})=>({
-  config
+@connect(({ lengedList: { config } }) => ({
+  config,
 }))
 export default class Plot extends React.Component {
   constructor(props) {
@@ -177,6 +174,7 @@ export default class Plot extends React.Component {
     this.sigleImage = null;
     this.selectName = "自定义类型";
     this.plotName = "自定义类型#1";
+    this.plotRemark = "";
     this.defeaultColors = [
       { fill: "rgba(255,84,86,1)", border: "rgba(255,84,86,1)" },
       { fill: "rgba(157, 104, 255, 1)", border: "rgba(157, 104, 255, 1)" },
@@ -231,11 +229,26 @@ export default class Plot extends React.Component {
     this.activeOperator = null;
   }
   componentDidMount() {
+    Event.Evt.firEvent("setAttribute", {
+      saveCb: this.handleSaveClick.bind(this),
+      delCb: this.updatePlotList.bind(this),
+    });
     this.getCustomSymbol();
     this.plotLayer = plotEdit.getPlottingLayer();
     const me = this;
+    const { parent } = this.props;
+    if (parent.isModifyPlot === true) {
+      this.plotName = parent.oldPlotName;
+      this.plotRemark = parent.oldRemark;
+      this.setState({
+        name: parent.oldPlotName,
+        remark: parent.oldRemark,
+      });
+    }
     this.operatorActive = function (e) {
       if (!e.feature_operator.isScouting) {
+        // 激活即修改状态
+        parent.isModifyPlot = true;
         let operator = e.feature_operator;
         window.featureOperator = operator;
         ListAction.checkItem()
@@ -284,20 +297,33 @@ export default class Plot extends React.Component {
         }
       }
     };
-    this.operatorDeactive = function () {
-      me.savePlot2TempPlot(window.featureOperator);
-      window.featureOperator = null;
+    this.operatorDeactive = function (e) {
+      if (!e.feature_operator.isScouting) {
+        parent.isModifyPlot = false;
+        parent.oldPlotName = "";
+        parent.oldRemark = "";
+        let operator = e.feature_operator;
+        me.savePlot2TempPlot(operator);
+        window.featureOperator = null;
+      }
     };
     this.plotLayer.on(FeatureOperatorEvent.ACTIVATE, this.operatorActive);
     this.plotLayer.on(FeatureOperatorEvent.DEACTIVATE, this.operatorDeactive);
-    if (this.props.plotType === "point") {
-      this.symbol = this.refs.defaultSymbol.innerText;
-      this.getPointDefaultSymbol();
+    if (!parent.isModifyPlot) {
+      if (this.props.plotType === "point") {
+        this.symbol = this.refs.defaultSymbol.innerText;
+        this.getPointDefaultSymbol();
+      } else {
+        this.updateStateCallbackFunc();
+      }
     } else {
-      this.updateStateCallbackFunc();
+      plotEdit.plottingLayer.plotEdit.activate(window.featureOperator.feature);
     }
   }
   componentWillUnmount() {
+    const { parent } = this.props;
+    parent.isModifyPlot = false;
+    window.featureOperator = null;
     plotEdit.deactivate();
     this.plotLayer.un(FeatureOperatorEvent.ACTIVATE, this.operatorActive);
     this.plotLayer.un(FeatureOperatorEvent.DEACTIVATE, this.operatorDeactive);
@@ -305,6 +331,7 @@ export default class Plot extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     this.handleResetClick();
+    this.createPlotName();
     this.nextProps = nextProps;
     if (nextProps.plotType === "point") {
       this.symbol = this.refs.defaultSymbol.innerText;
@@ -324,39 +351,45 @@ export default class Plot extends React.Component {
 
   // 获取自定义图标符号
   getCustomSymbol = () => {
-    this.customSymbols = {
-      typeName: "自定义图标",
-      type: "point|polygon|freePolygon|rect|circle|arrow",
-      content: [],
-    };
-    symbolStoreServices
-      .GET_ICON()
-      .then((res) => {
-        if (res.code === "0") {
-          const data = res.data;
-          if (Array.isArray(data)) {
-            data.forEach((item) => {
-              const temp = { name: item.icon_name, imageUrl: item.icon_url };
-              this.customSymbols.content.push(temp);
-            });
-            this.setState(
-              {
-                symbols: [this.customSymbols, ...symbols],
-              },
-              () => {
-                const { parent } = this.props;
-                parent.customSymbols = this.customSymbols;
-              }
-            );
-          }
-        }
-      })
-      .catch((err) => {
-        this.setState({
-          symbols: symbols,
-        });
-        console.log(err);
+    const { parent } = this.props;
+    if (parent.customSymbols) {
+      this.setState({
+        symbols: [parent.customSymbols, ...symbols],
       });
+    } else {
+      this.customSymbols = {
+        typeName: "自定义图标",
+        type: "point|polygon|freePolygon|rect|circle|arrow",
+        content: [],
+      };
+      symbolStoreServices
+        .GET_ICON()
+        .then((res) => {
+          if (res.code === "0") {
+            const data = res.data;
+            if (Array.isArray(data)) {
+              data.forEach((item) => {
+                const temp = { name: item.icon_name, imageUrl: item.icon_url };
+                this.customSymbols.content.push(temp);
+              });
+              this.setState(
+                {
+                  symbols: [this.customSymbols, ...symbols],
+                },
+                () => {
+                  parent.customSymbols = this.customSymbols;
+                }
+              );
+            }
+          }
+        })
+        .catch((err) => {
+          this.setState({
+            symbols: symbols,
+          });
+          console.log(err);
+        });
+    }
   };
 
   savePlot2TempPlot = (operator) => {
@@ -397,7 +430,7 @@ export default class Plot extends React.Component {
   };
   // 保存标绘到分组
   save2Group = (operator) => {
-    return new Promise((resolve,reject) =>{
+    return new Promise((resolve, reject) => {
       const { feature } = operator;
       let param = {
         coordinates: feature.getGeometry().getCoordinates(),
@@ -414,32 +447,50 @@ export default class Plot extends React.Component {
       };
       // console.log(board);
       DetailAction.addCollection(obj)
-      .then((res) => {
-        message.success(
-          `标绘已成功保存到${this.projectName}的${
-            this.ProjectGroupName || "未"
-          }分组`
-        );
-        this.plotLayer.removeFeature(operator);
-        resolve(res);
-      })
-      .catch((err) => {
-        reject(err)
-        console.log(err);
-        message.error("保存失败，请稍后再试");
-      });
-    })
+        .then((res) => {
+          message.success(
+            `标绘已成功保存到${this.projectName}的${
+              this.ProjectGroupName || "未"
+            }分组`
+          );
+          this.plotLayer.removeFeature(operator);
+          resolve(res);
+        })
+        .catch((err) => {
+          reject(err);
+          console.log(err);
+          message.error("保存失败，请稍后再试");
+        });
+    });
   };
   handleInputChange = (val) => {
     let newVal = val.replace(/\s+/g, "");
+    if (!newVal) {
+      message.info("标绘名称不能空白！");
+      return;
+    }
+    this.plotName = newVal;
     this.setState({
       name: newVal,
     });
+    if (window.featureOperator) {
+      // 更新style
+      let style = window.featureOperator.feature.getStyle();
+      style.getText().setText(this.plotName);
+      window.featureOperator.feature.setStyle(style);
+      // 更新attrs
+      window.featureOperator.attrs.name = this.plotName;
+      window.featureOperator.setName(this.plotName);
+    }
   };
   onTextAreaChange = (val) => {
+    this.plotRemark = val;
     this.setState({
       remark: val,
     });
+    if (window.featureOperator) {
+      window.featureOperator.attrs.remark = this.plotRemark;
+    }
   };
   handleColorClick = (data, type) => {
     if (this.props.plotType !== "point" && this.selectName !== "自定义类型") {
@@ -474,9 +525,22 @@ export default class Plot extends React.Component {
     }
     switch (this.props.plotType) {
       case "point":
-        this.state.symbolSelectedIndex === ""
-          ? this.getPointDefaultSymbol()
-          : this.getFillSymbol();
+        const arr =
+          this.state.symbolSelectedIndex &&
+          this.state.symbolSelectedIndex.split("|");
+
+        // 如果先前选择的自定义图标
+        if (arr && arr[0] === "0") {
+          this.setState({
+            symbolSelectedIndex: "",
+          });
+          this.symbol = this.refs.defaultSymbol.innerText;
+          this.getPointDefaultSymbol();
+        } else {
+          !this.state.symbolSelectedIndex
+            ? this.getPointDefaultSymbol()
+            : this.getFillSymbol();
+        }
         break;
       case "line":
       case "freeLine":
@@ -493,6 +557,8 @@ export default class Plot extends React.Component {
   };
 
   updateStateCallbackFunc = () => {
+    const { parent } = this.props;
+    this.createPlotName();
     let options = {
       ...this.commonStyleOptions,
       strokeColor: this.strokeColor,
@@ -528,14 +594,19 @@ export default class Plot extends React.Component {
       this.dic[this.nextProps?.plotType || this.props.plotType],
       options
     );
-    plotEdit.create(
-      this.plotDic[this.nextProps?.plotType || this.props.plotType]
-    );
-    Event.Evt.firEvent("setPlotDrawStyle", style);
-    Event.Evt.firEvent("setAttribute", {
-      style: style,
-      attrs: attrs,
-    });
+    if (parent.isModifyPlot === false) {
+      plotEdit.create(
+        this.plotDic[this.nextProps?.plotType || this.props.plotType]
+      );
+      Event.Evt.firEvent("setPlotDrawStyle", style);
+      Event.Evt.firEvent("setAttribute", {
+        style: style,
+        attrs: attrs,
+      });
+    } else if (parent.isModifyPlot === true && window.featureOperator) {
+      window.featureOperator.feature.setStyle(style);
+      window.featureOperator.attrs = attrs;
+    }
   };
 
   getCurrentIcon = (fontContent, { fontSize, fillColor, strokeColor }) => {
@@ -578,13 +649,14 @@ export default class Plot extends React.Component {
     return canvas.toDataURL("image/png");
   };
 
+  // 获取默认符号
   getPointDefaultSymbol = () => {
+    this.createPlotName();
     let iconUrl = this.getCurrentIcon(this.symbol, {
       fontSize: 38,
       fillColor: this.fillColor,
       strokeColor: this.strokeColor,
     });
-    this.createPlotName();
     let options = {
       ...this.commonStyleOptions,
       text: this.plotName,
@@ -599,6 +671,7 @@ export default class Plot extends React.Component {
     this.createPlot(options, iconUrl);
   };
 
+  // 点选图标后获取符号的回调
   getFillSymbol = (data, index, index2, typeItem) => {
     if (index !== undefined && index2 !== undefined) {
       if (
@@ -618,10 +691,12 @@ export default class Plot extends React.Component {
         }
       } else if (this.dic[this.props.plotType] === "Point") {
         if (index === 0) {
+          this.fillColor = "rgba(106, 154, 255, 1)";
           this.setState({
             symbolSelectedIndex: `${index}|${index2}`,
             fillSelectedIndex: -1,
             strokeSelectedIndex: -1,
+            customFillSelectedColor: "rgba(106, 154, 255, 1)",
           });
         } else {
           this.setState({
@@ -658,8 +733,10 @@ export default class Plot extends React.Component {
             : "rgba(80, 130, 255, 1)",
       });
     }
-    if (this.props.plotType === "point") {
+    if (this.dic[this.props.plotType] === "Point") {
       this.featureType = iconUrl;
+    } else if (this.dic[this.props.plotType] === "Polyline") {
+      this.featureType = this.strokeColor;
     }
     let options = {
       ...this.commonStyleOptions,
@@ -671,8 +748,6 @@ export default class Plot extends React.Component {
       case "Polyline":
         options = {
           ...options,
-          // strokeColor: this.strokeColor,
-          // fillColor: this.fillColor,
           strokeColor: this.strokeColor,
           fillColor: this.fillColor,
         };
@@ -687,14 +762,16 @@ export default class Plot extends React.Component {
     this.createPlot(options, iconUrl);
   };
 
+  // 创建标绘唯一入口
   createPlot = (options, iconUrl) => {
     const plotType = this.nextProps?.plotType || this.props.plotType;
     const style = createStyle(this.dic[plotType], options);
     let attrs = {
       name: this.plotName,
       strokeColor: this.strokeColor,
-      remark: this.state.remark,
+      remark: this.plotRemark,
       selectName: this.selectName,
+      plotType: this.props.plotType,
     };
     if (this.dic[this.props.plotType] === "Polygon") {
       attrs = {
@@ -711,14 +788,24 @@ export default class Plot extends React.Component {
       Event.Evt.firEvent("setAttribute", {
         style: style,
         attrs: attrs,
-        saveCb: this.handleSaveClick.bind(this),
-        delCb: this.updatePlotList.bind(this),
       });
     } else {
-      if (this.props.plotType === "point") {
-        window.featureOperator.feature.setStyle(style);
-        window.featureOperator.setName(attrs.name);
-        window.featureOperator.attrs = attrs;
+      window.featureOperator.feature.setStyle(style);
+      window.featureOperator.setName(attrs.name);
+      window.featureOperator.attrs = attrs;
+      if (this.dic[this.props.plotType] === "Polygon") {
+        if (iconUrl) {
+          plotEdit.plottingLayer.plotEdit.createPlotOverlay(
+            iconUrl,
+            window.featureOperator
+          );
+        } else {
+          plotEdit.plottingLayer.plotEdit.removePlotOverlay(
+            window.featureOperator
+          );
+        }
+        this.symbol = null;
+        this.sigleImage = null;
       }
     }
   };
@@ -788,6 +875,8 @@ export default class Plot extends React.Component {
     this.defaultSymbol = null;
     this.symbol = "";
     this.selectName = "自定义类型";
+    this.plotName = "";
+    this.plotRemark = "";
     this.setState({
       name: "",
       remark: "",
@@ -805,38 +894,68 @@ export default class Plot extends React.Component {
   };
 
   handleSaveClick = () => {
+    console.log(this);
+    // 有标绘被选择
     if (window.featureOperator) {
+      // 更新style
+      let style = window.featureOperator.feature.getStyle();
+      style.getText().setText(this.plotName);
+      window.featureOperator.feature.setStyle(style);
+      // 更新attrs
+      window.featureOperator.attrs.name = this.plotName;
+      window.featureOperator.setName(this.plotName);
+      window.featureOperator.attrs.remark = this.plotRemark;
       // 选择了项目
       if (this.projectId) {
-        this.save2Group(window.featureOperator).then(resp => {
-          if(window.ProjectGroupId){
-            let collections = DetailAction.CollectionGroup;
-            let obj = collections.find(item => item.id === window.ProjectGroupId);
-            if(obj){
-              let data = resp.data;
-              let coll = data && data[0];
-              if(coll){
-                coll.is_display = '1';
-                obj.collection.push(coll);
-                let arr = obj.collection;
-                DetailAction.renderCollection(arr,{lenged:this.props.config,dispatch: this.props.dispatch})
+        this.save2Group(window.featureOperator)
+          .then((resp) => {
+            if (window.ProjectGroupId) {
+              let collections = DetailAction.CollectionGroup;
+              let obj = collections.find(
+                (item) => item.id === window.ProjectGroupId
+              );
+              if (obj) {
+                let data = resp.data;
+                let coll = data && data[0];
+                if (coll) {
+                  coll.is_display = "1";
+                  obj.collection.push(coll);
+                  let arr = obj.collection;
+                  DetailAction.renderCollection(arr, {
+                    lenged: this.props.config,
+                    dispatch: this.props.dispatch,
+                  });
+                }
               }
             }
-          }
-        }).catch(err => {
-          console.log(err)
-        });
+          })
+          .catch((err) => {
+            console.log(err);
+          });
       }
       // 未选择项目
       else {
         this.savePlot2TempPlot(window.featureOperator);
       }
     } else {
+      message.info("请先标绘");
     }
     plotEdit.deactivate();
   };
 
-  handleDelClick = () => {};
+  handleDelClick = () => {
+    if (window.featureOperator) {
+      if (!this.projectId) {
+        const { parent } = this.props;
+        const index = this.findOperatorFromList(window.featureOperator.guid);
+        parent.featureOperatorList.splice(index, 1);
+        parent.updateFeatureOperatorList2(parent.featureOperatorList);
+      }
+      this.plotLayer.removeFeature(window.featureOperator);
+      window.featureOperator && delete window.featureOperator;
+    }
+    plotEdit.deactivate();
+  };
 
   render() {
     const { TextArea } = Input;
@@ -854,10 +973,17 @@ export default class Plot extends React.Component {
           <i
             className={globalStyle.global_icon}
             onClick={() => this.props.goBackProject()}
+            title="返回到项目(列表)"
           >
             &#xe758;
           </i>
-          <i className={globalStyle.global_icon}>&#xe759;</i>
+          <i
+            className={globalStyle.global_icon}
+            title="重置"
+            onClick={this.handleResetClick}
+          >
+            &#xe7ce;
+          </i>
         </div>
         <div
           className={`${styles.body} ${globalStyle.autoScrollY}`}
