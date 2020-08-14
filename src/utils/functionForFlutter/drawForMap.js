@@ -17,6 +17,7 @@ function renderAction (){
         this.hideProjectPoint();
         let data = await ListAction.getList();
         // console.log(data)
+        await ListAction.init();
         ListAction.renderProjectPoint(data.data);
     }
 
@@ -24,7 +25,7 @@ function renderAction (){
     this.clear = ()=>{
         if(this.overlay)
         this.overlay.setPosition(null);
-        
+
         // 删除规划图贴图
         DetailAction.removePlanPicCollection();
         if(this.Source && this.features.length){
