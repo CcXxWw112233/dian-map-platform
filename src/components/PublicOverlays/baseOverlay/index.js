@@ -17,7 +17,7 @@ export default function baseOverlay(content, data = {}){
         switch(placement){
             case "bottomLeft" :  ;
             case "bottomCenter" : ;
-            case "bottomRight" : 
+            case "bottomRight" :
                 return "5,0,10,10,20,0"
             ;
             case "rightTop": return "10,0,0,5,10,10" ;
@@ -33,9 +33,9 @@ export default function baseOverlay(content, data = {}){
     Object.assign(span.style, data.angleStyle);
     // span.style.borderColor = this.bgColor;
     span.innerHTML = `<svg xmlns="https://www.w3.org/2000/svg" width="20px" height="10px" version="1.1">
-        <polyline 
-        points=${position(data.placement)} 
-        style="fill:${data.angleColor || "#1769FF"}; 
+        <polyline
+        points=${position(data.placement)}
+        style="fill:${data.angleColor || "#1769FF"};
         stroke:${data.angleBorderColor || "#ffffff"};
         stroke-width:2" />
     </svg>`
@@ -45,6 +45,7 @@ export default function baseOverlay(content, data = {}){
     div.appendChild(span);
     div.style.backgroundColor = this.bgColor;
     div.style.minWidth = typeof this.width === 'number' ? this.width +'px' : this.width;
+    div.style.maxWidth = '500px';
     this.element = div;
     this.element.firstChild.addEventListener('click',(e)=>{
         e.stopPropagation();
@@ -55,7 +56,7 @@ export default function baseOverlay(content, data = {}){
             item.parentNode.classList.remove(this.activeClassName);
         })
         target.parentNode.classList.add(this.activeClassName);
-    }) 
+    })
     this.on = {}
 
     return this.element ;
