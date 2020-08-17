@@ -235,7 +235,7 @@ function Action() {
       }
     });
     // 删除绘制的元素
-    console.log(this.layer, "77777777777777777777");
+    // console.log(this.layer, "77777777777777777777");
     if (this.layer) {
       this.layer.projectScoutingArr &&
         this.layer.projectScoutingArr.forEach((item) => {

@@ -1,10 +1,10 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import styles from './playCollectionControl.less'
-import { MyIcon } from '../../../components/utils'
+import styles from './index.less'
+import { MyIcon } from '../../../../components/utils'
 import { Space ,Button ,message} from 'antd'
-import Action from '../../../lib/components/ProjectScouting/playCollection'
-import Event from '../../../lib/utils/event'
+import Action from '../../../../lib/components/ProjectScouting/playCollection'
+import Event from '../../../../lib/utils/event'
 const { Evt } = Event;
 
 export default class PlayCollectionControl extends React.PureComponent{
@@ -55,7 +55,7 @@ export default class PlayCollectionControl extends React.PureComponent{
             if(Action.status === 'end'){
                 clearTimeout(this.timer);
                 this.timer = setTimeout(()=>{
-                   message.success('采集资料自动播放完成'); 
+                   message.success('采集资料自动播放完成');
                 },500)
             }
         })
@@ -78,14 +78,14 @@ export default class PlayCollectionControl extends React.PureComponent{
     setParentTransform = (dom, offset)=>{
         let parent = dom.parentNode.parentNode;
         // console.log(parent);
-        
+
         if(parent){
             if(offset.x < 0){
                 if(!(this.move.x < 0 && Math.abs(this.move.x) >= parent.offsetLeft)) {
-                    this.move.x = (this.move.x + offset.x); 
+                    this.move.x = (this.move.x + offset.x);
                 }
             }else if(offset.x >= 0 && (this.move.x < (document.body.clientWidth - parent.clientWidth - 80 ))){
-                this.move.x = (this.move.x + offset.x); 
+                this.move.x = (this.move.x + offset.x);
             }
             if(offset.y < 0){
                 if(!(this.move.y < 0 && Math.abs(this.move.y) >= parent.offsetTop)){
@@ -94,7 +94,7 @@ export default class PlayCollectionControl extends React.PureComponent{
             }else if(offset.y > 0 && this.move.y < 0){
                 this.move.y = (this.move.y + offset.y);
             }
-            
+
             parent.style.transform = `translate3d(${this.move.x}px,${this.move.y}px,0px)`;
         }
     }
@@ -153,7 +153,7 @@ export default class PlayCollectionControl extends React.PureComponent{
                     disabled={!hasNext}
                     icon={<MyIcon type="icon-right"/>}
                     onClick={this.playNext}>
-                    
+
                     </Button>
 
                     {
