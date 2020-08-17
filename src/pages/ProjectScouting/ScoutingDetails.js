@@ -1215,7 +1215,7 @@ export default class ScoutingDetails extends PureComponent {
   collectionTouchStart = (e)=>{
     this.touchStartClient = this.getTouch(e);
     let { current } = this.scrollView;
-    current.ontouchmove = (evt)=>{
+    current.onpointermove = (evt)=>{
       let touchM = this.getTouch(evt);
       let scrollTop = current.scrollTop;
       let y = touchM.y - this.touchStartClient.y;
@@ -1234,14 +1234,15 @@ export default class ScoutingDetails extends PureComponent {
       this.touchStartClient = touchM;
 
     }
-    current.ontouchend = ()=>{
-      current.ontouchmove = null;
+    current.onpointerout = ()=>{
+      current.onpointermove = null;
     }
   }
 
   getTouch = (e)=>{
-    let touch = e.touches[0];
-    return {x: touch.screenX, y:touch.screenY}
+    // let touch = e.touches[0];
+    // return {x: touch.screenX, y:touch.screenY}
+    return {x: e.layerX, y: e.layerY}
   }
 
   PublicView = ({children})=>{
@@ -1252,7 +1253,7 @@ export default class ScoutingDetails extends PureComponent {
         ref={this.scrollView}
         onScroll={this.CollectionViewScroll}
         onWheel={this.collectionWhell}
-        onTouchStart={this.collectionTouchStart}>
+        onPointerDown={this.collectionTouchStart}>
         {children}
       </div>
     )
