@@ -185,6 +185,15 @@ export function dateFormat(val, format) {
 
   return format;
 }
+export function getOffsetTop(elm) {
+  var mOffsetTop = elm.offsetTop;
+  var mOffsetParent = elm.offsetParent;
+  while(mOffsetParent) {
+  mOffsetTop += mOffsetParent.offsetTop;
+  mOffsetParent = mOffsetParent.offsetParent;
+  }
+  return mOffsetTop;
+}
 
 export function keepLastIndex(obj) {
   if (window.getSelection) {

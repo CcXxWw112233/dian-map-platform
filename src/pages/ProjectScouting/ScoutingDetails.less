@@ -44,6 +44,14 @@
     text-align: left;
     display: flex;
     flex-direction: column;
+    height: 308px;
+    &.miniTitle{
+      // height: 30px;
+      animation: MinHeight 0.6s 0s cubic-bezier(0.01, 0.76, 0.45, 1) forwards;
+    }
+    &.maxTitle{
+      animation: MaxHeight 0.6s 0s cubic-bezier(0.16, 0.68, 0.36, 0.96) forwards;
+    }
     & > div{
       margin-top: 10px;
       flex: 1;
@@ -52,6 +60,7 @@
       color: @color_important;
       cursor: pointer;
       font-size: 1.5rem;
+      position: relative;
       transition: color 0.3s linear;
       &:hover{
         color: @color_theme;
@@ -64,8 +73,14 @@
       font-weight: bold;
     }
     .back_name{
-      margin-left: 10px;
+      float: right;
+      margin-right: 15px;
       font-size: 0.8rem;
+      animation-delay: 0.35s;
+      animation-duration: 0.4s;
+      position: absolute;
+      font-weight: bold;
+      right: 10px;
     }
 
     .title_boardBgImg{
@@ -421,6 +436,7 @@
       height: 100%;
     }
     .detailTabs {
+      position: relative;
       .ant-collapse-item{
         border-bottom: 0;
         border-top: 1px solid #d9d9d9;
@@ -438,7 +454,8 @@
         overflow: unset;
       }
       .ant-tabs-nav{
-        margin-bottom: 5px;
+        margin-bottom: 15px;
+        background-color: #fff;
         &::before{
           border: 0;
         }
@@ -472,5 +489,27 @@
         }
       }
     }
+  }
+}
+
+@keyframes MinHeight {
+  0%{
+    height: 308px;
+    opacity: 1;
+  }
+  100%{
+    height: 40px;
+    opacity: 1;
+  }
+}
+
+@keyframes MaxHeight {
+  0%{
+    height: 40px;
+    opacity: 1;
+  }
+  100%{
+    height: 308px;
+    opacity: 1;
   }
 }
