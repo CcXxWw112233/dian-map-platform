@@ -154,6 +154,7 @@ export default class LeftToolBar extends React.Component {
     ];
     this.state = {
       selectedIndex: 0,
+      hoveredIndex: -1,
       displayPlot: false,
       displayProject: true,
       displayTempPlot: false,
@@ -226,7 +227,7 @@ export default class LeftToolBar extends React.Component {
         displayTempPlotIcon: true,
       });
     }
-    window.featureOperator && delete window.featureOperator
+    // window.featureOperator && delete window.featureOperator
   };
 
   updateFeatureOperatorList2 = (list) => {
@@ -270,10 +271,14 @@ export default class LeftToolBar extends React.Component {
     }
   };
 
+  handleItemOver = () => {};
+
+  handleItemLeave = () => {};
+
   render() {
-    let tempPlotItemStyle = { bottom: 60, left: 4, background: "none" };
-    let customSymbolStoreStyle = { bottom: 0, left: 4, background: "none" };
-    const selectStyle = { background: "#3863d0" };
+    let tempPlotItemStyle = { bottom: 60, left: 4 };
+    let customSymbolStoreStyle = { bottom: 0, left: 4 };
+    const selectStyle = { background: "rgba(90, 134, 245, 1)" };
     if (this.state.displayTempPlot) {
       tempPlotItemStyle = { ...tempPlotItemStyle, ...selectStyle };
     }
@@ -293,13 +298,16 @@ export default class LeftToolBar extends React.Component {
             zIndex: 9,
           }}
         >
-          <div className={styles.circle}>
+          <div className={styles.circle} style={{ background: "#fff" }}>
             {/* <img alt="" src=""></img> */}
             <i className={globalStyle.global_icon} style={{ fontSize: 26 }}>
               &#xe764;
             </i>
           </div>
-          <ul>
+          <div
+            className={globalStyle.autoScrollY}
+            style={{ height: "calc(100% - 210px)" }}
+          >
             {this.leftTools.map((item, index) => {
               let displayText = true;
               if (
@@ -308,40 +316,51 @@ export default class LeftToolBar extends React.Component {
               ) {
                 displayText = false;
               }
+              if (this.state.hoveredIndex === index) {
+                displayText = false;
+              }
               const divStyle = displayText ? {} : { display: "table" };
               const iStyle = displayText
                 ? {}
                 : { display: "table-cell", verticalAlign: "middle" };
               return (
-                <li key={`${item.iconfont}-${index}`}>
-                  <div
-                    className={`${styles.item} ${
-                      this.state.selectedIndex === index ? styles.active : ""
-                    }`}
-                    style={divStyle}
-                    onClick={() => {
-                      this.setState({
-                        selectedIndex: index,
-                        displayTempPlot: false,
-                      });
-                      item.cb && item.cb();
-                    }}
-                  >
-                    <i
-                      className={globalStyle.global_icon}
-                      dangerouslySetInnerHTML={{ __html: item.iconfont }}
-                      style={iStyle}
-                    ></i>
-                    {displayText ? (
-                      <p>
-                        <span>{item.name}</span>
-                      </p>
-                    ) : null}
-                  </div>
-                </li>
+                <div
+                  key={`${item.iconfont}-${index}`}
+                  className={`${styles.item} ${
+                    this.state.selectedIndex === index ? styles.active : ""
+                  }`}
+                  style={divStyle}
+                  onPointerOver={() => {
+                    this.setState({
+                      hoveredIndex: index,
+                    });
+                  }}
+                  onPointerLeave={() => {
+                    this.setState({
+                      hoveredIndex: -1,
+                    });
+                  }}
+                  onPointerDown={() => {
+                    this.setState({
+                      selectedIndex: index,
+                    });
+                    item.cb && item.cb();
+                  }}
+                >
+                  <i
+                    className={globalStyle.global_icon}
+                    dangerouslySetInnerHTML={{ __html: item.iconfont }}
+                    style={iStyle}
+                  ></i>
+                  {displayText ? (
+                    <p>
+                      <span>{item.name}</span>
+                    </p>
+                  ) : null}
+                </div>
               );
             })}
-          </ul>
+          </div>
           {this.state.displayTempPlotIcon ? (
             <div
               className={`${styles.circle} ${styles.temp}`}
@@ -355,8 +374,18 @@ export default class LeftToolBar extends React.Component {
                   plotType: "",
                 });
               }}
-              style={tempPlotItemStyle}
+              style={{ ...tempPlotItemStyle, display: "table" }}
             >
+              {/* <Badge
+                count={this.featureOperatorList.length}
+              >
+                <i
+                  className={globalStyle.global_icon}
+                  style={{ fontSize: 30, color: "#fff" }}
+                >
+                  &#xe765;
+                </i>
+              </Badge> */}
               <i
                 className={globalStyle.global_icon}
                 style={{ fontSize: 30, color: "#fff" }}

@@ -6,13 +6,19 @@
   height: 100%;
   background: rgba(106, 154, 255, 1);
   font-family: PingFangSC-Medium, PingFang SC;
+  textarea {
+    resize: none;
+  }
   .circle {
     width: 40px;
     height: 40px;
     margin: 20px auto;
     border-radius: 20px;
-    background: #fff;
     cursor: pointer;
+    :global(.ant-badge) {
+      display: table-cell;
+      vertical-align: middle;
+    }
     &.temp {
       position: absolute;
       // bottom: 0px;
@@ -23,39 +29,39 @@
       width: 48px;
       height: 48px;
       border-radius: 24px;
-    }
-  }
-  ul {
-    li {
-      .item {
-        width: 56px;
-        height: 56px;
-        margin: 10px auto;
-        color: #fff;
-        // margin: 10px 0;
-        // padding: 4px 0;
-        &:active,
-        &.active {
-          background: rgba(52, 92, 170, 1);
-        }
-        &:hover {
-          background: rgba(52, 92, 170, 0.6);
-        }
-        i {
-          font-size: 24px;
-        }
-        p {
-          width: 100%;
-          line-height: 8px;
-        }
+      &:hover {
+        background: rgba(90, 134, 245, 0.6);
       }
     }
   }
+  .item {
+    width: 48px;
+    height: 48px;
+    margin: 10px auto;
+    border-radius: 24px;
+    color: #fff;
+    &:active,
+    &.active {
+      background: rgba(90, 134, 245, 1);
+    }
+    &:hover {
+      background: rgba(90, 134, 245, 0.6);
+    }
+    i {
+      font-size: 24px;
+    }
+    p {
+      width: 100%;
+      line-height: 8px;
+    }
+  }
+
   .panel {
     position: absolute;
     left: 56px;
     top: 0px;
     width: 20vw;
+    min-width: 240px;
     height: 100%;
     z-index: 5;
     // padding: 20px;
@@ -166,11 +172,14 @@
       position: absolute;
       left: 100%;
       top: 50%;
+      transform: translateY(-30px);
       width: 30px;
       height: 60px;
       background: #ffffff;
       border-radius: 0px 8px 8px 0px;
       display: table;
+      box-shadow: 17px 0px 33px 0px rgba(102, 144, 255, 0.1),
+      12px 0px 20px 0px rgba(87, 92, 118, 0.1);
     }
   }
   .loadingPage {

@@ -34,7 +34,7 @@ export default class ToolBox extends React.Component {
         },
       },
       {
-        name: "拉框放大",
+        name: "放大",
         iconfont: "&#xe75f;",
         cb: myDragZoom.setVal.bind(myDragZoom),
       },
@@ -89,24 +89,33 @@ export default class ToolBox extends React.Component {
   };
 
   render() {
+    const style = { display: "table" },
+      style2 = { display: "table-cell", verticalAlign: "middle" };
     return (
       <div className={`${styles.wrapper} ${globalStyle.global_icon}`}>
         {this.tools.map((item, index) => {
           return (
             <div
+              style={this.state.selectedIndex === index ? style : {}}
               key={`${item.name}-${index}`}
-              className={`${styles.content} ${
-                this.state.selectedIndex === index ? styles.active : ""
-              }`}
-              onClick={() => {
+              className={styles.content}
+              onPointerDown={() => {
                 this.deactivate();
+                item.cb();
+              }}
+              onPointerOver={() => {
                 this.setState({
                   selectedIndex: index,
                 });
-                item.cb();
+              }}
+              onPointerLeave={() => {
+                this.setState({
+                  selectedIndex: -1,
+                });
               }}
             >
               <i
+                style={this.state.selectedIndex === index ? style2 : {}}
                 className={globalStyle.global_icon}
                 dangerouslySetInnerHTML={{
                   __html:
@@ -115,7 +124,9 @@ export default class ToolBox extends React.Component {
                       : item.iconfont,
                 }}
               ></i>
-              <span>{item.name}</span>
+              {this.state.selectedIndex !== index ? (
+                <span>{item.name}</span>
+              ) : null}
             </div>
           );
         })}

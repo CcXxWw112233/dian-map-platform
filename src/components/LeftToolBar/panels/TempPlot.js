@@ -307,29 +307,42 @@ export default class TempPlot extends React.Component {
                         }`}
                         onClick={() => this.handleRowClick(featureOperator)}
                       >
-                        <Checkbox
-                          key={featureOperator.guid}
-                          value={featureOperator.guid}
-                          onChange={this.onChange}
-                          style={{ marginLeft: 10 }}
-                          checked={
-                            this.state.checkedList.indexOf(
-                              featureOperator.guid
-                            ) > -1
-                          }
-                        ></Checkbox>
                         <div
-                          className={styles.icon}
-                          style={this.getStyle(featureOperator)}
-                        ></div>
-                        <div className={styles.text}>
+                          style={{
+                            width: 60,
+                            display: "flex",
+                            flexDirection: "row",
+                            alignItems: "center",
+                          }}
+                        >
+                          <Checkbox
+                            key={featureOperator.guid}
+                            value={featureOperator.guid}
+                            onChange={this.onChange}
+                            style={{ marginLeft: 10 }}
+                            checked={
+                              this.state.checkedList.indexOf(
+                                featureOperator.guid
+                              ) > -1
+                            }
+                          ></Checkbox>
+                          <div
+                            className={styles.icon}
+                            style={this.getStyle(featureOperator)}
+                          ></div>
+                        </div>
+                        <div
+                          className={styles.text}
+                          style={{ width: "calc(100% - 116px)" }}
+                        >
                           <span>{featureOperator.attrs.name}</span>
                         </div>
-                        <div className={styles.edit}>
+                        <div className={styles.edit} style={{ width: 56 }}>
                           <i
                             className={globalStyle.global_icon}
                             style={{
                               fontSize: 18,
+                              marginRight: 5,
                               color: "rgba(134,140,164,1)",
                             }}
                             onClick={() =>
@@ -363,9 +376,22 @@ export default class TempPlot extends React.Component {
               </div>
             ) : null}
             {this.state.featureOperatorList.length === 0 ? (
-              <div style={{ margin: "120% auto" }}>
-                <p style={{ margin: 0 }}>您还未创建标绘</p>
-                <p>请选择相应工具开始创建</p>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  position: "relative",
+                  top: "30%",
+                }}
+              >
+                <i
+                  className={globalStyle.global_icon}
+                  style={{ fontSize: 50, lineHeight: "50px" }}
+                >
+                  &#xe7d1;
+                </i>
+                <span>暂无数据</span>
+                <span>请先使用标绘工具创建</span>
               </div>
             ) : null}
           </div>

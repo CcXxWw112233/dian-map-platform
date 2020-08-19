@@ -18,11 +18,23 @@ export default class LengedList extends React.Component {
 
   createNULL = () => {
     return (
-      <img
-        alt=""
-        src={require("../../assets/lenged/null.png")}
-        style={{ marginTop: 75 }}
-      ></img>
+      <div
+        style={{
+          color: "#fff",
+          display: "flex",
+          flexDirection: "column",
+          position: "relative",
+          top: "30%",
+        }}
+      >
+        <i
+          className={globalStyle.global_icon}
+          style={{ fontSize: 50, lineHeight: "50px" }}
+        >
+          &#xe7d1;
+        </i>
+        <span>暂无图例</span>
+      </div>
     );
   };
   render() {

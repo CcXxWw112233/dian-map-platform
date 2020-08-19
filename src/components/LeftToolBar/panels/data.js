@@ -309,7 +309,7 @@ export const symbols = [
       },
       {
         name: "小型商业设施",
-        iconfont: "icon-bianzu173",
+        iconfont: "icon-bianzu172",
         fillColor: "rgba(106, 154, 255, 0.7)",
       },
       {

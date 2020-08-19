@@ -109,7 +109,7 @@ export default class LocalPOI extends React.Component {
 
   // 一级tab change回调
   handle1stTabChange = (e) => {
-    const index = e.split("-")[0]
+    const index = e.split("-")[0];
     this.selectTabPanel = this.selectTabPanels[index];
     this.getPoi(this.selectTabPanels[index]);
   };
@@ -140,18 +140,20 @@ export default class LocalPOI extends React.Component {
               poiLayer.init();
               poiLayer.removePoi();
               res.forEach((item) => {
-                const distance = this.getDistance(item.location);
-                poiLayer.addPoiToMap(
-                  item.location.split(","),
-                  this.poiKeyVal[keywords],
-                  item.name,
-                  {
-                    name: item.name,
-                    address: item.address,
-                    keywords: keywords,
-                    distance: distance,
-                  }
-                );
+                if (item.name) {
+                  const distance = this.getDistance(item.location);
+                  poiLayer.addPoiToMap(
+                    item.location.split(","),
+                    this.poiKeyVal[keywords],
+                    item.name,
+                    {
+                      name: item.name,
+                      address: item.address,
+                      keywords: keywords,
+                      distance: distance,
+                    }
+                  );
+                }
               });
             }
           );
@@ -183,7 +185,7 @@ export default class LocalPOI extends React.Component {
         <Tabs
           type="card"
           onChange={(e) => this.handle1stTabChange(e)}
-          className={styles.wrapper + ' LocalPOI'}
+          className={styles.wrapper + " LocalPOI"}
         >
           {this.setting.map((item, index) => {
             const tabBarStyle = { borderRadius: 20 };
@@ -193,65 +195,79 @@ export default class LocalPOI extends React.Component {
                 key={`${index}-${item.name}`}
                 tabBarStyle={tabBarStyle}
               >
-                <Tabs onChange={(e) => this.handle2ndTabChange(e, index)} className="LocalPOI2">
+                <Tabs
+                  onChange={(e) => this.handle2ndTabChange(e, index)}
+                  className="LocalPOI2"
+                >
                   {item.children &&
                     item.children.map((item2) => {
                       return (
                         <TabPane tab={item2.name} key={item2.name}>
                           <ul
-                            style={{ height: "270px" }}
+                            style={{ height: "230px" }}
                             className={globalStyle.autoScrollY}
                           >
                             {this.state.pois.length > 0 ? (
                               this.state.pois.map((item3, index2) => {
-                                return (
-                                  <li
-                                    key={`p-${index2}`}
-                                    onClick={() => this.handleRowClick(item3)}
-                                  >
-                                    <div className={styles.row}>
-                                      <i
-                                        style={{
-                                          color: "rgb(254, 32, 66)",
-                                          fontSize: 16,
-                                          marginRight: 6,
-                                        }}
-                                        className={globalStyle.global_icon}
-                                        dangerouslySetInnerHTML={{
-                                          __html: item2.icon,
-                                        }}
-                                      ></i>
-                                      <div className={styles.firstDiv}>
-                                        <span>{item3.name}</span>
-                                      </div>
-                                      <div className={styles.secondDiv}>
-                                        <span>
-                                          {this.getDistance(item3.location)}
-                                        </span>
-                                      </div>
-                                    </div>
-                                    <div
-                                      className={styles.row}
-                                      style={{ marginLeft: 36 }}
+                                if (item3.name) {
+                                  return (
+                                    <li
+                                      key={`p-${index2}`}
+                                      onClick={() => this.handleRowClick(item3)}
                                     >
-                                      <span>{item3.address}</span>
-                                    </div>
-                                  </li>
-                                );
+                                      <div className={styles.row}>
+                                        <i
+                                          style={{
+                                            color: "rgb(255, 255, 255)",
+                                            fontSize: 16,
+                                            marginRight: 6,
+                                          }}
+                                          className={globalStyle.global_icon}
+                                          dangerouslySetInnerHTML={{
+                                            __html: item2.icon,
+                                          }}
+                                        ></i>
+                                        <div
+                                          className={styles.firstDiv}
+                                          style={{ width: "calc(100% - 70px)" }}
+                                        >
+                                          <span>{item3.name}</span>
+                                        </div>
+                                        <div className={styles.secondDiv}>
+                                          <span>
+                                            {this.getDistance(item3.location)}
+                                          </span>
+                                        </div>
+                                      </div>
+                                      <div
+                                        className={styles.row}
+                                        style={{ marginLeft: 36 }}
+                                      >
+                                        <span>{item3.address}</span>
+                                      </div>
+                                    </li>
+                                  );
+                                }
+                                return null;
                               })
                             ) : (
-                              <p
+                              <div
                                 style={{
+                                  color: "#fff",
+                                  display: "flex",
+                                  flexDirection: "column",
                                   position: "relative",
-                                  top: "45%",
-                                  fontSize: 15,
-                                  fontWeight: 600,
+                                  top: "30%",
                                 }}
                               >
-                                <span style={{ color: "#fff" }}>
-                                  请在地图上选择需要查看的楼盘点位
-                                </span>
-                              </p>
+                                <i
+                                  className={globalStyle.global_icon}
+                                  style={{ fontSize: 50, lineHeight: "50px" }}
+                                >
+                                  &#xe7d1;
+                                </i>
+                                <span>暂无数据</span>
+                              </div>
                             )}
                           </ul>
                         </TabPane>

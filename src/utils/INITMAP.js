@@ -19,6 +19,7 @@ const initMap = function () {
     drawing: {},
     baseMaps: [],
     mapId: "",
+    baseMapKey: "",
     operationLayers: [],
     init: function (mapId) {
       this.mapId = mapId;
