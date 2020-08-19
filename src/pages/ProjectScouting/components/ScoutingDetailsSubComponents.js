@@ -35,7 +35,7 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
 import { MyIcon } from '../../../components/utils'
 // import { UploadFile } from '../../../utils/XhrUploadFile'
 
-export const  Title = ({ name, date, cb, data = {} })=>{
+export const  Title = ({ name, date, cb, data = {} ,className = '', mini})=>{
   // 预览图片
   const previewImg = (e)=>{
     let url = e.target.src;
@@ -48,10 +48,10 @@ export const  Title = ({ name, date, cb, data = {} })=>{
     }
   }
   return (
-    <div className={styles.title}>
+    <div className={`${styles.title} ${className}`}>
       <div className={styles.title_goBack} onClick={cb}>
         <MyIcon type="icon-fanhuijiantou"/>
-        {/* <span className={styles.back_name}>返回</span> */}
+        <span className={`${styles.back_name} ${animateCss.animated} ${mini ? animateCss.fadeIn: animateCss.fadeOut}`}>{name}</span>
       </div>
       <div className={styles.title_name}>
         <span>{name}</span>

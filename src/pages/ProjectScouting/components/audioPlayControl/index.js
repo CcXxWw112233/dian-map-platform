@@ -1,8 +1,8 @@
 import React from 'react'
-import styles from './audioPlayControl.less'
+import styles from './index.less'
 import ReactDOM from 'react-dom'
-import globalStyle from '../../../globalSet/styles/globalStyles.less'
-import animateCss from '../../../assets/css/animate.min.css'
+import globalStyle from '../../../../globalSet/styles/globalStyles.less'
+import animateCss from '../../../../assets/css/animate.min.css'
 
 export default class AudioControl extends React.PureComponent{
     constructor(props){
@@ -31,7 +31,7 @@ export default class AudioControl extends React.PureComponent{
         let { audioEle } = this.props;
         audioEle && audioEle.pause();
     }
-    
+
     // 设置播放状态
     setEleStatus = (type)=>{
         let { audioEle } = this.props;
@@ -68,11 +68,11 @@ export default class AudioControl extends React.PureComponent{
         return (
             <div className={`${styles.playBtn} ${globalStyle.global_icon}`}>
                 {
-                    this.state.isPause ? 
-                    <span dangerouslySetInnerHTML={{__html: this.icons['video'].play}} 
+                    this.state.isPause ?
+                    <span dangerouslySetInnerHTML={{__html: this.icons['video'].play}}
                     onClick={this.setEleStatus.bind(this,'play')}></span>
                     :
-                    <span dangerouslySetInnerHTML={{__html: this.icons['video'].pause}} 
+                    <span dangerouslySetInnerHTML={{__html: this.icons['video'].pause}}
                     onClick={this.setEleStatus.bind(this,'pause')}></span>
                 }
             </div>
@@ -107,7 +107,7 @@ export default class AudioControl extends React.PureComponent{
         setTimeout(()=>{
             onClose && onClose();
         },30)
-        
+
     }
 
     render(){

@@ -31,9 +31,9 @@ import {
   areaScouting,
 } from "./components/ScoutingDetailsSubComponents";
 import PlayCollectionControl from "./components/playCollectionControl";
-
-import { setSession } from "utils/sessionManage";
+// import { getOffsetTop } from "utils/utils";
 import CollectionDetail from "./components/CollectionDetail";
+import LookingBack from "./components/LookingBack";
 
 const { Evt } = Event;
 const { TabPane } = Tabs;
@@ -82,12 +82,15 @@ export default class ScoutingDetails extends PureComponent {
       panes,
       activeId: -1,
       audioData: {},
+      miniTitle: false
     };
     this.scrollView = React.createRef();
     this.saveSortTimer = null;
     this.saveSortTime = 2 * 1000; // 秒
     this.isAddAreaBtn = false; //是否外部调用了新增分类按钮
     this.isGoBack = false;
+    this.collectionScrollTop = 0;
+    this.touchStartClient = {};
   }
   componentDidMount() {
     this.isGoBack = false;
@@ -150,6 +153,13 @@ export default class ScoutingDetails extends PureComponent {
       Action.removeLayer(true);
       Action.clearListen();
     }
+    dispatch({
+      type:"collectionDetail/updateDatas",
+      payload:{
+        selectData: null
+      }
+    })
+
   }
 
   // 设置正在播放的数据
@@ -1182,17 +1192,81 @@ export default class ScoutingDetails extends PureComponent {
     })
   }
 
+  CollectionViewScroll = (e)=>{
+    // console.log(e)
+    let target = e.target;
+    this.collectionScrollTop = target.scrollTop;
+  }
+
+  collectionWhell = (e)=>{
+    let whellY = e.deltaY;
+    if(this.collectionScrollTop === 0 && whellY < 0){
+      // console.log('向上滚动到顶了');
+      this.setState({
+        miniTitle: false
+      })
+    }else if(this.collectionScrollTop > 0 && whellY > 0){
+      // console.log('向下滚动中')
+      this.setState({
+        miniTitle: true
+      })
+    }
+  }
+  collectionTouchStart = (e)=>{
+    this.touchStartClient = this.getTouch(e);
+    let { current } = this.scrollView;
+    current.ontouchmove = (evt)=>{
+      let touchM = this.getTouch(evt);
+      let scrollTop = current.scrollTop;
+      let y = touchM.y - this.touchStartClient.y;
+      if(y > 0 && scrollTop === 0){
+        // console.log('滑动到顶了');
+        this.setState({
+          miniTitle: false
+        })
+      }else if(y < 0 && scrollTop > 0){
+        // console.log('往下滑动')
+        this.setState({
+          miniTitle: true
+        })
+      }
+
+      this.touchStartClient = touchM;
+
+    }
+    current.ontouchend = ()=>{
+      current.ontouchmove = null;
+    }
+  }
+
+  getTouch = (e)=>{
+    let touch = e.touches[0];
+    return {x: touch.screenX, y:touch.screenY}
+  }
+
+  PublicView = ({children})=>{
+    return (
+      <div
+        className={globalStyle.autoScrollY}
+        style={{ flex:1,display:"flex",flexDirection:"column"}}
+        ref={this.scrollView}
+        onScroll={this.CollectionViewScroll}
+        onWheel={this.collectionWhell}
+        onTouchStart={this.collectionTouchStart}>
+        {children}
+      </div>
+    )
+  }
+
   renderForActive = (key)=>{
     const { area_list, not_area_id_collection ,activeId} = this.state;
     const { dispatch } = this.props;
+    const { PublicView } = this;
     switch(key){
       case "1":
         return (
           <Fragment>
-          <div
-              className={globalStyle.autoScrollY}
-              style={{ flex:1,display:"flex",flexDirection:"column"}}
-              ref={this.scrollView}>
+            <PublicView>
               <Collapse
                 onChange={(e) => {
                   this.setActiveCollapse(e);
@@ -1359,7 +1433,7 @@ export default class ScoutingDetails extends PureComponent {
                   </Collapse.Panel>
                 )}
               </Collapse>
-            </div>
+            </PublicView>
             <div className={styles.addAreaBtn}>
               <Space style={{ paddingBottom: 10 }}>
                 <Button
@@ -1445,6 +1519,11 @@ export default class ScoutingDetails extends PureComponent {
           </Fragment>
         );
       case "2" :
+        return (
+          <PublicView>
+            <LookingBack />
+          </PublicView>
+        )
       case "3" :
       case "4" :
         return (
@@ -1477,8 +1556,10 @@ export default class ScoutingDetails extends PureComponent {
         )}
 
         <Title
+          className={this.state.miniTitle ? styles.miniTitle: styles.maxTitle}
           name={current_board.board_name}
           date={""}
+          mini={this.state.miniTitle}
           id={current_board.board_id}
           data={current_board}
           cb={this.handleGoBackClick.bind(this)}
