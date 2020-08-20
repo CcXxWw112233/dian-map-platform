@@ -18,6 +18,10 @@ import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 
 import Event from "../../../lib/utils/event";
+import { getLocal } from "utils/sessionManage";
+import { gcj02_to_wgs84, wgs84_to_gcj02 } from "utils/transCoordinateSystem";
+
+import { TransformCoordinate } from "../../../lib/utils/index";
 class PlottingLayer extends Observable {
   /**
    * @classdesc 标绘主图层封装。后续可以有多个对象。目前就中心而言应该就一个对象
@@ -130,6 +134,21 @@ class PlottingLayer extends Observable {
     this.style = null;
 
     this.responseData = null;
+    this.lastBaseMap = null;
+    this.currentBaseMap = null;
+    this.systemDic = {
+      gd_vec: wgs84_to_gcj02,
+      gd_img: wgs84_to_gcj02,
+      gg_img: wgs84_to_gcj02,
+      td_vec: gcj02_to_wgs84,
+      td_img: gcj02_to_wgs84,
+      td_ter: gcj02_to_wgs84,
+    };
+    this.baseMapKeys = ["gd_vec|gd_img|gg_img", "td_vec|td_img|td_ter"];
+    getLocal("baseMapKey").then((res) => {
+      this.lastBaseMap = res.data;
+      this.currentBaseMap = this.lastBaseMap;
+    });
 
     Event.Evt.on(
       "setAttribute",
@@ -154,7 +173,86 @@ class PlottingLayer extends Observable {
         }
       }
     );
+
+    Event.Evt.on("transCoordinateSystems", (key) => {
+      this.lastBaseMap = this.currentBaseMap;
+      this.currentBaseMap = key;
+      this.transCoordinateSystemsByChangeBaseMap();
+    });
   }
+
+  //切换底图后切换坐标
+  transCoordinateSystemsByChangeBaseMap() {
+    let lastIndex = this.baseMapKeys[0].indexOf(this.lastBaseMap);
+    let currentIndex = this.baseMapKeys[0].indexOf(this.currentBaseMap);
+    // 表示都是wgs84或者都是gcj02，不用转啦
+    if (
+      (lastIndex >= 0 && currentIndex >= 0) ||
+      (lastIndex === -1 && currentIndex === -1)
+    ) {
+      return;
+    } else {
+      for (let i = 0; i < this.projectScoutingArr.length; i++) {
+        let feature = this.projectScoutingArr[i].feature;
+        const type = feature.getGeometry().getType();
+        let newFeature = feature.clone();
+        let coords = newFeature.getGeometry().getCoordinates();
+        if (type.indexOf("Point") > -1) {
+          let temp = this._transformCoordinate(coords);
+          if (!temp) {
+            continue;
+          }
+          coords = temp;
+        } else if (type.indexOf("Polygon")) {
+          for (let j = 0; j < coords.length; j++) {
+            for (let k = 0; k < coords[j].length; k++) {
+              let temp = this._transformCoordinate(coords[j][k]);
+              if (!temp) {
+                continue;
+              }
+              coords[j][k] = temp;
+            }
+          }
+        } else {
+          for (let j = 0; j < coords.length; j++) {
+            let temp = this._transformCoordinate(coords[j]);
+            if (!temp) {
+              continue;
+            }
+            coords[j] = temp;
+          }
+        }
+        if (type === "Point") {
+          coords = [coords];
+        } else if (type === "Polygon") {
+          coords = [...coords[0]];
+        } else {
+          console.log(coords);
+        }
+
+        let plot = this.projectScoutingArr[i].feature.getGeometry();
+        plot.updateAllPoint(coords);
+      }
+    }
+  }
+
+  _transformCoordinate(coords) {
+    if (!coords || coords.length !== 2) {
+      return null;
+    }
+    let temp = TransformCoordinate(coords, "EPSG:3857", "EPSG:4326");
+    temp = this.systemDic[this.currentBaseMap](temp[0], temp[1]);
+    if (!temp || temp.length !== 2) {
+      return null;
+    }
+    temp = TransformCoordinate(temp, "EPSG:4326", "EPSG:3857");
+    return temp;
+  }
+
+  addProjectScouting(operator) {
+    this.projectScoutingArr.push(operator);
+  }
+
   /**
    * @ignore
    * 绑定地图事件

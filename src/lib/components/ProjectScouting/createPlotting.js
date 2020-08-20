@@ -2,8 +2,10 @@ import PlotFactory from "../../../utils/plot2ol/src/PlotFactory";
 import Feature from "ol/Feature";
 import { baseOverlay, PopupOverlay } from "../../../components/PublicOverlays";
 import { formatLength, formatArea } from "utils/mapUtils";
-import { createOverlay } from "../../../lib/utils/index";
+import { createOverlay, TransformCoordinate } from "../../../lib/utils/index";
 import InitMap from "../../../utils/INITMAP";
+import { gcj02_to_wgs84, wgs84_to_gcj02 } from "utils/transCoordinateSystem";
+const baseMapKeys = ["gd_vec|gd_img|gg_img", "td_vec|td_img|td_ter"];
 export const createPlottingFeature = (data) => {
   let newType = data.geoType.toLowerCase();
   let coordinates = null;
@@ -17,6 +19,16 @@ export const createPlottingFeature = (data) => {
   }
   if (newType === "polygon") {
     coordinates = [...data.coordinates[0]];
+  }
+  if (baseMapKeys[1].indexOf(InitMap.baseMapKey) > -1) {
+    for (let i = 0; i < coordinates.length; i++) {
+      let tmp = TransformCoordinate(coordinates[i], "EPSG:3857", "EPSG:4326");
+      tmp = gcj02_to_wgs84(tmp[0], tmp[1]);
+      if (!tmp || tmp.length !== 2) {
+        continue;
+      }
+      coordinates[i] = TransformCoordinate(tmp, "EPSG:4326", "EPSG:3857");
+    }
   }
   let plot = PlotFactory.createPlot(newType, coordinates);
   plot.updatePlot(false);

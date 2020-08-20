@@ -54,6 +54,13 @@ class Plot {
             this.generate();
         }
     }
+
+    updateAllPoint(points =[]) {
+      for(let index = 0; index < points.length; index++) {
+        this.points[index] = points[index];
+        this.generate();
+      }
+    }
     /**
      * 更新最后一个点
      * @param {ol.Coordinate} point 

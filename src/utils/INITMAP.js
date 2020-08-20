@@ -19,6 +19,7 @@ const initMap = function () {
     drawing: {},
     baseMaps: [],
     mapId: "",
+    lastBaseMapKey: "",
     baseMapKey: "",
     operationLayers: [],
     init: function (mapId) {
@@ -100,6 +101,8 @@ const initMap = function () {
       }
     },
     changeBaseMap: function (key) {
+      this.lastBaseMapKey = this.baseMapKey;
+      this.baseMapKey = key;
       let baseMapKey = null;
       if (baseMapDictionary && baseMapDictionary.length) {
         baseMapKey = baseMapDictionary.filter((item) => {

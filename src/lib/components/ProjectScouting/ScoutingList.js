@@ -17,6 +17,9 @@ import {
   drawPoint,
 } from "../../utils";
 
+import { gcj02_to_wgs84, wgs84_to_gcj02 } from "utils/transCoordinateSystem";
+import { feature } from "@turf/turf";
+
 // import addFeaturesOverlay from '../../../components/PublicOverlays/addFeaturesOverlay'
 
 const action = function () {
@@ -33,21 +36,64 @@ const action = function () {
   this.addProjectOverlay = {};
   this.sesstionSaveKey = "ScoutingItemId";
   this.projects = [];
+  this.baseMapKeys = ["gd_vec|gd_img|gg_img", "td_vec|td_img|td_ter"];
+  this.systemDic = {
+    gd_vec: wgs84_to_gcj02,
+    gd_img: wgs84_to_gcj02,
+    gg_img: wgs84_to_gcj02,
+    td_vec: gcj02_to_wgs84,
+    td_img: gcj02_to_wgs84,
+    td_ter: gcj02_to_wgs84,
+  };
+  this.currentData = null;
   this.addProjecStyle = createStyle("Point", {
     iconUrl: require("../../../assets/addPointLocation.png"),
-    icon:{ anchorOrigin:"bottom-left" ,anchor:[0.50,0.25]}
+    icon: { anchorOrigin: "bottom-left", anchor: [0.5, 0.25] },
   });
+
+  event.Evt.on("transCoordinateSystems", (key) => {
+    this.lastBaseMap = this.currentBaseMap;
+    this.currentBaseMap = key;
+    // this.transCoordinateSystemsByChangeBaseMap();
+    this.renderProjectPoint(this.currentData);
+  });
+
+  this.transCoordinateSystemsByChangeBaseMap = (key) => {
+    let lastIndex = this.baseMapKeys[0].indexOf(InitMap.lastBaseMapKey);
+    let currentIndex = this.baseMapKeys[0].indexOf(InitMap.baseMapKey);
+    if (
+      (lastIndex >= 0 && currentIndex >= 0) ||
+      (lastIndex === -1 && currentIndex === -1)
+    ) {
+      return;
+    } else {
+      let features = this.Source.getFeatures();
+      let newFeatures = [];
+      features.forEach((feature) => {
+        let newFeature = feature.clone();
+        let coords = newFeature.getGeometry().getCoordinates();
+        let tmp = TransformCoordinate(coords, "EPSG:3857", "EPSG:4326");
+        tmp = this.systemDic[this.currentBaseMap](tmp[0], tmp[1]);
+        coords = TransformCoordinate(tmp, "EPSG:4326", "EPSG:3857");
+        newFeature.getGeometry().setCoordinates(coords);
+        newFeatures.push(newFeature);
+      });
+      this.Source.clear();
+      newFeatures.forEach((feature) => {
+        this.Source.addFeature(feature);
+      });
+    }
+  };
 
   this.init = async () => {
     this.Layer = Layer({ id: "project_point_layer", zIndex: 11 });
     this.Source = Source();
     this.Layer.setSource(this.Source);
     const layers = InitMap.map.getLayers().getArray();
-    const layer = layers.filter(layer => {
-      return layer.get("id") === this.Layer.get("id")
-    })
-    if(!layer[0])
-    InitMap.map.addLayer(this.Layer);
+    const layer = layers.filter((layer) => {
+      return layer.get("id") === this.Layer.get("id");
+    });
+    if (!layer[0]) InitMap.map.addLayer(this.Layer);
     // let el = new addFeaturesOverlay({dataSource:[{text:"123",key:"1"},{text:'测试项目2',key:'2'}],activeKey:"2",width:300},'group')
     // InitMap.map.addOverlay(createOverlay(el.element,{
     //   positioning:"bottom-left",
@@ -72,24 +118,44 @@ const action = function () {
   };
 
   // 隐藏气泡
-  this.hideOverlay = ()=>{
-    this.overlays = this.overlays.map(item => {
+  this.hideOverlay = () => {
+    this.overlays = this.overlays.map((item) => {
       let oldpage = item.getPosition();
-      item.set('oldposition',oldpage);
+      item.set("oldposition", oldpage);
       item.setPosition(null);
       return item;
-    })
-  }
+    });
+  };
   // 显示气泡
-  this.showOverlay = ()=>{
-    this.overlays = this.overlays.map(item => {
-      let oldposition = item.get('oldposition');
+  this.showOverlay = () => {
+    this.overlays = this.overlays.map((item) => {
+      let oldposition = item.get("oldposition");
       item.setPosition(oldposition);
       return item;
-    })
-  }
+    });
+  };
+
+  this.getCoords = (x, y) => {
+    if (InitMap.lastBaseMapKey === "") {
+      if (this.baseMapKeys[0].indexOf(InitMap.baseMapKey) > -1) {
+        return TransformCoordinate([x, y]);
+      } else {
+        let tmp = gcj02_to_wgs84(x, y);
+        return TransformCoordinate(tmp);
+      }
+    } else {
+      if (this.baseMapKeys[0].indexOf(InitMap.baseMapKey) > -1) {
+        let tmp = wgs84_to_gcj02(x, y);
+        return TransformCoordinate(tmp);
+      } else {
+        let tmp = gcj02_to_wgs84(x, y);
+        return TransformCoordinate(tmp);
+      }
+    }
+  };
 
   this.renderProjectPoint = (data) => {
+    this.currentData = data;
     this.Source.clear();
     this.clearOverlay();
     data &&
@@ -98,10 +164,7 @@ const action = function () {
           text: item.board_name,
           type: "Point",
           iconUrl: require("../../../assets/Location-1.png"),
-          coordinates: TransformCoordinate([
-            item.coordinate_x,
-            item.coordinate_y,
-          ]),
+          coordinates: this.getCoords(item.coordinate_x, item.coordinate_y),
         };
         // 创建point
         let feature = addFeature(styleOption.type, {
@@ -118,6 +181,7 @@ const action = function () {
         if (this.Source) this.fitToCenter();
       }, 500);
   };
+
   this.fitToCenter = () => {
     window.lxMap = InitMap;
     let { getUrlParam } = config;
@@ -132,7 +196,7 @@ const action = function () {
   };
   // 添加overlay
   this.addOverlay = (data = {}, source) => {
-    let ele = new project({...data,zIndex:25});
+    let ele = new project({ ...data, zIndex: 25 });
     // console.log(overlay)
     let overlay = createOverlay(ele.element, { offset: [0, -53] });
 
@@ -243,14 +307,13 @@ const action = function () {
   this.handleClickBoard = (data) => {
     // 保存选中数据到本地
     setSession(this.sesstionSaveKey, data.board_id);
-    try{
-      if(window.parent){
-        window.parent.postMessage('map_board_change_'+data.board_id, "*");
+    try {
+      if (window.parent) {
+        window.parent.postMessage("map_board_change_" + data.board_id, "*");
       }
-    }catch(err){
+    } catch (err) {
       console.log(err);
     }
-
   };
 
   // 获取保存的本地缓存

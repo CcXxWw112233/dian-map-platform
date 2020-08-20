@@ -504,8 +504,9 @@ function Action() {
       feature.setStyle(myStyle);
       if (addSource) {
         let operator = this.layer._addFeature(feature);
+        operator.setName(content.name)
         operator.isScouting = true;
-        this.layer.projectScoutingArr.push(operator);
+        this.layer.addProjectScouting(operator);
         this.layer.plotEdit.plotClickCb = this.handlePlotClick.bind(this);
         operator.data = item;
         operator.updateFeatueToDB = this.updateFeatueToDB.bind(this);
@@ -539,7 +540,7 @@ function Action() {
       operator.isScouting = true;
       operator.data = obj;
       operator.updateFeatueToDB = this.updateFeatueToDB.bind(this);
-      this.layer.projectScoutingArr.push(operator);
+      this.layer.addProjectScouting(operator);
       this.layer.plotEdit.plotClickCb = this.handlePlotClick.bind(this);
     });
     let newConfig = [];
