@@ -43,13 +43,14 @@ const { TabPane } = Tabs;
     controller: { mainVisible, lastPageState },
     openswitch: { showFeatureName },
     lengedList: { config },
-    collectionDetail: {selectData}
+    collectionDetail: {selectData, showCollectionsModal}
   }) => ({
     mainVisible,
     lastPageState,
     config,
     showFeatureName,
-    selectData
+    selectData,
+    showCollectionsModal
   })
 )
 export default class ScoutingDetails extends PureComponent {
@@ -91,6 +92,7 @@ export default class ScoutingDetails extends PureComponent {
     this.isGoBack = false;
     this.collectionScrollTop = 0;
     this.touchStartClient = {};
+    this.isTouch = false;
   }
   componentDidMount() {
     this.isGoBack = false;
@@ -247,6 +249,20 @@ export default class ScoutingDetails extends PureComponent {
 
   onChange = (activeKey) => {
     this.setState({ activeKey });
+    if(activeKey !== '1'){
+      // 删除采集资料显示
+      Action.removeLayer();
+      // 删除轮询
+      Action.clearListen();
+    }else if(activeKey === '1'){
+      // 显示采集资料
+      this.setActiveCollapse(this.state.area_active_key);
+      let params = {
+        board_id: this.state.current_board.board_id,
+      };
+      // 添加轮询
+      Action.addToListen(params);
+    }
   };
 
   onEdit = (targetKey, action) => {
@@ -396,6 +412,8 @@ export default class ScoutingDetails extends PureComponent {
         this.state.area_active_key === "other" &&
           (arr = this.state.not_area_id_collection);
         this.renderCollection(arr || []);
+        // 更新回看的列表
+        Evt.firEvent('collectionListUpdate', area_list.concat([{id:'other',name: '未整理',collection:this.state.not_area_id_collection}]))
       }
     );
   };
@@ -1198,6 +1216,7 @@ export default class ScoutingDetails extends PureComponent {
     this.collectionScrollTop = target.scrollTop;
   }
 
+  // 鼠标滚轮滚动
   collectionWhell = (e)=>{
     let whellY = e.deltaY;
     if(this.collectionScrollTop === 0 && whellY < 0){
@@ -1212,37 +1231,33 @@ export default class ScoutingDetails extends PureComponent {
       })
     }
   }
+  // 触摸事件
+  move = (evt)=>{
+    if(!this.isTouch) return ;
+    let touchM = this.getTouch(evt);
+    let y = touchM.y - this.touchStartClient.y;
+    if(y > 0 && this.collectionScrollTop === 0){
+      // console.log('滑动到顶了');
+      this.setState({
+        miniTitle: false
+      })
+    }else if(y < 0 && this.collectionScrollTop > 0){
+      // console.log('往下滑动')
+      this.setState({
+        miniTitle: true
+      })
+    }
+
+    this.touchStartClient = touchM;
+  }
   collectionTouchStart = (e)=>{
+    if(e.pointerType === 'mouse') return;
+    this.isTouch = true;
     this.touchStartClient = this.getTouch(e);
-    let { current } = this.scrollView;
-    current.onpointermove = (evt)=>{
-      let touchM = this.getTouch(evt);
-      let scrollTop = current.scrollTop;
-      let y = touchM.y - this.touchStartClient.y;
-      if(y > 0 && scrollTop === 0){
-        // console.log('滑动到顶了');
-        this.setState({
-          miniTitle: false
-        })
-      }else if(y < 0 && scrollTop > 0){
-        // console.log('往下滑动')
-        this.setState({
-          miniTitle: true
-        })
-      }
-
-      this.touchStartClient = touchM;
-
-    }
-    current.onpointerout = ()=>{
-      current.onpointermove = null;
-    }
   }
 
   getTouch = (e)=>{
-    // let touch = e.touches[0];
-    // return {x: touch.screenX, y:touch.screenY}
-    return {x: e.layerX, y: e.layerY}
+    return {x: e.layerX || e.pageX, y: e.layerY || e.pageY}
   }
 
   PublicView = ({children})=>{
@@ -1253,14 +1268,16 @@ export default class ScoutingDetails extends PureComponent {
         ref={this.scrollView}
         onScroll={this.CollectionViewScroll}
         onWheel={this.collectionWhell}
-        onPointerDown={this.collectionTouchStart}>
+        onPointerDown={this.collectionTouchStart}
+        onPointerMove={this.move}
+        onPointerOut={()=> {this.isTouch = false;}}>
         {children}
       </div>
     )
   }
 
   renderForActive = (key)=>{
-    const { area_list, not_area_id_collection ,activeId} = this.state;
+    const { area_list, not_area_id_collection ,activeId, current_board} = this.state;
     const { dispatch } = this.props;
     const { PublicView } = this;
     switch(key){
@@ -1522,7 +1539,7 @@ export default class ScoutingDetails extends PureComponent {
       case "2" :
         return (
           <PublicView>
-            <LookingBack />
+            <LookingBack board={current_board}/>
           </PublicView>
         )
       case "3" :
@@ -1538,7 +1555,7 @@ export default class ScoutingDetails extends PureComponent {
 
   render () {
     const { current_board,isPlay, playing} = this.state;
-    const { selectData } = this.props;
+    const { selectData, showCollectionsModal} = this.props;
     const panelStyle = {
       // height: "100%",
     };
@@ -1546,6 +1563,7 @@ export default class ScoutingDetails extends PureComponent {
       <div
         className={`${styles.wrap} ${animateCss.animated} ${animateCss.slideInLeft}`}
         style={{ animationDuration: "0.3s" }}
+        id="detailContent"
       >
         {this.state.audioData.ele && !this.state.audioData.ele.paused && (
           <AudioControl
@@ -1604,6 +1622,12 @@ export default class ScoutingDetails extends PureComponent {
         { selectData &&
           <CollectionDetail />
         }
+
+        {/* {
+          showCollectionsModal &&
+
+        } */}
+
       </div>
     );
   }

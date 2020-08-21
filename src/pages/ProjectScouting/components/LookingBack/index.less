@@ -1,4 +1,89 @@
+@import '../../../../globalSet/styles/globalStyles.less';
 .lookingback{
   display: flex;
+  flex: 1;
   flex-direction: column;
+  overflow: hidden;
+  background-color: #fff;
+  .lookGroupTitle{
+    flex: none;
+    text-align: left;
+    .chooseGroup{
+      padding: 10px 8px;
+      background-color: rgba(245,247,250,1);
+      border-top: 1px solid rgba(226,229,236,1);
+      border-bottom: 1px solid rgba(226,229,236,1);
+      .tofull{
+        font-size: 1.3em;
+        float: right;
+      }
+    }
+    .remarks{
+      padding: 8px 15px ;
+      color: rgba(130, 138, 169, 1);
+      .remark_create_msg{
+        margin-top: 10px;
+        color: rgba(158, 166, 194, 1);
+      }
+    }
+    .time_selection{
+      position: relative;
+    }
+  }
+  .lookingback_collection{
+    .autoScrollY;
+    flex: 0.9;
+    .lookingback_item{
+      padding: 0 10px;
+      display: flex;
+      flex-wrap: wrap;
+      .looking_item{
+        flex-basis: 33%;
+        width: 33%;
+        height: 80px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        .active{
+          border-color:rgba(106, 154, 255, 1);
+        }
+        // border: 1px solid rgba(0,0,0,0.2);
+        & > div{
+          // background-color: rgba(71, 74, 91, 1);
+          color: #fff;
+          border-radius: 3px;
+          white-space: pre-wrap;
+          word-break: break-all;
+          text-align: center;
+          position: relative;
+          transition: all 0.1s linear;
+          overflow: hidden;
+          border: 3px solid transparent;
+          &:hover{
+            // border-color:rgba(106, 154, 255, 1);
+            .active;
+            // transform: scale(1.05);
+            // box-shadow: 0 0 16px rgba(0,0,0,0.5);
+          }
+          span{
+            position: relative;
+            z-index: 10;
+            text-shadow: 0 0 5px rgba(0,0,0,0.95);
+            font-size: 12px;
+          }
+          img{
+            z-index: 5;
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            vertical-align: middle;
+          }
+          width: 95%;
+          height: 95%;
+        }
+      }
+    }
+    // height: 70%;
+  }
 }

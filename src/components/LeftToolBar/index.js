@@ -283,6 +283,7 @@ export default class LeftToolBar extends React.Component {
       <div
         className={styles.wrapper}
         style={{ position: "absolute", top: 0, left: 0 }}
+        id="leftToolBar"
       >
         <div
           style={{

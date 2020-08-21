@@ -150,8 +150,8 @@ const SymbolBlock = ({
   );
 };
 
-@connect(({ lengedList: { config } }) => ({
-  config,
+@connect(({ lengedList: { config } , openswitch:{openPanel}}) => ({
+  config,openPanel
 }))
 export default class Plot extends React.Component {
   constructor(props) {
@@ -1034,12 +1034,13 @@ export default class Plot extends React.Component {
   render() {
     const { TextArea } = Input;
     const { Option } = Select;
-    const panelStyle = this.state.openPanel
+    const { dispatch, openPanel } = this.props;
+    const panelStyle = openPanel
       ? {}
       : { transform: "translateX(-100%)" };
     const directionStyle = { display: "table-cell", verticalAlign: "middle" };
     return (
-      <div className={styles.panel} style={panelStyle}>
+      <div className={styles.panel} style={panelStyle} id="panelId">
         <div style={{ width: "100%", height: "100%" }}>
           <div
             className={styles.header}
@@ -1269,12 +1270,18 @@ export default class Plot extends React.Component {
         <div
           className={styles.controller}
           onClick={() => {
-            this.setState({
-              openPanel: !this.state.openPanel,
-            });
+            // this.setState({
+            //   openPanel: !this.state.openPanel,
+            // });
+            dispatch({
+              type:"openswitch/updateDatas",
+              payload:{
+                openPanel: !openPanel
+              }
+            })
           }}
         >
-          {this.state.openPanel ? (
+          {openPanel ? (
             <LeftOutlined style={directionStyle} />
           ) : (
             <RightOutlined style={directionStyle} />

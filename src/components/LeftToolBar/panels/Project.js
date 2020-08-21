@@ -13,7 +13,7 @@ import ScoutAction from "../../../lib/components/ProjectScouting/ScoutingList";
 // import ScoutDetail from "../../../lib/components/ProjectScouting/ScoutingDetail";
 import { connect } from "dva";
 
-@connect(({ controller: { mainVisible } }) => ({ mainVisible }))
+@connect(({ controller: { mainVisible }, openswitch: { openPanel } }) => ({ mainVisible ,openPanel}))
 export default class Project extends React.Component {
   constructor(props) {
     super(props);
@@ -71,12 +71,13 @@ export default class Project extends React.Component {
 
   render() {
     const { TabPane } = Tabs;
-    const panelStyle = this.state.openPanel
+    const { dispatch, openPanel } = this.props;
+    const panelStyle = openPanel
       ? {}
       : { transform: "translateX(-100%)" };
     const directionStyle = { display: "table-cell", verticalAlign: "middle" };
     return (
-      <div className={styles.panel} style={panelStyle}>
+      <div className={styles.panel} style={panelStyle} id="leftPanel">
         <div style={{ width: "100%", height: "100%" }}>
           {this.props.mainVisible === "list" ? (
             <div
@@ -134,12 +135,18 @@ export default class Project extends React.Component {
         <div
           className={styles.controller}
           onClick={() => {
-            this.setState({
-              openPanel: !this.state.openPanel,
-            });
+            // this.setState({
+            //   openPanel: !this.state.openPanel,
+            // });
+            dispatch({
+              type:"openswitch/updateDatas",
+              payload:{
+                openPanel: !openPanel
+              }
+            })
           }}
         >
-          {this.state.openPanel ? (
+          {openPanel ? (
             <LeftOutlined style={directionStyle} />
           ) : (
             <RightOutlined style={directionStyle} />

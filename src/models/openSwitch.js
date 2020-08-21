@@ -9,6 +9,8 @@ export default {
     isShowPlanPicEdit: false,
     // 是否显示元素的text名称
     showFeatureName: true,
+    // 是否隐藏左侧面板
+    openPanel:true ,
 
     isShowBasemapGallery: isMobile ? false : true,
     isShowRightTools: isMobile ? false : true,
