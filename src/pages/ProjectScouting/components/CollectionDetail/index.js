@@ -10,7 +10,7 @@ import DetailAction from '../../../../lib/components/ProjectScouting/ScoutingDet
 import { message, Row, Col } from 'antd';
 import Event from '../../../../lib/utils/event'
 
-@connect(({collectionDetail: { selectData } })=>({ selectData }))
+@connect(({collectionDetail: { selectData ,zIndex} })=>({ selectData ,zIndex}))
 export default class CollectionDetail extends React.Component{
   constructor(props){
     super(props);
@@ -128,7 +128,7 @@ export default class CollectionDetail extends React.Component{
 
   render(){
     const { isEdit } = this.state;
-    const { selectData = {}, dispatch} = this.props;
+    const { selectData = {}, dispatch ,zIndex} = this.props;
     let oldRemark = selectData.description;
     if (oldRemark?.trim() === "") {
       oldRemark = null
@@ -138,7 +138,8 @@ export default class CollectionDetail extends React.Component{
     let hours = DetailAction.dateFormat(create_time, "HH:mm");
     return (
       ReactDOM.createPortal(
-        <div className={`${styles.collection_detail} ${animateCss.animated} ${animateCss.slideInRight} ${animateCss.fadeIn}`}>
+        <div className={`${styles.collection_detail} ${animateCss.animated} ${animateCss.slideInRight} ${animateCss.fadeIn}`}
+        style={{zIndex: zIndex}}>
           <div className={styles.detail_title}>
             <span className={styles.edit}>
               {isEdit ? <MyIcon type='icon-bianzu7beifen' onClick={(e)=> this.editEnd(false)}/> :

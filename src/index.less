@@ -1,8 +1,11 @@
 @import '~antd/lib/style/themes/default.less';
+@import './globalSet/styles/animate.less';
 html, body, :global(#root) {
   height: 100%;
   padding: 0;
   margin: 0;
+  position: relative;
+  z-index: 10;
 }
 :global(*){
   outline: none;

@@ -13,7 +13,7 @@ import ScoutAction from "../../../lib/components/ProjectScouting/ScoutingList";
 // import ScoutDetail from "../../../lib/components/ProjectScouting/ScoutingDetail";
 import { connect } from "dva";
 
-@connect(({ controller: { mainVisible } }) => ({ mainVisible }))
+@connect(({ controller: { mainVisible }, openswitch: { openPanel } }) => ({ mainVisible ,openPanel}))
 export default class Project extends React.Component {
   constructor(props) {
     super(props);

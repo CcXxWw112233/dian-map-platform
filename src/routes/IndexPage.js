@@ -301,7 +301,7 @@ class IndexPage extends React.Component {
       isShowPhotoSwipe,
     } = this.props;
     return (
-      <div className={styles.normal}>
+      <div className={styles.normal} id="IndexPage">
         {/* 地图主体 */}
         <LayerMap onLoad={this.MapOnload} />
         {isShowBasemapGallery && <BasemapGallery />}
