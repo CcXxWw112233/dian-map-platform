@@ -1,0 +1,71 @@
+@import '../../../../globalSet/styles/globalStyles.less';
+.collectionBox{
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  .containerHeader{
+    flex: none;
+    .board_name{
+      font-weight: bold;
+      font-size: 1.2em;
+    }
+    padding: 15px 6px;
+    text-align: left;
+  }
+  .exitFull{
+    cursor: pointer;
+    float: right;
+    font-size: 1.2em;
+    margin-right: 10px;
+  }
+  .content{
+    .autoScrollY;
+    flex: 1;
+    .collectionContent{
+      padding: 0 3px;
+      .collectionGroupName{
+        display: inline-block;
+        padding: 10px 8px;
+      }
+      .collectionGroup{
+        text-align: left;
+      }
+      .collectionRender{
+        display: flex;
+        flex-wrap: wrap;
+        .collectionItem{
+          margin-bottom: 3px;
+          overflow: hidden;
+          display: flex;
+          justify-content: center;
+          box-sizing: border-box;
+          align-items: center;
+          transition: border 0.2s linear;
+          border: 2px solid transparent;
+          &.activity{
+            border-color: rgba(106, 154, 255, 1);
+          }
+          & > div{
+            // padding: 2px;
+            border: 2px solid transparent;
+            // width: 100%;
+            // height: 100%;
+          }
+          flex-basis: 33%;
+          width: 33%;
+          height: 90px;
+          img{
+            vertical-align: middle;
+            width: 100%;
+          }
+        }
+      }
+    }
+  }
+}

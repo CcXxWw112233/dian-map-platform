@@ -152,8 +152,8 @@ const SymbolBlock = ({
   );
 };
 
-@connect(({ lengedList: { config } }) => ({
-  config,
+@connect(({ lengedList: { config } , openswitch:{openPanel}}) => ({
+  config,openPanel
 }))
 export default class Plot extends React.Component {
   constructor(props) {
