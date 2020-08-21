@@ -67,30 +67,26 @@ export default class ProjectList extends React.Component {
   };
 
   render() {
-    const panelStyle = this.state.openPanel
-      ? {}
-      : { transform: "translateX(-100%)" };
-    const directionStyle = { display: "table-cell", verticalAlign: "middle" };
     return (
-      <div className={styles.panel} style={panelStyle}>
-        <div style={{ width: "100%", height: "100%" }}>
-          <div
-            className={styles.header}
-            style={{ padding: "0 20px", marginBottom: 10 }}
+      <div style={{ width: "100%", height: "100%" }}>
+        <div
+          className={styles.header}
+          style={{ padding: "0 20px", marginBottom: 10 }}
+        >
+          <i
+            className={globalStyle.global_icon}
+            onClick={() => this.props.goBackTempPlot([])}
           >
-            <i
-              className={globalStyle.global_icon}
-              onClick={() => this.props.goBackTempPlot([])}
-            >
-              &#xe758;
-            </i>
-          </div>
-          <div
-            className={`${styles.body} ${globalStyle.autoScrollY}`}
-            style={{
-              height: "calc(100% - 50px)",
-            }}
-          >
+            &#xe758;
+          </i>
+        </div>
+        <div
+          className={`${styles.body} ${globalStyle.autoScrollY}`}
+          style={{
+            height: "calc(100% - 50px)",
+          }}
+        >
+          {this.state.projectList.length > 0 ? (
             <div className={styles.content}>
               <Radio.Group
                 onChange={(e) => this.onChange(e.target.value)}
@@ -111,20 +107,24 @@ export default class ProjectList extends React.Component {
                 })}
               </Radio.Group>
             </div>
-          </div>
-        </div>
-        <div
-          className={styles.controller}
-          onClick={() => {
-            this.setState({
-              openPanel: !this.state.openPanel,
-            });
-          }}
-        >
-          {this.state.openPanel ? (
-            <LeftOutlined style={directionStyle} />
           ) : (
-            <RightOutlined style={directionStyle} />
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                position: "relative",
+                top: "30%",
+              }}
+            >
+              <i
+                className={globalStyle.global_icon}
+                style={{ fontSize: 50, lineHeight: "50px" }}
+              >
+                &#xe7d1;
+              </i>
+              <span>暂无数据</span>
+              <span>请先创建项目</span>
+            </div>
           )}
         </div>
       </div>

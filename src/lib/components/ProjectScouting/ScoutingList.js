@@ -18,7 +18,6 @@ import {
 } from "../../utils";
 
 import { gcj02_to_wgs84, wgs84_to_gcj02 } from "utils/transCoordinateSystem";
-import { feature } from "@turf/turf";
 
 // import addFeaturesOverlay from '../../../components/PublicOverlays/addFeaturesOverlay'
 

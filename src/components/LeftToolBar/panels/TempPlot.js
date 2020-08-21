@@ -265,149 +265,127 @@ export default class TempPlot extends React.Component {
       : { transform: "translateX(-100%)" };
     const directionStyle = { display: "table-cell", verticalAlign: "middle" };
     return (
-      <div className={styles.panel} style={panelStyle}>
-        <div style={{ width: "100%", height: "100%" }}>
-          <div
-            className={styles.header}
-            style={{ padding: "0 20px", marginBottom: 10 }}
-          >
-            <span>临时标绘</span>
-          </div>
-          <div
-            className={styles.body}
-            style={{
-              height: "calc(100% - 30px)",
-            }}
-          >
-            {this.state.featureOperatorList.length > 0 ? (
-              <div
-                className={`${styles.content} ${globalStyle.autoScrollY}`}
-                style={{ height: "calc(100% - 70px)", padding: 0 }}
-              >
-                <div className={styles.checkAll} style={{ marginLeft: 10 }}>
-                  <Checkbox
-                    className={styles.row}
-                    onChange={this.onCheckAllChange}
-                    indeterminate={this.state.indeterminate}
-                    checked={this.state.checkAll}
-                    style={{ textAlign: "left" }}
-                  >
-                    全选
-                  </Checkbox>
-                </div>
-                {this.state.featureOperatorList.map(
-                  (featureOperator, index) => {
-                    return (
-                      <Row
-                        key={featureOperator.guid}
-                        className={`${styles.myRow} ${
-                          this.state.selectedGuid === featureOperator.guid
-                            ? styles.active
-                            : ""
-                        }`}
-                        onClick={() => this.handleRowClick(featureOperator)}
-                      >
-                        <div
-                          style={{
-                            width: 60,
-                            display: "flex",
-                            flexDirection: "row",
-                            alignItems: "center",
-                          }}
-                        >
-                          <Checkbox
-                            key={featureOperator.guid}
-                            value={featureOperator.guid}
-                            onChange={this.onChange}
-                            style={{ marginLeft: 10 }}
-                            checked={
-                              this.state.checkedList.indexOf(
-                                featureOperator.guid
-                              ) > -1
-                            }
-                          ></Checkbox>
-                          <div
-                            className={styles.icon}
-                            style={this.getStyle(featureOperator)}
-                          ></div>
-                        </div>
-                        <div
-                          className={styles.text}
-                          style={{ width: "calc(100% - 116px)" }}
-                        >
-                          <span>{featureOperator.attrs.name}</span>
-                        </div>
-                        <div className={styles.edit} style={{ width: 56 }}>
-                          <i
-                            className={globalStyle.global_icon}
-                            style={{
-                              fontSize: 18,
-                              marginRight: 5,
-                              color: "rgba(134,140,164,1)",
-                            }}
-                            onClick={() =>
-                              this.handleEditClick(featureOperator)
-                            }
-                          >
-                            &#xe759;
-                          </i>
-                          <i
-                            className={globalStyle.global_icon}
-                            style={{
-                              fontSize: 18,
-                              color: "rgba(134,140,164,1)",
-                            }}
-                            onClick={() => this.handleDelClick(featureOperator)}
-                          >
-                            &#xe75a;
-                          </i>
-                        </div>
-                      </Row>
-                    );
-                  }
-                )}
-              </div>
-            ) : null}
-            {this.state.featureOperatorList.length > 0 ? (
-              <div className={styles.footer}>
-                <Button type="primary" block onClick={this.saveToProject}>
-                  转存到项目
-                </Button>
-              </div>
-            ) : null}
-            {this.state.featureOperatorList.length === 0 ? (
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  position: "relative",
-                  top: "30%",
-                }}
-              >
-                <i
-                  className={globalStyle.global_icon}
-                  style={{ fontSize: 50, lineHeight: "50px" }}
-                >
-                  &#xe7d1;
-                </i>
-                <span>暂无数据</span>
-                <span>请先使用标绘工具创建</span>
-              </div>
-            ) : null}
-          </div>
+      <div style={{ width: "100%", height: "100%" }}>
+        <div
+          className={styles.header}
+          style={{ padding: "0 20px", marginBottom: 10 }}
+        >
+          <span>临时标绘</span>
         </div>
         <div
-          className={styles.controller}
-          onClick={() => {
-            this.setState({
-              openPanel: !this.state.openPanel,
-            });
+          className={styles.body}
+          style={{
+            height: "calc(100% - 30px)",
           }}
         >
-          {this.state.openPanel ? (
-            <LeftOutlined style={directionStyle} />
+          {this.state.featureOperatorList.length > 0 ? (
+            <div
+              className={`${styles.content} ${globalStyle.autoScrollY}`}
+              style={{ height: "calc(100% - 70px)", padding: 0 }}
+            >
+              <div className={styles.checkAll} style={{ marginLeft: 10 }}>
+                <Checkbox
+                  className={styles.row}
+                  onChange={this.onCheckAllChange}
+                  indeterminate={this.state.indeterminate}
+                  checked={this.state.checkAll}
+                  style={{ textAlign: "left" }}
+                >
+                  全选
+                </Checkbox>
+              </div>
+              {this.state.featureOperatorList.map((featureOperator, index) => {
+                return (
+                  <Row
+                    key={featureOperator.guid}
+                    className={`${styles.myRow} ${
+                      this.state.selectedGuid === featureOperator.guid
+                        ? styles.active
+                        : ""
+                    }`}
+                    onClick={() => this.handleRowClick(featureOperator)}
+                  >
+                    <div
+                      style={{
+                        width: 60,
+                        display: "flex",
+                        flexDirection: "row",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Checkbox
+                        key={featureOperator.guid}
+                        value={featureOperator.guid}
+                        onChange={this.onChange}
+                        style={{ marginLeft: 10 }}
+                        checked={
+                          this.state.checkedList.indexOf(featureOperator.guid) >
+                          -1
+                        }
+                      ></Checkbox>
+                      <div
+                        className={styles.icon}
+                        style={this.getStyle(featureOperator)}
+                      ></div>
+                    </div>
+                    <div
+                      className={styles.text}
+                      style={{ width: "calc(100% - 116px)" }}
+                    >
+                      <span>{featureOperator.attrs.name}</span>
+                    </div>
+                    <div className={styles.edit} style={{ width: 56 }}>
+                      <i
+                        className={globalStyle.global_icon}
+                        style={{
+                          fontSize: 18,
+                          marginRight: 5,
+                          color: "rgba(134,140,164,1)",
+                        }}
+                        onClick={() => this.handleEditClick(featureOperator)}
+                      >
+                        &#xe759;
+                      </i>
+                      <i
+                        className={globalStyle.global_icon}
+                        style={{
+                          fontSize: 18,
+                          color: "rgba(134,140,164,1)",
+                        }}
+                        onClick={() => this.handleDelClick(featureOperator)}
+                      >
+                        &#xe75a;
+                      </i>
+                    </div>
+                  </Row>
+                );
+              })}
+            </div>
+          ) : null}
+          {this.state.featureOperatorList.length > 0 ? (
+            <div className={styles.footer}>
+              <Button type="primary" block onClick={this.saveToProject}>
+                转存到项目
+              </Button>
+            </div>
           ) : (
-            <RightOutlined style={directionStyle} />
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                position: "relative",
+                top: "30%",
+              }}
+            >
+              <i
+                className={globalStyle.global_icon}
+                style={{ fontSize: 50, lineHeight: "50px" }}
+              >
+                &#xe7d1;
+              </i>
+              <span>暂无数据</span>
+              <span>请先使用标绘工具创建</span>
+            </div>
           )}
         </div>
       </div>

@@ -10,12 +10,12 @@ export default class ColorPicker extends Component {
   constructor(props) {
     super(props);
     this.defaultColor = {
-      r: "168",
-      g: "9",
-      b: "10",
+      r: "106",
+      g: "154",
+      b: "255",
       a: "1",
     };
-    this.defaultColorStyle = "rgba(168,9,10,1)";
+    this.defaultColorStyle = "rgba(106, 154, 255, 1)";
     this.state = {
       visible: false,
       color: this.defaultColor,
@@ -94,6 +94,8 @@ export default class ColorPicker extends Component {
   render() {
     let disable = "",
       backgroundColor = this.state.colorStyle;
+    let style = { margin: "auto" };
+    let non_disable = { pointerEvents: "none" };
     if (this.props.disable) {
       disable = ` ${btnStyles.disable}`;
       backgroundColor = "rgba(0,0,0,0.1)";
@@ -124,7 +126,10 @@ export default class ColorPicker extends Component {
       >
         {this.state.visible === false ? (
           <CaretDownOutlined
-            style={{ margin: "auto" }}
+            style={{
+              ...style,
+              ...(this.props.disable === false ? non_disable : {}),
+            }}
             onClick={() => {
               this.setState({
                 visible: true,
