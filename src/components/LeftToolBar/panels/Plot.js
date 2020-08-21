@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Input, Select, Button, Tooltip, message, Divider } from "antd";
+import { Input, Select, Button, Tooltip, message, Skeleton } from "antd";
 import {
   CaretUpOutlined,
   CaretDownOutlined,
@@ -852,10 +852,15 @@ export default class Plot extends React.Component {
 
   handleCustomStrokeColorOkClick = (value) => {
     this.strokeColor = value;
+    this.symbol = "";
+    this.selectName = "自定义类型";
+    this.createPlotName();
     this.setState(
       {
         strokeSelectedIndex: -1,
         customStrokeSelectedColor: value,
+        symbolSelectedIndex:
+          this.props.plotType === "point" ? this.state.symbolSelectedIndex : "",
       },
       () => {
         this.updateStateCallbackFunc();
@@ -865,36 +870,15 @@ export default class Plot extends React.Component {
 
   handleCustomFillColorOkClick = (value) => {
     this.fillColor = value;
+    this.symbol = "";
+    this.selectName = "自定义类型";
+    this.createPlotName();
     this.setState(
       {
         fillSelectedIndex: -1,
         customFillSelectedColor: value,
-      },
-      () => {
-        this.updateStateCallbackFunc();
-      }
-    );
-  };
-
-  handleCustomStrokeColorSelectChange = (value) => {
-    this.strokeColor = value;
-    this.setState(
-      {
-        customStrokeSelectedColor: value,
-        strokePercent: value,
-      },
-      () => {
-        this.updateStateCallbackFunc();
-      }
-    );
-  };
-
-  handleCustomFillColorSelectChange = (value) => {
-    this.fillColor = value;
-    this.setState(
-      {
-        customFillSelectedColor: value,
-        fillPercent: value,
+        symbolSelectedIndex:
+          this.props.plotType === "point" ? this.state.symbolSelectedIndex : "",
       },
       () => {
         this.updateStateCallbackFunc();
@@ -1115,7 +1099,7 @@ export default class Plot extends React.Component {
                     }}
                   ></div>
                   <ColorPicker
-                    handleOK={this.handleCustomFillColorSelectChange}
+                    handleOK={this.handleCustomFillColorOkClick}
                     disable={
                       this.dic[this.props.plotType] === "Polyline"
                         ? false
@@ -1125,23 +1109,27 @@ export default class Plot extends React.Component {
                 </div>
               </div>
             </div>
-            {this.state.symbols.map((item, index) => {
-              if (item.type.indexOf(this.props.plotType) >= 0) {
-                return (
-                  <SymbolBlock
-                    key={guid(false)}
-                    data={{ item: item, index: index }}
-                    plotTypeName={this.selectSymbolName}
-                    indexStr={this.state.symbolSelectedIndex}
-                    plotType={this.props.plotType}
-                    strokeColor={this.state.customStrokeSelectedColor}
-                    fillColor={this.state.customFillSelectedColor}
-                    cb={this.getFillSymbol}
-                  ></SymbolBlock>
-                );
-              }
-              return null;
-            })}
+            {this.state.symbols.length > 0 ? (
+              this.state.symbols.map((item, index) => {
+                if (item.type.indexOf(this.props.plotType) >= 0) {
+                  return (
+                    <SymbolBlock
+                      key={guid(false)}
+                      data={{ item: item, index: index }}
+                      plotTypeName={this.selectSymbolName}
+                      indexStr={this.state.symbolSelectedIndex}
+                      plotType={this.props.plotType}
+                      strokeColor={this.state.customStrokeSelectedColor}
+                      fillColor={this.state.customFillSelectedColor}
+                      cb={this.getFillSymbol}
+                    ></SymbolBlock>
+                  );
+                }
+                return null;
+              })
+            ) : (
+              <Skeleton active />
+            )}
           </div>
         </div>
         <div

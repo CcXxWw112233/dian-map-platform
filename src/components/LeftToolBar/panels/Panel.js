@@ -2,7 +2,9 @@ import React from "react";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 
 import styles from "../LeftToolBar.less";
+import { connect } from "dva";
 
+connect(() => ({}));
 export default class Panel extends React.Component {
   constructor(props) {
     super(props);
@@ -21,6 +23,7 @@ export default class Panel extends React.Component {
   };
 
   render() {
+    const { dispatch } = this.props;
     const panelStyle = this.state.openPanel
       ? {}
       : { transform: "translateX(-100%)" };
@@ -33,6 +36,12 @@ export default class Panel extends React.Component {
         <div
           className={styles.controller}
           onClick={() => {
+            dispatch({
+              type: "openswitch/updateDatas",
+              payload: {
+                openPanel: !this.state.openPanel,
+              },
+            });
             this.setState({
               openPanel: !this.state.openPanel,
             });
