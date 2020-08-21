@@ -77,14 +77,9 @@ class PlotEdit extends Observable {
         dom,
         "mousedown",
         () => {
-          // if (!this.activePlot.isScouting) {
-          //   // 标绘回调更新redux
-          //   const tempList = this.layer.getArrDifference(
-          //     this.layer.feature_operators,
-          //     this.layer.projectScoutingArr
-          //   );
-          //   this.layer.listCb && this.layer.listCb(tempList);
-          // }
+          if (!this.activePlot.isScouting) {
+            this.layer.saveCb && this.layer.saveCb();
+          }
         },
         this
       );
@@ -295,10 +290,7 @@ class PlotEdit extends Observable {
   // 更新overlay
   updatePlotOverlay() {
     const extent = this.activePlot.getGeometry().getExtent();
-    const center = [
-      extent[0] + (extent[2] - extent[0]) / 2,
-      extent[1] + (extent[3] - extent[1]) / 2,
-    ];
+    const center = [(extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2];
     const id = this.activePlot.get("overlayId");
     if (id) {
       const plotOverlay = this.map.getOverlayById(id);

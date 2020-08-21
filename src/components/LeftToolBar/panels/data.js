@@ -263,7 +263,7 @@ export const symbols = [
         fillColor: "rgba(248, 155, 185, 0.7)",
       },
       {
-        name: "其他公共设施用地",
+        name: "公共设施用地",
         iconfont: "icon-bianzu163",
         fillColor: "rgba(248, 155, 185, 0.7)",
       },
@@ -309,7 +309,7 @@ export const symbols = [
       },
       {
         name: "小型商业设施",
-        iconfont: "icon-bianzu173",
+        iconfont: "icon-bianzu172",
         fillColor: "rgba(106, 154, 255, 0.7)",
       },
       {
@@ -344,7 +344,7 @@ export const symbols = [
       },
       {
         name: "大型服务设施",
-        iconfont: "icon-bianzu178",
+        iconfont: "icon-bianzu179",
         fillColor: "rgba(106, 154, 255, 0.7)",
       },
       {

@@ -9,6 +9,8 @@ import { Row, Switch } from "antd";
 
 import { baseMapDictionary } from "utils/mapSource";
 
+import event from "../../lib/utils/event";
+
 export default class BasemapGallery extends PureComponent {
   constructor(props) {
     super(props);
@@ -91,6 +93,7 @@ export default class BasemapGallery extends PureComponent {
         mapApp.changeBaseMap(item.key);
         mapApp.showRoadLabel(item.key, this.state.showRoadLabel);
         this.selectBaseMapKey = item.key;
+        event.Evt.firEvent("transCoordinateSystems", this.selectBaseMapKey);
       }
     );
   };
@@ -107,30 +110,39 @@ export default class BasemapGallery extends PureComponent {
       >
         {this.state.isOpen ? (
           <div className={styles.open}>
-            {baseMapDictionary &&
-              baseMapDictionary.map((item, index) => {
-                return (
-                  <div
-                    className={`${styles.content} ${
-                      index === this.state.selectedIndex
-                        ? styles.content_active
-                        : ""
-                    }`}
-                    style={{ background: "none" }}
-                    key={`${item.name}${item.type}-${index}`}
-                    onClick={() => this.handleOpenContentClick(item, index)}
-                  >
-                    <img alt="" src={item.img}></img>
-                    <span
-                      className={
+            <div
+              className={globalStyle.autoScrollX}
+              style={{ width: "80%", display: "flex" }}
+            >
+              {baseMapDictionary &&
+                baseMapDictionary.map((item, index) => {
+                  return (
+                    <div
+                      className={`${styles.content} ${
                         index === this.state.selectedIndex
-                          ? `${styles.active}`
+                          ? styles.content_active
                           : ""
-                      }
-                    >{`${item.name}${item.type}`}</span>
-                  </div>
-                );
-              })}
+                      }`}
+                      style={{
+                        background: "none",
+                        whiteSpace: "nowrap",
+                        textOverflow: "ellipsis",
+                      }}
+                      key={`${item.name}${item.type}-${index}`}
+                      onClick={() => this.handleOpenContentClick(item, index)}
+                    >
+                      <img alt="" src={item.img}></img>
+                      <span
+                        className={
+                          index === this.state.selectedIndex
+                            ? `${styles.active}`
+                            : ""
+                        }
+                      >{`${item.name}${item.type}`}</span>
+                    </div>
+                  );
+                })}
+            </div>
             <div className={styles.switch}>
               <Row style={{ marginBottom: 8 }}>
                 <Switch
@@ -144,7 +156,7 @@ export default class BasemapGallery extends PureComponent {
                   checked={this.state.showPlotLabel}
                   onChange={(e) => this.onPlotLabelChange(e)}
                 ></Switch>
-                <div className={styles.nameDiv}>标绘名称</div>
+                <div className={styles.nameDiv}>名称</div>
               </Row>
             </div>
           </div>
@@ -157,7 +169,7 @@ export default class BasemapGallery extends PureComponent {
               ></img>
               <span className={styles.active}>{`${
                 baseMapDictionary[this.state.selectedIndex].name
-              } ${baseMapDictionary[this.state.selectedIndex].type}`}</span>
+              }${baseMapDictionary[this.state.selectedIndex].type}`}</span>
             </div>
           </div>
         )}

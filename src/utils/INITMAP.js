@@ -19,6 +19,8 @@ const initMap = function () {
     drawing: {},
     baseMaps: [],
     mapId: "",
+    lastBaseMapKey: "",
+    baseMapKey: "",
     operationLayers: [],
     init: function (mapId) {
       this.mapId = mapId;
@@ -65,18 +67,6 @@ const initMap = function () {
       layers = layers.getArray();
       let layer = layers.find((item) => item.get("id") === id);
       return layer;
-      // layerArr.filter((layer) => {
-      //   return layer.get("id") === id;
-      // });
-      // let layer = null;
-      // for (let i = 0; i < layerArr.length; i++) {
-      //   const currentId = layerArr[i].get("id");
-      //   if (currentId === id) {
-      //     layer = layerArr[i];
-      //     break;
-      //   }
-      // }
-      // return layer;
     },
     createTilelayer: function (options, zIndex) {
       return new TileLayer({
@@ -99,6 +89,8 @@ const initMap = function () {
       }
     },
     changeBaseMap: function (key) {
+      this.lastBaseMapKey = this.baseMapKey;
+      this.baseMapKey = key;
       let baseMapKey = null;
       if (baseMapDictionary && baseMapDictionary.length) {
         baseMapKey = baseMapDictionary.filter((item) => {

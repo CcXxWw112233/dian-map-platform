@@ -7,6 +7,7 @@ import {
   // getPoint,
   createStyle,
   Fit,
+  TransformCoordinate,
 } from "../../lib/utils";
 import { publicDataUrl } from "../../services/publicData";
 import mapApp from "../../utils/INITMAP";
@@ -16,8 +17,13 @@ import PopupOverlay from "../../components/PublicOverlays/PopupOverlay/index";
 import baseOverlay from "../../components/PublicOverlays/baseOverlay/index";
 import { createOverlay } from "../../lib/utils/index";
 import { getLocal } from "../../utils/sessionManage";
+import {
+  gcj02_to_wgs84,
+  wgs84_to_gcj02,
+} from "../../utils/transCoordinateSystem";
 
 const { getFeature, GET_GEO_DATA } = publicDataUrl;
+
 const publicData = {
   // 图层
   layer: Layer({ id: "publicDataLayer", zIndex: 11 }),
@@ -35,11 +41,26 @@ const publicData = {
   lpOverlay: null,
   lastBaseMap: null, // 上一个底图
   baseMapKeys: ["gd_vec|gd_img|gg_img", "td_vec|td_img|td_ter"],
+  systemDic: {
+    gd_vec: wgs84_to_gcj02,
+    gd_img: wgs84_to_gcj02,
+    gg_img: wgs84_to_gcj02,
+    td_vec: gcj02_to_wgs84,
+    td_img: gcj02_to_wgs84,
+    td_ter: gcj02_to_wgs84,
+  },
+  currentBaseMap: null,
   init: function () {
+    event.Evt.on("transCoordinateSystems", (key) => {
+      this.lastBaseMap = this.currentBaseMap;
+      this.currentBaseMap = key;
+      this.transCoordinateSystemsByChangeBaseMap();
+    });
     // 如果有layer，就不addlayer
     let layer = mapApp.findLayerById(this.layer.get("id"));
     getLocal("baseMapKey").then((res) => {
       this.lastBaseMap = res.data;
+      this.currentBaseMap = this.lastBaseMap;
     });
     if (layer) {
       this.layer.setVisible(true);
@@ -169,7 +190,7 @@ const publicData = {
       if (this.geomData[data.typeName + (data.cql_filter || "")]) {
         // 使用缓存的数据
         this.renderFeatures(
-          this.geomData[data.typeName + (data.cql_filter || "")],
+          this.geomData[this.activeTypeName],
           data,
           fillColor
         );
@@ -213,8 +234,154 @@ const publicData = {
       }
     }
   },
-  // 切换坐标
-  transCoordinateSystems: function () {},
+
+  //切换底图后切换坐标
+  transCoordinateSystemsByChangeBaseMap: function () {
+    let lastIndex = this.baseMapKeys[0].indexOf(this.lastBaseMap);
+    let currentIndex = this.baseMapKeys[0].indexOf(this.currentBaseMap);
+    // 表示都是wgs84或者都是gcj02，不用转啦
+    if (
+      (lastIndex >= 0 && currentIndex >= 0) ||
+      (lastIndex === -1 && currentIndex === -1)
+    ) {
+      return;
+    } else {
+      let newFeatures = [];
+      let keys = Object.keys(this.features);
+      for (let n = 0; n < keys.length; n++) {
+        let features = this.features[keys[n]];
+        if (!features) {
+          continue;
+        }
+        for (let i = 0; i < features.length; i++) {
+          let temp = null;
+          const type = features[i].getGeometry().getType();
+          let newFeature = features[i].clone();
+          let coords = newFeature.getGeometry().getCoordinates();
+          if (type.indexOf("Point") > -1) {
+            temp = TransformCoordinate(coords, "EPSG:3857", "EPSG:4326");
+            temp = this.systemDic[this.currentBaseMap](temp[0], temp[1]);
+            coords = TransformCoordinate(temp, "EPSG:4326", "EPSG:3857");
+            newFeature.getGeometry().setCoordinates(coords);
+            newFeatures.push(newFeature);
+            this.features[keys[n]][i] = newFeature;
+          } else if (type.indexOf("Polygon") > -1) {
+            for (let j = 0; j < coords.length; j++) {
+              for (let k = 0; k < coords[j].length; k++) {
+                for (let l = 0; l < coords[j][k].length; l++) {
+                  temp = TransformCoordinate(
+                    coords[j][k][l],
+                    "EPSG:3857",
+                    "EPSG:4326"
+                  );
+                  temp = this.systemDic[this.currentBaseMap](temp[0], temp[1]);
+                  coords[j][k][l] = TransformCoordinate(
+                    temp,
+                    "EPSG:4326",
+                    "EPSG:3857"
+                  );
+                }
+              }
+            }
+            newFeature.getGeometry().setCoordinates(coords);
+            newFeatures.push(newFeature);
+            this.features[keys[n]][i] = newFeature;
+          } else if (
+            type.indexOf("LineString") > -1 ||
+            type.indexOf("PolyLine") > -1
+          ) {
+            for (let j = 0; j < coords.length; j++) {
+              for (let k = 0; k < coords[j].length; k++) {
+                temp = TransformCoordinate(
+                  coords[j][k],
+                  "EPSG:3857",
+                  "EPSG:4326"
+                );
+                temp = this.systemDic[this.currentBaseMap](temp[0], temp[1]);
+                coords[j][k] = TransformCoordinate(
+                  temp,
+                  "EPSG:4326",
+                  "EPSG:3857"
+                );
+              }
+            }
+            newFeature.getGeometry().setCoordinates(coords);
+            newFeatures.push(newFeature);
+            this.features[keys[n]][i] = newFeature;
+          }
+        }
+      }
+      this.clear();
+      for (let m = 0; m < newFeatures.length; m++) {
+        this.source.addFeature(newFeatures[m]);
+      }
+    }
+    // 视图平移
+    this.areaForExtent(this.source.getExtent());
+  },
+
+  // 根据底图切换坐标,当数据更新了调用
+  transCoordinateSystems: function (coord, type) {
+    // 如果先前的底图key跟现有的底图key一致，则无需纠偏转换,直接返回coord
+
+    let newCoord = JSON.parse(JSON.stringify(coord));
+    // 当前地图是gcj02坐标系
+    let index = this.baseMapKeys[0].indexOf(this.currentBaseMap);
+    if (index !== -1) {
+      return newCoord;
+    } else {
+      // 纠偏转换
+      if (newCoord) {
+        if (type.indexOf("Polygon") > -1) {
+          for (let i = 0; i < newCoord.length; i++) {
+            for (let j = 0; j < newCoord[i].length; j++) {
+              for (let k = 0; k < newCoord[i][j].length; k++) {
+                let temp = TransformCoordinate(
+                  newCoord[i][j][k],
+                  "EPSG:3857",
+                  "EPSG:4326"
+                );
+                temp = this.systemDic[this.currentBaseMap](temp[0], temp[1]);
+                newCoord[i][j][k] = TransformCoordinate(
+                  temp,
+                  "EPSG:4326",
+                  "EPSG:3857"
+                );
+              }
+            }
+          }
+          return newCoord;
+        } else if (type.indexOf("Point") > -1) {
+          newCoord = TransformCoordinate(newCoord, "EPSG:3857", "EPSG:4326");
+          newCoord = this.systemDic[this.currentBaseMap](
+            newCoord[0],
+            newCoord[1]
+          );
+          newCoord = TransformCoordinate(newCoord, "EPSG:4326", "EPSG:3857");
+          return newCoord;
+        }
+        if (type.indexOf("LineString") > -1 || type.indexOf("PolyLine") > -1) {
+          for (let j = 0; j < newCoord.length; j++) {
+            for (let k = 0; k < newCoord[j].length; k++) {
+              let temp = TransformCoordinate(
+                newCoord[j][k],
+                "EPSG:3857",
+                "EPSG:4326"
+              );
+              temp = this.systemDic[this.currentBaseMap](temp[0], temp[1]);
+              newCoord[j][k] = TransformCoordinate(
+                temp,
+                "EPSG:4326",
+                "EPSG:3857"
+              );
+            }
+          }
+          return newCoord;
+        }
+      }
+    }
+  },
+
   // 渲染获取到的数据
   renderFeatures: function (data, option, fillColor) {
     if (data) {
@@ -222,6 +389,7 @@ const publicData = {
         data.features.forEach((item) => {
           let coor = item.geometry.coordinates;
           let type = item.geometry.type;
+          coor = this.transCoordinateSystems(coor, type);
           let feature = addFeature(type, {
             coordinates: coor,
             ...item.properties,
@@ -273,6 +441,7 @@ const publicData = {
     this.circleFeature = feature;
     this.source.addFeature(feature);
   },
+
   // 清除选到server key 图层
   removeFeatures: function (typeNames) {
     typeNames = typeof typeNames === "string" ? [typeNames] : typeNames;
@@ -300,6 +469,7 @@ const publicData = {
       });
     }
   },
+
   clear: function () {
     this.source.clear();
     this.circleFeature = null;

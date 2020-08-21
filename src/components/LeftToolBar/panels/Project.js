@@ -71,87 +71,60 @@ export default class Project extends React.Component {
 
   render() {
     const { TabPane } = Tabs;
-    const { dispatch, openPanel } = this.props;
-    const panelStyle = openPanel
-      ? {}
-      : { transform: "translateX(-100%)" };
-    const directionStyle = { display: "table-cell", verticalAlign: "middle" };
     return (
-      <div className={styles.panel} style={panelStyle} id="leftPanel">
-        <div style={{ width: "100%", height: "100%" }}>
-          {this.props.mainVisible === "list" ? (
-            <div
-              className={`${animateCss.animated} ${animateCss.slideInLeft}`}
-              style={{ animationDuration: "0.3s", height: "100%" }}
-            >
-              <Main>
-                <div style={{ flex: "0" }}>
-                  <Search changeQueryStr={this.changeQueryStr}></Search>
-                </div>
-                <div
-                  style={{ overflow: "hidden", height: "100%" }}
-                  className="panels"
-                >
-                  <Tabs
-                    className="HomeTabs"
-                    defaultActiveKey="1"
-                    // tabBarGutter={60}
-                    animated={true}
-                    onChange={this.tabChange}
-                    tabBarStyle={{
-                      textAlign: "center",
-                    }}
-                    style={{
-                      flex: "1",
-                      display: "flex",
-                      flexDirection: "column",
-                      overflow: "hidden",
-                      height: "100%",
-                    }}
-                  >
-                    <TabPane tab={<span>项目踏勘</span>} key="1">
-                      <ProjectScouting></ProjectScouting>
-                    </TabPane>
-                    <TabPane tab={<span>公共数据</span>} key="2">
-                      <PublicData
-                        getQueryStr={this.getQueryStr}
-                        onRef={this.onRef}
-                      />
-                    </TabPane>
-                  </Tabs>
-                </div>
-              </Main>
-            </div>
-          ) : this.props.mainVisible === "loading" ? (
-            <div className={styles.loadingPage} style={{ height: "100vh" }}>
-              <Spin />
-            </div>
-          ) : (
+      <div style={{ width: "100%", height: "100%" }}>
+        {this.props.mainVisible === "list" ? (
+          <div
+            className={`${animateCss.animated} ${animateCss.slideInLeft}`}
+            style={{ animationDuration: "0.3s", height: "100%" }}
+          >
             <Main>
-              <ScoutingDetails></ScoutingDetails>
+              <div style={{ flex: "0" }}>
+                <Search changeQueryStr={this.changeQueryStr}></Search>
+              </div>
+              <div
+                style={{ overflow: "hidden", height: "100%" }}
+                className="panels"
+              >
+                <Tabs
+                  className="HomeTabs"
+                  defaultActiveKey="1"
+                  // tabBarGutter={60}
+                  animated={true}
+                  onChange={this.tabChange}
+                  tabBarStyle={{
+                    textAlign: "center",
+                  }}
+                  style={{
+                    flex: "1",
+                    display: "flex",
+                    flexDirection: "column",
+                    overflow: "hidden",
+                    height: "100%",
+                  }}
+                >
+                  <TabPane tab={<span>项目踏勘</span>} key="1">
+                    <ProjectScouting></ProjectScouting>
+                  </TabPane>
+                  <TabPane tab={<span>公共数据</span>} key="2">
+                    <PublicData
+                      getQueryStr={this.getQueryStr}
+                      onRef={this.onRef}
+                    />
+                  </TabPane>
+                </Tabs>
+              </div>
             </Main>
-          )}
-        </div>
-        <div
-          className={styles.controller}
-          onClick={() => {
-            // this.setState({
-            //   openPanel: !this.state.openPanel,
-            // });
-            dispatch({
-              type:"openswitch/updateDatas",
-              payload:{
-                openPanel: !openPanel
-              }
-            })
-          }}
-        >
-          {openPanel ? (
-            <LeftOutlined style={directionStyle} />
-          ) : (
-            <RightOutlined style={directionStyle} />
-          )}
-        </div>
+          </div>
+        ) : this.props.mainVisible === "loading" ? (
+          <div className={styles.loadingPage} style={{ height: "100vh" }}>
+            <Spin />
+          </div>
+        ) : (
+          <Main>
+            <ScoutingDetails></ScoutingDetails>
+          </Main>
+        )}
       </div>
     );
   }

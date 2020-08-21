@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Input, Select, Button, Tooltip, message } from "antd";
+import { Input, Select, Button, Tooltip, message, Divider } from "antd";
 import {
   CaretUpOutlined,
   CaretDownOutlined,
@@ -27,38 +27,40 @@ import symbolStoreServices from "../../../services/symbolStore";
 
 const SymbolBlock = ({
   data,
+  plotTypeName = "未选择",
   indexStr,
   strokeColor,
   fillColor,
   plotType,
   cb,
 }) => {
-  let [show, toggle] = useState(true);
-  const style = {
-    transform: "translateX(-10px)",
-    margin: "10px 0px",
-  };
   return (
     <div>
-      <div className={styles.header}>
-        <span>{data.item.typeName}</span>
-        {show ? (
-          <CaretDownOutlined
-            style={style}
-            onClick={() => {
-              toggle(false);
-            }}
-          />
-        ) : (
-          <CaretUpOutlined
-            style={style}
-            onClick={() => {
-              toggle(true);
-            }}
-          />
-        )}
+      <div
+        style={{
+          width: "max-content",
+          padding: "0 4px",
+          background: "#fff",
+          transform: "translate(10px, 10px)",
+          fontSize: "12px",
+        }}
+      >
+        {data.item.typeName}
       </div>
-      {show ? (
+      <div
+        style={{
+          border: "1px solid rgba(226,229,236,1)",
+          borderRadius: 8,
+          // margin: "20px auto",
+        }}
+      >
+        <div style={{ marginTop: 12, textAlign: "left", marginLeft: 12 }}>
+          <span>
+            {Number(indexStr?.split("|")[0]) === data.index
+              ? plotTypeName
+              : "未选择"}
+          </span>
+        </div>
         <div className={styles.block}>
           {data.item.content.map((item, index) => {
             let style = {};
@@ -145,7 +147,7 @@ const SymbolBlock = ({
             );
           })}
         </div>
-      ) : null}
+      </div>
     </div>
   );
 };
@@ -179,6 +181,7 @@ export default class Plot extends React.Component {
     this.symbol = "";
     this.sigleImage = null;
     this.selectName = "自定义类型";
+    this.selectSymbolName = "";
     this.plotName = "自定义类型#1";
     this.plotRemark = "";
     this.defeaultColors = [
@@ -731,6 +734,7 @@ export default class Plot extends React.Component {
       }
     }
     if (data) {
+      this.selectSymbolName = typeItem.name;
       this.selectName = typeItem.name;
       if (data.target.textContent) {
         this.symbol = data.target.textContent;
@@ -756,6 +760,10 @@ export default class Plot extends React.Component {
           this.props.plotType === "point"
             ? this.fillColor
             : "rgba(80, 130, 255, 1)",
+        // strokeColor:
+        //   this.props.plotType === "point"
+        //     ? this.strokeColor
+        //     : "rgba(80, 130, 255, 1)",
       });
     }
     if (this.dic[this.props.plotType] === "Point") {
@@ -869,13 +877,10 @@ export default class Plot extends React.Component {
   };
 
   handleCustomStrokeColorSelectChange = (value) => {
-    let { customStrokeSelectedColor } = this.state;
-    let index = customStrokeSelectedColor.lastIndexOf(",");
-    let newStr =
-      customStrokeSelectedColor.substr(0, index + 1) + " " + value + ")";
+    this.strokeColor = value;
     this.setState(
       {
-        customStrokeSelectedColor: newStr,
+        customStrokeSelectedColor: value,
         strokePercent: value,
       },
       () => {
@@ -885,13 +890,10 @@ export default class Plot extends React.Component {
   };
 
   handleCustomFillColorSelectChange = (value) => {
-    let { customFillSelectedColor } = this.state;
-    let index = customFillSelectedColor.lastIndexOf(",");
-    let newStr =
-      customFillSelectedColor.substr(0, index + 1) + " " + value + ")";
+    this.fillColor = value;
     this.setState(
       {
-        customFillSelectedColor: newStr,
+        customFillSelectedColor: value,
         fillPercent: value,
       },
       () => {
@@ -937,80 +939,39 @@ export default class Plot extends React.Component {
       window.featureOperator.attrs.name = this.plotName;
       window.featureOperator.setName(this.plotName);
       window.featureOperator.attrs.remark = this.plotRemark;
-      ListAction.checkItem()
-        .then((res) => {
-          if (res) {
-            // 项目内
-            if (res.code === 0) {
-              if (this.projectId) {
-                this.save2Group(window.featureOperator)
-                  .then((resp) => {
-                    if (window.ProjectGroupId) {
-                      let collections = DetailAction.CollectionGroup;
-                      let obj = collections.find(
-                        (item) => item.id === window.ProjectGroupId
-                      );
-                      if (obj) {
-                        let data = resp.data;
-                        let coll = data && data[0];
-                        if (coll) {
-                          coll.is_display = "1";
-                          obj.collection.push(coll);
-                          let arr = obj.collection;
-                          DetailAction.renderCollection(arr, {
-                            lenged: this.props.config,
-                            dispatch: this.props.dispatch,
-                          });
-                        }
-                      }
-                      this.props.goBackProject();
-                    }
-                  })
-                  .catch((err) => {
-                    console.log(err);
-                  });
-              }
-            } else {
-              this.savePlot2TempPlot(window.featureOperator);
-            }
-          }
-        })
-        .catch((err) => {
-          this.savePlot2TempPlot(window.featureOperator);
-        });
       // 选择了项目
-      // if (this.projectId) {
-      //   this.save2Group(window.featureOperator)
-      //     .then((resp) => {
-      //       if (window.ProjectGroupId) {
-      //         let collections = DetailAction.CollectionGroup;
-      //         let obj = collections.find(
-      //           (item) => item.id === window.ProjectGroupId
-      //         );
-      //         if (obj) {
-      //           let data = resp.data;
-      //           let coll = data && data[0];
-      //           if (coll) {
-      //             coll.is_display = "1";
-      //             obj.collection.push(coll);
-      //             let arr = obj.collection;
-      //             DetailAction.renderCollection(arr, {
-      //               lenged: this.props.config,
-      //               dispatch: this.props.dispatch,
-      //             });
-      //           }
-      //         }
-      //         this.props.goBackProject();
-      //       }
-      //     })
-      //     .catch((err) => {
-      //       console.log(err);
-      //     });
-      // }
-      // // 未选择项目
-      // else {
-      //   this.savePlot2TempPlot(window.featureOperator);
-      // }
+      if (this.projectId) {
+        this.save2Group(window.featureOperator)
+          .then((resp) => {
+            if (window.ProjectGroupId) {
+              let collections = DetailAction.CollectionGroup;
+              let obj = collections.find(
+                (item) => item.id === window.ProjectGroupId
+              );
+              if (obj) {
+                let data = resp.data;
+                let coll = data && data[0];
+                if (coll) {
+                  coll.is_display = "1";
+                  obj.collection.push(coll);
+                  let arr = obj.collection;
+                  DetailAction.renderCollection(arr, {
+                    lenged: this.props.config,
+                    dispatch: this.props.dispatch,
+                  });
+                }
+              }
+              this.props.goBackProject();
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      }
+      // 未选择项目
+      else {
+        this.savePlot2TempPlot(window.featureOperator);
+      }
     } else {
       message.info("请先标绘");
     }
@@ -1034,258 +995,187 @@ export default class Plot extends React.Component {
   render() {
     const { TextArea } = Input;
     const { Option } = Select;
-    const { dispatch, openPanel } = this.props;
-    const panelStyle = openPanel
-      ? {}
-      : { transform: "translateX(-100%)" };
-    const directionStyle = { display: "table-cell", verticalAlign: "middle" };
+    const disableStyle = { color: "rgba(0,0,0,0.2)" };
+    const style = { marginTop: 18, marginRight: 10 };
     return (
-      <div className={styles.panel} style={panelStyle} id="panelId">
-        <div style={{ width: "100%", height: "100%" }}>
-          <div
-            className={styles.header}
-            style={{ padding: "0 20px", marginBottom: 10 }}
+      <div style={{ width: "100%", height: "100%" }}>
+        <div
+          className={styles.header}
+          style={{ padding: "0 20px", marginBottom: 10 }}
+        >
+          <i
+            className={globalStyle.global_icon}
+            onClick={() => this.props.goBackProject()}
+            title="返回到项目(列表)"
           >
+            &#xe758;
+          </i>
+          <i
+            className={globalStyle.global_icon}
+            title="重置"
+            onClick={this.handleResetClick}
+          >
+            &#xe7ce;
+          </i>
+        </div>
+        <div
+          className={`${styles.body} ${globalStyle.autoScrollY}`}
+          style={{
+            height: "calc(100% - 110px)",
+          }}
+        >
+          <div className={styles.content}>
+            <Input
+              style={{
+                width: "100%",
+                height: 40,
+                marginBottom: 20,
+              }}
+              placeholder="输入名称"
+              allowClear
+              value={this.state.name}
+              onChange={(e) => this.handleInputChange(e.target.value)}
+            />
+            <TextArea
+              style={{
+                width: "100%",
+                height: 120,
+              }}
+              placeholder="填写备注"
+              allowClear
+              value={this.state.remark}
+              onChange={(e) => this.onTextAreaChange(e.target.value)}
+            />
             <i
               className={globalStyle.global_icon}
-              onClick={() => this.props.goBackProject()}
-              title="返回到项目(列表)"
+              ref="defaultSymbol"
+              style={{ display: "none" }}
             >
-              &#xe758;
+              &#xe75d;
             </i>
-            <i
-              className={globalStyle.global_icon}
-              title="重置"
-              onClick={this.handleResetClick}
-            >
-              &#xe7ce;
-            </i>
-          </div>
-          <div
-            className={`${styles.body} ${globalStyle.autoScrollY}`}
-            style={{
-              height: "calc(100% - 110px)",
-            }}
-          >
-            <div className={styles.content}>
-              <Input
+            <div>
+              <div
                 style={{
-                  width: "100%",
-                  height: 40,
-                  marginBottom: 20,
+                  width: "max-content",
+                  padding: "0 4px",
+                  background: "#fff",
+                  transform: "translate(10px, 10px)",
+                  fontSize: "12px",
                 }}
-                placeholder="输入名称"
-                allowClear
-                value={this.state.name}
-                onChange={(e) => this.handleInputChange(e.target.value)}
-              />
-              <TextArea
-                style={{
-                  width: "100%",
-                  height: 120,
-                }}
-                placeholder="填写备注"
-                allowClear
-                value={this.state.remark}
-                onChange={(e) => this.onTextAreaChange(e.target.value)}
-              />
-              <i
-                className={globalStyle.global_icon}
-                ref="defaultSymbol"
-                style={{ display: "none" }}
               >
-                &#xe75d;
-              </i>
-              {this.props.plotType !== "point" ? (
-                <div className={styles.header} style={{ marginTop: 20 }}>
-                  <span>轮廓色</span>
-                  <ColorPicker
-                    style={{ margin: "auto" }}
-                    handleOK={this.handleCustomStrokeColorOkClick}
-                  ></ColorPicker>
+                自定义颜色
+              </div>
+              <div
+                style={{
+                  width: "100%",
+                  height: "60px",
+                  border: "1px solid rgba(226,229,236,1)",
+                  borderRadius: 8,
+                  display: "flex",
+                  flexDirection: "row",
+                  padding: "0 14px",
+                }}
+              >
+                <div className={styles.header} style={style}>
+                  <span style={{ fontSize: "14px" }}>轮廓色</span>
                   <div
                     className={styles.colorbar}
                     style={{
                       background: this.state.customStrokeSelectedColor,
-                      margin: "auto",
+                      margin: 8,
                     }}
                   ></div>
-                  <Select
-                    value={this.state.strokePercent}
-                    style={{ width: 120 }}
-                    bordered={false}
-                    onChange={(e) =>
-                      this.handleCustomStrokeColorSelectChange(e)
+                  <ColorPicker
+                    handleOK={this.handleCustomStrokeColorOkClick}
+                  ></ColorPicker>
+                </div>
+                <div className={styles.header} style={style}>
+                  <span
+                    style={
+                      this.dic[this.props.plotType] === "Polyline"
+                        ? {
+                            ...disableStyle,
+                            ...{ fontSize: "14px" },
+                          }
+                        : { fontSize: "14px" }
                     }
                   >
-                    <Option value="1">100%</Option>
-                    <Option value="0.75">75%</Option>
-                    <Option value="0.5">50%</Option>
-                    <Option value="0.25">25%</Option>
-                    <Option value="0">0%</Option>
-                  </Select>
-                </div>
-              ) : null}
-              {this.props.plotType !== "point" ? (
-                <div className={styles.block}>
-                  {this.defeaultColors.map((item, index) => {
-                    const style = item.selectedColor
-                      ? { color: item.selectedColor }
-                      : {};
-                    return (
-                      <div
-                        className={styles.symbol}
-                        key={guid(false)}
-                        style={{
-                          background: item.fill,
-                          border: `1px solid ${item.border}`,
-                        }}
-                        onClick={() => {
-                          this.setState(
-                            { strokeSelectedIndex: index },
-                            this.handleColorClick(item, 0)
-                          );
-                        }}
-                      >
-                        {this.state.strokeSelectedIndex === index && (
-                          <i className={globalStyle.global_icon} style={style}>
-                            &#xe75b;
-                          </i>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : null}
-              {this.props.plotType === "line" ||
-              this.props.plotType === "freeLine" ? null : (
-                <div className={styles.header} style={{ marginTop: 20 }}>
-                  <span>填充色</span>
-                  <ColorPicker
-                    style={{ margin: "auto" }}
-                    handleOK={this.handleCustomFillColorOkClick}
-                  ></ColorPicker>
+                    填充色
+                  </span>
                   <div
                     className={styles.colorbar}
                     style={{
-                      background: this.state.customFillSelectedColor,
-                      margin: "auto",
+                      background:
+                        this.dic[this.props.plotType] === "Polyline"
+                          ? "rgba(0,0,0,0.2)"
+                          : this.state.customFillSelectedColor,
+                      margin: 8,
                     }}
                   ></div>
-                  <Select
-                    value={this.state.fillPercent}
-                    style={{ width: 120 }}
-                    bordered={false}
-                    onChange={(e) => this.handleCustomFillColorSelectChange(e)}
-                  >
-                    <Option value="1">100%</Option>
-                    <Option value="0.75">75%</Option>
-                    <Option value="0.5">50%</Option>
-                    <Option value="0.25">25%</Option>
-                    <Option value="0">0%</Option>
-                  </Select>
+                  <ColorPicker
+                    handleOK={this.handleCustomFillColorSelectChange}
+                    disable={
+                      this.dic[this.props.plotType] === "Polyline"
+                        ? false
+                        : true
+                    }
+                  ></ColorPicker>
                 </div>
-              )}
-              {this.props.plotType === "line" ||
-              this.props.plotType === "freeLine" ? null : (
-                <div className={styles.block}>
-                  {this.defeaultColors.map((item, index) => {
-                    return (
-                      <div
-                        className={styles.symbol}
-                        key={guid(false)}
-                        style={{
-                          background: item.fill,
-                          border: `1px solid ${item.border}`,
-                        }}
-                        onClick={() => {
-                          this.setState(
-                            { fillSelectedIndex: index },
-                            this.handleColorClick(item, 1)
-                          );
-                        }}
-                      >
-                        {this.state.fillSelectedIndex === index && (
-                          <i className={globalStyle.global_icon}>&#xe75b;</i>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-              {this.state.symbols.map((item, index) => {
-                if (item.type.indexOf(this.props.plotType) >= 0) {
-                  return (
-                    <SymbolBlock
-                      key={guid(false)}
-                      data={{ item: item, index: index }}
-                      indexStr={this.state.symbolSelectedIndex}
-                      plotType={this.props.plotType}
-                      strokeColor={this.state.customStrokeSelectedColor}
-                      fillColor={this.state.customFillSelectedColor}
-                      cb={this.getFillSymbol}
-                    ></SymbolBlock>
-                  );
-                }
-                return null;
-              })}
+              </div>
             </div>
-          </div>
-          <div
-            className={styles.footer}
-            style={{ display: "flex", flexDirection: "row" }}
-          >
-            <Button
-              block
-              style={{
-                width: 140,
-                height: 36,
-                margin: "12px auto",
-                background: "rgba(163,205,255,0.2)",
-                borderRadius: 4,
-                border: "2px solid rgba(127,167,255,1)",
-                color: "rgba(102, 144, 255, 1)",
-              }}
-              onClick={this.handleSaveClick}
-            >
-              保存
-            </Button>
-            <Button
-              block
-              style={{
-                width: 140,
-                height: 36,
-                margin: "12px auto",
-                background: "rgba(255,85,85,0.2)",
-                borderRadius: 4,
-                border: "2px solid rgba(255,85,85,0.2)",
-                color: "rgba(255, 85, 85, 1)",
-              }}
-              onClick={this.handleDelClick}
-            >
-              删除
-            </Button>
+            {this.state.symbols.map((item, index) => {
+              if (item.type.indexOf(this.props.plotType) >= 0) {
+                return (
+                  <SymbolBlock
+                    key={guid(false)}
+                    data={{ item: item, index: index }}
+                    plotTypeName={this.selectSymbolName}
+                    indexStr={this.state.symbolSelectedIndex}
+                    plotType={this.props.plotType}
+                    strokeColor={this.state.customStrokeSelectedColor}
+                    fillColor={this.state.customFillSelectedColor}
+                    cb={this.getFillSymbol}
+                  ></SymbolBlock>
+                );
+              }
+              return null;
+            })}
           </div>
         </div>
         <div
-          className={styles.controller}
-          onClick={() => {
-            // this.setState({
-            //   openPanel: !this.state.openPanel,
-            // });
-            dispatch({
-              type:"openswitch/updateDatas",
-              payload:{
-                openPanel: !openPanel
-              }
-            })
-          }}
+          className={styles.footer}
+          style={{ display: "flex", flexDirection: "row" }}
         >
-          {openPanel ? (
-            <LeftOutlined style={directionStyle} />
-          ) : (
-            <RightOutlined style={directionStyle} />
-          )}
+          <Button
+            block
+            style={{
+              width: 140,
+              height: 36,
+              margin: "12px auto",
+              background: "rgba(163,205,255,0.2)",
+              borderRadius: 4,
+              border: "2px solid rgba(127,167,255,1)",
+              color: "rgba(102, 144, 255, 1)",
+            }}
+            onClick={this.handleSaveClick}
+          >
+            保存
+          </Button>
+          <Button
+            block
+            style={{
+              width: 140,
+              height: 36,
+              margin: "12px auto",
+              background: "rgba(255,85,85,0.2)",
+              borderRadius: 4,
+              border: "2px solid rgba(255,85,85,0.2)",
+              color: "rgba(255, 85, 85, 1)",
+            }}
+            onClick={this.handleDelClick}
+          >
+            删除
+          </Button>
         </div>
       </div>
     );
