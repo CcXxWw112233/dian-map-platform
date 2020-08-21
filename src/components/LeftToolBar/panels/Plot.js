@@ -1083,6 +1083,7 @@ export default class Plot extends React.Component {
                     style={{
                       background: this.state.customStrokeSelectedColor,
                       margin: 8,
+                      width: "calc(100% - 74px)",
                     }}
                   ></div>
                   <ColorPicker
@@ -1110,6 +1111,7 @@ export default class Plot extends React.Component {
                           ? "rgba(0,0,0,0.2)"
                           : this.state.customFillSelectedColor,
                       margin: 8,
+                      width: "calc(100% - 74px)",
                     }}
                   ></div>
                   <ColorPicker
