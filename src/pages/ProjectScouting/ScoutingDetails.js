@@ -1537,11 +1537,11 @@ export default class ScoutingDetails extends PureComponent {
           </Fragment>
         );
       case "2" :
-        return (
-          <PublicView>
-            <LookingBack board={current_board}/>
-          </PublicView>
-        )
+        // return (
+        //   <PublicView>
+        //     <LookingBack board={current_board}/>
+        //   </PublicView>
+        // )
       case "3" :
       case "4" :
         return (
