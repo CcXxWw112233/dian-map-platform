@@ -33,10 +33,19 @@ export default class RightTools extends React.Component {
         hasPanel: true,
         cb: (args) => {
           this.toggleButtonStyle(args);
-          this.setState({
-            lengedListPanelVisible: true,
-            POIPanelVisible: false,
-          });
+          this.setState(
+            {
+              lengedListPanelVisible: !this.state.lengedListPanelVisible,
+              POIPanelVisible: false,
+            },
+            () => {
+              if (!this.state.lengedListPanelVisible) {
+                this.setState({
+                  selectedIndex: -1,
+                });
+              }
+            }
+          );
         },
       },
       {
@@ -44,10 +53,19 @@ export default class RightTools extends React.Component {
         hasPanel: true,
         cb: (args) => {
           this.toggleButtonStyle(args);
-          this.setState({
-            lengedListPanelVisible: false,
-            POIPanelVisible: true,
-          });
+          this.setState(
+            {
+              lengedListPanelVisible: false,
+              POIPanelVisible: !this.state.POIPanelVisible,
+            },
+            () => {
+              if (!this.state.POIPanelVisible) {
+                this.setState({
+                  selectedIndex: -1,
+                });
+              }
+            }
+          );
         },
       },
       {
