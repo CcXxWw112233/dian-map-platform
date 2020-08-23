@@ -9,7 +9,7 @@ const config = [
     ],
   },
   {
-    title: "人口密度(单位:人/k㎡)",
+    title: "人口密度(单位:万人/k㎡)",
     key: "map:population:density",
     content: [
       { bgColor: "rgba(251,207,208,0.8)", font: "0-200" },
@@ -30,7 +30,7 @@ const config = [
     ],
   },
   {
-    title: "居民用地(单位:平方公里)",
+    title: "居民用地(单位:k㎡)",
     key: "map:population:resident",
     content: [
       { bgColor: "rgba(237,211,237,0.8)", font: "0-100" },
