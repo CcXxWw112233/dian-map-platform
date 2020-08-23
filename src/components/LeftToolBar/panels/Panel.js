@@ -4,7 +4,7 @@ import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import styles from "../LeftToolBar.less";
 import { connect } from "dva";
 
-connect(() => ({}));
+@connect()
 export default class Panel extends React.Component {
   constructor(props) {
     super(props);

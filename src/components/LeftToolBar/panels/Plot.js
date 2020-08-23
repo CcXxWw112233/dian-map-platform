@@ -152,8 +152,9 @@ const SymbolBlock = ({
   );
 };
 
-@connect(({ lengedList: { config } , openswitch:{openPanel}}) => ({
-  config,openPanel
+@connect(({ lengedList: { config }, openswitch: { openPanel } }) => ({
+  config,
+  openPanel,
 }))
 export default class Plot extends React.Component {
   constructor(props) {
@@ -653,16 +654,17 @@ export default class Plot extends React.Component {
     context.textBaseline = "top";
     if (fillColor && fillColor !== "") {
       context.fillStyle = fillColor;
+      context.strokeStyle = fillColor;
       if (fontContent) {
         context.fillText(fontContent, 0, 0);
       }
     }
-    if (strokeColor && strokeColor !== "") {
-      context.strokeStyle = strokeColor;
-      if (fontContent) {
-        context.strokeText(fontContent, 0, 0);
-      }
-    }
+    // if (strokeColor && strokeColor !== "") {
+    //   context.strokeStyle = strokeColor;
+    //   if (fontContent) {
+    //     context.strokeText(fontContent, 0, 0);
+    //   }
+    // }
     // let imageData = context.getImageData(0, 0, canvas.width, canvas.height);
     // for (let i = 0; i < imageData.data.length; i += 4) {
     //   // 当该像素是透明的,则设置成白色
@@ -852,8 +854,14 @@ export default class Plot extends React.Component {
 
   handleCustomStrokeColorOkClick = (value) => {
     this.strokeColor = value;
-    this.symbol = "";
-    this.selectName = "自定义类型";
+    if (this.dic[this.props.plotType] !== "Point") {
+      this.symbol = "";
+      this.selectName = "自定义类型";
+    } else {
+      if (!this.symbol) {
+        this.selectName = "自定义类型";
+      }
+    }
     this.createPlotName();
     this.setState(
       {
@@ -870,8 +878,14 @@ export default class Plot extends React.Component {
 
   handleCustomFillColorOkClick = (value) => {
     this.fillColor = value;
-    this.symbol = "";
-    this.selectName = "自定义类型";
+    if (this.dic[this.props.plotType] !== "Point") {
+      this.symbol = "";
+      this.selectName = "自定义类型";
+    } else {
+      if (!this.symbol) {
+        this.selectName = "自定义类型";
+      }
+    }
     this.createPlotName();
     this.setState(
       {

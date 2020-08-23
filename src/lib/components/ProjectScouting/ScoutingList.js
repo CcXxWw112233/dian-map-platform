@@ -135,26 +135,27 @@ const action = function () {
   };
 
   this.getCoords = (x, y) => {
-    if (InitMap.lastBaseMapKey === "") {
-      if (this.baseMapKeys[0].indexOf(InitMap.baseMapKey) > -1) {
+    let lastBaseMapKey = InitMap.lastBaseMapKey;
+    let baseMapKey = InitMap.baseMapKey;
+    console.log(lastBaseMapKey);
+    console.log(baseMapKey);
+    if (lastBaseMapKey === "") {
+      if (this.baseMapKeys[0].indexOf(baseMapKey) > -1) {
         return TransformCoordinate([x, y]);
       } else {
-        let tmp = gcj02_to_wgs84(x, y);
-        return TransformCoordinate(tmp);
+        return TransformCoordinate(gcj02_to_wgs84(x, y));
       }
     } else {
-      if (this.baseMapKeys[0].indexOf(InitMap.baseMapKey) > -1) {
-        let tmp = wgs84_to_gcj02(x, y);
-        return TransformCoordinate(tmp);
+      if (this.baseMapKeys[0].indexOf(baseMapKey) > -1) {
+        return TransformCoordinate([x, y]);
       } else {
-        let tmp = gcj02_to_wgs84(x, y);
-        return TransformCoordinate(tmp);
+        return TransformCoordinate(gcj02_to_wgs84(x, y));
       }
     }
   };
 
   this.renderProjectPoint = (data) => {
-    this.currentData = data;
+    this.currentData = JSON.parse(JSON.stringify(data));
     this.Source.clear();
     this.clearOverlay();
     data &&
