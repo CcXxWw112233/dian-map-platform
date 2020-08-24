@@ -262,10 +262,6 @@ export default class Plot extends React.Component {
           parent.featureOperatorList.push(operator);
         }
         window.featureOperator = operator;
-        // me.selectedPlotZIndex = operator.feature.getStyle().getZIndex();
-        // let style = operator.feature.getStyle();
-        // style.setZIndex(parent.maxZIndex + 1);
-        // window.featureOperator.feature.setStyle(style);
         me.plotLayer.setToTop(window.featureOperator);
         ListAction.checkItem()
           .then((res) => {
@@ -828,7 +824,6 @@ export default class Plot extends React.Component {
       attrs = { ...attrs, featureType: this.featureType };
     }
     if (!window.featureOperator) {
-      parent.maxZIndex++;
       plotEdit.create(this.plotDic[plotType]);
       Event.Evt.firEvent("setPlotDrawStyle", style);
       Event.Evt.firEvent("setAttribute", {
