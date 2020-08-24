@@ -20,14 +20,31 @@ export const createPlottingFeature = (data) => {
   if (newType === "polygon") {
     coordinates = [...data.coordinates[0]];
   }
+  // 如果底图是wgs84(天地图)
   if (baseMapKeys[1].indexOf(InitMap.baseMapKey) > -1) {
-    for (let i = 0; i < coordinates.length; i++) {
-      let tmp = TransformCoordinate(coordinates[i], "EPSG:3857", "EPSG:4326");
-      tmp = gcj02_to_wgs84(tmp[0], tmp[1]);
-      if (!tmp || tmp.length !== 2) {
-        continue;
+    // 数据是gcj02（高德）坐标系上画的，要转到wgs84坐标系
+    if (!data.coordSysType) {
+      for (let i = 0; i < coordinates.length; i++) {
+        let tmp = TransformCoordinate(coordinates[i], "EPSG:3857", "EPSG:4326");
+        tmp = gcj02_to_wgs84(tmp[0], tmp[1]);
+        if (!tmp || tmp.length !== 2) {
+          continue;
+        }
+        coordinates[i] = TransformCoordinate(tmp, "EPSG:4326", "EPSG:3857");
       }
-      coordinates[i] = TransformCoordinate(tmp, "EPSG:4326", "EPSG:3857");
+    }
+  } else if (baseMapKeys[0].indexOf(InitMap.baseMapKey) > -1) {
+    // 如果底图是gcj02(高德)坐标系
+    // 数据是wgs84(天地图)坐标系上画的，要转到gcj02坐标系
+    if (data.coordSysType === 1) {
+      for (let i = 0; i < coordinates.length; i++) {
+        let tmp = TransformCoordinate(coordinates[i], "EPSG:3857", "EPSG:4326");
+        tmp = wgs84_to_gcj02(tmp[0], tmp[1]);
+        if (!tmp || tmp.length !== 2) {
+          continue;
+        }
+        coordinates[i] = TransformCoordinate(tmp, "EPSG:4326", "EPSG:3857");
+      }
     }
   }
   let plot = PlotFactory.createPlot(newType, coordinates);

@@ -1,11 +1,5 @@
-import React, { useState } from "react";
+import React from "react";
 import { Input, Select, Button, Tooltip, message, Skeleton } from "antd";
-import {
-  CaretUpOutlined,
-  CaretDownOutlined,
-  LeftOutlined,
-  RightOutlined,
-} from "@ant-design/icons";
 
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import styles from "../LeftToolBar.less";
@@ -15,15 +9,14 @@ import { connect } from "dva";
 import { symbols } from "./data";
 import { plotEdit } from "../../../utils/plotEdit";
 import FeatureOperatorEvent from "../../../utils/plot2ol/src/events/FeatureOperatorEvent";
-import { createStyle, createOverlay, getPoint } from "../../../lib/utils/index";
+import { createStyle } from "../../../lib/utils/index";
 import Event from "../../../lib/utils/event";
 
-import addFeatureOverlay from "../../PublicOverlays/addFeaturesOverlay/index";
 import ListAction from "../../../lib/components/ProjectScouting/ScoutingList";
 import DetailAction from "../../../lib/components/ProjectScouting/ScoutingDetail";
-import { getSession } from "utils/sessionManage";
 import { MyIcon } from "../../utils";
 import symbolStoreServices from "../../../services/symbolStore";
+import mapApp from "utils/INITMAP";
 
 const SymbolBlock = ({
   data,
@@ -203,8 +196,8 @@ export default class Plot extends React.Component {
     ];
     this.dic = {
       point: "Point",
-      line: "Polyline",
-      freeLine: "Polyline",
+      line: "LineString",
+      freeLine: "LineString",
       polygon: "Polygon",
       freePolygon: "Polygon",
       rect: "Polygon",
@@ -238,6 +231,7 @@ export default class Plot extends React.Component {
     this.projectName = "";
     this.activeOperator = null;
     this.selectedPlotZIndex = 0;
+    this.baseMapKeys = ["gd_vec|gd_img|gg_img", "td_vec|td_img|td_ter"];
   }
   componentDidMount() {
     Event.Evt.firEvent("setAttribute", {
@@ -261,11 +255,14 @@ export default class Plot extends React.Component {
         // 激活即修改状态
         parent.isModifyPlot = true;
         let operator = e.feature_operator;
+        let tmp = parent.featureOperatorList.filter((tmpOperator) => {
+          return tmpOperator.guid === operator.guid;
+        })[0];
+        if (!tmp) {
+          parent.featureOperatorList.push(operator);
+        }
         window.featureOperator = operator;
-        me.selectedPlotZIndex = operator.feature.getStyle().getZIndex();
-        let style = operator.feature.getStyle();
-        style.setZIndex(parent.maxZIndex + 1);
-        window.featureOperator.feature.setStyle(style);
+        me.plotLayer.setToTop(window.featureOperator);
         ListAction.checkItem()
           .then((res) => {
             if (res) {
@@ -600,7 +597,11 @@ export default class Plot extends React.Component {
           : this.strokeColor,
       remark: this.state.remark,
       selectName: "自定义类型",
+      coordSysType: 0,
     };
+    if (this.baseMapKeys[0].indexOf(mapApp.baseMapKey) === -1) {
+      attrs.coordSysType = 1;
+    }
     const plotType = this.nextProps?.plotType || this.props.plotType;
     if (this.dic[plotType] === "Polygon") {
       options = { ...options, fillColor: this.fillColor };
@@ -706,7 +707,7 @@ export default class Plot extends React.Component {
     if (index !== undefined && index2 !== undefined) {
       if (
         this.dic[this.props.plotType] === "Polygon" ||
-        this.dic[this.props.plotType] === "Polyline"
+        this.dic[this.props.plotType] === "LineString"
       ) {
         if (index !== 0) {
           this.setState({
@@ -770,7 +771,7 @@ export default class Plot extends React.Component {
     }
     if (this.dic[this.props.plotType] === "Point") {
       this.featureType = iconUrl;
-    } else if (this.dic[this.props.plotType] === "Polyline") {
+    } else if (this.dic[this.props.plotType] === "LineString") {
       this.featureType = this.strokeColor;
     }
     let options = {
@@ -780,7 +781,7 @@ export default class Plot extends React.Component {
     };
     switch (this.dic[this.props.plotType]) {
       case "Polygon":
-      case "Polyline":
+      case "LineString":
         options = {
           ...options,
           strokeColor: this.strokeColor,
@@ -808,7 +809,11 @@ export default class Plot extends React.Component {
       remark: this.plotRemark,
       selectName: this.selectName,
       plotType: this.props.plotType,
+      coordSysType: 0, //坐标系类型，0代表gcj02，1代表wgs84
     };
+    if (this.baseMapKeys[0].indexOf(mapApp.baseMapKey) === -1) {
+      attrs.coordSysType = 1;
+    }
     if (this.dic[this.props.plotType] === "Polygon") {
       attrs = {
         ...attrs,
@@ -819,7 +824,6 @@ export default class Plot extends React.Component {
       attrs = { ...attrs, featureType: this.featureType };
     }
     if (!window.featureOperator) {
-      parent.maxZIndex++;
       plotEdit.create(this.plotDic[plotType]);
       Event.Evt.firEvent("setPlotDrawStyle", style);
       Event.Evt.firEvent("setAttribute", {
@@ -937,6 +941,7 @@ export default class Plot extends React.Component {
       window.featureOperator.attrs.name = this.plotName;
       window.featureOperator.setName(this.plotName);
       window.featureOperator.attrs.remark = this.plotRemark;
+
       // 选择了项目
       if (this.projectId) {
         this.save2Group(window.featureOperator)
@@ -958,6 +963,13 @@ export default class Plot extends React.Component {
                     dispatch: this.props.dispatch,
                   });
                 }
+              }
+              const { parent } = this.props;
+              const index = parent.featureOperatorList.findIndex(
+                (operator) => (operator.guid = window.featureOperator)
+              );
+              if (index > -1) {
+                parent.featureOperatorList.splice(index, 1);
               }
               this.props.goBackProject();
             }
@@ -1091,7 +1103,7 @@ export default class Plot extends React.Component {
                 <div className={styles.header} style={style}>
                   <span
                     style={
-                      this.dic[this.props.plotType] === "Polyline"
+                      this.dic[this.props.plotType] === "LineString"
                         ? {
                             ...disableStyle,
                             ...{ fontSize: "14px" },
@@ -1105,7 +1117,7 @@ export default class Plot extends React.Component {
                     className={styles.colorbar}
                     style={{
                       background:
-                        this.dic[this.props.plotType] === "Polyline"
+                        this.dic[this.props.plotType] === "LineString"
                           ? "rgba(0,0,0,0.2)"
                           : this.state.customFillSelectedColor,
                       margin: 8,
@@ -1115,7 +1127,7 @@ export default class Plot extends React.Component {
                   <ColorPicker
                     handleOK={this.handleCustomFillColorOkClick}
                     disable={
-                      this.dic[this.props.plotType] === "Polyline"
+                      this.dic[this.props.plotType] === "LineString"
                         ? false
                         : true
                     }

@@ -59,6 +59,10 @@
   margin: 0 auto;
 }
 
+:global(.invalid) {
+  pointer-events: none;
+}
+
 body {
   -webkit-user-select: none;
   -moz-user-select: none;

@@ -306,7 +306,7 @@ class IndexPage extends React.Component {
         <LayerMap onLoad={this.MapOnload} />
         {isShowBasemapGallery && <BasemapGallery />}
         {isShowRightTools && <RightTools />}
-        {isShowLeftToolBar && <LeftToolBar />}
+        <LeftToolBar isShowLeftToolBar={isShowLeftToolBar} />
         {isShowPhotoSwipe && <PhotoSwipe />}
         {/* 是否显示手机页面 */}
         {isShowMobile && <FlutterComponents />}

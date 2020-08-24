@@ -12,7 +12,12 @@ import Panel from "./panels/Panel";
 
 import { lineDrawing, pointDrawing, polygonDrawing } from "utils/drawing";
 import ListAction from "@/lib/components/ProjectScouting/ScoutingList";
+import { connect } from "dva";
 
+@connect(({ openswitch: { isShowLeftToolBar, isInvalidToolBar } }) => ({
+  isShowLeftToolBar,
+  isInvalidToolBar,
+}))
 export default class LeftToolBar extends React.Component {
   constructor(props) {
     super(props);
@@ -164,6 +169,11 @@ export default class LeftToolBar extends React.Component {
       plotType: "point",
       featureOperatorList: [],
     };
+    this.dic = {
+      Point: "point",
+      LineString: "line",
+      Polygon: "polygon",
+    };
     this.featureOperatorList = [];
     this.selectFeatureOperatorList = [];
     this.customSymbols = null;
@@ -288,7 +298,9 @@ export default class LeftToolBar extends React.Component {
     }
     return (
       <div
-        className={styles.wrapper}
+        className={`${styles.wrapper} ${
+          this.props.isShowLeftToolBar ? "" : styles.hidden
+        }`}
         style={{ position: "absolute", top: 0, left: 0 }}
         id="leftToolBar"
       >
@@ -300,14 +312,21 @@ export default class LeftToolBar extends React.Component {
             zIndex: 9,
           }}
         >
-          <div className={styles.circle} style={{ background: "#fff" }}>
+          <div
+            className={`${styles.circle} ${
+              this.props.isInvalidToolBar ? "invalid" : ""
+            }`}
+            style={{ background: "#fff" }}
+          >
             {/* <img alt="" src=""></img> */}
             <i className={globalStyle.global_icon} style={{ fontSize: 26 }}>
               &#xe764;
             </i>
           </div>
           <div
-            className={globalStyle.autoScrollY}
+            className={`${globalStyle.autoScrollY} ${
+              this.props.isInvalidToolBar ? "invalid" : ""
+            }`}
             style={{ height: "calc(100% - 210px)" }}
           >
             {this.leftTools.map((item, index) => {
@@ -363,39 +382,27 @@ export default class LeftToolBar extends React.Component {
               );
             })}
           </div>
-          {this.state.displayTempPlotIcon ? (
-            <div
-              className={`${styles.circle} ${styles.temp}`}
-              onClick={() => {
-                this.setState({
-                  selectedIndex: -1,
-                  displayPlot: false,
-                  displayProject: false,
-                  displayTempPlot: true,
-                  displayCustomSymbolStore: false,
-                  plotType: "",
-                });
-              }}
-              style={{ ...tempPlotItemStyle, display: "table" }}
+          <div
+            className={`${styles.circle} ${styles.temp}`}
+            onClick={() => {
+              this.setState({
+                selectedIndex: -1,
+                displayPlot: false,
+                displayProject: false,
+                displayTempPlot: true,
+                displayCustomSymbolStore: false,
+                plotType: "",
+              });
+            }}
+            style={{ ...tempPlotItemStyle, display: "table" }}
+          >
+            <i
+              className={globalStyle.global_icon}
+              style={{ fontSize: 30, color: "#fff" }}
             >
-              {/* <Badge
-                count={this.featureOperatorList.length}
-              >
-                <i
-                  className={globalStyle.global_icon}
-                  style={{ fontSize: 30, color: "#fff" }}
-                >
-                  &#xe765;
-                </i>
-              </Badge> */}
-              <i
-                className={globalStyle.global_icon}
-                style={{ fontSize: 30, color: "#fff" }}
-              >
-                &#xe765;
-              </i>
-            </div>
-          ) : null}
+              &#xe765;
+            </i>
+          </div>
           <div
             className={`${styles.circle} ${styles.temp}`}
             onClick={() => {
@@ -419,11 +426,16 @@ export default class LeftToolBar extends React.Component {
           </div>
         </div>
         <Panel>
-          {this.state.displayProject ? <Project></Project> : null}
+          <Project hidden={this.state.displayProject}></Project>
           {this.state.displayPlot ? (
             <Plot
               parent={this}
               plotType={this.state.plotType}
+              displayTempPlotIcon={() => {
+                this.setState({
+                  displayTempPlotIcon: true,
+                });
+              }}
               customSymbols={this.customSymbols}
               updateFeatureOperatorList={this.updateFeatureOperatorList}
               updateFeatureOperatorList2={this.updateFeatureOperatorList2}
@@ -450,7 +462,7 @@ export default class LeftToolBar extends React.Component {
                 this.oldPlotName = attrs.name;
                 this.oldRemark = attrs.remark;
                 this.setState({
-                  plotType: attrs.plotType,
+                  plotType: this.dic[attrs.geometryType],
                   displayPlot: true,
                   displayTempPlot: false,
                 });
