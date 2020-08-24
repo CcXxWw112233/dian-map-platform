@@ -79,6 +79,7 @@ function Action() {
   this.oldData = [];
   this.CollectionGroup = [];
   let requestTime = 10 * 1000;
+  this.selectedFeatureOperator = null;
 
   // 通过范围获取坐标点
   let getBoxCoordinates = (extent) => {
@@ -282,6 +283,7 @@ function Action() {
     for (let i = 0; i < this.layer.projectScoutingArr.length; i++) {
       const feature = this.layer.projectScoutingArr[i].feature;
       if (feature?.get("id") && feature?.get("id") === id) {
+        this.selectedFeatureOperator = this.layer.projectScoutingArr[i];
         return feature;
       }
     }
@@ -504,7 +506,7 @@ function Action() {
       feature.setStyle(myStyle);
       if (addSource) {
         let operator = this.layer._addFeature(feature);
-        operator.setName(content.name)
+        operator.setName(content.name);
         operator.isScouting = true;
         this.layer.addProjectScouting(operator);
         this.layer.plotEdit.plotClickCb = this.handlePlotClick.bind(this);
@@ -708,6 +710,8 @@ function Action() {
     zoom,
     transform = true,
   }) => {
+    this.selectedFeatureOperator &&
+      this.layer.setToTop(this.selectedFeatureOperator);
     if (type === "coordinate") {
       if (transform) center = TransformCoordinate(center);
 
