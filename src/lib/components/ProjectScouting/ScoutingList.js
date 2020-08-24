@@ -134,22 +134,56 @@ const action = function () {
     });
   };
 
-  this.getCoords = (x, y) => {
+  this.getCoords = (x, y, coordSysType) => {
     let lastBaseMapKey = InitMap.lastBaseMapKey;
     let baseMapKey = InitMap.baseMapKey;
     console.log(lastBaseMapKey);
     console.log(baseMapKey);
     if (lastBaseMapKey === "") {
+      // gcj02(高德)坐标系
       if (this.baseMapKeys[0].indexOf(baseMapKey) > -1) {
+        // 数据是在wgs84坐标系产生
+        if (coordSysType === 1) {
+          return TransformCoordinate(wgs84_to_gcj02(x, y));
+        }
         return TransformCoordinate([x, y]);
       } else {
-        return TransformCoordinate(gcj02_to_wgs84(x, y));
+        // wgs84(天地图)坐标系
+        // 数据是在gcj02坐标系产生
+        if (!coordSysType) {
+          return TransformCoordinate(gcj02_to_wgs84(x, y));
+        } else if (coordSysType === 1) {
+          return TransformCoordinate([x, y]);
+        } else {
+          return [0, 0];
+        }
       }
     } else {
+      // 切换了底图
+      // 底图坐标系一致
+      if (
+        this.baseMapKeys[0].indexOf(lastBaseMapKey) ===
+        this.baseMapKeys[0].indexOf(baseMapKey)
+      ) {
+        return;
+      }
       if (this.baseMapKeys[0].indexOf(baseMapKey) > -1) {
+        // gcj02(高德)坐标系
+        if (coordSysType === 1) {
+          // 天地图画的
+          return TransformCoordinate(wgs84_to_gcj02(x, y));
+        }
         return TransformCoordinate([x, y]);
       } else {
-        return TransformCoordinate(gcj02_to_wgs84(x, y));
+        // wgs84(天地图)坐标系
+        // 数据是在gcj02坐标系产生
+        if (!coordSysType) {
+          return TransformCoordinate(gcj02_to_wgs84(x, y));
+        } else if (coordSysType === 1) {
+          return TransformCoordinate([x, y]);
+        } else {
+          return [0, 0];
+        }
       }
     }
   };
@@ -164,7 +198,11 @@ const action = function () {
           text: item.board_name,
           type: "Point",
           iconUrl: require("../../../assets/Location-1.png"),
-          coordinates: this.getCoords(item.coordinate_x, item.coordinate_y),
+          coordinates: this.getCoords(
+            item.coordinate_x,
+            item.coordinate_y,
+            Number(item.coord_sys_type || 0)
+          ),
         };
         // 创建point
         let feature = addFeature(styleOption.type, {
@@ -300,6 +338,10 @@ const action = function () {
 
     data.lng = coor[0];
     data.lat = coor[1];
+    data.coord_sys_type = 0;
+    if (this.baseMapKeys[1].indexOf(InitMap.baseMapKey) > -1) {
+      data.coord_sys_type = 1;
+    }
     return await ADD_BOARD(data);
   };
 

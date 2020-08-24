@@ -169,6 +169,11 @@ export default class LeftToolBar extends React.Component {
       plotType: "point",
       featureOperatorList: [],
     };
+    this.dic = {
+      Point: "point",
+      LineString: "line",
+      Polygon: "polygon",
+    };
     this.featureOperatorList = [];
     this.selectFeatureOperatorList = [];
     this.customSymbols = null;
@@ -457,7 +462,7 @@ export default class LeftToolBar extends React.Component {
                 this.oldPlotName = attrs.name;
                 this.oldRemark = attrs.remark;
                 this.setState({
-                  plotType: attrs.plotType,
+                  plotType: this.dic[attrs.geometryType],
                   displayPlot: true,
                   displayTempPlot: false,
                 });

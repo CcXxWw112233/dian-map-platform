@@ -196,8 +196,8 @@ export default class Plot extends React.Component {
     ];
     this.dic = {
       point: "Point",
-      line: "Polyline",
-      freeLine: "Polyline",
+      line: "LineString",
+      freeLine: "LineString",
       polygon: "Polygon",
       freePolygon: "Polygon",
       rect: "Polygon",
@@ -600,7 +600,7 @@ export default class Plot extends React.Component {
           : this.strokeColor,
       remark: this.state.remark,
       selectName: "自定义类型",
-      coordSysType: 0
+      coordSysType: 0,
     };
     if (this.baseMapKeys[0].indexOf(mapApp.baseMapKey) === -1) {
       attrs.coordSysType = 1;
@@ -710,7 +710,7 @@ export default class Plot extends React.Component {
     if (index !== undefined && index2 !== undefined) {
       if (
         this.dic[this.props.plotType] === "Polygon" ||
-        this.dic[this.props.plotType] === "Polyline"
+        this.dic[this.props.plotType] === "LineString"
       ) {
         if (index !== 0) {
           this.setState({
@@ -774,7 +774,7 @@ export default class Plot extends React.Component {
     }
     if (this.dic[this.props.plotType] === "Point") {
       this.featureType = iconUrl;
-    } else if (this.dic[this.props.plotType] === "Polyline") {
+    } else if (this.dic[this.props.plotType] === "LineString") {
       this.featureType = this.strokeColor;
     }
     let options = {
@@ -784,7 +784,7 @@ export default class Plot extends React.Component {
     };
     switch (this.dic[this.props.plotType]) {
       case "Polygon":
-      case "Polyline":
+      case "LineString":
         options = {
           ...options,
           strokeColor: this.strokeColor,
@@ -1107,7 +1107,7 @@ export default class Plot extends React.Component {
                 <div className={styles.header} style={style}>
                   <span
                     style={
-                      this.dic[this.props.plotType] === "Polyline"
+                      this.dic[this.props.plotType] === "LineString"
                         ? {
                             ...disableStyle,
                             ...{ fontSize: "14px" },
@@ -1121,7 +1121,7 @@ export default class Plot extends React.Component {
                     className={styles.colorbar}
                     style={{
                       background:
-                        this.dic[this.props.plotType] === "Polyline"
+                        this.dic[this.props.plotType] === "LineString"
                           ? "rgba(0,0,0,0.2)"
                           : this.state.customFillSelectedColor,
                       margin: 8,
@@ -1131,7 +1131,7 @@ export default class Plot extends React.Component {
                   <ColorPicker
                     handleOK={this.handleCustomFillColorOkClick}
                     disable={
-                      this.dic[this.props.plotType] === "Polyline"
+                      this.dic[this.props.plotType] === "LineString"
                         ? false
                         : true
                     }
