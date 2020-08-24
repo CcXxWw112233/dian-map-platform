@@ -261,6 +261,12 @@ export default class Plot extends React.Component {
         // 激活即修改状态
         parent.isModifyPlot = true;
         let operator = e.feature_operator;
+        let tmp = parent.featureOperatorList.filter((tmpOperator) => {
+          return tmpOperator.guid === operator.guid;
+        })[0];
+        if (!tmp) {
+          parent.featureOperatorList.push(operator);
+        }
         window.featureOperator = operator;
         me.selectedPlotZIndex = operator.feature.getStyle().getZIndex();
         let style = operator.feature.getStyle();
@@ -339,6 +345,27 @@ export default class Plot extends React.Component {
     }
   }
   componentWillUnmount() {
+    ListAction.checkItem()
+      .then((res) => {
+        if (res) {
+          if (res.code !== 0) {
+            if (this.tempOperatorList.length > 0) {
+              this.props.displayTempPlotIcon();
+            }
+            this.tempOperatorList.forEach((operator) => {
+              this.savePlot2TempPlot(operator);
+            });
+          }
+        }
+      })
+      .catch((e) => {
+        if (this.tempOperatorList.length > 0) {
+          this.props.displayTempPlotIcon();
+        }
+        this.tempOperatorList.forEach((operator) => {
+          this.savePlot2TempPlot(operator);
+        });
+      });
     const { parent } = this.props;
     parent.isModifyPlot = false;
     window.featureOperator = null;
@@ -937,6 +964,7 @@ export default class Plot extends React.Component {
       window.featureOperator.attrs.name = this.plotName;
       window.featureOperator.setName(this.plotName);
       window.featureOperator.attrs.remark = this.plotRemark;
+
       // 选择了项目
       if (this.projectId) {
         this.save2Group(window.featureOperator)
@@ -958,6 +986,13 @@ export default class Plot extends React.Component {
                     dispatch: this.props.dispatch,
                   });
                 }
+              }
+              const { parent } = this.props;
+              const index = parent.featureOperatorList.findIndex(
+                (operator) => (operator.guid = window.featureOperator)
+              );
+              if (index > -1) {
+                parent.featureOperatorList.splice(index, 1);
               }
               this.props.goBackProject();
             }

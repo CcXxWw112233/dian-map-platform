@@ -363,22 +363,21 @@ export default class LeftToolBar extends React.Component {
               );
             })}
           </div>
-          {this.state.displayTempPlotIcon ? (
-            <div
-              className={`${styles.circle} ${styles.temp}`}
-              onClick={() => {
-                this.setState({
-                  selectedIndex: -1,
-                  displayPlot: false,
-                  displayProject: false,
-                  displayTempPlot: true,
-                  displayCustomSymbolStore: false,
-                  plotType: "",
-                });
-              }}
-              style={{ ...tempPlotItemStyle, display: "table" }}
-            >
-              {/* <Badge
+          <div
+            className={`${styles.circle} ${styles.temp}`}
+            onClick={() => {
+              this.setState({
+                selectedIndex: -1,
+                displayPlot: false,
+                displayProject: false,
+                displayTempPlot: true,
+                displayCustomSymbolStore: false,
+                plotType: "",
+              });
+            }}
+            style={{ ...tempPlotItemStyle, display: "table" }}
+          >
+            {/* <Badge
                 count={this.featureOperatorList.length}
               >
                 <i
@@ -388,14 +387,13 @@ export default class LeftToolBar extends React.Component {
                   &#xe765;
                 </i>
               </Badge> */}
-              <i
-                className={globalStyle.global_icon}
-                style={{ fontSize: 30, color: "#fff" }}
-              >
-                &#xe765;
-              </i>
-            </div>
-          ) : null}
+            <i
+              className={globalStyle.global_icon}
+              style={{ fontSize: 30, color: "#fff" }}
+            >
+              &#xe765;
+            </i>
+          </div>
           <div
             className={`${styles.circle} ${styles.temp}`}
             onClick={() => {
@@ -424,6 +422,11 @@ export default class LeftToolBar extends React.Component {
             <Plot
               parent={this}
               plotType={this.state.plotType}
+              displayTempPlotIcon={() => {
+                this.setState({
+                  displayTempPlotIcon: true,
+                });
+              }}
               customSymbols={this.customSymbols}
               updateFeatureOperatorList={this.updateFeatureOperatorList}
               updateFeatureOperatorList2={this.updateFeatureOperatorList2}
