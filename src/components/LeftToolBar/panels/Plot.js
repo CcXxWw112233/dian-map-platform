@@ -1,11 +1,5 @@
-import React, { useState } from "react";
+import React from "react";
 import { Input, Select, Button, Tooltip, message, Skeleton } from "antd";
-import {
-  CaretUpOutlined,
-  CaretDownOutlined,
-  LeftOutlined,
-  RightOutlined,
-} from "@ant-design/icons";
 
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import styles from "../LeftToolBar.less";
@@ -15,15 +9,14 @@ import { connect } from "dva";
 import { symbols } from "./data";
 import { plotEdit } from "../../../utils/plotEdit";
 import FeatureOperatorEvent from "../../../utils/plot2ol/src/events/FeatureOperatorEvent";
-import { createStyle, createOverlay, getPoint } from "../../../lib/utils/index";
+import { createStyle } from "../../../lib/utils/index";
 import Event from "../../../lib/utils/event";
 
-import addFeatureOverlay from "../../PublicOverlays/addFeaturesOverlay/index";
 import ListAction from "../../../lib/components/ProjectScouting/ScoutingList";
 import DetailAction from "../../../lib/components/ProjectScouting/ScoutingDetail";
-import { getSession } from "utils/sessionManage";
 import { MyIcon } from "../../utils";
 import symbolStoreServices from "../../../services/symbolStore";
+import mapApp from "utils/INITMAP";
 
 const SymbolBlock = ({
   data,
@@ -238,6 +231,7 @@ export default class Plot extends React.Component {
     this.projectName = "";
     this.activeOperator = null;
     this.selectedPlotZIndex = 0;
+    this.baseMapKeys = ["gd_vec|gd_img|gg_img", "td_vec|td_img|td_ter"];
   }
   componentDidMount() {
     Event.Evt.firEvent("setAttribute", {
@@ -606,7 +600,11 @@ export default class Plot extends React.Component {
           : this.strokeColor,
       remark: this.state.remark,
       selectName: "自定义类型",
+      coordSysType: 0
     };
+    if (this.baseMapKeys[0].indexOf(mapApp.baseMapKey) === -1) {
+      attrs.coordSysType = 1;
+    }
     const plotType = this.nextProps?.plotType || this.props.plotType;
     if (this.dic[plotType] === "Polygon") {
       options = { ...options, fillColor: this.fillColor };
@@ -814,7 +812,11 @@ export default class Plot extends React.Component {
       remark: this.plotRemark,
       selectName: this.selectName,
       plotType: this.props.plotType,
+      coordSysType: 0, //坐标系类型，0代表gcj02，1代表wgs84
     };
+    if (this.baseMapKeys[0].indexOf(mapApp.baseMapKey) === -1) {
+      attrs.coordSysType = 1;
+    }
     if (this.dic[this.props.plotType] === "Polygon") {
       attrs = {
         ...attrs,
