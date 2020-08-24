@@ -295,7 +295,7 @@ export default class LeftToolBar extends React.Component {
       <div
         className={`${styles.wrapper} ${
           this.props.isShowLeftToolBar ? "" : styles.hidden
-        } ${this.props.isInvalidToolBar ? "invalid" : ""}`}
+        }`}
         style={{ position: "absolute", top: 0, left: 0 }}
         id="leftToolBar"
       >
@@ -307,14 +307,21 @@ export default class LeftToolBar extends React.Component {
             zIndex: 9,
           }}
         >
-          <div className={styles.circle} style={{ background: "#fff" }}>
+          <div
+            className={`${styles.circle} ${
+              this.props.isInvalidToolBar ? "invalid" : ""
+            }`}
+            style={{ background: "#fff" }}
+          >
             {/* <img alt="" src=""></img> */}
             <i className={globalStyle.global_icon} style={{ fontSize: 26 }}>
               &#xe764;
             </i>
           </div>
           <div
-            className={globalStyle.autoScrollY}
+            className={`${globalStyle.autoScrollY} ${
+              this.props.isInvalidToolBar ? "invalid" : ""
+            }`}
             style={{ height: "calc(100% - 210px)" }}
           >
             {this.leftTools.map((item, index) => {
