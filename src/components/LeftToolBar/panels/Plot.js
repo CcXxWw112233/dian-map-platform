@@ -345,27 +345,6 @@ export default class Plot extends React.Component {
     }
   }
   componentWillUnmount() {
-    ListAction.checkItem()
-      .then((res) => {
-        if (res) {
-          if (res.code !== 0) {
-            if (this.tempOperatorList.length > 0) {
-              this.props.displayTempPlotIcon();
-            }
-            this.tempOperatorList.forEach((operator) => {
-              this.savePlot2TempPlot(operator);
-            });
-          }
-        }
-      })
-      .catch((e) => {
-        if (this.tempOperatorList.length > 0) {
-          this.props.displayTempPlotIcon();
-        }
-        this.tempOperatorList.forEach((operator) => {
-          this.savePlot2TempPlot(operator);
-        });
-      });
     const { parent } = this.props;
     parent.isModifyPlot = false;
     window.featureOperator = null;

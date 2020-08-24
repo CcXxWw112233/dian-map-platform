@@ -13,7 +13,10 @@ import ScoutAction from "../../../lib/components/ProjectScouting/ScoutingList";
 // import ScoutDetail from "../../../lib/components/ProjectScouting/ScoutingDetail";
 import { connect } from "dva";
 
-@connect(({ controller: { mainVisible }, openswitch: { openPanel } }) => ({ mainVisible ,openPanel}))
+@connect(({ controller: { mainVisible }, openswitch: { openPanel } }) => ({
+  mainVisible,
+  openPanel,
+}))
 export default class Project extends React.Component {
   constructor(props) {
     super(props);
@@ -71,8 +74,12 @@ export default class Project extends React.Component {
 
   render() {
     const { TabPane } = Tabs;
+    const { hidden } = this.props;
     return (
-      <div style={{ width: "100%", height: "100%" }}>
+      <div
+        style={{ width: "100%", height: "100%" }}
+        className={hidden ? "" : styles.hidden}
+      >
         {this.props.mainVisible === "list" ? (
           <div
             className={`${animateCss.animated} ${animateCss.slideInLeft}`}

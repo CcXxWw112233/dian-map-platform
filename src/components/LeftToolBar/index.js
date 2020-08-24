@@ -377,16 +377,6 @@ export default class LeftToolBar extends React.Component {
             }}
             style={{ ...tempPlotItemStyle, display: "table" }}
           >
-            {/* <Badge
-                count={this.featureOperatorList.length}
-              >
-                <i
-                  className={globalStyle.global_icon}
-                  style={{ fontSize: 30, color: "#fff" }}
-                >
-                  &#xe765;
-                </i>
-              </Badge> */}
             <i
               className={globalStyle.global_icon}
               style={{ fontSize: 30, color: "#fff" }}
@@ -417,7 +407,7 @@ export default class LeftToolBar extends React.Component {
           </div>
         </div>
         <Panel>
-          {this.state.displayProject ? <Project></Project> : null}
+          <Project hidden={this.state.displayProject}></Project>
           {this.state.displayPlot ? (
             <Plot
               parent={this}
