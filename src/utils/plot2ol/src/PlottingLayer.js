@@ -193,47 +193,48 @@ class PlottingLayer extends Observable {
       return;
     } else {
       for (let i = 0; i < this.projectScoutingArr.length; i++) {
-        let feature = this.projectScoutingArr[i].feature;
-        const type = feature.getGeometry().getType();
-        let newFeature = feature.clone();
-        let coords = newFeature.getGeometry().getCoordinates();
-        if (type.indexOf("Point") > -1) {
-          let temp = this._transformCoordinate(coords);
+        this._transCoordinateSystemsByChangeBaseMap(this.projectScoutingArr[i]);
+      }
+    }
+  }
+
+  _transCoordinateSystemsByChangeBaseMap(featureOperator) {
+    let feature = featureOperator.feature;
+    const type = feature.getGeometry().getType();
+    let newFeature = feature.clone();
+    let coords = newFeature.getGeometry().getCoordinates();
+    if (type.indexOf("Point") > -1) {
+      let temp = this._transformCoordinate(coords);
+      coords = temp ? temp : coords;
+    } else if (type.indexOf("Polygon") > -1) {
+      for (let j = 0; j < coords.length; j++) {
+        for (let k = 0; k < coords[j].length; k++) {
+          let temp = this._transformCoordinate(coords[j][k]);
           if (!temp) {
             continue;
           }
-          coords = temp;
-        } else if (type.indexOf("Polygon") > -1) {
-          for (let j = 0; j < coords.length; j++) {
-            for (let k = 0; k < coords[j].length; k++) {
-              let temp = this._transformCoordinate(coords[j][k]);
-              if (!temp) {
-                continue;
-              }
-              coords[j][k] = temp;
-            }
-          }
-        } else {
-          for (let j = 0; j < coords.length; j++) {
-            let temp = this._transformCoordinate(coords[j]);
-            if (!temp) {
-              continue;
-            }
-            coords[j] = temp;
-          }
+          coords[j][k] = temp;
         }
-        if (type === "Point") {
-          coords = [coords];
-        } else if (type === "Polygon") {
-          coords = [...coords[0]];
-        } else {
-          console.log(coords);
+      }
+    } else {
+      for (let j = 0; j < coords.length; j++) {
+        let temp = this._transformCoordinate(coords[j]);
+        if (!temp) {
+          continue;
         }
-
-        let plot = this.projectScoutingArr[i].feature.getGeometry();
-        plot.updateAllPoint(coords);
+        coords[j] = temp;
       }
     }
+    if (type === "Point") {
+      coords = [coords];
+    } else if (type === "Polygon") {
+      coords = [...coords[0]];
+    } else {
+      console.log(coords);
+    }
+
+    let plot = featureOperator.feature.getGeometry();
+    plot.updateAllPoint(coords);
   }
 
   _transformCoordinate(coords) {
