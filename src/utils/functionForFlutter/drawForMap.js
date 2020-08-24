@@ -12,6 +12,20 @@ function renderAction (){
     this.hideProjectPoint = ()=>{
         ListAction.clear();
     }
+    // 渲染分组坐标
+    this.renderGroupPoint = (data)=>{
+      if(!data && !data.length) return ;
+      DetailAction.init();
+      DetailAction.renderGroupPointer(data);
+    }
+    // 设置选中点的样式
+    this.setActiveGroupPoint = (id)=>{
+      DetailAction.setActiveGoupPointer(id)
+    }
+    // 删除渲染分组的坐标
+    this.clearGroupPoint = ()=>{
+      DetailAction.clearGroupPointer();
+    }
     // 显示项目坐标点
     this.showProjectPoint = async ()=>{
         this.hideProjectPoint();

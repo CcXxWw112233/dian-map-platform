@@ -1,5 +1,6 @@
-import {BASIC} from './config'
-import { request } from './index'
+import {BASIC} from './config';
+import { request } from './index';
+import checkResponse from './checkResponse';
 export default {
     ...BASIC,
     // 获取项目列表
@@ -35,7 +36,7 @@ export default {
         if(BASIC.checkResponse(response)){
             return response.data;
         }
-        
+
         return Promise.reject(response && response.data);
     },
     // 获取项目详情中的区域列表
@@ -54,6 +55,11 @@ export default {
         }
 
         return Promise.reject(response && response.data);
+    },
+    // 修改区域信息
+    EDIT_AREA_MESSAGE: async (id, data)=>{
+      let response = await request('PUT',`/map/area_type/${id}`,data);
+      return checkResponse(response);
     },
     // 文件上传
     UPLOAD_FILE: async (data) => {
@@ -79,7 +85,7 @@ export default {
         if(BASIC.checkResponse(response)){
             return response.data;
         }
-        
+
         return Promise.reject(response && response.data);
     },
     // 组合一个采集数据
@@ -88,7 +94,7 @@ export default {
         if(BASIC.checkResponse(response)){
             return response.data;
         }
-        
+
         return Promise.reject(response && response.data);
     },
     // 解除一个元素的组合
@@ -97,7 +103,7 @@ export default {
         if(BASIC.checkResponse(response)){
             return response.data;
         }
-        
+
         return Promise.reject(response && response.data);
     },
     // 排序采集数据
@@ -106,7 +112,7 @@ export default {
         if(BASIC.checkResponse(response)){
             return response.data;
         }
-        
+
         return Promise.reject(response && response.data);
     },
     // 删除一条采集数据
@@ -133,7 +139,7 @@ export default {
         if(BASIC.checkResponse(response)){
             return response.data;
         }
-        
+
         return Promise.reject(response && response.data);
     } ,
     // 修改分组名称

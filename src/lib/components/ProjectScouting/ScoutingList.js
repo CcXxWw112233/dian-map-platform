@@ -137,8 +137,8 @@ const action = function () {
   this.getCoords = (x, y) => {
     let lastBaseMapKey = InitMap.lastBaseMapKey;
     let baseMapKey = InitMap.baseMapKey;
-    console.log(lastBaseMapKey);
-    console.log(baseMapKey);
+    // console.log(lastBaseMapKey);
+    // console.log(baseMapKey);
     if (lastBaseMapKey === "") {
       if (this.baseMapKeys[0].indexOf(baseMapKey) > -1) {
         return TransformCoordinate([x, y]);
