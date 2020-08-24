@@ -95,7 +95,7 @@ export default class LookingBack extends React.Component{
     // console.log(data);
     // data = data.filter(item => DetailAction.checkCollectionType(item.target) === 'pic');
     this.setState({
-      selectData: data
+      selectData: data || []
     })
   }
 
@@ -154,11 +154,12 @@ export default class LookingBack extends React.Component{
 
           </div>
           <div className={styles.time_selection}>
-            {(activeSelectObj.collection && activeSelectObj.collection.length) &&
+            {(activeSelectObj.collection && activeSelectObj.collection.length) ?
             <TimeSelection data={activeSelectObj.collection} active={activeTime}
             onChangeActive={this.setActiveChange}
             onChange={this.setActiveData}
-            />}
+            /> :
+            <div style={{textAlign:"center"}}>暂无可回看的采集资料（图片、视频、音频）</div>}
           </div>
         </div>
         <div className={styles.lookingback_collection}>

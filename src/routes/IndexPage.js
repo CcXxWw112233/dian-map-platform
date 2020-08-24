@@ -150,13 +150,13 @@ class IndexPage extends React.Component {
     if (BASIC.getUrlParam.isMobile === "1") return;
     let minResolution = this.view.getMinResolution();
     let tolerance = 0;
-    this.map.on("moveend", () => {
-      let overlays = this.map.getOverlays();
-      let arr = overlays.getArray();
-      if (!arr.length) return;
-      // 计算overlay的位置
-      this.computedOverlayPosition(arr, minResolution, tolerance);
-    });
+    // this.map.on("moveend", () => {
+    //   let overlays = this.map.getOverlays();
+    //   let arr = overlays.getArray();
+    //   if (!arr.length) return;
+    //   // 计算overlay的位置
+    //   this.computedOverlayPosition(arr, minResolution, tolerance);
+    // });
     // this.setCenter(map, view);
   };
 
