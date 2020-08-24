@@ -1,10 +1,12 @@
 import React from 'react';
 import styles from './index.less';
 import ReactDOM from 'react-dom';
-// import animateCss from '../../../../assets/css/animate.min.css';
+import animateCss from '../../../../assets/css/animate.min.css';
 import { connect } from 'dva';
 import { MyIcon } from '../../../../components/utils';
-
+import MapMain from '../../../../utils/INITMAP';
+import DetailAction from '../../../../lib/components/ProjectScouting/ScoutingDetail';
+import { Fit , getExtentIsEmpty} from '../../../../lib/utils';
 
 @connect(({openswitch:{openPanel}})=>({openPanel}))
 export default class CollectionPreview extends React.Component{
@@ -13,11 +15,18 @@ export default class CollectionPreview extends React.Component{
     this.state = {
       updateStyle:{},
       datas: [],
-      active: null
+      active: null,
     }
+    this.imgContent = React.createRef();
+    this.touchStart = false;
+    this.startEvent = {};
+    this.windowHeight = document.body.clientHeight;
+    this.minImgHeight = 400;
+    this.map = MapMain.map;
+    this.view = MapMain.view;
   }
-  static getDerivedStateFromProps (nextProps, preState){
-    let { openPanel } = nextProps;
+  static getDerivedStateFromProps (nextProps){
+    let { openPanel, onUpdate } = nextProps;
     let obj = {
       datas: nextProps.currentGroup,
       active: nextProps.currentData || nextProps.currentGroup.collection[0]
@@ -36,7 +45,7 @@ export default class CollectionPreview extends React.Component{
         updateStyle: {
           width: document.body.clientWidth - width
         },
-        ...obj
+        ...obj,
       }
     }else{
       let dom1 = document.querySelector('#leftToolBar');
@@ -44,7 +53,7 @@ export default class CollectionPreview extends React.Component{
         updateStyle:{
           width: document.body.clientWidth - (dom1 ? dom1.clientWidth : 0),
         },
-        ...obj
+        ...obj,
       }
     }
     return null;
@@ -52,29 +61,104 @@ export default class CollectionPreview extends React.Component{
 
   componentDidMount(){
     // console.log(this.state)
+    setTimeout(()=>{
+      this.initPadding();
+    }, 500)
+  }
+  // 简化坐标
+  getPointer = (e)=>{
+    return {x:e.pageX, y: e.pageY}
+  }
+
+  initPadding = ()=>{
+    let { current } = this.imgContent;
+    let height = current.clientHeight;
+    let padding = [height + 60, 100, 40, Math.abs(this.state.updateStyle.width - document.body.clientWidth)]
+    this.fitview({padding})
+  }
+
+  fitview = ({padding, duration = 300})=>{
+    let extent = DetailAction.Source.getExtent();
+    if(!getExtentIsEmpty(extent))
+    Fit(this.view,extent,{
+      padding
+    },duration).then(res => {
+
+    })
+  }
+
+  pointerdown = (e)=>{
+    this.touchStart = true;
+    this.startEvent = this.getPointer(e);
+  }
+
+  pointermove = (e)=>{
+    let { onFull } = this.props;
+    if(!this.touchStart) return ;
+    let { current } = this.imgContent;
+    let targetHeight = current.clientHeight;
+    // console.log(current.clientHeight)
+    let moveEvent = this.getPointer(e);
+    let y = this.startEvent.y - moveEvent.y;
+    if(targetHeight >= this.windowHeight - 100 && y < 0){
+      // console.log('到底了');
+      onFull && onFull();
+      this.touchStart = false;
+      return ;
+    }
+    if(targetHeight <= this.minImgHeight && y > 0){
+      // console.log('到了最小高度了');
+      return ;
+
+    }
+
+    targetHeight -= y;
+    this.fitview({padding:[ targetHeight + 60, 100, 40, Math.abs(this.state.updateStyle.width - document.body.clientWidth)]})
+    let percent = (targetHeight / this.windowHeight).toFixed(4);
+    // current.style.height = targetHeight +'px';
+    current.style.height = (percent*100)+'%';
+    this.startEvent = moveEvent;
+  }
+
+  pointerout = ()=>{
+    this.touchStart = false;
+    this.startEvent = {};
   }
 
 
   render(){
-    let { updateStyle, active} = this.state;
-    const { dispatch } = this.props;
+    let { updateStyle, active, } = this.state;
+    const { dispatch, onExitFull, Full} = this.props;
     return (
       ReactDOM.createPortal(
-        <div className={`${styles.viewBoxContainer}`}
+        <div className={`${styles.viewBoxContainer} ${ Full ? styles.imgContentIsFull : styles.imgContentNotFull}`}
+        ref={this.imgContent}
         style={updateStyle}>
-        <span className={styles.closeModal} onClick={()=>{
-          dispatch({
-            type:"collectionDetail/updateDatas",
-            payload:{
-              showCollectionsModal: false,
-              selectData: null,
-              zIndex: 10
-            }
-          })
-        }}>
-          <MyIcon type="icon-guanbi2"/>
-        </span>
-          <div className={styles.CollectionPreviewContainer}>
+          <span className={styles.closeModal} onClick={()=>{
+            dispatch({
+              type:"collectionDetail/updateDatas",
+              payload:{
+                showCollectionsModal: false,
+                selectData: null,
+                zIndex: 10
+              }
+            })
+          }}>
+            <MyIcon type="icon-guanbi2"/>
+          </span>
+          <span className={styles.slidebar}
+          onPointerDown={this.pointerdown}
+          onPointerMove={this.pointermove}
+          onPointerOut={this.pointerout}
+          onPointerUp={this.pointerout}
+          ></span>
+          {
+            Full &&
+            <span className={`${styles.goBackMap} ${animateCss.animated} ${animateCss.fadeInUp}`} onClick={()=> {onExitFull && onExitFull()}}>
+              <img src={require('../../../../assets/backmap.png')} alt=""/>
+            </span>
+          }
+          <div className={`${styles.CollectionPreviewContainer}`}>
             <div className={styles.activeMedia}>
               <img src={active.resource_url} alt=""/>
             </div>

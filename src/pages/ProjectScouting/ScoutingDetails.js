@@ -12,12 +12,12 @@ import {
   Button,
   message,
   Space,
-  Popover,
+  // Popover,
   Empty,
-  Radio,
-  Form,
-  Input,
-  InputNumber,
+  // Radio,
+  // Form,
+  // Input,
+  // InputNumber,
 } from "antd";
 import { PlusCircleOutlined, CaretRightOutlined } from "@ant-design/icons";
 import Event from "../../lib/utils/event";
@@ -34,6 +34,7 @@ import PlayCollectionControl from "./components/playCollectionControl";
 // import { getOffsetTop } from "utils/utils";
 import CollectionDetail from "./components/CollectionDetail";
 import LookingBack from "./components/LookingBack";
+import { CSSTransition } from "react-transition-group";
 
 const { Evt } = Event;
 const { TabPane } = Tabs;
@@ -132,6 +133,11 @@ export default class ScoutingDetails extends PureComponent {
       this.isAddAreaBtn = true;
       this.pushAreaItem();
     });
+
+    Evt.on('handleGroupFeature',(id)=>{
+      if(this.state.activeKey === '1')
+      this.setActiveCollapse(id);
+    })
   }
 
   componentWillUnmount() {
@@ -154,6 +160,7 @@ export default class ScoutingDetails extends PureComponent {
       });
       Action.removeLayer(true);
       Action.clearListen();
+      this.clearGroupPointer();
     }
     dispatch({
       type:"collectionDetail/updateDatas",
@@ -248,12 +255,18 @@ export default class ScoutingDetails extends PureComponent {
   };
 
   onChange = (activeKey) => {
+    const { dispatch } = this.props;
     this.setState({ activeKey });
+    if(this.state.activeKey === activeKey) return ;
+    this.clearGroupPointer();
     if(activeKey !== '1'){
       // 删除采集资料显示
       Action.removeLayer();
       // 删除轮询
       Action.clearListen();
+      // if(activeKey === '2'){
+      //   this.renderGroupPointer();
+      // }
     }else if(activeKey === '1'){
       // 显示采集资料
       this.setActiveCollapse(this.state.area_active_key);
@@ -263,6 +276,13 @@ export default class ScoutingDetails extends PureComponent {
       // 添加轮询
       Action.addToListen(params);
     }
+    // 隐藏右上角的弹窗
+    dispatch({
+      type:"collectionDetail/updateDatas",
+      payload:{
+        selectData: null
+      }
+    })
   };
 
   onEdit = (targetKey, action) => {
@@ -583,6 +603,7 @@ export default class ScoutingDetails extends PureComponent {
       // 隐藏
       this.hideOtherSlide();
       // 添加坐标点的事件
+
       res = await Action.addCollectionPosition(val);
       let { feature } = res;
       // console.log(res);
@@ -709,6 +730,13 @@ export default class ScoutingDetails extends PureComponent {
     });
   };
 
+  renderGroupPointer = ()=>{
+    Action.renderGroupPointer(this.state.area_list);
+  }
+  clearGroupPointer = ()=>{
+    Action.clearGroupPointer();
+  }
+
   // 点击panel时的回调
   setActiveCollapse = (key) => {
     window.ProjectGroupId = key;
@@ -717,7 +745,11 @@ export default class ScoutingDetails extends PureComponent {
     // 关闭的时候，全部清空
     if (!key) {
       this.renderCollection([]);
+      this.renderGroupPointer();
+    }else {
+      this.clearGroupPointer();
     }
+
     this.setState({ area_selected: [key] });
     if (key) {
       let obj = this.state.area_list.find((item) => item.id === key);
@@ -1276,6 +1308,44 @@ export default class ScoutingDetails extends PureComponent {
     )
   }
 
+  // 设置分类坐标点
+  onSetCoordinates = async (val)=>{
+    message.success(
+      <span>
+        选取一个坐标设置为分类展示点 或{" "}
+        <a
+          onClick={(e) => {
+            e.stopPropagation();
+            this.cancelEditCollection();
+          }}
+        >
+          取消选择
+        </a>
+      </span>,
+      0
+    );
+    val.title = val.name;
+    let res = await Action.addCollectionPosition(val);
+    // console.log(res);
+    let { feature } = res;
+    let coor = feature.getGeometry().getCoordinates();
+    let resp = await Action.setGropCoordinates(val.id,{coordinate: coor}).catch(err => console.log(err));
+    let arr = Action.transform(coor);
+    if(resp){
+      message.success('保存成功');
+      this.cancelEditCollection();
+      let list = this.state.area_list.map(item => {if(item.id === val.id){item.longitude = arr[0]; item.latitude = arr[1]} return item ;})
+
+      // 更新全局的分组数据，不需要请求
+      this.updateCollection(Array.from(this.state.all_collection), list);
+
+      // 闭合分组
+      this.setActiveCollapse("");
+      // 渲染分类坐标
+      this.renderGroupPointer();
+    }
+  }
+
   renderForActive = (key)=>{
     const { area_list, not_area_id_collection ,activeId, current_board} = this.state;
     const { dispatch } = this.props;
@@ -1330,6 +1400,7 @@ export default class ScoutingDetails extends PureComponent {
                           onAreaDelete={this.onAreaDelete}
                           onExcelSuccess={this.onExcelSuccess}
                           dispatch={dispatch}
+                          onSetCoordinates={this.onSetCoordinates}
                           // onDragEnter={e => {this.setState({area_active_key: item.id})}}
                         />
                       }
@@ -1537,11 +1608,11 @@ export default class ScoutingDetails extends PureComponent {
           </Fragment>
         );
       case "2" :
-        // return (
-        //   <PublicView>
-        //     <LookingBack board={current_board}/>
-        //   </PublicView>
-        // )
+        return (
+          <PublicView>
+            <LookingBack board={current_board}/>
+          </PublicView>
+        )
       case "3" :
       case "4" :
         return (
@@ -1555,7 +1626,7 @@ export default class ScoutingDetails extends PureComponent {
 
   render () {
     const { current_board,isPlay, playing} = this.state;
-    const { selectData, showCollectionsModal} = this.props;
+    const { selectData } = this.props;
     const panelStyle = {
       // height: "100%",
     };
@@ -1619,14 +1690,13 @@ export default class ScoutingDetails extends PureComponent {
             hasPrevGroup={!this.state.notPrevGroup}
           />
         )}
-        { selectData &&
+        <CSSTransition
+        in={!!selectData}
+        classNames="slideRight"
+        timeout={300}
+        unmountOnExit>
           <CollectionDetail />
-        }
-
-        {/* {
-          showCollectionsModal &&
-
-        } */}
+        </CSSTransition>
 
       </div>
     );

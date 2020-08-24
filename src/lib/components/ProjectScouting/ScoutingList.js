@@ -137,8 +137,8 @@ const action = function () {
   this.getCoords = (x, y, coordSysType) => {
     let lastBaseMapKey = InitMap.lastBaseMapKey;
     let baseMapKey = InitMap.baseMapKey;
-    console.log(lastBaseMapKey);
-    console.log(baseMapKey);
+    // console.log(lastBaseMapKey);
+    // console.log(baseMapKey);
     if (lastBaseMapKey === "") {
       // gcj02(高德)坐标系
       if (this.baseMapKeys[0].indexOf(baseMapKey) > -1) {
