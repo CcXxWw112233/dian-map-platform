@@ -12,7 +12,12 @@ import Panel from "./panels/Panel";
 
 import { lineDrawing, pointDrawing, polygonDrawing } from "utils/drawing";
 import ListAction from "@/lib/components/ProjectScouting/ScoutingList";
+import { connect } from "dva";
 
+@connect(({ openswitch: { isShowLeftToolBar, isInvalidToolBar } }) => ({
+  isShowLeftToolBar,
+  isInvalidToolBar,
+}))
 export default class LeftToolBar extends React.Component {
   constructor(props) {
     super(props);
@@ -288,7 +293,9 @@ export default class LeftToolBar extends React.Component {
     }
     return (
       <div
-        className={styles.wrapper}
+        className={`${styles.wrapper} ${
+          this.props.isShowLeftToolBar ? "" : styles.hidden
+        } ${this.props.isInvalidToolBar ? "invalid" : ""}`}
         style={{ position: "absolute", top: 0, left: 0 }}
         id="leftToolBar"
       >
