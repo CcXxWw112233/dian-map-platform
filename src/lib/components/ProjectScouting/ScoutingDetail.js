@@ -727,6 +727,7 @@ function Action() {
         duration,
       });
     }
+    this.selectedFeatureOperator = null;
   };
 
   // 添加规划图编辑功能
