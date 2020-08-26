@@ -98,7 +98,7 @@ export default class ScoutingDetails extends PureComponent {
   componentDidMount() {
     this.isGoBack = false;
     const { Evt } = Event;
-    const { mainVisible } = this.props;
+    const { mainVisible, dispatch} = this.props;
     if (mainVisible) this.getDetails();
     // 删除存在与页面中的项目点和元素
     Action.removeListPoint();
@@ -138,10 +138,22 @@ export default class ScoutingDetails extends PureComponent {
       if(this.state.activeKey === '1')
       this.setActiveCollapse(id);
     })
-  }
 
+    Evt.addEventListener('handleGroupCollectionFeature', this.handleCollectionFeature);
+  }
+  handleCollectionFeature = (data)=>{
+    const { dispatch } = this.props;
+    dispatch({
+      type:"collectionDetail/updateDatas",
+      payload:{
+        selectData: data,
+        type:'view'
+      }
+    })
+  }
   componentWillUnmount() {
     const { dispatch, config: lengedList } = this.props;
+    Event.Evt.removeEventListener('handleGroupCollectionFeature', this.handleCollectionFeature);
     if (this.isGoBack) {
       let newLengedList = [...lengedList];
       if (!Array.isArray(lengedList)) {
@@ -165,7 +177,8 @@ export default class ScoutingDetails extends PureComponent {
     dispatch({
       type:"collectionDetail/updateDatas",
       payload:{
-        selectData: null
+        selectData: null,
+        type:'view'
       }
     })
 
@@ -264,12 +277,13 @@ export default class ScoutingDetails extends PureComponent {
       Action.removeLayer();
       // 删除轮询
       Action.clearListen();
-      // if(activeKey === '2'){
-      //   this.renderGroupPointer();
-      // }
+      if(activeKey === '2'){
+        // this.renderGroupPointer();
+      }
     }else if(activeKey === '1'){
       // 显示采集资料
       this.setActiveCollapse(this.state.area_active_key);
+      Action.clearGroupCollectionPoint();
       let params = {
         board_id: this.state.current_board.board_id,
       };
@@ -280,7 +294,8 @@ export default class ScoutingDetails extends PureComponent {
     dispatch({
       type:"collectionDetail/updateDatas",
       payload:{
-        selectData: null
+        selectData: null,
+        type:'view'
       }
     })
   };
@@ -433,7 +448,9 @@ export default class ScoutingDetails extends PureComponent {
           (arr = this.state.not_area_id_collection);
         this.renderCollection(arr || []);
         // 更新回看的列表
-        Evt.firEvent('collectionListUpdate', area_list.concat([{id:'other',name: '未整理',collection:this.state.not_area_id_collection}]))
+        let a = area_list.concat([{id:'other',name: '未整理',collection:this.state.not_area_id_collection}]);
+        Evt.firEvent('collectionListUpdate1', a);
+        Evt.firEvent('collectionListUpdate2', a);
       }
     );
   };
@@ -1237,7 +1254,8 @@ export default class ScoutingDetails extends PureComponent {
     dispatch({
       type:"collectionDetail/updateDatas",
       payload:{
-        selectData: val
+        selectData: val,
+        type:'edit'
       }
     })
   }
@@ -1610,7 +1628,7 @@ export default class ScoutingDetails extends PureComponent {
       case "2" :
         return (
           <PublicView>
-            <LookingBack board={current_board}/>
+            <LookingBack board={current_board} active={this.state.activeKey === '2'}/>
           </PublicView>
         )
       case "3" :
