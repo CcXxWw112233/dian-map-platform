@@ -7,6 +7,7 @@ import { MyIcon } from '../../../../components/utils';
 import MapMain from '../../../../utils/INITMAP';
 import DetailAction from '../../../../lib/components/ProjectScouting/ScoutingDetail';
 import { Fit , getExtentIsEmpty} from '../../../../lib/utils';
+import EditImage from './EditImg';
 
 @connect(({openswitch:{openPanel}})=>({openPanel}))
 export default class CollectionPreview extends React.Component{
@@ -16,6 +17,8 @@ export default class CollectionPreview extends React.Component{
       updateStyle:{},
       datas: [],
       active: null,
+      update: 0,
+      isEdit: false
     }
     this.imgContent = React.createRef();
     this.touchStart = false;
@@ -26,10 +29,10 @@ export default class CollectionPreview extends React.Component{
     this.view = MapMain.view;
   }
   static getDerivedStateFromProps (nextProps){
-    let { openPanel, onUpdate } = nextProps;
+    let { openPanel } = nextProps;
     let obj = {
-      datas: nextProps.currentGroup,
-      active: nextProps.currentData || nextProps.currentGroup.collection[0]
+      // datas: nextProps.currentGroup,
+      // active: nextProps.currentData
     }
     if(openPanel){
       let width = 0;
@@ -63,7 +66,19 @@ export default class CollectionPreview extends React.Component{
     // console.log(this.state)
     setTimeout(()=>{
       this.initPadding();
+      this.props.dispatch({
+        type:"collectionDetail/updateDatas",
+        payload:{
+          selectData: this.state.active,
+          type:'view'
+        }
+      })
     }, 500)
+    window.addEventListener('resize', ()=>{
+      this.setState({
+        update: this.state.update + 1
+      })
+    })
   }
   // 简化坐标
   getPointer = (e)=>{
@@ -125,10 +140,24 @@ export default class CollectionPreview extends React.Component{
     this.startEvent = {};
   }
 
+  onChageEdit = ()=>{
+    let { onFull } = this.props;
+    this.setState({
+      isEdit: true,
+    })
+    onFull && onFull();
+  }
+
+  exit = ()=>{
+    this.setState({
+      isEdit: false,
+    })
+  }
+
 
   render(){
-    let { updateStyle, active, } = this.state;
-    const { dispatch, onExitFull, Full} = this.props;
+    let { updateStyle, isEdit} = this.state;
+    const { dispatch, onExitFull, Full , currentData} = this.props;
     return (
       ReactDOM.createPortal(
         <div className={`${styles.viewBoxContainer} ${ Full ? styles.imgContentIsFull : styles.imgContentNotFull}`}
@@ -140,7 +169,8 @@ export default class CollectionPreview extends React.Component{
               payload:{
                 showCollectionsModal: false,
                 selectData: null,
-                zIndex: 10
+                zIndex: 10,
+                type:'view'
               }
             })
           }}>
@@ -152,17 +182,48 @@ export default class CollectionPreview extends React.Component{
           onPointerOut={this.pointerout}
           onPointerUp={this.pointerout}
           ></span>
+
+          <div className={styles.contentTitle}>
+            <div className={styles.title_name}>{currentData?.title}</div>
+            <div className={styles.title_remark}>{currentData?.description}</div>
+          </div>
+
+          <div className={styles.tools}>
+            {/* <span className={styles.edit} onClick={this.onChageEdit}>
+              <MyIcon type='icon-huabi'/>
+            </span> */}
+            <span className={styles.prevImg} onClick={()=>{
+                this.props.onPrev && this.props.onPrev();
+              }}>
+              <MyIcon type="icon-bianzu681" />
+            </span>
+            <span className={styles.nextImg} onClick={()=>{
+                this.props.onNext && this.props.onNext();
+              }}>
+              <MyIcon type="icon-bianzu671"/>
+            </span>
+          </div>
+
           {
             Full &&
             <span className={`${styles.goBackMap} ${animateCss.animated} ${animateCss.fadeInUp}`} onClick={()=> {onExitFull && onExitFull()}}>
               <img src={require('../../../../assets/backmap.png')} alt=""/>
             </span>
           }
-          <div className={`${styles.CollectionPreviewContainer}`}>
-            <div className={styles.activeMedia}>
-              <img src={active.resource_url} alt=""/>
-            </div>
-          </div>
+          {
+            isEdit ? (
+              <div className={styles.editImg}>
+                <EditImage onExit={this.exit}/>
+              </div>
+            )
+            :(
+              <div className={`${styles.CollectionPreviewContainer}`}>
+                <div className={styles.activeMedia}>
+                  <img src={currentData?.resource_url} alt=""/>
+                </div>
+              </div>
+            )
+          }
         </div>,
         document.body.querySelector('#IndexPage')
       )

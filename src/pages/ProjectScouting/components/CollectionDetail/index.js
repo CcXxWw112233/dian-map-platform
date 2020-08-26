@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import styles from './index.less';
 import { connect } from 'dva'
 import ReactDOM from 'react-dom';
@@ -7,17 +7,29 @@ import animateCss from '../../../../assets/css/animate.min.css';
 import PhotoSwipe from '../../../../components/PhotoSwipe/action'
 import { keepLastIndex } from '../../../../utils/utils';
 import DetailAction from '../../../../lib/components/ProjectScouting/ScoutingDetail'
-import { message, Row, Col } from 'antd';
+import { message, Row, Col, Carousel } from 'antd';
 import Event from '../../../../lib/utils/event';
+import EditDescription from './editDescription';
+import Slider from "react-slick";
 
-@connect(({collectionDetail: { selectData ,zIndex} })=>({ selectData ,zIndex}))
+@connect(({collectionDetail: { selectData ,zIndex, type} })=>({ selectData ,zIndex ,type}))
 export default class CollectionDetail extends React.Component{
   constructor(props){
     super(props);
     this.state = {
-      isEdit: false
+      isEdit: false,
+      activeImg: {},
+      disabled: false,
+      sliderPages:{
+        total: 1,
+        current: 1
+      }
     }
     this.content = React.createRef();
+    this.slider = React.createRef();
+  }
+  componentDidMount(){
+    this.InitActiveImg(this.props);
   }
   // 预览图片
   previewImg = (e)=>{
@@ -82,7 +94,7 @@ export default class CollectionDetail extends React.Component{
   }
   // 编辑
   editEnd = (flag)=>{
-    console.log(flag)
+    // console.log(flag)
     this.setState({
       isEdit: flag
     },()=>{
@@ -97,14 +109,57 @@ export default class CollectionDetail extends React.Component{
       }
     })
   }
-  saveEdit = ()=>{
-    const { selectData, dispatch} = this.props;
-    let { current } = this.content;
-    if(!current) return;
-    let text = current.textContent
-    if(selectData.description === text) return ;
+  // 设置
+  setActiveImg = (type)=>{
+    let { selectData } = this.props;
+    let { activeImg } = this.state;
+    if(selectData && selectData.length){
+      let index = selectData.find(item => activeImg.id === item.id);
+      if(index !== -1){
+        switch(type){
+          case "next":;break;
+          case "prev":;break;
+          default:;
+        }
+      }
+    }
+  }
+
+  InitActiveImg = (props)=>{
+    const { selectData, type} = props;
+    let { sliderPages } = this.state;
+    if(selectData){
+      let isArr = Array.isArray(selectData);
+      if(isArr){
+        let data = selectData[0];
+        this.setState({
+          activeImg: data,
+          disabled: type === 'view',
+          sliderPages: {...sliderPages, total: selectData.length, current:1}
+        })
+      }else {
+        this.setState({
+          activeImg: selectData,
+          disabled: type === 'view',
+          sliderPages: {...sliderPages, total: 1, current:1}
+        })
+      }
+    }
+  }
+
+  componentWillReceiveProps(nextProps){
+    const { selectData } = nextProps;
+    if(selectData){
+      this.InitActiveImg(nextProps);
+    }
+  }
+
+  saveEdit = (text , val)=>{
+    let { selectData,dispatch} = this.props;
+    selectData = Array.isArray(selectData) ? selectData : selectData ? [selectData] : [];
+    if(val.description === text) return ;
     let param = {
-      id: selectData.id,
+      id: val.id,
       description:text,
     }
     DetailAction.editCollection(param).then(res => {
@@ -112,12 +167,19 @@ export default class CollectionDetail extends React.Component{
       dispatch({
         type:"collectionDetail/updateDatas",
         payload:{
-          selectData: {...selectData, description: text}
+          selectData:
+          selectData.map(item => {
+            if(item.id === val.id){
+              item.description = text;
+            }
+            return item;
+          }),
+          type:'edit'
         }
       })
       let datas = DetailAction.oldData;
       let data = datas.map(item => {
-        if(item.id === selectData.id){
+        if(item.id === val.id){
           item.description = text;
         }
         return item;
@@ -126,61 +188,85 @@ export default class CollectionDetail extends React.Component{
     })
   }
 
+  slideChange = (current)=>{
+    let { sliderPages } = this.state;
+    // console.log(current)
+    this.setState({
+      sliderPages: {...sliderPages, current: current + 1}
+    })
+  }
+
   render(){
-    const { isEdit } = this.state;
-    let { selectData = {}, dispatch ,zIndex} = this.props;
-    selectData = selectData || {};
-    let oldRemark = selectData && selectData.description;
-    if (oldRemark?.trim() === "") {
-      oldRemark = null
-    }
-    let { create_by, create_time } = selectData;
-    let time = DetailAction.dateFormat(create_time, "yyyy/MM/dd");
-    let hours = DetailAction.dateFormat(create_time, "HH:mm");
+    const { sliderPages } = this.state;
+    let { dispatch ,zIndex, selectData} = this.props;
+    // let selectData = activeImg || {};
+    selectData = Array.isArray(selectData) ? selectData: selectData ? [selectData] : null;
+    // let oldRemark = selectData && selectData.description;
+    // if (oldRemark?.trim() === "") {
+    //   oldRemark = null
+    // }
+    // let { create_by, create_time } = selectData;
+    // let time = DetailAction.dateFormat(create_time, "yyyy/MM/dd");
+    // let hours = DetailAction.dateFormat(create_time, "HH:mm");
     return (
       ReactDOM.createPortal(
         <div className={`${styles.collection_detail}`}
         style={{zIndex: zIndex}}>
           <div className={styles.detail_title}>
-            <span className={styles.edit}>
+            <span className={styles.pages}>
+              {sliderPages.current}/{sliderPages.total}
+            </span>
+            {/* <span className={styles.edit}>
               {isEdit ? <MyIcon type='icon-bianzu7beifen' onClick={(e)=> this.editEnd(false)}/> :
               <MyIcon type="icon-bianzu7beifen4" onClick={()=> this.editEnd(true)}/>}
-            </span>
+            </span> */}
             <span className={styles.close}>
-              <MyIcon type="icon-guanbi2" onClick={()=> dispatch({type:'collectionDetail/updateDatas',payload:{selectData:null}})}/>
+              <MyIcon type="icon-guanbi2" onClick={()=> dispatch({
+                type:'collectionDetail/updateDatas',payload:{selectData:null}
+              })}/>
             </span>
           </div>
           <div className={styles.container}>
-            <div className={styles.container_img}>
-              <img src={selectData.resource_url} alt="" onClick={this.previewImg}/>
-            </div>
-            <div className={styles.data_msg}>
-              <div className={styles.data_title}>
-                {selectData.title}
-              </div>
-              <div className={`${styles.data_remark} ${isEdit ? styles.activeEdit :""}`} suppressContentEditableWarning
-              onPaste={this.textFormat}
-              ref={this.content}
-              placeholder="未添加备注哦"
-              onBlur={() => setTimeout(()=> {this.editEnd(false)},100)}
-              onDoubleClick={this.toEdit}
-              contentEditable={isEdit}>
-                {oldRemark}
-              </div>
-              <div className={styles.creator}>
-                <Row gutter={10}>
-                  <Col span={12}>
-                    {create_by && create_by.name}
-                  </Col>
-                  <Col span={6} style={{textAlign:"center"}}>
-                    {time}
-                  </Col>
-                  <Col span={6} style={{textAlign:"center"}}>
-                    {hours}
-                  </Col>
-                </Row>
-              </div>
-            </div>
+            { (selectData && selectData.length > 1) && (
+              <Fragment>
+                <span className={styles.prev}
+                onClick={()=> {this.slider.current?.prev()}}>
+                  <MyIcon type="icon-bianzu681"/>
+                </span>
+                <span className={styles.next}
+                onClick={()=> {this.slider.current?.next()}}>
+                  <MyIcon type="icon-bianzu671"/>
+                </span>
+              </Fragment>
+            ) }
+            <Carousel ref={this.slider} loop={false} afterChange={this.slideChange}>
+              { selectData && selectData.map(item => {
+                return (<div key={item.id}>
+                  <div className={styles.container_img}>
+                    <img src={item.resource_url} alt="" onClick={this.previewImg}/>
+                  </div>
+                  <div className={styles.data_msg}>
+                    <div className={styles.data_title}>
+                      {item.title ? <span>{item.title}</span> : <span>&nbsp;</span>}
+                    </div>
+                    <EditDescription disabled={this.state.disabled} data={item} onEdit={this.saveEdit}/>
+                    <div className={styles.creator}>
+                      <Row gutter={10}>
+                        <Col span={12}>
+                          {item.create_by && item.create_by.name}
+                        </Col>
+                        <Col span={6} style={{textAlign:"center"}}>
+                          {DetailAction.dateFormat(item.create_time, "yyyy/MM/dd")}
+                        </Col>
+                        <Col span={6} style={{textAlign:"center"}}>
+                          { DetailAction.dateFormat(item.create_time, "HH:mm")}
+                        </Col>
+                      </Row>
+                    </div>
+                  </div>
+                </div>)
+              })}
+            </Carousel>
           </div>
         </div>,
         document.body
