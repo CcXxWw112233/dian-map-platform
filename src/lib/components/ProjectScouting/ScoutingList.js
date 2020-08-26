@@ -50,10 +50,9 @@ const action = function () {
     icon: { anchorOrigin: "bottom-left", anchor: [0.5, 0.25] },
   });
 
-  event.Evt.on("transCoordinateSystems", (key) => {
+  event.Evt.on("transCoordinateSystems2ScoutingList", (key) => {
     this.lastBaseMap = this.currentBaseMap;
     this.currentBaseMap = key;
-    // this.transCoordinateSystemsByChangeBaseMap();
     this.renderProjectPoint(this.currentData);
   });
 
@@ -135,11 +134,7 @@ const action = function () {
   };
 
   this.getCoords = (x, y, coordSysType) => {
-    let lastBaseMapKey = InitMap.lastBaseMapKey;
     let baseMapKey = InitMap.baseMapKey;
-    // console.log(lastBaseMapKey);
-    // console.log(baseMapKey);
-    if (lastBaseMapKey === "") {
       // gcj02(高德)坐标系
       if (this.baseMapKeys[0].indexOf(baseMapKey) > -1) {
         // 数据是在wgs84坐标系产生
@@ -155,42 +150,22 @@ const action = function () {
         } else if (coordSysType === 1) {
           return TransformCoordinate([x, y]);
         } else {
-          return [0, 0];
+          return null;
         }
       }
-    } else {
-      // 切换了底图
-      // 底图坐标系一致
-      if (
-        this.baseMapKeys[0].indexOf(lastBaseMapKey) ===
-        this.baseMapKeys[0].indexOf(baseMapKey)
-      ) {
-        return;
-      }
-      if (this.baseMapKeys[0].indexOf(baseMapKey) > -1) {
-        // gcj02(高德)坐标系
-        if (coordSysType === 1) {
-          // 天地图画的
-          return TransformCoordinate(wgs84_to_gcj02(x, y));
-        }
-        return TransformCoordinate([x, y]);
-      } else {
-        // wgs84(天地图)坐标系
-        // 数据是在gcj02坐标系产生
-        if (!coordSysType) {
-          return TransformCoordinate(gcj02_to_wgs84(x, y));
-        } else if (coordSysType === 1) {
-          return TransformCoordinate([x, y]);
-        } else {
-          return [0, 0];
-        }
-      }
-    }
   };
 
   this.renderProjectPoint = (data) => {
+    let lastBaseMapKey = InitMap.lastBaseMapKey;
+    let baseMapKey = InitMap.baseMapKey;
+    if (
+      this.baseMapKeys[0].indexOf(lastBaseMapKey) ===
+      this.baseMapKeys[0].indexOf(baseMapKey)
+    ) {
+      return;
+    }
     this.currentData = JSON.parse(JSON.stringify(data));
-    this.Source.clear();
+    this.Source && this.Source.clear();
     this.clearOverlay();
     data &&
       data.forEach((item) => {
@@ -204,6 +179,7 @@ const action = function () {
             Number(item.coord_sys_type || 0)
           ),
         };
+        if (!styleOption.coordinates) return;
         // 创建point
         let feature = addFeature(styleOption.type, {
           coordinates: styleOption.coordinates,

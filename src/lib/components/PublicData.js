@@ -51,7 +51,7 @@ const publicData = {
   },
   currentBaseMap: null,
   init: function () {
-    event.Evt.on("transCoordinateSystems", (key) => {
+    event.Evt.on("transCoordinateSystems2PublicData", (key) => {
       this.lastBaseMap = this.currentBaseMap;
       this.currentBaseMap = key;
       this.transCoordinateSystemsByChangeBaseMap();

@@ -150,6 +150,7 @@ export default class CustomSymbolStore extends React.Component {
           });
           this.transfromUploadIcon = null;
           message.success("上传成功");
+          this.props.parent.customSymbols = null;
           this.fetchIcons();
         } else {
           message.error("上传出现错误,请检查后再试");
@@ -200,6 +201,7 @@ export default class CustomSymbolStore extends React.Component {
   };
 
   toRemove = () => {
+    this.props.parent.customSymbolsn = null;
     let { removeActives, allIcons, dataIcons } = this.state;
     let arr = Array.from(allIcons);
     let rArr = Array.from(removeActives);

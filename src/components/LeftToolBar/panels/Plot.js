@@ -1,4 +1,4 @@
-import React from "react";
+import React, { PureComponent } from "react";
 import { Input, Select, Button, Tooltip, message, Skeleton } from "antd";
 
 import globalStyle from "@/globalSet/styles/globalStyles.less";
@@ -109,16 +109,33 @@ const SymbolBlock = ({
                   ) : null}
                   {item.color && item.color.length > 0 ? (
                     <div
-                      className={styles.symbol}
-                      style={{
-                        background: item.color,
-                        border: item.line ? `1px solid ${item.color}` : "",
-                        height: item.line ? 0 : "",
-                      }}
+                      style={
+                        item.line
+                          ? {
+                              width: 44,
+                              height: 24,
+                              display: "inline-flex",
+                            }
+                          : {}
+                      }
                       onClick={(e) => {
                         cb(e, data.index, index, item);
                       }}
-                    ></div>
+                    >
+                      <div
+                        className={styles.symbol}
+                        style={{
+                          background: item.color,
+                          border: item.line ? `2px solid ${item.color}` : "",
+                          height: item.line ? 0 : "",
+                          margin: item.line ? "11px auto" : "",
+                          transform: item.line ? "translateY(-1px)" : "",
+                        }}
+                        // onClick={(e) => {
+                        //   cb(e, data.index, index, item);
+                        // }}
+                      ></div>
+                    </div>
                   ) : null}
                   {item.imageUrl ? (
                     <div
@@ -149,7 +166,7 @@ const SymbolBlock = ({
   config,
   openPanel,
 }))
-export default class Plot extends React.Component {
+export default class Plot extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -232,13 +249,9 @@ export default class Plot extends React.Component {
     this.activeOperator = null;
     this.selectedPlotZIndex = 0;
     this.baseMapKeys = ["gd_vec|gd_img|gg_img", "td_vec|td_img|td_ter"];
+    this.isLoaded = true;
   }
   componentDidMount() {
-    Event.Evt.firEvent("setAttribute", {
-      saveCb: this.handleSaveClick.bind(this),
-      delCb: this.updatePlotList.bind(this),
-    });
-    this.getCustomSymbol();
     this.plotLayer = plotEdit.getPlottingLayer();
     const me = this;
     const { parent } = this.props;
@@ -249,6 +262,13 @@ export default class Plot extends React.Component {
         name: parent.oldPlotName,
         remark: parent.oldRemark,
       });
+    }
+    if (parent.customSymbols) {
+      this.setState({
+        symbols: [parent.customSymbols, ...symbols],
+      });
+    } else {
+      this.getCustomSymbol();
     }
     this.operatorActive = function (e) {
       if (!e.feature_operator.isScouting) {
@@ -345,27 +365,33 @@ export default class Plot extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    this.handleResetClick();
-    this.createPlotName();
-    this.nextProps = nextProps;
-    if (nextProps.plotType === "point") {
-      this.symbol = this.refs.defaultSymbol.innerText;
-      this.getPointDefaultSymbol();
-    } else {
-      this.updateStateCallbackFunc();
-    }
-    const { parent } = nextProps;
-    if (parent.customSymbols) {
-      this.setState({
-        symbols: [parent.customSymbols, ...symbols],
-      });
-    } else {
-      this.getCustomSymbol();
+    Event.Evt.firEvent("setAttribute", {
+      saveCb: this.handleSaveClick.bind(this),
+      delCb: this.updatePlotList.bind(this),
+    });
+    if (nextProps.hidden === false) {
+      this.handleResetClick();
+      this.createPlotName();
+      this.nextProps = nextProps;
+      if (nextProps.plotType === "point") {
+        this.symbol = this.refs.defaultSymbol.innerText;
+        this.getPointDefaultSymbol();
+      } else {
+        this.updateStateCallbackFunc();
+      }
     }
   }
 
+  // shouldComponentUpdate(nextProps, nextState) {
+  //   if (nextProps.plotType === this.props.plotType) {
+  //     return false; //不渲染
+  //   }
+  //   return true; //渲染
+  // }
+
   // 获取自定义图标符号
   getCustomSymbol = () => {
+    this.isLoaded = false;
     const { parent } = this.props;
     if (parent.customSymbols) {
       this.setState({
@@ -380,6 +406,7 @@ export default class Plot extends React.Component {
       symbolStoreServices
         .GET_ICON()
         .then((res) => {
+          this.isLoaded = true;
           if (res.code === "0") {
             const data = res.data;
             if (Array.isArray(data)) {
@@ -399,6 +426,7 @@ export default class Plot extends React.Component {
           }
         })
         .catch((err) => {
+          this.isLoaded = true;
           this.setState({
             symbols: symbols,
           });
@@ -800,7 +828,6 @@ export default class Plot extends React.Component {
 
   // 创建标绘唯一入口
   createPlot = (options, iconUrl) => {
-    const { parent } = this.props;
     const plotType = this.nextProps?.plotType || this.props.plotType;
     const style = createStyle(this.dic[plotType], options);
     let attrs = {
@@ -964,13 +991,6 @@ export default class Plot extends React.Component {
                   });
                 }
               }
-              const { parent } = this.props;
-              const index = parent.featureOperatorList.findIndex(
-                (operator) => (operator.guid = window.featureOperator)
-              );
-              if (index > -1) {
-                parent.featureOperatorList.splice(index, 1);
-              }
               this.props.goBackProject();
             }
           })
@@ -1008,7 +1028,10 @@ export default class Plot extends React.Component {
     const disableStyle = { color: "rgba(0,0,0,0.2)" };
     const style = { marginTop: 18, marginRight: 10 };
     return (
-      <div style={{ width: "100%", height: "100%" }}>
+      <div
+        style={{ width: "100%", height: "100%" }}
+        className={this.props.hidden ? styles.hidden : ""}
+      >
         <div
           className={styles.header}
           style={{ padding: "0 20px", marginBottom: 10 }}

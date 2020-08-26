@@ -93,7 +93,12 @@ export default class BasemapGallery extends PureComponent {
         mapApp.changeBaseMap(item.key);
         mapApp.showRoadLabel(item.key, this.state.showRoadLabel);
         this.selectBaseMapKey = item.key;
-        event.Evt.firEvent("transCoordinateSystems", this.selectBaseMapKey);
+        event.Evt.firEvent("transCoordinateSystems2ScoutingDetail");
+        event.Evt.firEvent("transCoordinateSystems2Plot");
+        event.Evt.firEvent("transCoordinateSystems2PublicData", this.selectBaseMapKey);
+        event.Evt.firEvent("transCoordinateSystems2ScoutingList", this.selectBaseMapKey);
+        event.Evt.firEvent("transCoordinateSystems2AreaSearch");
+        event.Evt.firEvent("transCoordinateSystems2CommonSearch");
       }
     );
   };

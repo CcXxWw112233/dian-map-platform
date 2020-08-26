@@ -431,85 +431,86 @@ const jsons = {
         },
       ],
     },
-    {
-      name: "地籍地貌",
-      icon: "icon-icon-yongdi",
-      key: "6",
-      child: [
-        {
-          name: "地籍概况",
-          icon: "",
-          key: "map:landforms:basic",
-          loadFeatureKeys: [
-            // 水路路线图
-            {
-              typeName: "lingxi:diji_sxss_polyline",
-              cql_filter:  `${queryStr}`,
-              style: {
-                strokeColor: "#00B0F0",
-                strokeWidth: 4,
-              },
-            },
-            //水系设施图
-            {
-              typeName: "lingxi:diji_sxss_polygon",
-              cql_filter:  `${queryStr}`,
-              style: {
-                fillColor: "#00B0F0",
-                strokeWidth: 1,
-              },
-            },
-            // 居民点计划图
-            {
-              typeName: "lingxi:plan_polygon",
-              // cql_filter: "adcode in ('440117','*')",
-              style: {
-                fillColor: "#7030A0",
-                strokeWidth: 2,
-              },
-            },
-          ],
-        },
-        {
-          name: "农林耕地",
-          icon: "",
-          key: "map:landforms:forestry",
-          loadFeatureKeys: [
-            // 农业用地
-            {
-              typeName: "lingxi:diji_zbtz_polyline",
-              cql_filter: `${queryStr}`,
-              style: {
-                strokeColor: "#92D050",
-                strokeWidth: 2,
-                fillColor: "#92D050",
-              },
-            },
-            // 林业用地
-            {
-              typeName: "lingxi:diji_zbtz_point",
-              cql_filter: `${queryStr}`,
-              showName: true,
-              style: {
-                fillColor: "#803a0a",
-                strokeColor: "#92D050",
-                offsetY: 0,
-                textFillColor: "#000",
-                textStrokeColor: "#92D050",
-                textStrokeWidth: 3,
-                font: "13px sans-serif",
-              },
-            },
-          ],
-        },
-      ],
-    },
+    // {
+    //   name: "地籍地貌",
+    //   icon: "icon-icon-yongdi",
+    //   key: "6",
+    //   child: [
+    //     {
+    //       name: "地籍概况",
+    //       icon: "",
+    //       key: "map:landforms:basic",
+    //       loadFeatureKeys: [
+    //         // 水路路线图
+    //         {
+    //           typeName: "lingxi:diji_sxss_polyline",
+    //           cql_filter:  `${queryStr}`,
+    //           style: {
+    //             strokeColor: "#00B0F0",
+    //             strokeWidth: 4,
+    //           },
+    //         },
+    //         //水系设施图
+    //         {
+    //           typeName: "lingxi:diji_sxss_polygon",
+    //           cql_filter:  `${queryStr}`,
+    //           style: {
+    //             fillColor: "#00B0F0",
+    //             strokeWidth: 1,
+    //           },
+    //         },
+    //         // 居民点计划图
+    //         {
+    //           typeName: "lingxi:plan_polygon",
+    //           // cql_filter: "adcode in ('440117','*')",
+    //           style: {
+    //             fillColor: "#7030A0",
+    //             strokeWidth: 2,
+    //           },
+    //         },
+    //       ],
+    //     },
+    //     {
+    //       name: "农林耕地",
+    //       icon: "",
+    //       key: "map:landforms:forestry",
+    //       loadFeatureKeys: [
+    //         // 农业用地
+    //         {
+    //           typeName: "lingxi:diji_zbtz_polyline",
+    //           cql_filter: `${queryStr}`,
+    //           style: {
+    //             strokeColor: "#92D050",
+    //             strokeWidth: 2,
+    //             fillColor: "#92D050",
+    //           },
+    //         },
+    //         // 林业用地
+    //         {
+    //           typeName: "lingxi:diji_zbtz_point",
+    //           cql_filter: `${queryStr}`,
+    //           showName: true,
+    //           style: {
+    //             fillColor: "#803a0a",
+    //             strokeColor: "#92D050",
+    //             offsetY: 0,
+    //             textFillColor: "#000",
+    //             textStrokeColor: "#92D050",
+    //             textStrokeWidth: 3,
+    //             font: "13px sans-serif",
+    //           },
+    //         },
+    //       ],
+    //     },
+    //   ],
+    // },
     {
       name: "政策红线",
       icon: "icon-icon-xianzai",
       key: "7",
       child: [],
-    },{
+    },
+    {
       name: "地产楼盘",
       icon: "icon-loufang2",
       key: "8",

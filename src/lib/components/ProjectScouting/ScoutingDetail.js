@@ -53,7 +53,7 @@ function Action() {
     MERGE_COLLECTION,
     CANCEL_COLLECTION_MERGE,
     GET_DOWNLOAD_URL,
-    EDIT_AREA_MESSAGE
+    EDIT_AREA_MESSAGE,
   } = config;
   this.activeFeature = {};
   this.layerId = "scoutingDetailLayer";
@@ -62,7 +62,20 @@ function Action() {
   this.features = [];
   this.overlays = [];
   this.drawBox = null;
+  this.currentData = null;
+  this.currentSet = null;
   this.init = (dispatch) => {
+    Event.Evt.on("transCoordinateSystems2ScoutingDetail", () => {
+      const baseMapKey = INITMAP.baseMapKey;
+      const lastBaseMapKey = INITMAP.lastBaseMapKey;
+      const baseMapKeys = INITMAP.baseMapKeys;
+      const isSame =
+        baseMapKeys[0].indexOf(baseMapKey) ===
+        baseMapKeys[0].indexOf(lastBaseMapKey);
+      if (this.currentData && this.currentSet && isSame === false) {
+        this.renderCollection(this.currentData, this.currentSet);
+      }
+    });
     this.Layer.setSource(this.Source);
     const layers = InitMap.map.getLayers().getArray();
     const layer = layers.filter((layer) => {
@@ -179,16 +192,16 @@ function Action() {
   };
 
   // 添加分类的坐标点
-  this.setGropCoordinates = async (id, data)=>{
-    let {coordinate} = data;
-    coordinate = TransformCoordinate(coordinate,'EPSG:3857','EPSG:4326');
+  this.setGropCoordinates = async (id, data) => {
+    let { coordinate } = data;
+    coordinate = TransformCoordinate(coordinate, "EPSG:3857", "EPSG:4326");
     let param = {
       longitude: coordinate[0],
       latitude: coordinate[1],
-    }
+    };
     // console.log(coordinate)
-    return await EDIT_AREA_MESSAGE(id, param)
-  }
+    return await EDIT_AREA_MESSAGE(id, param);
+  };
   // 添加关联点的交互
   this.addCollectionPosition = (data) => {
     return new Promise((resolve, reject) => {
@@ -197,7 +210,7 @@ function Action() {
         text: data.title,
         showName: true,
         textFillColor: "#ff0000",
-        textStrokeColor: "#ffffff"
+        textStrokeColor: "#ffffff",
       });
       this.draw = drawPoint(this.Source, { style });
       this.draw.on("drawend", (e) => {
@@ -212,31 +225,31 @@ function Action() {
     });
   };
   // 清除分组的点
-  this.clearGroupPointer = ()=>{
-    this.groupPointer.forEach(item => {
-      if(this.Source.getFeatureByUid(item.ol_uid)){
+  this.clearGroupPointer = () => {
+    this.groupPointer.forEach((item) => {
+      if (this.Source.getFeatureByUid(item.ol_uid)) {
         this.Source.removeFeature(item);
       }
-    })
+    });
     this.groupPointer = [];
-  }
+  };
   // 点击事件
-  const mapClick = (evt)=>{
+  const mapClick = (evt) => {
     const obj = InitMap.map.forEachFeatureAtPixel(
       evt.pixel,
       (feature, layer) => {
         return { feature, layer };
       }
     );
-    if(obj && obj.layer && obj.layer.get('id') === this.layerId){
+    if (obj && obj.layer && obj.layer.get("id") === this.layerId) {
       let { feature } = obj;
-      let p_type = feature.get('p_type');
-      if(p_type === 'group'){
-        Event.Evt.firEvent('handleGroupFeature', feature.get('p_id'))
+      let p_type = feature.get("p_type");
+      if (p_type === "group") {
+        Event.Evt.firEvent("handleGroupFeature", feature.get("p_id"));
       }
       // console.log(p_type)
     }
-  }
+  };
 
   // 地图点击
   const LookingBackPointClick = (evt)=>{
@@ -343,57 +356,64 @@ function Action() {
   }
 
   // 设置选中的样式
-  this.setActiveGoupPointer = (id)=>{
-    this.groupPointer.map(item => {
+  this.setActiveGoupPointer = (id) => {
+    this.groupPointer.map((item) => {
       let style = item.getStyle();
-      if(item.get('p_id') === id){
+      if (item.get("p_id") === id) {
         style.getImage().getFill().setColor("#FE2042");
-        style.getImage().setRadius(12)
-      }else{
+        style.getImage().setRadius(12);
+      } else {
         style.getImage().getFill().setColor("#577DFF");
         style.getImage().setRadius(9)
       }
       item.setStyle(style);
       return item;
-    })
-  }
+    });
+  };
 
   // 渲染分组的点
-  this.renderGroupPointer = (data)=>{
-    InitMap.map.un('click', mapClick);
+  this.renderGroupPointer = (data) => {
+    InitMap.map.un("click", mapClick);
     this.clearGroupPointer();
-    if(data.length){
-      data = data.filter(item => (item.hasOwnProperty('longitude') && item.hasOwnProperty('latitude')));
+    if (data.length) {
+      data = data.filter(
+        (item) =>
+          item.hasOwnProperty("longitude") && item.hasOwnProperty("latitude")
+      );
       let fs = [];
-      InitMap.map.on('click',mapClick);
-      data.forEach(item => {
+      InitMap.map.on("click", mapClick);
+      data.forEach((item) => {
         let coordinate = TransformCoordinate([+item.longitude, +item.latitude]);
-        let feature = addFeature('Point', { coordinates: coordinate ,p_id: item.id,p_type:'group'});
-        let style = createStyle('Point',{
+        let feature = addFeature("Point", {
+          coordinates: coordinate,
+          p_id: item.id,
+          p_type: "group",
+        });
+        let style = createStyle("Point", {
           radius: 8,
-          fillColor: '#577DFF',
-          strokeColor: '#ffffff',
+          fillColor: "#577DFF",
+          strokeColor: "#ffffff",
           strokeWidth: 2,
           showName: true,
           text: item.name,
-          textFillColor: '#FF4628',
-          textStrokeColor: '#ffffff',
+          textFillColor: "#FF4628",
+          textStrokeColor: "#ffffff",
           textStrokeWidth: 1,
-          font: 14
-        })
+          font: 14,
+        });
         feature.setStyle(style);
         fs.push(feature);
         this.groupPointer.push(feature);
-      })
-      if(fs.length){
+      });
+      if (fs.length) {
         this.Source.addFeatures(fs);
-        Fit(InitMap.view, this.Source.getExtent(),{
+        Fit(InitMap.view, this.Source.getExtent(), {
           size: InitMap.map.getSize(),
           padding: fitPadding,
-        })
+        });
       }
     }
-  }
+  };
 
   this.transform = (coor) => {
     return TransformCoordinate(coor, "EPSG:3857", "EPSG:4326");
@@ -452,13 +472,45 @@ function Action() {
 
   this.renderPointCollection = (data, addOverlay = true) => {
     let array = findHasLocationData(data);
+    const baseMapKey = InitMap.baseMapKey;
+    const baseMapKeys = InitMap.baseMapKeys;
+    const systemDic = InitMap.systemDic;
     // console.log(array)
     let features = [];
     array.forEach((item) => {
-      let coor = TransformCoordinate([
-        +item.location.longitude,
-        +item.location.latitude,
-      ]);
+      let coor = null;
+      // gcj02
+      if (!Number(item.location.coordSysType)) {
+        if (baseMapKeys[0].indexOf(baseMapKey) > -1) {
+          coor = TransformCoordinate([
+            +item.location.longitude,
+            +item.location.latitude,
+          ]);
+        } else if (baseMapKeys[1].indexOf(baseMapKey) > -1) {
+          coor = TransformCoordinate(
+            systemDic[baseMapKey](
+              +item.location.longitude,
+              +item.location.latitude
+            )
+          );
+        }
+      }
+      // wgs84
+      else if (Number(item.location.coordSysType) === 1) {
+        if (baseMapKeys[1].indexOf(baseMapKey) > -1) {
+          coor = TransformCoordinate([
+            +item.location.longitude,
+            +item.location.latitude,
+          ]);
+        } else if (baseMapKeys[0].indexOf(baseMapKey) > -1) {
+          coor = TransformCoordinate(
+            systemDic[baseMapKey](
+              +item.location.longitude,
+              +item.location.latitude
+            )
+          );
+        }
+      }
       let feature = addFeature("Point", { coordinates: coor, id: item.id });
       let style = createStyle("Point", {
         iconUrl: require("../../../assets/mark/collectionIcon.png"),
@@ -782,6 +834,8 @@ function Action() {
     data,
     { lenged, dispatch, animation = true, showFeatureName = true }
   ) => {
+    this.currentData = data;
+    this.currentSet = { lenged, dispatch, animation, showFeatureName };
     // 删除元素
     this.removeFeatures();
     if (!data.length) {
@@ -1097,8 +1151,37 @@ function Action() {
     });
   };
 
+  this.getNewExtent = (extent) => {
+    if (extent && extent.length === 4) {
+      const baseMapKey = InitMap.baseMapKey;
+      const systemDic = InitMap.systemDic;
+      let tmp = TransformCoordinate(
+        [extent[0], extent[1]],
+        "EPSG:3857",
+        "EPSG:4326"
+      );
+      let tmp2 = TransformCoordinate(
+        [extent[2], extent[3]],
+        "EPSG:3857",
+        "EPSG:4326"
+      );
+      tmp = systemDic[baseMapKey](tmp[0], tmp[1]);
+      tmp2 = systemDic[baseMapKey](tmp2[0], tmp2[1]);
+      tmp = TransformCoordinate(tmp, "EPSG:4326", "EPSG:3857");
+      tmp2 = TransformCoordinate(tmp2, "EPSG:4326", "EPSG:3857");
+      return [...tmp, ...tmp2];
+    }
+    return null;
+  };
+
   //   渲染规划图
   this.renderPlanPicCollection = async (data) => {
+    this.imgs.forEach((item) => {
+      //   console.log(item)
+      InitMap.map.removeLayer(item);
+    });
+    const baseMapKey = InitMap.baseMapKey;
+    const baseMapKeys = InitMap.baseMapKeys;
     //   console.log(data);
     // 所有规划图加载的范围
     let ext = [Infinity, Infinity, -Infinity, -Infinity];
@@ -1117,6 +1200,18 @@ function Action() {
       let extent = resp.extent
         ? resp.extent.split(",").map((e) => parseFloat(e))
         : [];
+
+      // 数据为gcj02坐标系 并且当前坐标系非gcj02坐标系时要转换
+      if (
+        !Number(resp.coord_sys_type || 0) &&
+        baseMapKeys[0].indexOf(baseMapKey) === -1
+      ) {
+        extent = this.getNewExtent(extent) || extent;
+      } else if (Number(resp.coord_sys_type)) {
+        if (baseMapKeys[0].indexOf(baseMapKey) > -1) {
+          extent = this.getNewExtent() || extent;
+        }
+      }
 
       // let url = config.BASE_URL + PLAN_IMG_URL(resp.id);
       let img = ImageStatic(PLAN_IMG_URL(resp.id), extent, {

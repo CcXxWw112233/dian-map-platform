@@ -10,6 +10,7 @@ import TileLayer from "ol/layer/Tile";
 import XYZ from "ol/source/XYZ";
 
 import { baseMaps, baseMapDictionary } from "utils/mapSource";
+import { gcj02_to_wgs84, wgs84_to_gcj02 } from "utils/transCoordinateSystem";
 
 const initMap = function () {
   return {
@@ -22,6 +23,15 @@ const initMap = function () {
     lastBaseMapKey: "",
     baseMapKey: "",
     operationLayers: [],
+    baseMapKeys: ["gd_vec|gd_img|gg_img", "td_vec|td_img|td_ter"],
+    systemDic: {
+      gd_vec: wgs84_to_gcj02,
+      gd_img: wgs84_to_gcj02,
+      gg_img: wgs84_to_gcj02,
+      td_vec: gcj02_to_wgs84,
+      td_img: gcj02_to_wgs84,
+      td_ter: gcj02_to_wgs84,
+    },
     init: function (mapId) {
       this.mapId = mapId;
       this.status = "rendering";

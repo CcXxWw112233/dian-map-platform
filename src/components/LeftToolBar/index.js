@@ -9,6 +9,10 @@ import TempPlot from "./panels/TempPlot";
 import ProjectList from "./panels/ProjectList";
 import CustomSymbolStore from "./panels/CustomSymbolStore";
 import Panel from "./panels/Panel";
+import Event from "../../lib/utils/event";
+import mapApp from "../../utils/INITMAP";
+import { TransformCoordinate } from "../../lib/utils/index";
+import { plotEdit } from "../../utils/plotEdit";
 
 import { lineDrawing, pointDrawing, polygonDrawing } from "utils/drawing";
 import ListAction from "@/lib/components/ProjectScouting/ScoutingList";
@@ -29,6 +33,7 @@ export default class LeftToolBar extends React.Component {
         cb: () => {
           this.setState({
             displayPlot: false,
+            hidePlot: false,
             displayProject: true,
             displayTempPlot: false,
             displayCustomSymbolStore: false,
@@ -44,6 +49,7 @@ export default class LeftToolBar extends React.Component {
         cb: () => {
           this.setState({
             displayPlot: true,
+            hidePlot: false,
             displayProject: false,
             displayTempPlot: false,
             displayCustomSymbolStore: false,
@@ -59,6 +65,7 @@ export default class LeftToolBar extends React.Component {
         cb: () => {
           this.setState({
             displayPlot: true,
+            hidePlot: false,
             displayProject: false,
             displayTempPlot: false,
             displayCustomSymbolStore: false,
@@ -74,6 +81,7 @@ export default class LeftToolBar extends React.Component {
         cb: () => {
           this.setState({
             displayPlot: true,
+            hidePlot: false,
             displayProject: false,
             displayTempPlot: false,
             displayCustomSymbolStore: false,
@@ -89,6 +97,7 @@ export default class LeftToolBar extends React.Component {
         cb: () => {
           this.setState({
             displayPlot: true,
+            hidePlot: false,
             displayProject: false,
             displayTempPlot: false,
             displayCustomSymbolStore: false,
@@ -104,6 +113,7 @@ export default class LeftToolBar extends React.Component {
         cb: () => {
           this.setState({
             displayPlot: true,
+            hidePlot: false,
             displayProject: false,
             displayTempPlot: false,
             displayCustomSymbolStore: false,
@@ -119,6 +129,7 @@ export default class LeftToolBar extends React.Component {
         cb: () => {
           this.setState({
             displayPlot: true,
+            hidePlot: false,
             displayProject: false,
             displayTempPlot: false,
             displayCustomSymbolStore: false,
@@ -134,6 +145,7 @@ export default class LeftToolBar extends React.Component {
         cb: () => {
           this.setState({
             displayPlot: true,
+            hidePlot: false,
             displayProject: false,
             displayTempPlot: false,
             displayCustomSymbolStore: false,
@@ -149,6 +161,7 @@ export default class LeftToolBar extends React.Component {
         cb: () => {
           this.setState({
             displayPlot: true,
+            hidePlot: false,
             displayProject: false,
             displayTempPlot: false,
             displayCustomSymbolStore: false,
@@ -162,6 +175,7 @@ export default class LeftToolBar extends React.Component {
       selectedIndex: 0,
       hoveredIndex: -1,
       displayPlot: false,
+      hidePlot: false,
       displayProject: true,
       displayTempPlot: false,
       displayCustomSymbolStore: false,
@@ -180,29 +194,10 @@ export default class LeftToolBar extends React.Component {
     this.isModifyPlot = false;
     this.oldPlotName = "";
     this.oldRemark = "";
-    this.maxZIndex = 0;
-    ListAction.checkItem()
-      .then((res) => {
-        if (res) {
-          if (res.code === 0) {
-            this.setState({
-              displayTempPlotIcon: false,
-            });
-          } else {
-            this.setState({
-              displayTempPlotIcon: true,
-            });
-          }
-        }
-      })
-      .catch((e) => {
-        this.setState({
-          displayTempPlotIcon: true,
-        });
-      });
-    // if (this.customSymbols === null) {
-    //   this.getCustomSymbol();
-    // }
+    this.systemDic = null;
+    this.lastBaseMap = null;
+    this.currentBaseMap = null;
+    this.baseMapKeys = null;
   }
 
   deactivate = () => {
@@ -388,6 +383,7 @@ export default class LeftToolBar extends React.Component {
               this.setState({
                 selectedIndex: -1,
                 displayPlot: false,
+                hidePlot: false,
                 displayProject: false,
                 displayTempPlot: true,
                 displayCustomSymbolStore: false,
@@ -409,6 +405,7 @@ export default class LeftToolBar extends React.Component {
               this.setState({
                 selectedIndex: -1,
                 displayPlot: false,
+                hidePlot: false,
                 displayProject: false,
                 displayTempPlot: false,
                 displayCustomSymbolStore: true,
@@ -436,12 +433,12 @@ export default class LeftToolBar extends React.Component {
                   displayTempPlotIcon: true,
                 });
               }}
-              customSymbols={this.customSymbols}
+              hidden={this.state.hidePlot}
               updateFeatureOperatorList={this.updateFeatureOperatorList}
               updateFeatureOperatorList2={this.updateFeatureOperatorList2}
               goBackProject={() => {
                 this.setState({
-                  displayPlot: false,
+                  hidePlot: true,
                   displayProject: true,
                   selectedIndex: 0,
                 });
@@ -487,7 +484,7 @@ export default class LeftToolBar extends React.Component {
             ></ProjectList>
           ) : null}
           {this.state.displayCustomSymbolStore ? (
-            <CustomSymbolStore></CustomSymbolStore>
+            <CustomSymbolStore parent={this}></CustomSymbolStore>
           ) : null}
         </Panel>
       </div>

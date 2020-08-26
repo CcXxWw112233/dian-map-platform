@@ -19,8 +19,8 @@ import VectorSource from "ol/source/Vector";
 
 import Event from "../../../lib/utils/event";
 import { getLocal } from "utils/sessionManage";
-import { gcj02_to_wgs84, wgs84_to_gcj02 } from "utils/transCoordinateSystem";
 
+import mapApp from "../../INITMAP";
 import { TransformCoordinate } from "../../../lib/utils/index";
 class PlottingLayer extends Observable {
   /**
@@ -134,17 +134,6 @@ class PlottingLayer extends Observable {
     this.style = null;
 
     this.responseData = null;
-    this.lastBaseMap = null;
-    this.currentBaseMap = null;
-    this.systemDic = {
-      gd_vec: wgs84_to_gcj02,
-      gd_img: wgs84_to_gcj02,
-      gg_img: wgs84_to_gcj02,
-      td_vec: gcj02_to_wgs84,
-      td_img: gcj02_to_wgs84,
-      td_ter: gcj02_to_wgs84,
-    };
-    this.baseMapKeys = ["gd_vec|gd_img|gg_img", "td_vec|td_img|td_ter"];
     getLocal("baseMapKey").then((res) => {
       this.lastBaseMap = res.data;
       this.currentBaseMap = this.lastBaseMap;
@@ -174,15 +163,18 @@ class PlottingLayer extends Observable {
       }
     );
 
-    Event.Evt.on("transCoordinateSystems", (key) => {
-      this.lastBaseMap = this.currentBaseMap;
-      this.currentBaseMap = key;
+    Event.Evt.on("transCoordinateSystems2Plot", () => {
+      this.baseMapKeys = mapApp.baseMapKeys;
+      this.lastBaseMap = mapApp.lastBaseMapKey;
+      this.currentBaseMap = mapApp.baseMapKey;
+      this.systemDic = mapApp.systemDic;
       this.transCoordinateSystemsByChangeBaseMap();
     });
   }
 
   //切换底图后切换坐标
-  transCoordinateSystemsByChangeBaseMap() {
+  transCoordinateSystemsByChangeBaseMap = () => {
+    this.plotEdit.deactivate();
     let lastIndex = this.baseMapKeys[0].indexOf(this.lastBaseMap);
     let currentIndex = this.baseMapKeys[0].indexOf(this.currentBaseMap);
     // 上一种坐标系跟当前坐标系一致，不用转啦
@@ -192,13 +184,19 @@ class PlottingLayer extends Observable {
     ) {
       return;
     } else {
-      for (let i = 0; i < this.projectScoutingArr.length; i++) {
-        this._transCoordinateSystemsByChangeBaseMap(this.projectScoutingArr[i]);
+      let arr = this.getArrDifference(
+        this.feature_operators,
+        this.projectScoutingArr
+      );
+      for (let i = 0; i < arr.length; i++) {
+        this._transCoordinateSystemsByChangeBaseMap(arr[i]);
+        arr[i].attrs.coordSysType =
+          this.baseMapKeys[0].indexOf(this.currentBaseMap) > -1 ? 0 : 1;
       }
     }
-  }
+  };
 
-  _transCoordinateSystemsByChangeBaseMap(featureOperator) {
+  _transCoordinateSystemsByChangeBaseMap = (featureOperator) => {
     let feature = featureOperator.feature;
     const type = feature.getGeometry().getType();
     let newFeature = feature.clone();
@@ -235,9 +233,16 @@ class PlottingLayer extends Observable {
 
     let plot = featureOperator.feature.getGeometry();
     plot.updateAllPoint(coords);
-  }
+    if (featureOperator.attrs.sigleImage) {
+      this.plotEdit.removePlotOverlay(featureOperator);
+      this.plotEdit.createPlotOverlay(
+        featureOperator.attrs.sigleImage,
+        featureOperator
+      );
+    }
+  };
 
-  _transformCoordinate(coords) {
+  _transformCoordinate = (coords) => {
     if (!coords || coords.length !== 2) {
       return null;
     }
@@ -249,7 +254,7 @@ class PlottingLayer extends Observable {
     }
     temp = TransformCoordinate(temp, "EPSG:4326", "EPSG:3857");
     return temp;
-  }
+  };
 
   addProjectScouting(operator) {
     this.projectScoutingArr.push(operator);

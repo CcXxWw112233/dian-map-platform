@@ -22,6 +22,7 @@ export const plotEdit = {
   responseData: {},
   deactivate() {
     if (this.plottingLayer) {
+      window.featureOperator = null;
       this.plottingLayer.plotDraw.deactivate();
       this.plottingLayer.plotEdit.deactivate();
       this.target.style.cursor = "default";
