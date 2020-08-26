@@ -5,11 +5,19 @@ import {
   addFeature,
   TransformCoordinate,
 } from "../../utils/index";
+import event from "../../utils/event";
 import { setSession, getSession } from "utils/sessionManage";
 import mapApp from "utils/INITMAP";
+
 function Action() {
   this.layer = null;
   this.source = null;
+  this.currentPoi = null;
+  event.Evt.on("transCoordinateSystems2CommonSearch", (key) => {
+    if (this.currentPoi) {
+      this.addPOIToMap(this.currentPoi);
+    }
+  });
   this.getPOI = async (address, locationName, offset) => {
     return await window.CallWebMapFunction("getAddressForName", {
       address: address,
@@ -18,6 +26,7 @@ function Action() {
     });
   };
   this.addPOIToMap = (item) => {
+    this.currentPoi = item;
     if (!this.layer) {
       this.layer = Layer({ id: "POILayer", zIndex: 12 });
       this.source = Source();
@@ -34,8 +43,20 @@ function Action() {
       font: "14px sans-serif",
     });
     const ptArr = item.location.split(",");
+    let coord = null;
+    // 当前底图是gcj02坐标系
+    const baseMapKeys = mapApp.baseMapKeys;
+    const baseMapKey = mapApp.baseMapKey;
+    const systemDic = mapApp.systemDic;
+    if (baseMapKeys[0].indexOf(baseMapKey) > -1) {
+      coord = TransformCoordinate([ptArr[0] * 1, ptArr[1] * 1]);
+    } else if (baseMapKeys[1].indexOf(baseMapKey) > -1) {
+      coord = TransformCoordinate(
+        systemDic[baseMapKey](ptArr[0] * 1, ptArr[1] * 1)
+      );
+    }
     let newFeature = addFeature("Point", {
-      coordinates: TransformCoordinate([ptArr[0] * 1, ptArr[1] * 1]),
+      coordinates: coord,
     });
     newFeature.setStyle(style);
     this.source.addFeature(newFeature);
@@ -47,6 +68,7 @@ function Action() {
 
   this.removePOI = () => {
     this.source && this.source.clear();
+    this.currentPoi = null;
   };
 
   this.setSession = (address) => {

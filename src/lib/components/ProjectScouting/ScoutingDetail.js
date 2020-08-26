@@ -61,7 +61,20 @@ function Action() {
   this.features = [];
   this.overlays = [];
   this.drawBox = null;
+  this.currentData = null;
+  this.currentSet = null;
   this.init = (dispatch) => {
+    Event.Evt.on("transCoordinateSystems2ScoutingDetail", () => {
+      const baseMapKey = INITMAP.baseMapKey;
+      const lastBaseMapKey = INITMAP.lastBaseMapKey;
+      const baseMapKeys = INITMAP.baseMapKeys;
+      const isSame =
+        baseMapKeys[0].indexOf(baseMapKey) ===
+        baseMapKeys[0].indexOf(lastBaseMapKey);
+      if (this.currentData && this.currentSet && isSame === false) {
+        this.renderCollection(this.currentData, this.currentSet);
+      }
+    });
     this.Layer.setSource(this.Source);
     const layers = InitMap.map.getLayers().getArray();
     const layer = layers.filter((layer) => {
@@ -251,13 +264,45 @@ function Action() {
 
   this.renderPointCollection = (data, addOverlay = true) => {
     let array = findHasLocationData(data);
+    const baseMapKey = InitMap.baseMapKey;
+    const baseMapKeys = InitMap.baseMapKeys;
+    const systemDic = InitMap.systemDic;
     // console.log(array)
     let features = [];
     array.forEach((item) => {
-      let coor = TransformCoordinate([
-        +item.location.longitude,
-        +item.location.latitude,
-      ]);
+      let coor = null;
+      // gcj02
+      if (!Number(item.location.coordSysType)) {
+        if (baseMapKeys[0].indexOf(baseMapKey) > -1) {
+          coor = TransformCoordinate([
+            +item.location.longitude,
+            +item.location.latitude,
+          ]);
+        } else if (baseMapKeys[1].indexOf(baseMapKey) > -1) {
+          coor = TransformCoordinate(
+            systemDic[baseMapKey](
+              +item.location.longitude,
+              +item.location.latitude
+            )
+          );
+        }
+      }
+      // wgs84
+      else if (Number(item.location.coordSysType) === 1) {
+        if (baseMapKeys[1].indexOf(baseMapKey) > -1) {
+          coor = TransformCoordinate([
+            +item.location.longitude,
+            +item.location.latitude,
+          ]);
+        } else if (baseMapKeys[0].indexOf(baseMapKey) > -1) {
+          coor = TransformCoordinate(
+            systemDic[baseMapKey](
+              +item.location.longitude,
+              +item.location.latitude
+            )
+          );
+        }
+      }
       let feature = addFeature("Point", { coordinates: coor, id: item.id });
       let style = createStyle("Point", {
         iconUrl: require("../../../assets/mark/collectionIcon.png"),
@@ -581,6 +626,8 @@ function Action() {
     data,
     { lenged, dispatch, animation = true, showFeatureName = true }
   ) => {
+    this.currentData = data;
+    this.currentSet = { lenged, dispatch, animation, showFeatureName };
     // 删除元素
     this.removeFeatures();
     if (!data.length) {
@@ -896,8 +943,37 @@ function Action() {
     });
   };
 
+  this.getNewExtent = (extent) => {
+    if (extent && extent.length === 4) {
+      const baseMapKey = InitMap.baseMapKey;
+      const systemDic = InitMap.systemDic;
+      let tmp = TransformCoordinate(
+        [extent[0], extent[1]],
+        "EPSG:3857",
+        "EPSG:4326"
+      );
+      let tmp2 = TransformCoordinate(
+        [extent[2], extent[3]],
+        "EPSG:3857",
+        "EPSG:4326"
+      );
+      tmp = systemDic[baseMapKey](tmp[0], tmp[1]);
+      tmp2 = systemDic[baseMapKey](tmp2[0], tmp2[1]);
+      tmp = TransformCoordinate(tmp, "EPSG:4326", "EPSG:3857");
+      tmp2 = TransformCoordinate(tmp2, "EPSG:4326", "EPSG:3857");
+      return [...tmp, ...tmp2];
+    }
+    return null;
+  };
+
   //   渲染规划图
   this.renderPlanPicCollection = async (data) => {
+    this.imgs.forEach((item) => {
+      //   console.log(item)
+      InitMap.map.removeLayer(item);
+    });
+    const baseMapKey = InitMap.baseMapKey;
+    const baseMapKeys = InitMap.baseMapKeys;
     //   console.log(data);
     // 所有规划图加载的范围
     let ext = [Infinity, Infinity, -Infinity, -Infinity];
@@ -916,6 +992,15 @@ function Action() {
       let extent = resp.extent
         ? resp.extent.split(",").map((e) => parseFloat(e))
         : [];
+
+      // 数据为gcj02坐标系 并且当前坐标系非gcj02坐标系时要转换
+      if (!resp.coordSysType && baseMapKeys[0].indexOf(baseMapKey) === -1) {
+        extent = this.getNewExtent(extent) || extent;
+      } else if (resp.coordSysType) {
+        if (baseMapKeys[0].indexOf(baseMapKey) > -1) {
+          extent = this.getNewExtent() || extent;
+        }
+      }
 
       // let url = config.BASE_URL + PLAN_IMG_URL(resp.id);
       let img = ImageStatic(PLAN_IMG_URL(resp.id), extent, {

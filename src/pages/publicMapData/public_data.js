@@ -509,7 +509,8 @@ const jsons = {
       icon: "icon-icon-xianzai",
       key: "7",
       child: [],
-    },{
+    },
+    {
       name: "地产楼盘",
       icon: "icon-loufang2",
       key: "8",

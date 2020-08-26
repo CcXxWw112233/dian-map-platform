@@ -800,7 +800,6 @@ export default class Plot extends React.Component {
 
   // 创建标绘唯一入口
   createPlot = (options, iconUrl) => {
-    const { parent } = this.props;
     const plotType = this.nextProps?.plotType || this.props.plotType;
     const style = createStyle(this.dic[plotType], options);
     let attrs = {
@@ -965,12 +964,10 @@ export default class Plot extends React.Component {
                 }
               }
               const { parent } = this.props;
-              const index = parent.featureOperatorList.findIndex(
-                (operator) => (operator.guid = window.featureOperator)
+              const index = this.findOperatorFromList(
+                window.featureOperator.guid
               );
-              if (index > -1) {
-                parent.featureOperatorList.splice(index, 1);
-              }
+              parent.featureOperatorList.splice(index, 1);
               this.props.goBackProject();
             }
           })

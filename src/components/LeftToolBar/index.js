@@ -9,6 +9,10 @@ import TempPlot from "./panels/TempPlot";
 import ProjectList from "./panels/ProjectList";
 import CustomSymbolStore from "./panels/CustomSymbolStore";
 import Panel from "./panels/Panel";
+import Event from "../../lib/utils/event";
+import mapApp from "../../utils/INITMAP";
+import { TransformCoordinate } from "../../lib/utils/index";
+import { plotEdit } from "../../utils/plotEdit"
 
 import { lineDrawing, pointDrawing, polygonDrawing } from "utils/drawing";
 import ListAction from "@/lib/components/ProjectScouting/ScoutingList";
@@ -180,29 +184,10 @@ export default class LeftToolBar extends React.Component {
     this.isModifyPlot = false;
     this.oldPlotName = "";
     this.oldRemark = "";
-    this.maxZIndex = 0;
-    ListAction.checkItem()
-      .then((res) => {
-        if (res) {
-          if (res.code === 0) {
-            this.setState({
-              displayTempPlotIcon: false,
-            });
-          } else {
-            this.setState({
-              displayTempPlotIcon: true,
-            });
-          }
-        }
-      })
-      .catch((e) => {
-        this.setState({
-          displayTempPlotIcon: true,
-        });
-      });
-    // if (this.customSymbols === null) {
-    //   this.getCustomSymbol();
-    // }
+    this.systemDic = null;
+    this.lastBaseMap = null;
+    this.currentBaseMap = null;
+    this.baseMapKeys = null;
   }
 
   deactivate = () => {
@@ -487,7 +472,7 @@ export default class LeftToolBar extends React.Component {
             ></ProjectList>
           ) : null}
           {this.state.displayCustomSymbolStore ? (
-            <CustomSymbolStore></CustomSymbolStore>
+            <CustomSymbolStore parent={this}></CustomSymbolStore>
           ) : null}
         </Panel>
       </div>
