@@ -811,9 +811,9 @@ export const UploadItem = ({
       {data.content && JSON.parse(data.content)?.remark ? (
         <Menu.Item key="modifyRemark">编辑备注</Menu.Item>
       ) : null}
-      {data.content && JSON.parse(data.content)?.remark === "" ? (
+      {/* {data.content && JSON.parse(data.content)?.remark === "" ? (
         <Menu.Item key="addRemark">新增备注</Menu.Item>
-      ) : null}
+      ) : null} */}
       {data.content && JSON.parse(data.content)?.featureType ? (
         <Menu.Item key="modifyFeature">编辑几何图形</Menu.Item>
       ) : null}

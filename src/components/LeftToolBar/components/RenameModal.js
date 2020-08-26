@@ -67,7 +67,7 @@ export default function RenameModal (props){
             autoFocus
             allowClear
             style={{width:'60%'}}
-            placeholder="情输入您定义的图标名称"
+            placeholder="请输入您定义的图标名称"
             defaultValue={name}
             onChange={(e)=> {setName(e.target.value.trim()); onChangeName(e.target.value)}}/>
           </div>

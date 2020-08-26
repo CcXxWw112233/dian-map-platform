@@ -251,11 +251,6 @@ export default class Plot extends React.Component {
     this.baseMapKeys = ["gd_vec|gd_img|gg_img", "td_vec|td_img|td_ter"];
   }
   componentDidMount() {
-    Event.Evt.firEvent("setAttribute", {
-      saveCb: this.handleSaveClick.bind(this),
-      delCb: this.updatePlotList.bind(this),
-    });
-    this.getCustomSymbol();
     this.plotLayer = plotEdit.getPlottingLayer();
     const me = this;
     const { parent } = this.props;
@@ -362,22 +357,28 @@ export default class Plot extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    this.handleResetClick();
-    this.createPlotName();
-    this.nextProps = nextProps;
-    if (nextProps.plotType === "point") {
-      this.symbol = this.refs.defaultSymbol.innerText;
-      this.getPointDefaultSymbol();
-    } else {
-      this.updateStateCallbackFunc();
-    }
-    const { parent } = nextProps;
-    if (parent.customSymbols) {
-      this.setState({
-        symbols: [parent.customSymbols, ...symbols],
-      });
-    } else {
-      this.getCustomSymbol();
+    Event.Evt.firEvent("setAttribute", {
+      saveCb: this.handleSaveClick.bind(this),
+      delCb: this.updatePlotList.bind(this),
+    });
+    if (nextProps.hidden === false) {
+      this.handleResetClick();
+      this.createPlotName();
+      this.nextProps = nextProps;
+      if (nextProps.plotType === "point") {
+        this.symbol = this.refs.defaultSymbol.innerText;
+        this.getPointDefaultSymbol();
+      } else {
+        this.updateStateCallbackFunc();
+      }
+      const { parent } = nextProps;
+      if (parent.customSymbols) {
+        this.setState({
+          symbols: [parent.customSymbols, ...symbols],
+        });
+      } else {
+        this.getCustomSymbol();
+      }
     }
   }
 
@@ -980,11 +981,6 @@ export default class Plot extends React.Component {
                   });
                 }
               }
-              const { parent } = this.props;
-              const index = this.findOperatorFromList(
-                window.featureOperator.guid
-              );
-              parent.featureOperatorList.splice(index, 1);
               this.props.goBackProject();
             }
           })
@@ -1022,7 +1018,10 @@ export default class Plot extends React.Component {
     const disableStyle = { color: "rgba(0,0,0,0.2)" };
     const style = { marginTop: 18, marginRight: 10 };
     return (
-      <div style={{ width: "100%", height: "100%" }}>
+      <div
+        style={{ width: "100%", height: "100%" }}
+        className={this.props.hidden ? styles.hidden : ""}
+      >
         <div
           className={styles.header}
           style={{ padding: "0 20px", marginBottom: 10 }}

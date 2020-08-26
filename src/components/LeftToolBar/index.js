@@ -12,7 +12,7 @@ import Panel from "./panels/Panel";
 import Event from "../../lib/utils/event";
 import mapApp from "../../utils/INITMAP";
 import { TransformCoordinate } from "../../lib/utils/index";
-import { plotEdit } from "../../utils/plotEdit"
+import { plotEdit } from "../../utils/plotEdit";
 
 import { lineDrawing, pointDrawing, polygonDrawing } from "utils/drawing";
 import ListAction from "@/lib/components/ProjectScouting/ScoutingList";
@@ -33,6 +33,7 @@ export default class LeftToolBar extends React.Component {
         cb: () => {
           this.setState({
             displayPlot: false,
+            hidePlot: false,
             displayProject: true,
             displayTempPlot: false,
             displayCustomSymbolStore: false,
@@ -48,6 +49,7 @@ export default class LeftToolBar extends React.Component {
         cb: () => {
           this.setState({
             displayPlot: true,
+            hidePlot: false,
             displayProject: false,
             displayTempPlot: false,
             displayCustomSymbolStore: false,
@@ -63,6 +65,7 @@ export default class LeftToolBar extends React.Component {
         cb: () => {
           this.setState({
             displayPlot: true,
+            hidePlot: false,
             displayProject: false,
             displayTempPlot: false,
             displayCustomSymbolStore: false,
@@ -78,6 +81,7 @@ export default class LeftToolBar extends React.Component {
         cb: () => {
           this.setState({
             displayPlot: true,
+            hidePlot: false,
             displayProject: false,
             displayTempPlot: false,
             displayCustomSymbolStore: false,
@@ -93,6 +97,7 @@ export default class LeftToolBar extends React.Component {
         cb: () => {
           this.setState({
             displayPlot: true,
+            hidePlot: false,
             displayProject: false,
             displayTempPlot: false,
             displayCustomSymbolStore: false,
@@ -108,6 +113,7 @@ export default class LeftToolBar extends React.Component {
         cb: () => {
           this.setState({
             displayPlot: true,
+            hidePlot: false,
             displayProject: false,
             displayTempPlot: false,
             displayCustomSymbolStore: false,
@@ -123,6 +129,7 @@ export default class LeftToolBar extends React.Component {
         cb: () => {
           this.setState({
             displayPlot: true,
+            hidePlot: false,
             displayProject: false,
             displayTempPlot: false,
             displayCustomSymbolStore: false,
@@ -138,6 +145,7 @@ export default class LeftToolBar extends React.Component {
         cb: () => {
           this.setState({
             displayPlot: true,
+            hidePlot: false,
             displayProject: false,
             displayTempPlot: false,
             displayCustomSymbolStore: false,
@@ -153,6 +161,7 @@ export default class LeftToolBar extends React.Component {
         cb: () => {
           this.setState({
             displayPlot: true,
+            hidePlot: false,
             displayProject: false,
             displayTempPlot: false,
             displayCustomSymbolStore: false,
@@ -166,6 +175,7 @@ export default class LeftToolBar extends React.Component {
       selectedIndex: 0,
       hoveredIndex: -1,
       displayPlot: false,
+      hidePlot: false,
       displayProject: true,
       displayTempPlot: false,
       displayCustomSymbolStore: false,
@@ -373,6 +383,7 @@ export default class LeftToolBar extends React.Component {
               this.setState({
                 selectedIndex: -1,
                 displayPlot: false,
+                hidePlot: false,
                 displayProject: false,
                 displayTempPlot: true,
                 displayCustomSymbolStore: false,
@@ -394,6 +405,7 @@ export default class LeftToolBar extends React.Component {
               this.setState({
                 selectedIndex: -1,
                 displayPlot: false,
+                hidePlot: false,
                 displayProject: false,
                 displayTempPlot: false,
                 displayCustomSymbolStore: true,
@@ -421,12 +433,13 @@ export default class LeftToolBar extends React.Component {
                   displayTempPlotIcon: true,
                 });
               }}
+              hidden={this.state.hidePlot}
               customSymbols={this.customSymbols}
               updateFeatureOperatorList={this.updateFeatureOperatorList}
               updateFeatureOperatorList2={this.updateFeatureOperatorList2}
               goBackProject={() => {
                 this.setState({
-                  displayPlot: false,
+                  hidePlot: true,
                   displayProject: true,
                   selectedIndex: 0,
                 });
