@@ -382,4 +382,4 @@ export const setSelectInteraction = function (data = {}) {
 };
 
 // 适应范围后的调整
-export const fitPadding = [200, 150, 80, 400];
+export const fitPadding = [200, 150, 80, 500];

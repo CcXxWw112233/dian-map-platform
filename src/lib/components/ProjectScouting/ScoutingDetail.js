@@ -53,6 +53,7 @@ function Action() {
     MERGE_COLLECTION,
     CANCEL_COLLECTION_MERGE,
     GET_DOWNLOAD_URL,
+    EDIT_AREA_MESSAGE
   } = config;
   this.activeFeature = {};
   this.layerId = "scoutingDetailLayer";
@@ -91,6 +92,7 @@ function Action() {
   this.lenged = null;
   this.oldData = [];
   this.CollectionGroup = [];
+  this.groupPointer = [];
   let requestTime = 10 * 1000;
   this.selectedFeatureOperator = null;
 
@@ -188,12 +190,26 @@ function Action() {
     return await DELETE_COLLECTION(id);
   };
 
+  // 添加分类的坐标点
+  this.setGropCoordinates = async (id, data)=>{
+    let {coordinate} = data;
+    coordinate = TransformCoordinate(coordinate,'EPSG:3857','EPSG:4326');
+    let param = {
+      longitude: coordinate[0],
+      latitude: coordinate[1],
+    }
+    // console.log(coordinate)
+    return await EDIT_AREA_MESSAGE(id, param)
+  }
   // 添加关联点的交互
   this.addCollectionPosition = (data) => {
     return new Promise((resolve, reject) => {
       let style = createStyle("Point", {
         iconUrl: require("../../../assets/addPointLocation.png"),
         text: data.title,
+        showName: true,
+        textFillColor: "#ff0000",
+        textStrokeColor: "#ffffff"
       });
       this.draw = drawPoint(this.Source, { style });
       this.draw.on("drawend", (e) => {
@@ -207,6 +223,86 @@ function Action() {
       InitMap.map.addInteraction(this.draw);
     });
   };
+  // 清除分组的点
+  this.clearGroupPointer = ()=>{
+    this.groupPointer.forEach(item => {
+      if(this.Source.getFeatureByUid(item.ol_uid)){
+        this.Source.removeFeature(item);
+      }
+    })
+    this.groupPointer = [];
+  }
+  // 点击事件
+  const mapClick = (evt)=>{
+    const obj = InitMap.map.forEachFeatureAtPixel(
+      evt.pixel,
+      (feature, layer) => {
+        return { feature, layer };
+      }
+    );
+    if(obj && obj.layer && obj.layer.get('id') === this.layerId){
+      let { feature } = obj;
+      let p_type = feature.get('p_type');
+      if(p_type === 'group'){
+        Event.Evt.firEvent('handleGroupFeature', feature.get('p_id'))
+      }
+      // console.log(p_type)
+    }
+  }
+
+  // 设置选中的样式
+  this.setActiveGoupPointer = (id)=>{
+    this.groupPointer.map(item => {
+      let style = item.getStyle();
+      if(item.get('p_id') === id){
+        style.getImage().getFill().setColor("#FE2042");
+        style.getImage().setRadius(12)
+      }else{
+        style.getImage().getFill().setColor("#577DFF");
+        style.getImage().setRadius(8)
+      }
+      item.setStyle(style);
+      return item;
+    })
+  }
+
+  // 渲染分组的点
+  this.renderGroupPointer = (data)=>{
+    InitMap.map.un('click', mapClick);
+    this.clearGroupPointer();
+    if(data.length){
+      data = data.filter(item => (item.hasOwnProperty('longitude') && item.hasOwnProperty('latitude')));
+      let fs = [];
+      InitMap.map.on('click',mapClick);
+      data.forEach(item => {
+        let coordinate = TransformCoordinate([+item.longitude, +item.latitude]);
+        let feature = addFeature('Point', { coordinates: coordinate ,p_id: item.id,p_type:'group'});
+        let style = createStyle('Point',{
+          radius: 8,
+          fillColor: '#577DFF',
+          strokeColor: '#ffffff',
+          strokeWidth: 2,
+          showName: true,
+          text: item.name,
+          textFillColor: '#FF4628',
+          textStrokeColor: '#ffffff',
+          textStrokeWidth: 1,
+          font: 14
+        })
+        feature.setStyle(style);
+        fs.push(feature);
+        this.groupPointer.push(feature);
+      })
+      if(fs.length){
+        this.Source.addFeatures(fs);
+        Fit(InitMap.view, this.Source.getExtent(),{
+          size: InitMap.map.getSize(),
+          padding: fitPadding,
+        })
+      }
+    }
+  }
+
   this.transform = (coor) => {
     return TransformCoordinate(coor, "EPSG:3857", "EPSG:4326");
   };

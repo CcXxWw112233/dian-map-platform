@@ -22,6 +22,7 @@ export default class LookingBack extends React.Component{
         y: new Date().getFullYear()
       },
       selectData: [],
+      previewFull: false
     }
     this.timer = null;
   }
@@ -47,9 +48,20 @@ export default class LookingBack extends React.Component{
           collection: fArr
         }
         arr.push(obj);
+      }else{
+        arr.push({...item, disabled: true})
       }
     })
     return arr ;
+  }
+
+  activeGroup = ()=>{
+    let { selectActive } = this.state;
+    if(selectActive !== 'other'){
+      DetailAction.setActiveGoupPointer(selectActive)
+    }else {
+      DetailAction.setActiveGoupPointer(null)
+    }
   }
 
   setSelectionData = (data)=>{
@@ -57,10 +69,14 @@ export default class LookingBack extends React.Component{
     clearTimeout(this.timer);
     this.timer = setTimeout(()=>{
       let arr = this.filterNotImg(data);
+      // console.log(arr)
+      DetailAction.renderGroupPointer(arr);
       this.setState({
         options: arr,
         selectActive: arr[0] ? arr[0].id : 'other',
         activeSelectObj: arr[0]
+      },()=>{
+        this.activeGroup();
       })
     }, 500)
 
@@ -70,7 +86,7 @@ export default class LookingBack extends React.Component{
     const { Option } = Select;
     return options.map(item => {
       return (
-        <Option key={item.id}>{item.name}</Option>
+        <Option key={item.id} disabled={item.disabled}>{item.name}</Option>
       )
     })
   }
@@ -82,6 +98,8 @@ export default class LookingBack extends React.Component{
       activeTime:{
         y: new Date().getFullYear()
       }
+    },()=>{
+      this.activeGroup();
     })
   }
 
@@ -95,7 +113,7 @@ export default class LookingBack extends React.Component{
     // console.log(data);
     // data = data.filter(item => DetailAction.checkCollectionType(item.target) === 'pic');
     this.setState({
-      selectData: data
+      selectData: data || []
     })
   }
 
@@ -118,6 +136,9 @@ export default class LookingBack extends React.Component{
         zIndex: 5
       }
     })
+  }
+  mapUpdate = ()=>{
+    // console.log('要更新了')
   }
 
   render(){
@@ -154,11 +175,12 @@ export default class LookingBack extends React.Component{
 
           </div>
           <div className={styles.time_selection}>
-            {(activeSelectObj.collection && activeSelectObj.collection.length) &&
+            {(activeSelectObj.collection && activeSelectObj.collection.length) ?
             <TimeSelection data={activeSelectObj.collection} active={activeTime}
             onChangeActive={this.setActiveChange}
             onChange={this.setActiveData}
-            />}
+            /> :
+            <div style={{textAlign:"center"}}>暂无可回看的采集资料（图片、视频、音频）</div>}
           </div>
         </div>
         <div className={styles.lookingback_collection}>
@@ -200,7 +222,22 @@ export default class LookingBack extends React.Component{
         classNames="slide"
         timeout={300}
         unmountOnExit>
-          <CollectionPreview currentGroup={ activeSelectObj } currentData={this.props.selectData}/>
+          <CollectionPreview
+          currentGroup={ activeSelectObj }
+          currentData={this.props.selectData}
+          Full={this.state.previewFull}
+          onUpdate={this.mapUpdate}
+          onFull={()=>{
+            this.setState({
+              previewFull: true
+            })
+          }}
+          onExitFull={()=>{
+            this.setState({
+              previewFull: false
+            })
+          }}
+          />
         </CSSTransition>
       </div>
     )

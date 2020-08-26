@@ -8,7 +8,7 @@ import PhotoSwipe from '../../../../components/PhotoSwipe/action'
 import { keepLastIndex } from '../../../../utils/utils';
 import DetailAction from '../../../../lib/components/ProjectScouting/ScoutingDetail'
 import { message, Row, Col } from 'antd';
-import Event from '../../../../lib/utils/event'
+import Event from '../../../../lib/utils/event';
 
 @connect(({collectionDetail: { selectData ,zIndex} })=>({ selectData ,zIndex}))
 export default class CollectionDetail extends React.Component{
@@ -128,8 +128,9 @@ export default class CollectionDetail extends React.Component{
 
   render(){
     const { isEdit } = this.state;
-    const { selectData = {}, dispatch ,zIndex} = this.props;
-    let oldRemark = selectData.description;
+    let { selectData = {}, dispatch ,zIndex} = this.props;
+    selectData = selectData || {};
+    let oldRemark = selectData && selectData.description;
     if (oldRemark?.trim() === "") {
       oldRemark = null
     }
@@ -138,7 +139,7 @@ export default class CollectionDetail extends React.Component{
     let hours = DetailAction.dateFormat(create_time, "HH:mm");
     return (
       ReactDOM.createPortal(
-        <div className={`${styles.collection_detail} ${animateCss.animated} ${animateCss.slideInRight} ${animateCss.fadeIn}`}
+        <div className={`${styles.collection_detail}`}
         style={{zIndex: zIndex}}>
           <div className={styles.detail_title}>
             <span className={styles.edit}>
@@ -169,7 +170,7 @@ export default class CollectionDetail extends React.Component{
               <div className={styles.creator}>
                 <Row gutter={10}>
                   <Col span={12}>
-                    {create_by.name}
+                    {create_by && create_by.name}
                   </Col>
                   <Col span={6} style={{textAlign:"center"}}>
                     {time}

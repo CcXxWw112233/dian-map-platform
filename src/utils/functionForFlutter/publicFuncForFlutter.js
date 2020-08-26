@@ -385,6 +385,18 @@ let callFunctions = {
   viewFitById: ({id})=>{
     lib.fitCenter(id);
   },
+  // 渲染分组坐标点
+  renderGoupPoint:(data)=>{
+    lib.renderGroupPoint(data);
+  },
+  // 清除分组坐标点
+  clearGroupPoint: ()=>{
+    lib.clearGroupPoint();
+  },
+  // 设置选中的分组点
+  setActiveGroup: (id) => {
+    lib.setActiveGroupPoint(id);
+  },
   // zoomIn 放大
   zoomIn:()=>{
     let view = _getMap('view');

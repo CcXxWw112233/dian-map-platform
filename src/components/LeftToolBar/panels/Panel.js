@@ -29,7 +29,7 @@ export default class Panel extends React.Component {
       : { transform: "translateX(-100%)" };
     const directionStyle = { display: "table-cell", verticalAlign: "middle" };
     return (
-      <div className={styles.panel} style={panelStyle}>
+      <div className={styles.panel} style={panelStyle} id="leftPanel">
         <div style={{ width: "100%", height: "100%" }}>
           {this.props.children}
         </div>

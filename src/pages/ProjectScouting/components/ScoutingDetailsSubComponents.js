@@ -229,8 +229,12 @@ export const ScoutingHeader = (props) => {
 
     const handleClick = ({ key })=>{
       // console.log(key)
+      let onSetCoordinates = props.onSetCoordinates;
       if(key !== 'delete'){
         setMenuShow(false);
+      }
+      if(key === 'setCoordinates'){
+        onSetCoordinates && onSetCoordinates(data)
       }
     }
 
@@ -303,6 +307,9 @@ export const ScoutingHeader = (props) => {
 
     const menu = (
       <Menu onClick={handleClick}>
+        <Menu.Item key="setCoordinates">
+          设置分类坐标
+        </Menu.Item>
         <Menu.Item key="upload">
           {/* 上传采集资料 */}
           <UploadBtn onChange={startUpload} />
