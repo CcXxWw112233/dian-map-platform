@@ -434,7 +434,6 @@ export default class LeftToolBar extends React.Component {
                 });
               }}
               hidden={this.state.hidePlot}
-              customSymbols={this.customSymbols}
               updateFeatureOperatorList={this.updateFeatureOperatorList}
               updateFeatureOperatorList2={this.updateFeatureOperatorList2}
               goBackProject={() => {

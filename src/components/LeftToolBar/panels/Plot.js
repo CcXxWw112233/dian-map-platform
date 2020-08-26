@@ -1,4 +1,4 @@
-import React from "react";
+import React, { PureComponent } from "react";
 import { Input, Select, Button, Tooltip, message, Skeleton } from "antd";
 
 import globalStyle from "@/globalSet/styles/globalStyles.less";
@@ -166,7 +166,7 @@ const SymbolBlock = ({
   config,
   openPanel,
 }))
-export default class Plot extends React.Component {
+export default class Plot extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -249,6 +249,7 @@ export default class Plot extends React.Component {
     this.activeOperator = null;
     this.selectedPlotZIndex = 0;
     this.baseMapKeys = ["gd_vec|gd_img|gg_img", "td_vec|td_img|td_ter"];
+    this.isLoaded = true;
   }
   componentDidMount() {
     this.plotLayer = plotEdit.getPlottingLayer();
@@ -261,6 +262,13 @@ export default class Plot extends React.Component {
         name: parent.oldPlotName,
         remark: parent.oldRemark,
       });
+    }
+    if (parent.customSymbols) {
+      this.setState({
+        symbols: [parent.customSymbols, ...symbols],
+      });
+    } else {
+      this.getCustomSymbol();
     }
     this.operatorActive = function (e) {
       if (!e.feature_operator.isScouting) {
@@ -371,19 +379,19 @@ export default class Plot extends React.Component {
       } else {
         this.updateStateCallbackFunc();
       }
-      const { parent } = nextProps;
-      if (parent.customSymbols) {
-        this.setState({
-          symbols: [parent.customSymbols, ...symbols],
-        });
-      } else {
-        this.getCustomSymbol();
-      }
     }
   }
 
+  // shouldComponentUpdate(nextProps, nextState) {
+  //   if (nextProps.plotType === this.props.plotType) {
+  //     return false; //不渲染
+  //   }
+  //   return true; //渲染
+  // }
+
   // 获取自定义图标符号
   getCustomSymbol = () => {
+    this.isLoaded = false;
     const { parent } = this.props;
     if (parent.customSymbols) {
       this.setState({
@@ -398,6 +406,7 @@ export default class Plot extends React.Component {
       symbolStoreServices
         .GET_ICON()
         .then((res) => {
+          this.isLoaded = true;
           if (res.code === "0") {
             const data = res.data;
             if (Array.isArray(data)) {
@@ -417,6 +426,7 @@ export default class Plot extends React.Component {
           }
         })
         .catch((err) => {
+          this.isLoaded = true;
           this.setState({
             symbols: symbols,
           });
