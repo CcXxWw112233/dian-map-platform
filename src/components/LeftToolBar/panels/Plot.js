@@ -109,16 +109,33 @@ const SymbolBlock = ({
                   ) : null}
                   {item.color && item.color.length > 0 ? (
                     <div
-                      className={styles.symbol}
-                      style={{
-                        background: item.color,
-                        border: item.line ? `1px solid ${item.color}` : "",
-                        height: item.line ? 0 : "",
-                      }}
+                      style={
+                        item.line
+                          ? {
+                              width: 44,
+                              height: 24,
+                              display: "inline-flex",
+                            }
+                          : {}
+                      }
                       onClick={(e) => {
                         cb(e, data.index, index, item);
                       }}
-                    ></div>
+                    >
+                      <div
+                        className={styles.symbol}
+                        style={{
+                          background: item.color,
+                          border: item.line ? `2px solid ${item.color}` : "",
+                          height: item.line ? 0 : "",
+                          margin: item.line ? "11px auto" : "",
+                          transform: item.line ? "translateY(-1px)" : "",
+                        }}
+                        // onClick={(e) => {
+                        //   cb(e, data.index, index, item);
+                        // }}
+                      ></div>
+                    </div>
                   ) : null}
                   {item.imageUrl ? (
                     <div
