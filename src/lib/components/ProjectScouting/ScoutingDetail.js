@@ -53,7 +53,7 @@ function Action() {
     MERGE_COLLECTION,
     CANCEL_COLLECTION_MERGE,
     GET_DOWNLOAD_URL,
-    EDIT_AREA_MESSAGE
+    EDIT_AREA_MESSAGE,
   } = config;
   this.activeFeature = {};
   this.layerId = "scoutingDetailLayer";
@@ -191,16 +191,16 @@ function Action() {
   };
 
   // 添加分类的坐标点
-  this.setGropCoordinates = async (id, data)=>{
-    let {coordinate} = data;
-    coordinate = TransformCoordinate(coordinate,'EPSG:3857','EPSG:4326');
+  this.setGropCoordinates = async (id, data) => {
+    let { coordinate } = data;
+    coordinate = TransformCoordinate(coordinate, "EPSG:3857", "EPSG:4326");
     let param = {
       longitude: coordinate[0],
       latitude: coordinate[1],
-    }
+    };
     // console.log(coordinate)
-    return await EDIT_AREA_MESSAGE(id, param)
-  }
+    return await EDIT_AREA_MESSAGE(id, param);
+  };
   // 添加关联点的交互
   this.addCollectionPosition = (data) => {
     return new Promise((resolve, reject) => {
@@ -209,7 +209,7 @@ function Action() {
         text: data.title,
         showName: true,
         textFillColor: "#ff0000",
-        textStrokeColor: "#ffffff"
+        textStrokeColor: "#ffffff",
       });
       this.draw = drawPoint(this.Source, { style });
       this.draw.on("drawend", (e) => {
@@ -224,84 +224,91 @@ function Action() {
     });
   };
   // 清除分组的点
-  this.clearGroupPointer = ()=>{
-    this.groupPointer.forEach(item => {
-      if(this.Source.getFeatureByUid(item.ol_uid)){
+  this.clearGroupPointer = () => {
+    this.groupPointer.forEach((item) => {
+      if (this.Source.getFeatureByUid(item.ol_uid)) {
         this.Source.removeFeature(item);
       }
-    })
+    });
     this.groupPointer = [];
-  }
+  };
   // 点击事件
-  const mapClick = (evt)=>{
+  const mapClick = (evt) => {
     const obj = InitMap.map.forEachFeatureAtPixel(
       evt.pixel,
       (feature, layer) => {
         return { feature, layer };
       }
     );
-    if(obj && obj.layer && obj.layer.get('id') === this.layerId){
+    if (obj && obj.layer && obj.layer.get("id") === this.layerId) {
       let { feature } = obj;
-      let p_type = feature.get('p_type');
-      if(p_type === 'group'){
-        Event.Evt.firEvent('handleGroupFeature', feature.get('p_id'))
+      let p_type = feature.get("p_type");
+      if (p_type === "group") {
+        Event.Evt.firEvent("handleGroupFeature", feature.get("p_id"));
       }
       // console.log(p_type)
     }
-  }
+  };
 
   // 设置选中的样式
-  this.setActiveGoupPointer = (id)=>{
-    this.groupPointer.map(item => {
+  this.setActiveGoupPointer = (id) => {
+    this.groupPointer.map((item) => {
       let style = item.getStyle();
-      if(item.get('p_id') === id){
+      if (item.get("p_id") === id) {
         style.getImage().getFill().setColor("#FE2042");
-        style.getImage().setRadius(12)
-      }else{
+        style.getImage().setRadius(12);
+      } else {
         style.getImage().getFill().setColor("#577DFF");
-        style.getImage().setRadius(8)
+        style.getImage().setRadius(8);
       }
       item.setStyle(style);
       return item;
-    })
-  }
+    });
+  };
 
   // 渲染分组的点
-  this.renderGroupPointer = (data)=>{
-    InitMap.map.un('click', mapClick);
+  this.renderGroupPointer = (data) => {
+    InitMap.map.un("click", mapClick);
     this.clearGroupPointer();
-    if(data.length){
-      data = data.filter(item => (item.hasOwnProperty('longitude') && item.hasOwnProperty('latitude')));
+    if (data.length) {
+      data = data.filter(
+        (item) =>
+          item.hasOwnProperty("longitude") && item.hasOwnProperty("latitude")
+      );
       let fs = [];
-      InitMap.map.on('click',mapClick);
-      data.forEach(item => {
+      InitMap.map.on("click", mapClick);
+      data.forEach((item) => {
         let coordinate = TransformCoordinate([+item.longitude, +item.latitude]);
-        let feature = addFeature('Point', { coordinates: coordinate ,p_id: item.id,p_type:'group'});
-        let style = createStyle('Point',{
+        let feature = addFeature("Point", {
+          coordinates: coordinate,
+          p_id: item.id,
+          p_type: "group",
+        });
+        let style = createStyle("Point", {
           radius: 8,
-          fillColor: '#577DFF',
-          strokeColor: '#ffffff',
+          fillColor: "#577DFF",
+          strokeColor: "#ffffff",
           strokeWidth: 2,
           showName: true,
           text: item.name,
-          textFillColor: '#FF4628',
-          textStrokeColor: '#ffffff',
+          textFillColor: "#FF4628",
+          textStrokeColor: "#ffffff",
           textStrokeWidth: 1,
-          font: 14
-        })
+          font: 14,
+        });
         feature.setStyle(style);
         fs.push(feature);
         this.groupPointer.push(feature);
-      })
-      if(fs.length){
+      });
+      if (fs.length) {
         this.Source.addFeatures(fs);
-        Fit(InitMap.view, this.Source.getExtent(),{
+        Fit(InitMap.view, this.Source.getExtent(), {
           size: InitMap.map.getSize(),
           padding: fitPadding,
-        })
+        });
       }
     }
-  }
+  };
 
   this.transform = (coor) => {
     return TransformCoordinate(coor, "EPSG:3857", "EPSG:4326");
@@ -1090,9 +1097,12 @@ function Action() {
         : [];
 
       // 数据为gcj02坐标系 并且当前坐标系非gcj02坐标系时要转换
-      if (!resp.coordSysType && baseMapKeys[0].indexOf(baseMapKey) === -1) {
+      if (
+        !Number(resp.coord_sys_type || 0) &&
+        baseMapKeys[0].indexOf(baseMapKey) === -1
+      ) {
         extent = this.getNewExtent(extent) || extent;
-      } else if (resp.coordSysType) {
+      } else if (Number(resp.coord_sys_type)) {
         if (baseMapKeys[0].indexOf(baseMapKey) > -1) {
           extent = this.getNewExtent() || extent;
         }
