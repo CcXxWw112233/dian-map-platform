@@ -198,6 +198,7 @@ export default class LeftToolBar extends React.Component {
     this.lastBaseMap = null;
     this.currentBaseMap = null;
     this.baseMapKeys = null;
+    this.activeFeatureOperator = null;
   }
 
   deactivate = () => {
@@ -228,12 +229,6 @@ export default class LeftToolBar extends React.Component {
     } else {
       this.featureOperatorList[index] = operator;
     }
-    if (!this.state.displayTempPlotIcon) {
-      this.setState({
-        displayTempPlotIcon: true,
-      });
-    }
-    // window.featureOperator && delete window.featureOperator
   };
 
   updateFeatureOperatorList2 = (list) => {
@@ -428,11 +423,6 @@ export default class LeftToolBar extends React.Component {
             <Plot
               parent={this}
               plotType={this.state.plotType}
-              displayTempPlotIcon={() => {
-                this.setState({
-                  displayTempPlotIcon: true,
-                });
-              }}
               hidden={this.state.hidePlot}
               updateFeatureOperatorList={this.updateFeatureOperatorList}
               updateFeatureOperatorList2={this.updateFeatureOperatorList2}
