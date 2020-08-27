@@ -18,6 +18,21 @@ function renderAction (){
       DetailAction.init();
       DetailAction.renderGroupPointer(data);
     }
+    // 渲染分组内的所有坐标
+    this.renderGroupCollectionPoint = (data)=>{
+      if(!data && !data.length) return ;
+      DetailAction.renderGoupCollectionForLookingBack(data);
+    }
+    // 清除
+    this.clearGroupCollectionPoint = ()=>{
+      DetailAction.clearGroupCollectionPoint();
+    }
+    // 设置选中
+    this.setActiveGropCollectionPoint = (val)=>{
+      if(val){
+        DetailAction.setGroupCollectionActive(val);
+      }
+    }
     // 设置选中点的样式
     this.setActiveGroupPoint = (id)=>{
       DetailAction.setActiveGoupPointer(id)

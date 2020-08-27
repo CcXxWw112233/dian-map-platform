@@ -47,7 +47,7 @@ export default function TimeSelection(props){
       select = Time[y][+m].filter(item => item.date === +d);
     }else {
       select = data.map(item => {
-        return {data: item}
+        return {data: item, time: +item.create_time}
       })
     }
     // console.log(select);

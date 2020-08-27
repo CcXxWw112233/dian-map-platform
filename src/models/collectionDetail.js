@@ -4,7 +4,9 @@ export default {
     selectData: null,
     collections:[],
     showCollectionsModal: false,
-    zIndex:10
+    zIndex:10,
+    type:'view',
+    previewDatas: []
   },
   effects:{
 

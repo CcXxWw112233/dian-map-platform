@@ -93,8 +93,9 @@ function Action() {
   this.oldData = [];
   this.CollectionGroup = [];
   this.groupPointer = [];
-  let requestTime = 10 * 1000;
+  let requestTime = 60 * 1000;
   this.selectedFeatureOperator = null;
+  this.groupCollectionPointer = [];
 
   // 通过范围获取坐标点
   let getBoxCoordinates = (extent) => {
@@ -250,6 +251,110 @@ function Action() {
     }
   };
 
+  // 地图点击
+  const LookingBackPointClick = (evt)=>{
+    const obj = InitMap.map.forEachFeatureAtPixel(
+      evt.pixel,
+      (feature, layer) => {
+        return { feature, layer };
+      }
+    );
+    if(obj && obj.layer && obj.layer.get('id') === this.layerId){
+      let { feature } = obj;
+      let collections = feature.get('collections');
+      if(collections && collections.length){
+        Event.Evt.firEvent('handleGroupCollectionFeature', collections)
+      }
+    }
+  }
+
+  // 设置active的坐标点
+  this.setGroupCollectionActive = (data)=>{
+    this.groupCollectionPointer.forEach(item => {
+      let style = item.getStyle();
+      style.setZIndex(1);
+      style.getImage().getFill().setColor("#577DFF");
+      style.getImage().setRadius(9);
+      item.setStyle(style);
+    })
+    if(!data) return ;
+    let coordinate = (data.location && data.location.latitude && data.location.longitude) && [+data.location.longitude, +data.location.latitude];
+    if(!coordinate) return undefined;
+    let coor = TransformCoordinate(coordinate);
+    let feature = this.Source.getFeaturesAtCoordinate(coor);
+    // console.log(feature)
+
+    feature.forEach(item => {
+      let style = item.getStyle();
+      style.setZIndex(10);
+      style.getImage().getFill().setColor("#FE2042");
+      style.getImage().setRadius(12);
+      item.setStyle(style);
+    })
+  }
+
+  this.renderGoupCollectionForLookingBack = (data)=>{
+    this.clearGroupCollectionPoint();
+    InitMap.map.un('click', LookingBackPointClick)
+    if(data && data.length){
+      let obj = {};
+      data.forEach(d => {
+        let item = d.data || d;
+        if(item.location && item.location.hasOwnProperty('longitude') && item.location.hasOwnProperty('latitude')){
+          let coor = [+item.location.longitude, +item.location.latitude];
+          let key = coor.join('/');
+          !obj[key] && (obj[key] = []);
+          obj[key].push(item);
+        }
+      })
+      // 提取相同坐标点的数据
+      let objkeys = Object.keys(obj);
+      objkeys.forEach(item => {
+        let collections = obj[item];
+        let coordinate = item.split('/').map(i => +i);
+        let feature = addFeature('Point',{
+          coordinates: TransformCoordinate(coordinate),
+          collections
+        })
+        let style = createStyle('Point',{
+          radius: 8,
+          fillColor: '#577DFF',
+          strokeColor: '#ffffff',
+          strokeWidth: 2,
+          showName: false,
+          // text: item.title || item.name,
+          textFillColor: '#FF4628',
+          textStrokeColor: '#ffffff',
+          textStrokeWidth: 1,
+          font: 14
+        })
+        feature.setStyle(style);
+        this.groupCollectionPointer.push(feature);
+        // console.log(coordinate)
+      })
+      if(this.groupCollectionPointer.length){
+        this.Source.addFeatures(this.groupCollectionPointer);
+        Fit(InitMap.view, this.Source.getExtent(),{
+          size: InitMap.map.getSize(),
+          padding: fitPadding,
+        })
+        InitMap.map.on('click', LookingBackPointClick);
+      }
+      // console.log(obj)
+    }
+  }
+  // 清除坐标点的数据
+  this.clearGroupCollectionPoint = ()=>{
+    if(this.groupCollectionPointer.length){
+      this.groupCollectionPointer.forEach(item => {
+        if(this.Source.getFeatureByUid(item.ol_uid)){
+          this.Source.removeFeature(item);
+        }
+      })
+      this.groupCollectionPointer = [];
+    }
+  }
+
   // 设置选中的样式
   this.setActiveGoupPointer = (id) => {
     this.groupPointer.map((item) => {
@@ -259,7 +364,7 @@ function Action() {
         style.getImage().setRadius(12);
       } else {
         style.getImage().getFill().setColor("#577DFF");
-        style.getImage().setRadius(8);
+        style.getImage().setRadius(9)
       }
       item.setStyle(style);
       return item;

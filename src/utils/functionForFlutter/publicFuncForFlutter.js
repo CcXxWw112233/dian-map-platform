@@ -13,6 +13,8 @@ import { baseConfig } from "../../globalSet/config";
 import scoutingProjectAction from "../../lib/components/ProjectScouting/ScoutingList";
 import lib from './drawForMap'
 import { setLocal } from "../sessionManage";
+import Event from '../../lib/utils/event';
+const { Evt } = Event;
 
 // 获取地图和视图
 const _getMap = (key) => {
@@ -57,6 +59,32 @@ const MapMoveSearch = function () {
     });
   }, 1000);
 };
+
+Evt.addEventListener('handleGroupCollectionFeature', (data)=>{
+  // 安卓
+  if(window.mapAndroid){
+    window.mapAndroid.getPoint && window.mapAndroid.getPoint({data})
+  }
+  // ios
+  if(window.webkit){
+    window.webkit.messageHandlers && window.webkit.messageHandlers.viewCollectionDetails &&
+    window.webkit.messageHandlers.viewCollectionDetails.postMessage &&
+    window.webkit.messageHandlers.viewCollectionDetails.postMessage({data})
+  }
+})
+
+Evt.addEventListener('handleGroupFeature', (id) => {
+  // 安卓
+  if(window.mapAndroid){
+    window.mapAndroid.getPoint && window.mapAndroid.getPoint({id})
+  }
+  // ios
+  if(window.webkit){
+    window.webkit.messageHandlers && window.webkit.messageHandlers.viewCollectionGroup &&
+    window.webkit.messageHandlers.viewCollectionGroup.postMessage &&
+    window.webkit.messageHandlers.viewCollectionGroup.postMessage({id})
+  }
+})
 
 // 所有暴露在外面的方法
 let callFunctions = {
@@ -396,6 +424,20 @@ let callFunctions = {
   // 设置选中的分组点
   setActiveGroup: (id) => {
     lib.setActiveGroupPoint(id);
+  },
+  // 渲染分组的采集资料点
+  renderGoupCollectionPoint : (data)=>{
+    if(data){
+      let arr = [];
+      Array.isArray(data) ? (arr = data): arr = Object.parse(data);
+      lib.renderGroupCollectionPoint(arr);
+    }
+  },
+  clearGroupCollectionPoint : ()=>{
+    lib.clearGroupCollectionPoint();
+  },
+  setActiveGroupCollectionPoint : (val)=>{
+    lib.setActiveGropCollectionPoint(val)
   },
   // zoomIn 放大
   zoomIn:()=>{
