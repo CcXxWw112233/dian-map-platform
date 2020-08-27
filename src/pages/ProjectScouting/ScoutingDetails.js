@@ -167,6 +167,7 @@ export default class ScoutingDetails extends PureComponent {
 
     Evt.addEventListener('handleGroupCollectionFeature', this.handleCollectionFeature);
   }
+  // 点击了坐标点
   handleCollectionFeature = (data)=>{
     const { dispatch } = this.props;
     dispatch({
@@ -176,6 +177,7 @@ export default class ScoutingDetails extends PureComponent {
         type:'view'
       }
     })
+    Action.setGroupCollectionActive(Array.isArray(data) ? data[0] : data)
   }
   componentWillUnmount() {
     const { dispatch, config: lengedList } = this.props;
@@ -406,6 +408,10 @@ export default class ScoutingDetails extends PureComponent {
             }
             return item;
           }),
+        }, ()=>{
+          Action.CollectionGroup = this.state.area_list;
+          Event.Evt.firEvent('collectionListUpdate1', this.state.area_list)
+          // console.log(Action.CollectionGroup, this.state.area_list)
         });
       });
       message.success("修改成功");
@@ -560,6 +566,7 @@ export default class ScoutingDetails extends PureComponent {
 
   // 删除采集的资料
   onCollectionRemove = (item, collection) => {
+    const { dispatch } = this.props;
     let { id } = collection;
 
     Action.removeCollection(id)
@@ -577,6 +584,12 @@ export default class ScoutingDetails extends PureComponent {
             // this.renderCollection();
             this.updateCollection(Array.from(this.state.all_collection), arr);
             Action.oldData = this.state.all_collection;
+            dispatch({
+              type:"collectionDetail/updateDatas",
+              payload:{
+                selectData: null
+              }
+            })
           }
         );
       })

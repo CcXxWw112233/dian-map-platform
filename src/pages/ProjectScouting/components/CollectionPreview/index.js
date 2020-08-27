@@ -103,8 +103,13 @@ export default class CollectionPreview extends React.Component{
   }
 
   pointerdown = (e)=>{
-    this.touchStart = true;
-    this.startEvent = this.getPointer(e);
+    if(e.target){
+      console.log(e.target.id)
+      if(e.target.id === 'slidebar_preview'){
+        this.touchStart = true;
+        this.startEvent = this.getPointer(e);
+      }
+    }
   }
 
   pointermove = (e)=>{
@@ -162,6 +167,9 @@ export default class CollectionPreview extends React.Component{
       ReactDOM.createPortal(
         <div className={`${styles.viewBoxContainer} ${ Full ? styles.imgContentIsFull : styles.imgContentNotFull}`}
         ref={this.imgContent}
+        onPointerDown={this.pointerdown}
+        onPointerMove={this.pointermove}
+        onPointerUp={this.pointerout}
         style={updateStyle}>
           <span className={styles.closeModal} onClick={()=>{
             dispatch({
@@ -177,10 +185,7 @@ export default class CollectionPreview extends React.Component{
             <MyIcon type="icon-guanbi2"/>
           </span>
           <span className={styles.slidebar}
-          onPointerDown={this.pointerdown}
-          onPointerMove={this.pointermove}
-          onPointerOut={this.pointerout}
-          onPointerUp={this.pointerout}
+          id="slidebar_preview"
           ></span>
 
           <div className={styles.contentTitle}>

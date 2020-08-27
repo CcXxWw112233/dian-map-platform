@@ -426,10 +426,10 @@ let callFunctions = {
     lib.setActiveGroupPoint(id);
   },
   // 渲染分组的采集资料点
-  renderGoupCollectionPoint : (data)=>{
+  renderGroupCollectionPoint : (data)=>{
     if(data){
       let arr = [];
-      Array.isArray(data) ? (arr = data): arr = Object.parse(data);
+      Array.isArray(data) ? (arr = data): arr = JSON.parse(data);
       lib.renderGroupCollectionPoint(arr);
     }
   },
