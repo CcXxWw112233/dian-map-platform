@@ -1,14 +1,15 @@
 import React,{Fragment} from 'react';
 import styles from './index.less';
+import animateCss from '../../../../assets/css/animate.min.css';
 import { MyIcon } from '../../../../components/utils';
-import { Select, Row, Col, message } from 'antd';
+import { Select, Row, Col } from 'antd';
 import DetailAction from '../../../../lib/components/ProjectScouting/ScoutingDetail';
 import TimeSelection from './TimeSelection';
 import { connect } from 'dva';
 import Event from '../../../../lib/utils/event';
 import AllCollection from '../AllCollectionList';
 import { CSSTransition } from 'react-transition-group';
-import CollectionPreview from '../CollectionPreview';
+// import CollectionPreview from '../CollectionPreview';
 
 @connect(({collectionDetail:{selectData, showCollectionsModal}})=>({selectData, showCollectionsModal}))
 export default class LookingBack extends React.Component{
@@ -177,116 +178,34 @@ export default class LookingBack extends React.Component{
       }
     })
   }
-  mapUpdate = ()=>{
-    // console.log('要更新了')
-    let { onUpdate } = this.props;
-    onUpdate && onUpdate(this.state.selectActive);
-  }
+  // mapUpdate = ()=>{
+  //   // console.log('要更新了')
+  //   let { onUpdate } = this.props;
+  //   onUpdate && onUpdate(this.state.selectActive);
+  // }
   // 检查选中的文件属于哪个分组
-  checkSelectDataInGroup = ()=>{
-    return new Promise((resolve)=>{
-      const { selectData } = this.props;
-      let { options } = this.state;
-      if(selectData){
-        let obj = {};
-        options.forEach(item => {
-          if(item.id === selectData.area_type_id){
-            obj = item;
-          }
-        })
-        if(!selectData.area_type_id){
-          obj = options.find(item => item.id === 'other');
-        }
-        this.setState({
-          activeSelectObj: {...obj}
-        },()=>{
-          resolve()
-        })
-      }
-    })
-  }
-  // 切换下一个
-  onNext = async ()=>{
-    await this.checkSelectDataInGroup();
-    const { selectData, dispatch} = this.props;
-    let { activeSelectObj,options } = this.state;
-    // 去除没有媒体信息的分组
-    options = options.filter(item => !item.disabled);
-    let index = activeSelectObj?.collection && activeSelectObj.collection.findIndex(item => item.id === selectData?.id);
-    if(index!== false && index !== -1){
-      if(index === activeSelectObj?.collection?.length -1){
-        // 已经是最后一个了，要切换下一组
-        let groupIndex = options.findIndex(item => item.id === activeSelectObj.id);
-        if(groupIndex === options.length -1){
-          // 分组也到了最后一个，没有后面的了
-          message.warn('已经是最后一个了');
-        }else{
-          this.setState({
-            activeSelectObj: options[groupIndex + 1],
-          },()=>{
-            dispatch({
-              type:"collectionDetail/updateDatas",
-              payload:{
-                selectData: this.state.activeSelectObj.collection[0],
-                type:'view'
-              }
-            })
-          })
-
-        }
-
-      }else {
-        // 切换下一个
-        dispatch({
-          type:"collectionDetail/updateDatas",
-          payload:{
-            selectData: activeSelectObj.collection[index + 1],
-            type:'view'
-          }
-        })
-      }
-    }
-  }
-  onPrev = async ()=>{
-    await this.checkSelectDataInGroup();
-    const { selectData, dispatch} = this.props;
-    let { activeSelectObj,options } = this.state;
-    // 去除没有媒体信息的分组
-    options = options.filter(item => !item.disabled);
-    let index = activeSelectObj?.collection && activeSelectObj.collection.findIndex(item => item.id === selectData?.id);
-    if(index!== false && index !== -1){
-      if(index === 0){
-        // 已经是第一个了，要切换上一组
-        let groupIndex = options.findIndex(item => item.id === activeSelectObj.id);
-        if(groupIndex === 0){
-          // 分组也到了最后一个，没有后面的了
-          message.warn('已经是第一个了');
-        }else{
-          this.setState({
-            activeSelectObj: options[groupIndex - 1],
-          },()=>{
-            dispatch({
-              type:"collectionDetail/updateDatas",
-              payload:{
-                selectData: this.state.activeSelectObj.collection[this.state.activeSelectObj.collection.length - 1],
-                type:'view'
-              }
-            })
-          })
-        }
-      }else {
-        // 切换上一个
-        dispatch({
-          type:"collectionDetail/updateDatas",
-          payload:{
-            selectData: activeSelectObj.collection[index - 1],
-            type:'view'
-          }
-        })
-      }
-    }
-
-  }
+  // checkSelectDataInGroup = ()=>{
+  //   return new Promise((resolve)=>{
+  //     const { selectData } = this.props;
+  //     let { options } = this.state;
+  //     if(selectData){
+  //       let obj = {};
+  //       options.forEach(item => {
+  //         if(item.id === selectData.area_type_id){
+  //           obj = item;
+  //         }
+  //       })
+  //       if(!selectData.area_type_id){
+  //         obj = options.find(item => item.id === 'other');
+  //       }
+  //       this.setState({
+  //         activeSelectObj: {...obj}
+  //       },()=>{
+  //         resolve()
+  //       })
+  //     }
+  //   })
+  // }
 
   render(){
     let { selectActive, activeSelectObj = {}, activeTime, timeData } = this.state;
@@ -339,7 +258,11 @@ export default class LookingBack extends React.Component{
                   <div className={styles.lookingback_item}>
                     { timeData[item].map((data) => {
                       return (
-                        <div className={styles.looking_item} key={data.time} onClick={()=> this.pictureView(data.data)}>
+                        <div className={
+                          `${styles.looking_item}
+                           ${animateCss.animated}
+                          `
+                          } key={data.time} onClick={()=> this.pictureView(data.data)}>
                           <div>
                             <span>{data.data.title}</span>
                             {DetailAction.checkCollectionType(data.data.target) === 'pic' &&
