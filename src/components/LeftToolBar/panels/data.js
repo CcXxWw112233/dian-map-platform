@@ -188,7 +188,7 @@ export const symbols = [
       {
         name: "机场用地",
         iconfont: "rgb(61, 168, 171)",
-        fillColor: "rgb(61, 168, 171)",
+        fillColor: "rgba(61, 168, 171, 0.7)",
       }, //
       {
         name: "广场用地",
@@ -204,17 +204,17 @@ export const symbols = [
       {
         name: "供电用地",
         iconfont: "icon-bianzu151",
-        fillColor: "rgb(80, 157, 255)",
+        fillColor: "rgba(80, 157, 255, 0.7)",
       },
       {
         name: "供水用地",
         iconfont: "icon-bianzu152",
-        fillColor: "rgb(80, 157, 255)",
+        fillColor: "rgba(80, 157, 255, 0.7)",
       },
       {
         name: "供燃气用地",
         iconfont: "icon-bianzu153",
-        fillColor: "rgb(80, 157, 255)",
+        fillColor: "rgba(80, 157, 255, 0.7)",
       },
       {
         name: "一类居住用地",

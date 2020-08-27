@@ -281,7 +281,7 @@ class PlotEdit extends Observable {
       id: operator.guid,
       element: ele,
       position: center,
-      offset: [0, 10],
+      offset: [0, 15],
       positioning: "bottom-center",
     });
     this.map.addOverlay(overlay);

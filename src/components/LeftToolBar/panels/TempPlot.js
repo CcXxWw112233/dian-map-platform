@@ -1,11 +1,9 @@
 import React from "react";
 
 import { Checkbox, Row, Button, message } from "antd";
-import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import styles from "../LeftToolBar.less";
-import event from "../../../lib/utils/event";
 import { plotEdit } from "../../../utils/plotEdit";
 import ListAction from "../../../lib/components/ProjectScouting/ScoutingList";
 import FeatureOperatorEvent from "../../../utils/plot2ol/src/events/FeatureOperatorEvent";
@@ -142,7 +140,8 @@ export default class TempPlot extends React.Component {
   };
 
   handleEditClick = (featureOperator) => {
-    window.featureOperator = featureOperator;
+    const { parent } = this.props;
+    parent.activeFeatureOperator = featureOperator;
     this.props.displayPlotPanel(featureOperator.attrs);
   };
 
@@ -261,10 +260,6 @@ export default class TempPlot extends React.Component {
   };
 
   render() {
-    const panelStyle = this.state.openPanel
-      ? {}
-      : { transform: "translateX(-100%)" };
-    const directionStyle = { display: "table-cell", verticalAlign: "middle" };
     return (
       <div style={{ width: "100%", height: "100%" }}>
         <div

@@ -352,7 +352,8 @@ export default class Plot extends PureComponent {
         this.updateStateCallbackFunc();
       }
     } else {
-      plotEdit.plottingLayer.plotEdit.activate(window.featureOperator.feature);
+      window.featureOperator = parent.activeFeatureOperator;
+      this.plotLayer.plotEdit.activate(window.featureOperator.feature);
     }
   }
   componentWillUnmount() {
@@ -812,8 +813,14 @@ export default class Plot extends PureComponent {
       case "LineString":
         options = {
           ...options,
-          strokeColor: this.strokeColor,
-          fillColor: this.fillColor,
+          strokeColor:
+            index === 0 && this.dic[this.props.plotType] === "Polygon"
+              ? this.state.customStrokeSelectedColor
+              : this.strokeColor,
+          fillColor:
+            index === 0 && this.dic[this.props.plotType] === "Polygon"
+              ? this.state.customFillSelectedColor
+              : this.fillColor,
         };
         break;
       default:
@@ -885,6 +892,7 @@ export default class Plot extends PureComponent {
 
   handleCustomStrokeColorOkClick = (value) => {
     this.strokeColor = value;
+    this.fillColor = this.state.customFillSelectedColor;
     if (this.dic[this.props.plotType] !== "Point") {
       this.symbol = "";
       this.selectName = "自定义类型";
@@ -909,6 +917,7 @@ export default class Plot extends PureComponent {
 
   handleCustomFillColorOkClick = (value) => {
     this.fillColor = value;
+    this.strokeColor = this.state.customStrokeSelectedColor;
     if (this.dic[this.props.plotType] !== "Point") {
       this.symbol = "";
       this.selectName = "自定义类型";
@@ -1024,7 +1033,6 @@ export default class Plot extends PureComponent {
 
   render() {
     const { TextArea } = Input;
-    const { Option } = Select;
     const disableStyle = { color: "rgba(0,0,0,0.2)" };
     const style = { marginTop: 18, marginRight: 10 };
     return (
