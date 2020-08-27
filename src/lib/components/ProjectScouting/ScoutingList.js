@@ -84,14 +84,17 @@ const action = function () {
   };
 
   this.init = async () => {
-    this.Layer = Layer({ id: "project_point_layer", zIndex: 11 });
-    this.Source = Source();
-    this.Layer.setSource(this.Source);
     const layers = InitMap.map.getLayers().getArray();
     const layer = layers.filter((layer) => {
-      return layer.get("id") === this.Layer.get("id");
+      return layer.get("id") === "project_point_layer";
     });
-    if (!layer[0]) InitMap.map.addLayer(this.Layer);
+    if(!layer[0]){
+      this.Layer = Layer({ id: "project_point_layer", zIndex: 11 });
+      this.Source = Source();
+      this.Layer.setSource(this.Source);
+      InitMap.map.addLayer(this.Layer);
+    }
+
     // let el = new addFeaturesOverlay({dataSource:[{text:"123",key:"1"},{text:'测试项目2',key:'2'}],activeKey:"2",width:300},'group')
     // InitMap.map.addOverlay(createOverlay(el.element,{
     //   positioning:"bottom-left",
