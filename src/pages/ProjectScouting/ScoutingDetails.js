@@ -566,6 +566,7 @@ export default class ScoutingDetails extends PureComponent {
 
   // 删除采集的资料
   onCollectionRemove = (item, collection) => {
+    const { dispatch } = this.props;
     let { id } = collection;
 
     Action.removeCollection(id)
@@ -583,6 +584,12 @@ export default class ScoutingDetails extends PureComponent {
             // this.renderCollection();
             this.updateCollection(Array.from(this.state.all_collection), arr);
             Action.oldData = this.state.all_collection;
+            dispatch({
+              type:"collectionDetail/updateDatas",
+              payload:{
+                selectData: null
+              }
+            })
           }
         );
       })

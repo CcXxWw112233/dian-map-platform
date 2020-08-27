@@ -11,6 +11,13 @@ import AllCollection from '../AllCollectionList';
 import { CSSTransition } from 'react-transition-group';
 // import CollectionPreview from '../CollectionPreview';
 
+const times = (()=>{
+  let obj = {};
+  for(let i = 0; i < 23; i++){
+    obj[i] = [];
+  }
+  return obj;
+})();
 @connect(({collectionDetail:{selectData, showCollectionsModal}})=>({selectData, showCollectionsModal}))
 export default class LookingBack extends React.Component{
   constructor(props){
@@ -24,13 +31,7 @@ export default class LookingBack extends React.Component{
       },
       selectData: [],
       previewFull: false,
-      timeData: (()=>{
-        let obj = {};
-        for(let i = 0; i < 23; i++){
-          obj[i] = [];
-        }
-        return obj;
-      })()
+      timeData:times
     }
     this.timer = null;
   }
@@ -57,7 +58,7 @@ export default class LookingBack extends React.Component{
         }
         arr.push(obj);
       }else{
-        arr.push({...item, disabled: true})
+        arr.push({...item, disabled: true, collection:[]})
       }
     })
     return arr ;
@@ -82,7 +83,11 @@ export default class LookingBack extends React.Component{
       this.setState({
         options: arr,
         selectActive: arr[0] ? arr[0].id : 'other',
-        activeSelectObj: arr[0]
+        activeSelectObj: arr[0],
+        activeTime:{
+          y: this.state.activeTime.y
+        },
+        timeData: times
       },()=>{
         // this.activeGroup();
       })
