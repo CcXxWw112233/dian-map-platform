@@ -940,6 +940,7 @@ export default class Plot extends PureComponent {
       this.selectName = "自定义类型";
     } else {
       if (!this.symbol) {
+        this.symbol = this.refs.defaultSymbol.innerText;
         this.selectName = "自定义类型";
       }
     }
@@ -962,7 +963,6 @@ export default class Plot extends PureComponent {
     this.strokeColor = "rgba(106, 154, 255, 1)";
     this.nextProps = null;
     this.defaultSymbol = null;
-    this.symbol = "";
     this.selectName = "自定义类型";
     this.plotName = "";
     this.plotRemark = "";

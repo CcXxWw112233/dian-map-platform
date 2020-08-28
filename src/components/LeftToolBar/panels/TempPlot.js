@@ -247,8 +247,8 @@ export default class TempPlot extends React.Component {
       this.setState({
         selectedGuid: featureOperator.guid,
       });
-      this.plotLayer.setToTop(featureOperator);
       if (featureOperator.feature) {
+        this.plotLayer.setToTop(featureOperator);
         plotEdit.map
           .getView()
           .fit(featureOperator.feature?.getGeometry().getExtent(), {
