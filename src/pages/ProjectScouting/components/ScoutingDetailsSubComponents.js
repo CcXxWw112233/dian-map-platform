@@ -929,12 +929,13 @@ export const UploadItem = ({
 
   const itemClick = (val) => {
     let ty = Action.checkCollectionType(val.target);
-    if (ty === "pic") {
-      // 点击的是图片
-      onCheckItem(val);
-    } else {
-      onCheckItem(null);
-    }
+    // if (ty === "pic") {
+    //   // 点击的是图片
+    //   onCheckItem(val);
+    // } else {
+    //   onCheckItem(null);
+    // }
+    onCheckItem(val);
     if (val.is_display === "0") return;
     if (
       val.location &&

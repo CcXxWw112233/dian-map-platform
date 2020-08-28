@@ -124,7 +124,7 @@ export default class ScoutingDetails extends PureComponent {
   componentDidMount() {
     this.isGoBack = false;
     const { Evt } = Event;
-    const { mainVisible, dispatch} = this.props;
+    const { mainVisible } = this.props;
     if (mainVisible) this.getDetails();
     // 删除存在与页面中的项目点和元素
     Action.removeListPoint();
@@ -174,7 +174,8 @@ export default class ScoutingDetails extends PureComponent {
       type:"collectionDetail/updateDatas",
       payload:{
         selectData: data,
-        type:'view'
+        type:'view',
+        isImg: true
       }
     })
     Action.setGroupCollectionActive(Array.isArray(data) ? data[0] : data)
@@ -206,7 +207,8 @@ export default class ScoutingDetails extends PureComponent {
       type:"collectionDetail/updateDatas",
       payload:{
         selectData: null,
-        type:'view'
+        type:'view',
+        isImg: true
       }
     })
 
@@ -323,7 +325,8 @@ export default class ScoutingDetails extends PureComponent {
       type:"collectionDetail/updateDatas",
       payload:{
         selectData: null,
-        type:'view'
+        type:'view',
+        isImg: true
       }
     })
   };
@@ -587,7 +590,8 @@ export default class ScoutingDetails extends PureComponent {
             dispatch({
               type:"collectionDetail/updateDatas",
               payload:{
-                selectData: null
+                selectData: null,
+                isImg: true
               }
             })
           }
@@ -1294,11 +1298,13 @@ export default class ScoutingDetails extends PureComponent {
   checkItem = (val) => {
     const { dispatch } = this.props;
     // console.log(val)
+    let type = Action.checkCollectionType(val.target);
     dispatch({
       type:"collectionDetail/updateDatas",
       payload:{
         selectData: val,
-        type:'edit'
+        type:'edit',
+        isImg: type === 'pic'
       }
     })
   }
@@ -1621,66 +1627,6 @@ export default class ScoutingDetails extends PureComponent {
                 >
                   {this.state.multipleGroup ? "分组展示" : "组合展示"}
                 </Button>
-                {/* <Popover
-                title="选择播放模式"
-                trigger="click"
-                visible={this.state.playCollectionVisible}
-                onVisibleChange={(visible)=> this.setState({playCollectionVisible: visible})}
-                content={
-                  <div style={{textAlign:"center"}}>
-                    <Form size='small' onFinish={this.toPlayCollection}
-                    initialValues={
-                      {
-                        mode:PlayCollectionAction.playMode,
-                        time:PlayCollectionAction.autoPlayTime,
-                        showone: PlayCollectionAction.justShowOne
-                      }
-                    }>
-                      <Form.Item label="播放模式" name='mode'>
-                        <Radio.Group buttonStyle="solid"
-                        size="small">
-                          <Radio.Button value="hand">手动</Radio.Button>
-                          <Radio.Button value='auto'>自动</Radio.Button>
-                        </Radio.Group>
-                      </Form.Item>
-                      <Form.Item
-                      noStyle
-                      shouldUpdate={(prevValues, currentValues) => prevValues.mode !== currentValues.mode}>
-                        {({getFieldValue }) => {
-                          return (
-                            <Form.Item name="time" label="播放间隔">
-                              <InputNumber value={PlayCollectionAction.autoPlayTime} size="small"
-                              max={60}
-                              formatter={value => `${value}s`}
-                              parser={value => value.replace('s', '')}
-                              disabled={getFieldValue('mode') === 'hand'}/>
-                            </Form.Item>
-                          )
-                        }}
-                      </Form.Item>
-                      <Form.Item name="showone" label="单个展示">
-                        <Radio.Group>
-                          <Radio value={false}>否</Radio>
-                          <Radio value={true}>是</Radio>
-                        </Radio.Group>
-                      </Form.Item>
-                      <Form.Item style={{marginBottom:"5px"}}>
-                        <Button type="primary" htmlType="submit" shape='round' size='small'>
-                          开始
-                        </Button>
-                      </Form.Item>
-                    </Form>
-                  </div>
-                }>
-                  <Button
-                  icon={<MyIcon type="icon-bofang"/>}
-                  ghost
-                  size="small"
-                  type="primary"
-                  disabled={!all_collection.length}>
-                    演播
-                  </Button>
-                </Popover> */}
               </Space>
             </div>
           </Fragment>
