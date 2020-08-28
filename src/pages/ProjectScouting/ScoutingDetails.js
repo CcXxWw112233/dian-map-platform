@@ -1505,11 +1505,11 @@ export default class ScoutingDetails extends PureComponent {
   onMultipleRemove = ()=>{
     let arr = [...this.state.selections, ...this.state.notAreaIdSelections];
     let list = Array.from(this.state.all_collection);
-    for(let i = 0; i< arr.length; i ++){
-      ( async ()=>{
+    ( async ()=>{
+      for(let i = 0; i< arr.length; i ++){
         await Action.removeCollection(arr[i]).catch(err=> console.log(err));
-      })()
-    }
+      }
+    })()
     list = list.filter(item => !arr.includes(item.id));
     this.setState({
       all_collection: list,

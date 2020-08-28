@@ -19,8 +19,8 @@ instance.interceptors.request.use(config => {
     NProgress.start();
   }
   else {
-    if(BASIC.getUrlParam.isMobile === "1") return ;
     clearTimeout(requestTimer);
+    if(BASIC.getUrlParam.isMobile === "1") return {};
     requestTimer = setTimeout(()=>{
       message.error('缺少权限，无法试用地图');
     },1000)
