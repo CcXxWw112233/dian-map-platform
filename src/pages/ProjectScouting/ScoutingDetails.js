@@ -481,6 +481,8 @@ export default class ScoutingDetails extends PureComponent {
         let arr = obj.collection;
         this.state.area_active_key === "other" &&
           (arr = this.state.not_area_id_collection);
+          // 只有在整理页面才需要渲染
+        if(this.state.activeKey === '1')
         this.renderCollection(arr || []);
         // 更新回看的列表
         let a = area_list.concat([{id:'other',name: '未整理',collection:this.state.not_area_id_collection}]);
