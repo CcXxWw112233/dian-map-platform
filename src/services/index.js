@@ -10,7 +10,7 @@ const instance = axios.create({
   baseURL: BASIC.API_URL
 })
 NProgress.inc(0.3)
-NProgress.configure({ easing: 'ease', speed: 500, showSpinner: true })
+NProgress.configure({ easing: 'ease', speed: 500, showSpinner: false })
 let requestTimer = null ,responseTimer = null;
 instance.interceptors.request.use(config => {
   let token = BASIC.getUrlParam.token;
