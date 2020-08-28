@@ -8,14 +8,14 @@ import { gcj02_to_wgs84, wgs84_to_gcj02 } from "utils/transCoordinateSystem";
 const baseMapKeys = ["gd_vec|gd_img|gg_img", "td_vec|td_img|td_ter"];
 export const createPlottingFeature = (data) => {
   let newType = data.geoType.toLowerCase();
-  let coordinates = null;
+  let coordinates = data.coordinates;
+  if (!coordinates) return
   if (newType === "point") {
     newType = "marker";
     coordinates = [data.coordinates];
   }
   if (newType === "linestring") {
     newType = "polyline";
-    coordinates = data.coordinates;
   }
   if (newType === "polygon") {
     coordinates = [...data.coordinates[0]];
