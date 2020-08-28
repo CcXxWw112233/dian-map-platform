@@ -312,7 +312,8 @@ class IndexPage extends React.Component {
         {isShowMobile && <FlutterComponents />}
         {editShow && <MatrixEdit />}
         {/* 文件上传通知 */}
-        {!isShowMobile && <UploadNotification />}
+        {/* {!isShowMobile && } */}
+        <UploadNotification />
       </div>
     );
   }
