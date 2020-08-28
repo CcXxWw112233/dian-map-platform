@@ -1283,17 +1283,61 @@ export default class ScoutingDetails extends PureComponent {
       other = current[index + 1];
       ids = [collection.id, other.id];
     }
+    let array = Array.from(this.state.all_collection);
     // 保存
     if (ids.length)
       Action.saveMergeCollection({ data_ids: ids }).then((res) => {
         message.success("操作成功");
-        this.fetchCollection();
+        // this.fetchCollection();
+        let g_id = [], list = [];
+        let arr = array.filter(item => ids.includes(item.id));
+        g_id = arr.map(item => item.group_id).filter(v => v);
+        if(g_id.length){
+          // 两个拥有groupId的数据，合并抹除掉其中一个
+          if(g_id.length > 1){
+            let oldId = g_id[1];
+            let newId = g_id[0];
+            list = array.map(item => {
+              if(ids.includes(item.id)){
+                item.group_id = newId;
+              }
+              if(item.group_id === oldId){
+                item.group_id = newId;
+              }
+              return item ;
+            })
+          }else if(g_id.length === 1){
+            list = array.map(item => {
+              if(ids.includes(item.id)){
+                item.group_id = g_id[0];
+              }
+              return item ;
+            })
+          }
+        }
+        else {
+          let mgId = Math.round(Math.random() * 1000000 + 1);
+          list = array.map(item => {
+            if(ids.includes(item.id)){
+              item.group_id = mgId;
+            }
+            return item;
+          })
+        }
+        this.updateAllCollectionReset(list);
       });
     // 退出这个组合
     if (type === "cancel") {
       await this.CollectionReMerge(collection);
       message.success("操作成功");
-      this.fetchCollection();
+      array = array.map(item => {
+        if(item.id === collection.id){
+          item.group_id = "";
+        }
+        return item;
+      })
+      this.updateAllCollectionReset(array);
+      // this.fetchCollection();
     }
   };
 
