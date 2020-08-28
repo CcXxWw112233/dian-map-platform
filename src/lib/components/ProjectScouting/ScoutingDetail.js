@@ -1758,6 +1758,10 @@ function Action() {
     }
   };
 
+  this.addAnimatePoint = ({duration, inOrOut = 'out', feature})=>{
+
+  }
+
   // 更新江西数据的临时方法
   this.loadGeoJson = async (props = {}) => {
     let { boardId, areaTypeId } = props;
