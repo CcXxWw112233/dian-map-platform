@@ -1639,7 +1639,7 @@ export default class ScoutingDetails extends PureComponent {
                     style={{ backgroundColor: "#fff", marginBottom: "10px" }}
                     header={
                       <ScoutingHeader
-                        data={{ name: "未分组", id: "other" }}
+                        data={{ name: "未整理", id: "other" }}
                         edit={false}
                         activeKey={this.state.area_active_key}
                         index={area_list.length + 1}
