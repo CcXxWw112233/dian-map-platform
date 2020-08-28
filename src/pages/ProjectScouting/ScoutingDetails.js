@@ -1650,7 +1650,7 @@ export default class ScoutingDetails extends PureComponent {
                     }
                   >
                     {!!not_area_id_collection.length ? (
-                      <Checkbox.Group onChange={this.onNotAreaIdSelection}>
+                      <Checkbox.Group onChange={this.onNotAreaIdSelection} style={{width:"100%"}}>
                         <div className={styles.norAreaIdsData}>
                           {not_area_id_collection.map((item, index) => {
                             let activeStyle = null;
