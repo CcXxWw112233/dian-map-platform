@@ -162,6 +162,7 @@ const action = function () {
     let lastBaseMapKey = InitMap.lastBaseMapKey;
     let baseMapKey = InitMap.baseMapKey;
     if (
+      (lastBaseMapKey && baseMapKey) &&
       this.baseMapKeys[0].indexOf(lastBaseMapKey) ===
       this.baseMapKeys[0].indexOf(baseMapKey)
     ) {
