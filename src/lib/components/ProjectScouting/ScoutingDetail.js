@@ -646,8 +646,7 @@ function Action() {
         continue;
       }
       if (
-        featureType.indexOf("/") > -1 ||
-        featureType.indexOf("data:image") > -1
+        featureType.indexOf("/") > -1
       ) {
         isImage = true;
         if (featureType.indexOf("https") === 0) {

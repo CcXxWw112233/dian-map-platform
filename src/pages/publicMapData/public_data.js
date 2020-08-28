@@ -504,12 +504,12 @@ const jsons = {
     //     },
     //   ],
     // },
-    {
-      name: "政策红线",
-      icon: "icon-icon-xianzai",
-      key: "7",
-      child: [],
-    },
+    // {
+    //   name: "政策红线",
+    //   icon: "icon-icon-xianzai",
+    //   key: "7",
+    //   child: [],
+    // },
     {
       name: "地产楼盘",
       icon: "icon-loufang2",
