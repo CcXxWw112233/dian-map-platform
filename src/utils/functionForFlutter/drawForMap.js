@@ -21,6 +21,7 @@ function renderAction (){
     // 渲染分组内的所有坐标
     this.renderGroupCollectionPoint = (data)=>{
       if(!data && !data.length) return ;
+      DetailAction.init();
       DetailAction.renderGoupCollectionForLookingBack(data);
     }
     // 清除

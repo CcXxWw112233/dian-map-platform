@@ -12,7 +12,7 @@ import Event from '../../../../lib/utils/event';
 import EditDescription from './editDescription';
 import Slider from "react-slick";
 
-@connect(({collectionDetail: { selectData ,zIndex, type} })=>({ selectData ,zIndex ,type}))
+@connect(({collectionDetail: { selectData ,zIndex, type,isImg} })=>({ selectData ,zIndex ,type, isImg}))
 export default class CollectionDetail extends React.Component{
   constructor(props){
     super(props);
@@ -174,7 +174,7 @@ export default class CollectionDetail extends React.Component{
             }
             return item;
           }),
-          type:'edit'
+          type:'edit',
         }
       })
       let datas = DetailAction.oldData;
@@ -198,7 +198,7 @@ export default class CollectionDetail extends React.Component{
 
   render(){
     const { sliderPages } = this.state;
-    let { dispatch ,zIndex, selectData} = this.props;
+    let { dispatch ,zIndex, selectData, isImg} = this.props;
     // let selectData = activeImg || {};
     selectData = Array.isArray(selectData) ? selectData: selectData ? [selectData] : null;
     // let oldRemark = selectData && selectData.description;
@@ -222,7 +222,7 @@ export default class CollectionDetail extends React.Component{
             </span> */}
             <span className={styles.close}>
               <MyIcon type="icon-guanbi2" onClick={()=> dispatch({
-                type:'collectionDetail/updateDatas',payload:{selectData:null}
+                type:'collectionDetail/updateDatas',payload:{selectData:null,isImg: true}
               })}/>
             </span>
           </div>
@@ -242,14 +242,14 @@ export default class CollectionDetail extends React.Component{
             <Carousel ref={this.slider} loop={false} afterChange={this.slideChange}>
               { selectData && selectData.map(item => {
                 return (<div key={item.id}>
-                  <div className={styles.container_img}>
+                  {isImg && <div className={styles.container_img}>
                     <img src={item.resource_url} alt="" onClick={this.previewImg}/>
-                  </div>
+                  </div>}
                   <div className={styles.data_msg}>
                     <div className={styles.data_title}>
                       {item.title ? <span>{item.title}</span> : <span>&nbsp;</span>}
                     </div>
-                    <EditDescription disabled={this.state.disabled} data={item} onEdit={this.saveEdit}/>
+                    <EditDescription disabled={this.state.disabled} data={item} onEdit={this.saveEdit} isMaxHeight={!isImg}/>
                     <div className={styles.creator}>
                       <Row gutter={10}>
                         <Col span={12}>

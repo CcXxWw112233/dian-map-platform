@@ -11,6 +11,7 @@ import axios from "axios";
 import { baseConfig } from "../../globalSet/config";
 // import { draw } from "utils/draw";
 import scoutingProjectAction from "../../lib/components/ProjectScouting/ScoutingList";
+import DetailAction from '../../lib/components/ProjectScouting/ScoutingDetail';
 import lib from './drawForMap'
 import { setLocal } from "../sessionManage";
 import Event from '../../lib/utils/event';
@@ -426,10 +427,10 @@ let callFunctions = {
     lib.setActiveGroupPoint(id);
   },
   // 渲染分组的采集资料点
-  renderGoupCollectionPoint : (data)=>{
+  renderGroupCollectionPoint : (data)=>{
     if(data){
       let arr = [];
-      Array.isArray(data) ? (arr = data): arr = Object.parse(data);
+      Array.isArray(data) ? (arr = data): arr = JSON.parse(data);
       lib.renderGroupCollectionPoint(arr);
     }
   },
@@ -464,6 +465,14 @@ let callFunctions = {
       zoom: zoom,
       duration:200
     });
+  },
+
+  renderTestData :(data)=>{
+    DetailAction.loadGeoJson(data);
+  },
+
+  saveTestPoint : (val = {})=>{
+    DetailAction.savePoint(val)
   }
 
 };
