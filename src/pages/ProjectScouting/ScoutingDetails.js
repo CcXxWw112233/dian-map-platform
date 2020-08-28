@@ -823,7 +823,7 @@ export default class ScoutingDetails extends PureComponent {
     if (!key) {
       this.renderCollection([]);
       this.renderGroupPointer();
-      this.clearGroupCollectionPoint();
+      Action.clearGroupCollectionPoint();
     } else {
       this.clearGroupPointer();
     }
@@ -1435,7 +1435,7 @@ export default class ScoutingDetails extends PureComponent {
       this.setActiveCollapse("");
       // 渲染分类坐标
       this.renderGroupPointer();
-      this.clearGroupCollectionPoint();
+      Action.clearGroupCollectionPoint();
     }
   };
 
