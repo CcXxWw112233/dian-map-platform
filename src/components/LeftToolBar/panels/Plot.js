@@ -986,28 +986,23 @@ export default class Plot extends PureComponent {
       if (this.projectId) {
         this.save2Group(window.featureOperator)
           .then((resp) => {
-            if (window.ProjectGroupId) {
-              let collections = DetailAction.CollectionGroup;
-              let obj = collections.find(
-                (item) => item.id === window.ProjectGroupId
-              );
-              if (obj) {
-                let data = resp.data;
-                let coll = data && data[0];
-                if (coll) {
-                  coll.is_display = "1";
-                  // obj.collection.push(coll);
-                  // let arr = obj.collection;
-                  // DetailAction.renderCollection(arr, {
-                  //   lenged: this.props.config,
-                  //   dispatch: this.props.dispatch,
-                  // });
-                  DetailAction.oldData.push(coll)
-                  Event.Evt.firEvent('CollectionUpdate:reload',DetailAction.oldData)
-                }
-              }
-              this.props.goBackProject();
+            // if (window.ProjectGroupId) {
+            //   let collections = DetailAction.CollectionGroup;
+            //   let obj = collections.find(
+            //     (item) => item.id === window.ProjectGroupId
+            //   );
+            //   if (obj) {
+            let data = resp.data;
+            let coll = data && data[0];
+            if (coll) {
+              coll.is_display = "1";
+              DetailAction.oldData.push(coll)
+              Event.Evt.firEvent('CollectionUpdate:reload',DetailAction.oldData);
             }
+            this.props.goBackProject();
+            //   }
+
+            // }
           })
           .catch((err) => {
             console.log(err);
