@@ -95,7 +95,7 @@ function Action() {
   this.oldData = [];
   this.CollectionGroup = [];
   this.groupPointer = [];
-  let requestTime = 60 * 1000;
+  let requestTime = 80 * 1000;
   this.selectedFeatureOperator = null;
   this.groupCollectionPointer = [];
 
