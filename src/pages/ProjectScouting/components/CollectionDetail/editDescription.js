@@ -80,26 +80,24 @@ export default function EditDescription (props){
         { isEdit ? <MyIcon type="icon-bianzu7beifen"/> : <MyIcon type="icon-huabi" onClick={()=> toEdit()}/>}
       </span>)
       :"" }
-      { !isEdit ? <ReactMarkdown source={text || '未添加备注哦'}
-      className={`${styles.data_remark} ${ props.isMaxHeight ? styles.maxHeight :""}`}
-      escapeHtml={false}
-      />
-      :
-        <textarea className={`${styles.data_remark} ${ props.isMaxHeight ? styles.maxHeight :""} ${isEdit ? styles.activeEdit :""}`}
+        <ReactMarkdown source={text || '未添加备注哦'}
+        className={`${styles.data_remark} ${ props.isMaxHeight ? styles.maxHeight :""} ${isEdit ? styles.hidden: styles.show}`}
+        />
+        <textarea className={`${styles.data_remark}
+        ${ props.isMaxHeight ? styles.maxHeight :""}
+        ${isEdit ? styles.activeEdit :""} ${!isEdit ? styles.hidden: styles.show}`}
         suppressContentEditableWarning
-        onPaste={textFormat}
+        // onPaste={textFormat}
         ref={content}
         defaultValue={text}
         value={text}
         placeholder="未添加备注哦"
         onBlur={() => setTimeout(()=> {editEnd()},100)}
         onDoubleClick={toEdit}
-        onInput={(e)=>{setText(e.target.value)}}
+        onInput={(e)=>{setText(e.target.value.trim())}}
         contentEditable={isEdit}>
           {data?.description?.trim()}
         </textarea>
-      }
-
     </div>
   )
 }
