@@ -14,7 +14,6 @@ import { lineDrawing, pointDrawing, polygonDrawing } from "utils/drawing";
 import ListAction from "@/lib/components/ProjectScouting/ScoutingList";
 import { connect } from "dva";
 
-
 @connect(({ openswitch: { isShowLeftToolBar, isInvalidToolBar } }) => ({
   isShowLeftToolBar,
   isInvalidToolBar,
@@ -272,7 +271,16 @@ export default class LeftToolBar extends React.Component {
   handleItemOver = () => {};
 
   handleItemLeave = () => {};
-
+  displayPlotPanel = (attrs) => {
+    this.isModifyPlot = true;
+    this.oldPlotName = attrs.name;
+    this.oldRemark = attrs.remark;
+    this.setState({
+      plotType: this.dic[attrs.geometryType],
+      displayPlot: true,
+      displayTempPlot: false,
+    });
+  };
   render() {
     let tempPlotItemStyle = { bottom: 60, left: 4 };
     let customSymbolStoreStyle = { bottom: 0, left: 4 };
@@ -441,16 +449,7 @@ export default class LeftToolBar extends React.Component {
                   displayTempPlot: false,
                 });
               }}
-              displayPlotPanel={(attrs) => {
-                this.isModifyPlot = true;
-                this.oldPlotName = attrs.name;
-                this.oldRemark = attrs.remark;
-                this.setState({
-                  plotType: this.dic[attrs.geometryType],
-                  displayPlot: true,
-                  displayTempPlot: false,
-                });
-              }}
+              displayPlotPanel={(attrs) => this.displayPlotPanel(attrs)}
               editPlot={this.editPlot}
             ></TempPlot>
           ) : null}

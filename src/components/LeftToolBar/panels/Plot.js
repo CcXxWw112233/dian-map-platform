@@ -18,7 +18,6 @@ import { MyIcon } from "../../utils";
 import symbolStoreServices from "../../../services/symbolStore";
 import mapApp from "utils/INITMAP";
 
-
 // import { loadGeoJson } from "../tmp"
 
 const SymbolBlock = ({
@@ -258,21 +257,6 @@ export default class Plot extends PureComponent {
     this.plotLayer = plotEdit.getPlottingLayer();
     const me = this;
     const { parent } = this.props;
-    if (parent.isModifyPlot === true) {
-      this.plotName = parent.oldPlotName;
-      this.plotRemark = parent.oldRemark;
-      this.setState({
-        name: parent.oldPlotName,
-        remark: parent.oldRemark,
-      });
-    }
-    if (parent.customSymbols) {
-      this.setState({
-        symbols: [parent.customSymbols, ...symbols],
-      });
-    } else {
-      this.getCustomSymbol();
-    }
     this.operatorActive = function (e) {
       if (!e.feature_operator.isScouting) {
         // 激活即修改状态
@@ -285,7 +269,7 @@ export default class Plot extends PureComponent {
           parent.featureOperatorList.push(operator);
         }
         window.featureOperator = operator;
-        me.plotName = window.featureOperator.getName()
+        me.plotName = window.featureOperator.getName();
         me.plotLayer.setToTop(window.featureOperator);
         ListAction.checkItem()
           .then((res) => {
@@ -359,7 +343,22 @@ export default class Plot extends PureComponent {
       window.featureOperator = parent.activeFeatureOperator;
       this.plotLayer.plotEdit.activate(window.featureOperator.feature);
     }
-    // loadGeoJson(this)
+    if (parent.isModifyPlot === true) {
+      this.plotName = parent.oldPlotName;
+      this.plotRemark = parent.oldRemark;
+      this.setState({
+        name: parent.oldPlotName,
+        remark: parent.oldRemark,
+      });
+    }
+    if (parent.customSymbols) {
+      const mySymbols = symbols;
+      this.setState({
+        symbols: [parent.customSymbols, ...mySymbols],
+      });
+    } else {
+      this.getCustomSymbol();
+    }
   }
   componentWillUnmount() {
     const { parent } = this.props;
@@ -400,8 +399,9 @@ export default class Plot extends PureComponent {
     this.isLoaded = false;
     const { parent } = this.props;
     if (parent.customSymbols) {
+      const mySymbols = symbols;
       this.setState({
-        symbols: [parent.customSymbols, ...symbols],
+        symbols: [parent.customSymbols, ...mySymbols],
       });
     } else {
       this.customSymbols = {
@@ -420,9 +420,10 @@ export default class Plot extends PureComponent {
                 const temp = { name: item.icon_name, imageUrl: item.icon_url };
                 this.customSymbols.content.push(temp);
               });
+              const mySymbols = symbols;
               this.setState(
                 {
-                  symbols: [this.customSymbols, ...symbols],
+                  symbols: [this.customSymbols, ...mySymbols],
                 },
                 () => {
                   parent.customSymbols = this.customSymbols;
@@ -433,8 +434,9 @@ export default class Plot extends PureComponent {
         })
         .catch((err) => {
           this.isLoaded = true;
+          const mySymbols = symbols;
           this.setState({
-            symbols: symbols,
+            symbols: mySymbols,
           });
           console.log(err);
         });
@@ -631,6 +633,8 @@ export default class Plot extends PureComponent {
           : this.strokeColor,
       remark: this.state.remark,
       selectName: "自定义类型",
+      plotType: this.props.plotType,
+      geometryType: this.dic[this.props.plotType],
       coordSysType: 0,
     };
     if (this.baseMapKeys[0].indexOf(mapApp.baseMapKey) === -1) {
@@ -848,6 +852,7 @@ export default class Plot extends PureComponent {
       remark: this.plotRemark,
       selectName: this.selectName,
       plotType: this.props.plotType,
+      geometryType: this.dic[this.props.plotType],
       coordSysType: 0, //坐标系类型，0代表gcj02，1代表wgs84
     };
     if (this.baseMapKeys[0].indexOf(mapApp.baseMapKey) === -1) {
@@ -898,10 +903,8 @@ export default class Plot extends PureComponent {
   handleCustomStrokeColorOkClick = (value) => {
     this.strokeColor = value;
     this.fillColor = this.state.customFillSelectedColor;
-    if (this.props.isModifyPlot) {
-      plotEdit.plottingLayer.plotEdit.removePlotOverlay(
-        window.featureOperator
-      );
+    if (window.featureOperator) {
+      plotEdit.plottingLayer.plotEdit.removePlotOverlay(window.featureOperator);
     }
     if (this.dic[this.props.plotType] !== "Point") {
       this.symbol = "";
@@ -929,10 +932,8 @@ export default class Plot extends PureComponent {
   handleCustomFillColorOkClick = (value) => {
     this.fillColor = value;
     this.strokeColor = this.state.customStrokeSelectedColor;
-    if (this.props.isModifyPlot) {
-      plotEdit.plottingLayer.plotEdit.removePlotOverlay(
-        window.featureOperator
-      );
+    if (window.featureOperator) {
+      plotEdit.plottingLayer.plotEdit.removePlotOverlay(window.featureOperator);
     }
     if (this.dic[this.props.plotType] !== "Point") {
       this.symbol = "";
@@ -1008,8 +1009,11 @@ export default class Plot extends PureComponent {
             let coll = data && data[0];
             if (coll) {
               coll.is_display = "1";
-              DetailAction.oldData.push(coll)
-              Event.Evt.firEvent('CollectionUpdate:reload',DetailAction.oldData);
+              DetailAction.oldData.push(coll);
+              Event.Evt.firEvent(
+                "CollectionUpdate:reload",
+                DetailAction.oldData
+              );
             }
             this.props.goBackProject();
             //   }
@@ -1048,6 +1052,7 @@ export default class Plot extends PureComponent {
     const { TextArea } = Input;
     const disableStyle = { color: "rgba(0,0,0,0.2)" };
     const style = { marginTop: 18, marginRight: 10 };
+    const { plotType } = this.props;
     return (
       <div
         style={{ width: "100%", height: "100%" }}
@@ -1147,7 +1152,7 @@ export default class Plot extends PureComponent {
                 <div className={styles.header} style={style}>
                   <span
                     style={
-                      this.dic[this.props.plotType] === "LineString"
+                      this.dic[plotType] === "LineString"
                         ? {
                             ...disableStyle,
                             ...{ fontSize: "14px" },
@@ -1161,7 +1166,7 @@ export default class Plot extends PureComponent {
                     className={styles.colorbar}
                     style={{
                       background:
-                        this.dic[this.props.plotType] === "LineString"
+                        this.dic[plotType] === "LineString"
                           ? "rgba(0,0,0,0.2)"
                           : this.state.customFillSelectedColor,
                       margin: 8,
@@ -1170,25 +1175,21 @@ export default class Plot extends PureComponent {
                   ></div>
                   <ColorPicker
                     handleOK={this.handleCustomFillColorOkClick}
-                    disable={
-                      this.dic[this.props.plotType] === "LineString"
-                        ? false
-                        : true
-                    }
+                    disable={this.dic[plotType] === "LineString" ? false : true}
                   ></ColorPicker>
                 </div>
               </div>
             </div>
             {this.state.symbols.length > 0 ? (
               this.state.symbols.map((item, index) => {
-                if (item.type.indexOf(this.props.plotType) >= 0) {
+                if (item.type.indexOf(plotType) >= 0) {
                   return (
                     <SymbolBlock
                       key={guid(false)}
                       data={{ item: item, index: index }}
                       plotTypeName={this.selectSymbolName}
                       indexStr={this.state.symbolSelectedIndex}
-                      plotType={this.props.plotType}
+                      plotType={plotType}
                       strokeColor={this.state.customStrokeSelectedColor}
                       fillColor={this.state.customFillSelectedColor}
                       cb={this.getFillSymbol}
