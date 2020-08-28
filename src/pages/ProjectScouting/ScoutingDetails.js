@@ -14,6 +14,8 @@ import {
   Space,
   // Popover,
   Empty,
+  Popconfirm,
+  Checkbox,
   // Radio,
   // Form,
   // Input,
@@ -111,6 +113,9 @@ export default class ScoutingDetails extends PureComponent {
       activeId: -1,
       audioData: {},
       miniTitle: false,
+      isEdit: false,
+      selections: [],
+      notAreaIdSelections: []
     };
     this.scrollView = React.createRef();
     this.saveSortTimer = null;
@@ -576,7 +581,6 @@ export default class ScoutingDetails extends PureComponent {
 
   // 删除采集的资料
   onCollectionRemove = (item, collection) => {
-    const { dispatch } = this.props;
     let { id } = collection;
 
     Action.removeCollection(id)
@@ -594,13 +598,7 @@ export default class ScoutingDetails extends PureComponent {
             // this.renderCollection();
             this.updateCollection(Array.from(this.state.all_collection), arr);
             Action.oldData = this.state.all_collection;
-            dispatch({
-              type:"collectionDetail/updateDatas",
-              payload:{
-                selectData: null,
-                isImg: true
-              }
-            })
+            this.hiddenDetail();
           }
         );
       })
@@ -609,7 +607,17 @@ export default class ScoutingDetails extends PureComponent {
         console.log(err);
       });
   };
-
+  // 隐藏右上角的详情框
+  hiddenDetail = ()=>{
+    const { dispatch } = this.props;
+    dispatch({
+      type:"collectionDetail/updateDatas",
+      payload:{
+        selectData: null,
+        isImg: true
+      }
+    })
+  }
   // 取消新增
   cancelEditCollection = () => {
     message.destroy();
@@ -1483,6 +1491,38 @@ export default class ScoutingDetails extends PureComponent {
     }
   };
 
+  selectionCollection = (val)=>{
+    this.setState({
+      selections: val
+    })
+  }
+  onNotAreaIdSelection = (val)=>{
+    this.setState({
+      notAreaIdSelections: val
+    })
+  }
+  // 多选删除
+  onMultipleRemove = ()=>{
+    let { } = this.props;
+    let arr = [...this.state.selections, ...this.state.notAreaIdSelections];
+    let list = Array.from(this.state.all_collection);
+    for(let i = 0; i< arr.length; i ++){
+      ( async ()=>{
+        await Action.removeCollection(arr[i]).catch(err=> console.log(err));
+      })()
+    }
+    list = list.filter(item => !arr.includes(item.id));
+    this.setState({
+      all_collection: list,
+      notAreaIdSelections:[],
+      selections: []
+    }, ()=>{
+      message.success('删除成功');
+      this.hiddenDetail();
+      this.updateAllCollectionReset(list)
+    })
+  }
+
   renderForActive = (key) => {
     const {
       area_list,
@@ -1550,6 +1590,8 @@ export default class ScoutingDetails extends PureComponent {
                       style={{ backgroundColor: "#fff", marginBottom: "10px" }}
                     >
                       <ScoutingItem
+                        onSelectCollection={this.selectionCollection}
+                        CollectionEdit={this.state.isEdit}
                         board={this.state.current_board}
                         // dispatch={dispatch}
                         onCheckItem={this.checkItem}
@@ -1608,53 +1650,56 @@ export default class ScoutingDetails extends PureComponent {
                     }
                   >
                     {!!not_area_id_collection.length ? (
-                      <div className={styles.norAreaIdsData}>
-                        {not_area_id_collection.map((item, index) => {
-                          let activeStyle = null;
-                          if (item.id === activeId) {
-                            activeStyle = {
-                              backgroundColor: "rgba(214,228,255,0.5)",
-                            };
-                          }
-                          return (
-                            <div
-                              key={item.id}
-                              className={`${animateCss.animated} ${animateCss.slideInRight}`}
-                              style={{
-                                animationDuration: "0.3s",
-                                animationDelay: index * 0.02 + "s",
-                                width: "100%",
-                              }}
-                            >
-                              <UploadItem
-                                onCheckItem={this.checkItem}
-                                style={activeStyle}
-                                data={item}
-                                type={Action.checkCollectionType(item.target)}
-                                areaList={area_list}
-                                onSelectGroup={this.onSelectGroup}
-                                onRemove={this.onCollectionRemove.bind(
-                                  this,
-                                  item
-                                )}
-                                onEditCollection={this.onEditCollection}
-                                onChangeDisplay={this.onChangeDisplay.bind(
-                                  this,
-                                  item
-                                )}
-                                onModifyRemark={this.onModifyRemark}
-                                onRemarkSave={this.onRemarkSave}
-                                onModifyFeature={this.onModifyFeatureInDetails}
-                                onStopMofifyFeatureInDetails={
-                                  this.onStopMofifyFeatureInDetails
-                                }
-                                onToggleChangeStyle={this.onToggleChangeStyle}
-                                onCopyCollection={this.onCopyCollection}
-                              />
-                            </div>
-                          );
-                        })}
-                      </div>
+                      <Checkbox.Group onChange={this.onNotAreaIdSelection}>
+                        <div className={styles.norAreaIdsData}>
+                          {not_area_id_collection.map((item, index) => {
+                            let activeStyle = null;
+                            if (item.id === activeId) {
+                              activeStyle = {
+                                backgroundColor: "rgba(214,228,255,0.5)",
+                              };
+                            }
+                            return (
+                              <div
+                                key={item.id}
+                                className={`${animateCss.animated} ${animateCss.slideInRight}`}
+                                style={{
+                                  animationDuration: "0.3s",
+                                  animationDelay: index * 0.02 + "s",
+                                  width: "100%",
+                                }}
+                              >
+                                <UploadItem
+                                  Edit={this.state.isEdit}
+                                  onCheckItem={this.checkItem}
+                                  style={activeStyle}
+                                  data={item}
+                                  type={Action.checkCollectionType(item.target)}
+                                  areaList={area_list}
+                                  onSelectGroup={this.onSelectGroup}
+                                  onRemove={this.onCollectionRemove.bind(
+                                    this,
+                                    item
+                                  )}
+                                  onEditCollection={this.onEditCollection}
+                                  onChangeDisplay={this.onChangeDisplay.bind(
+                                    this,
+                                    item
+                                  )}
+                                  onModifyRemark={this.onModifyRemark}
+                                  onRemarkSave={this.onRemarkSave}
+                                  onModifyFeature={this.onModifyFeatureInDetails}
+                                  onStopMofifyFeatureInDetails={
+                                    this.onStopMofifyFeatureInDetails
+                                  }
+                                  onToggleChangeStyle={this.onToggleChangeStyle}
+                                  onCopyCollection={this.onCopyCollection}
+                                />
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </Checkbox.Group>
                     ) : (
                       <Empty
                         style={{ textAlign: "center" }}
@@ -1666,6 +1711,7 @@ export default class ScoutingDetails extends PureComponent {
               </Collapse>
             </PublicView>
             <div className={styles.addAreaBtn}>
+            {!this.state.isEdit ?
               <Space style={{ paddingBottom: 10 }}>
                 <Button
                   type="primary"
@@ -1686,7 +1732,45 @@ export default class ScoutingDetails extends PureComponent {
                 >
                   {this.state.multipleGroup ? "分组展示" : "组合展示"}
                 </Button>
+                <Button
+                  type="primary"
+                  ghost
+                  size="small"
+                  icon={<MyIcon type="icon-huabi" />}
+                  onClick={()=> {this.setState({isEdit: true})}}
+                >
+                编辑
+                </Button>
               </Space>
+              :
+              <Space style={{ paddingBottom: 10 }}>
+                <Button
+                  type="primary"
+                  ghost
+                  icon={<MyIcon type="icon-chexiao"/>}
+                  onClick={()=> {this.setState({isEdit: false,notAreaIdSelections:[],selections:[]})}}
+                  size="small"
+                >
+                  取消
+                </Button>
+                <Popconfirm
+                title={`确定删除选中的${[...this.state.selections,...this.state.notAreaIdSelections].length}个采集资料吗？`}
+                onConfirm={this.onMultipleRemove}
+                okText="删除"
+                cancelText="取消"
+                >
+                  <Button
+                    type="primary"
+                    ghost
+                    icon={<MyIcon type="icon-bianzu52"/>}
+                    size="small"
+                    danger
+                  >
+                    删除
+                  </Button>
+                </Popconfirm>
+              </Space>
+            }
             </div>
           </Fragment>
         );

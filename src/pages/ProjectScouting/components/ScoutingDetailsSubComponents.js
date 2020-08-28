@@ -567,14 +567,22 @@ export const ScoutingItem = ({
   onMergeUp,
   onMergeDown,
   onMergeCancel,
+  CollectionEdit = false,
+  onSelectCollection,
   onCheckItem = () => {},
 }) => {
+  const handleSelect = (val)=>{
+    // console.log(val);
+    onSelectCollection && onSelectCollection(val)
+  }
+
   return (
     <DragDropContext onDragEnd={onDragEnd.bind(this, data)}>
       <Droppable droppableId="droppable">
         {(provided, snapshot) => (
           <div {...provided.droppableProps} ref={provided.innerRef}>
-            {dataSource.length ? (
+          <Checkbox.Group onChange={handleSelect} style={{width:'100%'}}>
+          {dataSource.length ? (
               dataSource.map((item, index) => {
                 return (
                   <Draggable key={item.id} draggableId={item.id} index={index}>
@@ -599,6 +607,7 @@ export const ScoutingItem = ({
                           </span>
                           {item.type !== "groupCollection" ? (
                             <UploadItem
+                              Edit={CollectionEdit}
                               onCheckItem={onCheckItem}
                               onCopyCollection={onCopyCollection}
                               onChangeDisplay={onChangeDisplay}
@@ -625,6 +634,7 @@ export const ScoutingItem = ({
                               {item.child &&
                                 item.child.map((child, i) => (
                                   <UploadItem
+                                    Edit={CollectionEdit}
                                     onCheckItem={onCheckItem}
                                     group_id={item.gid}
                                     subIndex={i}
@@ -668,6 +678,8 @@ export const ScoutingItem = ({
                 description="暂无采集数据"
               />
             )}
+          </Checkbox.Group>
+
             {provided.placeholder}
             {/* <div
               style={{
@@ -688,6 +700,7 @@ export const UploadItem = ({
   type,
   data,
   onRemove,
+  Edit = false,
   onEditCollection = () => {},
   areaList,
   onSelectGroup,
@@ -1146,7 +1159,8 @@ export const UploadItem = ({
               <MyIcon type="icon-yanjing_xianshi" />
             )}
           </span>
-          <Dropdown
+          { !Edit ?
+            <Dropdown
             overlay={menu}
             trigger="click"
             onVisibleChange={(val) => setVisible(val)}
@@ -1157,7 +1171,8 @@ export const UploadItem = ({
             >
               <MyIcon type="icon-gengduo2" />
             </span>
-          </Dropdown>
+          </Dropdown>:
+          <Checkbox value={data.id} style={{marginLeft:5}}></Checkbox>}
         </div>
       </div>
       {/* {oldRemark || isAddMark === true ? (
