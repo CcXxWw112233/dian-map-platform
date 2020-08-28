@@ -9,14 +9,11 @@ import TempPlot from "./panels/TempPlot";
 import ProjectList from "./panels/ProjectList";
 import CustomSymbolStore from "./panels/CustomSymbolStore";
 import Panel from "./panels/Panel";
-import Event from "../../lib/utils/event";
-import mapApp from "../../utils/INITMAP";
-import { TransformCoordinate } from "../../lib/utils/index";
-import { plotEdit } from "../../utils/plotEdit";
 
 import { lineDrawing, pointDrawing, polygonDrawing } from "utils/drawing";
 import ListAction from "@/lib/components/ProjectScouting/ScoutingList";
 import { connect } from "dva";
+
 
 @connect(({ openswitch: { isShowLeftToolBar, isInvalidToolBar } }) => ({
   isShowLeftToolBar,

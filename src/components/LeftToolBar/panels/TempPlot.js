@@ -183,7 +183,7 @@ export default class TempPlot extends React.Component {
           image = attrs.featureType;
         } else {
           tempIconUrl = attrs.featureType.replace("img", "");
-          image = require("../../assets" + tempIconUrl);
+          image = require("../../../assets" + tempIconUrl);
         }
         style = {
           ...style,

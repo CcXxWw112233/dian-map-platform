@@ -18,6 +18,9 @@ import { MyIcon } from "../../utils";
 import symbolStoreServices from "../../../services/symbolStore";
 import mapApp from "utils/INITMAP";
 
+
+// import { loadGeoJson } from "../tmp"
+
 const SymbolBlock = ({
   data,
   plotTypeName = "未选择",
@@ -355,6 +358,7 @@ export default class Plot extends PureComponent {
       window.featureOperator = parent.activeFeatureOperator;
       this.plotLayer.plotEdit.activate(window.featureOperator.feature);
     }
+    // loadGeoJson(this)
   }
   componentWillUnmount() {
     const { parent } = this.props;

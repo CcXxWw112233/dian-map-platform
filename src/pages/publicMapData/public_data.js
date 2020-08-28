@@ -441,7 +441,7 @@ const jsons = {
     //       icon: "",
     //       key: "map:landforms:basic",
     //       loadFeatureKeys: [
-    //         // 水路路线图
+    //         // 水路路线图，有问题
     //         {
     //           typeName: "lingxi:diji_sxss_polyline",
     //           cql_filter:  `${queryStr}`,
@@ -459,7 +459,7 @@ const jsons = {
     //             strokeWidth: 1,
     //           },
     //         },
-    //         // 居民点计划图
+    //         // 居民点计划图，已导入
     //         {
     //           typeName: "lingxi:plan_polygon",
     //           // cql_filter: "adcode in ('440117','*')",
@@ -475,7 +475,7 @@ const jsons = {
     //       icon: "",
     //       key: "map:landforms:forestry",
     //       loadFeatureKeys: [
-    //         // 农业用地
+    //         // 农业用地,已导入
     //         {
     //           typeName: "lingxi:diji_zbtz_polyline",
     //           cql_filter: `${queryStr}`,
@@ -485,7 +485,7 @@ const jsons = {
     //             fillColor: "#92D050",
     //           },
     //         },
-    //         // 林业用地
+    //         // 林业用地。 已导入
     //         {
     //           typeName: "lingxi:diji_zbtz_point",
     //           cql_filter: `${queryStr}`,
