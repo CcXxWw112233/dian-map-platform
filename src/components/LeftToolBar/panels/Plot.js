@@ -285,6 +285,7 @@ export default class Plot extends PureComponent {
           parent.featureOperatorList.push(operator);
         }
         window.featureOperator = operator;
+        me.plotName = window.featureOperator.getName()
         me.plotLayer.setToTop(window.featureOperator);
         ListAction.checkItem()
           .then((res) => {
