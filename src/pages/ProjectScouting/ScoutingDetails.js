@@ -462,6 +462,11 @@ export default class ScoutingDetails extends PureComponent {
     });
   };
 
+  // 更新某个采集资料，并且重组，刷新元素,只需要更改all_collection数据
+  updateAllCollectionReset = (data)=>{
+    let array = this.reSetCollection(data);
+    this.updateCollection(data, array);
+  }
   // 更新数据
   updateCollection = (data, area_list) => {
     this.setState(
@@ -693,7 +698,16 @@ export default class ScoutingDetails extends PureComponent {
       .then((resp) => {
         // console.log(res);
         this.cancelEditCollection();
-        this.fetchCollection();
+        // this.fetchCollection();
+        let arr = Array.from(this.state.all_collection);
+        arr = arr.map(item => {
+          if(item.id === id){
+            item.title = name;
+          }
+          return item;
+        })
+        // 更新数据列表，会更新地图标绘数据
+        this.updateAllCollectionReset(arr);
         let f = editType === "editCoordinate" ? "关联坐标完成" : "修改名称完成";
         message.success(f);
         if (selectData && editType === "editName") {
@@ -872,19 +886,16 @@ export default class ScoutingDetails extends PureComponent {
       id: collection.id,
       is_display: is_display === "1" ? "0" : "1",
     };
+    let arr = this.state.all_collection.map((item) => {
+      if (item.id === collection.id) {
+        collection.is_display = param.is_display;
+        item = collection;
+      }
+      return item;
+    });
+    this.updateAllCollectionReset(arr);
     Action.editCollection(param).then((res) => {
-      // console.log(res);
-      let { all_collection } = this.state;
-      // 更新状态重新渲染
-      let arr = all_collection.map((item) => {
-        if (item.id === collection.id) {
-          collection.is_display = param.is_display;
-          item = collection;
-        }
-        return item;
-      });
-      let list = this.reSetCollection(arr);
-      this.updateCollection(Array.from(all_collection), list);
+
     });
   };
   // 编辑规划图
