@@ -1518,7 +1518,8 @@ export default class ScoutingDetails extends PureComponent {
     }, ()=>{
       message.success('删除成功');
       this.hiddenDetail();
-      this.updateAllCollectionReset(list)
+      this.updateAllCollectionReset(list);
+      Action.oldData = list;
     })
   }
 
