@@ -124,7 +124,7 @@ export const loadFeatureJSON = function (data, type = "WTK") {
   if (type === "WTK") {
     return new WKT().readFeature(data.source, data.options);
   }
-  return new GeoJSON().readFeature(data);
+  return (new GeoJSON()).readFeatures(data);
 };
 
 const getPolygonFillColor = (properties = {}, fillColorKeyVals = []) => {

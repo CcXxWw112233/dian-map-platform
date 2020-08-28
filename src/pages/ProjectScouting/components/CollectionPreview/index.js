@@ -178,7 +178,8 @@ export default class CollectionPreview extends React.Component{
                 showCollectionsModal: false,
                 selectData: null,
                 zIndex: 10,
-                type:'view'
+                type:'view',
+                isImg: true
               }
             })
           }}>

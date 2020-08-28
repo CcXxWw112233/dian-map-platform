@@ -6,7 +6,7 @@ export default {
     showCollectionsModal: false,
     zIndex:10,
     type:'view',
-    previewDatas: []
+    isImg: true
   },
   effects:{
 

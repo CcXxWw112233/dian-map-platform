@@ -26,14 +26,19 @@
       padding: 8px 15px;
       .data_title{
         font-weight: bold;
+        font-size: 1.2em;
       }
       div[contenteditable]:empty:before{
         content: attr(placeholder);
         color: #CCCCCC;
       }
+      textarea.data_remark{
+        padding: 3px;
+        box-sizing: border-box;
+      }
       .data_remark{
         // text-indent: 1em;
-        padding: 3px 5px;
+        padding: 3px 0px;
         font-size: 14px;
         height: 80px;
         .autoScrollY;
@@ -41,6 +46,14 @@
         border-radius: 5px;
         margin-bottom: 10px;
         margin-top: 5px;
+        width: 100%;
+        &.maxHeight{
+          height: 240px;
+        }
+        li{
+          margin-bottom: 10px;
+          line-height: 1.8em;
+        }
       }
       .activeEdit{
         transition: all 0.3s linear;

@@ -167,7 +167,8 @@ export default class LookingBack extends React.Component{
       type:"collectionDetail/updateDatas",
       payload:{
         selectData: val,
-        type:'view'
+        type:'view',
+        isImg: true
       }
     });
     DetailAction.setGroupCollectionActive(val);
@@ -179,7 +180,8 @@ export default class LookingBack extends React.Component{
       payload:{
         showCollectionsModal: true,
         zIndex: 5,
-        type:'view'
+        type:'view',
+        isImg: true
       }
     })
   }
@@ -309,7 +311,8 @@ export default class LookingBack extends React.Component{
                 showCollectionsModal: false,
                 selectData: null,
                 zIndex: 10,
-                type:'view'
+                type:'view',
+                isImg: true
               }
             })
           }}/>
