@@ -898,12 +898,16 @@ export default class Plot extends PureComponent {
   handleCustomStrokeColorOkClick = (value) => {
     this.strokeColor = value;
     this.fillColor = this.state.customFillSelectedColor;
+    plotEdit.plottingLayer.plotEdit.removePlotOverlay(
+      window.featureOperator
+    );
     if (this.dic[this.props.plotType] !== "Point") {
       this.symbol = "";
       this.selectName = "自定义类型";
     } else {
       if (!this.symbol) {
         this.selectName = "自定义类型";
+        this.symbol = this.refs.defaultSymbol.innerText;
       }
     }
     this.createPlotName();
@@ -923,6 +927,9 @@ export default class Plot extends PureComponent {
   handleCustomFillColorOkClick = (value) => {
     this.fillColor = value;
     this.strokeColor = this.state.customStrokeSelectedColor;
+    plotEdit.plottingLayer.plotEdit.removePlotOverlay(
+      window.featureOperator
+    );
     if (this.dic[this.props.plotType] !== "Point") {
       this.symbol = "";
       this.selectName = "自定义类型";
