@@ -1,8 +1,9 @@
-import React, { useState, Fragment } from "react";
+import React, { useState, Fragment, useMemo} from "react";
 import globalStyle from "../../../globalSet/styles/globalStyles.less";
 import animateCss from "../../../assets/css/animate.min.css";
 import styles from "../ScoutingDetails.less";
 import Action from "../../../lib/components/ProjectScouting/ScoutingDetail";
+import ListAction from '../../../lib/components/ProjectScouting/ScoutingList';
 import PhotoSwipe from "../../../components/PhotoSwipe/action";
 import {
   Row,
@@ -34,7 +35,24 @@ import { formatSize } from "../../../utils/utils";
 import ExcelRead from "../../../components/ExcelRead";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { MyIcon } from "../../../components/utils";
+import Nprogress from 'nprogress';
 // import { UploadFile } from '../../../utils/XhrUploadFile'
+
+
+export const UploadBgPic = ({children,onUpload, onStart})=>{
+  return (
+    <Upload
+    action='/api/map/file/upload/public'
+    showUploadList={false}
+    accept=".jpg, .jpeg, .png, .bmp"
+    beforeUpload={()=>{ onStart && onStart(); return true}}
+    headers={{ Authorization: BASIC.getUrlParam.token }}
+    onChange={onUpload}
+    >
+      {children}
+    </Upload>
+  )
+}
 
 export const Title = ({ name, date, cb, data = {}, className = "", mini }) => {
   // 预览图片
@@ -48,6 +66,22 @@ export const Title = ({ name, date, cb, data = {}, className = "", mini }) => {
       PhotoSwipe.show([{ w, h, src: img.src, title: name }]);
     };
   };
+  const [url, setUrl] = useState(data.bg_image);
+  useMemo(() => {
+    setUrl(data.bg_image);
+  }, [data])
+  const onUpload = ({file})=>{
+    if(file.response){
+      Nprogress.done();
+      if(BASIC.checkResponse(file.response)){
+        let src = file.response.message
+        setUrl(src);
+        ListAction.editBoard(data.board_id,{ bg_image: src }).then(res=> {
+          message.success('设置成功')
+        })
+      }
+    }
+  }
   return (
     <div className={`${styles.title} ${className}`}>
       <div className={styles.title_goBack} onClick={cb}>
@@ -62,6 +96,10 @@ export const Title = ({ name, date, cb, data = {}, className = "", mini }) => {
       </div>
       <div className={styles.title_name}>
         <span>{name}</span>
+        <span className={styles.atPosition} title="定位到项目位置"
+        onClick={()=> {Action.toCenter({center: [data.coordinate_x, data.coordinate_y], transform: true})}}>
+          <MyIcon type="icon-duomeitiicon-"/>
+        </span>
       </div>
       <div className={styles.title_remark}>
         <div style={{ textIndent: "1rem" }}>
@@ -69,15 +107,20 @@ export const Title = ({ name, date, cb, data = {}, className = "", mini }) => {
         </div>
       </div>
       <div className={styles.title_boardBgImg}>
-        {data.bg_image ? (
+        {url ? (
           <div className={styles.boardBgImg}>
-            <img src={data.bg_image} alt="" onClick={previewImg} />
+            <img src={url} alt="" onClick={previewImg} />
           </div>
         ) : (
           <div className={styles.boardBgImg}>
             <span>
               暂未设置图片~~
-              {/**<a>点击设置</a> */}
+              <UploadBgPic
+              onStart={()=> Nprogress.start() }
+              onUpload={onUpload}
+              >
+                <a>点击设置</a>
+              </UploadBgPic>
             </span>
           </div>
         )}
@@ -524,14 +567,22 @@ export const ScoutingItem = ({
   onMergeUp,
   onMergeDown,
   onMergeCancel,
+  CollectionEdit = false,
+  onSelectCollection,
   onCheckItem = () => {},
 }) => {
+  const handleSelect = (val)=>{
+    // console.log(val);
+    onSelectCollection && onSelectCollection(val)
+  }
+
   return (
     <DragDropContext onDragEnd={onDragEnd.bind(this, data)}>
       <Droppable droppableId="droppable">
         {(provided, snapshot) => (
           <div {...provided.droppableProps} ref={provided.innerRef}>
-            {dataSource.length ? (
+          <Checkbox.Group onChange={handleSelect} style={{width:'100%'}}>
+          {dataSource.length ? (
               dataSource.map((item, index) => {
                 return (
                   <Draggable key={item.id} draggableId={item.id} index={index}>
@@ -556,6 +607,7 @@ export const ScoutingItem = ({
                           </span>
                           {item.type !== "groupCollection" ? (
                             <UploadItem
+                              Edit={CollectionEdit}
                               onCheckItem={onCheckItem}
                               onCopyCollection={onCopyCollection}
                               onChangeDisplay={onChangeDisplay}
@@ -582,6 +634,7 @@ export const ScoutingItem = ({
                               {item.child &&
                                 item.child.map((child, i) => (
                                   <UploadItem
+                                    Edit={CollectionEdit}
                                     onCheckItem={onCheckItem}
                                     group_id={item.gid}
                                     subIndex={i}
@@ -625,6 +678,8 @@ export const ScoutingItem = ({
                 description="暂无采集数据"
               />
             )}
+          </Checkbox.Group>
+
             {provided.placeholder}
             {/* <div
               style={{
@@ -645,6 +700,7 @@ export const UploadItem = ({
   type,
   data,
   onRemove,
+  Edit = false,
   onEditCollection = () => {},
   areaList,
   onSelectGroup,
@@ -1103,7 +1159,8 @@ export const UploadItem = ({
               <MyIcon type="icon-yanjing_xianshi" />
             )}
           </span>
-          <Dropdown
+          { !Edit ?
+            <Dropdown
             overlay={menu}
             trigger="click"
             onVisibleChange={(val) => setVisible(val)}
@@ -1114,7 +1171,8 @@ export const UploadItem = ({
             >
               <MyIcon type="icon-gengduo2" />
             </span>
-          </Dropdown>
+          </Dropdown>:
+          <Checkbox value={data.id} style={{marginLeft:5}}></Checkbox>}
         </div>
       </div>
       {/* {oldRemark || isAddMark === true ? (

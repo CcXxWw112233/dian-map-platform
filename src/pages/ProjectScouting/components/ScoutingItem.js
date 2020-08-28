@@ -9,6 +9,8 @@ import globalStyle from '../../../globalSet/styles/globalStyles.less'
 import { keepLastIndex } from '../../../utils/utils'
 import { BASIC } from '../../../services/config'
 import { MyIcon } from '../../../components/utils';
+import { UploadBgPic } from './ScoutingDetailsSubComponents';
+import Nprogress from 'nprogress'
 export default class ScoutingItem extends React.PureComponent {
     constructor(props){
         super(props);
@@ -182,6 +184,7 @@ export default class ScoutingItem extends React.PureComponent {
         if(response){
             if(BASIC.checkResponse(response))
             onSetBgImg(response.message);
+            Nprogress.done();
         }
     }
 
@@ -233,18 +236,13 @@ export default class ScoutingItem extends React.PureComponent {
                             <MyIcon type='icon-bianzu46'/>
                           </span>
 
-                          <Upload
-                          action='/api/map/file/upload/public'
-                          showUploadList={false}
-                          accept=".jpg, .jpeg, .png, .bmp"
-                          beforeUpload={()=>{message.success('正在上传'); return true}}
-                          headers={{ Authorization: BASIC.getUrlParam.token }}
-                          onChange={this.onUploadImg}
-                          >
+                          <UploadBgPic
+                          onUpload={this.onUploadImg}
+                          onStart={()=> Nprogress.start()}>
                             <span className={`${styles.settings_item}`} title="上传背景图">
                               <MyIcon type="icon-bianzu45"/>
                             </span>
-                          </Upload>
+                          </UploadBgPic>
 
                           <Popconfirm title='确定删除这个项目吗?'
                           okText='删除'

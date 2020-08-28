@@ -996,12 +996,14 @@ export default class Plot extends PureComponent {
                 let coll = data && data[0];
                 if (coll) {
                   coll.is_display = "1";
-                  obj.collection.push(coll);
-                  let arr = obj.collection;
-                  DetailAction.renderCollection(arr, {
-                    lenged: this.props.config,
-                    dispatch: this.props.dispatch,
-                  });
+                  // obj.collection.push(coll);
+                  // let arr = obj.collection;
+                  // DetailAction.renderCollection(arr, {
+                  //   lenged: this.props.config,
+                  //   dispatch: this.props.dispatch,
+                  // });
+                  DetailAction.oldData.push(coll)
+                  Event.Evt.firEvent('CollectionUpdate:reload',DetailAction.oldData)
                 }
               }
               this.props.goBackProject();

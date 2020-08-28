@@ -2,20 +2,25 @@ import axios from 'axios'
 import originJsonp from "jsonp"
 import { BASIC } from './config'
 import { message } from 'antd'
+import NProgress from 'nprogress';
+import 'nprogress/nprogress.css';
 
 const instance = axios.create({
   method:"GET",
   baseURL: BASIC.API_URL
 })
+NProgress.inc(0.3)
+NProgress.configure({ easing: 'ease', speed: 500, showSpinner: false })
 let requestTimer = null ,responseTimer = null;
 instance.interceptors.request.use(config => {
   let token = BASIC.getUrlParam.token;
   if(token){
     config.headers['Authorization'] = token;
+    NProgress.start();
   }
   else {
-    if(BASIC.getUrlParam.isMobile === "1") return ;
     clearTimeout(requestTimer);
+    if(BASIC.getUrlParam.isMobile === "1") return {};
     requestTimer = setTimeout(()=>{
       message.error('缺少权限，无法试用地图');
     },1000)
@@ -26,6 +31,7 @@ instance.interceptors.request.use(config => {
 
 instance.interceptors.response.use(config => {
   let { data } = config;
+  NProgress.done();
   if(data.code === BASIC.TOKEN_AUTH_ERROR){
     clearTimeout(responseTimer);
     responseTimer = setTimeout(()=>{
@@ -38,13 +44,14 @@ instance.interceptors.response.use(config => {
       }catch(err){
         console.log(err)
       }
-      
+
     }, 1000)
     return config;
   }else
-  
+
   return config ;
 },err => {
+  NProgress.done();
   if(err && err.response ){
     if(err.response.status === BASIC.SERVER_ERROR){
       clearTimeout(responseTimer);
@@ -53,13 +60,14 @@ instance.interceptors.response.use(config => {
       },1000)
     }
 
+    // eslint-disable-next-line eqeqeq
     if(err.response.status == BASIC.TOKEN_AUTH_ERROR){
       clearTimeout(responseTimer);
       responseTimer = setTimeout(()=>{
         message.error('权限不足，请重新登录');
       }, 1000)
     }
-    
+
     return err.response;
   }
   return err && err.response;

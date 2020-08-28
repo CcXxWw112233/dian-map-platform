@@ -89,11 +89,12 @@ export default function EditDescription (props){
         suppressContentEditableWarning
         // onPaste={textFormat}
         ref={content}
-        defaultValue={text}
+        // defaultValue={text}
         value={text}
         placeholder="未添加备注哦"
         onBlur={() => setTimeout(()=> {editEnd()},100)}
         onDoubleClick={toEdit}
+        readOnly={!isEdit}
         onInput={(e)=>{setText(e.target.value.trim())}}
         contentEditable={isEdit}>
           {data?.description?.trim()}

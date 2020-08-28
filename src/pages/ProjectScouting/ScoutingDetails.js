@@ -14,6 +14,8 @@ import {
   Space,
   // Popover,
   Empty,
+  Popconfirm,
+  Checkbox,
   // Radio,
   // Form,
   // Input,
@@ -111,6 +113,9 @@ export default class ScoutingDetails extends PureComponent {
       activeId: -1,
       audioData: {},
       miniTitle: false,
+      isEdit: false,
+      selections: [],
+      notAreaIdSelections: []
     };
     this.scrollView = React.createRef();
     this.saveSortTimer = null;
@@ -462,6 +467,11 @@ export default class ScoutingDetails extends PureComponent {
     });
   };
 
+  // 更新某个采集资料，并且重组，刷新元素,只需要更改all_collection数据
+  updateAllCollectionReset = (data)=>{
+    let array = this.reSetCollection(data);
+    this.updateCollection(data, array);
+  }
   // 更新数据
   updateCollection = (data, area_list) => {
     this.setState(
@@ -571,7 +581,6 @@ export default class ScoutingDetails extends PureComponent {
 
   // 删除采集的资料
   onCollectionRemove = (item, collection) => {
-    const { dispatch } = this.props;
     let { id } = collection;
 
     Action.removeCollection(id)
@@ -589,13 +598,7 @@ export default class ScoutingDetails extends PureComponent {
             // this.renderCollection();
             this.updateCollection(Array.from(this.state.all_collection), arr);
             Action.oldData = this.state.all_collection;
-            dispatch({
-              type:"collectionDetail/updateDatas",
-              payload:{
-                selectData: null,
-                isImg: true
-              }
-            })
+            this.hiddenDetail();
           }
         );
       })
@@ -604,7 +607,17 @@ export default class ScoutingDetails extends PureComponent {
         console.log(err);
       });
   };
-
+  // 隐藏右上角的详情框
+  hiddenDetail = ()=>{
+    const { dispatch } = this.props;
+    dispatch({
+      type:"collectionDetail/updateDatas",
+      payload:{
+        selectData: null,
+        isImg: true
+      }
+    })
+  }
   // 取消新增
   cancelEditCollection = () => {
     message.destroy();
@@ -693,7 +706,16 @@ export default class ScoutingDetails extends PureComponent {
       .then((resp) => {
         // console.log(res);
         this.cancelEditCollection();
-        this.fetchCollection();
+        // this.fetchCollection();
+        let arr = Array.from(this.state.all_collection);
+        arr = arr.map(item => {
+          if(item.id === id){
+            item.title = name;
+          }
+          return item;
+        })
+        // 更新数据列表，会更新地图标绘数据
+        this.updateAllCollectionReset(arr);
         let f = editType === "editCoordinate" ? "关联坐标完成" : "修改名称完成";
         message.success(f);
         if (selectData && editType === "editName") {
@@ -809,6 +831,7 @@ export default class ScoutingDetails extends PureComponent {
     if (!key) {
       this.renderCollection([]);
       this.renderGroupPointer();
+      Action.clearGroupCollectionPoint();
     } else {
       this.clearGroupPointer();
     }
@@ -872,19 +895,16 @@ export default class ScoutingDetails extends PureComponent {
       id: collection.id,
       is_display: is_display === "1" ? "0" : "1",
     };
+    let arr = this.state.all_collection.map((item) => {
+      if (item.id === collection.id) {
+        collection.is_display = param.is_display;
+        item = collection;
+      }
+      return item;
+    });
+    this.updateAllCollectionReset(arr);
     Action.editCollection(param).then((res) => {
-      // console.log(res);
-      let { all_collection } = this.state;
-      // 更新状态重新渲染
-      let arr = all_collection.map((item) => {
-        if (item.id === collection.id) {
-          collection.is_display = param.is_display;
-          item = collection;
-        }
-        return item;
-      });
-      let list = this.reSetCollection(arr);
-      this.updateCollection(Array.from(all_collection), list);
+
     });
   };
   // 编辑规划图
@@ -1271,17 +1291,61 @@ export default class ScoutingDetails extends PureComponent {
       other = current[index + 1];
       ids = [collection.id, other.id];
     }
+    let array = Array.from(this.state.all_collection);
     // 保存
     if (ids.length)
       Action.saveMergeCollection({ data_ids: ids }).then((res) => {
         message.success("操作成功");
-        this.fetchCollection();
+        // this.fetchCollection();
+        let g_id = [], list = [];
+        let arr = array.filter(item => ids.includes(item.id));
+        g_id = arr.map(item => item.group_id).filter(v => v);
+        if(g_id.length){
+          // 两个拥有groupId的数据，合并抹除掉其中一个
+          if(g_id.length > 1){
+            let oldId = g_id[1];
+            let newId = g_id[0];
+            list = array.map(item => {
+              if(ids.includes(item.id)){
+                item.group_id = newId;
+              }
+              if(item.group_id === oldId){
+                item.group_id = newId;
+              }
+              return item ;
+            })
+          }else if(g_id.length === 1){
+            list = array.map(item => {
+              if(ids.includes(item.id)){
+                item.group_id = g_id[0];
+              }
+              return item ;
+            })
+          }
+        }
+        else {
+          let mgId = Math.round(Math.random() * 1000000 + 1);
+          list = array.map(item => {
+            if(ids.includes(item.id)){
+              item.group_id = mgId;
+            }
+            return item;
+          })
+        }
+        this.updateAllCollectionReset(list);
       });
     // 退出这个组合
     if (type === "cancel") {
       await this.CollectionReMerge(collection);
       message.success("操作成功");
-      this.fetchCollection();
+      array = array.map(item => {
+        if(item.id === collection.id){
+          item.group_id = "";
+        }
+        return item;
+      })
+      this.updateAllCollectionReset(array);
+      // this.fetchCollection();
     }
   };
 
@@ -1423,8 +1487,40 @@ export default class ScoutingDetails extends PureComponent {
       this.setActiveCollapse("");
       // 渲染分类坐标
       this.renderGroupPointer();
+      Action.clearGroupCollectionPoint();
     }
   };
+
+  selectionCollection = (val)=>{
+    this.setState({
+      selections: val
+    })
+  }
+  onNotAreaIdSelection = (val)=>{
+    this.setState({
+      notAreaIdSelections: val
+    })
+  }
+  // 多选删除
+  onMultipleRemove = ()=>{
+    let arr = [...this.state.selections, ...this.state.notAreaIdSelections];
+    let list = Array.from(this.state.all_collection);
+    ( async ()=>{
+      for(let i = 0; i< arr.length; i ++){
+        await Action.removeCollection(arr[i]).catch(err=> console.log(err));
+      }
+    })()
+    list = list.filter(item => !arr.includes(item.id));
+    this.setState({
+      all_collection: list,
+      notAreaIdSelections:[],
+      selections: []
+    }, ()=>{
+      message.success('删除成功');
+      this.hiddenDetail();
+      this.updateAllCollectionReset(list)
+    })
+  }
 
   renderForActive = (key) => {
     const {
@@ -1493,6 +1589,8 @@ export default class ScoutingDetails extends PureComponent {
                       style={{ backgroundColor: "#fff", marginBottom: "10px" }}
                     >
                       <ScoutingItem
+                        onSelectCollection={this.selectionCollection}
+                        CollectionEdit={this.state.isEdit}
                         board={this.state.current_board}
                         // dispatch={dispatch}
                         onCheckItem={this.checkItem}
@@ -1551,53 +1649,56 @@ export default class ScoutingDetails extends PureComponent {
                     }
                   >
                     {!!not_area_id_collection.length ? (
-                      <div className={styles.norAreaIdsData}>
-                        {not_area_id_collection.map((item, index) => {
-                          let activeStyle = null;
-                          if (item.id === activeId) {
-                            activeStyle = {
-                              backgroundColor: "rgba(214,228,255,0.5)",
-                            };
-                          }
-                          return (
-                            <div
-                              key={item.id}
-                              className={`${animateCss.animated} ${animateCss.slideInRight}`}
-                              style={{
-                                animationDuration: "0.3s",
-                                animationDelay: index * 0.02 + "s",
-                                width: "100%",
-                              }}
-                            >
-                              <UploadItem
-                                onCheckItem={this.checkItem}
-                                style={activeStyle}
-                                data={item}
-                                type={Action.checkCollectionType(item.target)}
-                                areaList={area_list}
-                                onSelectGroup={this.onSelectGroup}
-                                onRemove={this.onCollectionRemove.bind(
-                                  this,
-                                  item
-                                )}
-                                onEditCollection={this.onEditCollection}
-                                onChangeDisplay={this.onChangeDisplay.bind(
-                                  this,
-                                  item
-                                )}
-                                onModifyRemark={this.onModifyRemark}
-                                onRemarkSave={this.onRemarkSave}
-                                onModifyFeature={this.onModifyFeatureInDetails}
-                                onStopMofifyFeatureInDetails={
-                                  this.onStopMofifyFeatureInDetails
-                                }
-                                onToggleChangeStyle={this.onToggleChangeStyle}
-                                onCopyCollection={this.onCopyCollection}
-                              />
-                            </div>
-                          );
-                        })}
-                      </div>
+                      <Checkbox.Group onChange={this.onNotAreaIdSelection}>
+                        <div className={styles.norAreaIdsData}>
+                          {not_area_id_collection.map((item, index) => {
+                            let activeStyle = null;
+                            if (item.id === activeId) {
+                              activeStyle = {
+                                backgroundColor: "rgba(214,228,255,0.5)",
+                              };
+                            }
+                            return (
+                              <div
+                                key={item.id}
+                                className={`${animateCss.animated} ${animateCss.slideInRight}`}
+                                style={{
+                                  animationDuration: "0.3s",
+                                  animationDelay: index * 0.02 + "s",
+                                  width: "100%",
+                                }}
+                              >
+                                <UploadItem
+                                  Edit={this.state.isEdit}
+                                  onCheckItem={this.checkItem}
+                                  style={activeStyle}
+                                  data={item}
+                                  type={Action.checkCollectionType(item.target)}
+                                  areaList={area_list}
+                                  onSelectGroup={this.onSelectGroup}
+                                  onRemove={this.onCollectionRemove.bind(
+                                    this,
+                                    item
+                                  )}
+                                  onEditCollection={this.onEditCollection}
+                                  onChangeDisplay={this.onChangeDisplay.bind(
+                                    this,
+                                    item
+                                  )}
+                                  onModifyRemark={this.onModifyRemark}
+                                  onRemarkSave={this.onRemarkSave}
+                                  onModifyFeature={this.onModifyFeatureInDetails}
+                                  onStopMofifyFeatureInDetails={
+                                    this.onStopMofifyFeatureInDetails
+                                  }
+                                  onToggleChangeStyle={this.onToggleChangeStyle}
+                                  onCopyCollection={this.onCopyCollection}
+                                />
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </Checkbox.Group>
                     ) : (
                       <Empty
                         style={{ textAlign: "center" }}
@@ -1609,6 +1710,7 @@ export default class ScoutingDetails extends PureComponent {
               </Collapse>
             </PublicView>
             <div className={styles.addAreaBtn}>
+            {!this.state.isEdit ?
               <Space style={{ paddingBottom: 10 }}>
                 <Button
                   type="primary"
@@ -1629,7 +1731,45 @@ export default class ScoutingDetails extends PureComponent {
                 >
                   {this.state.multipleGroup ? "分组展示" : "组合展示"}
                 </Button>
+                <Button
+                  type="primary"
+                  ghost
+                  size="small"
+                  icon={<MyIcon type="icon-huabi" />}
+                  onClick={()=> {this.setState({isEdit: true})}}
+                >
+                编辑
+                </Button>
               </Space>
+              :
+              <Space style={{ paddingBottom: 10 }}>
+                <Button
+                  type="primary"
+                  ghost
+                  icon={<MyIcon type="icon-chexiao"/>}
+                  onClick={()=> {this.setState({isEdit: false,notAreaIdSelections:[],selections:[]})}}
+                  size="small"
+                >
+                  取消
+                </Button>
+                <Popconfirm
+                title={`确定删除选中的${[...this.state.selections,...this.state.notAreaIdSelections].length}个采集资料吗？`}
+                onConfirm={this.onMultipleRemove}
+                okText="删除"
+                cancelText="取消"
+                >
+                  <Button
+                    type="primary"
+                    ghost
+                    icon={<MyIcon type="icon-bianzu52"/>}
+                    size="small"
+                    danger
+                  >
+                    删除
+                  </Button>
+                </Popconfirm>
+              </Space>
+            }
             </div>
           </Fragment>
         );

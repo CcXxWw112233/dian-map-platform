@@ -95,7 +95,7 @@ function Action() {
   this.oldData = [];
   this.CollectionGroup = [];
   this.groupPointer = [];
-  let requestTime = 60 * 1000;
+  let requestTime = 80 * 1000;
   this.selectedFeatureOperator = null;
   this.groupCollectionPointer = [];
 
@@ -1758,6 +1758,10 @@ function Action() {
     }
   };
 
+  this.addAnimatePoint = ({duration, inOrOut = 'out', feature})=>{
+
+  }
+
   // 更新江西数据的临时方法
   this.loadGeoJson = async (props = {}) => {
     let { boardId, areaTypeId } = props;
@@ -1827,7 +1831,7 @@ function Action() {
           content:
           JSON.stringify({
             geoType:'Point',
-            selectName:'company',
+            selectName:'公司',
             plotType:'point',
             "strokeColor":"rgba(106, 154, 255, 1)",
             coordinates: feature.getGeometry().getCoordinates(),
