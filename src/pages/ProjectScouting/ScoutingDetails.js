@@ -1503,7 +1503,6 @@ export default class ScoutingDetails extends PureComponent {
   }
   // 多选删除
   onMultipleRemove = ()=>{
-    let { } = this.props;
     let arr = [...this.state.selections, ...this.state.notAreaIdSelections];
     let list = Array.from(this.state.all_collection);
     for(let i = 0; i< arr.length; i ++){

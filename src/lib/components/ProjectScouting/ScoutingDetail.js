@@ -1831,7 +1831,7 @@ function Action() {
           content:
           JSON.stringify({
             geoType:'Point',
-            selectName:'company',
+            selectName:'公司',
             plotType:'point',
             "strokeColor":"rgba(106, 154, 255, 1)",
             coordinates: feature.getGeometry().getCoordinates(),
