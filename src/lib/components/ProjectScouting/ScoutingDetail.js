@@ -66,18 +66,21 @@ function Action() {
   this.drawBox = null;
   this.currentData = null;
   this.currentSet = null;
+  this.mounted = false;
+  Event.Evt.on("transCoordinateSystems2ScoutingDetail", () => {
+    if(!this.mounted) return ;
+    const baseMapKey = INITMAP.baseMapKey;
+    const lastBaseMapKey = INITMAP.lastBaseMapKey;
+    const baseMapKeys = INITMAP.baseMapKeys;
+    const isSame =
+      baseMapKeys[0].indexOf(baseMapKey) ===
+      baseMapKeys[0].indexOf(lastBaseMapKey);
+    if (this.currentData && this.currentSet && isSame === false) {
+      this.renderCollection(this.currentData, this.currentSet);
+    }
+  });
   this.init = (dispatch) => {
-    Event.Evt.on("transCoordinateSystems2ScoutingDetail", () => {
-      const baseMapKey = INITMAP.baseMapKey;
-      const lastBaseMapKey = INITMAP.lastBaseMapKey;
-      const baseMapKeys = INITMAP.baseMapKeys;
-      const isSame =
-        baseMapKeys[0].indexOf(baseMapKey) ===
-        baseMapKeys[0].indexOf(lastBaseMapKey);
-      if (this.currentData && this.currentSet && isSame === false) {
-        this.renderCollection(this.currentData, this.currentSet);
-      }
-    });
+    this.mounted = true;
     this.Layer.setSource(this.Source);
     const layers = InitMap.map.getLayers().getArray();
     const layer = layers.filter((layer) => {

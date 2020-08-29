@@ -36,6 +36,9 @@ export default class ScoutingList extends PureComponent {
       this.handleClick(val);
     });
   }
+  componentWillUnmount(){
+    Action.mounted = false;
+  }
 
   renderBoardList = () => {
     // 获取列表

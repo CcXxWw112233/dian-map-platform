@@ -49,8 +49,10 @@ const action = function () {
     iconUrl: require("../../../assets/addPointLocation.png"),
     icon: { anchorOrigin: "bottom-left", anchor: [0.5, 0.25] },
   });
+  this.mounted = false;
 
   event.Evt.on("transCoordinateSystems2ScoutingList", (key) => {
+    if(!this.mounted) return ;
     this.lastBaseMap = this.currentBaseMap;
     this.currentBaseMap = key;
     this.renderProjectPoint(this.currentData);
@@ -84,6 +86,7 @@ const action = function () {
   };
 
   this.init = async () => {
+    this.mounted = true;
     const layers = InitMap.map.getLayers().getArray();
     const layer = layers.filter((layer) => {
       return layer.get("id") === "project_point_layer";
