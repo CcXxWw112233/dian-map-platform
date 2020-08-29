@@ -11,6 +11,7 @@ import PlotFactory from "./PlotFactory";
 import Constants from "./Constants";
 import { combineOpts, deepcopy } from "../util/core";
 import * as ArrTools from "../util/array";
+import DetailAction from '../../../lib/components/ProjectScouting/ScoutingDetail';
 // import Ajax from '../util/seieajax';
 
 import * as ol from "ol";

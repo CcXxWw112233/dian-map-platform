@@ -252,13 +252,13 @@ export default class CollectionDetail extends React.Component{
                     <EditDescription disabled={this.state.disabled} data={item} onEdit={this.saveEdit} isMaxHeight={!isImg}/>
                     <div className={styles.creator}>
                       <Row gutter={10}>
-                        <Col span={12}>
+                        <Col xs={8} sm={12} md={8}>
                           {item.create_by && item.create_by.name}
                         </Col>
-                        <Col span={6} style={{textAlign:"center"}}>
+                        <Col xs={8} sm={6} md={8}style={{textAlign:"center"}}>
                           {DetailAction.dateFormat(item.create_time, "yyyy/MM/dd")}
                         </Col>
-                        <Col span={6} style={{textAlign:"center"}}>
+                        <Col xs={8} sm={6} md={8}style={{textAlign:"center"}}>
                           { DetailAction.dateFormat(item.create_time, "HH:mm")}
                         </Col>
                       </Row>

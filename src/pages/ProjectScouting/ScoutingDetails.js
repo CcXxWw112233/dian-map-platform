@@ -187,6 +187,7 @@ export default class ScoutingDetails extends PureComponent {
   }
   componentWillUnmount() {
     const { dispatch, config: lengedList } = this.props;
+    Action.mounted = false;
     Event.Evt.removeEventListener('handleGroupCollectionFeature', this.handleCollectionFeature);
     if (this.isGoBack) {
       let newLengedList = [...lengedList];
@@ -832,6 +833,7 @@ export default class ScoutingDetails extends PureComponent {
       this.renderCollection([]);
       this.renderGroupPointer();
       Action.clearGroupCollectionPoint();
+      this.hiddenDetail();
     } else {
       this.clearGroupPointer();
     }
