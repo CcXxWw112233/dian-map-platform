@@ -67,6 +67,7 @@ function Action() {
   this.currentData = null;
   this.currentSet = null;
   this.mounted = false;
+  this.geoFeatures = [];
   Event.Evt.on("transCoordinateSystems2ScoutingDetail", () => {
     if(!this.mounted) return ;
     const baseMapKey = INITMAP.baseMapKey;
@@ -454,6 +455,7 @@ function Action() {
   };
   this.removeFeatures = () => {
     this.removeOverlay();
+    this.clearGeoFeatures();
     this.removePlanPicCollection();
     // 删除元素
     this.features.forEach((item) => {
@@ -600,6 +602,55 @@ function Action() {
     createPopupOverlay(feature, pixel);
   };
 
+  this.renderGeoJson = (data)=>{
+    return new Promise((resolve) => {
+      let promise = [];
+    if(data && data.length){
+      data.forEach(item => {
+        if(item.resource_url){
+          promise.push(Axios.get(item.resource_url,{headers:{"Access-Control-Allow-Origin":"*","Content-Type":"application/json"}}));
+        }
+      })
+    }
+    Promise.all(promise).then(res => {
+      this.clearGeoFeatures();
+      // console.log(res, '加载全部geo数据完成')
+      res.forEach(item => {
+        let geojson = item.data;
+        let features = loadFeatureJSON(geojson,'GeoJSON');
+        features.forEach((feature, index) => {
+          let type = feature.getGeometry().getType()
+          let style = createStyle(type, {
+            showName: (type !== 'Point' && index < 3 )|| type ==='Point',
+            text: feature.get('name') || geojson.name,
+            strokeColor: feature.get('color_fill') || 'rgba(255,0,0,0.3)',
+            fillColor: feature.get('color_fill') || 'rgba(255,0,0,0.3)',
+            textFillColor: feature.get('color_fill') || "rgba(255,0,0,0.9)",
+            textStrokeColor: "#FFFFFF",
+            font: 14
+          })
+          feature.setStyle(style);
+          this.geoFeatures.push(feature)
+        })
+        this.Source.addFeatures(features);
+        setTimeout(()=>{
+          resolve();
+        },50)
+      });
+      return res;
+    })
+    })
+  }
+  this.clearGeoFeatures = ()=>{
+    if(this.geoFeatures.length){
+      this.geoFeatures.forEach(item => {
+        if(this.Source.getFeatureByUid(item.ol_uid)){
+          this.Source.removeFeature(item);
+        }
+      })
+      this.geoFeatures = [];
+    }
+  }
   // 渲染标绘数据
   this.renderFeaturesCollection = async (
     data,
@@ -869,10 +920,12 @@ function Action() {
       (item) =>
         item.collect_type !== "4" &&
         item.collect_type !== "5" &&
-        item.collect_type !== "group"
+        item.collect_type !== "group" &&
+        item.collect_type !== "8"
     );
     let features = data.filter((item) => item.collect_type === "4");
     let planPic = data.filter((item) => item.collect_type === "5");
+    let geoData = data.filter(item => item.collect_type === "8");
 
     // 清除变量
     this.layer.style = null;
@@ -881,17 +934,21 @@ function Action() {
     this.layer.saveCb = null;
     this.layer.deleteCb = null;
     this.layer.isDefault = null;
+
     // 渲染标绘数据
     await this.renderFeaturesCollection(features, {
       lenged,
       dispatch,
       showFeatureName,
     });
+    // 渲染geo数据
+    await this.renderGeoJson(geoData);
     const sou = this.layer.showLayer.getSource();
     // 渲染规划图
     let ext = await this.renderPlanPicCollection(planPic);
     // 渲染点的数据
     let pointCollection = this.renderPointCollection(ponts);
+    
     this.features = this.features.concat(pointCollection);
     this.Source.addFeatures(pointCollection);
 

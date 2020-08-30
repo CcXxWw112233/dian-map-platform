@@ -556,7 +556,7 @@ export default class ScoutingDetails extends PureComponent {
       let params = {
         board_id: this.state.current_board.board_id,
         area_type_id: val.id,
-        collect_type: 3,
+        collect_type: suffix === '.geojson' ? 8 : 3,
         resource_id: file_resource_id,
         target: suffix && suffix.replace(".", ""),
         title: original_file_name,
@@ -687,12 +687,21 @@ export default class ScoutingDetails extends PureComponent {
       coor = Action.transform(coor);
       params = {
         id,
+        title: val.name,
         location: {
           longitude: coor[0],
           latitude: coor[1],
           site_name: val.title,
         },
       };
+      this.setState({
+        all_collection: this.state.all_collection.map(item => {
+          if(item.id === id){
+            item.location = params.location
+          }
+          return item;
+        })
+      })
     } else if (editType === "editName") {
       if (!name || name === val.name) {
         return;
@@ -711,7 +720,8 @@ export default class ScoutingDetails extends PureComponent {
         let arr = Array.from(this.state.all_collection);
         arr = arr.map(item => {
           if(item.id === id){
-            item.title = name;
+            item.title = name || val.title;
+
           }
           return item;
         })
