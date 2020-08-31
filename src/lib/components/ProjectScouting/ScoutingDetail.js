@@ -621,13 +621,16 @@ function Action() {
         let features = loadFeatureJSON(geojson,'GeoJSON');
         features.forEach((feature, index) => {
           let type = feature.getGeometry().getType()
+          let icon = feature.get('iconUrl');
+          icon = icon && icon.replace('../../../assets',"");
           let style = createStyle(type, {
-            showName: (type !== 'Point' && index < 3 )|| type ==='Point',
+            showName: (type !== 'Point' && index < 15 )|| type ==='Point',
             text: feature.get('name') || geojson.name,
-            strokeColor: feature.get('color_fill') || 'rgba(255,0,0,0.3)',
-            fillColor: feature.get('color_fill') || 'rgba(255,0,0,0.3)',
-            textFillColor: feature.get('color_fill') || "rgba(255,0,0,0.9)",
-            textStrokeColor: "#FFFFFF",
+            iconUrl: icon ? require('../../../assets' + icon): null,
+            strokeColor: feature.get('strokeColor') || 'rgba(255,0,0,0.3)',
+            fillColor: feature.get('fillColor') || 'rgba(255,0,0,0.3)',
+            textFillColor:"#ffffff" || feature.get('fillColor') || "rgba(255,0,0,0.9)",
+            textStrokeColor: "#333333",
             font: 14
           })
           feature.setStyle(style);
@@ -639,6 +642,8 @@ function Action() {
         },50)
       });
       return res;
+    }).catch(err => {
+      console.log(err)
     })
     })
   }
@@ -943,13 +948,13 @@ function Action() {
       dispatch,
       showFeatureName,
     });
-    
+
     const sou = this.layer.showLayer.getSource();
     // 渲染规划图
     let ext = await this.renderPlanPicCollection(planPic);
     // 渲染点的数据
     let pointCollection = this.renderPointCollection(ponts);
-    
+
     this.features = this.features.concat(pointCollection);
     this.Source.addFeatures(pointCollection);
 
