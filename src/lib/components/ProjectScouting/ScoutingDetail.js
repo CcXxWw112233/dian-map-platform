@@ -930,9 +930,9 @@ function Action() {
     // 清除变量
     this.layer.style = null;
     this.layer.attrs = null;
-    this.layer.responseData = null;
-    this.layer.saveCb = null;
-    this.layer.deleteCb = null;
+    // this.layer.responseData = null;
+    // this.layer.saveCb = null;
+    // this.layer.deleteCb = null;
     this.layer.isDefault = null;
 
     // 渲染geo数据

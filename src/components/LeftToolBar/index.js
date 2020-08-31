@@ -1,7 +1,6 @@
 import React from "react";
-import { Badge } from "antd";
+import { connect } from "dva";
 
-import globalStyle from "@/globalSet/styles/globalStyles.less";
 import styles from "./LeftToolBar.less";
 import Plot from "./panels/Plot";
 import Project from "./panels/Project";
@@ -9,10 +8,10 @@ import TempPlot from "./panels/TempPlot";
 import ProjectList from "./panels/ProjectList";
 import CustomSymbolStore from "./panels/CustomSymbolStore";
 import Panel from "./panels/Panel";
+import ToolBar from "./toolbar";
 
 import { lineDrawing, pointDrawing, polygonDrawing } from "utils/drawing";
 import ListAction from "@/lib/components/ProjectScouting/ScoutingList";
-import { connect } from "dva";
 
 @connect(({ openswitch: { isShowLeftToolBar, isInvalidToolBar } }) => ({
   isShowLeftToolBar,
@@ -168,8 +167,6 @@ export default class LeftToolBar extends React.Component {
       },
     ];
     this.state = {
-      selectedIndex: 0,
-      hoveredIndex: -1,
       displayPlot: false,
       hidePlot: false,
       displayProject: true,
@@ -195,6 +192,7 @@ export default class LeftToolBar extends React.Component {
     this.currentBaseMap = null;
     this.baseMapKeys = null;
     this.activeFeatureOperator = null;
+    this.leftToolBarRef = null;
   }
 
   deactivate = () => {
@@ -204,17 +202,7 @@ export default class LeftToolBar extends React.Component {
   };
 
   updateFeatureOperatorList = (operator) => {
-    ListAction.checkItem()
-      .then((res) => {
-        if (res) {
-          if (res.code !== 0) {
-            this._updateFeatureOperatorList(operator);
-          }
-        }
-      })
-      .catch((e) => {
-        this._updateFeatureOperatorList(operator);
-      });
+    this._updateFeatureOperatorList(operator);
   };
 
   _updateFeatureOperatorList = (operator) => {
@@ -225,10 +213,12 @@ export default class LeftToolBar extends React.Component {
     } else {
       this.featureOperatorList[index] = operator;
     }
+    this.leftToolBarRef.updateListLen(this.featureOperatorList.length);
   };
 
   updateFeatureOperatorList2 = (list) => {
     this.featureOperatorList = Array.from(new Set(list));
+    this.leftToolBarRef.updateListLen(this.featureOperatorList.length);
   };
 
   // 从数组中找到operator
@@ -268,8 +258,9 @@ export default class LeftToolBar extends React.Component {
     }
   };
 
-  handleItemOver = () => {};
-
+  onRef = (ref) => {
+    this.leftToolBarRef = ref;
+  }
   handleItemLeave = () => {};
   displayPlotPanel = (attrs) => {
     this.isModifyPlot = true;
@@ -282,15 +273,6 @@ export default class LeftToolBar extends React.Component {
     });
   };
   render() {
-    let tempPlotItemStyle = { bottom: 60, left: 4 };
-    let customSymbolStoreStyle = { bottom: 0, left: 4 };
-    const selectStyle = { background: "rgba(90, 134, 245, 1)" };
-    if (this.state.displayTempPlot) {
-      tempPlotItemStyle = { ...tempPlotItemStyle, ...selectStyle };
-    }
-    if (this.state.displayCustomSymbolStore) {
-      customSymbolStoreStyle = { ...customSymbolStoreStyle, ...selectStyle };
-    }
     return (
       <div
         className={`${styles.wrapper} ${
@@ -299,129 +281,7 @@ export default class LeftToolBar extends React.Component {
         style={{ position: "absolute", top: 0, left: 0 }}
         id="leftToolBar"
       >
-        <div
-          style={{
-            width: "100%",
-            height: "100%",
-            background: "#6a9aff",
-            zIndex: 9,
-          }}
-        >
-          <div
-            className={`${styles.circle} ${
-              this.props.isInvalidToolBar ? "invalid" : ""
-            }`}
-            style={{ background: "#fff" }}
-          >
-            {/* <img alt="" src=""></img> */}
-            <i className={globalStyle.global_icon} style={{ fontSize: 26 }}>
-              &#xe764;
-            </i>
-          </div>
-          <div
-            className={`${globalStyle.autoScrollY} ${
-              this.props.isInvalidToolBar ? "invalid" : ""
-            }`}
-            style={{ height: "calc(100% - 210px)" }}
-          >
-            {this.leftTools.map((item, index) => {
-              let displayText = true;
-              if (
-                item.displayText === false ||
-                this.state.selectedIndex === index
-              ) {
-                displayText = false;
-              }
-              if (this.state.hoveredIndex === index) {
-                displayText = false;
-              }
-              const divStyle = displayText ? {} : { display: "table" };
-              const iStyle = displayText
-                ? {}
-                : { display: "table-cell", verticalAlign: "middle" };
-              return (
-                <div
-                  key={`${item.iconfont}-${index}`}
-                  className={`${styles.item} ${
-                    this.state.selectedIndex === index ? styles.active : ""
-                  }`}
-                  style={divStyle}
-                  onPointerOver={() => {
-                    this.setState({
-                      hoveredIndex: index,
-                    });
-                  }}
-                  onPointerLeave={() => {
-                    this.setState({
-                      hoveredIndex: -1,
-                    });
-                  }}
-                  onPointerDown={() => {
-                    this.setState({
-                      selectedIndex: index,
-                    });
-                    item.cb && item.cb();
-                  }}
-                >
-                  <i
-                    className={globalStyle.global_icon}
-                    dangerouslySetInnerHTML={{ __html: item.iconfont }}
-                    style={iStyle}
-                  ></i>
-                  {displayText ? (
-                    <p>
-                      <span>{item.name}</span>
-                    </p>
-                  ) : null}
-                </div>
-              );
-            })}
-          </div>
-          <div
-            className={`${styles.circle} ${styles.temp}`}
-            onClick={() => {
-              this.setState({
-                selectedIndex: -1,
-                displayPlot: false,
-                hidePlot: false,
-                displayProject: false,
-                displayTempPlot: true,
-                displayCustomSymbolStore: false,
-                plotType: "",
-              });
-            }}
-            style={{ ...tempPlotItemStyle, display: "table" }}
-          >
-            <i
-              className={globalStyle.global_icon}
-              style={{ fontSize: 30, color: "#fff" }}
-            >
-              &#xe765;
-            </i>
-          </div>
-          <div
-            className={`${styles.circle} ${styles.temp}`}
-            onClick={() => {
-              this.setState({
-                selectedIndex: -1,
-                displayPlot: false,
-                hidePlot: false,
-                displayProject: false,
-                displayTempPlot: false,
-                displayCustomSymbolStore: true,
-                plotType: "",
-              });
-            }}
-            style={customSymbolStoreStyle}
-          >
-            <i
-              className={globalStyle.global_icon}
-              style={{ fontSize: 30, color: "#fff" }}
-            >
-              &#xe7b6;
-            </i>
-          </div>
-        </div>
+        <ToolBar parent={this} onRef={this.onRef}></ToolBar>
         <Panel>
           <Project hidden={this.state.displayProject}></Project>
           {this.state.displayPlot ? (
@@ -435,7 +295,6 @@ export default class LeftToolBar extends React.Component {
                 this.setState({
                   hidePlot: true,
                   displayProject: true,
-                  selectedIndex: 0,
                 });
               }}
             ></Plot>

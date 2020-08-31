@@ -259,6 +259,10 @@ export default class Plot extends PureComponent {
     const { parent } = this.props;
     this.operatorActive = function (e) {
       if (!e.feature_operator.isScouting) {
+        Event.Evt.firEvent("setAttribute", {
+          saveCb: me.handleSaveClick.bind(me),
+          delCb: me.updatePlotList.bind(me),
+        });
         // 激活即修改状态
         parent.isModifyPlot = true;
         let operator = e.feature_operator;
@@ -266,7 +270,7 @@ export default class Plot extends PureComponent {
           return tmpOperator.guid === operator.guid;
         })[0];
         if (!tmp) {
-          parent.featureOperatorList.push(operator);
+          parent.updateFeatureOperatorList(operator);
         }
         window.featureOperator = operator;
         me.plotName = window.featureOperator.getName();
@@ -322,11 +326,6 @@ export default class Plot extends PureComponent {
         parent.isModifyPlot = false;
         parent.oldPlotName = "";
         parent.oldRemark = "";
-        let operator = e.feature_operator;
-        // let style = operator.feature.getStyle();
-        // style.setZIndex(me.selectedPlotZIndex);
-        // operator.feature.setStyle(style);
-        me.savePlot2TempPlot(operator);
         window.featureOperator && delete window.featureOperator;
       }
     };
@@ -370,10 +369,6 @@ export default class Plot extends PureComponent {
   }
 
   componentWillReceiveProps(nextProps) {
-    Event.Evt.firEvent("setAttribute", {
-      saveCb: this.handleSaveClick.bind(this),
-      delCb: this.updatePlotList.bind(this),
-    });
     if (nextProps.hidden === false) {
       this.handleResetClick();
       this.createPlotName();
@@ -448,7 +443,8 @@ export default class Plot extends PureComponent {
   };
 
   updatePlotList = (list) => {
-    this.props.updateFeatureOperatorList2(list);
+    const { parent } = this.props;
+    parent.updateFeatureOperatorList2(list);
   };
 
   // 从数组中找到operator
@@ -985,26 +981,10 @@ export default class Plot extends PureComponent {
   handleSaveClick = () => {
     // 有标绘被选择
     if (window.featureOperator) {
-      // 更新style
-      let tstyle = window.featureOperator.feature.getStyle();
-      let textStyle = tstyle.getText();
-      textStyle.setText(this.plotName);
-      window.featureOperator.feature.setStyle(tstyle);
-      // 更新attrs
-      window.featureOperator.attrs.name = this.plotName;
-      window.featureOperator.setName(this.plotName);
-      window.featureOperator.attrs.remark = this.plotRemark;
-
       // 选择了项目
       if (this.projectId) {
         this.save2Group(window.featureOperator)
           .then((resp) => {
-            // if (window.ProjectGroupId) {
-            //   let collections = DetailAction.CollectionGroup;
-            //   let obj = collections.find(
-            //     (item) => item.id === window.ProjectGroupId
-            //   );
-            //   if (obj) {
             let data = resp.data;
             let coll = data && data[0];
             if (coll) {
@@ -1015,21 +995,19 @@ export default class Plot extends PureComponent {
                 DetailAction.oldData
               );
             }
+            this.handleDelClick();
             this.props.goBackProject();
-            //   }
-
-            // }
           })
           .catch((err) => {
-            console.log(err);
+            message.info("已保存到临时标绘。");
           });
       }
       // 未选择项目
       else {
-        this.savePlot2TempPlot(window.featureOperator);
+        message.info("已保存到临时标绘。");
       }
     } else {
-      message.info("请先标绘");
+      message.info("请先标绘或选择要保存的标绘。");
     }
     plotEdit.deactivate();
   };

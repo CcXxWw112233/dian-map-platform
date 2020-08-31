@@ -185,7 +185,7 @@ class PlotEdit extends Observable {
       () => {
         window.featureOperator &&
           this.layer.removeFeature(window.featureOperator);
-        window.featureOperator && delete window.featureOperator;
+        // window.featureOperator && delete window.featureOperator;
 
         // 标绘回调更新redux
         const tempList = this.layer.getArrDifference(
