@@ -256,7 +256,7 @@ export default class ToolBar extends React.Component {
           })}
         </div>
         {/* 临时标绘 */}
-        <Badge count={this.state.operatorListLength} className={styles.temp}>
+        <Badge count={this.state.operatorListLength} className={styles.temp} offset={[0, 20]}>
           <div
             className={`${styles.circle} ${styles.temp}`}
             onClick={() => {

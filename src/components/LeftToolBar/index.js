@@ -11,7 +11,6 @@ import Panel from "./panels/Panel";
 import ToolBar from "./toolbar";
 
 import { lineDrawing, pointDrawing, polygonDrawing } from "utils/drawing";
-import ListAction from "@/lib/components/ProjectScouting/ScoutingList";
 
 @connect(({ openswitch: { isShowLeftToolBar, isInvalidToolBar } }) => ({
   isShowLeftToolBar,

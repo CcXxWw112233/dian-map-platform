@@ -1,5 +1,5 @@
 import React, { PureComponent } from "react";
-import { Input, Select, Button, Tooltip, message, Skeleton } from "antd";
+import { Input, Button, Tooltip, message, Skeleton } from "antd";
 
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import styles from "../LeftToolBar.less";
@@ -1191,21 +1191,6 @@ export default class Plot extends PureComponent {
               width: 140,
               height: 36,
               margin: "12px auto",
-              background: "rgba(163,205,255,0.2)",
-              borderRadius: 4,
-              border: "2px solid rgba(127,167,255,1)",
-              color: "rgba(102, 144, 255, 1)",
-            }}
-            onClick={this.handleSaveClick}
-          >
-            保存
-          </Button>
-          <Button
-            block
-            style={{
-              width: 140,
-              height: 36,
-              margin: "12px auto",
               background: "rgba(255,85,85,0.2)",
               borderRadius: 4,
               border: "2px solid rgba(255,85,85,0.2)",
@@ -1214,6 +1199,21 @@ export default class Plot extends PureComponent {
             onClick={this.handleDelClick}
           >
             删除
+          </Button>
+          <Button
+            block
+            style={{
+              width: 140,
+              height: 36,
+              margin: "12px auto",
+              background: "rgba(163,205,255,0.2)",
+              borderRadius: 4,
+              border: "2px solid rgba(127,167,255,1)",
+              color: "rgba(102, 144, 255, 1)",
+            }}
+            onClick={this.handleSaveClick}
+          >
+            保存
           </Button>
         </div>
       </div>

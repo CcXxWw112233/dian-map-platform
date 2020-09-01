@@ -323,7 +323,7 @@ const publicData = {
   // 根据底图切换坐标,当数据更新了调用
   transCoordinateSystems: function (coord, type) {
     // 如果先前的底图key跟现有的底图key一致，则无需纠偏转换,直接返回coord
-
+    this.currentBaseMap = mapApp.baseMapKey;
     let newCoord = JSON.parse(JSON.stringify(coord));
     // 当前地图是gcj02坐标系
     let index = this.baseMapKeys[0].indexOf(this.currentBaseMap);

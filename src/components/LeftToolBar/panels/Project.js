@@ -1,6 +1,5 @@
 import React from "react";
 import { Tabs, Spin } from "antd";
-import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 
 import animateCss from "../../../assets/css/animate.min.css";
 import styles from "../LeftToolBar.less";
@@ -22,6 +21,8 @@ export default class Project extends React.Component {
     super(props);
     this.queryStr = "";
     this.publicDataChild = null;
+    this.publicDataCheckedKeys = [];
+    this.hasRenderPublicData = false;
     this.state = {
       openPanel: true,
     };
@@ -115,6 +116,7 @@ export default class Project extends React.Component {
                   </TabPane>
                   <TabPane tab={<span>公共数据</span>} key="2">
                     <PublicData
+                      parent={this}
                       getQueryStr={this.getQueryStr}
                       onRef={this.onRef}
                     />

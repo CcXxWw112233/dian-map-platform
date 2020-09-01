@@ -19,6 +19,7 @@ export default class TempPlot extends React.Component {
       featureOperatorList: [],
       displayCreateProject: false,
       openPanel: true,
+      isInProject: false,
     };
     this.plotLayer = null;
   }
@@ -114,6 +115,7 @@ export default class TempPlot extends React.Component {
       message.info("请先选择需要保存的标绘。");
     }
   };
+
   onCheckAllChange = (e) => {
     if (e.target.checked) {
       let newCheckedList = [];
@@ -229,6 +231,13 @@ export default class TempPlot extends React.Component {
     return null;
   };
 
+  deleteSelectedFeature = () => {
+    let arr = this.getSelectedData();
+    arr.forEach((operator) => {
+      this.handleDelClick(operator);
+    });
+  };
+
   getSelectedData = () => {
     let { parent } = this.props;
     let { checkedList } = this.state;
@@ -277,7 +286,7 @@ export default class TempPlot extends React.Component {
           {this.state.featureOperatorList.length > 0 ? (
             <div
               className={`${styles.content} ${globalStyle.autoScrollY}`}
-              style={{ height: "calc(100% - 70px)", padding: 0 }}
+              style={{ height: "calc(100% - 80px)", padding: 0 }}
             >
               <div className={styles.checkAll} style={{ marginLeft: 10 }}>
                 <Checkbox
@@ -359,9 +368,39 @@ export default class TempPlot extends React.Component {
             </div>
           ) : null}
           {this.state.featureOperatorList.length > 0 ? (
-            <div className={styles.footer}>
-              <Button type="primary" block onClick={this.saveToProject}>
-                转存到项目
+            <div
+              className={styles.footer}
+              style={{ display: "flex", flexDirection: "row" }}
+            >
+              <Button
+                block
+                onClick={this.deleteSelectedFeature}
+                style={{
+                  width: 140,
+                  height: 36,
+                  margin: "12px auto",
+                  background: "rgba(255,85,85,0.2)",
+                  borderRadius: 4,
+                  border: "2px solid rgba(255,85,85,0.2)",
+                  color: "rgba(255, 85, 85, 1)",
+                }}
+              >
+                删除
+              </Button>
+              <Button
+                block
+                onClick={this.saveToProject}
+                style={{
+                  width: 140,
+                  height: 36,
+                  margin: "12px auto",
+                  background: "rgba(163,205,255,0.2)",
+                  borderRadius: 4,
+                  border: "2px solid rgba(127,167,255,1)",
+                  color: "rgba(102, 144, 255, 1)",
+                }}
+              >
+                转存项目(分组)
               </Button>
             </div>
           ) : (
