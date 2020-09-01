@@ -3,6 +3,7 @@ import listAction from "./ScoutingList";
 import PhotoSwipe from "../../../components/PhotoSwipe/action";
 import config from "../../../services/scouting";
 import { dateFormat, Different } from "../../../utils/utils";
+import { Pointer as PointerInteraction } from 'ol/interaction'
 import InitMap from "../../../utils/INITMAP";
 import {
   drawPoint,
@@ -27,6 +28,7 @@ import {
   CollectionOverlay,
   settingsOverlay,
   areaDetailOverlay,
+  SetCoordinateForCollection
 } from "../../../components/PublicOverlays";
 import { Modify } from "ol/interaction";
 import { extend } from "ol/extent";
@@ -91,6 +93,16 @@ function Action() {
     this.layer = plotEdit.getPlottingLayer(dispatch);
 
     if (!layer[0]) {
+      InitMap.map.on('click', (evt)=>{
+        let obj = evt.map.forEachFeatureAtPixel(evt.pixel, (feature,layer) => { return {feature, layer}});
+        if(!obj) return ;
+        if(!obj.feature) return;
+        if(obj && obj.layer && obj.layer.get('id') === this.layerId){
+          if(obj.feature.get('ftype') === 'collection'){
+            Event.Evt.firEvent('handleCollectionFeature',obj.feature.get('data'));
+          }
+        }
+      })
       InitMap.map.addLayer(this.Layer);
     }
   };
@@ -121,6 +133,7 @@ function Action() {
     // 删除已经存在的项目列表
     listAction.clear();
   };
+
 
   this.checkCollectionType = (suffix = "") => {
     if (!suffix) return "unknow";
@@ -209,7 +222,193 @@ function Action() {
     // console.log(coordinate)
     return await EDIT_AREA_MESSAGE(id, param);
   };
-  // 添加关联点的交互
+
+  const Drag = /*@__PURE__*/(function (PointerInteraction) {
+    function Drag() {
+      PointerInteraction.call(this, {
+        handleDownEvent: ()=>{}, //handleDownEvent
+        handleDragEvent:()=>{}, //handleDragEvent,
+        handleMoveEvent:()=>{}, //handleMoveEvent,
+        handleUpEvent:()=>{}, //handleUpEvent,
+      });
+
+      /**
+       * @type {import("../src/ol/coordinate.js").Coordinate}
+       * @private
+       */
+      this.coordinate_ = null;
+
+      /**
+       * @type {string|undefined}
+       * @private
+       */
+      this.cursor_ = 'pointer';
+
+      /**
+       * @type {Feature}
+       * @private
+       */
+      this.feature_ = null;
+
+      /**
+       * @type {string|undefined}
+       * @private
+       */
+      this.previousCursor_ = undefined;
+    }
+
+    if ( PointerInteraction ) Drag.__proto__ = PointerInteraction;
+    Drag.prototype = Object.create( PointerInteraction && PointerInteraction.prototype );
+    Drag.prototype.constructor = Drag;
+
+    return Drag;
+  }(PointerInteraction));
+
+  // 添加坐标点
+  this.addCollectionCoordinates = (isMultiple,data)=>{
+    this.dragEvt = new Drag();
+    this.hideCollectionOverlay();
+    this.isActivity = true;
+    return new Promise((resolve, reject) => {
+      InitMap.map.once('click', (event)=> {
+        let { coordinate } = event;
+        let handlefeature = InitMap.map.forEachFeatureAtPixel(event.pixel, (feature)=> feature);
+        if(handlefeature){
+          let type = handlefeature.getGeometry().getType();
+          if(type === 'Point'){
+            coordinate = handlefeature.getGeometry().getCoordinates();
+            message.success(`选择了关联已有的坐标点`);
+          }
+        }
+        let style = createStyle('Point', {
+          icon:{
+            src: require("../../../assets/unselectlocation.png"),
+            crossOrigin: 'anonymous',
+            anchor:[0.5,0.8]
+          },
+          text: !isMultiple && data.title,
+          showName: !isMultiple,
+          textFillColor: "#ff0000",
+          textStrokeColor: "#ffffff",
+          zIndex: 20
+        })
+        let f = addFeature('Point',{coordinates: coordinate,ftype:"select_coordinates"});
+        f.setStyle(style);
+        this.Layer.setZIndex(50);
+        this.Source.addFeature(f);
+
+        let ele = new SetCoordinateForCollection({});
+        let overlay = createOverlay(ele.element, {position: coordinate,positioning:"bottom-center",offset:[0,-40]});
+        InitMap.map.addOverlay(overlay);
+
+        let p = this.transform(coordinate);
+        ele.setLong(p[0]);
+        ele.setLat(p[1]);
+
+        InitMap.map.addInteraction(this.dragEvt)
+        this.dragEvt.handleDownEvent = (evt)=>{
+          let map = evt.map;
+
+          let feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {
+            return feature;
+          });
+
+          if (feature && feature.get('ftype') === 'select_coordinates') {
+            this.coordinate_ = evt.coordinate;
+            overlay.setPosition(null);
+            let styles = feature.getStyle();
+            let imgstyle = createStyle("Point",{
+              icon: {
+                src: require("../../../assets/selectlocation.png"),
+                crossOrigin: 'anonymous',
+                anchor:[0.5,0.8]
+              }
+            })
+            styles.setImage(imgstyle.getImage());
+            feature.setStyle(styles)
+            this.feature_ = feature;
+          }
+          return !!feature;
+        }
+        this.dragEvt.handleDragEvent = (evt)=>{
+          if(this.coordinate_){
+            let deltaX = evt.coordinate[0] - this.coordinate_[0];
+            let deltaY = evt.coordinate[1] - this.coordinate_[1];
+            if(this.feature_){
+              let geometry = this.feature_.getGeometry();
+              geometry.translate(deltaX, deltaY);
+              this.coordinate_ = evt.coordinate;
+            }
+          }
+        }
+        this.dragEvt.handleMoveEvent = (evt)=>{
+          if (this.cursor_) {
+            let map = evt.map;
+            let feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {
+              return feature;
+            });
+            let element = evt.map.getTargetElement();
+            if (feature && feature.get('ftype') === 'select_coordinates') {
+              if (element.style.cursor != this.cursor_) {
+                this.previousCursor_ = element.style.cursor;
+                element.style.cursor = this.cursor_;
+              }
+            } else if (this.previousCursor_ !== undefined) {
+              element.style.cursor = this.previousCursor_;
+              this.previousCursor_ = undefined;
+            }
+          }
+        }
+        this.dragEvt.handleUpEvent = ()=>{
+          if(this.feature_){
+            let geo = this.feature_.getGeometry();
+            let coor = geo.getCoordinates();
+            overlay.setPosition(coor);
+            let styles = this.feature_.getStyle();
+            let imgstyle = createStyle("Point",{
+              icon: {
+                src: require("../../../assets/unselectlocation.png"),
+                crossOrigin: 'anonymous',
+                anchor:[0.5,0.8]
+              }
+            })
+
+            styles.setImage(imgstyle.getImage())
+            this.feature_.setStyle(styles);
+            // 更新显示的内容
+            let position = this.transform(coor);
+            ele.setLong(position[0]);
+            ele.setLat(position[1]);
+          }
+          this.coordinate_ = null;
+          this.feature_ = null;
+          return false;
+        }
+        ele.on = {
+          save: (val)=>{
+            // console.log(val)
+            resolve(val);
+            cancelAdd();
+            this.isActivity = false;
+          },
+          cancel: ()=>{
+            cancelAdd();
+            reject();
+            this.isActivity = false;
+          }
+        }
+        const cancelAdd = ()=>{
+          InitMap.map.removeInteraction(this.dragEvt);
+          this.dragEvt = null ;
+          this.Source.removeFeature(f);
+          InitMap.map.removeOverlay(overlay);
+        }
+      })
+    })
+
+  }
+
+  // 添加关联点的交互 ---废弃 已有 addCollectionCoordinate 代替
   this.addCollectionPosition = (data) => {
     return new Promise((resolve, reject) => {
       let style = createStyle("Point", {
@@ -485,57 +684,59 @@ function Action() {
     const systemDic = InitMap.systemDic;
     // console.log(array)
     let features = [];
-    array.forEach((item) => {
-      let coor = null;
-      // gcj02
-      if (!Number(item.location.coordSysType)) {
+    let coordinate = {};
+    array.forEach(item => {
+      let key = [+item.location.longitude,+item.location.latitude];
+      key = key.join('/');
+
+      let pointType = this.checkCollectionType(item.target);
+      item.pointType = pointType;
+
+      !coordinate[key] && (coordinate[key] = []);
+      coordinate[key].push(item);
+    })
+    Object.keys(coordinate).forEach(item => {
+      let coor = item.split('/').map(c => +c);
+      let d = coordinate[item][0];
+      if (!Number(d.location.coordSysType)) {
         if (baseMapKeys[0].indexOf(baseMapKey) > -1) {
-          coor = TransformCoordinate([
-            +item.location.longitude,
-            +item.location.latitude,
-          ]);
+          coor = TransformCoordinate(coor);
         } else if (baseMapKeys[1].indexOf(baseMapKey) > -1) {
           coor = TransformCoordinate(
             systemDic[baseMapKey](
-              +item.location.longitude,
-              +item.location.latitude
+              coor[0],
+              coor[1]
             )
           );
         }
       }
       // wgs84
-      else if (Number(item.location.coordSysType) === 1) {
+      else if (Number(d.location.coordSysType) === 1) {
         if (baseMapKeys[1].indexOf(baseMapKey) > -1) {
-          coor = TransformCoordinate([
-            +item.location.longitude,
-            +item.location.latitude,
-          ]);
+          coor = TransformCoordinate(coor);
         } else if (baseMapKeys[0].indexOf(baseMapKey) > -1) {
           coor = TransformCoordinate(
             systemDic[baseMapKey](
-              +item.location.longitude,
-              +item.location.latitude
+              coor[0],
+              coor[1]
             )
           );
         }
       }
-      let feature = addFeature("Point", { coordinates: coor, id: item.id });
+
+      let feature = addFeature("Point", { coordinates: coor, id: d.id ,ftype:"collection",data: coordinate[item]});
       let style = createStyle("Point", {
-        iconUrl: require("../../../assets/mark/collectionIcon.png"),
+        iconUrl: require("../../../assets/unselectlocation.png"),
         strokeWidth: 2,
         strokeColor: "#fff",
         zIndex: 10,
-        icon: { anchorOrigin: "bottom-left", anchor: [0.35, 0.25] },
+        icon: { anchorOrigin: "bottom-left", anchor: [0.5, 0.8] },
       });
 
-      let pointType = this.checkCollectionType(item.target);
-      item.pointType = pointType;
       feature.setStyle(style);
 
-      addOverlay && this.addOverlay(coor, item);
-
       features.push(feature);
-    });
+    })
     return features;
   };
 
@@ -600,6 +801,7 @@ function Action() {
   };
 
   this.handlePlotClick = (feature, pixel) => {
+    if(this.isActivity) return ;
     createPopupOverlay(feature, pixel);
   };
 

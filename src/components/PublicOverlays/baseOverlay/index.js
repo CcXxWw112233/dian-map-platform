@@ -15,8 +15,8 @@ export default function baseOverlay(content, data = {}){
 
     let position = (placement) => {
         switch(placement){
-            case "bottomLeft" :  ;
-            case "bottomCenter" : ;
+            case "bottomLeft" :
+            case "bottomCenter" :
             case "bottomRight" :
                 return "5,0,10,10,20,0"
             ;
