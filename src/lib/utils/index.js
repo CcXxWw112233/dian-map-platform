@@ -209,12 +209,12 @@ export const createStyle = function (
     }),
   });
   if (type === "Point") {
-    let isIcon = true;
-    if (!options.iconUrl) {
-      isIcon = false;
+    let isIcon = false;
+    if (options.iconUrl) {
+      isIcon = true;
     }else
-    if (!options.icon && !options.icon.hasOwnProperty("src")) {
-      isIcon = false;
+    if (options.icon && options.icon.hasOwnProperty("src")) {
+      isIcon = true;
     }
     return new Style({
       image: isIcon

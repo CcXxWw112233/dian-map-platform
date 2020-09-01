@@ -175,11 +175,10 @@ export const Title = ({ name, date, cb, data = {}, className = "", mini }) => {
 //   };
 
 const checkFileSize = (file) => {
-  // console.log(file);
   let { size, text } = formatSize(file.size);
   text = text.trim();
   if (+size > 60 && text === "MB") {
-    message.error("文件不能大于60MB");
+    message.error("文件不能大于60MB---"+ file.name);
     return false;
   }
   return true;
@@ -195,8 +194,10 @@ const UploadBtn = ({ onChange }) => {
       onChange(e);
       // 清空上传列表
       if (e.file.response) {
-        let fFile = file.filter((item) => item.uid !== e.file.uid);
-        setFiles(fFile);
+        setTimeout(()=>{
+          let fFile = file.filter((item) => item.uid !== e.file.uid);
+          setFiles(fFile);
+        }, 2000)
       }
     }
   };
@@ -209,6 +210,7 @@ const UploadBtn = ({ onChange }) => {
     <Upload
       action="/api/map/file/upload"
       beforeUpload={checkFileSize}
+      multiple
       headers={{ Authorization: BASIC.getUrlParam.token }}
       onChange={(e) => {
         onupload(e);
@@ -559,6 +561,7 @@ export const ScoutingItem = ({
   onChangeDisplay = () => {},
   onEditPlanPic = () => {},
   onCopyCollection,
+  selected = [],
   onModifyFeature = () => {},
   onModifyRemark = () => {},
   onRemarkSave = () => {},
@@ -581,7 +584,7 @@ export const ScoutingItem = ({
       <Droppable droppableId="droppable">
         {(provided, snapshot) => (
           <div {...provided.droppableProps} ref={provided.innerRef}>
-          <Checkbox.Group onChange={handleSelect} style={{width:'100%'}}>
+          <Checkbox.Group onChange={handleSelect} style={{width:'100%'}} value={selected}>
           {dataSource.length ? (
               dataSource.map((item, index) => {
                 return (
@@ -607,6 +610,7 @@ export const ScoutingItem = ({
                           </span>
                           {item.type !== "groupCollection" ? (
                             <UploadItem
+                              selected={selected}
                               Edit={CollectionEdit}
                               onCheckItem={onCheckItem}
                               onCopyCollection={onCopyCollection}
@@ -634,6 +638,7 @@ export const ScoutingItem = ({
                               {item.child &&
                                 item.child.map((child, i) => (
                                   <UploadItem
+                                    selected={selected}
                                     Edit={CollectionEdit}
                                     onCheckItem={onCheckItem}
                                     group_id={item.gid}

@@ -51,3 +51,10 @@ Object.defineProperty(exports, "areaDetailOverlay", {
     return require('./areaDetailOverlay/index').default;
   }
 });
+
+Object.defineProperty(exports, "SetCoordinateForCollection", {
+  enumerable: true,
+  get: function get() {
+    return require('./setCoordinateForCollection/index').default;
+  }
+})
