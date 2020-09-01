@@ -12,7 +12,7 @@ import Event from '../../../../lib/utils/event';
 import EditDescription from './editDescription';
 import Slider from "react-slick";
 
-@connect(({collectionDetail: { selectData ,zIndex, type,isImg} })=>({ selectData ,zIndex ,type, isImg}))
+@connect(({collectionDetail: { selectData ,zIndex, type,isImg, small} })=>({ selectData ,zIndex ,type, isImg, small}))
 export default class CollectionDetail extends React.Component{
   constructor(props){
     super(props);
@@ -198,35 +198,47 @@ export default class CollectionDetail extends React.Component{
 
   render(){
     const { sliderPages } = this.state;
-    let { dispatch ,zIndex, selectData, isImg} = this.props;
-    // let selectData = activeImg || {};
+    let { dispatch ,zIndex, selectData, isImg ,small} = this.props;
     selectData = Array.isArray(selectData) ? selectData: selectData ? [selectData] : null;
-    // let oldRemark = selectData && selectData.description;
-    // if (oldRemark?.trim() === "") {
-    //   oldRemark = null
-    // }
-    // let { create_by, create_time } = selectData;
-    // let time = DetailAction.dateFormat(create_time, "yyyy/MM/dd");
-    // let hours = DetailAction.dateFormat(create_time, "HH:mm");
     return (
       ReactDOM.createPortal(
         <div className={`${styles.collection_detail}`}
         style={{zIndex: zIndex}}>
           <div className={styles.detail_title}>
-            <span className={styles.pages}>
-              {sliderPages.current}/{sliderPages.total}
-            </span>
+            {small ?
+            <Fragment>
+              <div className={styles.smallTitle}>
+                <span className={styles.smallTitle_title}>
+                  {selectData && selectData[sliderPages.current - 1] && selectData[sliderPages.current - 1].title}
+                </span>
+              </div>
+            </Fragment>
+            :
+            <Fragment>
+              <span className={styles.pages}>
+                {sliderPages.current}/{sliderPages.total}
+              </span>
+              <span style={{fontSize:'0.7em'}} onClick={()=> dispatch({type:"collectionDetail/updateDatas",payload:{small: true}})}>
+                <MyIcon type="icon-suoxiao1"/>
+              </span>
+            </Fragment>
+            }
             {/* <span className={styles.edit}>
               {isEdit ? <MyIcon type='icon-bianzu7beifen' onClick={(e)=> this.editEnd(false)}/> :
               <MyIcon type="icon-bianzu7beifen4" onClick={()=> this.editEnd(true)}/>}
             </span> */}
+            {small &&
+            <span
+            onClick={()=> dispatch({type:"collectionDetail/updateDatas",payload:{small: false}})}>
+              <MyIcon type="icon-jia1"/>
+            </span>}
             <span className={styles.close}>
               <MyIcon type="icon-guanbi2" onClick={()=> dispatch({
                 type:'collectionDetail/updateDatas',payload:{selectData:null,isImg: true}
               })}/>
             </span>
           </div>
-          <div className={styles.container}>
+          <div className={`${styles.container}`} style={{height: small ? 0: 'auto'}}>
             { (selectData && selectData.length > 1) && (
               <Fragment>
                 <span className={styles.prev}
@@ -243,7 +255,9 @@ export default class CollectionDetail extends React.Component{
               { selectData && selectData.map(item => {
                 return (<div key={item.id}>
                   {isImg && <div className={styles.container_img}>
-                    <img src={item.resource_url} alt="" onClick={this.previewImg}/>
+                    {item.resource_url ? <img src={item.resource_url} alt="" onClick={this.previewImg}/>
+                    :
+                    <span>暂不支持预览</span>}
                   </div>}
                   <div className={styles.data_msg}>
                     <div className={styles.data_title}>

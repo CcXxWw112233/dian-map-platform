@@ -17,6 +17,7 @@ import PopupOverlay from "../../components/PublicOverlays/PopupOverlay/index";
 import baseOverlay from "../../components/PublicOverlays/baseOverlay/index";
 import { createOverlay } from "../../lib/utils/index";
 import { getLocal } from "../../utils/sessionManage";
+import DetailAction from '../../lib/components/ProjectScouting/ScoutingDetail';
 import {
   gcj02_to_wgs84,
   wgs84_to_gcj02,
@@ -75,6 +76,8 @@ const publicData = {
           }
         );
         if (!feature) return;
+        if(DetailAction.isActivity) return ;
+        console.log(DetailAction.isActivity)
         const properties = feature.getProperties();
         if (
           properties.price &&

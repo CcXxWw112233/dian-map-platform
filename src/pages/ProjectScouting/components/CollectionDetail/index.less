@@ -1,6 +1,7 @@
 @import '../../../../globalSet/styles/globalStyles.less';
 .collection_detail{
   position: absolute;
+  overflow: hidden;
   animation-duration: 0.5s;
   top: 1%;
   right: 1%;
@@ -12,6 +13,7 @@
   border-radius:8px;
   // padding-bottom: 30px;
   .detail_title{
+    background-color: #fff;
     text-align: right;
     padding: 8px 4px;
     border-bottom: 1px solid rgba(0,0,0,0.12);
@@ -19,6 +21,16 @@
       margin-right: 8px;
       font-size: 1.2em;
       cursor: pointer;
+    }
+  }
+  .smallTitle{
+    // display: inline-block;
+    float: left;
+    .smallTitle_title{
+      float: left;
+      margin-left: 5px;
+      font-size: 14px;
+      font-weight: bold;
     }
   }
   .container{
