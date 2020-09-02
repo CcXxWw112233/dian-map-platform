@@ -302,8 +302,8 @@ export default class LeftToolBar extends React.Component {
         <Panel>
           <Project
             hidden={this.state.displayProject}
-            displayPlotPanel={(attrs, plot) =>
-              this.displayPlotPanel(attrs, plot)
+            displayPlotPanel={(attrs, operator) =>
+              this.displayPlotPanel(attrs, operator)
             }
           ></Project>
           {this.state.displayPlot ? (
@@ -333,7 +333,9 @@ export default class LeftToolBar extends React.Component {
                   displayTempPlot: false,
                 });
               }}
-              displayPlotPanel={(attrs) => this.displayPlotPanel(attrs)}
+              displayPlotPanel={(attrs, operator) =>
+                this.displayPlotPanel(attrs, operator)
+              }
               editPlot={this.editPlot}
             ></TempPlot>
           ) : null}
