@@ -284,6 +284,11 @@ export default class PublicData extends React.Component {
         node.children.forEach((item) => {
           selectedArr.push(item.key);
         });
+      } else {
+        const pkey = arr.filter((item) => item === node.pKey)[0];
+        if (pkey) {
+          selectedArr.push(node.pKey);
+        }
       }
       arr = this.getDiff(arr, selectedArr);
     }

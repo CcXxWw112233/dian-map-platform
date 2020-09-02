@@ -20,31 +20,38 @@ export default class ProjectList extends React.Component {
     };
   }
   componentDidMount() {
-    ListAction.checkItem().then((res) => {
-      if (res) {
-        // 项目内
-        if (res.code === 0) {
-          let param = { board_id: res.data.board_id };
-          ScoutDetail.fetchAreaList(param).then((resp) => {
-            resp.data.push({
-              board_id: "other",
-              name: "未分组",
+    ListAction.checkItem()
+      .then((res) => {
+        if (res) {
+          // 项目内
+          if (res.code === 0) {
+            let param = { board_id: res.data.board_id };
+            ScoutDetail.fetchAreaList(param).then((resp) => {
+              resp.data.push({
+                board_id: "other",
+                name: "未分组",
+              });
+              this.setState({
+                isInProject: true,
+                projectId: res.data.board_id,
+                projectName: res.data.board_name,
+                groupList: resp.data,
+              });
             });
+          } else {
             this.setState({
-              isInProject: true,
-              projectId: res.data.board_id,
-              projectName: res.data.board_name,
-              groupList: resp.data,
+              isInProject: false,
+              projectList: ListAction.projects,
             });
-          });
-        } else {
-          this.setState({
-            isInProject: false,
-            projectList: ListAction.projects,
-          });
+          }
         }
-      }
-    });
+      })
+      .catch((e) => {
+        this.setState({
+          isInProject: false,
+          projectList: ListAction.projects,
+        });
+      });
   }
   onChange = (value) => {
     // 项目外

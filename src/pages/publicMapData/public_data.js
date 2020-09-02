@@ -31,6 +31,7 @@ const data = [
         title: "人口分布",
         icon: "",
         key: "map:population:number",
+        pKey: "1",
         loadFeatureKeys: [{ ...commonFeatureKeys }],
         fillColorKeyVals: [
           {
@@ -59,6 +60,7 @@ const data = [
         title: "人口密度",
         icon: "",
         key: "map:population:density",
+        pKey: "1",
         loadFeatureKeys: [{ ...commonFeatureKeys }],
         fillColorKeyVals: [
           {
@@ -92,6 +94,7 @@ const data = [
         title: "就业岗位",
         icon: "",
         key: "map:population:employment",
+        pKey: "1",
         loadFeatureKeys: [{ ...commonFeatureKeys }],
         fillColorKeyVals: [
           {
@@ -115,6 +118,7 @@ const data = [
         title: "居民用地",
         icon: "",
         key: "map:population:resident",
+        pKey: "1",
         loadFeatureKeys: [{ ...commonFeatureKeys }],
         fillColorKeyVals: [
           {
@@ -155,6 +159,7 @@ const data = [
         title: "道路交通",
         icon: "",
         key: "map:transport:road",
+        pKey: "2",
         loadFeatureKeys: [
           {
             typeName: "lingxi:ggss_point",
@@ -171,6 +176,7 @@ const data = [
         title: "轨道交通",
         icon: "",
         key: "map:transport:rail",
+        pKey: "2",
         loadFeatureKeys: [
           {
             typeName: "lingxi:ggss_point",
@@ -187,6 +193,7 @@ const data = [
         title: "城市交通",
         icon: "",
         key: "map:transport:city",
+        pKey: "2",
         loadFeatureKeys: [
           {
             typeName: "lingxi:ggss_point",
@@ -203,6 +210,7 @@ const data = [
         title: "停车场",
         icon: "",
         key: "map:transport:parking",
+        pKey: "2",
         loadFeatureKeys: [
           {
             typeName: "lingxi:ggss_point",
@@ -219,6 +227,7 @@ const data = [
         title: "公交车站",
         icon: "",
         key: "map:transport:busstop",
+        pKey: "2",
         loadFeatureKeys: [
           {
             typeName: "lingxi:ggss_point",
@@ -235,6 +244,7 @@ const data = [
         title: "地铁站",
         icon: "",
         key: "map:transport:metroStation",
+        pKey: "2",
         loadFeatureKeys: [
           {
             typeName: "lingxi:ggss_point",
@@ -258,6 +268,7 @@ const data = [
         title: "商业设施",
         icon: "",
         key: "map:infrastructure:business",
+        pKey: "3",
         loadFeatureKeys: [
           {
             typeName: "lingxi:ggss_point",
@@ -274,6 +285,7 @@ const data = [
         title: "医疗设施",
         icon: "",
         key: "map:infrastructure:medical",
+        pKey: "3",
         loadFeatureKeys: [
           {
             typeName: "lingxi:ggss_point",
@@ -290,6 +302,7 @@ const data = [
         title: "教育设施",
         icon: "",
         key: "map:infrastructure:education",
+        pKey: "3",
         loadFeatureKeys: [
           {
             typeName: "lingxi:ggss_point",
@@ -306,6 +319,7 @@ const data = [
         title: "文体设施",
         icon: "",
         key: "map:infrastructure:sport",
+        pKey: "3",
         loadFeatureKeys: [
           {
             typeName: "lingxi:ggss_point",
@@ -322,6 +336,7 @@ const data = [
         title: "市政设施",
         icon: "",
         key: "map:infrastructure:municipal",
+        pKey: "3",
         loadFeatureKeys: [
           {
             typeName: "lingxi:ggss_point",
@@ -345,6 +360,7 @@ const data = [
         title: "人文景观",
         icon: "",
         key: "map:landscape:humanity",
+        pKey: "4",
         loadFeatureKeys: [
           {
             typeName: "lingxi:ggss_point",
@@ -361,6 +377,7 @@ const data = [
         title: "自然景观",
         icon: "",
         key: "map:landscape:natural",
+        pKey: "4",
         loadFeatureKeys: [
           {
             typeName: "lingxi:ggss_point",
@@ -384,6 +401,7 @@ const data = [
         title: "第一产业",
         icon: "",
         key: "map:industry:primary",
+        pKey: "5",
         loadFeatureKeys: [
           {
             typeName: "lingxi:ggss_point",
@@ -400,6 +418,7 @@ const data = [
         title: "第二产业",
         icon: "",
         key: "map:industry:second",
+        pKey: "5",
         loadFeatureKeys: [
           {
             typeName: "lingxi:ggss_point",
@@ -416,6 +435,7 @@ const data = [
         title: "第三产业",
         icon: "",
         key: "map:industry:third",
+        pKey: "5",
         loadFeatureKeys: [
           {
             typeName: "lingxi:ggss_point",
@@ -439,6 +459,7 @@ const data = [
         title: "新房",
         icon: "",
         key: "map:loupan:newHouse",
+        pKey: "8",
         loadFeatureKeys: [
           {
             typeName: "lingxi:dichan_loupan_point",

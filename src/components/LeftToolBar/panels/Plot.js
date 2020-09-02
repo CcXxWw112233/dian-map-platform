@@ -556,69 +556,6 @@ export default class Plot extends PureComponent {
       window.featureOperator.attrs.remark = this.plotRemark;
     }
   };
-  handleColorClick = (data, type) => {
-    if (this.props.plotType !== "point" && this.selectName !== "自定义类型") {
-      this.selectName = "自定义类型";
-    }
-    this.createPlotName();
-    // 0为轮廓色
-    if (type === 0) {
-      this.strokeColor = data.fill;
-      const index = this.strokeColor.lastIndexOf(",");
-      this.strokeColor =
-        this.strokeColor.substr(0, index + 1) +
-        " " +
-        this.state.strokePercent +
-        ")";
-      this.setState({
-        customStrokeSelectedColor: this.strokeColor,
-      });
-    }
-    // 1为填充色
-    if (type === 1) {
-      this.fillColor = data.fill;
-      const index = this.fillColor.lastIndexOf(",");
-      this.fillColor =
-        this.fillColor.substr(0, index + 1) +
-        " " +
-        this.state.fillPercent +
-        ")";
-      this.setState({
-        customFillSelectedColor: this.fillColor,
-      });
-    }
-    switch (this.props.plotType) {
-      case "point":
-        const arr =
-          this.state.symbolSelectedIndex &&
-          this.state.symbolSelectedIndex.split("|");
-
-        // 如果先前选择的自定义图标
-        if (arr && arr[0] === "0") {
-          this.setState({
-            symbolSelectedIndex: "",
-          });
-          this.symbol = this.refs.defaultSymbol.innerText;
-          this.getPointDefaultSymbol();
-        } else {
-          !this.state.symbolSelectedIndex
-            ? this.getPointDefaultSymbol()
-            : this.getFillSymbol();
-        }
-        break;
-      case "line":
-      case "freeLine":
-      case "freePolygon":
-      case "polygon":
-      case "rect":
-      case "circle":
-      case "arrow":
-        this.updateStateCallbackFunc();
-        break;
-      default:
-        break;
-    }
-  };
 
   updateStateCallbackFunc = () => {
     const { parent } = this.props;
@@ -676,8 +613,18 @@ export default class Plot extends PureComponent {
         // delCb: this.updatePlotList.bind(this),
       });
     } else if (parent.isModifyPlot === true && window.featureOperator) {
-      window.featureOperator.feature.setStyle(style);
-      window.featureOperator.attrs = attrs;
+      if (window.featureOperator.feature) {
+        const geoType = window.featureOperator.feature.getGeometry().getType();
+        if (geoType === this.dic[this.plotType]) {
+          window.featureOperator.feature.setStyle(style);
+          window.featureOperator.attrs = attrs;
+        } else {
+          parent.isModifyPlot = false;
+          plotEdit.deactivate();
+          delete window.featureOperator;
+          this.updateStateCallbackFunc();
+        }
+      }
     }
   };
 
@@ -880,22 +827,30 @@ export default class Plot extends PureComponent {
       });
     } else {
       if (window.featureOperator.feature) {
-        window.featureOperator.feature.setStyle(style);
-        window.featureOperator.setName(attrs.name);
-        window.featureOperator.attrs = attrs;
-        if (this.dic[this.props.plotType] === "Polygon") {
-          if (iconUrl) {
-            plotEdit.plottingLayer.plotEdit.createPlotOverlay(
-              iconUrl,
-              window.featureOperator
-            );
-          } else {
-            plotEdit.plottingLayer.plotEdit.removePlotOverlay(
-              window.featureOperator
-            );
+        const geoType = window.featureOperator.feature.getGeometry().getType();
+        if (geoType === this.dic[this.props.plotType]) {
+          window.featureOperator.feature.setStyle(style);
+          window.featureOperator.setName(attrs.name);
+          window.featureOperator.attrs = attrs;
+          if (this.dic[this.props.plotType] === "Polygon") {
+            if (iconUrl) {
+              plotEdit.plottingLayer.plotEdit.createPlotOverlay(
+                iconUrl,
+                window.featureOperator
+              );
+            } else {
+              plotEdit.plottingLayer.plotEdit.removePlotOverlay(
+                window.featureOperator
+              );
+            }
           }
+        } else {
+          plotEdit.deactivate();
+          delete window.featureOperator;
+          this.createPlot(options, iconUrl);
         }
       } else {
+        plotEdit.deactivate();
         delete window.featureOperator;
         this.createPlot(options, iconUrl);
       }
@@ -904,7 +859,7 @@ export default class Plot extends PureComponent {
 
   handleCustomStrokeColorOkClick = (value) => {
     this.strokeColor = value;
-    this.fillColor = this.state.customFillSelectedColor;
+    // this.fillColor = this.state.customFillSelectedColor;
     if (window.featureOperator) {
       plotEdit.plottingLayer.plotEdit.removePlotOverlay(window.featureOperator);
     }
@@ -933,7 +888,7 @@ export default class Plot extends PureComponent {
 
   handleCustomFillColorOkClick = (value) => {
     this.fillColor = value;
-    this.strokeColor = this.state.customStrokeSelectedColor;
+    // this.strokeColor = this.state.customStrokeSelectedColor;
     if (window.featureOperator) {
       plotEdit.plottingLayer.plotEdit.removePlotOverlay(window.featureOperator);
     }
@@ -1167,7 +1122,7 @@ export default class Plot extends PureComponent {
                       background:
                         this.dic[plotType] === "Point"
                           ? "rgba(0,0,0,0.2)"
-                          : this.state.customFillSelectedColor,
+                          : this.state.customStrokeSelectedColor,
                       margin: 8,
                       width: "calc(100% - 74px)",
                     }}
