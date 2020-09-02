@@ -7,7 +7,7 @@ import { MyIcon } from '../../../../components/utils';
 // }
 export default function TimeSelection(props){
   let { data, active = {y: new Date().getFullYear()}, onChange ,onChangeActive} = props;
-
+  let num = props.idKey;
   let Time = {};
   let [ timeTree, setTimeTree ] = useState({})
   // let [ selection, setSelection ] = useState([]);
@@ -58,10 +58,10 @@ export default function TimeSelection(props){
   const FilterDateFormat = ()=>{
     const { m, d } = active;
     if(m && !d){
-      return 'm_'+ m
+      return 'm_'+ m +"_" + num
     }else if(m && d){
-      return `d_${m}_${d}`
-    }else return "_all";
+      return `d_${m}_${d}_${num}`
+    }else return "_all"+num;
   }
 
   // 获取月份中所有的数据并且去重日期
@@ -106,7 +106,7 @@ export default function TimeSelection(props){
     let keys = Object.keys(obj);
     return keys.map((item,index) => {
       let date = obj[item];
-      let id = `d_${month}_${item}`
+      let id = `d_${month}_${item}_${num}`
       return <span className={`${styles.date} ${setActiveClass(month, item)}`} key={index} title={`${month}.${item}`}
       id={id}
       onClick={(e)=> setActiveDay(e,{y: active['y'], m: month, d: item , data: date}, 'day')}
@@ -179,13 +179,13 @@ export default function TimeSelection(props){
               <div className={styles.timeOfMonth} key={month}>
                 {
                   mindex === 0 &&
-                  <span className={`${styles.allMonth} ${(!active["m"] && !active["d"])? styles.activeAll :""}`} id='_all'
+                  <span className={`${styles.allMonth} ${(!active["m"] && !active["d"])? styles.activeAll :""}`} id={'_all'+num}
                   onClick={(e)=>setActiveDay(e,{y: active['y'],m: undefined ,data: timeTree[active['y']]},'month')}>
                     {(active["m"] || active['d']) && <span className={styles.selectTime}>全部</span>}
                   </span>
                 }
                 <span className={`${styles.month} ${+month === +active['m'] ? styles.activeMonth: ''}`}
-                id={`m_${month}`}
+                id={`m_${month}_${num}`}
                 onClick={(e)=>setActiveDay(e,{y: active['y'],m: month ,data: timeTree[active['y']]},'month')}
                 >
                   { month !== active["m"] && <span className={styles.selectTime}>{month}月</span> }

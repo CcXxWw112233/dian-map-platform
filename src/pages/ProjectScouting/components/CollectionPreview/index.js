@@ -7,9 +7,12 @@ import { MyIcon } from '../../../../components/utils';
 import MapMain from '../../../../utils/INITMAP';
 import DetailAction from '../../../../lib/components/ProjectScouting/ScoutingDetail';
 import { Fit , getExtentIsEmpty} from '../../../../lib/utils';
+import Event from '../../../../lib/utils/event';
 import EditImage from './EditImg';
+import ReactPlayer from 'react-player';
+import { message } from 'antd';
 
-@connect(({openswitch:{openPanel}})=>({openPanel}))
+@connect(({openswitch:{openPanel}, scoutingDetail:{collections,board}})=>({openPanel,collections,board}))
 export default class CollectionPreview extends React.Component{
   constructor(props){
     super(props);
@@ -104,7 +107,6 @@ export default class CollectionPreview extends React.Component{
 
   pointerdown = (e)=>{
     if(e.target){
-      console.log(e.target.id)
       if(e.target.id === 'slidebar_preview'){
         this.touchStart = true;
         this.startEvent = this.getPointer(e);
@@ -146,9 +148,15 @@ export default class CollectionPreview extends React.Component{
   }
 
   onChageEdit = ()=>{
-    let { onFull } = this.props;
+    let { onFull, dispatch} = this.props;
     this.setState({
       isEdit: true,
+    })
+    dispatch({
+      type:"openswitch/updateDatas",
+      payload:{
+        openPanel: false
+      }
     })
     onFull && onFull();
   }
@@ -159,6 +167,73 @@ export default class CollectionPreview extends React.Component{
     })
   }
 
+  checkRender = (data)=>{
+    let type = DetailAction.checkCollectionType(data.target)
+    if(type === 'pic'){
+      return <img src={data?.resource_url} alt=""/>
+    }else
+    if(type === 'video' || type === 'interview'){
+      let config = {
+        file: {
+          forceVideo: type === 'video',
+          forceAudio: type === 'interview'
+        }
+      }
+      return <ReactPlayer config={config} url={data.resource_url} width="100%" controls={true} height='80%'/>
+    }
+    else return "";
+  }
+
+  saveImg = (data, url, resource_id)=>{
+    let arr = Array.from(this.props.collections)
+    let param = {
+      id: data.id,
+      resource_id : resource_id
+    }
+    DetailAction.editCollection(param).then(res => {
+      message.success('保存成功');
+      this.exit();
+      arr = arr.map(item => {
+        if(item.id === data.id){
+          item.resource_id = resource_id;
+          item.resource_url = url;
+        }
+        return item
+      })
+      this.props.dispatch({
+        type:'openswitch/updateDatas',
+        payload:{
+          openPanel: true
+        }
+      })
+      Event.Evt.firEvent('CollectionUpdate:reload', arr);
+    })
+  }
+
+  onSaveAs = async (data, file_resource_id ,suffix, name)=> {
+    const { board, collections} = this.props;
+    let params = {
+      board_id: board.board_id,
+      area_type_id: data.area_type_id,
+      collect_type: 3,
+      resource_id: file_resource_id,
+      target: suffix && suffix.replace(".", ""),
+      title: name,
+    };
+    DetailAction.addCollection(params).then(res => {
+      message.success('保存成功');
+      let arr = Array.from(collections);
+      arr = arr.concat(res.data);
+      Event.Evt.firEvent('CollectionUpdate:reload', arr);
+      this.props.dispatch({
+        type:'openswitch/updateDatas',
+        payload:{
+          openPanel: true
+        }
+      })
+      this.exit();
+    })
+  }
 
   render(){
     let { updateStyle, isEdit} = this.state;
@@ -195,9 +270,11 @@ export default class CollectionPreview extends React.Component{
           </div>
 
           <div className={styles.tools}>
-            {/* <span className={styles.edit} onClick={this.onChageEdit}>
-              <MyIcon type='icon-huabi'/>
-            </span> */}
+            { DetailAction.checkCollectionType(currentData.target) === 'pic' &&
+              <span className={styles.edit} onClick={this.onChageEdit}>
+                <MyIcon type='icon-huabi'/>
+              </span>
+            }
             <span className={styles.prevImg} onClick={()=>{
                 this.props.onPrev && this.props.onPrev();
               }}>
@@ -219,13 +296,13 @@ export default class CollectionPreview extends React.Component{
           {
             isEdit ? (
               <div className={styles.editImg}>
-                <EditImage onExit={this.exit}/>
+                <EditImage onExit={this.exit} data={currentData} onSave={this.saveImg} onSaveAs={this.onSaveAs}/>
               </div>
             )
             :(
               <div className={`${styles.CollectionPreviewContainer}`}>
                 <div className={styles.activeMedia}>
-                  <img src={currentData?.resource_url} alt=""/>
+                  {this.checkRender(currentData)}
                 </div>
               </div>
             )

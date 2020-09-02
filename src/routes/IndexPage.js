@@ -117,6 +117,12 @@ class IndexPage extends React.Component {
     ScoutAction.checkItem()
       .then((res) => {
         dispatch({
+          type:"scoutingDetail/updateDatas",
+          payload:{
+            board: res.code === 0 ? res.data : {}
+          }
+        })
+        dispatch({
           type: "controller/updateMainVisible",
           payload: {
             mainVisible: res.code === 0 ? "detail" : "list",

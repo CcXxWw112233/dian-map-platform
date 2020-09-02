@@ -8,8 +8,9 @@ import { connect } from 'dva';
 import { CSSTransition } from 'react-transition-group';
 import CollectionPreview from '../CollectionPreview';
 import { message } from 'antd';
+import TimeSelection from '../LookingBack/TimeSelection';
 
-@connect(({collectionDetail:{selectData, showCollectionsModal}})=>({selectData, showCollectionsModal}))
+@connect(({collectionDetail:{selectData, showCollectionsModal},scoutingDetail:{collections}})=>({selectData, showCollectionsModal,collections}))
 export default class AllCollection extends React.Component {
   constructor(props){
     super(props);
@@ -20,7 +21,16 @@ export default class AllCollection extends React.Component {
       timeTree:{},
       collectionlist: [],
       active: {},
-      hasFilter: false
+      hasFilter: false,
+      collections:[],
+      activeTime: {
+        y: new Date().getFullYear()
+      },
+    }
+    this.keys = {
+      pic:"图片",
+      video: "视频",
+      interview:"音频"
     }
   }
   componentDidMount(){
@@ -34,8 +44,13 @@ export default class AllCollection extends React.Component {
     Event.Evt.on('collectionListUpdate2', this.setUpdateData)
     Event.Evt.addEventListener('handleGroupCollectionFeature', this.handleCollectionFeature)
   }
+  componentWillUnmount(){
+    Event.Evt.un('collectionListUpdate2');
+    Event.Evt.removeEventListener('handleGroupCollectionFeature', this.handleCollectionFeature);
+    Event.Evt.firEvent('previewDeatilClose',{});
+  }
 
-  handleCollectionFeature = (collections)=>{
+  handleCollectionFeature = (collections ,from = 'feature')=>{
     let priviewData = JSON.parse(JSON.stringify(this.state.data))
     let ids = collections.map(item => item.id);
     let arr = []
@@ -59,16 +74,36 @@ export default class AllCollection extends React.Component {
       // data: arr,
       collectionlist: list,
       active,
-      hasFilter: true
+      hasFilter: from === 'feature' ? true : (this.state.activeTime.y && !this.state.activeTime.m && !this.state.activeTime.d) ? false: true
     })
+    if(from === 'time'){
+      DetailAction.renderGoupCollectionForLookingBack(list);
+    }
     DetailAction.setGroupCollectionActive(active)
+  }
+
+  getAllCollection = (data)=>{
+    let arr = [];
+    data.forEach(item => {
+      arr = arr.concat(item.collection);
+    })
+    this.setState({
+      collections: arr
+    })
   }
 
   filterNotImg = (data)=>{
     let arr = [];
     data.forEach(item => {
       let collection = item.collection || [];
-      let fArr = collection.filter(col => DetailAction.checkCollectionType(col.target) === 'pic');
+      let s = [];
+      collection.forEach(col => {
+        if(col.child){
+          s = s.concat(col.child);
+        }else
+        s.push(col);
+      })
+      let fArr = s.filter(col => ['pic','video','interview'].includes(DetailAction.checkCollectionType(col.target)));
       if(fArr.length){
         let obj = {
           ...item,
@@ -77,6 +112,7 @@ export default class AllCollection extends React.Component {
         arr.push(obj);
       }
     })
+    this.getAllCollection(arr);
     return arr ;
   }
 
@@ -141,14 +177,23 @@ export default class AllCollection extends React.Component {
         <div className={styles.collectionRender}>
           { Object.keys(month[m]).map(day => {
             let data = month[m][day].data;
+            let k = DetailAction.checkCollectionType(data.target)
             return <div key={data.id}
               className={`${styles.collectionItem} ${this.state.active.id === data.id ? styles.activity : ""}`}
               >
               <div
-              onClick={()=>{this.setActive(data)}}>
+              onClick={()=>{this.setActive(data)}}
+              style={{width:'100%',height:'100%'}}>
+                {
+                  k === 'pic' ?
                 <img src={data.resource_url} alt=""/>
+                :
+                <div style={{height:"100%",backgroundColor:"rgba(71, 74, 91, 1)",display:"flex",justifyContent:"center",alignItems:"center",color:"#fff"}}>
+                  {this.keys[k]}
+                </div>
+                }
               </div>
-            </div>;
+            </div>
           }) }
         </div>
       </div>)
@@ -178,10 +223,24 @@ export default class AllCollection extends React.Component {
   reset = ()=>{
     this.setUpdateData(this.state.data);
     this.setState({
-      hasFilter: false
+      hasFilter: false,
+      activeTime: {y: new Date().getFullYear()}
     })
   }
 
+  setActiveChange = (data)=>{
+    this.setState({
+      activeTime: data.active
+    })
+    // console.log(data.data,'active')
+  }
+
+  setActiveData = (data)=>{
+    // console.log(data);
+    let arr = data.map(item => item.data);
+    if(arr.length)
+    this.handleCollectionFeature(arr, 'time');
+  }
   render(){
     const { data , timeTree, hasFilter} = this.state;
     const { board, onClose, showCollectionsModal} = this.props;
@@ -189,15 +248,23 @@ export default class AllCollection extends React.Component {
       ReactDOM.createPortal(
         <div className={styles.collectionBox}>
           <div className={styles.containerHeader}>
-            <span className={styles.board_name}>
-              {board.board_name}
-            </span>
-            {hasFilter && <span className={styles.clearFilter} onClick={this.reset}>
-              <MyIcon type="icon-zhongzhi"/>重置
-            </span>}
-            <span className={styles.exitFull} onClick={()=> {onClose && onClose()}}>
-              <MyIcon type='icon-bianzu17beifen2'/>
-            </span>
+            <div className={styles.filterAction}>
+              <span className={styles.board_name}>
+                {board.board_name}
+              </span>
+              {hasFilter && <span className={styles.clearFilter} onClick={this.reset}>
+                <MyIcon type="icon-zhongzhi"/>重置
+              </span>}
+              <span className={styles.exitFull} onClick={()=> {onClose && onClose()}}>
+                <MyIcon type='icon-bianzu17beifen2'/>
+              </span>
+              <TimeSelection data={this.state.collections} active={this.state.activeTime}
+              idKey="allLook"
+              onChangeActive={this.setActiveChange}
+              onChange={this.setActiveData}
+              />
+            </div>
+
           </div>
           <div className={styles.content}>
             <div className={styles.collectionContent}>
@@ -213,27 +280,6 @@ export default class AllCollection extends React.Component {
                   </div>
                 )
               }) }
-              {/* {data.map((item, index) => {
-                return (
-                  <div key={item.id} className={styles.collectionGroup}>
-                    <span className={styles.collectionGroupName}>{item.name}</span>
-                    <div className={styles.collectionRender}>
-                      { item.collection && item.collection.map((collec, i) => {
-                        return <div key={collec.id}
-                        className={`${styles.collectionItem} ${(selectData && selectData.id) === collec.id ? styles.activity :
-                          (!selectData ? (index === 0 && i === 0) ? styles.activity: "" :"") }`}
-                        >
-                          <div
-                          onClick={()=>{this.setActive(collec)}}>
-                            <img src={collec.resource_url} alt=""/>
-                          </div>
-                        </div>
-                      }) }
-                    </div>
-
-                  </div>
-                )
-              })} */}
             </div>
           </div>
           {/* 全屏的图片查看 */}

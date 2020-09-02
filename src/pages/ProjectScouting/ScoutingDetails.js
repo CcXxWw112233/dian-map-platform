@@ -252,10 +252,7 @@ export default class ScoutingDetails extends PureComponent {
     if (type === "reload") {
       arr = collections;
     }
-    // 重组所有数据
-    let list = this.reSetCollection(arr);
-    // 更新分组列表和所有collection
-    this.updateCollection(arr, list);
+    this.updateAllCollectionReset(arr);
   };
 
   // 获取缓存中选定的项目
@@ -324,6 +321,9 @@ export default class ScoutingDetails extends PureComponent {
       Action.removeLayer();
       // 删除轮询
       Action.clearListen();
+      this.setState({
+        isEdit: false
+      })
       if(activeKey === '2'){
         // this.renderGroupPointer();
       }
@@ -486,6 +486,7 @@ export default class ScoutingDetails extends PureComponent {
   }
   // 更新数据
   updateCollection = (data, area_list) => {
+    const { dispatch } = this.props;
     this.setState(
       {
         all_collection: data,
@@ -495,6 +496,12 @@ export default class ScoutingDetails extends PureComponent {
           .sort((a, b) => a.create_time - b.create_time),
       },
       () => {
+        dispatch({
+          type:"scoutingDetail/updateDatas",
+          payload: {
+            collections: this.state.all_collection
+          }
+        })
         // 之渲染选中的区域数据
         let obj =
           this.state.area_list.find(
@@ -1395,7 +1402,7 @@ export default class ScoutingDetails extends PureComponent {
       payload:{
         selectData: val,
         type:'edit',
-        isImg: type === 'pic'
+        isImg: type === 'pic' || type === 'video' || type === 'interview'
       }
     })
   }
@@ -1629,6 +1636,12 @@ export default class ScoutingDetails extends PureComponent {
       let { selections, notAreaIdSelections } = this.state;
       let arr = [...selections,...notAreaIdSelections];
       let selectArr = this.state.all_collection.filter(item => arr.includes(item.id));
+      if(type === 'copy'){
+        let notA = selectArr.filter(item => item.collect_type !== '4');
+        if(notA.length){
+          return message.warn('非标绘数据暂不支持复制，请取消勾选');
+        }
+      }
       let promise = selectArr.map(item => {
         if(type === 'copy'){
           return this.onCopyCollection(val,item, true);

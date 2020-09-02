@@ -3,14 +3,15 @@ import styles from './index.less';
 import { connect } from 'dva'
 import ReactDOM from 'react-dom';
 import { MyIcon } from '../../../../components/utils';
-import animateCss from '../../../../assets/css/animate.min.css';
+// import animateCss from '../../../../assets/css/animate.min.css';
 import PhotoSwipe from '../../../../components/PhotoSwipe/action'
 import { keepLastIndex } from '../../../../utils/utils';
 import DetailAction from '../../../../lib/components/ProjectScouting/ScoutingDetail'
 import { message, Row, Col, Carousel } from 'antd';
 import Event from '../../../../lib/utils/event';
 import EditDescription from './editDescription';
-import Slider from "react-slick";
+// import Slider from "react-slick";
+import ReactPlayer from 'react-player';
 
 @connect(({collectionDetail: { selectData ,zIndex, type,isImg, small} })=>({ selectData ,zIndex ,type, isImg, small}))
 export default class CollectionDetail extends React.Component{
@@ -188,12 +189,48 @@ export default class CollectionDetail extends React.Component{
     })
   }
 
+  allVideoStop = ()=>{
+    document.querySelectorAll('video').forEach(item => {
+      item.pause();
+    });
+    document.querySelectorAll('audio').forEach(item => {
+      item.pause();
+    })
+  }
+
   slideChange = (current)=>{
     let { sliderPages } = this.state;
-    // console.log(current)
+    this.allVideoStop();
     this.setState({
       sliderPages: {...sliderPages, current: current + 1}
     })
+  }
+  checkRender = (val)=>{
+    let type = DetailAction.checkCollectionType(val.target);
+    if(type === 'pic'){
+      return <img src={val.resource_url} alt="" onClick={this.previewImg}/>
+    }
+    if(type === 'video' || type === 'interview'){
+      let config = {
+        file: {
+          forceVideo: type === 'video',
+          forceAudio: type === 'interview'
+        }
+      }
+      return <ReactPlayer config={config} url={val.resource_url} width="100%" controls={true} height='195px' light={true}/>
+    }
+    else return "";
+  }
+
+  changeSmall = (val)=>{
+    const { dispatch } = this.props;
+    dispatch({
+      type:"collectionDetail/updateDatas",
+      payload:{
+        small: val
+      }
+    });
+    this.allVideoStop();
   }
 
   render(){
@@ -218,7 +255,7 @@ export default class CollectionDetail extends React.Component{
               <span className={styles.pages}>
                 {sliderPages.current}/{sliderPages.total}
               </span>
-              <span style={{fontSize:'0.7em'}} onClick={()=> dispatch({type:"collectionDetail/updateDatas",payload:{small: true}})}>
+              <span style={{fontSize:'0.7em'}} onClick={()=> this.changeSmall(true)}>
                 <MyIcon type="icon-suoxiao1"/>
               </span>
             </Fragment>
@@ -229,7 +266,7 @@ export default class CollectionDetail extends React.Component{
             </span> */}
             {small &&
             <span
-            onClick={()=> dispatch({type:"collectionDetail/updateDatas",payload:{small: false}})}>
+            onClick={()=> this.changeSmall(false)}>
               <MyIcon type="icon-jia1"/>
             </span>}
             <span className={styles.close}>
@@ -255,9 +292,10 @@ export default class CollectionDetail extends React.Component{
               { selectData && selectData.map(item => {
                 return (<div key={item.id}>
                   {isImg && <div className={styles.container_img}>
-                    {item.resource_url ? <img src={item.resource_url} alt="" onClick={this.previewImg}/>
+                    {this.checkRender(item)}
+                    {/* {item.resource_url ? <img src={item.resource_url} alt="" onClick={this.previewImg}/>
                     :
-                    <span>暂不支持预览</span>}
+                    <span>暂不支持预览</span>} */}
                   </div>}
                   <div className={styles.data_msg}>
                     <div className={styles.data_title}>
