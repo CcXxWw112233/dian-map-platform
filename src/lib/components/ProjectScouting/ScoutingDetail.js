@@ -139,7 +139,7 @@ function Action() {
     if (!suffix) return "unknow";
     const itemKeyVals = {
       paper: [], // 图纸
-      interview: ["aac", "mp3", "语音", "m4a"], // 访谈
+      interview: ["aac", "mp3", "语音", "m4a","flac"], // 访谈
       pic: ["jpg", "PNG", "gif", "jpeg","bmp"].map((item) =>
         item.toLocaleLowerCase()
       ),

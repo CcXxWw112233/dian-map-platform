@@ -4,12 +4,12 @@ import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import styles from "../LeftToolBar.less";
 import { connect } from "dva";
 
-@connect()
+@connect(({openswitch: {openPanel}})=>({openPanel}))
 export default class Panel extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      openPanel: true,
+      // openPanel: true,
     };
   }
 
@@ -23,8 +23,8 @@ export default class Panel extends React.Component {
   };
 
   render() {
-    const { dispatch } = this.props;
-    const panelStyle = this.state.openPanel
+    const { dispatch,openPanel} = this.props;
+    const panelStyle = openPanel
       ? {}
       : { transform: "translateX(-100%)" };
     const directionStyle = { display: "table-cell", verticalAlign: "middle" };
@@ -39,15 +39,12 @@ export default class Panel extends React.Component {
             dispatch({
               type: "openswitch/updateDatas",
               payload: {
-                openPanel: !this.state.openPanel,
+                openPanel: !openPanel,
               },
-            });
-            this.setState({
-              openPanel: !this.state.openPanel,
             });
           }}
         >
-          {this.state.openPanel ? (
+          {openPanel ? (
             <LeftOutlined style={directionStyle} />
           ) : (
             <RightOutlined style={directionStyle} />
