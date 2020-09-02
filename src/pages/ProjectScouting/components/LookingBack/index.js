@@ -259,7 +259,7 @@ export default class LookingBack extends React.Component{
                           `${styles.looking_item}
                            ${animateCss.animated}
                           `
-                          } key={data.time} onClick={()=> this.pictureView(data.data)}>
+                          } key={data.data.id} onClick={()=> this.pictureView(data.data)}>
                           <div style={{backgroundColor:"rgba(71, 74, 91, 1)"}} className={ activeItem === data.data.id ? styles.active :''}>
                             <span>{data.data.title}</span>
                             {DetailAction.checkCollectionType(data.data.target) === 'pic' ?
