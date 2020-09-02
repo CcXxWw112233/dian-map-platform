@@ -876,7 +876,7 @@ export const UploadItem = ({
         <Menu.Item key="addRemark">新增备注</Menu.Item>
       ) : null} */}
       {data.content && JSON.parse(data.content)?.featureType ? (
-        <Menu.Item key="modifyFeature">编辑</Menu.Item>
+        <Menu.Item key="modifyFeature">标绘编辑</Menu.Item>
       ) : null}
       {data.collect_type === "4" && !isPlotEdit ? (
         <Menu.Item key="copyToGroup">
