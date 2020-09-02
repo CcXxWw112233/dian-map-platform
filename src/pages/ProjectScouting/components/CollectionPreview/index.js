@@ -167,7 +167,7 @@ export default class CollectionPreview extends React.Component{
     })
   }
 
-  checkRender = (data)=>{
+  checkRender = (data = {})=>{
     let type = DetailAction.checkCollectionType(data.target)
     if(type === 'pic'){
       return <img src={data?.resource_url} alt=""/>
@@ -270,7 +270,7 @@ export default class CollectionPreview extends React.Component{
           </div>
 
           <div className={styles.tools}>
-            { DetailAction.checkCollectionType(currentData.target) === 'pic' &&
+            { DetailAction.checkCollectionType(currentData?.target) === 'pic' &&
               <span className={styles.edit} onClick={this.onChageEdit}>
                 <MyIcon type='icon-huabi'/>
               </span>

@@ -156,6 +156,30 @@ export function exitScreen() {
   }
 }
 
+export function Base64ToFile (base64,file_name){
+  const base64ToBlob = function(base64Data) {
+    let arr = base64Data.split(','),
+        fileType = arr[0].match(/:(.*?);/)[1],
+        bstr = atob(arr[1]),
+        l = bstr.length,
+        u8Arr = new Uint8Array(l);
+
+    while (l--) {
+        u8Arr[l] = bstr.charCodeAt(l);
+    }
+    return new Blob([u8Arr], {
+        type: fileType
+    });
+  };
+  // blob转file
+  const blobToFile = function(newBlob) {
+    let file = new File([newBlob],file_name,{type: newBlob.type,lastModified: Date.now()});
+    return file;
+  };
+  const blob = base64ToBlob(base64);
+  return blobToFile(blob);
+}
+
 export function dateFormat(val, format) {
   val = +val;
   function Zero(number) {
