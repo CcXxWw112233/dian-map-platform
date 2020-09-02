@@ -44,13 +44,27 @@ export default class LookingBack extends React.Component{
     }
     this.setSelectionData(DetailAction.CollectionGroup.concat([obj]));
     Event.Evt.on('collectionListUpdate1', this.setSelectionData);
+    Event.Evt.on('previewDeatilClose',()=>{
+      DetailAction.renderGoupCollectionForLookingBack(this.state.activeSelectObj?.collection || [])
+    })
+  }
+  componentWillUnmount(){
+    Event.Evt.un('collectionListUpdate1');
+    Event.Evt.un('previewDeatilClose');
   }
 
   filterNotImg = (data)=>{
     let arr = [];
     data.forEach(item => {
       let collection = item.collection || [];
-      let fArr = collection.filter(col => DetailAction.checkCollectionType(col.target) === 'pic');
+      let s = [];
+      collection.forEach(col => {
+        if(col.child){
+          s = s.concat(col.child);
+        }else
+        s.push(col);
+      })
+      let fArr = s.filter(col => ['pic','video','interview'].includes(DetailAction.checkCollectionType(col.target)));
       if(fArr.length){
         let obj = {
           ...item,
@@ -162,7 +176,7 @@ export default class LookingBack extends React.Component{
 
   pictureView = (val)=>{
     const { dispatch } = this.props;
-    if(DetailAction.checkCollectionType(val.target) === 'pic')
+    // if(DetailAction.checkCollectionType(val.target) === 'pic')
     dispatch({
       type:"collectionDetail/updateDatas",
       payload:{
@@ -185,34 +199,6 @@ export default class LookingBack extends React.Component{
       }
     })
   }
-  // mapUpdate = ()=>{
-  //   // console.log('要更新了')
-  //   let { onUpdate } = this.props;
-  //   onUpdate && onUpdate(this.state.selectActive);
-  // }
-  // 检查选中的文件属于哪个分组
-  // checkSelectDataInGroup = ()=>{
-  //   return new Promise((resolve)=>{
-  //     const { selectData } = this.props;
-  //     let { options } = this.state;
-  //     if(selectData){
-  //       let obj = {};
-  //       options.forEach(item => {
-  //         if(item.id === selectData.area_type_id){
-  //           obj = item;
-  //         }
-  //       })
-  //       if(!selectData.area_type_id){
-  //         obj = options.find(item => item.id === 'other');
-  //       }
-  //       this.setState({
-  //         activeSelectObj: {...obj}
-  //       },()=>{
-  //         resolve()
-  //       })
-  //     }
-  //   })
-  // }
 
   render(){
     let { selectActive, activeSelectObj = {}, activeTime, timeData } = this.state;
@@ -250,6 +236,7 @@ export default class LookingBack extends React.Component{
           <div className={styles.time_selection}>
             {(activeSelectObj.collection && activeSelectObj.collection.length) ?
             <TimeSelection data={activeSelectObj.collection} active={activeTime}
+            idKey="look"
             onChangeActive={this.setActiveChange}
             onChange={this.setActiveData}
             /> :
@@ -270,10 +257,10 @@ export default class LookingBack extends React.Component{
                            ${animateCss.animated}
                           `
                           } key={data.time} onClick={()=> this.pictureView(data.data)}>
-                          <div>
+                          <div style={{backgroundColor:"rgba(71, 74, 91, 1)"}}>
                             <span>{data.data.title}</span>
-                            {DetailAction.checkCollectionType(data.data.target) === 'pic' &&
-                            <img src={data.data.resource_url} alt="" width='100%'/>}
+                            {DetailAction.checkCollectionType(data.data.target) === 'pic' ?
+                            <img src={data.data.resource_url} alt="" width='100%'/>: <div></div>}
                           </div>
                         </div>
                       )
