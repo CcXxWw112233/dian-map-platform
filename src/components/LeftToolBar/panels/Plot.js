@@ -1030,6 +1030,8 @@ export default class Plot extends PureComponent {
           coordinates: feature.getGeometry().getCoordinates(),
           geoType: feature.getGeometry().getType(),
         };
+        newAttrs.coordSysType =
+          mapApp.baseMapKeys[0].indexOf(mapApp.baseMapKey) > -1 ? 0 : 1;
         const content = JSON.stringify(newAttrs);
         window.featureOperator.updateFeatueToDB &&
           window.featureOperator.updateFeatueToDB(data, content).then((res) => {
