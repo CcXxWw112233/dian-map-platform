@@ -31,11 +31,13 @@ import {
 import { BASIC } from "../../../services/config";
 import Event from "../../../lib/utils/event";
 import mapApp from "../../../utils/INITMAP";
+import { DefaultUpload } from '../../../utils/XhrUploadFile';
 import { formatSize } from "../../../utils/utils";
 import ExcelRead from "../../../components/ExcelRead";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { MyIcon } from "../../../components/utils";
 import Nprogress from 'nprogress';
+import Axios from "axios";
 // import { UploadFile } from '../../../utils/XhrUploadFile'
 
 
@@ -234,7 +236,8 @@ const UploadBtn = ({ onChange }) => {
     </Upload>
   );
 };
-
+let hasChangeFile = false;
+let saveData = null;
 export const ScoutingHeader = (props) => {
   let {
     onUpload,
@@ -270,6 +273,8 @@ export const ScoutingHeader = (props) => {
   let [coordSysType, setCoordSysType] = useState(0);
   let [transparency, setTransparency] = useState("1");
   let [transformFile, setTransformFile] = useState(null);
+  // let [ saveData, setSaveData ] = useState();
+  let [uploadUrl, setUploadUrl] = useState(`/api/map/ght/${data.id}`);
   // 保存事件
   const saveItem = () => {
     onSave && onSave(areaName);
@@ -309,11 +314,14 @@ export const ScoutingHeader = (props) => {
   // 上传规划图
   const onStartUploadPlan = ({ file, fileList }) => {
     let { response } = file;
-    onUploadPlan && onUploadPlan(null, fileList);
+    onUploadPlan && onUploadPlan(null, fileList, hasChangeFile,saveData);
     if (response) {
       BASIC.checkResponse(response)
-        ? onUploadPlan && onUploadPlan(response.data, fileList)
+        ? onUploadPlan && onUploadPlan(response.data, fileList, hasChangeFile,saveData)
         : onError && onError(response, file);
+
+        hasChangeFile = false;
+        saveData = null;
     } else {
       // onError && onError(file)
     }
@@ -324,6 +332,16 @@ export const ScoutingHeader = (props) => {
     return Promise.resolve(transformFile);
   };
 
+  const firstUpload = async (file,extent)=> {
+    let formdata = new FormData();
+    formdata.append("file",file);
+    formdata.append("extent",extent);
+    formdata.append("transparency",transparency);
+    formdata.append("coord_sys_type",coordSysType);
+    let resp = await Axios.post(uploadUrl,formdata, {headers:{Authorization: BASIC.getUrlParam.token}});
+    saveData = resp.data;
+    return resp.data;
+  }
   // 上传规划图
   const beforeUploadPlan = (val) => {
     onUploadPlanStart && onUploadPlanStart(val);
@@ -337,27 +355,43 @@ export const ScoutingHeader = (props) => {
     return new Promise((resolve, reject) => {
       let url = window.URL.createObjectURL(val);
       Action.addPlanPictureDraw(url, val, dispatch)
-        .then((res) => {
+        .then( async (res) => {
           let { feature } = res;
           let extent = feature.getGeometry().getExtent();
-          if (res.blobFile) {
-            // 设置文件
-            setTransformFile(res.blobFile);
-          } else {
-            setTransformFile(val);
-          }
+          // console.log(extent)
           // 设置透明度,设置范围大小
           setTransparency(res.opacity);
           setPlanExtent(extent.join(","));
           const baseMapKeys = mapApp.baseMapKeys;
           const baseMapKey = mapApp.baseMapKey;
           setCoordSysType(baseMapKeys[0].indexOf(baseMapKey) > -1 ? 0 : 1);
+          // await (()=>{
+          //   return new Promise(resolve => {
+          //     setTimeout(()=>{
+          //       resolve()
+          //     },300)
+          //   })
+
+          // })()
+          // console.log(planExtent)
+          if (res.blobFile) {
+            // 设置文件
+            hasChangeFile = true;
+            setTransformFile(res.blobFile);
+            // 如果改变了文件，则先保存一份
+            await firstUpload(val,extent.join(','));
+          } else {
+            // 设置原文件
+            setTransformFile(val);
+          }
           resolve({ ...val });
           // resolve({})
         })
         .catch((err) => {
           reject(err);
           onUploadPlanCancel && onUploadPlanCancel(err);
+          hasChangeFile = false;
+          saveData = null;
         });
     });
   };
@@ -371,7 +405,7 @@ export const ScoutingHeader = (props) => {
       </Menu.Item>
       <Menu.Item key="uploadPlan">
         <Upload
-          action={`/api/map/ght/${data.id}`}
+          action={uploadUrl}
           accept=".jpg, .jpeg, .png, .bmp"
           headers={{ Authorization: BASIC.getUrlParam.token }}
           beforeUpload={beforeUploadPlan}
