@@ -95,7 +95,7 @@ export default class ColorPicker extends Component {
     let disable = "",
       backgroundColor = this.state.colorStyle;
     let style = { margin: "auto" };
-    let non_disable = { pointerEvents: "none" };
+    let non_disable = { pointerEvents: "none", color: "rgba(0, 0, 0, 0.2)" };
     if (this.props.disable) {
       disable = ` ${btnStyles.disable}`;
       backgroundColor = "rgba(0,0,0,0.1)";

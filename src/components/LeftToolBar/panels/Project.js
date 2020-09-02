@@ -131,7 +131,9 @@ export default class Project extends React.Component {
           </div>
         ) : (
           <Main>
-            <ScoutingDetails></ScoutingDetails>
+            <ScoutingDetails
+              displayPlotPanel={this.props.displayPlotPanel}
+            ></ScoutingDetails>
           </Main>
         )}
       </div>

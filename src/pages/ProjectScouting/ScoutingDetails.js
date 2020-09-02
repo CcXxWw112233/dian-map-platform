@@ -968,7 +968,8 @@ export default class ScoutingDetails extends PureComponent {
 
   //激活编辑几何图形
   onModifyFeatureInDetails = (data) => {
-    Action.modifyFeature(data);
+    const { displayPlotPanel } = this.props
+    Action.modifyFeature(data, displayPlotPanel);
   };
 
   //停止编辑几何图形

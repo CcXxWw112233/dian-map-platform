@@ -257,22 +257,26 @@ export default class Plot extends PureComponent {
     this.plotLayer = plotEdit.getPlottingLayer();
     const me = this;
     const { parent } = this.props;
+    Event.Evt.firEvent("setAttribute", {
+      saveCb: this.handleSaveClick.bind(this),
+      delCb: this.updatePlotList.bind(this),
+    });
     this.operatorActive = function (e) {
-      if (!e.feature_operator.isScouting) {
+      // 激活即修改状态
+      parent.isModifyPlot = true;
+      let operator = e.feature_operator;
+      window.featureOperator = operator;
+      if (!operator.isScouting) {
         Event.Evt.firEvent("setAttribute", {
           saveCb: me.handleSaveClick.bind(me),
           delCb: me.updatePlotList.bind(me),
         });
-        // 激活即修改状态
-        parent.isModifyPlot = true;
-        let operator = e.feature_operator;
         let tmp = parent.featureOperatorList.filter((tmpOperator) => {
           return tmpOperator.guid === operator.guid;
         })[0];
         if (!tmp) {
           parent.updateFeatureOperatorList(operator);
         }
-        window.featureOperator = operator;
         me.plotName = window.featureOperator.getName();
         me.plotLayer.setToTop(window.featureOperator);
         ListAction.checkItem()
@@ -312,22 +316,23 @@ export default class Plot extends PureComponent {
                 iconUrl,
                 operator
               );
-              me.symbol = null;
-              me.sigleImage = null;
             }
             break;
           default:
             break;
         }
+      } else {
       }
     };
     this.operatorDeactive = function (e) {
-      if (!e.feature_operator.isScouting) {
-        parent.isModifyPlot = false;
-        parent.oldPlotName = "";
-        parent.oldRemark = "";
-        window.featureOperator && delete window.featureOperator;
-      }
+      // if (!e.feature_operator.isScouting) {
+      parent.isModifyPlot = false;
+      me.symbol = null;
+      me.sigleImage = null;
+      parent.oldPlotName = "";
+      parent.oldRemark = "";
+      // window.featureOperator && delete window.featureOperator;
+      // }
     };
     this.plotLayer.on(FeatureOperatorEvent.ACTIVATE, this.operatorActive);
     this.plotLayer.on(FeatureOperatorEvent.DEACTIVATE, this.operatorDeactive);
@@ -339,8 +344,10 @@ export default class Plot extends PureComponent {
         this.updateStateCallbackFunc();
       }
     } else {
-      window.featureOperator = parent.activeFeatureOperator;
-      this.plotLayer.plotEdit.activate(window.featureOperator.feature);
+      if (parent.activeFeatureOperator) {
+        window.featureOperator = parent.activeFeatureOperator;
+        this.plotLayer.plotEdit.activate(window.featureOperator.feature);
+      }
     }
     if (parent.isModifyPlot === true) {
       this.plotName = parent.oldPlotName;
@@ -369,32 +376,40 @@ export default class Plot extends PureComponent {
   }
 
   componentWillReceiveProps(nextProps) {
+    this.handleResetClick();
     if (nextProps.hidden === false) {
-      this.handleResetClick();
-      this.createPlotName();
-      this.nextProps = nextProps;
-      if (nextProps.plotType === "point") {
-        this.symbol = this.refs.defaultSymbol.innerText;
-        this.getPointDefaultSymbol();
+      const { parent } = this.props;
+      if (parent.isModifyPlot === true) {
+        this.plotName = parent.oldPlotName;
+        this.plotRemark = parent.oldRemark;
+
+        this.setState({
+          name: parent.oldPlotName,
+          remark: parent.oldRemark,
+        });
+        if (parent.activeFeatureOperator) {
+          window.featureOperator = parent.activeFeatureOperator;
+          this.plotLayer.plotEdit.activate(window.featureOperator.feature);
+        }
       } else {
-        this.updateStateCallbackFunc();
+        this.createPlotName();
+        this.nextProps = nextProps;
+        if (nextProps.plotType === "point") {
+          this.symbol = this.refs.defaultSymbol.innerText;
+          this.getPointDefaultSymbol();
+        } else {
+          this.updateStateCallbackFunc();
+        }
       }
     }
   }
-
-  // shouldComponentUpdate(nextProps, nextState) {
-  //   if (nextProps.plotType === this.props.plotType) {
-  //     return false; //不渲染
-  //   }
-  //   return true; //渲染
-  // }
 
   // 获取自定义图标符号
   getCustomSymbol = () => {
     this.isLoaded = false;
     const { parent } = this.props;
+    const mySymbols = symbols;
     if (parent.customSymbols) {
-      const mySymbols = symbols;
       this.setState({
         symbols: [parent.customSymbols, ...mySymbols],
       });
@@ -415,15 +430,8 @@ export default class Plot extends PureComponent {
                 const temp = { name: item.icon_name, imageUrl: item.icon_url };
                 this.customSymbols.content.push(temp);
               });
-              const mySymbols = symbols;
-              this.setState(
-                {
-                  symbols: [this.customSymbols, ...mySymbols],
-                },
-                () => {
-                  parent.customSymbols = this.customSymbols;
-                }
-              );
+              parent.customSymbols = this.customSymbols;
+              this.getCustomSymbol();
             }
           }
         })
@@ -886,8 +894,6 @@ export default class Plot extends PureComponent {
               window.featureOperator
             );
           }
-          this.symbol = null;
-          this.sigleImage = null;
         }
       } else {
         delete window.featureOperator;
@@ -982,34 +988,61 @@ export default class Plot extends PureComponent {
     // 有标绘被选择
     if (window.featureOperator) {
       // 选择了项目
-      if (this.projectId) {
-        this.save2Group(window.featureOperator)
-          .then((resp) => {
-            let data = resp.data;
-            let coll = data && data[0];
-            if (coll) {
-              coll.is_display = "1";
-              DetailAction.oldData.push(coll);
-              Event.Evt.firEvent(
-                "CollectionUpdate:reload",
-                DetailAction.oldData
-              );
-            }
-            this.handleDelClick();
+      if (!window.featureOperator.isScouting) {
+        if (this.projectId) {
+          let featureOperator = window.featureOperator;
+          this.save2Group(featureOperator)
+            .then((resp) => {
+              let data = resp.data;
+              let coll = data && data[0];
+              if (coll) {
+                coll.is_display = "1";
+                DetailAction.oldData.push(coll);
+                Event.Evt.firEvent(
+                  "CollectionUpdate:reload",
+                  DetailAction.oldData
+                );
+              }
+              const { parent } = this.props;
+              const index = this.findOperatorFromList(featureOperator.guid);
+              parent.featureOperatorList.splice(index, 1);
+              parent.updateFeatureOperatorList2(parent.featureOperatorList);
+              Event.Evt.firEvent("updatePlotFeature");
+              this.props.goBackProject();
+            })
+            .catch((err) => {
+              message.info("已保存到临时标绘。");
+              plotEdit.deactivate();
+            });
+        }
+        // 未选择项目
+        else {
+          message.info("已保存到临时标绘。");
+          plotEdit.deactivate();
+        }
+      } else {
+        Event.Evt.firEvent("stopEditPlot");
+        let data = window.featureOperator.data;
+        data.title = this.state.name;
+        const { feature } = window.featureOperator;
+        let newAttrs = {
+          ...window.featureOperator.attrs,
+          coordinates: feature.getGeometry().getCoordinates(),
+          geoType: feature.getGeometry().getType(),
+        };
+        const content = JSON.stringify(newAttrs);
+        window.featureOperator.updateFeatueToDB &&
+          window.featureOperator.updateFeatueToDB(data, content).then((res) => {
+            const { parent } = this.props;
+            parent.activeFeatureOperator = null;
+            plotEdit.deactivate();
+            Event.Evt.firEvent("updatePlotFeature");
             this.props.goBackProject();
-          })
-          .catch((err) => {
-            message.info("已保存到临时标绘。");
           });
-      }
-      // 未选择项目
-      else {
-        message.info("已保存到临时标绘。");
       }
     } else {
       message.info("请先标绘或选择要保存的标绘。");
     }
-    plotEdit.deactivate();
   };
 
   handleDelClick = () => {
@@ -1114,17 +1147,32 @@ export default class Plot extends PureComponent {
                 }}
               >
                 <div className={styles.header} style={style}>
-                  <span style={{ fontSize: "14px" }}>轮廓色</span>
+                  <span
+                    style={
+                      this.dic[plotType] === "Point"
+                        ? {
+                            ...disableStyle,
+                            ...{ fontSize: "14px" },
+                          }
+                        : { fontSize: "14px" }
+                    }
+                  >
+                    轮廓色
+                  </span>
                   <div
                     className={styles.colorbar}
                     style={{
-                      background: this.state.customStrokeSelectedColor,
+                      background:
+                        this.dic[plotType] === "Point"
+                          ? "rgba(0,0,0,0.2)"
+                          : this.state.customFillSelectedColor,
                       margin: 8,
                       width: "calc(100% - 74px)",
                     }}
                   ></div>
                   <ColorPicker
                     handleOK={this.handleCustomStrokeColorOkClick}
+                    disable={this.dic[plotType] === "Point" ? false : true}
                   ></ColorPicker>
                 </div>
                 <div className={styles.header} style={style}>
@@ -1185,7 +1233,7 @@ export default class Plot extends PureComponent {
           className={styles.footer}
           style={{ display: "flex", flexDirection: "row" }}
         >
-          <Button
+          {/* <Button
             block
             style={{
               width: 140,
@@ -1199,11 +1247,11 @@ export default class Plot extends PureComponent {
             onClick={this.handleDelClick}
           >
             删除
-          </Button>
+          </Button> */}
           <Button
             block
             style={{
-              width: 140,
+              width: "100%",
               height: 36,
               margin: "12px auto",
               background: "rgba(163,205,255,0.2)",

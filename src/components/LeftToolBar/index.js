@@ -192,6 +192,7 @@ export default class LeftToolBar extends React.Component {
     this.baseMapKeys = null;
     this.activeFeatureOperator = null;
     this.leftToolBarRef = null;
+    this.projectPlot = null;
   }
 
   deactivate = () => {
@@ -259,17 +260,30 @@ export default class LeftToolBar extends React.Component {
 
   onRef = (ref) => {
     this.leftToolBarRef = ref;
-  }
-  handleItemLeave = () => {};
-  displayPlotPanel = (attrs) => {
+  };
+  displayPlotPanel = (attrs, operator) => {
     this.isModifyPlot = true;
     this.oldPlotName = attrs.name;
     this.oldRemark = attrs.remark;
-    this.setState({
-      plotType: this.dic[attrs.geometryType],
-      displayPlot: true,
-      displayTempPlot: false,
-    });
+    this.activeFeatureOperator = operator;
+    this.oldPlotName = operator.attrs.name;
+    this.oldRemark = operator.attrs.remark;
+    if (!this.state.displayPlot) {
+      this.setState({
+        plotType: this.dic[attrs.geometryType],
+        displayPlot: true,
+        hidePlot: false,
+        displayTempPlot: false,
+        displayProject: false,
+      });
+    } else {
+      this.setState({
+        plotType: this.dic[attrs.geometryType],
+        hidePlot: false,
+        displayTempPlot: false,
+        displayProject: false,
+      });
+    }
   };
   render() {
     return (
@@ -280,9 +294,18 @@ export default class LeftToolBar extends React.Component {
         style={{ position: "absolute", top: 0, left: 0 }}
         id="leftToolBar"
       >
-        <ToolBar parent={this} onRef={this.onRef}></ToolBar>
+        <ToolBar
+          parent={this}
+          onRef={this.onRef}
+          selectIndex={this.toolBarSelectedIndex}
+        ></ToolBar>
         <Panel>
-          <Project hidden={this.state.displayProject}></Project>
+          <Project
+            hidden={this.state.displayProject}
+            displayPlotPanel={(attrs, plot) =>
+              this.displayPlotPanel(attrs, plot)
+            }
+          ></Project>
           {this.state.displayPlot ? (
             <Plot
               parent={this}
@@ -291,6 +314,9 @@ export default class LeftToolBar extends React.Component {
               updateFeatureOperatorList={this.updateFeatureOperatorList}
               updateFeatureOperatorList2={this.updateFeatureOperatorList2}
               goBackProject={() => {
+                this.leftToolBarRef.setState({
+                  selectedIndex: 0,
+                });
                 this.setState({
                   hidePlot: true,
                   displayProject: true,

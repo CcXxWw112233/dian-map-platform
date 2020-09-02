@@ -37,7 +37,7 @@ export const plotEdit = {
     if (!this.plottingLayer) {
       this.plottingLayer = new PlottingLayer(this.map);
       window.plottingLayer = this.plottingLayer;
-      this.bindEventListener();
+      // this.bindEventListener();
     }
     return this.plottingLayer;
   },

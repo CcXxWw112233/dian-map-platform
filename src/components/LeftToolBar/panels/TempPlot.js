@@ -400,7 +400,7 @@ export default class TempPlot extends React.Component {
                   color: "rgba(102, 144, 255, 1)",
                 }}
               >
-                转存项目(分组)
+                转存项目/分组
               </Button>
             </div>
           ) : (

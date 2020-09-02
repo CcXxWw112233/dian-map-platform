@@ -305,8 +305,9 @@ class PlotEdit extends Observable {
     this.controlPoints = [];
     var cPnts = this.getControlPoints();
     // cPnts = douglasPeucker(cPnts, 100);
+
+    this.createSaveBtn(cPnts[cPnts.length - 1]);
     if (!isScouting) {
-      this.createSaveBtn(cPnts[cPnts.length - 1]);
       this.createDelBtn(cPnts[cPnts.length - 1]);
     }
     for (var i = 0; i < cPnts.length; i++) {
