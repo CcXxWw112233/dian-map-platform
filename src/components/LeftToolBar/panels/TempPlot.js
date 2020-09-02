@@ -233,9 +233,14 @@ export default class TempPlot extends React.Component {
 
   deleteSelectedFeature = () => {
     let arr = this.getSelectedData();
-    arr.forEach((operator) => {
-      this.handleDelClick(operator);
-    });
+    if (arr.length > 0) {
+      let arr = this.getSelectedData();
+      arr.forEach((operator) => {
+        this.handleDelClick(operator);
+      });
+    } else {
+      message.info("请先选择需要删除的标绘。");
+    }
   };
 
   getSelectedData = () => {
