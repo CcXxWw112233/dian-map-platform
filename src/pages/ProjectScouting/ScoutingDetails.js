@@ -1559,6 +1559,7 @@ export default class ScoutingDetails extends PureComponent {
   onMultipleRemove = ()=>{
     let arr = [...this.state.selections, ...this.state.notAreaIdSelections];
     let list = Array.from(this.state.all_collection);
+    if(!arr.length) return ;
     ( async ()=>{
       for(let i = 0; i< arr.length; i ++){
         Action.removeCollection(arr[i]).catch(err=> console.log(err));
@@ -1658,6 +1659,7 @@ export default class ScoutingDetails extends PureComponent {
       let { selections, notAreaIdSelections } = this.state;
       let arr = [...selections,...notAreaIdSelections];
       let selectArr = this.state.all_collection.filter(item => arr.includes(item.id));
+      if(!arr.length) return message.warn('未选择采集资料');
       if(type === 'copy'){
         let notA = selectArr.filter(item => item.collect_type !== '4');
         if(notA.length){

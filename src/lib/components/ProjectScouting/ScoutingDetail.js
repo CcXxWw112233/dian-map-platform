@@ -1210,7 +1210,7 @@ function Action() {
       setTimeout(() => {
         // 当存在feature的时候，才可以缩放 需要兼容规划图，规划图不存在source的元素中
         // console.log(sourceExtent)
-        if (this.features.length && !getExtentIsEmpty(sourceExtent)) {
+        if (!getExtentIsEmpty(sourceExtent)) {
           let points = [
             this.transform([sourceExtent[0],sourceExtent[3]]),
             this.transform([sourceExtent[2],sourceExtent[1]])
