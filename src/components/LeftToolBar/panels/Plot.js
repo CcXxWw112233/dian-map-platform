@@ -331,7 +331,7 @@ export default class Plot extends PureComponent {
       me.sigleImage = null;
       parent.oldPlotName = "";
       parent.oldRemark = "";
-      // window.featureOperator && delete window.featureOperator;
+      window.featureOperator && delete window.featureOperator;
       // }
     };
     this.plotLayer.on(FeatureOperatorEvent.ACTIVATE, this.operatorActive);
