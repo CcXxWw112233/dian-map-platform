@@ -685,6 +685,9 @@ export default class ScoutingDetails extends PureComponent {
       );
       // 隐藏
       this.hideOtherSlide();
+      setTimeout(()=>{
+        this.hiddenDetail();
+      }, 50)
       // 添加坐标点的事件
       let coor = await Action.addCollectionCoordinates(false,val).catch(err => console.log(err));
       if(coor){
