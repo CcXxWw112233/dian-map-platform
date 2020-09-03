@@ -191,7 +191,7 @@ export default class ToolBar extends React.Component {
           }`}
           style={{ background: "#fff" }}
         >
-          {/* <img alt="" src=""></img> */}
+          {/* <img crossOrigin="anonymous" alt="" src=""></img> */}
           <i className={globalStyle.global_icon} style={{ fontSize: 26 }}>
             &#xe764;
           </i>

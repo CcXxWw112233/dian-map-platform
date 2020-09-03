@@ -330,7 +330,7 @@ export default class PlotInfoPanel extends Component {
     }
     if (
       this.props.plotType === "Polyline" ||
-      this.props.plotType === "LineString" || 
+      this.props.plotType === "LineString" ||
       this.props.plotType === "freeLine"
     ) {
       style = { ...style, height: 0, border: `1px solid ${symbolUrl}` };
@@ -1026,7 +1026,7 @@ export default class PlotInfoPanel extends Component {
       const gifUrl = require("../../assets/plot/remind.gif");
       return (
         <div style={{ width: "100%" }}>
-          <img alt="" src={gifUrl} />
+          <img crossOrigin="anonymous" alt="" src={gifUrl} />
           <p>您可以开始绘制了哟！</p>
         </div>
       );
@@ -1044,7 +1044,7 @@ export default class PlotInfoPanel extends Component {
     const disableStyle = { color: "rgba(0,0,0,0.2)" };
     const { isOpen } = this.state;
     return (
-      <div className={`${styles.plotpanel} ${isOpen ? styles.plotpanelActive : styles.plotpanelHide}`} 
+      <div className={`${styles.plotpanel} ${isOpen ? styles.plotpanelActive : styles.plotpanelHide}`}
       style={{overflowX:"visible"}}>
         <div className={`${styles.panel} ${globalStyle.autoScrollY}`}
         style={{opacity: isOpen ? 1: 0}}>

@@ -170,7 +170,7 @@ export default class CollectionPreview extends React.Component{
   checkRender = (data = {})=>{
     let type = DetailAction.checkCollectionType(data.target)
     if(type === 'pic'){
-      return <img src={data?.resource_url} alt=""/>
+      return <img crossOrigin="anonymous" src={data?.resource_url} alt=""/>
     }else
     if(type === 'video' || type === 'interview'){
       let config = {
@@ -290,7 +290,7 @@ export default class CollectionPreview extends React.Component{
           {
             Full &&
             <span className={`${styles.goBackMap} ${animateCss.animated} ${animateCss.fadeInUp}`} onClick={()=> {onExitFull && onExitFull()}}>
-              <img src={require('../../../../assets/backmap.png')} alt=""/>
+              <img crossOrigin="anonymous" src={require('../../../../assets/backmap.png')} alt=""/>
             </span>
           }
           {

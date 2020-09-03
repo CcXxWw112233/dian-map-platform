@@ -208,7 +208,7 @@ export default class CollectionDetail extends React.Component{
   checkRender = (val)=>{
     let type = DetailAction.checkCollectionType(val.target);
     if(type === 'pic'){
-      return <img src={val.resource_url} alt="" onClick={this.previewImg}/>
+      return <img crossOrigin="anonymous" src={val.resource_url} alt="" onClick={this.previewImg}/>
     }
     if(type === 'video' || type === 'interview'){
       let config = {
@@ -231,6 +231,15 @@ export default class CollectionDetail extends React.Component{
       }
     });
     this.allVideoStop();
+  }
+
+  detailClose = ()=>{
+    const { dispatch } = this.props;
+    DetailAction.clearSelectPoint();
+    dispatch({
+      type:'collectionDetail/updateDatas',
+      payload:{selectData:null,isImg: true}
+    })
   }
 
   render(){
@@ -270,9 +279,7 @@ export default class CollectionDetail extends React.Component{
               <MyIcon type="icon-jia1"/>
             </span>}
             <span className={styles.close}>
-              <MyIcon type="icon-guanbi2" onClick={()=> dispatch({
-                type:'collectionDetail/updateDatas',payload:{selectData:null,isImg: true}
-              })}/>
+              <MyIcon type="icon-guanbi2" onClick={()=> this.detailClose()}/>
             </span>
           </div>
           <div className={`${styles.container}`} style={{height: small ? 0: 'auto'}}>
@@ -293,7 +300,7 @@ export default class CollectionDetail extends React.Component{
                 return (<div key={item.id}>
                   {isImg && <div className={styles.container_img}>
                     {this.checkRender(item)}
-                    {/* {item.resource_url ? <img src={item.resource_url} alt="" onClick={this.previewImg}/>
+                    {/* {item.resource_url ? <img crossOrigin="anonymous" src={item.resource_url} alt="" onClick={this.previewImg}/>
                     :
                     <span>暂不支持预览</span>} */}
                   </div>}

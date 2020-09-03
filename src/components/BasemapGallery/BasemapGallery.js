@@ -136,7 +136,7 @@ export default class BasemapGallery extends PureComponent {
                       key={`${item.name}${item.type}-${index}`}
                       onClick={() => this.handleOpenContentClick(item, index)}
                     >
-                      <img alt="" src={item.img}></img>
+                      <img crossOrigin="anonymous" alt="" src={item.img}></img>
                       <span
                         className={
                           index === this.state.selectedIndex

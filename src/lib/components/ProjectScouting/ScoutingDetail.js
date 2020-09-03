@@ -83,6 +83,22 @@ function Action() {
       this.renderCollection(this.currentData, this.currentSet);
     }
   });
+  const pointUnselect = (()=>
+  createStyle("Point",{
+    icon: {
+      src: require("../../../assets/unselectlocation.png"),
+      crossOrigin: "anonymous",
+      anchor: [0.5, 0.8],
+    }
+  }))();
+  const pointSelect = (() =>
+  createStyle("Point", {
+    icon: {
+      src: require("../../../assets/selectlocation.png"),
+      crossOrigin: "anonymous",
+      anchor: [0.5, 0.8],
+    },
+  }))();
   this.init = (dispatch) => {
     this.mounted = true;
     this.Layer.setSource(this.Source);
@@ -99,8 +115,10 @@ function Action() {
         });
         if (!obj) return;
         if (!obj.feature) return;
+        this.clearSelectPoint();
         if (obj && obj.layer && obj.layer.get("id") === this.layerId) {
           if (obj.feature.get("ftype") === "collection") {
+            this.handleFeatureCollectionPoint(obj.feature);
             Event.Evt.firEvent(
               "handleCollectionFeature",
               obj.feature.get("data")
@@ -703,6 +721,7 @@ function Action() {
     }
 
     this.features = [];
+    this.currentData = [];
   };
 
   this.renderPointCollection = (data, addOverlay = true) => {
@@ -749,11 +768,14 @@ function Action() {
         data: coordinate[item],
       });
       let style = createStyle("Point", {
-        iconUrl: require("../../../assets/unselectlocation.png"),
         strokeWidth: 2,
         strokeColor: "#fff",
         zIndex: 10,
-        icon: { anchorOrigin: "bottom-left", anchor: [0.5, 0.8] },
+        icon: {
+          src: require("../../../assets/unselectlocation.png"),
+          anchor: [0.5, 0.8],
+          crossOrigin: "anonymous",
+        },
       });
 
       feature.setStyle(style);
@@ -1127,7 +1149,6 @@ function Action() {
     data,
     { lenged, dispatch, animation = true, showFeatureName = true }
   ) => {
-    this.currentData = data;
     this.currentSet = { lenged, dispatch, animation, showFeatureName };
     // 删除元素
     this.removeFeatures();
@@ -1189,7 +1210,7 @@ function Action() {
 
     this.features = this.features.concat(pointCollection);
     this.Source.addFeatures(pointCollection);
-
+    this.currentData = data;
     if (!animation) return this.features;
 
     let sourceExtent = this.Source.getExtent();
@@ -2132,6 +2153,49 @@ function Action() {
   this.cancelMergeCollection = async (data) => {
     return await CANCEL_COLLECTION_MERGE(data);
   };
+
+  // 情空选中状态
+  this.clearSelectPoint = ()=>{
+    this.features.forEach(item => {
+      // if(!uids.includes(item.ol_uid)){
+      if(item.get('ftype') === 'collection'){
+        let style = item.getStyle();
+        style.setImage(pointUnselect.getImage());
+        item.setStyle(style);
+      }
+      // }
+    });
+  }
+
+  this.handleFeatureCollectionPoint = (feature)=> {
+    this.clearSelectPoint();
+    if(feature){
+      let style = feature.getStyle();
+      style.setImage(pointSelect.getImage());
+      feature.setStyle(style);
+    }
+  }
+  // 点的数据选中状态
+  this.handleCollectionPoint = (data)=> {
+    // console.log(data);
+    let { location } = data;
+    this.clearSelectPoint();
+    if(location && location.hasOwnProperty('latitude') && location.hasOwnProperty('longitude')){
+      let coor = [+location.longitude, +location.latitude];
+      coor = TransformCoordinate(coor);
+      let feature = this.Source.getFeaturesAtCoordinate(coor);
+      // if(!feature.length) return ;
+      // console.log(feature);
+      // let uids = feature.map(item => item.ol_uid)|| [];
+      if(feature&& feature.length){
+        feature.forEach(item => {
+          let fstyle = item.getStyle();
+          fstyle.setImage(pointSelect.getImage());
+          item.setStyle(fstyle);
+        })
+      }
+    }
+  }
   // 采集资料的点击事件
   this.handleCollection = async (val) => {
     let { target, resource_url, title, resource_id } = val;
