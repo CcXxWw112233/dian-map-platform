@@ -359,7 +359,7 @@ export default class ScoutingList extends PureComponent {
         )}
         <ScoutingAddBtn cb={this.handleAddClick.bind(this)} />
         <div className={styles.bgStyleImg}>
-          <img src={Bitmap} />
+          <img crossOrigin="anonymous" src={Bitmap} />
         </div>
       </div>
     );

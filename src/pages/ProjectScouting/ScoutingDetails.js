@@ -1428,6 +1428,7 @@ export default class ScoutingDetails extends PureComponent {
         isImg: type === 'pic' || type === 'video' || type === 'interview'
       }
     })
+    Action.handleCollectionPoint(val);
   }
 
   CollectionViewScroll = (e) => {

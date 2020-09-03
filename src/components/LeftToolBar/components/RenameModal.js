@@ -59,7 +59,7 @@ export default function RenameModal (props){
       <div className={styles.renameContainer}>
         <div className={styles.edit_msg}>
           <div className={styles.edit_img}>
-            <img src={dataSource.src} alt=""/>
+            <img crossOrigin="anonymous" src={dataSource.src} alt=""/>
           </div>
           <div className={styles.edit_name}>
             <Input size='small' value={name}
