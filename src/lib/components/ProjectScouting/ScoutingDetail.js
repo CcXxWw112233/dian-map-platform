@@ -62,7 +62,7 @@ function Action() {
   } = config;
   this.activeFeature = {};
   this.layerId = "scoutingDetailLayer";
-  this.Layer = Layer({ id: this.layerId, zIndex: 11 });
+  this.Layer = Layer({ id: this.layerId, zIndex: 40 });
   this.Source = Source();
   this.features = [];
   this.overlays = [];
@@ -83,22 +83,22 @@ function Action() {
       this.renderCollection(this.currentData, this.currentSet);
     }
   });
-  const pointUnselect = (()=>
+  const pointUnselect = (isMulti)=>
   createStyle("Point",{
     icon: {
-      src: require("../../../assets/unselectlocation.png"),
+      src: isMulti ? require("../../../assets/multiunselect.png") : require("../../../assets/unselectlocation.png"),
       crossOrigin: "anonymous",
       anchor: [0.5, 0.8],
     }
-  }))();
-  const pointSelect = (() =>
+  });
+  const pointSelect = (isMulti) =>
   createStyle("Point", {
     icon: {
-      src: require("../../../assets/selectlocation.png"),
+      src: isMulti? require('../../../assets/multiselect.png'): require("../../../assets/selectlocation.png"),
       crossOrigin: "anonymous",
       anchor: [0.5, 0.8],
     },
-  }))();
+  });
   this.init = (dispatch) => {
     this.mounted = true;
     this.Layer.setSource(this.Source);
@@ -761,22 +761,52 @@ function Action() {
         }
       }
 
+      let moreStyle = () => {
+        if(coordinate[item].length === 1){
+          return {
+            strokeWidth: 2,
+            strokeColor: "#fff",
+            zIndex: 10,
+            showName: true,
+            textFillColor:"#5A86F5",
+            textStrokeColor:"#fff",
+            textStrokeWidth:2,
+            font: 14,
+            offsetY: -30,
+            text: coordinate[item][0].title,
+            icon: {
+              src: require("../../../assets/unselectlocation.png"),
+              anchor: [0.5, 0.8],
+              crossOrigin: "anonymous",
+            },
+          }
+        }else return {
+            strokeWidth: 2,
+            strokeColor: "#fff",
+            zIndex: 10,
+            showName:true,
+            font:coordinate[item].length < 10 ? 12 : 10,
+            offsetY:-12,
+            textFillColor:"#ffffff",
+            textStrokeWidth:1,
+            textStrokeColor:"#fff",
+            text: coordinate[item].length + "",
+            icon: {
+              src: require("../../../assets/multiunselect.png"),
+              anchor: [0.5, 0.8],
+              crossOrigin: "anonymous",
+            },
+        }
+      }
       let feature = addFeature("Point", {
         coordinates: coor,
         id: d.id,
         ftype: "collection",
         data: coordinate[item],
+        multi: coordinate[item].length > 1
       });
-      let style = createStyle("Point", {
-        strokeWidth: 2,
-        strokeColor: "#fff",
-        zIndex: 10,
-        icon: {
-          src: require("../../../assets/unselectlocation.png"),
-          anchor: [0.5, 0.8],
-          crossOrigin: "anonymous",
-        },
-      });
+
+      let style = createStyle("Point", moreStyle() );
 
       feature.setStyle(style);
 
@@ -2154,13 +2184,14 @@ function Action() {
     return await CANCEL_COLLECTION_MERGE(data);
   };
 
-  // 情空选中状态
+  // 清空选中状态
   this.clearSelectPoint = ()=>{
     this.features.forEach(item => {
       // if(!uids.includes(item.ol_uid)){
       if(item.get('ftype') === 'collection'){
         let style = item.getStyle();
-        style.setImage(pointUnselect.getImage());
+        style.setZIndex(20);
+        style.setImage(pointUnselect(item.get('multi')).getImage());
         item.setStyle(style);
       }
       // }
@@ -2171,7 +2202,8 @@ function Action() {
     this.clearSelectPoint();
     if(feature){
       let style = feature.getStyle();
-      style.setImage(pointSelect.getImage());
+      style.setImage(pointSelect(feature.get('multi')).getImage());
+      style.setZIndex(50);
       feature.setStyle(style);
     }
   }
@@ -2190,7 +2222,8 @@ function Action() {
       if(feature&& feature.length){
         feature.forEach(item => {
           let fstyle = item.getStyle();
-          fstyle.setImage(pointSelect.getImage());
+          fstyle.setZIndex(20);
+          fstyle.setImage(pointSelect(item.get('multi')).getImage());
           item.setStyle(fstyle);
         })
       }
