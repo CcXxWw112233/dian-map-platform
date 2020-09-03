@@ -44,6 +44,7 @@ import * as olProj from "ol/proj";
 import { circular as circularPolygon } from "ol/geom/Polygon";
 
 import INITMAP from "../../utils/INITMAP";
+import { BASIC } from '../../services/config';
 
 // 新建feature
 export const addFeature = function (type, data) {
@@ -382,4 +383,4 @@ export const setSelectInteraction = function (data = {}) {
 };
 
 // 适应范围后的调整
-export const fitPadding = [200, 150, 80, 500];
+export const fitPadding = BASIC.getUrlParam.isMobile === "1" ? [100,100,240,100] : [200, 150, 80, 500];
