@@ -615,7 +615,7 @@ export default class Plot extends PureComponent {
     } else if (parent.isModifyPlot === true && window.featureOperator) {
       if (window.featureOperator.feature) {
         const geoType = window.featureOperator.feature.getGeometry().getType();
-        if (geoType === this.dic[this.plotType]) {
+        if (geoType === this.dic[this.props.plotType]) {
           window.featureOperator.feature.setStyle(style);
           window.featureOperator.attrs = attrs;
         } else {
