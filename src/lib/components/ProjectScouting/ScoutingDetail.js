@@ -804,7 +804,8 @@ function Action() {
         id: d.id,
         ftype: "collection",
         data: coordinate[item],
-        multi: coordinate[item].length > 1
+        multi: coordinate[item].length > 1,
+        ...coordinate[item][0]||null
       });
 
       let style = createStyle("Point", moreStyle() );
@@ -876,6 +877,7 @@ function Action() {
 
   this.handlePlotClick = (feature, pixel) => {
     if (this.isActivity) return;
+    Event.Evt.firEvent('handleFeatureToLeftMenu',feature.get('id'));
     createPopupOverlay(feature, pixel);
   };
 
@@ -1702,6 +1704,7 @@ function Action() {
     // });
   };
 
+
   // 设置overlay层叠问题
   this.editZIndexOverlay = (id) => {
     let overlay = InitMap.map.getOverlayById(id);
@@ -2200,6 +2203,7 @@ function Action() {
   }
 
   this.handleFeatureCollectionPoint = (feature)=> {
+    Event.Evt.firEvent('handleFeatureToLeftMenu',feature.get('id'));
     this.clearSelectPoint();
     if(feature){
       let style = feature.getStyle();
@@ -2223,7 +2227,7 @@ function Action() {
       if(feature&& feature.length){
         feature.forEach(item => {
           let fstyle = item.getStyle();
-          fstyle.setZIndex(20);
+          fstyle.setZIndex(50);
           fstyle.setImage(pointSelect(item.get('multi')).getImage());
           item.setStyle(fstyle);
         })
