@@ -14,7 +14,8 @@ export default class PlayCollectionControl extends React.PureComponent{
             hasPrev:true,
             hasNext:true,
             isAutoPlay: false,
-            playMode: ''
+            playMode: '',
+            // currentGroup: {},
         }
         this.move = {
             x:0,

@@ -185,6 +185,9 @@ export default class LookingBack extends React.Component{
         isImg: true
       }
     });
+    this.setState({
+      activeItem: val.id
+    })
     DetailAction.setGroupCollectionActive(val);
   }
   Full = ()=>{
@@ -201,7 +204,7 @@ export default class LookingBack extends React.Component{
   }
 
   render(){
-    let { selectActive, activeSelectObj = {}, activeTime, timeData } = this.state;
+    let { selectActive, activeSelectObj = {}, activeTime, timeData ,activeItem} = this.state;
     const { dispatch, showCollectionsModal, board} = this.props;
     return (
       <div className={styles.lookingback}>
@@ -256,8 +259,8 @@ export default class LookingBack extends React.Component{
                           `${styles.looking_item}
                            ${animateCss.animated}
                           `
-                          } key={data.time} onClick={()=> this.pictureView(data.data)}>
-                          <div style={{backgroundColor:"rgba(71, 74, 91, 1)"}}>
+                          } key={data.data.id} onClick={()=> this.pictureView(data.data)}>
+                          <div style={{backgroundColor:"rgba(71, 74, 91, 1)"}} className={ activeItem === data.data.id ? styles.active :''}>
                             <span>{data.data.title}</span>
                             {DetailAction.checkCollectionType(data.data.target) === 'pic' ?
                             <img src={data.data.resource_url} alt="" width='100%'/>: <div></div>}

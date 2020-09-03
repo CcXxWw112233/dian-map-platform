@@ -1,4 +1,4 @@
-import React, { PureComponent, Fragment , useState} from "react";
+import React, { PureComponent, Fragment } from "react";
 import globalStyle from "../../globalSet/styles/globalStyles.less";
 import animateCss from "../../assets/css/animate.min.css";
 import styles from "./ScoutingDetails.less";
@@ -42,6 +42,8 @@ import LookingBack from "./components/LookingBack";
 import mapApp from "../../utils/INITMAP";
 
 import { CSSTransition } from "react-transition-group";
+import Axios from "axios";
+import { BASIC } from "../../services/config";
 
 const { Evt } = Event;
 const { TabPane } = Tabs;
@@ -887,17 +889,23 @@ export default class ScoutingDetails extends PureComponent {
   };
 
   // 上传规划图
-  onUploadPlan = (val, resp) => {
+  onUploadPlan = (val, resp, filelist, setData, firstSave) => {
     this.showOtherSlide();
     // console.log(resp);
     if (resp) {
       message.success("上传成功");
+      let content = (setData && firstSave)? {
+        content: firstSave.data.id
+      }: {
+        content: resp.id
+      } ;
       let { id, name } = resp;
 
       let params = {
         board_id: this.state.current_board.board_id,
         area_type_id: val.id,
         collect_type: 5,
+        ...content,
         resource_id: id,
         target: "plan",
         title: name,
@@ -937,20 +945,35 @@ export default class ScoutingDetails extends PureComponent {
   };
   // 编辑规划图
   onEditPlanPic = (val, collection) => {
+    const { dispatch } = this.props;
     const baseMapKeys = mapApp.baseMapKeys;
     const baseMapKey = mapApp.baseMapKey;
     // console.log(val,collection)
     this.hideOtherSlide();
+    this.hiddenDetail();
     let img = Action.findImgLayer(collection.resource_id);
-    Action.setEditPlanPicLayer(img)
-      .then((resp) => {
+    Action.setEditPlanPicLayer(val,img, dispatch, collection)
+      .then(async (resp) => {
         let param = {
           extent: resp.extent.join(","),
           transparency: resp.opacity,
           coord_sys_type: baseMapKeys[0].indexOf(baseMapKey) > -1 ? 0 : 1,
         };
         this.showOtherSlide();
-        Action.saveEditPlanPic(collection.resource_id, param).then((res) => {
+        let imgid = collection.resource_id;
+        if(resp.blobFile){
+          imgid = collection.content;
+          let formdata = new FormData();
+          formdata.append("file",resp.blobFile);
+          formdata.append("extent",param.extent);
+          formdata.append("transparency",param.transparency);
+          formdata.append("coord_sys_type",param.coord_sys_type);
+          let saved = await Axios.post(`/api/map/ght/${val.id}`,formdata, {headers: {Authorization:BASIC.getUrlParam.token}});
+
+          await Action.editCollection({id: collection.id, resource_id: saved.data.data.id});
+        }
+
+        Action.saveEditPlanPic(imgid, param).then((res) => {
           message.success(`修改${collection.title}成功`);
           this.fetchCollection();
         });
@@ -1537,6 +1560,7 @@ export default class ScoutingDetails extends PureComponent {
   onMultipleRemove = ()=>{
     let arr = [...this.state.selections, ...this.state.notAreaIdSelections];
     let list = Array.from(this.state.all_collection);
+    if(!arr.length) return ;
     ( async ()=>{
       for(let i = 0; i< arr.length; i ++){
         Action.removeCollection(arr[i]).catch(err=> console.log(err));
@@ -1636,6 +1660,7 @@ export default class ScoutingDetails extends PureComponent {
       let { selections, notAreaIdSelections } = this.state;
       let arr = [...selections,...notAreaIdSelections];
       let selectArr = this.state.all_collection.filter(item => arr.includes(item.id));
+      if(!arr.length) return message.warn('未选择采集资料');
       if(type === 'copy'){
         let notA = selectArr.filter(item => item.collect_type !== '4');
         if(notA.length){
