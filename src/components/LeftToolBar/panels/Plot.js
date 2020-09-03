@@ -993,6 +993,7 @@ export default class Plot extends PureComponent {
             const { parent } = this.props;
             parent.activeFeatureOperator = null;
             plotEdit.deactivate();
+            window.featureOperator && delete window.featureOperator;
             Event.Evt.firEvent("updatePlotFeature");
             this.props.goBackProject();
           });

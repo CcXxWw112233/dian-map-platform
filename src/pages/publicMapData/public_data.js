@@ -453,13 +453,13 @@ const data = [
   {
     title: "地产楼盘",
     icon: "icon-loufang2",
-    key: "8",
+    key: "6",
     children: [
       {
         title: "新房",
         icon: "",
         key: "map:loupan:newHouse",
-        pKey: "8",
+        pKey: "6",
         loadFeatureKeys: [
           {
             typeName: "lingxi:dichan_loupan_point",

@@ -14,7 +14,7 @@ export default class PublicData extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      expandedKeys: ["1", "2"],
+      expandedKeys: ["1", "2", "3", "4", "5", "6"],
       checkedKeys: [],
       selectedKeys: [],
       autoExpandParent: true,
