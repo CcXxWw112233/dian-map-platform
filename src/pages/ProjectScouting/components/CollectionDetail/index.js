@@ -21,6 +21,7 @@ export default class CollectionDetail extends React.Component{
       isEdit: false,
       activeImg: {},
       disabled: false,
+      currentIndex:0,
       sliderPages:{
         total: 1,
         current: 1
@@ -136,12 +137,14 @@ export default class CollectionDetail extends React.Component{
         this.setState({
           activeImg: data,
           disabled: type === 'view',
+          currentIndex:0,
           sliderPages: {...sliderPages, total: selectData.length, current:1}
         })
       }else {
         this.setState({
           activeImg: selectData,
           disabled: type === 'view',
+          currentIndex: 0,
           sliderPages: {...sliderPages, total: 1, current:1}
         })
       }
@@ -150,7 +153,7 @@ export default class CollectionDetail extends React.Component{
 
   componentWillReceiveProps(nextProps){
     const { selectData } = nextProps;
-    if(selectData){
+    if(this.props.selectData !== selectData){
       this.InitActiveImg(nextProps);
     }
   }
@@ -202,6 +205,7 @@ export default class CollectionDetail extends React.Component{
     let { sliderPages } = this.state;
     this.allVideoStop();
     this.setState({
+      currentIndex: current,
       sliderPages: {...sliderPages, current: current + 1}
     })
   }
@@ -243,8 +247,8 @@ export default class CollectionDetail extends React.Component{
   }
 
   render(){
-    const { sliderPages } = this.state;
-    let { dispatch ,zIndex, selectData, isImg ,small} = this.props;
+    const { sliderPages, currentIndex} = this.state;
+    let { zIndex, selectData, isImg ,small} = this.props;
     selectData = Array.isArray(selectData) ? selectData: selectData ? [selectData] : null;
     return (
       ReactDOM.createPortal(
@@ -255,7 +259,7 @@ export default class CollectionDetail extends React.Component{
             <Fragment>
               <div className={styles.smallTitle}>
                 <span className={styles.smallTitle_title}>
-                  {selectData && selectData[sliderPages.current - 1] && selectData[sliderPages.current - 1].title}
+                  {selectData && selectData[currentIndex] && selectData[currentIndex].title}
                 </span>
               </div>
             </Fragment>
@@ -269,10 +273,6 @@ export default class CollectionDetail extends React.Component{
               </span>
             </Fragment>
             }
-            {/* <span className={styles.edit}>
-              {isEdit ? <MyIcon type='icon-bianzu7beifen' onClick={(e)=> this.editEnd(false)}/> :
-              <MyIcon type="icon-bianzu7beifen4" onClick={()=> this.editEnd(true)}/>}
-            </span> */}
             {small &&
             <span
             onClick={()=> this.changeSmall(false)}>

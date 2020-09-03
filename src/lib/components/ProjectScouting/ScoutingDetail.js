@@ -115,6 +115,7 @@ function Action() {
         });
         if (!obj) return;
         if (!obj.feature) return;
+        if(this.isActivity) return ;
         this.clearSelectPoint();
         if (obj && obj.layer && obj.layer.get("id") === this.layerId) {
           if (obj.feature.get("ftype") === "collection") {
