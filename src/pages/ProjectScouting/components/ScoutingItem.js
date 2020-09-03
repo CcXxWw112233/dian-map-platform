@@ -225,7 +225,7 @@ export default class ScoutingItem extends React.PureComponent {
             >
                 {
                     bgImage && <div className={styles.itemBgImage}>
-                        <img src={bgImage} alt=""/>
+                        <img crossOrigin="anonymous" src={bgImage} alt=""/>
                     </div>
                 }
                 <div className={`${remarkStatus === 'full' ? styles.nameHidden : styles.nameShow } ${styles.nameBox}`}>

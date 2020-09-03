@@ -263,7 +263,7 @@ export default class LookingBack extends React.Component{
                           <div style={{backgroundColor:"rgba(71, 74, 91, 1)"}} className={ activeItem === data.data.id ? styles.active :''}>
                             <span>{data.data.title}</span>
                             {DetailAction.checkCollectionType(data.data.target) === 'pic' ?
-                            <img src={data.data.resource_url} alt="" width='100%'/>: <div></div>}
+                            <img crossOrigin="anonymous" src={data.data.resource_url} alt="" width='100%'/>: <div></div>}
                           </div>
                         </div>
                       )
@@ -280,7 +280,7 @@ export default class LookingBack extends React.Component{
                   <div>
                     <span>{item.data.title}</span>
                     {DetailAction.checkCollectionType(item.data.target) === 'pic' &&
-                    <img src={item.data.resource_url} alt="" width='100%'/>}
+                    <img crossOrigin="anonymous" src={item.data.resource_url} alt="" width='100%'/>}
                   </div>
                 </div>
               )

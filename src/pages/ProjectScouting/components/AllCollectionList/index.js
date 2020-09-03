@@ -186,7 +186,7 @@ export default class AllCollection extends React.Component {
               style={{width:'100%',height:'100%'}}>
                 {
                   k === 'pic' ?
-                <img src={data.resource_url} alt=""/>
+                <img crossOrigin="anonymous" src={data.resource_url} alt=""/>
                 :
                 <div style={{height:"100%",backgroundColor:"rgba(71, 74, 91, 1)",display:"flex",justifyContent:"center",alignItems:"center",color:"#fff"}}>
                   {this.keys[k]}

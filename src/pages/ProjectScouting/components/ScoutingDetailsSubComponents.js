@@ -111,7 +111,7 @@ export const Title = ({ name, date, cb, data = {}, className = "", mini }) => {
       <div className={styles.title_boardBgImg}>
         {url ? (
           <div className={styles.boardBgImg}>
-            <img src={url} alt="" onClick={previewImg} />
+            <img crossOrigin="anonymous" src={url} alt="" onClick={previewImg} />
           </div>
         ) : (
           <div className={styles.boardBgImg}>
@@ -136,7 +136,7 @@ export const Title = ({ name, date, cb, data = {}, className = "", mini }) => {
 //       <div className={`${styles.title}`}>
 //         {data.bg_image && (
 //           <div className={styles.boardBgImg}>
-//             <img src={data.bg_image} alt=""/>
+//             <img crossOrigin="anonymous" src={data.bg_image} alt=""/>
 //           </div>
 //         )}
 //         <div className={styles.projectModal}></div>
@@ -1023,7 +1023,7 @@ export const UploadItem = ({
   };
 
   const itemClick = (val) => {
-    let ty = Action.checkCollectionType(val.target);
+    // let ty = Action.checkCollectionType(val.target);
     // if (ty === "pic") {
     //   // 点击的是图片
     //   onCheckItem(val);
