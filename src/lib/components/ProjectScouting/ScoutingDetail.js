@@ -83,22 +83,26 @@ function Action() {
       this.renderCollection(this.currentData, this.currentSet);
     }
   });
-  const pointUnselect = (isMulti)=>
-  createStyle("Point",{
-    icon: {
-      src: isMulti ? require("../../../assets/multiunselect.png") : require("../../../assets/unselectlocation.png"),
-      crossOrigin: "anonymous",
-      anchor: [0.5, 0.8],
-    }
-  });
+  const pointUnselect = (isMulti) =>
+    createStyle("Point", {
+      icon: {
+        src: isMulti
+          ? require("../../../assets/multiunselect.png")
+          : require("../../../assets/unselectlocation.png"),
+        crossOrigin: "anonymous",
+        anchor: [0.5, 0.8],
+      },
+    });
   const pointSelect = (isMulti) =>
-  createStyle("Point", {
-    icon: {
-      src: isMulti? require('../../../assets/multiselect.png'): require("../../../assets/selectlocation.png"),
-      crossOrigin: "anonymous",
-      anchor: [0.5, 0.8],
-    },
-  });
+    createStyle("Point", {
+      icon: {
+        src: isMulti
+          ? require("../../../assets/multiselect.png")
+          : require("../../../assets/selectlocation.png"),
+        crossOrigin: "anonymous",
+        anchor: [0.5, 0.8],
+      },
+    });
   this.init = (dispatch) => {
     this.mounted = true;
     this.Layer.setSource(this.Source);
@@ -115,7 +119,7 @@ function Action() {
         });
         if (!obj) return;
         if (!obj.feature) return;
-        if(this.isActivity) return ;
+        if (this.isActivity) return;
         this.clearSelectPoint();
         if (obj && obj.layer && obj.layer.get("id") === this.layerId) {
           if (obj.feature.get("ftype") === "collection") {
@@ -162,8 +166,8 @@ function Action() {
     if (!suffix) return "unknow";
     const itemKeyVals = {
       paper: [], // 图纸
-      interview: ["aac", "mp3", "语音", "m4a","flac"], // 访谈
-      pic: ["jpg", "PNG", "gif", "jpeg","bmp"].map((item) =>
+      interview: ["aac", "mp3", "语音", "m4a", "flac"], // 访谈
+      pic: ["jpg", "PNG", "gif", "jpeg", "bmp"].map((item) =>
         item.toLocaleLowerCase()
       ),
       video: ["MP4", "WebM", "Ogg", "avi"].map((item) =>
@@ -763,15 +767,15 @@ function Action() {
       }
 
       let moreStyle = () => {
-        if(coordinate[item].length === 1){
+        if (coordinate[item].length === 1) {
           return {
             strokeWidth: 2,
             strokeColor: "#fff",
             zIndex: 10,
             showName: true,
-            textFillColor:"#5A86F5",
-            textStrokeColor:"#fff",
-            textStrokeWidth:2,
+            textFillColor: "#5A86F5",
+            textStrokeColor: "#fff",
+            textStrokeWidth: 2,
             font: 14,
             offsetY: -30,
             text: coordinate[item][0].title,
@@ -780,34 +784,35 @@ function Action() {
               anchor: [0.5, 0.8],
               crossOrigin: "anonymous",
             },
-          }
-        }else return {
+          };
+        } else
+          return {
             strokeWidth: 2,
             strokeColor: "#fff",
             zIndex: 10,
-            showName:true,
-            font:coordinate[item].length < 10 ? 12 : 10,
-            offsetY:-12,
-            textFillColor:"#ffffff",
-            textStrokeWidth:1,
-            textStrokeColor:"#fff",
+            showName: true,
+            font: coordinate[item].length < 10 ? 12 : 10,
+            offsetY: -12,
+            textFillColor: "#ffffff",
+            textStrokeWidth: 1,
+            textStrokeColor: "#fff",
             text: coordinate[item].length + "",
             icon: {
               src: require("../../../assets/multiunselect.png"),
               anchor: [0.5, 0.8],
               crossOrigin: "anonymous",
             },
-        }
-      }
+          };
+      };
       let feature = addFeature("Point", {
         coordinates: coor,
         id: d.id,
         ftype: "collection",
         data: coordinate[item],
-        multi: coordinate[item].length > 1
+        multi: coordinate[item].length > 1,
       });
 
-      let style = createStyle("Point", moreStyle() );
+      let style = createStyle("Point", moreStyle());
 
       feature.setStyle(style);
 
@@ -1031,9 +1036,13 @@ function Action() {
             if (content.sigleImage.indexOf("data:image") > -1) {
               obj.sigleImage = content.sigleImage;
             } else if (content.sigleImage.indexOf("/") > -1) {
-              let sigleImage = content.sigleImage.replace("img", "");
-              sigleImage = require("../../../assets" + sigleImage);
-              obj.sigleImage = sigleImage;
+              if (content.sigleImage.indexOf("http") > -1) {
+                obj.sigleImage = content.sigleImage;
+              } else {
+                let sigleImage = content.sigleImage.replace("img", "");
+                sigleImage = require("../../../assets" + sigleImage);
+                obj.sigleImage = sigleImage;
+              }
             }
           }
           this.lenged.content.push(obj);
@@ -1348,7 +1357,7 @@ function Action() {
   };
 
   // 添加规划图编辑功能
-  this.setEditPlanPicLayer = (val,staticImg, dispatch,collection) => {
+  this.setEditPlanPicLayer = (val, staticImg, dispatch, collection) => {
     return new Promise((resolve, reject) => {
       if (staticImg) {
         // console.log(staticImg)
@@ -1435,7 +1444,7 @@ function Action() {
             // console.log(val)
             let ext = staticImg.getSource().getImageExtent();
             let opacity = val.opacity;
-            let obj = { extent: ext, opacity,url: url,blobFile: file };
+            let obj = { extent: ext, opacity, url: url, blobFile: file };
             staticImg.setZIndex(oldZindex);
             this.showCollectionOverlay();
             resolve(obj);
@@ -1451,10 +1460,7 @@ function Action() {
           },
           editImg: async () => {
             // 等待视图移动到合适地点
-            let center = getPoint(
-              box.getGeometry().getExtent(),
-              "center"
-            );
+            let center = getPoint(box.getGeometry().getExtent(), "center");
             await animate({ center: center });
             let resp = await GET_PLAN_PIC(collection.content);
             let respdata = resp.data;
@@ -1488,9 +1494,12 @@ function Action() {
             // 保存新的图层
             Event.Evt.on("ImgEditComplete", (data) => {
               url = data.url;
-              let title = collection.title.indexOf(respdata.layer_format) !== -1 ? collection.title : collection.title + respdata.layer_format;
+              let title =
+                collection.title.indexOf(respdata.layer_format) !== -1
+                  ? collection.title
+                  : collection.title + respdata.layer_format;
               file = new File([data.blob], title, {
-                type: 'image/png',
+                type: "image/png",
                 lastModified: Date.now(),
               });
               let tl = [data.extent[0], data.extent[1]];
@@ -1532,10 +1541,7 @@ function Action() {
               // console.log(data);
               staticImg && staticImg.setVisible(true);
               this.Source.addFeature(box);
-              let p = getPoint(
-                box.getGeometry().getExtent(),
-                "topRight"
-              );
+              let p = getPoint(box.getGeometry().getExtent(), "topRight");
               overlay.setPosition(p);
               dispatch &&
                 dispatch({
@@ -2186,50 +2192,54 @@ function Action() {
   };
 
   // 清空选中状态
-  this.clearSelectPoint = ()=>{
-    this.features.forEach(item => {
+  this.clearSelectPoint = () => {
+    this.features.forEach((item) => {
       // if(!uids.includes(item.ol_uid)){
-      if(item.get('ftype') === 'collection'){
+      if (item.get("ftype") === "collection") {
         let style = item.getStyle();
         style.setZIndex(20);
-        style.setImage(pointUnselect(item.get('multi')).getImage());
+        style.setImage(pointUnselect(item.get("multi")).getImage());
         item.setStyle(style);
       }
       // }
     });
-  }
+  };
 
-  this.handleFeatureCollectionPoint = (feature)=> {
+  this.handleFeatureCollectionPoint = (feature) => {
     this.clearSelectPoint();
-    if(feature){
+    if (feature) {
       let style = feature.getStyle();
-      style.setImage(pointSelect(feature.get('multi')).getImage());
+      style.setImage(pointSelect(feature.get("multi")).getImage());
       style.setZIndex(50);
       feature.setStyle(style);
     }
-  }
+  };
   // 点的数据选中状态
-  this.handleCollectionPoint = (data)=> {
+  this.handleCollectionPoint = (data) => {
     // console.log(data);
     let { location } = data;
     this.clearSelectPoint();
-    if(location && location.hasOwnProperty('latitude') && location.hasOwnProperty('longitude')){
+    if (
+      location &&
+      location.hasOwnProperty("latitude") &&
+      location.hasOwnProperty("longitude")
+    ) {
       let coor = [+location.longitude, +location.latitude];
       coor = TransformCoordinate(coor);
       let feature = this.Source.getFeaturesAtCoordinate(coor);
       // if(!feature.length) return ;
       // console.log(feature);
       // let uids = feature.map(item => item.ol_uid)|| [];
-      if(feature&& feature.length){
-        feature.forEach(item => {
+      if (feature && feature.length) {
+        feature.forEach((item) => {
           let fstyle = item.getStyle();
           fstyle.setZIndex(20);
-          fstyle.setImage(pointSelect(item.get('multi')).getImage());
+          fstyle.setImage(pointSelect(item.get("multi")).getImage());
           item.setStyle(fstyle);
-        })
+        });
       }
     }
-  }
+  };
   // 采集资料的点击事件
   this.handleCollection = async (val) => {
     let { target, resource_url, title, resource_id } = val;
