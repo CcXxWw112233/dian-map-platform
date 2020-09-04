@@ -239,8 +239,9 @@ export default class ScoutingDetails extends PureComponent {
   handleCollectionFeature = (data, type = 'view', from ='group')=>{
     const { dispatch } = this.props;
     data = data.map(item => {
-      if(item){
-        let feature = Action.getFeatureById(item.id);
+      if(item.location && item.location.longitude && item.location.latitude){
+        let coor = [+item.location.longitude, +item.location.latitude];
+        let feature = Action.getFeatureByCoordinate(coor)[0];
         if(feature){
           let geo = feature.getGeometry();
           let properties = this.getProperties(geo.getType(), geo);
@@ -253,7 +254,7 @@ export default class ScoutingDetails extends PureComponent {
     dispatch({
       type:"collectionDetail/updateDatas",
       payload:{
-        selectData: data,
+        selectData: [...data],
         type,
         isImg: true
       }
@@ -1497,10 +1498,9 @@ export default class ScoutingDetails extends PureComponent {
       if(feature){
         let geo = feature.getGeometry();
         let properties = this.getProperties(geo.getType(), geo);
-        val.properties_map = properties;
+        val = Object.assign({},{properties_map :properties},val);
       }
     // }
-
     dispatch({
       type:"collectionDetail/updateDatas",
       payload:{
