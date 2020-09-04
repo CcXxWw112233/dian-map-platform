@@ -330,6 +330,7 @@ export default class AreaPanel extends React.Component {
     this.props.updateLocationName(currentLocation);
     this.getGeomByCode(currentCode, needChange);
     window.areaCode = currentCode;
+    this.props.changeAreaPanelVisible();
   };
 
   render() {
@@ -350,8 +351,9 @@ export default class AreaPanel extends React.Component {
       villageDisabled,
       okDisabled,
     } = this.props;
+    let style = { padding: 10 };
     return (
-      <div className={styles.locatePanel} style={{ padding: 10 }}>
+      <div className={styles.locatePanel} style={style}>
         <div className={styles.locatePanelBody}>
           <Select
             className={styles.select}

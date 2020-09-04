@@ -24,11 +24,12 @@ export default class Search extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      locationName: "中国",
+      locationName: "全国",
       showArea: false,
       showLocation: false,
       searchResult: [],
       searchPanelVisible: false,
+      areaPanelVisible: false,
       searchLoading: false,
       searchHistory: [],
       searchVal: "",
@@ -37,6 +38,7 @@ export default class Search extends React.Component {
     this.handleSearch = throttle(this.handleSearch, 1000);
   }
   componentDidMount() {
+    return;
     getSession("xzqhCode").then((res) => {
       if (res.code === 0) {
         if (!res.data) {
@@ -171,6 +173,11 @@ export default class Search extends React.Component {
         });
       });
   };
+  changeAreaPanelVisible = () => {
+    this.setState({
+      areaPanelVisible: false,
+    });
+  };
   changeLocationPanelVisible = () => {
     this.setState({
       searchPanelVisible: false,
@@ -185,6 +192,13 @@ export default class Search extends React.Component {
   onSearchFocus = async (e) => {
     this.getSearchHistory();
   };
+
+  onAreaPanelVisibleChange = (value) => {
+    this.setState({
+      areaPanelVisible: value,
+    });
+  };
+
   onLocationPanelVisibleChange = (value) => {
     const { searchHistory } = this.state;
     let newState = false;
@@ -206,6 +220,7 @@ export default class Search extends React.Component {
         handleClose={this.handleAreaClose}
         updateLocationName={this.updateLocationName}
         changeQueryStr={this.props.changeQueryStr}
+        changeAreaPanelVisible={this.changeAreaPanelVisible}
       ></AreaPanel>
     );
     const locationPanel = (
@@ -219,7 +234,12 @@ export default class Search extends React.Component {
     );
     return (
       <div className={styles.wrap} style={this.props.style}>
-        <Dropdown overlay={areaPanel} trigger="click">
+        <Dropdown
+          overlay={areaPanel}
+          trigger="click"
+          visible={this.state.areaPanelVisible}
+          onVisibleChange={(e) => this.onAreaPanelVisibleChange(e)}
+        >
           <Button style={{ borderRadius: 0 }}>
             {this.props.locationName}
             <DownOutlined />
