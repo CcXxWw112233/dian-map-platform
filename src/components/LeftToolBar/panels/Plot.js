@@ -590,6 +590,7 @@ export default class Plot extends PureComponent {
   updateStateCallbackFunc = () => {
     const { parent } = this.props;
     this.createPlotName();
+    if(this.props.plotType === 'freeLine' || this.props.plotType === 'freePolygon')
     this.setActiveDragPan(false);
     let options = {
       ...this.commonStyleOptions,
@@ -649,6 +650,7 @@ export default class Plot extends PureComponent {
       })
     } else if (parent.isModifyPlot === true && window.featureOperator) {
       if (window.featureOperator.feature) {
+        this.setActiveDragPan(true);
         const geoType = window.featureOperator.feature.getGeometry().getType();
         if (geoType === this.dic[this.props.plotType]) {
           window.featureOperator.feature.setStyle(style);
