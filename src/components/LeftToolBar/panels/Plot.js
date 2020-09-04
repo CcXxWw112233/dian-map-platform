@@ -985,6 +985,7 @@ export default class Plot extends PureComponent {
   };
 
   handleSaveClick = () => {
+    this.setActiveDragPan(true);
     // 有标绘被选择
     if (window.featureOperator) {
       // 选择了项目
