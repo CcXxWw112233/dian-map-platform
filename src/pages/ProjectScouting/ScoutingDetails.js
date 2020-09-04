@@ -208,7 +208,7 @@ export default class ScoutingDetails extends PureComponent {
     switch(type){
       case "Point":
         let coor = Action.transform(geometry.getCoordinates())
-      return {"坐标": `经度: ${coor[0].toFixed(2)} 纬度:${coor[1].toFixed(2)}`};
+      return {"坐标": `经度: ${coor[0].toFixed(4)} 纬度:${coor[1].toFixed(4)}`};
       case "Polygon":
       return {"面积": formatArea(geometry)};
       case "LineString":
@@ -238,6 +238,18 @@ export default class ScoutingDetails extends PureComponent {
   // 点击了坐标点
   handleCollectionFeature = (data, type = 'view', from ='group')=>{
     const { dispatch } = this.props;
+    data = data.map(item => {
+      if(item){
+        let feature = Action.getFeatureById(item.id);
+        if(feature){
+          let geo = feature.getGeometry();
+          let properties = this.getProperties(geo.getType(), geo);
+          item.properties_map = properties;
+        }
+      }
+      return item;
+    })
+
     dispatch({
       type:"collectionDetail/updateDatas",
       payload:{
@@ -622,6 +634,7 @@ export default class ScoutingDetails extends PureComponent {
           uid: file.uid,
         },
       });
+      Event.Evt.firEvent('uploadFileSuccess', file);
     }, 3000);
   };
   // 上传完成
@@ -631,7 +644,6 @@ export default class ScoutingDetails extends PureComponent {
       this.removeUploadItem(file);
       message.success("上传成功");
       let { file_resource_id, suffix, original_file_name } = resp;
-
       let params = {
         board_id: this.state.current_board.board_id,
         area_type_id: val.id,
@@ -1479,8 +1491,16 @@ export default class ScoutingDetails extends PureComponent {
   // 选中采集资料，可以打开右上角的详情
   checkItem = (val) => {
     const { dispatch } = this.props;
-    // console.log(val)
     let type = Action.checkCollectionType(val.target);
+    // if(val.collect_type === '4'){
+      let feature = Action.getFeatureById(val.id);
+      if(feature){
+        let geo = feature.getGeometry();
+        let properties = this.getProperties(geo.getType(), geo);
+        val.properties_map = properties;
+      }
+    // }
+
     dispatch({
       type:"collectionDetail/updateDatas",
       payload:{
