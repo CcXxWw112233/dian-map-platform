@@ -911,7 +911,7 @@ function Action() {
           }
         });
       }
-      Promise.all(promise)
+      return Promise.all(promise)
         .then((res) => {
           nProgress.done();
           // this.clearGeoFeatures();
@@ -929,9 +929,8 @@ function Action() {
                 iconUrl: icon ? require("../../../assets" + icon) : null,
                 strokeColor: feature.get("strokeColor") || "rgba(255,0,0,0.3)",
                 fillColor: feature.get("fillColor") || "rgba(255,0,0,0.3)",
-                textFillColor:
-                  "#ffffff" || feature.get("fillColor") || "rgba(255,0,0,0.9)",
-                textStrokeColor: "#333333",
+                textFillColor: "rgba(255,0,0,0.9)",
+                textStrokeColor: "#FFFFFF",
                 font: 14,
               });
               feature.setStyle(style);
@@ -1246,7 +1245,7 @@ function Action() {
     this.layer.isDefault = null;
 
     // 渲染geo数据
-    this.renderGeoJson(geoData).catch((err) => console.log(err));
+    await this.renderGeoJson(geoData).catch((err) => console.log(err));
     // 渲染标绘数据
     await this.renderFeaturesCollection(features, {
       lenged,
@@ -1312,18 +1311,17 @@ function Action() {
       data.length &&
       setTimeout(() => {
         // 当存在feature的时候，才可以缩放 需要兼容规划图，规划图不存在source的元素中
-        // console.log(sourceExtent)
         if (!getExtentIsEmpty(sourceExtent)) {
-          let points = [
-            this.transform([sourceExtent[0], sourceExtent[3]]),
-            this.transform([sourceExtent[2], sourceExtent[1]]),
-          ];
-          if (
-            out_of_china(points[0][0], points[0][1]) ||
-            out_of_china(points[1][0], points[1][1])
-          ) {
-            return;
-          }
+          // let points = [
+          //   this.transform([sourceExtent[0], sourceExtent[3]]),
+          //   this.transform([sourceExtent[2], sourceExtent[1]]),
+          // ];
+          // if (
+          //   out_of_china(points[0][0], points[0][1]) ||
+          //   out_of_china(points[1][0], points[1][1])
+          // ) {
+          //   return;
+          // }
           this.toCenter({ center: sourceExtent, type: "extent" });
         }
         // else if (ext.length) {
