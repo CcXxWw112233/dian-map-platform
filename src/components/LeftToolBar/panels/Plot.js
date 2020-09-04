@@ -426,6 +426,7 @@ export default class Plot extends PureComponent {
       message.destroy();
       clearTimeout(this.msgtimer);
       this.msgtimer = setTimeout(()=>{
+        message.destroy();
         message.success('自由绘制中，已锁定图层拖拽',0)
       }, 50)
     }else{
