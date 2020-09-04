@@ -543,8 +543,10 @@ function Action() {
     feature.forEach((item) => {
       let style = item.getStyle();
       style.setZIndex(10);
-      style.getImage().getFill().setColor("#FE2042");
-      style.getImage().setRadius(12);
+      if(style.getImage()){
+        style.getImage().getFill().setColor("#FE2042");
+        style.getImage().setRadius(12);
+      }
       item.setStyle(style);
     });
   };
@@ -2226,12 +2228,16 @@ function Action() {
       feature.setStyle(style);
     }
   };
-  this.getFeatureByCoordinate = (coor)=>{
+  this.getFeatureByPlotCoordinate = (coor)=>{
     if(this.layer.showLayer){
       let source = this.layer.showLayer.getSource();
       return source.getFeaturesAtCoordinate(coor);
     }
     return []
+  }
+  this.getFeatureByCoordinate = (coor) => {
+    coor = TransformCoordinate(coor);
+    return this.Source.getFeaturesAtCoordinate(coor);
   }
   this.getFeatureById = (id)=>{
     return this.features.find(item => item.get('id') === id);
