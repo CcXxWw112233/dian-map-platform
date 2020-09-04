@@ -103,7 +103,7 @@ export const Title = ({ name, date, cb, data = {}, className = "", mini }) => {
           <MyIcon type="icon-duomeitiicon-"/>
         </span>
       </div>
-      <div className={styles.title_remark}>
+      <div className={styles.title_remark} style={{flex:"none"}}>
         <div style={{ textIndent: "1rem" }}>
           {data.remark || "暂无备注信息"}
         </div>
