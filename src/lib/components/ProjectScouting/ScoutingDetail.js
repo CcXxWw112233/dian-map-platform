@@ -843,7 +843,8 @@ function Action() {
     InitMap.map.removeOverlay(feature && feature.overlay);
     feature.hasPopup = false;
     const plot = feature?.getGeometry();
-    if (plot && !plot.isActive) {
+    // if (plot && !plot.isActive) {
+      if (plot) {
       plot.updatePlot(true);
       feature.isScouting = true;
       // this.layer.plotEdit.activate(feature);

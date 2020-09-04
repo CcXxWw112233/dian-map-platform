@@ -263,14 +263,16 @@ export default class LeftToolBar extends React.Component {
   };
   displayPlotPanel = (attrs, operator) => {
     this.isModifyPlot = true;
-    this.oldPlotName = attrs.name;
-    this.oldRemark = attrs.remark;
     this.activeFeatureOperator = operator;
-    this.oldPlotName = operator.attrs.name;
+    if (operator.data) {
+      operator.attrs.name = operator.data.title || "";
+      operator.setName(operator.attrs.name);
+    }
+    this.oldPlotName = operator.getName() || operator.attrs.name;
     this.oldRemark = operator.attrs.remark;
     if (!this.state.displayPlot) {
       this.setState({
-        plotType: this.dic[attrs.geometryType],
+        plotType: this.dic[attrs.geometryType || attrs.geoType],
         displayPlot: true,
         hidePlot: false,
         displayTempPlot: false,
@@ -278,7 +280,7 @@ export default class LeftToolBar extends React.Component {
       });
     } else {
       this.setState({
-        plotType: this.dic[attrs.geometryType],
+        plotType: this.dic[attrs.geometryType || attrs.geoType],
         hidePlot: false,
         displayTempPlot: false,
         displayProject: false,
