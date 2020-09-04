@@ -64,7 +64,9 @@ export default class PublicData extends React.Component {
                     this.queryStr +
                     key.cql_filter.substring(index, key.cql_filter.length);
                 } else {
-                  key.cql_filter = this.queryStr;
+                  if (!key.non_area) {
+                    key.cql_filter = this.queryStr;
+                  }
                 }
               }
               this.fillColor = data.children[j].fillColorKeyVals;
@@ -129,7 +131,9 @@ export default class PublicData extends React.Component {
                     cqlFilter.substring(index, cqlFilter.length);
                   child[i].loadFeatureKeys[j].cql_filter = cqlFilter;
                 } else {
-                  child[i].loadFeatureKeys[j].cql_filter = this.queryStr;
+                  if (!child[i].loadFeatureKeys[j].non_area) {
+                    child[i].loadFeatureKeys[j].cql_filter = this.queryStr;
+                  }
                 }
               }
             }
@@ -213,7 +217,9 @@ export default class PublicData extends React.Component {
                     this.queryStr +
                     data.cql_filter.substring(index, data.cql_filter.length);
                 } else {
-                  data.cql_filter = this.queryStr;
+                  if (!data.non_area) {
+                    data.cql_filter = this.queryStr;
+                  }
                 }
               }
               this.fillColor = this.getFillColor(currentPopup);

@@ -163,7 +163,9 @@ const data = [
         loadFeatureKeys: [
           {
             typeName: "lingxi:ggss_point",
-            cql_filter: `${queryStr} AND type='13'`,
+            // cql_filter:  `${queryStr} AND type='13'`,
+            cql_filter: `type='13'`,
+            non_area: true,
             showName: true,
             style: {
               iconUrl: require("../../assets/img/qiche.png"),
@@ -180,7 +182,9 @@ const data = [
         loadFeatureKeys: [
           {
             typeName: "lingxi:ggss_point",
-            cql_filter: `${queryStr} AND type='2'`,
+            // cql_filter:  `${queryStr} AND type='2'`,
+            cql_filter: `type='2'`,
+            non_area: true,
             showName: true,
             style: {
               iconUrl: require("../../assets/img/huochezhan.png"),
@@ -197,7 +201,9 @@ const data = [
         loadFeatureKeys: [
           {
             typeName: "lingxi:ggss_point",
-            cql_filter: `${queryStr} AND type='1'`,
+            // cql_filter:  `${queryStr} AND type='1'`,
+            cql_filter: `type='1'`,
+            non_area: true,
             showName: true,
             style: {
               iconUrl: require("../../assets/img/chengshi.png"),
