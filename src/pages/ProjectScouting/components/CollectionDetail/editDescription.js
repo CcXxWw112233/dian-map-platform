@@ -83,9 +83,11 @@ export default function EditDescription (props){
       :"" }
         {
           !isEdit ? (
-            <ReactMarkdown source={text || '未添加备注哦'}
-            className={`${styles.data_remark} ${ props.isMaxHeight ? styles.maxHeight :""}`}
-            />
+            <div onDoubleClick={toEdit}>
+              <ReactMarkdown source={text || '未添加备注哦'}
+              className={`${styles.data_remark} ${ props.isMaxHeight ? styles.maxHeight :""}`}
+              />
+            </div>
           ):
           (
             <textarea className={`${styles.data_remark}
