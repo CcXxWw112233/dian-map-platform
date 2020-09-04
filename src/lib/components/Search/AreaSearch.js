@@ -82,6 +82,11 @@ function Action() {
     });
   };
 
+
+  this.clearAreaExtent = () => {
+    this.source.clear();
+  }
+
   this.addAreaGeomToMap = (data) => {
     this.currentData = data;
     if (!data) return;

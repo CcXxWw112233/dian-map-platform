@@ -333,6 +333,26 @@ export default class AreaPanel extends React.Component {
     this.props.changeAreaPanelVisible();
   };
 
+  handleClearClick = () => {
+    const { dispatch } = this.props;
+    dispatch({
+      type: "areaSearch/update",
+      payload: {
+        provinceCode: null,
+        cityCode: null,
+        districtCode: null,
+        townCode: null,
+        villageCode: null,
+        cityDisabled: false,
+        districtDisabled: false,
+        townDisabled: false,
+        villageDisabled: false,
+        okDisabled: true,
+      },
+    });
+    areaSearchAction.clearAreaExtent();
+  };
+
   render() {
     const {
       provinceOptions,
@@ -436,6 +456,13 @@ export default class AreaPanel extends React.Component {
           </Select>
         </div>
         <div className={styles.locatePanelFooter}>
+          <Button
+            onClick={this.handleClearClick}
+            style={{ marginRight: 20 }}
+            disabled={okDisabled}
+          >
+            清除
+          </Button>
           <Button
             type="primary"
             disabled={okDisabled}

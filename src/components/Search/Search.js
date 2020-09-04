@@ -38,7 +38,6 @@ export default class Search extends React.Component {
     this.handleSearch = throttle(this.handleSearch, 1000);
   }
   componentDidMount() {
-    return;
     getSession("xzqhCode").then((res) => {
       if (res.code === 0) {
         if (!res.data) {
@@ -61,7 +60,8 @@ export default class Search extends React.Component {
           const options = {
             type: tempArr[0],
             adcode: tempArr[1],
-            locationName: tempArr[2],
+            // locationName: tempArr[2],
+            locationName: "全国",
           };
           this.updateState(options);
         }
