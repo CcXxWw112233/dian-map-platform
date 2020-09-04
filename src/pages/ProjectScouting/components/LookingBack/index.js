@@ -2,7 +2,7 @@ import React,{Fragment} from 'react';
 import styles from './index.less';
 import animateCss from '../../../../assets/css/animate.min.css';
 import { MyIcon } from '../../../../components/utils';
-import { Select, Row, Col } from 'antd';
+import { Select, Row, Col, message } from 'antd';
 import DetailAction from '../../../../lib/components/ProjectScouting/ScoutingDetail';
 import TimeSelection from './TimeSelection';
 import { connect } from 'dva';
@@ -203,6 +203,14 @@ export default class LookingBack extends React.Component{
     })
   }
 
+  toViewCenter = (val)=>{
+    // console.log(val)
+    if(val.location && val.location.longitude && val.location.latitude){
+      let coordinate = [+val.location.longitude, +val.location.latitude];
+      DetailAction.toCenter({center: coordinate});
+    }else message.warn('采集资料暂未关联地图坐标');
+  }
+
   render(){
     let { selectActive, activeSelectObj = {}, activeTime, timeData ,activeItem} = this.state;
     const { dispatch, showCollectionsModal, board} = this.props;
@@ -259,7 +267,8 @@ export default class LookingBack extends React.Component{
                           `${styles.looking_item}
                            ${animateCss.animated}
                           `
-                          } key={data.data.id} onClick={()=> this.pictureView(data.data)}>
+                          } key={data.data.id} onClick={()=> this.pictureView(data.data)}
+                          onDoubleClick={()=> this.toViewCenter(data.data)}>
                           <div style={{backgroundColor:"rgba(71, 74, 91, 1)"}} className={ activeItem === data.data.id ? styles.active :''}>
                             <span>{data.data.title}</span>
                             {DetailAction.checkCollectionType(data.data.target) === 'pic' ?
