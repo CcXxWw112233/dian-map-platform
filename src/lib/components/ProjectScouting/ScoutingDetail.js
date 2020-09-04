@@ -896,8 +896,8 @@ function Action() {
   this.renderGeoJson = async (data) => {
     // return new Promise((resolve) => {
       let promise = [];
-      nProgress.start();
       if (data && data.length) {
+        nProgress.start();
         data.forEach((item) => {
           if (item.resource_url) {
             promise.push(
@@ -911,8 +911,8 @@ function Action() {
           }
         });
       }
-      nProgress.done();
       let res = await Promise.all(promise);
+      nProgress.done();
       res.forEach((item) => {
         let geojson = item.data;
         let features = loadFeatureJSON(geojson, "GeoJSON");
