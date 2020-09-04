@@ -17,6 +17,7 @@ import DetailAction from "../../../lib/components/ProjectScouting/ScoutingDetail
 import { MyIcon } from "../../utils";
 import symbolStoreServices from "../../../services/symbolStore";
 import mapApp from "utils/INITMAP";
+import { DragPan } from 'ol/interaction';
 
 // import { loadGeoJson } from "../tmp"
 
@@ -252,6 +253,7 @@ export default class Plot extends PureComponent {
     this.selectedPlotZIndex = 0;
     this.baseMapKeys = ["gd_vec|gd_img|gg_img", "td_vec|td_img|td_ter"];
     this.isLoaded = true;
+    this.msgtimer = null ;
   }
   componentDidMount() {
     this.plotLayer = plotEdit.getPlottingLayer();
@@ -261,6 +263,9 @@ export default class Plot extends PureComponent {
       saveCb: this.handleSaveClick.bind(this),
       delCb: this.updatePlotList.bind(this),
     });
+    if(this.props.plotType === 'freeLine' || this.props.plotType === 'freePolygon'){
+      this.setActiveDragPan(false);
+    }
     this.operatorActive = function (e) {
       // 激活即修改状态
       parent.isModifyPlot = true;
@@ -400,7 +405,32 @@ export default class Plot extends PureComponent {
         } else {
           this.updateStateCallbackFunc();
         }
+        if (nextProps.plotType === "freeLine" || nextProps.plotType === "freePolygon") {
+          this.setActiveDragPan(false);
+        }else {
+          this.setActiveDragPan(true)
+        }
+
       }
+    }
+  }
+
+  setActiveDragPan = (active = true)=>{
+    let interactions = mapApp.map.getInteractions().getArray();
+    interactions.forEach(item => {
+      if(item instanceof DragPan){
+        item.setActive(active);
+      }
+    })
+    if(!active){
+      message.destroy();
+      clearTimeout(this.msgtimer);
+      this.msgtimer = setTimeout(()=>{
+        message.success('自由绘制中，已锁定图层拖拽',0)
+      }, 50)
+    }else{
+      clearTimeout(this.msgtimer);
+      message.destroy();
     }
   }
 
@@ -560,6 +590,7 @@ export default class Plot extends PureComponent {
   updateStateCallbackFunc = () => {
     const { parent } = this.props;
     this.createPlotName();
+    this.setActiveDragPan(false);
     let options = {
       ...this.commonStyleOptions,
       strokeColor: this.strokeColor,
@@ -602,7 +633,7 @@ export default class Plot extends PureComponent {
       options
     );
     if (parent.isModifyPlot === false) {
-      plotEdit.create(
+      let drawing = plotEdit.create(
         this.plotDic[this.nextProps?.plotType || this.props.plotType]
       );
       Event.Evt.firEvent("setPlotDrawStyle", style);
@@ -612,6 +643,10 @@ export default class Plot extends PureComponent {
         // saveCb: this.handleSaveClick.bind(this),
         // delCb: this.updatePlotList.bind(this),
       });
+      drawing.plotDraw.on('draw_end',(e)=>{
+        // console.log(e,'333333333333333')
+        this.setActiveDragPan(true);
+      })
     } else if (parent.isModifyPlot === true && window.featureOperator) {
       if (window.featureOperator.feature) {
         const geoType = window.featureOperator.feature.getGeometry().getType();
@@ -793,7 +828,7 @@ export default class Plot extends PureComponent {
     this.createPlot(options, iconUrl);
   };
 
-  // 创建标绘唯一入口
+  // 创建标绘入口
   createPlot = (options, iconUrl) => {
     const plotType = this.nextProps?.plotType || this.props.plotType;
     const style = createStyle(this.dic[plotType], options);
@@ -818,15 +853,22 @@ export default class Plot extends PureComponent {
     } else {
       attrs = { ...attrs, featureType: this.featureType };
     }
+    if(this.props.plotType === 'freeLine' || this.props.plotType === 'freePolygon'){
+      this.setActiveDragPan(false);
+    }
     if (!window.featureOperator) {
-      plotEdit.create(this.plotDic[plotType]);
+      let drawing = plotEdit.create(this.plotDic[plotType]);
       Event.Evt.firEvent("setPlotDrawStyle", style);
       Event.Evt.firEvent("setAttribute", {
         style: style,
         attrs: attrs,
       });
+      drawing.on('draw_end',()=>{
+        this.setActiveDragPan(true);
+      })
     } else {
       if (window.featureOperator.feature) {
+        this.setActiveDragPan(true);
         const geoType = window.featureOperator.feature.getGeometry().getType();
         if (geoType === this.dic[this.props.plotType]) {
           window.featureOperator.feature.setStyle(style);
