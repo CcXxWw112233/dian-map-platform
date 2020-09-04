@@ -77,9 +77,9 @@ class PlotEdit extends Observable {
         dom,
         "mousedown",
         () => {
-          if (!this.activePlot.isScouting) {
-            this.layer.saveCb && this.layer.saveCb();
-          }
+          // if (!this.activePlot.isScouting) {
+          //   this.layer.saveCb && this.layer.saveCb();
+          // }
         },
         this
       );
