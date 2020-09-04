@@ -6,6 +6,7 @@ import Action from "../../lib/components/ProjectScouting/ScoutingDetail";
 import ScouListAction from "../../lib/components/ProjectScouting/ScoutingList";
 import PlayCollectionAction from "../../lib/components/ProjectScouting/playCollection";
 import { connect } from "dva";
+import { formatLength, formatArea } from "utils/mapUtils";
 import {
   Collapse,
   Tabs,
@@ -202,11 +203,28 @@ export default class ScoutingDetails extends PureComponent {
       }, 3 * 1000)
     }
   }
+
+  getProperties = (type,geometry)=>{
+    switch(type){
+      case "Point":
+        let coor = Action.transform(geometry.getCoordinates())
+      return {"坐标": `经度: ${coor[0].toFixed(2)} 纬度:${coor[1].toFixed(2)}`};
+      case "Polygon":
+      return {"面积": formatArea(geometry)};
+      case "LineString":
+      return {"长度": formatLength(geometry)}
+      default:;
+    }
+  }
+
   handlePlotFeature = ({feature, pixel})=>{
     // console.log(feature, pixel)
     const { dispatch } = this.props;
     let collection = this.state.all_collection.find(item => item.id === feature.get('id'));
     if(collection){
+      let ftype = feature.getGeometry().getType();
+      let properties = this.getProperties(ftype, feature.getGeometry());
+      collection.properties_map = properties;
       dispatch({
         type:"collectionDetail/updateDatas",
         payload:{
