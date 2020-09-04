@@ -17,7 +17,7 @@ import DetailAction from "../../../lib/components/ProjectScouting/ScoutingDetail
 import { MyIcon } from "../../utils";
 import symbolStoreServices from "../../../services/symbolStore";
 import mapApp from "utils/INITMAP";
-import { DragPan } from 'ol/interaction';
+import { DragPan } from "ol/interaction";
 
 // import { loadGeoJson } from "../tmp"
 
@@ -253,7 +253,7 @@ export default class Plot extends PureComponent {
     this.selectedPlotZIndex = 0;
     this.baseMapKeys = ["gd_vec|gd_img|gg_img", "td_vec|td_img|td_ter"];
     this.isLoaded = true;
-    this.msgtimer = null ;
+    this.msgtimer = null;
   }
   componentDidMount() {
     this.plotLayer = plotEdit.getPlottingLayer();
@@ -263,7 +263,10 @@ export default class Plot extends PureComponent {
       saveCb: this.handleSaveClick.bind(this),
       delCb: this.updatePlotList.bind(this),
     });
-    if(this.props.plotType === 'freeLine' || this.props.plotType === 'freePolygon'){
+    if (
+      this.props.plotType === "freeLine" ||
+      this.props.plotType === "freePolygon"
+    ) {
       this.setActiveDragPan(false);
     }
     this.operatorActive = function (e) {
@@ -336,6 +339,7 @@ export default class Plot extends PureComponent {
       me.sigleImage = null;
       parent.oldPlotName = "";
       parent.oldRemark = "";
+      Event.Evt.firEvent("stopEditPlot");
       window.featureOperator && delete window.featureOperator;
       // }
     };
@@ -378,7 +382,7 @@ export default class Plot extends PureComponent {
     plotEdit.deactivate();
     this.plotLayer.un(FeatureOperatorEvent.ACTIVATE, this.operatorActive);
     this.plotLayer.un(FeatureOperatorEvent.DEACTIVATE, this.operatorDeactive);
-    this.setActiveDragPan(true)
+    this.setActiveDragPan(true);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -406,37 +410,39 @@ export default class Plot extends PureComponent {
         } else {
           this.updateStateCallbackFunc();
         }
-        if (nextProps.plotType === "freeLine" || nextProps.plotType === "freePolygon") {
+        if (
+          nextProps.plotType === "freeLine" ||
+          nextProps.plotType === "freePolygon"
+        ) {
           this.setActiveDragPan(false);
-        }else {
-          this.setActiveDragPan(true)
+        } else {
+          this.setActiveDragPan(true);
         }
-
       }
-    }else{
+    } else {
       this.setActiveDragPan(true);
     }
   }
 
-  setActiveDragPan = (active = true)=>{
+  setActiveDragPan = (active = true) => {
     let interactions = mapApp.map.getInteractions().getArray();
-    interactions.forEach(item => {
-      if(item instanceof DragPan){
+    interactions.forEach((item) => {
+      if (item instanceof DragPan) {
         item.setActive(active);
       }
-    })
-    if(!active){
+    });
+    if (!active) {
       message.destroy();
       clearTimeout(this.msgtimer);
-      this.msgtimer = setTimeout(()=>{
+      this.msgtimer = setTimeout(() => {
         message.destroy();
-        message.success('自由绘制中，已锁定图层拖拽',0)
-      }, 50)
-    }else{
+        message.success("自由绘制中，已锁定图层拖拽", 0);
+      }, 50);
+    } else {
       clearTimeout(this.msgtimer);
       message.destroy();
     }
-  }
+  };
 
   // 获取自定义图标符号
   getCustomSymbol = () => {
@@ -594,8 +600,11 @@ export default class Plot extends PureComponent {
   updateStateCallbackFunc = () => {
     const { parent } = this.props;
     this.createPlotName();
-    if(this.props.plotType === 'freeLine' || this.props.plotType === 'freePolygon')
-    this.setActiveDragPan(false);
+    if (
+      this.props.plotType === "freeLine" ||
+      this.props.plotType === "freePolygon"
+    )
+      this.setActiveDragPan(false);
     let options = {
       ...this.commonStyleOptions,
       strokeColor: this.strokeColor,
@@ -648,10 +657,10 @@ export default class Plot extends PureComponent {
         // saveCb: this.handleSaveClick.bind(this),
         // delCb: this.updatePlotList.bind(this),
       });
-      drawing.plotDraw.on('draw_end',(e)=>{
+      drawing.plotDraw.on("draw_end", (e) => {
         // console.log(e,'333333333333333')
         this.setActiveDragPan(true);
-      })
+      });
     } else if (parent.isModifyPlot === true && window.featureOperator) {
       if (window.featureOperator.feature) {
         this.setActiveDragPan(true);
@@ -859,7 +868,10 @@ export default class Plot extends PureComponent {
     } else {
       attrs = { ...attrs, featureType: this.featureType };
     }
-    if(this.props.plotType === 'freeLine' || this.props.plotType === 'freePolygon'){
+    if (
+      this.props.plotType === "freeLine" ||
+      this.props.plotType === "freePolygon"
+    ) {
       this.setActiveDragPan(false);
     }
     if (!window.featureOperator) {
@@ -869,9 +881,9 @@ export default class Plot extends PureComponent {
         style: style,
         attrs: attrs,
       });
-      drawing.on('draw_end',()=>{
+      drawing.on("draw_end", () => {
         this.setActiveDragPan(true);
-      })
+      });
     } else {
       if (window.featureOperator.feature) {
         this.setActiveDragPan(true);

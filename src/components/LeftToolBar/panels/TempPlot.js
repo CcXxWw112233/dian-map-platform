@@ -26,13 +26,6 @@ export default class TempPlot extends React.Component {
   componentDidMount() {
     this.plotLayer = plotEdit.getPlottingLayer();
     const { parent } = this.props;
-    this.operatorDeactive = function (e) {
-      if (!e.feature_operator.isScouting) {
-        let operator = e.feature_operator;
-        parent.updateFeatureOperatorList(operator);
-        window.featureOperator && delete window.featureOperator;
-      }
-    };
     this.plotLayer &&
       this.plotLayer.on(FeatureOperatorEvent.DEACTIVATE, this.operatorDeactive);
     let newFeatureOperatorList = [];
@@ -60,7 +53,6 @@ export default class TempPlot extends React.Component {
   }
   componentWillUnmount() {
     plotEdit.deactivate();
-    this.plotLayer.un(FeatureOperatorEvent.DEACTIVATE, this.operatorDeactive);
     this.state.featureOperatorList.forEach((operator) => {
       operator.feature.getGeometry().updatePlot(true);
     });
