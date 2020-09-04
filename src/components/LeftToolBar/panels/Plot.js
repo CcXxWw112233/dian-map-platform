@@ -378,6 +378,7 @@ export default class Plot extends PureComponent {
     plotEdit.deactivate();
     this.plotLayer.un(FeatureOperatorEvent.ACTIVATE, this.operatorActive);
     this.plotLayer.un(FeatureOperatorEvent.DEACTIVATE, this.operatorDeactive);
+    this.setActiveDragPan(true)
   }
 
   componentWillReceiveProps(nextProps) {
@@ -412,6 +413,8 @@ export default class Plot extends PureComponent {
         }
 
       }
+    }else{
+      this.setActiveDragPan(true);
     }
   }
 
