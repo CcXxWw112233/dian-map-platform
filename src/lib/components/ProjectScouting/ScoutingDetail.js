@@ -863,6 +863,7 @@ function Action() {
     newData.create_time && delete newData.create_time;
     newData.update_time && delete newData.update_time;
     newData.sort && delete newData.sort;
+    newData.properties_map && delete newData.properties_map;
     await this.editCollection(newData);
   };
 
