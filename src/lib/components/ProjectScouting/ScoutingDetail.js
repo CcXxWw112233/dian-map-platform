@@ -1461,7 +1461,7 @@ function Action() {
             // 等待视图移动到合适地点
             let center = getPoint(box.getGeometry().getExtent(), "center");
             await animate({ center: center });
-            let resp = await GET_PLAN_PIC(collection.content);
+            let resp = await GET_PLAN_PIC(collection.content || collection.resource_id);
             let respdata = resp.data;
             let imgUrl = PLAN_IMG_URL(respdata.id);
             // 隐藏页面中的元素
