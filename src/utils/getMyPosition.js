@@ -7,6 +7,7 @@ import { Point, Circle } from "ol/geom";
 import { Feature } from "ol";
 
 import { BASIC } from "../services/config";
+import { createStyle } from "../lib/utils";
 let isMobile = BASIC.getUrlParam.isMobile;
 
 const iconpoint = require("../assets/loc.png");
@@ -100,13 +101,20 @@ export const getMyPosition = {
       name: "My Self Point",
     });
     // 点
-    var iconStyle = new Style({
-      image: new Icon({
-        // radius: 11,
-        scale:1.5,
-        src: iconpoint,
-      }),
-    });
+    var iconStyle = createStyle("Point",{
+      fillColor: "#6A9AFF",
+      strokeColor:"#ffffff",
+      strokeWidth: 2,
+      radius: 11
+    })
+    // new Style({
+    //   image: new Icon({
+    //     // radius: 11,
+    //     scale:1.5,
+    //     // src: iconpoint,
+    //     fill
+    //   }),
+    // });
     // 偏差范围
     let cirCleFeature = new Feature({
       geometry: new Circle(coordinate, radius),
