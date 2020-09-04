@@ -893,8 +893,8 @@ function Action() {
     createPopupOverlay(feature, pixel);
   };
 
-  this.renderGeoJson = (data) => {
-    return new Promise((resolve) => {
+  this.renderGeoJson = async (data) => {
+    // return new Promise((resolve) => {
       let promise = [];
       nProgress.start();
       if (data && data.length) {
@@ -911,43 +911,31 @@ function Action() {
           }
         });
       }
-      return Promise.all(promise)
-        .then((res) => {
-          nProgress.done();
-          // this.clearGeoFeatures();
-          // console.log(res, '加载全部geo数据完成')
-          res.forEach((item) => {
-            let geojson = item.data;
-            let features = loadFeatureJSON(geojson, "GeoJSON");
-            features.forEach((feature, index) => {
-              let type = feature.getGeometry().getType();
-              let icon = feature.get("iconUrl");
-              icon = icon && icon.replace("../../../assets", "");
-              let style = createStyle(type, {
-                showName: (type !== "Point" && index < 15) || type === "Point",
-                text: feature.get("name") || geojson.name,
-                iconUrl: icon ? require("../../../assets" + icon) : null,
-                strokeColor: feature.get("strokeColor") || "rgba(255,0,0,0.3)",
-                fillColor: feature.get("fillColor") || "rgba(255,0,0,0.3)",
-                textFillColor: "rgba(255,0,0,0.9)",
-                textStrokeColor: "#FFFFFF",
-                font: 14,
-              });
-              feature.setStyle(style);
-              this.geoFeatures.push(feature);
-            });
-            this.Source.addFeatures(features);
-            setTimeout(() => {
-              resolve();
-            }, 50);
+      nProgress.done();
+      let res = await Promise.all(promise);
+      res.forEach((item) => {
+        let geojson = item.data;
+        let features = loadFeatureJSON(geojson, "GeoJSON");
+        features.forEach((feature, index) => {
+          let type = feature.getGeometry().getType();
+          let icon = feature.get("iconUrl");
+          icon = icon && icon.replace("../../../assets", "");
+          let style = createStyle(type, {
+            showName: (type !== "Point" && index < 15) || type === "Point",
+            text: feature.get("name") || geojson.name,
+            iconUrl: icon ? require("../../../assets" + icon) : null,
+            strokeColor: feature.get("strokeColor") || "rgba(255,0,0,0.3)",
+            fillColor: feature.get("fillColor") || "rgba(255,0,0,0.3)",
+            textFillColor: "rgba(255,0,0,0.9)",
+            textStrokeColor: "#FFFFFF",
+            font: 14,
           });
-          return res;
-        })
-        .catch((err) => {
-          nProgress.done();
-          console.log(err);
+          feature.setStyle(style);
+          this.geoFeatures.push(feature);
         });
-    });
+        this.Source.addFeatures(features);
+      });
+      return res;
   };
   this.clearGeoFeatures = () => {
     if (this.geoFeatures.length) {
