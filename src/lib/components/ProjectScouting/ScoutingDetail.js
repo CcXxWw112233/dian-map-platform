@@ -129,7 +129,7 @@ function Action() {
             this.handleFeatureCollectionPoint(obj.feature);
             Event.Evt.firEvent(
               "handleCollectionFeature",
-              obj.feature.get("data")
+              obj.feature.get("data"),
             );
           }
         }
@@ -2226,6 +2226,16 @@ function Action() {
       feature.setStyle(style);
     }
   };
+  this.getFeatureByCoordinate = (coor)=>{
+    if(this.layer.showLayer){
+      let source = this.layer.showLayer.getSource();
+      return source.getFeaturesAtCoordinate(coor);
+    }
+    return []
+  }
+  this.getFeatureById = (id)=>{
+    return this.features.find(item => item.get('id') === id);
+  }
   // 点的数据选中状态
   this.handleCollectionPoint = (data) => {
     // console.log(data);
@@ -2238,6 +2248,7 @@ function Action() {
     ) {
       let coor = [+location.longitude, +location.latitude];
       coor = TransformCoordinate(coor);
+      console.log(coor)
       let feature = this.Source.getFeaturesAtCoordinate(coor);
       // if(!feature.length) return ;
       // console.log(feature);
