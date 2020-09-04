@@ -19,6 +19,7 @@ import {
   Dropdown,
   Menu,
   Popover,
+  BackTop,
   // Radio,
   // Form,
   // Input,
@@ -187,6 +188,7 @@ export default class ScoutingDetails extends PureComponent {
     Evt.on('handleFeatureToLeftMenu',(id)=>{
       this.scrollForFeature(id)
     })
+    Evt.on('handlePlotFeature', this.handlePlotFeature)
   }
   // 定位到位置
   scrollForFeature = (id)=>{
@@ -194,10 +196,25 @@ export default class ScoutingDetails extends PureComponent {
     let dom = document.querySelector(text);
     if(dom){
       dom.classList.add(styles.hoverActive);
-      dom.scrollIntoView();
+      dom.scrollIntoView({behavior:"smooth"});
       this.scrolltoDom = setTimeout(()=>{
         dom.classList.remove(styles.hoverActive);
-      }, 2 * 1000)
+      }, 3 * 1000)
+    }
+  }
+  handlePlotFeature = ({feature, pixel})=>{
+    // console.log(feature, pixel)
+    const { dispatch } = this.props;
+    let collection = this.state.all_collection.find(item => item.id === feature.get('id'));
+    if(collection){
+      dispatch({
+        type:"collectionDetail/updateDatas",
+        payload:{
+          selectData: collection,
+          type: "edit",
+          isImg: false
+        }
+      })
     }
   }
   // 点击了坐标点
@@ -307,7 +324,7 @@ export default class ScoutingDetails extends PureComponent {
             Object.assign(item, { _edit: false, _remarkEdit: false })
           ),
           area_active_key: active,
-          area_selected: active,
+          area_selected: [active],
         });
         // 获取区域分类的数据列表
         window.ProjectGroupId = active;
@@ -521,17 +538,25 @@ export default class ScoutingDetails extends PureComponent {
             collections: this.state.all_collection
           }
         })
+        let arr = [];
+        if(this.state.multipleGroup){
+          let selectArr = this.state.area_list.filter(item => this.state.area_selected.includes(item.id));
+          selectArr.forEach(item => {
+            arr = arr.concat(item.collection || []);
+          })
+        }else{
+          let obj = this.state.area_list.find(
+              (item) => item.id === this.state.area_active_key
+            ) || {};
+          arr = obj.collection;
+          this.state.area_active_key === "other" && (arr = this.state.not_area_id_collection);
+        }
         // 之渲染选中的区域数据
-        let obj =
-          this.state.area_list.find(
-            (item) => item.id === this.state.area_active_key
-          ) || {};
-        let arr = obj.collection;
-        this.state.area_active_key === "other" &&
-          (arr = this.state.not_area_id_collection);
+
           // 只有在整理页面才需要渲染
-        if(this.state.activeKey === '1')
-        this.renderCollection(arr || []);
+        if(this.state.activeKey === '1'){
+          this.renderCollection(arr || []);
+        }
         // 更新回看的列表
         let a = area_list.concat([{id:'other',name: '未整理',collection:this.state.not_area_id_collection}]);
         Evt.firEvent('collectionListUpdate1', a);
@@ -959,9 +984,7 @@ export default class ScoutingDetails extends PureComponent {
       return item;
     });
     this.updateAllCollectionReset(arr);
-    Action.editCollection(param).then((res) => {
-
-    });
+    Action.editCollection(param)
   };
   // 编辑规划图
   onEditPlanPic = (val, collection) => {
@@ -1501,12 +1524,13 @@ export default class ScoutingDetails extends PureComponent {
     return { x: e.layerX || e.pageX, y: e.layerY || e.pageY };
   };
 
-  PublicView = ({ children, height, hasFooter = true}) => {
+  PublicView = ({ children, height }) => {
     let {miniTitle} = this.state;
     let h = height ? height: (miniTitle ? "calc(100vh - 150px)":"calc(100vh - 415px)");
     return (
       <div
         className={globalStyle.autoScrollY}
+
         style={{ display: "flex", flexDirection: "column" ,height: h}}
         ref={this.scrollView}
         onScroll={this.CollectionViewScroll}
@@ -1981,7 +2005,7 @@ export default class ScoutingDetails extends PureComponent {
                   size="small"
                   icon={<MyIcon type="icon-duoxuan" />}
                 >
-                  {this.state.multipleGroup ? "分组展示" : "组合展示"}
+                  {this.state.multipleGroup ? "单图层" : "多图层"}
                 </Button>
                 <Button
                   type="primary"
@@ -2122,6 +2146,7 @@ export default class ScoutingDetails extends PureComponent {
         >
           <CollectionDetail />
         </CSSTransition>
+        <BackTop target={()=> this.scrollView.current} style={{right:10}}/>
       </div>
     );
   }

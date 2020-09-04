@@ -4,6 +4,7 @@ import PhotoSwipe from "../../../components/PhotoSwipe/action";
 import config from "../../../services/scouting";
 import { dateFormat, Different } from "../../../utils/utils";
 import { Pointer as PointerInteraction } from "ol/interaction";
+import Select from 'ol/interaction/Select';
 import InitMap from "../../../utils/INITMAP";
 import {
   drawPoint,
@@ -40,6 +41,7 @@ import { plotEdit } from "utils/plotEdit";
 import INITMAP from "../../../utils/INITMAP";
 import { out_of_china } from "../../../utils/transCoordinateSystem";
 import Axios from "axios";
+import nProgress from "nprogress";
 
 function Action() {
   const {
@@ -102,6 +104,7 @@ function Action() {
         crossOrigin: "anonymous",
         anchor: [0.5, 0.8],
       },
+      iconScale:1,
     });
   this.init = (dispatch) => {
     this.mounted = true;
@@ -883,12 +886,15 @@ function Action() {
   this.handlePlotClick = (feature, pixel) => {
     if (this.isActivity) return;
     Event.Evt.firEvent('handleFeatureToLeftMenu',feature.get('id'));
+    Event.Evt.firEvent('handlePlotFeature', {feature, pixel})
+    return ;
     createPopupOverlay(feature, pixel);
   };
 
   this.renderGeoJson = (data) => {
     return new Promise((resolve) => {
       let promise = [];
+      nProgress.start();
       if (data && data.length) {
         data.forEach((item) => {
           if (item.resource_url) {
@@ -905,6 +911,7 @@ function Action() {
       }
       Promise.all(promise)
         .then((res) => {
+          nProgress.done();
           // this.clearGeoFeatures();
           // console.log(res, '加载全部geo数据完成')
           res.forEach((item) => {
@@ -936,6 +943,7 @@ function Action() {
           return res;
         })
         .catch((err) => {
+          nProgress.done();
           console.log(err);
         });
     });
