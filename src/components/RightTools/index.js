@@ -8,15 +8,18 @@ import LengedList from "../LengedList/index";
 import LocalPOI from "../LocalPOI/index";
 import Zoom from "../Zoom/index";
 import ToolBox from "../ToolBox/index";
+import { myFullScreen } from "utils/drawing/public";
 
 export default class RightTools extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       selectedIndex: -1,
+      isFull: false,
       lengedListPanelVisible: false,
       POIPanelVisible: false,
       toolBoxPanelVisible: false,
+      fullcreenIcon: "&#xe7f3;",
     };
     this.tools = [
       {
@@ -26,6 +29,29 @@ export default class RightTools extends React.Component {
         cb: (args) => {
           this.toggleButtonStyle(args);
           getMyCenter();
+        },
+      },
+      {
+        name: "全屏",
+        iconfont: "&#xe7f3;",
+        cb: () => {
+          myFullScreen.change();
+          this.setState(
+            {
+              isFull: !this.state.isFull,
+            },
+            () => {
+              if (this.state.isFull) {
+                this.setState({
+                  fullcreenIcon: "&#xe7f7;",
+                });
+              } else {
+                this.setState({
+                  fullcreenIcon: "&#xe7f3;",
+                });
+              }
+            }
+          );
         },
       },
       {
@@ -112,7 +138,12 @@ export default class RightTools extends React.Component {
             const icon = item.iconfont ? (
               <i
                 className={globalStyle.global_icon}
-                dangerouslySetInnerHTML={{ __html: item.iconfont }}
+                dangerouslySetInnerHTML={{
+                  __html:
+                    item.name !== "全屏"
+                      ? item.iconfont
+                      : this.state.fullcreenIcon,
+                }}
               ></i>
             ) : null;
             const btnSelectedStyle =
