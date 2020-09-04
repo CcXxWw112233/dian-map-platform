@@ -1479,8 +1479,16 @@ export default class ScoutingDetails extends PureComponent {
   // 选中采集资料，可以打开右上角的详情
   checkItem = (val) => {
     const { dispatch } = this.props;
-    // console.log(val)
     let type = Action.checkCollectionType(val.target);
+    if(val.collect_type === '4'){
+      let feature = Action.getFeatureById(val.id);
+      if(feature){
+        let geo = feature.getGeometry();
+        let properties = this.getProperties(geo.getType(), geo);
+        val.properties_map = properties;
+      }
+    }
+
     dispatch({
       type:"collectionDetail/updateDatas",
       payload:{
