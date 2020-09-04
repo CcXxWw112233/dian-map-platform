@@ -102,7 +102,7 @@ export default function EditDescription (props){
             onBlur={() => setTimeout(()=> {editEnd()},100)}
             onDoubleClick={toEdit}
             readOnly={!isEdit}
-            onInput={(e)=>{setText(e.target.value.trim())}}
+            onInput={(e)=>{setText(e.target.value)}}
             contentEditable={isEdit}>
               {data?.description?.trim()}
             </textarea>
