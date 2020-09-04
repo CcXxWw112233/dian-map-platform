@@ -176,6 +176,7 @@ export const Title = ({ name, date, cb, data = {}, className = "", mini }) => {
 //     );
 //   };
 
+let uploadFiles = [];
 const checkFileSize = (file) => {
   let { size, text } = formatSize(file.size);
   text = text.trim();
@@ -183,6 +184,7 @@ const checkFileSize = (file) => {
     message.error("文件不能大于60MB---"+ file.name);
     return false;
   }
+  // uploadFiles.push(file);
   return true;
 };
 
@@ -194,15 +196,14 @@ const UploadBtn = ({ onChange }) => {
     if (!(+size > 60 && text === "MB")) {
       setFiles(e.fileList);
       onChange(e);
-      // 清空上传列表
-      if (e.file.response) {
-        setTimeout(()=>{
-          let fFile = file.filter((item) => item.uid !== e.file.uid);
-          setFiles(fFile);
-        }, 2000)
-      }
     }
   };
+  Event.Evt.on('uploadFileSuccess', (files)=>{
+    // setTimeout(()=>{
+    setFiles(file.filter(item => item.uid !== files.uid))
+    // }, 2000)
+  })
+
   // const customRequest = (val)=>{
   //     UploadFile(val.file, val.action,null, BASIC.getUrlParam.token ,(e)=>{
   //       // console.log(e);
