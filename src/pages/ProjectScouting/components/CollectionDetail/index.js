@@ -236,6 +236,24 @@ export default class CollectionDetail extends React.Component{
     });
     this.allVideoStop();
   }
+  renderPropertiesMap = (val)=>{
+    // console.log(val)
+    if(val.properties_map){
+      let property = val.properties_map;
+      let data = Object.keys(val.properties_map);
+      return data.map((item, index) => (
+        <div className={styles.properties_item} key={index}>
+          <span className={styles.properties_item_key}>
+            {item}
+          </span>
+          :
+          <span dangerouslySetInnerHTML={{__html: property[item]}}>
+          </span>
+        </div>
+      ))
+    }
+    return "";
+  }
 
   detailClose = ()=>{
     const { dispatch } = this.props;
@@ -307,6 +325,9 @@ export default class CollectionDetail extends React.Component{
                   <div className={styles.data_msg}>
                     <div className={styles.data_title}>
                       {item.title ? <span>{item.title}</span> : <span>&nbsp;</span>}
+                    </div>
+                    <div className={styles.propertiesMap}>
+                      {this.renderPropertiesMap(item)}
                     </div>
                     <EditDescription disabled={this.state.disabled} data={item} onEdit={this.saveEdit} isMaxHeight={!isImg}/>
                     <div className={styles.creator}>
