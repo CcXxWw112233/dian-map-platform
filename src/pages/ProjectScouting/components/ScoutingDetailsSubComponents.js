@@ -1087,6 +1087,7 @@ export const UploadItem = ({
       draggable={true}
       // style={myStyle}
       onClick={() => itemClick(data)}
+      id={`menu_collection_${data.id}`}
     >
       <div
         style={{

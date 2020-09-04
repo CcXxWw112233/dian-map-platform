@@ -134,6 +134,7 @@ export default class ScoutingDetails extends PureComponent {
     this.collectionScrollTop = 0;
     this.touchStartClient = {};
     this.isTouch = false;
+    this.scrolltoDom = null;
   }
   componentDidMount() {
     this.isGoBack = false;
@@ -183,6 +184,21 @@ export default class ScoutingDetails extends PureComponent {
     })
 
     Evt.addEventListener('handleGroupCollectionFeature', this.handleCollectionFeature);
+    Evt.on('handleFeatureToLeftMenu',(id)=>{
+      this.scrollForFeature(id)
+    })
+  }
+  // 定位到位置
+  scrollForFeature = (id)=>{
+    let text = "#menu_collection_" + id;
+    let dom = document.querySelector(text);
+    if(dom){
+      dom.classList.add(styles.hoverActive);
+      dom.scrollIntoView();
+      this.scrolltoDom = setTimeout(()=>{
+        dom.classList.remove(styles.hoverActive);
+      }, 2 * 1000)
+    }
   }
   // 点击了坐标点
   handleCollectionFeature = (data, type = 'view', from ='group')=>{
@@ -201,6 +217,7 @@ export default class ScoutingDetails extends PureComponent {
   componentWillUnmount() {
     const { dispatch, config: lengedList } = this.props;
     Action.mounted = false;
+    clearTimeout(this.scrolltoDom);
     Event.Evt.removeEventListener('handleGroupCollectionFeature', this.handleCollectionFeature);
     if (this.isGoBack) {
       let newLengedList = [...lengedList];
@@ -1484,11 +1501,13 @@ export default class ScoutingDetails extends PureComponent {
     return { x: e.layerX || e.pageX, y: e.layerY || e.pageY };
   };
 
-  PublicView = ({ children }) => {
+  PublicView = ({ children, height, hasFooter = true}) => {
+    let {miniTitle} = this.state;
+    let h = height ? height: (miniTitle ? "calc(100vh - 150px)":"calc(100vh - 415px)");
     return (
       <div
         className={globalStyle.autoScrollY}
-        style={{ flex: 1, display: "flex", flexDirection: "column" }}
+        style={{ display: "flex", flexDirection: "column" ,height: h}}
         ref={this.scrollView}
         onScroll={this.CollectionViewScroll}
         onWheel={this.collectionWhell}
@@ -2006,7 +2025,7 @@ export default class ScoutingDetails extends PureComponent {
         );
       case "2":
         return (
-          <PublicView>
+          <PublicView height={this.state.miniTitle ? 'calc(100vh - 100px)': "calc(100vh - 370px)"}>
             <LookingBack board={current_board} active={this.state.activeKey === '2'}/>
           </PublicView>
         );
