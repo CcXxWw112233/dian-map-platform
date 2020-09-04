@@ -2248,7 +2248,6 @@ function Action() {
     ) {
       let coor = [+location.longitude, +location.latitude];
       coor = TransformCoordinate(coor);
-      console.log(coor)
       let feature = this.Source.getFeaturesAtCoordinate(coor);
       // if(!feature.length) return ;
       // console.log(feature);
