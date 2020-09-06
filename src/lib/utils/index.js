@@ -6,6 +6,7 @@ import {
   MultiLineString,
   MultiPoint,
   MultiPolygon,
+  Circle as defaultCircle
 } from "ol/geom";
 import { Image } from "ol/layer";
 import Static from "ol/source/ImageStatic";
@@ -73,6 +74,9 @@ export const addFeature = function (type, data) {
       const circle4326 = circularPolygon(data ? projPt : [], data.radius);
       const circle3857 = circle4326.clone().transform("EPSG:4326", "EPSG:3857");
       return circle3857;
+    }
+    if(type === 'defaultCircle'){
+      return new defaultCircle(data.coordinates, data.radius)
     }
   };
 
@@ -271,6 +275,15 @@ export const createStyle = function (
       text: text,
       zIndex: options.zIndex || Infinity,
     });
+  }
+  if(type === 'Circle'){
+    return new Style({
+      fill,
+      stroke,
+      text,
+      zIndex: options.zIndex || Infinity,
+      radius: options.radius
+    })
   }
 };
 

@@ -58,3 +58,10 @@ Object.defineProperty(exports, "SetCoordinateForCollection", {
     return require('./setCoordinateForCollection/index').default;
   }
 })
+
+Object.defineProperty(exports, "DragCircleRadius", {
+  enumerable: true,
+  get: function get() {
+    return require('./dragCircleRadius/index').default;
+  }
+})
