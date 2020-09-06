@@ -4,7 +4,7 @@ import PhotoSwipe from "../../../components/PhotoSwipe/action";
 import config from "../../../services/scouting";
 import { dateFormat, Different } from "../../../utils/utils";
 import { Pointer as PointerInteraction } from "ol/interaction";
-import Select from 'ol/interaction/Select';
+// import Select from 'ol/interaction/Select';
 import InitMap from "../../../utils/INITMAP";
 import {
   drawPoint,
@@ -24,12 +24,14 @@ import {
   getExtentIsEmpty,
   animate,
   loadFeatureJSON,
+  getExtent,
 } from "../../utils/index";
 import {
   CollectionOverlay,
   settingsOverlay,
   areaDetailOverlay,
   SetCoordinateForCollection,
+  DragCircleRadius
 } from "../../../components/PublicOverlays";
 import { Modify } from "ol/interaction";
 import { extend } from "ol/extent";
@@ -64,7 +66,7 @@ function Action() {
   } = config;
   this.activeFeature = {};
   this.layerId = "scoutingDetailLayer";
-  this.Layer = Layer({ id: this.layerId, zIndex: 40 });
+  this.Layer = Layer({ id: this.layerId, zIndex: 40 ,declutter: true});
   this.Source = Source();
   this.features = [];
   this.overlays = [];
@@ -73,6 +75,7 @@ function Action() {
   this.currentSet = null;
   this.mounted = false;
   this.geoFeatures = [];
+  this.searchAroundCircle = null;
   Event.Evt.on("transCoordinateSystems2ScoutingDetail", () => {
     if (!this.mounted) return;
     const baseMapKey = INITMAP.baseMapKey;
@@ -135,6 +138,7 @@ function Action() {
         }
       });
       InitMap.map.addLayer(this.Layer);
+      console.log(this.Layer.setDeclutter)
     }
   };
   this.boxFeature = {};
@@ -524,8 +528,9 @@ function Action() {
     this.groupCollectionPointer.forEach((item) => {
       let style = item.getStyle();
       style.setZIndex(1);
-      style.getImage().getFill().setColor("#577DFF");
-      style.getImage().setRadius(9);
+      // style.getImage().getFill().setColor("#577DFF");
+      // style.getImage().setRadius(9);
+      style.setImage(pointUnselect().getImage())
       item.setStyle(style);
     });
     if (!data) return;
@@ -544,8 +549,9 @@ function Action() {
       let style = item.getStyle();
       style.setZIndex(10);
       if(style.getImage()){
-        style.getImage().getFill().setColor("#FE2042");
-        style.getImage().setRadius(12);
+        // style.getImage().getFill().setColor("#FE2042");
+        // style.getImage().setRadius(12);
+        style.setImage(pointSelect().getImage())
       }
       item.setStyle(style);
     });
@@ -583,12 +589,19 @@ function Action() {
           fillColor: "#577DFF",
           strokeColor: "#ffffff",
           strokeWidth: 2,
-          showName: false,
+          showName: true,
+          text: "回看集合点",
+          offsetY: -30,
+          icon:{
+            src: require('../../../assets/unselectlocation.png'),
+            anchor: [0.5, 0.8],
+            crossOrigin: "anonymous",
+          },
           // text: item.title || item.name,
           textFillColor: "#FF4628",
           textStrokeColor: "#ffffff",
           textStrokeWidth: 1,
-          font: 14,
+          font: 10,
         });
         feature.setStyle(style);
         this.groupCollectionPointer.push(feature);
@@ -2379,6 +2392,79 @@ function Action() {
       });
     }
   };
+
+  // 添加周边搜索
+  this.addSearchAround = ({id, feature})=>{
+    let sFeature = null;
+    if(id){
+      sFeature = this.features.find(item => item.get('id') === id);
+    } else if(feature){
+      sFeature = feature;
+    }else return ;
+    if(sFeature){
+      let geometry = sFeature.getGeometry();
+      let type = geometry.getType();
+      if(type === 'Point'){
+        let coordinates = geometry.getCoordinates();
+        let f = addFeature('defaultCircle',{coordinates, radius: 5 * 1000});
+        let style = createStyle("Circle",{
+          fillColor: "rgba(255,255,255,0)",
+          strokeColor: "#ff0000",
+          strokeWidth: 2,
+          radius: 5 * 1000,
+          showName: true,
+          text: 5 + "公里",
+          offsetY: 0,
+          textFillColor: "#ff0000",
+          textStrokeColor: "#ffffff",
+          textStrokeWidth: 2
+        })
+        f.setStyle(style);
+        this.searchAroundCircle = f;
+        let extent = f.getGeometry().getExtent();
+        let rightTop = getPoint(extent,'topRight');
+        let rightBottom = getPoint(extent, 'bottomRight');
+        let point = [rightTop[0] ,(rightTop[1] + rightBottom[1]) / 2]
+        this.Source.addFeature(this.searchAroundCircle);
+        let ele = new DragCircleRadius({format: "5公里"});
+        this.searchAroundOverlay = createOverlay(ele.element,{position: point, offset:[-20, 0]});
+        InitMap.map.addOverlay(this.searchAroundOverlay);
+        let _pixel = InitMap.map.getPixelFromCoordinate(coordinates);
+        let coord = null;
+        ele.on = {
+          mouseDown: ()=> {
+            _pixel = InitMap.map.getPixelFromCoordinate(coordinates);
+          },
+          mouseMove: (evt, step)=>{
+            var pixel = [evt.clientX, _pixel[1]];
+            coord = InitMap.map.getCoordinateFromPixel(pixel);
+            this.searchAroundOverlay.setPosition(coord);
+            let radius = coord[0] - coordinates[0];
+            f.getGeometry().setRadius(radius);
+            let text = (radius / 1000).toFixed(2)
+            ele.updateRadius(text +'公里');
+            let s = f.getStyle();
+            s.getText().setText(text +'公里')
+          },
+          mouseUp: ()=>{
+            Fit(InitMap.view, f.getGeometry().getExtent(),{duration: 300})
+          }
+        }
+      }
+
+      Fit(InitMap.view, this.searchAroundCircle.getGeometry().getExtent(),{
+        size: InitMap.map.getSize(),
+        padding: fitPadding,
+        duration: 300
+      })
+    }
+  }
+  this.cancelSearchAround = ()=>{
+    if(this.Source.getFeatureByUid(this.searchAroundCircle.ol_uid)){
+      this.Source.removeFeature(this.searchAroundCircle);
+    }
+    InitMap.map.removeOverlay(this.searchAroundOverlay)
+  }
 }
 
 let action = new Action();

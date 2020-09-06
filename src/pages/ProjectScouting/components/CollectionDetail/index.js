@@ -7,7 +7,7 @@ import { MyIcon } from '../../../../components/utils';
 import PhotoSwipe from '../../../../components/PhotoSwipe/action'
 import { keepLastIndex } from '../../../../utils/utils';
 import DetailAction from '../../../../lib/components/ProjectScouting/ScoutingDetail'
-import { message, Row, Col, Carousel } from 'antd';
+import { message, Row, Col, Carousel, Tag} from 'antd';
 import Event from '../../../../lib/utils/event';
 import EditDescription from './editDescription';
 // import Slider from "react-slick";
@@ -25,7 +25,8 @@ export default class CollectionDetail extends React.Component{
       sliderPages:{
         total: 1,
         current: 1
-      }
+      },
+      isSearch: false
     }
     this.content = React.createRef();
     this.slider = React.createRef();
@@ -264,6 +265,16 @@ export default class CollectionDetail extends React.Component{
     })
   }
 
+  searchAroundAbout = (val,flag)=>{
+    this.setState({
+      isSearch: !flag
+    })
+    if(flag){
+      DetailAction.cancelSearchAround();
+    }else
+    DetailAction.addSearchAround({id: val.id});
+  }
+
   render(){
     const { sliderPages, currentIndex} = this.state;
     let { zIndex, selectData, isImg ,small} = this.props;
@@ -328,6 +339,9 @@ export default class CollectionDetail extends React.Component{
                     </div>
                     <div className={styles.propertiesMap}>
                       {this.renderPropertiesMap(item)}
+                      <span className={styles.around_about} onClick={()=>this.searchAroundAbout(item,this.state.isSearch)}>
+                        {this.state.isSearch ? <Tag color="red">取消</Tag> :<Tag color="purple">周边</Tag>}
+                      </span>
                     </div>
                     <EditDescription disabled={this.state.disabled} data={item} onEdit={this.saveEdit} isMaxHeight={!isImg}/>
                     <div className={styles.creator}>
