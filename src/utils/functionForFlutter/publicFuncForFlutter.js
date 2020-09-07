@@ -268,7 +268,7 @@ let callFunctions = {
 
   // 通过点搜索周围数据
   SearchForPoint: async (val) => {
-    let { position, radius = 200, locationName } = val;
+    let { position, radius = 200, locationName, type} = val;
     if (locationName) {
       let data = await callFunctions.getAddressForName({
         address: locationName,
@@ -281,8 +281,9 @@ let callFunctions = {
     let data = await new Promise((resolve,reject) => {
       AMap.service(["AMap.PlaceSearch"], function () {
         let placeSearch = new AMap.PlaceSearch({
-          pageSize: 10,
+          pageSize: 50,
           pageIndex: 1,
+          type: type
         });
         placeSearch.searchNearBy("", position, radius, (status, result) => {
           resolve(result.poiList)

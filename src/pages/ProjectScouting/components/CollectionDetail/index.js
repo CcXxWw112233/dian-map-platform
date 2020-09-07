@@ -259,6 +259,7 @@ export default class CollectionDetail extends React.Component{
   detailClose = ()=>{
     const { dispatch } = this.props;
     DetailAction.clearSelectPoint();
+    DetailAction.cancelSearchAround();
     dispatch({
       type:'collectionDetail/updateDatas',
       payload:{selectData:null,isImg: true}
@@ -271,8 +272,12 @@ export default class CollectionDetail extends React.Component{
     })
     if(flag){
       DetailAction.cancelSearchAround();
-    }else
-    DetailAction.addSearchAround({id: val.id});
+    }else{
+      DetailAction.cancelSearchAround();
+      DetailAction.init();
+      DetailAction.addSearchAround({id: val.id});
+    }
+
   }
 
   render(){
@@ -337,12 +342,12 @@ export default class CollectionDetail extends React.Component{
                     <div className={styles.data_title}>
                       {item.title ? <span>{item.title}</span> : <span>&nbsp;</span>}
                     </div>
-                    <div className={styles.propertiesMap}>
+                    {item.properties_map && <div className={styles.propertiesMap}>
                       {this.renderPropertiesMap(item)}
                       <span className={styles.around_about} onClick={()=>this.searchAroundAbout(item,this.state.isSearch)}>
                         {this.state.isSearch ? <Tag color="red">取消</Tag> :<Tag color="purple">周边</Tag>}
                       </span>
-                    </div>
+                    </div>}
                     <EditDescription disabled={this.state.disabled} data={item} onEdit={this.saveEdit} isMaxHeight={!isImg}/>
                     <div className={styles.creator}>
                       <Row gutter={10}>
