@@ -41,7 +41,8 @@ import { message } from "antd";
 import { createPlottingFeature, createPopupOverlay } from "./createPlotting";
 import { plotEdit } from "utils/plotEdit";
 import INITMAP from "../../../utils/INITMAP";
-import { out_of_china } from "../../../utils/transCoordinateSystem";
+import AboutAction from './AroundAbout';
+// import { out_of_china } from "../../../utils/transCoordinateSystem";
 import Axios from "axios";
 import nProgress from "nprogress";
 
@@ -66,7 +67,7 @@ function Action() {
   } = config;
   this.activeFeature = {};
   this.layerId = "scoutingDetailLayer";
-  this.Layer = Layer({ id: this.layerId, zIndex: 40 ,declutter: true});
+  this.Layer = Layer({ id: this.layerId, zIndex: 40, declutter: true });
   this.Source = Source();
   this.features = [];
   this.overlays = [];
@@ -76,6 +77,7 @@ function Action() {
   this.mounted = false;
   this.geoFeatures = [];
   this.searchAroundCircle = null;
+  this.searchPageIndex = 1;
   Event.Evt.on("transCoordinateSystems2ScoutingDetail", () => {
     if (!this.mounted) return;
     const baseMapKey = INITMAP.baseMapKey;
@@ -107,7 +109,7 @@ function Action() {
         crossOrigin: "anonymous",
         anchor: [0.5, 0.8],
       },
-      iconScale:1,
+      iconScale: 1,
     });
   this.init = (dispatch) => {
     this.mounted = true;
@@ -138,7 +140,7 @@ function Action() {
         }
       });
       InitMap.map.addLayer(this.Layer);
-      console.log(this.Layer.setDeclutter)
+      // console.log(this.Layer.setDeclutter)
     }
   };
   this.boxFeature = {};
@@ -260,10 +262,10 @@ function Action() {
   const Drag = /*@__PURE__*/ (function (PointerInteraction) {
     function Drag() {
       PointerInteraction.call(this, {
-        handleDownEvent: () => {}, //handleDownEvent
-        handleDragEvent: () => {}, //handleDragEvent,
-        handleMoveEvent: () => {}, //handleMoveEvent,
-        handleUpEvent: () => {}, //handleUpEvent,
+        handleDownEvent: () => { }, //handleDownEvent
+        handleDragEvent: () => { }, //handleDragEvent,
+        handleMoveEvent: () => { }, //handleMoveEvent,
+        handleUpEvent: () => { }, //handleUpEvent,
       });
 
       /**
@@ -548,7 +550,7 @@ function Action() {
     feature.forEach((item) => {
       let style = item.getStyle();
       style.setZIndex(10);
-      if(style.getImage()){
+      if (style.getImage()) {
         // style.getImage().getFill().setColor("#FE2042");
         // style.getImage().setRadius(12);
         style.setImage(pointSelect().getImage())
@@ -592,14 +594,14 @@ function Action() {
           showName: true,
           text: "回看集合点",
           offsetY: -30,
-          icon:{
+          icon: {
             src: require('../../../assets/unselectlocation.png'),
             anchor: [0.5, 0.8],
             crossOrigin: "anonymous",
           },
           // text: item.title || item.name,
-          textFillColor: "#FF4628",
-          textStrokeColor: "#ffffff",
+          textFillColor: "rgba(255,255,255,0)",
+          textStrokeColor: "rgba(255,255,255,0)",
           textStrokeWidth: 1,
           font: 10,
         });
@@ -828,9 +830,8 @@ function Action() {
         ftype: "collection",
         data: coordinate[item],
         multi: coordinate[item].length > 1,
-        ...coordinate[item][0]||null
+        ...coordinate[item][0] || null
       });
-
       let style = createStyle("Point", moreStyle());
 
       feature.setStyle(style);
@@ -901,55 +902,55 @@ function Action() {
 
   this.handlePlotClick = (feature, pixel) => {
     if (this.isActivity) return;
-    Event.Evt.firEvent('handleFeatureToLeftMenu',feature.get('id'));
-    Event.Evt.firEvent('handlePlotFeature', {feature, pixel})
-    return ;
+    Event.Evt.firEvent('handleFeatureToLeftMenu', feature.get('id'));
+    Event.Evt.firEvent('handlePlotFeature', { feature, pixel })
+    return;
     createPopupOverlay(feature, pixel);
   };
 
   this.renderGeoJson = async (data) => {
     // return new Promise((resolve) => {
-      let promise = [];
-      if (data && data.length) {
-        nProgress.start();
-        data.forEach((item) => {
-          if (item.resource_url) {
-            promise.push(
-              Axios.get(item.resource_url, {
-                headers: {
-                  "Access-Control-Allow-Origin": "*",
-                  "Content-Type": "application/json",
-                },
-              })
-            );
-          }
-        });
-      }
-      let res = await Promise.all(promise);
-      nProgress.done();
-      res.forEach((item) => {
-        let geojson = item.data;
-        let features = loadFeatureJSON(geojson, "GeoJSON");
-        features.forEach((feature, index) => {
-          let type = feature.getGeometry().getType();
-          let icon = feature.get("iconUrl");
-          icon = icon && icon.replace("../../../assets", "");
-          let style = createStyle(type, {
-            showName: (type !== "Point" && index < 15) || type === "Point",
-            text: feature.get("name") || geojson.name,
-            iconUrl: icon ? require("../../../assets" + icon) : null,
-            strokeColor: feature.get("strokeColor") || "rgba(255,0,0,0.3)",
-            fillColor: feature.get("fillColor") || "rgba(255,0,0,0.3)",
-            textFillColor: "rgba(255,0,0,0.9)",
-            textStrokeColor: "#FFFFFF",
-            font: 14,
-          });
-          feature.setStyle(style);
-          this.geoFeatures.push(feature);
-        });
-        this.Source.addFeatures(features);
+    let promise = [];
+    if (data && data.length) {
+      nProgress.start();
+      data.forEach((item) => {
+        if (item.resource_url) {
+          promise.push(
+            Axios.get(item.resource_url, {
+              headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Content-Type": "application/json",
+              },
+            })
+          );
+        }
       });
-      return res;
+    }
+    let res = await Promise.all(promise);
+    nProgress.done();
+    res.forEach((item) => {
+      let geojson = item.data;
+      let features = loadFeatureJSON(geojson, "GeoJSON");
+      features.forEach((feature, index) => {
+        let type = feature.getGeometry().getType();
+        let icon = feature.get("iconUrl");
+        icon = icon && icon.replace("../../../assets", "");
+        let style = createStyle(type, {
+          showName: (type !== "Point" && index < 15) || type === "Point",
+          text: feature.get("name") || geojson.name,
+          iconUrl: icon ? require("../../../assets" + icon) : null,
+          strokeColor: feature.get("strokeColor") || "rgba(255,0,0,0.3)",
+          fillColor: feature.get("fillColor") || "rgba(255,0,0,0.3)",
+          textFillColor: "rgba(255,0,0,0.9)",
+          textStrokeColor: "#FFFFFF",
+          font: 14,
+        });
+        feature.setStyle(style);
+        this.geoFeatures.push(feature);
+      });
+      this.Source.addFeatures(features);
+    });
+    return res;
   };
   this.clearGeoFeatures = () => {
     if (this.geoFeatures.length) {
@@ -1039,8 +1040,8 @@ function Action() {
             borderColor: strokeColor,
             font:
               content.selectName === "自定义类型" ||
-              content.selectName === "" ||
-              !content.selectName
+                content.selectName === "" ||
+                !content.selectName
                 ? item.title
                 : content.selectName,
             type: featureLowerType,
@@ -1772,7 +1773,7 @@ function Action() {
       };
     }
     if (ele.video) {
-      ele.video.onplay = (e) => {};
+      ele.video.onplay = (e) => { };
     }
 
     ele.on = {
@@ -2218,8 +2219,8 @@ function Action() {
     });
   };
 
-  this.handleFeatureCollectionPoint = (feature)=> {
-    Event.Evt.firEvent('handleFeatureToLeftMenu',feature.get('id'));
+  this.handleFeatureCollectionPoint = (feature) => {
+    Event.Evt.firEvent('handleFeatureToLeftMenu', feature.get('id'));
     this.clearSelectPoint();
     if (feature) {
       let style = feature.getStyle();
@@ -2228,8 +2229,8 @@ function Action() {
       feature.setStyle(style);
     }
   };
-  this.getFeatureByPlotCoordinate = (coor)=>{
-    if(this.layer.showLayer){
+  this.getFeatureByPlotCoordinate = (coor) => {
+    if (this.layer.showLayer) {
       let source = this.layer.showLayer.getSource();
       return source.getFeaturesAtCoordinate(coor);
     }
@@ -2239,7 +2240,7 @@ function Action() {
     coor = TransformCoordinate(coor);
     return this.Source.getFeaturesAtCoordinate(coor);
   }
-  this.getFeatureById = (id)=>{
+  this.getFeatureById = (id) => {
     return this.features.find(item => item.get('id') === id);
   }
   // 点的数据选中状态
@@ -2302,7 +2303,7 @@ function Action() {
     }
   };
 
-  this.addAnimatePoint = ({ duration, inOrOut = "out", feature }) => {};
+  this.addAnimatePoint = ({ duration, inOrOut = "out", feature }) => { };
 
   // 更新江西数据的临时方法
   this.loadGeoJson = async (props = {}) => {
@@ -2393,27 +2394,75 @@ function Action() {
     }
   };
 
-  // 添加周边搜索
-  this.addSearchAround = ({id, feature})=>{
-    let sFeature = null;
-    if(id){
-      sFeature = this.features.find(item => item.get('id') === id);
-    } else if(feature){
-      sFeature = feature;
-    }else return ;
+  this.searchByPosition = async ({ position, radius, type, pageIndex}) => {
+    AboutAction.init();
+    console.log(type)
+    AboutAction.searchByPosition({ position, radius, type, pageIndex})
+  }
+
+  // this.renderSearchPoint = (data)=>{
+  //   console.log(data);
+  // }
+
+  this.formatUnit = (size) => {
+    if (size) {
+      return size < 1000 ? size.toFixed(2) + '米' : (size/ 1000).toFixed(2) + '千米';
+    }
+    return null;
+  }
+
+
+  const updateRadius = (feature, radius)=> {
+    let f = this.formatUnit(radius);
+    feature.getGeometry().setRadius(radius);
+    let style = feature.getStyle();
+    style.getText().setText(f);
+  }
+
+  const updateOverlayPosition = (overlay, f)=>{
+    let extent = f.getGeometry().getExtent();
+    let rightTop = getPoint(extent, 'topRight');
+    let rightBottom = getPoint(extent, 'bottomRight');
+    let point = [rightTop[0], (rightTop[1] + rightBottom[1]) / 2]
+    // console.log(coor,coord,overlayElement);
+    overlay.setPosition(point);
+  }
+
+  this.setSearchIndex = (index) => {
+    this.searchPageIndex = index;
+  }
+
+  this.updateSearch = (id, type, index)=>{
+    let sFeature = this.features.find(item => item.get('id') === id);
+    let coordinates = [];
     if(sFeature){
+      coordinates = sFeature.getGeometry().getCoordinates();
+    }
+    this.searchByPosition({position: coordinates, radius: this.circleRadius, type: type, pageIndex: index});
+  }
+  // 添加周边搜索
+  this.addSearchAround = ({ id, feature, stype ='高速路入口'}) => {
+    let sFeature = null;
+    if (id) {
+      sFeature = this.features.find(item => item.get('id') === id);
+    } else if (feature) {
+      sFeature = feature;
+    } else return false;
+    if (sFeature) {
       let geometry = sFeature.getGeometry();
       let type = geometry.getType();
-      if(type === 'Point'){
+      if (type === 'Point') {
+        let defaultRadius = 8 * 1000;
+        this.circleRadius = defaultRadius;
         let coordinates = geometry.getCoordinates();
-        let f = addFeature('defaultCircle',{coordinates, radius: 5 * 1000});
-        let style = createStyle("Circle",{
-          fillColor: "rgba(255,255,255,0)",
-          strokeColor: "#ff0000",
+        let f = addFeature('defaultCircle', { coordinates, radius: defaultRadius });
+        let style = createStyle("Circle", {
+          fillColor: "rgba(193, 232, 255, 0.3)",
+          strokeColor: "rgba(99, 199, 255, 0.5)",
           strokeWidth: 2,
-          radius: 5 * 1000,
-          showName: true,
-          text: 5 + "公里",
+          radius: defaultRadius,
+          showName: false,
+          text: this.formatUnit(defaultRadius),
           offsetY: 0,
           textFillColor: "#ff0000",
           textStrokeColor: "#ffffff",
@@ -2421,47 +2470,69 @@ function Action() {
         })
         f.setStyle(style);
         this.searchAroundCircle = f;
-        let extent = f.getGeometry().getExtent();
-        let rightTop = getPoint(extent,'topRight');
-        let rightBottom = getPoint(extent, 'bottomRight');
-        let point = [rightTop[0] ,(rightTop[1] + rightBottom[1]) / 2]
         this.Source.addFeature(this.searchAroundCircle);
-        let ele = new DragCircleRadius({format: "5公里"});
-        this.searchAroundOverlay = createOverlay(ele.element,{position: point, offset:[-20, 0]});
+        let ele = new DragCircleRadius({ format: this.formatUnit(defaultRadius) });
+        this.searchAroundOverlay = createOverlay(ele.element, { offset: [-20, 0] });
+        // 启动搜索功能
+        this.searchByPosition({position: coordinates, radius: defaultRadius, type: stype, pageIndex: this.searchPageIndex})
+        updateOverlayPosition(this.searchAroundOverlay, f);
+
         InitMap.map.addOverlay(this.searchAroundOverlay);
         let _pixel = InitMap.map.getPixelFromCoordinate(coordinates);
         let coord = null;
+        let radius;
         ele.on = {
-          mouseDown: ()=> {
+          mouseDown: () => {
             _pixel = InitMap.map.getPixelFromCoordinate(coordinates);
           },
-          mouseMove: (evt, step)=>{
+          mouseMove: (evt, step) => {
             var pixel = [evt.clientX, _pixel[1]];
             coord = InitMap.map.getCoordinateFromPixel(pixel);
+            radius = coord[0] - coordinates[0];
+            if(radius <= 5 *100){
+              return ;
+            }
+            this.circleRadius = radius;
             this.searchAroundOverlay.setPosition(coord);
-            let radius = coord[0] - coordinates[0];
-            f.getGeometry().setRadius(radius);
-            let text = (radius / 1000).toFixed(2)
-            ele.updateRadius(text +'公里');
-            let s = f.getStyle();
-            s.getText().setText(text +'公里')
+            let text = this.formatUnit(radius)
+            ele.updateRadius(text);
+            updateRadius(f, radius);
           },
-          mouseUp: ()=>{
-            Fit(InitMap.view, f.getGeometry().getExtent(),{duration: 300})
+          mouseUp: async () => {
+            this.searchByPosition({position: coordinates, radius, type: stype, pageIndex: this.searchPageIndex})
+            Fit(InitMap.view, f.getGeometry().getExtent(), { duration: 300 });
+          },
+          change: (text)=>{
+            let t = +text;
+            radius = t;
+            this.circleRadius = radius;
+            updateRadius(f, t);
+            ele.updateRadius(this.formatUnit(t));
+            updateOverlayPosition(this.searchAroundOverlay, f);
+            Fit(InitMap.view, f.getGeometry().getExtent(), { duration: 300 });
+            this.searchByPosition({position: coordinates, radius: t, type: stype, pageIndex: this.searchPageIndex})
           }
         }
       }
+      else
+      {
+        message.warn('暂时只支持坐标点的周边查询');
+        return false;
+      }
 
-      Fit(InitMap.view, this.searchAroundCircle.getGeometry().getExtent(),{
+      Fit(InitMap.view, this.searchAroundCircle.getGeometry().getExtent(), {
         size: InitMap.map.getSize(),
         padding: fitPadding,
         duration: 300
       })
+      return true;
     }
   }
-  this.cancelSearchAround = ()=>{
-    if(this.Source.getFeatureByUid(this.searchAroundCircle.ol_uid)){
+  this.cancelSearchAround = () => {
+    if(!this.searchAroundCircle) return ;
+    if (this.Source.getFeatureByUid(this.searchAroundCircle.ol_uid)) {
       this.Source.removeFeature(this.searchAroundCircle);
+      AboutAction.clearLine()
     }
     InitMap.map.removeOverlay(this.searchAroundOverlay)
   }

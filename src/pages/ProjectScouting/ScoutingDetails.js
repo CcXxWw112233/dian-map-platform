@@ -46,6 +46,7 @@ import mapApp from "../../utils/INITMAP";
 import { CSSTransition } from "react-transition-group";
 import Axios from "axios";
 import { BASIC } from "../../services/config";
+import AboutAction from '../../lib/components/ProjectScouting/AroundAbout';
 
 const { Evt } = Event;
 const { TabPane } = Tabs;
@@ -264,6 +265,7 @@ export default class ScoutingDetails extends PureComponent {
   }
   componentWillUnmount() {
     const { dispatch, config: lengedList } = this.props;
+    AboutAction.clearLine('detail');
     Action.mounted = false;
     clearTimeout(this.scrolltoDom);
     Event.Evt.removeEventListener('handleGroupCollectionFeature', this.handleCollectionFeature);
@@ -937,11 +939,10 @@ export default class ScoutingDetails extends PureComponent {
       this.renderCollection([]);
       this.renderGroupPointer();
       Action.clearGroupCollectionPoint();
-      this.hiddenDetail();
     } else {
       this.clearGroupPointer();
     }
-
+    this.hiddenDetail();
     this.setState({ area_selected: [key] });
     if (key) {
       let obj = this.state.area_list.find((item) => item.id === key);
