@@ -77,6 +77,7 @@ function Action() {
   this.mounted = false;
   this.geoFeatures = [];
   this.searchAroundCircle = null;
+  this.searchPageIndex = 1;
   Event.Evt.on("transCoordinateSystems2ScoutingDetail", () => {
     if (!this.mounted) return;
     const baseMapKey = INITMAP.baseMapKey;
@@ -2393,9 +2394,10 @@ function Action() {
     }
   };
 
-  this.searchByPosition = async ({ position, radius }) => {
+  this.searchByPosition = async ({ position, radius, type, pageIndex}) => {
     AboutAction.init();
-    AboutAction.searchByPosition({ position, radius })
+    console.log(type)
+    AboutAction.searchByPosition({ position, radius, type, pageIndex})
   }
 
   // this.renderSearchPoint = (data)=>{
@@ -2426,24 +2428,37 @@ function Action() {
     overlay.setPosition(point);
   }
 
+  this.setSearchIndex = (index) => {
+    this.searchPageIndex = index;
+  }
+
+  this.updateSearch = (id, type, index)=>{
+    let sFeature = this.features.find(item => item.get('id') === id);
+    let coordinates = [];
+    if(sFeature){
+      coordinates = sFeature.getGeometry().getCoordinates();
+    }
+    this.searchByPosition({position: coordinates, radius: this.circleRadius, type: type, pageIndex: index});
+  }
   // 添加周边搜索
-  this.addSearchAround = ({ id, feature }) => {
+  this.addSearchAround = ({ id, feature, stype ='高速路入口'}) => {
     let sFeature = null;
     if (id) {
       sFeature = this.features.find(item => item.get('id') === id);
     } else if (feature) {
       sFeature = feature;
-    } else return;
+    } else return false;
     if (sFeature) {
       let geometry = sFeature.getGeometry();
       let type = geometry.getType();
       if (type === 'Point') {
         let defaultRadius = 8 * 1000;
+        this.circleRadius = defaultRadius;
         let coordinates = geometry.getCoordinates();
         let f = addFeature('defaultCircle', { coordinates, radius: defaultRadius });
         let style = createStyle("Circle", {
-          fillColor: "rgba(255,255,255,0)",
-          strokeColor: "#ff0000",
+          fillColor: "rgba(193, 232, 255, 0.3)",
+          strokeColor: "rgba(99, 199, 255, 0.5)",
           strokeWidth: 2,
           radius: defaultRadius,
           showName: false,
@@ -2458,7 +2473,8 @@ function Action() {
         this.Source.addFeature(this.searchAroundCircle);
         let ele = new DragCircleRadius({ format: this.formatUnit(defaultRadius) });
         this.searchAroundOverlay = createOverlay(ele.element, { offset: [-20, 0] });
-        this.searchByPosition({position: coordinates, radius: defaultRadius})
+        // 启动搜索功能
+        this.searchByPosition({position: coordinates, radius: defaultRadius, type: stype, pageIndex: this.searchPageIndex})
         updateOverlayPosition(this.searchAroundOverlay, f);
 
         InitMap.map.addOverlay(this.searchAroundOverlay);
@@ -2467,46 +2483,49 @@ function Action() {
         let radius;
         ele.on = {
           mouseDown: () => {
-            // console.log('down')
             _pixel = InitMap.map.getPixelFromCoordinate(coordinates);
           },
           mouseMove: (evt, step) => {
-            // console.log('move')
             var pixel = [evt.clientX, _pixel[1]];
             coord = InitMap.map.getCoordinateFromPixel(pixel);
             radius = coord[0] - coordinates[0];
             if(radius <= 5 *100){
               return ;
             }
+            this.circleRadius = radius;
             this.searchAroundOverlay.setPosition(coord);
             let text = this.formatUnit(radius)
             ele.updateRadius(text);
             updateRadius(f, radius);
           },
           mouseUp: async () => {
-            // console.log('up')
-            this.searchByPosition({position: coordinates, radius})
+            this.searchByPosition({position: coordinates, radius, type: stype, pageIndex: this.searchPageIndex})
             Fit(InitMap.view, f.getGeometry().getExtent(), { duration: 300 });
           },
           change: (text)=>{
-            // console.log('change',text)
             let t = +text;
             radius = t;
+            this.circleRadius = radius;
             updateRadius(f, t);
             ele.updateRadius(this.formatUnit(t));
             updateOverlayPosition(this.searchAroundOverlay, f);
             Fit(InitMap.view, f.getGeometry().getExtent(), { duration: 300 });
-            this.searchByPosition({position: coordinates, radius: t})
+            this.searchByPosition({position: coordinates, radius: t, type: stype, pageIndex: this.searchPageIndex})
           }
         }
       }
-      else return message.warn('暂时只支持坐标点的周边查询');
+      else
+      {
+        message.warn('暂时只支持坐标点的周边查询');
+        return false;
+      }
 
       Fit(InitMap.view, this.searchAroundCircle.getGeometry().getExtent(), {
         size: InitMap.map.getSize(),
         padding: fitPadding,
         duration: 300
       })
+      return true;
     }
   }
   this.cancelSearchAround = () => {

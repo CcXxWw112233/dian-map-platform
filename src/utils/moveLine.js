@@ -36,6 +36,18 @@
     this._draw();
   }
 
+  CanvasLayer.prototype._draw = function () {
+    var map = this._map;
+    var size = map.getSize();
+    var center = map.getView().getCenter();
+    if (center) {
+        var pixel = map.getPixelFromCoordinate(center);
+        this.canvas.style.left = pixel[0] - size[0] / 2 + 'px';
+        this.canvas.style.top = pixel[1] - size[1] / 2 + 'px';
+        this.options.update && this.options.update.call(this);
+    }
+  };
+
   CanvasLayer.prototype.initialize = function () {
       var canvas = this.canvas = document.createElement('canvas');
       var ctx = this.ctx = this.canvas.getContext('2d');
@@ -49,6 +61,13 @@
       this._map.on("moveend", this.onMoveEnd.bind(this, this.canvas));
       return this.canvas;
   };
+
+  CanvasLayer.prototype.remove = function(){
+    let canvas = this.canvas;
+    if(canvas){
+      canvas.parentNode.removeChild(canvas);
+    }
+  }
 
   CanvasLayer.prototype.adjustSize = function () {
       var size = this._map.getSize();
@@ -85,18 +104,6 @@
       self.timeoutID = setTimeout(function () {
           self._draw();
       }, 15);
-  };
-
-  CanvasLayer.prototype._draw = function () {
-      var map = this._map;
-      var size = map.getSize();
-      var center = map.getView().getCenter();
-      if (center) {
-          var pixel = map.getPixelFromCoordinate(center);
-          this.canvas.style.left = pixel[0] - size[0] / 2 + 'px';
-          this.canvas.style.top = pixel[1] - size[1] / 2 + 'px';
-          this.options.update && this.options.update.call(this);
-      }
   };
 
   CanvasLayer.prototype.getContainer = function () {
@@ -297,7 +304,7 @@
           context.save();
           context.beginPath();
           context.lineWidth = options.lineWidth;
-          context.strokeStyle = options.colors[this.id];
+          context.strokeStyle = options.strokeColor ||  options.colors[this.id];
 
           if (!options.lineType || options.lineType == 'solid') {
               context.moveTo(pointList[0][0], pointList[0][1]);
@@ -382,12 +389,12 @@
                   from: new Marker({
                       city: line.from.city,
                       location: [line.from.lnglat[0], line.from.lnglat[1]],
-                      color: options.colors[i] || '#FF0000'
+                      color: options.strokeColor || options.colors[i] || '#FF0000'
                   }),
                   to: new Marker({
                       city: line.to.city,
                       location: [line.to.lnglat[0], line.to.lnglat[1]],
-                      color: options.colors[i] || '#FF0000'
+                      color: options.strokeColor || options.colors[i] || '#FF0000'
                   })
               }));
           });
@@ -401,12 +408,14 @@
               map: map,
               update: brush
           });
+          baseLayer._draw();
           self.canvas = baseLayer;
 
           animationLayer = new CanvasLayer({
               map: map,
               update: render
           });
+          animationLayer._draw();
           self.animateCanvas = animationLayer;
           (function drawFrame() {
               requestAnimationFrame(drawFrame);

@@ -15,6 +15,7 @@ import InitMap from '../../../utils/INITMAP';
 // import { DragCircleRadius } from '../../../components/PublicOverlays/index';
 import DetailAction from './ScoutingDetail';
 import MoveLine from '../../../utils/moveLine';
+import Event from '../../utils/event';
 
 
 function action(){
@@ -40,9 +41,11 @@ function action(){
     return style;
   }});
   this.Source = Source();
-  this.distance = 20;
+  this.distance = 30;
   this.points = [];
   this.center = null;
+  this.moveLine = null ;
+  this.mounted = false;
   this.init = ()=>{
     const layers = InitMap.map.getLayers().getArray();
     const layer = layers.find((layer) => {
@@ -54,30 +57,61 @@ function action(){
         distance: this.distance,
         source: this.Source
       })
-
+      InitMap.map.on('moveend', ()=>{
+        let list = this.Layer.getSource().getFeatures();
+        if(this.moveLine && this.mounted){
+          this.moveLine.update({data: this.createRenderList(list)})
+        }
+      })
+      this.mounted = true;
       this.Layer.setSource(source);
       InitMap.map.addLayer(this.Layer);
-      this.Layer.on('postrender',()=>{
-        // console.log(this.Layer)
-      })
-      // console.log('加载好了')
     }
   }
+
+  this.createRenderList = (data)=>{
+    let list = [];
+    data.forEach(item => {
+      let obj = {
+        from: {
+          city: '',
+          lnglat: this.center
+        },
+        to:{
+          city: "",
+          lnglat: item.getGeometry().getCoordinates()
+        }
+      };
+      list.push(obj);
+    })
+    return list;
+  }
+
+  this.renderLine = ()=>{
+    if(this.mounted){
+      let list = this.Layer.getSource().getFeatures();
+      // if(list.length)
+      this.createMoveLine(list, this.center);
+    }
+  }
+
   this.transform = (coordinates)=>{
     return TransformCoordinate(coordinates, "EPSG:3857", "EPSG:4326");
   }
-  this.searchByPosition = async ({ position, radius, size }) => {
-    // console.log(radius)
+  this.searchByPosition = async ({ position, radius, type, pageIndex,a}) => {
+    // type 高速路入口 火车站 城际交通
+    this.center = position;
     let param = {
       position: this.transform(position),
-      radius,
-      type: "高速路入口",
+      radius: Math.round(radius),
+      type: type,
+      pageSize: 10,
+      pageIndex: pageIndex
     }
     let searchMsg = await window.CallWebMapFunction('SearchForPoint', param);
-    // console.log(searchMsg)
-    this.renderSearchPoint(searchMsg);
-    if(searchMsg)
-    this.createMoveLine(searchMsg, position);
+    Event.Evt.firEvent('SearchPOI', searchMsg);
+    this.clearSearchPoint();
+    this.renderSearchPoint(searchMsg, position);
   }
 
   this.clearSearchPoint = ()=>{
@@ -91,46 +125,24 @@ function action(){
     }
   }
 
-  this.renderSearchPoint = (data)=>{
-    // console.log(data);
-    this.clearSearchPoint();
+  this.renderSearchPoint = (data, center)=>{
     if(data){
       let { pois } = data;
       pois.forEach(item => {
         let coor = TransformCoordinate([+item.location.lng, +item.location.lat])
         let feature = addFeature('Point',{coordinates: coor, name: item.name});
-        // let style = createStyle("Point",{
-        //   fillColor:"#ff0000",
-        //   text: item.name,
-        //   showName: true
-        // })
-        // feature.setStyle(style);
         this.points.push(feature);
       })
-      // console.log(this.points);
       this.Source.addFeatures(this.points);
-      // this.createMoveLine(data);
+      this.renderLine();
     }
   }
 
-  this.createMoveLine = (data, from)=>{
+  //
+  this.createMoveLine = (data)=>{
+    this.clearCanvas('create');
     if(data){
-      let pois = data.pois;
-      // new MoveLine()
-      let list = [];
-      pois.forEach(item => {
-        let obj = {
-          from: {
-            city: '',
-            lnglat: from
-          },
-          to:{
-            city: "",
-            lnglat: TransformCoordinate([+item.location.lng, +item.location.lat])
-          }
-        };
-        list.push(obj);
-      })
+      let list = this.createRenderList(data);
       // console.log(list)
       let m = new MoveLine(InitMap.map, {
         //marker点半径
@@ -143,26 +155,38 @@ function action(){
         lineWidth: 2,
         //线条颜色
         colors: ['#F9815C', '#F8AB60', '#EDCC72', '#E2F194', '#94E08A', '#4ECDA5'],
+        // 统一设置线条颜色
+        strokeColor: "#6DCEFF",
         //移动点半径
         moveRadius: 3,
         //移动点颜色
-        fillColor: '#fff',
+        fillColor: '#613FFF',
         //移动点阴影颜色
-        shadowColor: '#fff',
+        shadowColor: '#3EA3FF',
         //移动点阴影大小
         shadowBlur: 6,
         data: list
       });
+
       // console.log(m)
       this.moveLine = m;
     }
   }
-  this.clearLine = ()=>{
+  this.clearCanvas = (a)=>{
+    console.log('我删除了图层',a)
+    if(this.moveLine){
+      this.moveLine.canvas.remove();
+      this.moveLine.canvas.destory = true;
+      this.moveLine.animateCanvas.remove();
+      this.moveLine.animateCanvas.destory = true;
+    }
+
+    this.moveLine = null ;
+  }
+  this.clearLine = (a)=>{
+    console.log(a)
     this.clearSearchPoint();
-    this.moveLine.canvas.hidden();
-    this.moveLine.canvas.destory = true;
-    this.moveLine.animateCanvas.hidden();
-    this.moveLine.animateCanvas.destory = true;
+    this.clearCanvas(a);
   }
 }
 

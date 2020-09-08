@@ -12,6 +12,7 @@ import Event from '../../../../lib/utils/event';
 import EditDescription from './editDescription';
 // import Slider from "react-slick";
 import ReactPlayer from 'react-player';
+import TrafficDetail from './TrafficDetail';
 
 @connect(({collectionDetail: { selectData ,zIndex, type,isImg, small} })=>({ selectData ,zIndex ,type, isImg, small}))
 export default class CollectionDetail extends React.Component{
@@ -26,10 +27,26 @@ export default class CollectionDetail extends React.Component{
         total: 1,
         current: 1
       },
-      isSearch: false
+      isSearch: false,
+      checkedTag:"roadTraffic",
     }
     this.content = React.createRef();
     this.slider = React.createRef();
+    this.activeType = "";
+    this.tags = [
+      {
+        key:"roadTraffic",
+        label:"道路交通"
+      },
+      {
+        key:"railTransit",
+        label:"轨道交通"
+      },
+      {
+        key:"UrbanTransportation",
+        label: "城市交通"
+      }
+    ]
   }
   componentDidMount(){
     this.InitActiveImg(this.props);
@@ -266,19 +283,61 @@ export default class CollectionDetail extends React.Component{
     })
   }
 
-  searchAroundAbout = (val,flag)=>{
-    this.setState({
-      isSearch: !flag
-    })
+  searchAroundAbout = (val,flag, type)=>{
+    let isSearchFlag = !flag;
     if(flag){
       DetailAction.cancelSearchAround();
     }else{
       DetailAction.cancelSearchAround();
       DetailAction.init();
-      DetailAction.addSearchAround({id: val.id});
+      let f = DetailAction.addSearchAround({id: val.id , stype: type});
+      if(f === false){
+        isSearchFlag = false;
+      }
     }
+    this.setState({
+      isSearch: isSearchFlag
+    })
+  }
+
+  checkType = ()=>{
 
   }
+
+  toSearch = (val, data)=>{
+    let type;
+    switch(val.key){
+      case "roadTraffic":
+        type = '高速路入口';
+        break;
+      case "railTransit" :
+        type = '火车站';
+        break;
+      case "UrbanTransportation":
+        type = '';
+        break;
+      default: type = '';
+    }
+    // this.activeType = type;
+    this.setState({
+      activeType: type
+    })
+    // 开始搜索
+    this.searchAroundAbout(data, this.state.isSearch, type);
+  }
+
+  handleTag = (tag, checked)=>{
+    this.setState({
+      checkedTag: tag.key
+    })
+  }
+  componentWillUnmount(){
+    DetailAction.cancelSearchAround();
+  }
+  detailBack = ()=>{
+    this.searchAroundAbout({},this.state.isSearch);
+  }
+
 
   render(){
     const { sliderPages, currentIndex} = this.state;
@@ -288,85 +347,99 @@ export default class CollectionDetail extends React.Component{
       ReactDOM.createPortal(
         <div className={`${styles.collection_detail}`}
         style={{zIndex: zIndex}}>
-          <div className={styles.detail_title}>
-            {small ?
-            <Fragment>
-              <div className={styles.smallTitle}>
-                <span className={styles.smallTitle_title}>
-                  {selectData && selectData[currentIndex] && selectData[currentIndex].title}
-                </span>
-              </div>
-            </Fragment>
-            :
-            <Fragment>
-              <span className={styles.pages}>
-                {sliderPages.current}/{sliderPages.total}
-              </span>
-              <span style={{fontSize:'0.7em'}} onClick={()=> this.changeSmall(true)}>
-                <MyIcon type="icon-suoxiao1"/>
-              </span>
-            </Fragment>
-            }
-            {small &&
-            <span
-            onClick={()=> this.changeSmall(false)}>
-              <MyIcon type="icon-jia1"/>
-            </span>}
-            <span className={styles.close}>
-              <MyIcon type="icon-guanbi2" onClick={()=> this.detailClose()}/>
-            </span>
-          </div>
-          <div className={`${styles.container}`} style={{height: small ? 0: 'auto'}}>
-            { (selectData && selectData.length > 1) && (
+          {!this.state.isSearch ? <Fragment>
+            <div className={styles.detail_title}>
+              {small ?
               <Fragment>
-                <span className={styles.prev}
-                onClick={()=> {this.slider.current?.prev()}}>
-                  <MyIcon type="icon-bianzu681"/>
+                <div className={styles.smallTitle}>
+                  <span className={styles.smallTitle_title}>
+                    {selectData && selectData[currentIndex] && selectData[currentIndex].title}
+                  </span>
+                </div>
+              </Fragment>
+              :
+              <Fragment>
+                <span className={styles.pages}>
+                  {sliderPages.current}/{sliderPages.total}
                 </span>
-                <span className={styles.next}
-                onClick={()=> {this.slider.current?.next()}}>
-                  <MyIcon type="icon-bianzu671"/>
+                <span style={{fontSize:'0.7em'}} onClick={()=> this.changeSmall(true)}>
+                  <MyIcon type="icon-suoxiao1"/>
                 </span>
               </Fragment>
-            ) }
-            <Carousel ref={this.slider} loop={false} afterChange={this.slideChange}>
-              { selectData && selectData.map(item => {
-                return (<div key={item.id}>
-                  {isImg && <div className={styles.container_img}>
-                    {this.checkRender(item)}
-                    {/* {item.resource_url ? <img crossOrigin="anonymous" src={item.resource_url} alt="" onClick={this.previewImg}/>
-                    :
-                    <span>暂不支持预览</span>} */}
-                  </div>}
-                  <div className={styles.data_msg}>
-                    <div className={styles.data_title}>
-                      {item.title ? <span>{item.title}</span> : <span>&nbsp;</span>}
-                    </div>
-                    {item.properties_map && <div className={styles.propertiesMap}>
-                      {this.renderPropertiesMap(item)}
-                      <span className={styles.around_about} onClick={()=>this.searchAroundAbout(item,this.state.isSearch)}>
-                        {this.state.isSearch ? <Tag color="red">取消</Tag> :<Tag color="purple">周边</Tag>}
-                      </span>
+              }
+              {small &&
+              <span
+              onClick={()=> this.changeSmall(false)}>
+                <MyIcon type="icon-jia1"/>
+              </span>}
+              <span className={styles.close}>
+                <MyIcon type="icon-guanbi2" onClick={()=> this.detailClose()}/>
+              </span>
+            </div>
+            <div className={`${styles.container}`} style={{height: small ? 0: 'auto'}}>
+              { (selectData && selectData.length > 1) && (
+                <Fragment>
+                  <span className={styles.prev}
+                  onClick={()=> {this.slider.current?.prev()}}>
+                    <MyIcon type="icon-bianzu681"/>
+                  </span>
+                  <span className={styles.next}
+                  onClick={()=> {this.slider.current?.next()}}>
+                    <MyIcon type="icon-bianzu671"/>
+                  </span>
+                </Fragment>
+              ) }
+              <Carousel ref={this.slider} loop={false} afterChange={this.slideChange}>
+                { selectData && selectData.map(item => {
+                  return (<div key={item.id}>
+                    {isImg && <div className={styles.container_img}>
+                      {this.checkRender(item)}
+                      {/* {item.resource_url ? <img crossOrigin="anonymous" src={item.resource_url} alt="" onClick={this.previewImg}/>
+                      :
+                      <span>暂不支持预览</span>} */}
                     </div>}
-                    <EditDescription disabled={this.state.disabled} data={item} onEdit={this.saveEdit} isMaxHeight={!isImg}/>
-                    <div className={styles.creator}>
-                      <Row gutter={10}>
-                        <Col xs={8} sm={12} md={8}>
-                          {item.create_by && item.create_by.name}
-                        </Col>
-                        <Col xs={8} sm={6} md={8}style={{textAlign:"center"}}>
-                          {DetailAction.dateFormat(item.create_time, "yyyy/MM/dd")}
-                        </Col>
-                        <Col xs={8} sm={6} md={8}style={{textAlign:"center"}}>
-                          { DetailAction.dateFormat(item.create_time, "HH:mm")}
-                        </Col>
-                      </Row>
+                    <div className={styles.data_msg}>
+                      <div className={styles.data_title}>
+                        {item.title ? <span>{item.title}</span> : <span>&nbsp;</span>}
+                      </div>
+                      <EditDescription disabled={this.state.disabled} data={item} onEdit={this.saveEdit} isMaxHeight={!isImg}/>
+
+                      {item.properties_map && <div className={styles.propertiesMap}>
+                        {this.renderPropertiesMap(item)}
+                        {/* <span className={styles.around_about} onClick={()=>this.searchAroundAbout(item,this.state.isSearch)}>
+                          {this.state.isSearch ? <Tag color="red">取消</Tag> :<Tag color="purple">周边快查</Tag>}
+                        </span> */}
+                        <div className={styles.around_search_item}>
+                          <div>周边快查</div>
+                          {this.tags.map(tags => {
+                            return <Tag key={tags.key}
+                            color="default"
+                            onClick={this.toSearch.bind(this, tags, item)}
+                            >{tags.label}</Tag>
+                          })}
+                        </div>
+                      </div>}
+                      <div className={styles.creator}>
+                        <Row gutter={10}>
+                          <Col xs={8} sm={12} md={8}>
+                            {item.create_by && item.create_by.name}
+                          </Col>
+                          <Col xs={8} sm={6} md={8}style={{textAlign:"center"}}>
+                            {DetailAction.dateFormat(item.create_time, "yyyy/MM/dd")}
+                          </Col>
+                          <Col xs={8} sm={6} md={8}style={{textAlign:"center"}}>
+                            { DetailAction.dateFormat(item.create_time, "HH:mm")}
+                          </Col>
+                        </Row>
+                      </div>
                     </div>
-                  </div>
-                </div>)
-              })}
-            </Carousel>
-          </div>
+                  </div>)
+                })}
+              </Carousel>
+            </div>
+          </Fragment>:
+          <TrafficDetail onBack={this.detailBack} data={selectData && selectData[currentIndex]} type={this.state.activeType} onClose={this.detailClose} />
+          }
         </div>,
         document.body
       )
