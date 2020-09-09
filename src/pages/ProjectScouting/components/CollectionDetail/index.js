@@ -42,10 +42,10 @@ export default class CollectionDetail extends React.Component{
         key:"railTransit",
         label:"轨道交通"
       },
-      {
-        key:"UrbanTransportation",
-        label: "城市交通"
-      }
+      // {
+      //   key:"UrbanTransportation",
+      //   label: "城市交通"
+      // }
     ]
   }
   componentDidMount(){
