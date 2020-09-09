@@ -273,6 +273,7 @@ const publicData = {
             placement: "point",
             iconScale: 1,
             pointColor: "#fff",
+            showName: true,
             text: item.name,
             iconUrl: require("../../assets/location.svg"),
           };
