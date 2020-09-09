@@ -180,6 +180,11 @@ export function Base64ToFile (base64,file_name){
   return blobToFile(blob);
 }
 
+/**
+ *
+ * @param {new Date().getTime()} val
+ * @param {yyyy-MM-dd HH:mm:ss} format
+ */
 export function dateFormat(val, format) {
   val = +val;
   function Zero(number) {

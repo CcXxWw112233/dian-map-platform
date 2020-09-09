@@ -110,6 +110,10 @@
       return this.canvas;
   };
 
+  CanvasLayer.prototype.showLayer = function(){
+    this.canvas.style.display = 'block';
+  }
+
   CanvasLayer.prototype.show = function () {
       this.initialize();
       this.canvas.style.display = 'block';

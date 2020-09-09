@@ -47,6 +47,7 @@ import { CSSTransition } from "react-transition-group";
 import Axios from "axios";
 import { BASIC } from "../../services/config";
 import AboutAction from '../../lib/components/ProjectScouting/AroundAbout';
+import Meettings from "./components/Meeting";
 
 const { Evt } = Event;
 const { TabPane } = Tabs;
@@ -1843,6 +1844,7 @@ export default class ScoutingDetails extends PureComponent {
       activeId,
       current_board,
     } = this.state;
+    const defaultHeight = this.state.miniTitle ? 'calc(100vh - 100px)': "calc(100vh - 370px)";
     const { dispatch } = this.props;
     const { PublicView } = this;
     switch (key) {
@@ -2088,11 +2090,16 @@ export default class ScoutingDetails extends PureComponent {
         );
       case "2":
         return (
-          <PublicView height={this.state.miniTitle ? 'calc(100vh - 100px)': "calc(100vh - 370px)"}>
+          <PublicView height={defaultHeight}>
             <LookingBack board={current_board} active={this.state.activeKey === '2'}/>
           </PublicView>
         );
       case "3":
+       return (
+        <PublicView height={defaultHeight}>
+          <Meettings board={current_board} active={this.state.activeKey === '3'}/>
+        </PublicView>
+       )
       case "4":
         return (
           <div

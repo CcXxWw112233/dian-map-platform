@@ -44,6 +44,7 @@ import INITMAP from "../../../utils/INITMAP";
 import AboutAction from './AroundAbout';
 // import { out_of_china } from "../../../utils/transCoordinateSystem";
 import Axios from "axios";
+import Metting from './meetting';
 import nProgress from "nprogress";
 
 function Action() {
@@ -140,7 +141,6 @@ function Action() {
         }
       });
       InitMap.map.addLayer(this.Layer);
-      // console.log(this.Layer.setDeclutter)
     }
   };
   this.boxFeature = {};
@@ -152,6 +152,7 @@ function Action() {
   let requestTime = 80 * 1000;
   this.selectedFeatureOperator = null;
   this.groupCollectionPointer = [];
+  this.meetting = new Metting();
 
   // 通过范围获取坐标点
   let getBoxCoordinates = (extent) => {
