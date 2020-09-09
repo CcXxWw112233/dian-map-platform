@@ -46,16 +46,65 @@ function action(){
   this.center = null;
   this.moveLine = null ;
   this.mounted = false;
-  this.init = ()=>{
+  this.init = (center)=>{
     const layers = InitMap.map.getLayers().getArray();
     const layer = layers.find((layer) => {
       return layer.get("id") === this.Layer.get("id");
     });
+
     this.features = DetailAction.features;
     if(!layer){
+      let keys = InitMap.baseMapKeys[1];
+      // 切换了底图
+      Event.Evt.addEventListener('basemapchange', (key)=>{
+        let flag = InitMap.checkUpdateMapSystem(key);
+        // console.log(flag);
+        if(flag){
+          let dic = InitMap.systemDic[key];
+          let features = this.Layer.getSource().getFeatures();
+          features.map(item => {
+            let coor = item.getGeometry().getCoordinates();
+            coor = this.transform(coor);
+            coor = dic(coor[0], coor[1]);
+            item.getGeometry().setCoordinates(TransformCoordinate(coor));
+            return item;
+          })
+          let center = this.transform(this.center);
+
+          center = dic(center[0], center[1]);
+          this.center = TransformCoordinate(center);
+          if(this.moveLine){
+            let list = this.createRenderList(features);
+            this.moveLine.update({data: list});
+            this.moveLine.canvas._draw();
+            this.moveLine.animateCanvas._draw();
+          }
+        }
+      })
       let source = new Cluster({
         distance: this.distance,
         source: this.Source
+      })
+
+      source.on('addfeature',(options)=>{
+        // 如果加载的时候不是天地图。或者是高德底图类型切换，则不需要纠偏
+
+        if(!InitMap.checkUpdateMapSystem(InitMap.baseMapKey) && InitMap.lastBaseMapKey) {
+          return ;
+        }
+        if(keys.indexOf(InitMap.baseMapKey) === -1) return;
+
+        let { feature } = options;
+        if(!feature.get('isRectification')){
+          let key = InitMap.baseMapKey;
+          let dic = InitMap.systemDic[key];
+          let coodinates = feature.getGeometry().getCoordinates();
+          coodinates = this.transform(coodinates);
+          let coor = dic(coodinates[0],coodinates[1]);
+          coor = TransformCoordinate(coor);
+          feature.getGeometry().setCoordinates(coor);
+          feature.set('isRectification',true);
+        }
       })
       InitMap.map.on('moveend', ()=>{
         let list = this.Layer.getSource().getFeatures();
@@ -100,7 +149,19 @@ function action(){
   }
   this.searchByPosition = async ({ position, radius, type, pageIndex,a}) => {
     // type 高速路入口 火车站 城际交通
-    this.center = position;
+    // this.center = position;
+    let keys = InitMap.baseMapKeys;
+    if(keys.indexOf(InitMap.baseMapKey)!== -1){
+      let d = InitMap.systemDic[InitMap.baseMapKey];
+      if(position){
+        // console.log(position)
+        // this.center = this.transform(center);
+        this.center = d(position[0], position[1]);
+        this.center = TransformCoordinate(this.center);
+      }
+    }else{
+      this.center = position;
+    }
     let param = {
       position: this.transform(position),
       radius: Math.round(radius),
