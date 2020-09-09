@@ -1569,8 +1569,7 @@ export default class ScoutingDetails extends PureComponent {
     let h = height ? height: (miniTitle ? "calc(100vh - 150px)":"calc(100vh - 415px)");
     return (
       <div
-        className={globalStyle.autoScrollY}
-
+        className={styles.publicview}
         style={{ display: "flex", flexDirection: "column" ,height: h}}
         ref={this.scrollView}
         onScroll={this.CollectionViewScroll}
