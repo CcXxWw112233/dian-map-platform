@@ -11,6 +11,8 @@ import LocationPanel from "./LocationPanel";
 import { getMyPosition } from "utils/getMyPosition";
 import { BASIC } from "../../services/config";
 import { setSession, getSession } from "utils/sessionManage";
+import mapApp from "utils/INITMAP";
+import { TransformCoordinate } from "@/lib/utils";
 
 import { connect } from "dva";
 
@@ -67,6 +69,43 @@ export default class Search extends React.Component {
         }
       }
     });
+    if (mapApp) {
+      mapApp.map.on("moveend", (e) => {
+        const { parent } = this.props;
+        if (parent.activePanelKey === "2") {
+          const map = mapApp.map;
+          const view = map.getView();
+          const center = view.getCenter();
+          const zoom = view.getZoom();
+          const newCoord = TransformCoordinate(
+            center,
+            "EPSG:3857",
+            "EPSG:4326"
+          );
+          window
+            .CallWebMapFunction("getCityByLonLat", {
+              lon: newCoord[0],
+              lat: newCoord[1],
+            })
+            .then((res) => {
+              let locationName = "";
+              if (Math.round(zoom) <= 8) {
+                locationName = "全国";
+              } else if (Math.round(zoom) > 8 && Math.round(zoom) <= 12) {
+                locationName = res.addressComponent.province;
+              } else {
+                locationName = res.addressComponent.city;
+              }
+              const options = {
+                type: "districtcode",
+                adcode: res.addressComponent?.adcode,
+                locationName: locationName,
+              };
+              this.updateState(options);
+            });
+        }
+      });
+    }
   }
 
   updateState = (val) => {

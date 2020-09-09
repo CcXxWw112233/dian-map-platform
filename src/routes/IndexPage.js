@@ -23,6 +23,8 @@ import RightTools from "../components/RightTools/index";
 
 import LeftToolBar from "../components/LeftToolBar/index";
 
+import SearchBtn from "../pages/publicMapData/searchBtn";
+
 @connect(
   ({
     controller: { mainVisible },
@@ -117,11 +119,11 @@ class IndexPage extends React.Component {
     ScoutAction.checkItem()
       .then((res) => {
         dispatch({
-          type:"scoutingDetail/updateDatas",
-          payload:{
-            board: res.code === 0 ? res.data : {}
-          }
-        })
+          type: "scoutingDetail/updateDatas",
+          payload: {
+            board: res.code === 0 ? res.data : {},
+          },
+        });
         dispatch({
           type: "controller/updateMainVisible",
           payload: {
@@ -320,6 +322,7 @@ class IndexPage extends React.Component {
         {/* 文件上传通知 */}
         {/* {!isShowMobile && } */}
         <UploadNotification />
+        <SearchBtn></SearchBtn>
       </div>
     );
   }

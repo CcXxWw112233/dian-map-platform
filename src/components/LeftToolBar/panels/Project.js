@@ -23,6 +23,7 @@ export default class Project extends React.Component {
     this.publicDataChild = null;
     this.publicDataCheckedKeys = [];
     this.hasRenderPublicData = false;
+    this.activePanelKey = "1";
     this.state = {
       openPanel: true,
     };
@@ -33,6 +34,7 @@ export default class Project extends React.Component {
   }
 
   tabChange = (val) => {
+    this.activePanelKey = val;
     if (val === "1") {
       ScoutAction.fitToCenter();
     }
@@ -88,7 +90,10 @@ export default class Project extends React.Component {
           >
             <Main>
               <div style={{ flex: "0" }}>
-                <Search changeQueryStr={this.changeQueryStr}></Search>
+                <Search
+                  changeQueryStr={this.changeQueryStr}
+                  parent={this}
+                ></Search>
               </div>
               <div
                 style={{ overflow: "hidden", height: "100%" }}
@@ -111,7 +116,7 @@ export default class Project extends React.Component {
                     height: "100%",
                   }}
                 >
-                  <TabPane tab={<span>项目踏勘</span>} key="1">
+                  <TabPane tab={<span>项目数据</span>} key="1">
                     <ProjectScouting></ProjectScouting>
                   </TabPane>
                   <TabPane tab={<span>公共数据</span>} key="2">

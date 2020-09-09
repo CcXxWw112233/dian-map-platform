@@ -17,7 +17,7 @@ import PopupOverlay from "../../components/PublicOverlays/PopupOverlay/index";
 import baseOverlay from "../../components/PublicOverlays/baseOverlay/index";
 import { createOverlay } from "../../lib/utils/index";
 import { getLocal } from "../../utils/sessionManage";
-import DetailAction from '../../lib/components/ProjectScouting/ScoutingDetail';
+import DetailAction from "../../lib/components/ProjectScouting/ScoutingDetail";
 import {
   gcj02_to_wgs84,
   wgs84_to_gcj02,
@@ -51,11 +51,24 @@ const publicData = {
     td_ter: gcj02_to_wgs84,
   },
   currentBaseMap: null,
+  commonStyleOption: {
+    textFillColor: "#3F48CC",
+    textStrokeColor: "#fff",
+    textStrokeWidth: 3,
+    font: "13px sans-serif",
+    placement: "point",
+    iconScale: 0.6,
+    pointColor: "#fff",
+  },
   init: function () {
     event.Evt.on("transCoordinateSystems2PublicData", (key) => {
       this.lastBaseMap = this.currentBaseMap;
       this.currentBaseMap = key;
       this.transCoordinateSystemsByChangeBaseMap();
+    });
+    event.Evt.on("getPoi", ({ xy, keywords }) => {
+      this.source.clear();
+      this.getADPoi(xy, keywords, this.source);
     });
     // 如果有layer，就不addlayer
     let layer = mapApp.findLayerById(this.layer.get("id"));
@@ -76,8 +89,8 @@ const publicData = {
           }
         );
         if (!feature) return;
-        if(DetailAction.isActivity) return ;
-        console.log(DetailAction.isActivity)
+        if (DetailAction.isActivity) return;
+        console.log(DetailAction.isActivity);
         const properties = feature.getProperties();
         if (
           properties.price &&
@@ -235,6 +248,40 @@ const publicData = {
             }
           });
       }
+    }
+  },
+
+  getADPoi: async (xy, keywords, source) => {
+    const res = await window.CallWebMapFunction("searchNearByXY", {
+      xy: xy,
+      keywords: keywords,
+      radius: 5000,
+    });
+    // 这里渲染要素、查询数据库入库
+    if (res && res.length) {
+      res.forEach((item) => {
+        const location = item.location;
+        if (location) {
+          const tmp = location.split(",");
+          const temp = [tmp[0], tmp[1]];
+          const coords = TransformCoordinate(temp, "EPSG:4326", "EPSG:3857");
+          const options = {
+            textFillColor: "#3F48CC",
+            textStrokeColor: "#fff",
+            textStrokeWidth: 3,
+            font: "13px sans-serif",
+            placement: "point",
+            iconScale: 1,
+            pointColor: "#fff",
+            text: item.name,
+            iconUrl: require("../../assets/location.svg"),
+          };
+          const style = createStyle("Point", options);
+          const feature = addFeature("Point", { coordinates: coords });
+          feature.setStyle(style);
+          source && source.addFeature(feature);
+        }
+      });
     }
   },
 

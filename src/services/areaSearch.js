@@ -43,15 +43,20 @@ export default {
   },
 
   GET_GEOM: async (code, needChange) => {
-    let response = null
+    let response = null;
     if (!needChange) {
       response = await request("GET", `/map/area/${code}/geom`);
     } else {
-      response = await request("GET", `/map/area/place/${code}`)
+      response = await request("GET", `/map/area/place/${code}`);
     }
     if (BASIC.checkResponse(response)) {
       return response.data;
     }
     return Promise.reject(response && response.data);
+  },
+
+  GET_CITY: async (lon, lat) => {
+    let res = await window.CallWebMapFunction("getCityByLonLat", { lon, lat });
+    
   },
 };

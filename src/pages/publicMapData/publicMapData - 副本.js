@@ -10,8 +10,6 @@ import Event from "../../lib/utils/event";
 import lengedListConf from "components/LengedList/config";
 import publicDataServices from "@/services/publicData";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
-import mapApp from "utils/INITMAP";
-import { TransformCoordinate } from "@/lib/utils";
 
 @connect()
 export default class PublicData extends React.Component {
@@ -175,7 +173,7 @@ export default class PublicData extends React.Component {
     });
     return newArr;
   };
-  onCheck = (checkedKeys, e) => {
+  onCheck = (checkedKeys) => {
     const { parent } = this.props;
     const arr = this.getDiff(this.lastSelectedKeys, checkedKeys);
     // 人口
@@ -198,40 +196,67 @@ export default class PublicData extends React.Component {
         checkedKeys: checkedKeys,
       },
       () => {
-        const { checkedNodes } = e;
-        const view = mapApp.map.getView();
-        const zoom = view.getZoom();
-        const center = view.getCenter();
-        const newCoord = TransformCoordinate(center, "EPSG:3857", "EPSG:4326");
-        let keywords = "";
-        for (let i = 0; i < checkedNodes.length; i++) {
-          keywords += checkedNodes[i].title + "|";
-        }
-        if (keywords.length > 0) {
-          keywords = keywords.substring(0, keywords.length - 1);
-        }
-        let xy = newCoord[0] + "," + newCoord[1];
-        if (checkedKeys.length > 0) {
-          if (Math.round(zoom) > 8) {
-            Event.Evt.firEvent("displaySearchBtn", {
-              visible: true,
-              keywords: keywords,
-              xy: xy,
+        // 去除数字的key数组
+        const diffArr = this.rejectNumberFromDiff(arr);
+
+        const diffTreeNodeSources = this.getCheckBoxForDatas(diffArr);
+
+        // 去勾选了的
+        if (
+          this.state.checkedKeys.length > this.lastSelectedKeys.length ||
+          this.state.checkedKeys.length === this.lastSelectedKeys.length
+        ) {
+          diffTreeNodeSources &&
+            diffTreeNodeSources.forEach((item) => {
+              let data = { ...item };
+              if (
+                this.state.checkedKeys.length === this.lastSelectedKeys.length
+              ) {
+                data.key = 1;
+                if (diffTreeNodeSources.length) {
+                  // 删除勾选的选项-这里只需要传key，剔除其他属性
+                  let a = diffTreeNodeSources.map(
+                    (item) => item.typeName + (item.cql_filter || "")
+                  );
+                  PublicDataActions.removeFeatures(a);
+                }
+              }
+              if (data.cql_filter) {
+                const index = data.cql_filter.indexOf(" AND");
+                if (index > -1) {
+                  data.cql_filter =
+                    this.queryStr +
+                    data.cql_filter.substring(index, data.cql_filter.length);
+                } else {
+                  if (!data.non_area) {
+                    data.cql_filter = this.queryStr;
+                  }
+                }
+              }
+              this.fillColor = this.getFillColor(currentPopup);
+              PublicDataActions.getPublicData({
+                url: "",
+                data: data,
+                fillColor: this.fillColor,
+              });
             });
-          } else {
-            Event.Evt.firEvent("displaySearchBtn", {
-              visible: false,
-              keywords: keywords,
-              xy: xy,
-            });
-          }
         } else {
-          Event.Evt.firEvent("displaySearchBtn", {
-            visible: false,
-            keywords: keywords,
-            xy: xy,
-          });
+          if (diffTreeNodeSources && diffTreeNodeSources.length) {
+            // 删除勾选的选项-这里只需要传key，剔除其他属性
+            let a = diffTreeNodeSources.map(
+              (item) => item.typeName + (item.cql_filter || "")
+            );
+            a.forEach((item) => {
+              if (item.indexOf("lingxi:dichan_loupan_point") > -1) {
+                PublicDataActions.removeLpInfo();
+                Event.Evt.firEvent("removeHousePOI");
+                window.housePoi = "";
+              }
+            });
+            PublicDataActions.removeFeatures(a);
+          }
         }
+        this.updateLengedList(checkedKeys);
         this.lastSelectedKeys = this.state.checkedKeys;
       }
     );
@@ -264,45 +289,22 @@ export default class PublicData extends React.Component {
     // 表示是未勾选的
     if (index === -1) {
       arr.push(node.key);
-      node.children.forEach((item) => {
-        arr.push(item.key);
-        if (item.children) {
-          item.children.forEach((item2) => {
-            arr.push(item2.key);
-          });
-        }
-      });
+      if (node.children) {
+        node.children.forEach((item) => {
+          arr.push(item.key);
+        });
+      }
     } else {
       const selectedArr = [];
       selectedArr.push(node.key);
-      node.children.forEach((item) => {
-        selectedArr.push(item.key);
-        if (item.children) {
-          item.children.forEach((item2) => {
-            selectedArr.push(item2.key);
-          });
-        }
-      });
-      const pkey = arr.filter((item) => item === node.pkey)[0];
-      if (pkey) {
-        selectedArr.push(node.pkey);
-        const { publicDataTree } = this.state;
-        let has = false;
-        for (let i = 0; i < publicDataTree.length; i++) {
-          const child = publicDataTree[i].children;
-          for (let j = 0; j < child.length; j++) {
-            if (child[j].key === pkey) {
-              const ckey = arr.filter((item) => item === child[j].pkey)[0];
-              if (ckey) {
-                selectedArr.push(ckey);
-                has = true;
-                break;
-              }
-            }
-          }
-          if (has) {
-            break;
-          }
+      if (node.children) {
+        node.children.forEach((item) => {
+          selectedArr.push(item.key);
+        });
+      } else {
+        const pkey = arr.filter((item) => item === node.pKey)[0];
+        if (pkey) {
+          selectedArr.push(node.pKey);
         }
       }
       arr = this.getDiff(arr, selectedArr);
