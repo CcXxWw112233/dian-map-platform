@@ -214,9 +214,11 @@ export default class EditImage extends React.Component{
 
   save = async () => {
     const { data, onSave} = this.props;
-    // console.log(data);
+    // 锁定绘制状态
     this.disabledDraw();
+    // 将绘制的图片转成file
     let file = this.getFile(data.title + data.resource_suffix);
+    // 将file上传到服务器
     let res = await DefaultUpload(file, {}).catch(err => console.log(err));
     if(res){
       let respose = res.data;

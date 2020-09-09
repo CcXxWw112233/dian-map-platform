@@ -190,6 +190,7 @@ export default class CollectionPreview extends React.Component{
       id: data.id,
       resource_id : resource_id
     }
+    // 修改采集数据的resource_id 并且更新列表
     DetailAction.editCollection(param).then(res => {
       message.success('保存成功');
       this.exit();

@@ -140,51 +140,60 @@ function action(){
 
   //
   this.createMoveLine = (data)=>{
-    this.clearCanvas('create');
+    // this.clearCanvas('create');
     if(data){
       let list = this.createRenderList(data);
-      // console.log(list)
-      let m = new MoveLine(InitMap.map, {
-        //marker点半径
-        markerRadius: 2,
-        //marker点颜色,为空或null则默认取线条颜色
-        markerColor: null,
-        //线条类型 solid、dashed、dotted
-        lineType: 'solid',
-        //线条宽度
-        lineWidth: 2,
-        //线条颜色
-        colors: ['#F9815C', '#F8AB60', '#EDCC72', '#E2F194', '#94E08A', '#4ECDA5'],
-        // 统一设置线条颜色
-        strokeColor: "#6DCEFF",
-        //移动点半径
-        moveRadius: 3,
-        //移动点颜色
-        fillColor: '#613FFF',
-        //移动点阴影颜色
-        shadowColor: '#3EA3FF',
-        //移动点阴影大小
-        shadowBlur: 6,
-        data: list
-      });
+      if(this.moveLine){
+        this.moveLine.canvas.destory = false;
+        this.moveLine.animateCanvas.destory = false;
+        this.moveLine.update({data: list});
+        this.moveLine.canvas._draw();
+        this.moveLine.canvas.showLayer();
+        this.moveLine.animateCanvas._draw();
+        this.moveLine.animateCanvas.showLayer();
+        return ;
+      }
+      else {
+        let m = new MoveLine(InitMap.map, {
+          //marker点半径
+          markerRadius: 2,
+          //marker点颜色,为空或null则默认取线条颜色
+          markerColor: null,
+          //线条类型 solid、dashed、dotted
+          lineType: 'solid',
+          //线条宽度
+          lineWidth: 2,
+          //线条颜色
+          colors: ['#F9815C', '#F8AB60', '#EDCC72', '#E2F194', '#94E08A', '#4ECDA5'],
+          // 统一设置线条颜色
+          strokeColor: "#6DCEFF",
+          //移动点半径
+          moveRadius: 3,
+          //移动点颜色
+          fillColor: '#613FFF',
+          //移动点阴影颜色
+          shadowColor: '#3EA3FF',
+          //移动点阴影大小
+          shadowBlur: 6,
+          data: list
+        });
 
-      // console.log(m)
-      this.moveLine = m;
+        // console.log(m)
+        this.moveLine = m;
+      }
     }
   }
   this.clearCanvas = (a)=>{
-    console.log('我删除了图层',a)
+    // console.log('我删除了图层',a)
     if(this.moveLine){
-      this.moveLine.canvas.remove();
+      this.moveLine.canvas.hide();
       this.moveLine.canvas.destory = true;
-      this.moveLine.animateCanvas.remove();
+      this.moveLine.animateCanvas.hide();
       this.moveLine.animateCanvas.destory = true;
     }
-
-    this.moveLine = null ;
   }
   this.clearLine = (a)=>{
-    console.log(a)
+    // console.log(a)
     this.clearSearchPoint();
     this.clearCanvas(a);
   }

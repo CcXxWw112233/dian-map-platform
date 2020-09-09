@@ -1,0 +1,73 @@
+@import '../../../../globalSet/styles/globalStyles.less';
+.meettingContainer{
+  height: 100%;
+  padding-left: 5%;
+  padding-right: 10%;
+  text-align: left;
+  background-color: #fff;
+  color: rgba(130, 138, 169, 1);
+  display: flex;
+  flex-direction: column;
+  .meettingHeader{
+    padding: 10px 0;
+  }
+  .meettingContainerTitle{
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+  .meettingPhoneNumber{
+    margin: 0 auto;
+    display: flex;
+    // padding-right: 10%;
+    .avatar{
+      padding-right: 15px;
+      padding-left: 10px;
+      cursor: pointer;
+      width: auto;
+      color: #fff;
+      background-color: rgba(141, 185, 255, 1);
+      border-radius: 0;
+    }
+  }
+  .renderList{
+    .autoScrollY;
+    height: 100%;
+  }
+  .users{
+    position: relative;
+    padding: 5px 0;
+    animation-direction: 0.3s;
+    .user_avatar{
+      margin-right: 10px;
+    }
+  }
+  .removeUser{
+    position: absolute;
+    right: 0;
+    font-size: 1.2em;
+    cursor: pointer;
+  }
+  .footer{
+    text-align: center;
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 5px;
+  }
+}
+
+.selectUsers{
+  :global{
+    .ant-popover-inner-content{
+      padding-left: 5px;
+      padding-right: 5px;
+    }
+  }
+  width: 290px;
+  .border_user{
+    cursor: pointer;
+    &:hover{
+      background-color: rgba(238, 248, 255, 1);
+    }
+    padding: 5px 5px;
+  }
+}

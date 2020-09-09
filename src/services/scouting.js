@@ -181,5 +181,15 @@ export default {
         }
 
         return Promise.reject(response && response.data);
+    },
+    // 发起会议
+    METTING_START: async (data)=>{
+      let response = await request('POST','/map/board/meeting',{...data,_organization_id: BASIC.getUrlParam.orgId});
+      return checkResponse(response);
+    },
+    // 获取项目成员数据
+    GET_BOARD_USERS: async (data)=>{
+      let response = await request('GET','/map/board/user', data);
+      return checkResponse(response);
     }
 }
