@@ -93,8 +93,9 @@ export default class BasemapGallery extends PureComponent {
         mapApp.changeBaseMap(item.key);
         mapApp.showRoadLabel(item.key, this.state.showRoadLabel);
         this.selectBaseMapKey = item.key;
+        event.Evt.firEvent("basemapchange", this.selectBaseMapKey);
         event.Evt.firEvent("transCoordinateSystems2ScoutingDetail");
-        event.Evt.firEvent("transCoordinateSystems2Plot");
+        // event.Evt.firEvent("transCoordinateSystems2Plot");
         event.Evt.firEvent("transCoordinateSystems2PublicData", this.selectBaseMapKey);
         event.Evt.firEvent("transCoordinateSystems2ScoutingList", this.selectBaseMapKey);
         event.Evt.firEvent("transCoordinateSystems2AreaSearch");

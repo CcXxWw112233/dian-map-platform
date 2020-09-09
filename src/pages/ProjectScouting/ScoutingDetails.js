@@ -240,16 +240,21 @@ export default class ScoutingDetails extends PureComponent {
   // 点击了坐标点
   handleCollectionFeature = (data, type = 'view', from ='group')=>{
     const { dispatch } = this.props;
+    // let coordinates = [];
+    let feature = null, geo;
+    for(let i = 0 ; i < data.length; i++){
+      let item = data[i];
+      let f = Action.getFeatureById(item.id);
+      if(f) feature = f;
+      break;
+    }
+    if(feature){
+      geo = feature.getGeometry();
+      // coordinates = geo.getCoordinates();
+    }
     data = data.map(item => {
-      if(item.location && item.location.longitude && item.location.latitude){
-        let coor = [+item.location.longitude, +item.location.latitude];
-        let feature = Action.getFeatureByCoordinate(coor)[0];
-        if(feature){
-          let geo = feature.getGeometry();
-          let properties = this.getProperties(geo.getType(), geo);
-          item.properties_map = properties;
-        }
-      }
+      let properties = this.getProperties(geo?.getType(), geo);
+      item.properties_map = properties;
       return item;
     })
 
