@@ -2397,7 +2397,6 @@ function Action() {
 
   this.searchByPosition = async ({ position, radius, type, pageIndex}) => {
     AboutAction.init();
-    console.log(type)
     AboutAction.searchByPosition({ position, radius, type, pageIndex})
   }
 
@@ -2490,7 +2489,8 @@ function Action() {
             var pixel = [evt.clientX, _pixel[1]];
             coord = InitMap.map.getCoordinateFromPixel(pixel);
             radius = coord[0] - coordinates[0];
-            if(radius <= 5 *100){
+            if(radius <= 5 *100 || radius > 50000){
+
               return ;
             }
             this.circleRadius = radius;
