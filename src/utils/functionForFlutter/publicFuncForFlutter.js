@@ -325,13 +325,8 @@ let callFunctions = {
         });
       });
       // 调用启动监听
-<<<<<<< HEAD
-      callFunctions.StartMove();
-    });
-=======
       // callFunctions.StartMove();
     })
->>>>>>> c8b545e6416e79ec78263acaffdbc929c4158807
     return data;
   },
 
