@@ -270,7 +270,7 @@ const publicData = {
     keywords1 = keywords1.substr(0, keywords1.length - 1);
     let keywords2 = JSON.stringify(keywords);
     keywords2 = keywords2.replace("[", "").replace("]", "");
-    keywords2 = keywords2.replace(/\"/g, "'");
+    keywords2 = keywords2.replace(/\"/g, "");
 
     const view = mapApp.map.getView();
     const center = view.getCenter();
@@ -369,7 +369,7 @@ const publicData = {
           const feature = addFeature("Point", { coordinates: coords });
           feature.setStyle(style);
           that.source && that.source.addFeature(feature);
-          this.features[item.type3].push(feature);
+          that.features[item.type3].push(feature);
         }
       });
     }
