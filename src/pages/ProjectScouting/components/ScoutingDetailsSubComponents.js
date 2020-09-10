@@ -5,6 +5,7 @@ import styles from "../ScoutingDetails.less";
 import Action from "../../../lib/components/ProjectScouting/ScoutingDetail";
 import ListAction from '../../../lib/components/ProjectScouting/ScoutingList';
 import PhotoSwipe from "../../../components/PhotoSwipe/action";
+import InitMap from '../../../utils/INITMAP';
 import {
   Row,
   Input,
@@ -87,6 +88,11 @@ export const Title = ({ name, date, cb, data = {}, className = "", mini }) => {
   // 定位到项目位置
   const setToCenter = async ()=>{
     let coor = [+data.coordinate_x, +data.coordinate_y];
+    if(!InitMap.checkNowIsGcj02System()){
+      // 需要纠偏
+      let dic = InitMap.systemDic[InitMap.baseMapKey];
+      coor = dic(coor[0], coor[1]);
+    }
     await Action.toCenter({center: coor, transform: true})
     Action.addAnimatePoint({coordinates: coor, transform: true, name});
   }
