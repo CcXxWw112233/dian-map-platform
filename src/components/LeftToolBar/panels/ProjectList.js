@@ -115,6 +115,7 @@ export default class ProjectList extends React.Component {
           plotEdit.plottingLayer.removeFeature(operator);
         });
         Event.Evt.firEvent("addCollectionForFeature", resp);
+        Event.Evt.firEvent("updatePlotFeature");
       })
       .catch((err) => {
         console.log(err);
@@ -147,6 +148,7 @@ export default class ProjectList extends React.Component {
           plotEdit.plottingLayer.removeFeature(operator);
         });
         Event.Evt.firEvent("addCollectionForFeature", resp);
+        Event.Evt.firEvent("updatePlotFeature");
       })
       .catch((err) => {
         console.log(err);
