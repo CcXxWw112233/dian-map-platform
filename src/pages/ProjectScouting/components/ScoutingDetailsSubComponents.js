@@ -84,6 +84,12 @@ export const Title = ({ name, date, cb, data = {}, className = "", mini }) => {
       }
     }
   }
+  // 定位到项目位置
+  const setToCenter = async ()=>{
+    let coor = [+data.coordinate_x, +data.coordinate_y];
+    await Action.toCenter({center: coor, transform: true})
+    Action.addAnimatePoint({coordinates: coor, transform: true, name});
+  }
   return (
     <div className={`${styles.title} ${className}`}>
       <div className={styles.title_goBack} onClick={cb}>
@@ -99,7 +105,7 @@ export const Title = ({ name, date, cb, data = {}, className = "", mini }) => {
       <div className={styles.title_name}>
         <span>{name}</span>
         <span className={styles.atPosition} title="定位到项目位置"
-        onClick={()=> {Action.toCenter({center: [data.coordinate_x, data.coordinate_y], transform: true})}}>
+        onClick={()=> {setToCenter()}}>
           <MyIcon type="icon-duomeitiicon-"/>
         </span>
       </div>

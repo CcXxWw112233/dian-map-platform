@@ -5,6 +5,8 @@ import config from "../../../services/scouting";
 import { dateFormat, Different } from "../../../utils/utils";
 import { Pointer as PointerInteraction } from "ol/interaction";
 // import Select from 'ol/interaction/Select';
+import {easeOut} from 'ol/easing';
+import {unByKey} from 'ol/Observable';
 import InitMap from "../../../utils/INITMAP";
 import {
   drawPoint,
@@ -46,6 +48,8 @@ import AboutAction from './AroundAbout';
 import Axios from "axios";
 import Metting from './meetting';
 import nProgress from "nprogress";
+import { getVectorContext } from "ol/render";
+import { Style, Circle, Stroke, Fill } from "ol/style";
 
 function Action() {
   const {
@@ -1409,7 +1413,7 @@ function Action() {
   };
 
   // type coordinate or extent
-  this.toCenter = ({
+  this.toCenter = async ({
     center,
     type = "coordinate",
     duration = 800,
@@ -1421,13 +1425,13 @@ function Action() {
     if (type === "coordinate") {
       if (transform) center = TransformCoordinate(center);
 
-      InitMap.view.animate({
+      return await animate({
         center: center,
         zoom: zoom ? zoom : InitMap.view.getMaxZoom() - 2,
         duration,
       });
     } else if (type === "extent") {
-      Fit(InitMap.view, center, {
+      return await Fit(InitMap.view, center, {
         size: InitMap.map.getSize(),
         padding: fitPadding,
         duration,
@@ -2370,7 +2374,63 @@ function Action() {
     }
   };
 
-  this.addAnimatePoint = ({ duration, inOrOut = "out", feature }) => { };
+  this.addAnimatePoint = ({ duration = 3000, inOrOut = "out", feature, coordinates, transform = true, name}) => {
+    if(!feature) {
+      if(transform){
+        coordinates = TransformCoordinate(coordinates);
+      }
+      feature = addFeature('Point', {coordinates});
+      let fstyle = createStyle('Point',{
+        radius: 8,
+        opacity: 1,
+        fillColor: 'rgba(254, 32, 66, 1)',
+        strokeColor: "#ffffff",
+        showName: true,
+        text: name,
+        textFillColor:"#ff0000",
+        font: 14,
+        textStrokeColor:"#ffffff",
+        zIndex: 40
+      })
+      feature.setStyle(fstyle)
+      this.Source.addFeature(feature);
+    };
+    let start = new Date().getTime();
+    const animate = (event)=>{
+      let vectorContext = getVectorContext(event);
+      let frameState = event.frameState;
+      let flashGeom = feature.getGeometry().clone();
+      let elapsed = frameState.time - start;
+      let elapsedRatio = elapsed / duration;
+      let radius = easeOut(elapsedRatio) * 25 + 5;
+      let opacity = easeOut(1 - elapsedRatio);
+      let style = new Style({
+        image: new Circle({
+          radius: radius,
+          fill: new Fill({
+            color: `rgba(75, 122, 255, ${opacity})`,
+          }),
+          stroke: new Stroke({
+            color: `rgba(75, 122, 255,${opacity})`,
+            width: 0.25 + opacity
+          })
+        })
+      })
+      let s = feature.getStyle();
+      s.getImage().setOpacity(opacity);
+      feature.setStyle(s);
+      vectorContext.setStyle(style);
+      vectorContext.drawGeometry(flashGeom);
+      if(elapsed > duration){
+        unByKey(listenerKey);
+        this.Source.removeFeature(feature);
+        return ;
+      }
+      InitMap.map.render();
+    }
+    let listenerKey = this.Layer.on('postrender', animate);
+
+  };
 
   // 更新江西数据的临时方法
   this.loadGeoJson = async (props = {}) => {
