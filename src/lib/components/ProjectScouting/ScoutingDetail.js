@@ -2374,6 +2374,14 @@ function Action() {
     }
   };
 
+  /**
+   * 添加一个淡出的动画点
+   * @param duration 动画时间
+   * @param feature 在页面中的元素
+   * @param coordinates 如果不传入元素，则需要传入一个坐标点
+   * @param transform 传入的坐标点是否需要转换，EPSG:3857 - EPSG:4326
+   * @param name 点的名称
+   */
   this.addAnimatePoint = ({ duration = 3000, inOrOut = "out", feature, coordinates, transform = true, name}) => {
     if(!feature) {
       if(transform){
@@ -2424,12 +2432,12 @@ function Action() {
       if(elapsed > duration){
         unByKey(listenerKey);
         this.Source.removeFeature(feature);
+        InitMap.map.render();
         return ;
       }
       InitMap.map.render();
     }
     let listenerKey = this.Layer.on('postrender', animate);
-
   };
 
   // 更新江西数据的临时方法
