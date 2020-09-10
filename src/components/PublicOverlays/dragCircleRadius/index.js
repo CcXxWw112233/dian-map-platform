@@ -29,10 +29,12 @@ export default function DragCircleRadius(data){
     event.preventDefault();
     event.stopPropagation();
     // console.log(event)
+    if(text.contentEditable !== 'true') {
+      unit.innerText = '米';
+      text.innerText = (text.innerHTML< 1000 && text.innerHTML > 50) ? text.innerHTML : text.innerHTML * 1000;
+    }
     text.contentEditable = true;
     unit.contentEditable = false;
-    unit.innerText = '米';
-    text.innerText = (text.innerHTML< 1000 && text.innerHTML > 50) ? text.innerHTML : text.innerHTML * 1000;
     text.oninput = ()=>{
       let t = text.innerHTML || "";
       text.innerHTML = t.replace(reg, "");
