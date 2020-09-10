@@ -20,7 +20,7 @@ import Event from '../../utils/event';
 
 function action(){
   this.layerId = 'around_about_layer';
-  this.Layer = Layer({id: this.layerId,zIndex: 39, style: (feature)=>{
+  this.Layer = Layer({id: this.layerId,zIndex: 40, style: (feature)=>{
     let data = feature.get('features');
     let size = data.length;
     let style = createStyle('Point',{
@@ -104,6 +104,7 @@ function action(){
           coor = TransformCoordinate(coor);
           feature.getGeometry().setCoordinates(coor);
           feature.set('isRectification',true);
+          feature.setZIndex(60)
         }
       })
       InitMap.map.on('moveend', ()=>{
