@@ -12,10 +12,12 @@ import ToolBar from "./toolbar";
 
 import { lineDrawing, pointDrawing, polygonDrawing } from "utils/drawing";
 
-@connect(({ openswitch: { isShowLeftToolBar, isInvalidToolBar } }) => ({
-  isShowLeftToolBar,
-  isInvalidToolBar,
-}))
+@connect(
+  ({ openswitch: { isShowLeftToolBar, isInvalidToolBar } }) => ({
+    isShowLeftToolBar,
+    isInvalidToolBar,
+  })
+)
 export default class LeftToolBar extends React.Component {
   constructor(props) {
     super(props);
@@ -193,6 +195,7 @@ export default class LeftToolBar extends React.Component {
     this.activeFeatureOperator = null;
     this.leftToolBarRef = null;
     this.projectPlot = null;
+    this.plotRef = null;
   }
 
   deactivate = () => {
@@ -261,6 +264,11 @@ export default class LeftToolBar extends React.Component {
   onRef = (ref) => {
     this.leftToolBarRef = ref;
   };
+
+  onPlotRef = (ref) => {
+    this.plotRef = ref;
+  };
+
   displayPlotPanel = (attrs, operator) => {
     this.isModifyPlot = true;
     this.activeFeatureOperator = operator;
@@ -313,6 +321,7 @@ export default class LeftToolBar extends React.Component {
               parent={this}
               plotType={this.state.plotType}
               hidden={this.state.hidePlot}
+              onRef={this.onPlotRef}
               updateFeatureOperatorList={this.updateFeatureOperatorList}
               updateFeatureOperatorList2={this.updateFeatureOperatorList2}
               goBackProject={() => {

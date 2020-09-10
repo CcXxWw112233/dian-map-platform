@@ -165,13 +165,11 @@ const SymbolBlock = ({
   );
 };
 
-@connect(({ lengedList: { config }, openswitch: { openPanel } }) => ({
-  config,
-  openPanel,
-}))
+
 export default class Plot extends PureComponent {
   constructor(props) {
     super(props);
+    this.props.onRef(this);
     this.state = {
       name: "",
       remark: "",
@@ -999,6 +997,9 @@ export default class Plot extends PureComponent {
     plotEdit.deactivate();
   };
 
+  plotEditDeactivate = () => {
+    plotEdit.deactivate();
+  };
   handleSaveClick = () => {
     this.setActiveDragPan(true);
     // 有标绘被选择

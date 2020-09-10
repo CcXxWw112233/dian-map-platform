@@ -12,7 +12,6 @@ import publicDataServices from "@/services/publicData";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import mapApp from "utils/INITMAP";
 
-
 @connect()
 export default class PublicData extends React.Component {
   constructor(props) {
@@ -177,14 +176,14 @@ export default class PublicData extends React.Component {
     });
     return newArr;
   };
-  
+
   onCheck = (checkedKeys, e) => {
     this.setState(
       {
         checkedKeys: checkedKeys,
       },
       () => {
-        const { checkedNodes } = e;
+        let checkedNodes = e.checkedNodes || e;
         const view = mapApp.map.getView();
         const zoom = view.getZoom();
         let keywords = [];
@@ -246,13 +245,23 @@ export default class PublicData extends React.Component {
     const node = e.node;
     let arr = JSON.parse(JSON.stringify(this.lastSelectedKeys));
     const index = arr.findIndex((item) => item === node.key);
+    let checkedKeys = [];
     // 表示是未勾选的
     if (index === -1) {
       arr.push(node.key);
+      if (node.type === "3") {
+        checkedKeys.push(node);
+      }
       node.children.forEach((item) => {
         arr.push(item.key);
+        if (item.type === "3") {
+          checkedKeys.push(item);
+        }
         if (item.children) {
           item.children.forEach((item2) => {
+            if (item2.type === "3") {
+              checkedKeys.push(item2);
+            }
             arr.push(item2.key);
           });
         }
@@ -260,11 +269,20 @@ export default class PublicData extends React.Component {
     } else {
       const selectedArr = [];
       selectedArr.push(node.key);
+      if (node.type === "3") {
+        checkedKeys.push(node);
+      }
       node.children.forEach((item) => {
         selectedArr.push(item.key);
+        if (item.type === "3") {
+          checkedKeys.push(item);
+        }
         if (item.children) {
           item.children.forEach((item2) => {
             selectedArr.push(item2.key);
+            if (item.type === "3") {
+              checkedKeys.push(item);
+            }
           });
         }
       });
@@ -293,7 +311,7 @@ export default class PublicData extends React.Component {
       arr = this.getDiff(arr, selectedArr);
     }
     arr = Array.from(new Set(arr));
-    this.onCheck(arr);
+    this.onCheck(arr, checkedKeys);
   };
 
   onExpand = (expandedKeys) => {
