@@ -11,6 +11,7 @@ export default function Meettings(props) {
   const [ phoneNumber, setPhoneNumber ] = useState("");
   const [ selectUsers, setSelectUsers ] = useState([]);
   const [ boardUsers, setBoardUsers ] = useState([]);
+  let userPhone = [];
   let users = [];
   const reg = /^(?:(?:\+|00)86)?1[3-9]\d{9}$/;
   const phoneChange = (e)=>{
@@ -33,7 +34,7 @@ export default function Meettings(props) {
   const addPhone = ()=>{
     let list = [...selectUsers];
     if(reg.test(phoneNumber)){
-      if(list.includes(phoneNumber)){
+      if(list.includes(phoneNumber) || userPhone.includes(phoneNumber)){
         return message.warn('不能重复添加联系人')
       }
       // 关闭设置手机号
@@ -74,6 +75,7 @@ export default function Meettings(props) {
         return boardUsers.find(user => user.user_id === item);
       }
     })
+    userPhone = list.map(item => item.mobile || item.user_id);
     users = list;
     return list;
   }
@@ -112,6 +114,7 @@ export default function Meettings(props) {
           window.open(url,'_blank');
         }, 2000)
         setSelectUsers([]);
+        userPhone = [];
         message.success('会议已发起,将自动跳转页面开启会议');
       }
     })
@@ -123,7 +126,7 @@ export default function Meettings(props) {
           输入手机号邀请协作
         </div>
         <div className={styles.meettingPhoneNumber}>
-          <Input placeholder="输入手机号邀请" onChange={phoneChange} value={phoneNumber} allowClear/>
+          <Input placeholder="输入手机号邀请" onChange={phoneChange} value={phoneNumber} allowClear onPressEnter={addPhone}/>
           { isAddPhone ?
           <Avatar shape="square"
             className={styles.avatar}
