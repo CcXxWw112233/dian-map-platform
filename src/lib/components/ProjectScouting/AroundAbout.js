@@ -104,7 +104,7 @@ function action(){
           coor = TransformCoordinate(coor);
           feature.getGeometry().setCoordinates(coor);
           feature.set('isRectification',true);
-          feature.setZIndex(60)
+          feature.setZIndex && feature.setZIndex(60)
         }
       })
       InitMap.map.on('moveend', ()=>{
@@ -192,7 +192,7 @@ function action(){
       let { pois } = data;
       pois.forEach(item => {
         let coor = TransformCoordinate([+item.location.lng, +item.location.lat])
-        let feature = addFeature('Point',{coordinates: coor, name: item.name});
+        let feature = addFeature('Point',{coordinates: coor, name: item.name, zIndex: 60});
         this.points.push(feature);
       })
       this.Source.addFeatures(this.points);

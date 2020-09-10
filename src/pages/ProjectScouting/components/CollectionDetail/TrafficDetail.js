@@ -4,6 +4,7 @@ import { MyIcon } from '../../../../components/utils';
 import Event from '../../../../lib/utils/event';
 import { Empty, Pagination } from 'antd';
 import DetailAction from '../../../../lib/components/ProjectScouting/ScoutingDetail';
+import InitMap from '../../../../utils/INITMAP';
 
 export default function TrafficDetail(props){
   const [ poiData, setPoiData ] = useState([]);
@@ -31,6 +32,11 @@ export default function TrafficDetail(props){
   const setActiveItem = (val)=>{
     // console.log(val);
     let coor = [+val.location.lng, +val.location.lat];
+    if(!InitMap.checkNowIsGcj02System()){
+      // 需要纠偏
+      let dic = InitMap.systemDic[InitMap.baseMapKey];
+      coor = dic(coor[0], coor[1]);
+    }
     let param = {
       center: coor,
     }
