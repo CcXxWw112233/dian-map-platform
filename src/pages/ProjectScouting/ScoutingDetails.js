@@ -772,6 +772,8 @@ export default class ScoutingDetails extends PureComponent {
       // 添加坐标点的事件
       let coor = await Action.addCollectionCoordinates(false,val).catch(err => console.log(err));
       if(coor){
+        coor.longitude = coor.longitude.toString();
+        coor.latitude = coor.latitude.toString();
         params = {
           id,
           title: val.name,
@@ -1710,6 +1712,8 @@ export default class ScoutingDetails extends PureComponent {
         message.success(`点击地图中的任意位置可设定坐标，可以拖动调整`,0);
         this.hiddenDetail();
         Action.addCollectionCoordinates(true,{}).then(val => {
+          val.longitude = val.longitude.toString();
+          val.latitude = val.latitude.toString();
           let p = selection.map(item => {
             return Action.editCollection({
               id: item.id,
