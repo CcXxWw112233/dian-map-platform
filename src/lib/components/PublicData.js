@@ -310,10 +310,6 @@ const publicData = {
               text: item.name,
               iconUrl: require("../../assets/location.svg"),
             };
-            const style = createStyle("Point", options);
-            const feature = addFeature("Point", { coordinates: coords });
-            feature.setStyle(style);
-            that.source && that.source.addFeature(feature);
             const typeArr = item.type.split(";");
             const data = {
               ad_id: item.id,
@@ -332,8 +328,10 @@ const publicData = {
               type3: typeArr[2],
             };
             if (keys.includes(data.type3)) {
-              that.features[data.type3].push(feature);
-            } else {
+              const style = createStyle("Point", options);
+              const feature = addFeature("Point", { coordinates: coords });
+              feature.setStyle(style);
+              that.source && that.source.addFeature(feature);
               that.features[data.type3].push(feature);
             }
             let promise = publicDataServices.INSERT_PUBLIC_POI(data);
@@ -366,13 +364,11 @@ const publicData = {
           text: item.name,
           iconUrl: require("../../assets/location.svg"),
         };
-        const style = createStyle("Point", options);
-        const feature = addFeature("Point", { coordinates: coords });
-        feature.setStyle(style);
-        that.source && that.source.addFeature(feature);
         if (keys.includes(item.type3)) {
-          this.features[item.type3].push(feature);
-        } else {
+          const style = createStyle("Point", options);
+          const feature = addFeature("Point", { coordinates: coords });
+          feature.setStyle(style);
+          that.source && that.source.addFeature(feature);
           this.features[item.type3].push(feature);
         }
       });
@@ -596,14 +592,14 @@ const publicData = {
   // 清除选到server key 图层
   removeFeatures: function (typeNames) {
     typeNames = typeof typeNames === "string" ? [typeNames] : typeNames;
-    const me = this
+    const me = this;
     if (Array.isArray(typeNames)) {
       typeNames.forEach((item) => {
         if (me.features[item]) {
           me.features[item].forEach((feature) => {
             // 这里removeFeature有个bug，底层代码中找不到对应的feature，所以这里进行uid判断，有才执行删除
             if (me.source.getFeatureByUid(feature.ol_uid))
-            me.source.removeFeature(feature);
+              me.source.removeFeature(feature);
           });
           me.features[item] = null;
         }
