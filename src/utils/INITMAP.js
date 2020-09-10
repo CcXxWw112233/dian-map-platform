@@ -23,6 +23,7 @@ const initMap = function () {
     lastBaseMapKey: "",
     baseMapKey: "",
     operationLayers: [],
+    adcode: "",
     baseMapKeys: ["gd_vec|gd_img|gg_img", "td_vec|td_img|td_ter"],
     systemDic: {
       gd_vec: wgs84_to_gcj02,

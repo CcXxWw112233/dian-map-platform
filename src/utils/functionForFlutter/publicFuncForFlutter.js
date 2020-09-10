@@ -297,7 +297,14 @@ let callFunctions = {
 
   // 通过点搜索周围数据
   SearchForPoint: async (val) => {
-    let { position, radius = 200, locationName, type, pageSize, pageIndex} = val;
+    let {
+      position,
+      radius = 200,
+      locationName,
+      type,
+      pageSize,
+      pageIndex,
+    } = val;
     if (locationName) {
       let data = await callFunctions.getAddressForName({
         address: locationName,
@@ -312,7 +319,7 @@ let callFunctions = {
         let placeSearch = new AMap.PlaceSearch({
           pageSize: pageSize ? pageSize : 10,
           pageIndex: pageIndex ? pageIndex : 1,
-          type: type
+          type: type,
         });
         placeSearch.searchNearBy("", position, radius, (status, result) => {
           resolve(result.poiList);
@@ -326,7 +333,7 @@ let callFunctions = {
       });
       // 调用启动监听
       // callFunctions.StartMove();
-    })
+    });
     return data;
   },
 
@@ -401,7 +408,7 @@ let callFunctions = {
   },
 
   // 通过经纬度、关键字查询
-  searchNearByXY: ({ xy, keywords, radius }) => {
+  searchNearByXY: ({ xy, keywords, radius, adcode }) => {
     return new Promise((resolve, reject) => {
       let url = protocol + "//restapi.amap.com/v3/place/around";
       let params = {
@@ -410,6 +417,9 @@ let callFunctions = {
         keywords: keywords,
         radius: radius,
       };
+      if (adcode) {
+        params.city = adcode;
+      }
       axios.get(url, { params }).then((res) => {
         if (res.status === 200) {
           let data = res.data;
