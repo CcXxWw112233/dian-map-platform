@@ -29,7 +29,12 @@ export default function TrafficDetail(props){
   }
 
   const setActiveItem = (val)=>{
-    console.log(val);
+    // console.log(val);
+    let coor = [+val.location.lng, +val.location.lat];
+    let param = {
+      center: coor,
+    }
+    DetailAction.toCenter(param);
   }
 
   return (
