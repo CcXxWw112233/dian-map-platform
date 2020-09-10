@@ -173,6 +173,7 @@ export default class CollectionDetail extends React.Component{
     const { selectData } = nextProps;
     if(this.props.selectData !== selectData){
       this.InitActiveImg(nextProps);
+      this.detailBack();
     }
   }
 

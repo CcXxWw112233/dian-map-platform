@@ -79,17 +79,74 @@ function Action() {
   this.geoFeatures = [];
   this.searchAroundCircle = null;
   this.searchPageIndex = 1;
-  Event.Evt.on("transCoordinateSystems2ScoutingDetail", () => {
+  Event.Evt.addEventListener("basemapchange", (key) => {
     if (!this.mounted) return;
-    const baseMapKey = INITMAP.baseMapKey;
-    const lastBaseMapKey = INITMAP.lastBaseMapKey;
-    const baseMapKeys = INITMAP.baseMapKeys;
-    const isSame =
-      baseMapKeys[0].indexOf(baseMapKey) ===
-      baseMapKeys[0].indexOf(lastBaseMapKey);
-    if (this.currentData && this.currentSet && isSame === false) {
-      this.renderCollection(this.currentData, this.currentSet);
+    if(InitMap.checkUpdateMapSystem(key)){
+      if(this.searchAroundOverlay){
+        updateOverlayPosition();
+      }
+      let needReload = false;
+      // 此图层的纠偏操作
+      let features = this.Layer.getSource().getFeatures();
+      let dic = InitMap.systemDic[key];
+      features.forEach(item => {
+        let type = item.getGeometry().getType()
+        if( type === 'Point'){
+          let coordinate = this.transform(item.getGeometry().getCoordinates());
+          let coor = dic(coordinate[0],coordinate[1]);
+          item.getGeometry().setCoordinates(TransformCoordinate(coor));
+        }else if( type === 'Circle'){
+          let center = item.getGeometry().getCenter();
+          center = this.transform(center);
+          center = dic(center[0], center[1]);
+          center = TransformCoordinate(center);
+          item.getGeometry().setCenter(center);
+        }else if(type === 'MultiPolygon' || type === 'MultiLineString'){
+          needReload = true;
+        }
+      })
+      // 标绘图层的纠偏操作
+      if(this.layer && this.layer.showLayer && this.layer.showLayer.getSource){
+        let source = this.layer.showLayer.getSource();
+        let fs = source.getFeatures();
+
+        fs.forEach(item => {
+          let type = item.getGeometry().getType();
+          if(type === 'Point'){
+            let coor = item.getGeometry().getCoordinates();
+            item.getGeometry().setCoordinates(this.changeCoordinate(coor, dic));
+          }
+          if(type === 'Circle'){
+            let coor = item.getGeometry().getCenter();
+            item.getGeometry().setCoordinates(this.changeCoordinate(coor, dic));
+          }else if(type === 'Polygon'){
+            let coor = item.getGeometry().getCoordinates();
+            let list = coor[0];
+            list = list.map(cor => this.changeCoordinate(cor, dic));
+            item.getGeometry().setCoordinates([list]);
+          }else if(type === 'LineString'){
+            let coor = item.getGeometry().getCoordinates();
+            coor = coor.map(cor => this.changeCoordinate(cor, dic));
+            item.getGeometry().setCoordinates(coor);
+          }else if(type === 'MultiPolygon' || type === 'MultiLineString'){
+            needReload = true;
+          }
+        })
+      }
+      if(this.imgs && this.imgs.length) needReload = true;
+      if(needReload){
+        this.renderCollection(this.currentData, this.currentSet);
+      }
     }
+    // const baseMapKey = INITMAP.baseMapKey;
+    // const lastBaseMapKey = INITMAP.lastBaseMapKey;
+    // const baseMapKeys = INITMAP.baseMapKeys;
+    // const isSame =
+    //   baseMapKeys[0].indexOf(baseMapKey) ===
+    //   baseMapKeys[0].indexOf(lastBaseMapKey);
+    // if (this.currentData && this.currentSet && isSame === false) {
+    //   this.renderCollection(this.currentData, this.currentSet);
+    // }
   });
   const pointUnselect = (isMulti) =>
     createStyle("Point", {
@@ -112,6 +169,14 @@ function Action() {
       },
       iconScale: 1,
     });
+
+  this.changeCoordinate = (coordinates, dic )=>{
+    if(coordinates && dic){
+      let center = this.transform(coordinates);
+      let coor = dic(center[0], center[1]);
+      return TransformCoordinate(coor);
+    }
+  }
   this.init = (dispatch) => {
     this.mounted = true;
     this.Layer.setSource(this.Source);
@@ -2397,7 +2462,7 @@ function Action() {
   };
 
   this.searchByPosition = async ({ position, radius, type, pageIndex}) => {
-    AboutAction.init();
+    AboutAction.init(position);
     AboutAction.searchByPosition({ position, radius, type, pageIndex})
   }
 
@@ -2420,13 +2485,13 @@ function Action() {
     style.getText().setText(f);
   }
 
-  const updateOverlayPosition = (overlay, f)=>{
-    let extent = f.getGeometry().getExtent();
+  const updateOverlayPosition = ()=>{
+    let extent = this.searchAroundCircle.getGeometry().getExtent();
     let rightTop = getPoint(extent, 'topRight');
     let rightBottom = getPoint(extent, 'bottomRight');
     let point = [rightTop[0], (rightTop[1] + rightBottom[1]) / 2]
     // console.log(coor,coord,overlayElement);
-    overlay.setPosition(point);
+    this.searchAroundOverlay.setPosition(point);
   }
 
   this.setSearchIndex = (index) => {
