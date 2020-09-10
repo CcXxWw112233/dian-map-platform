@@ -33,6 +33,11 @@ const initMap = function () {
       td_img: gcj02_to_wgs84,
       td_ter: gcj02_to_wgs84,
     },
+    // 检查现在的图层是否是Gcj02类型
+    checkNowIsGcj02System: function(){
+      let arr1 = ['gd_vec','gd_img','gg_img'];
+      return arr1.includes(this.baseMapKey);
+    },
     checkUpdateMapSystem: function(to){
       let arr1 = ['gd_vec','gd_img','gg_img'];
       let arr2 = ['td_vec','td_img','td_ter'];
