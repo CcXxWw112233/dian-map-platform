@@ -58,6 +58,7 @@ export default class PublicData extends React.Component {
 
   // 区域选择同步更新该区域的选择的公共数据
   getAllData = (queryStr) => {
+    return;
     this.queryStr = queryStr;
     const { parent } = this.props;
     const list = parent.publicDataCheckedKeys || [];
@@ -203,12 +204,11 @@ export default class PublicData extends React.Component {
         const zoom = view.getZoom();
         const center = view.getCenter();
         const newCoord = TransformCoordinate(center, "EPSG:3857", "EPSG:4326");
-        let keywords = "";
+        let keywords = [];
         for (let i = 0; i < checkedNodes.length; i++) {
-          keywords += checkedNodes[i].title + "|";
-        }
-        if (keywords.length > 0) {
-          keywords = keywords.substring(0, keywords.length - 1);
+          if (checkedNodes[i].type === "3") {
+            keywords.push(checkedNodes[i].title);
+          }
         }
         let xy = newCoord[0] + "," + newCoord[1];
         if (checkedKeys.length > 0) {

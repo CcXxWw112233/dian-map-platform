@@ -23,6 +23,8 @@ import {
   wgs84_to_gcj02,
 } from "../../utils/transCoordinateSystem";
 
+import publicDataServices from "../../services/publicData";
+
 const { getFeature, GET_GEO_DATA } = publicDataUrl;
 
 const publicData = {
@@ -68,7 +70,7 @@ const publicData = {
     });
     event.Evt.on("getPoi", ({ xy, keywords }) => {
       this.source.clear();
-      this.getADPoi(xy, keywords, this.source);
+      this.getADPoi(xy, keywords, this);
     });
     // 如果有layer，就不addlayer
     let layer = mapApp.findLayerById(this.layer.get("id"));
@@ -140,6 +142,7 @@ const publicData = {
       });
       const that = this;
       mapApp.map.on("moveend", (e) => {
+        return;
         const keys = Object.keys(that.features);
         let key = null;
         for (let i = 0; i < keys.length; i++) {
@@ -251,39 +254,114 @@ const publicData = {
     }
   },
 
-  getADPoi: async (xy, keywords, source) => {
-    const res = await window.CallWebMapFunction("searchNearByXY", {
-      xy: xy,
-      keywords: keywords,
-      radius: 5000,
+  getADPoi: async (xy, keywords, that) => {
+    if (keywords.length === 0) return;
+    let keywords1 = "";
+    keywords.forEach((keyword) => {
+      keywords1 += keyword + "|";
     });
-    // 这里渲染要素、查询数据库入库
-    if (res && res.length) {
-      res.forEach((item) => {
-        const location = item.location;
-        if (location) {
-          const tmp = location.split(",");
-          const temp = [tmp[0], tmp[1]];
-          const coords = TransformCoordinate(temp, "EPSG:4326", "EPSG:3857");
-          const options = {
-            textFillColor: "#3F48CC",
-            textStrokeColor: "#fff",
-            textStrokeWidth: 3,
-            font: "13px sans-serif",
-            placement: "point",
-            iconScale: 1,
-            pointColor: "#fff",
-            showName: true,
-            text: item.name,
-            iconUrl: require("../../assets/location.svg"),
-          };
-          const style = createStyle("Point", options);
-          const feature = addFeature("Point", { coordinates: coords });
-          feature.setStyle(style);
-          source && source.addFeature(feature);
-        }
+    keywords1.substr(0, keywords1.len);
+    let keywords2 = JSON.stringify(keywords);
+    keywords2 = keywords2.replace("[", "").replace("]", "");
+    keywords2 = keywords2.replace(/\"/g, "'");
+
+    const lonlat = xy.split(",");
+    const res0 = await publicDataServices.QUERY_LOCAL_GEOM({
+      lon: lonlat[0],
+      lat: lonlat[1],
+      radius: 5000,
+      type: keywords2,
+    });
+    if (!res0.data || (res0.data && res0.data.length === 0)) {
+      const res = await window.CallWebMapFunction("searchNearByXY", {
+        xy: xy,
+        keywords: keywords1,
+        radius: 5000,
+        adcode: mapApp.adcode,
+      });
+      // 这里渲染要素、查询数据库入库
+      if (res && res.length) {
+        let promiseArr = [];
+        res.forEach((item) => {
+          const location = item.location;
+          if (location) {
+            const tmp = location.split(",");
+            const temp = [tmp[0], tmp[1]];
+            const coords = TransformCoordinate(temp, "EPSG:4326", "EPSG:3857");
+            const options = {
+              textFillColor: "#3F48CC",
+              textStrokeColor: "#fff",
+              textStrokeWidth: 3,
+              font: "13px sans-serif",
+              placement: "point",
+              iconScale: 1,
+              pointColor: "#fff",
+              showName: true,
+              text: item.name,
+              iconUrl: require("../../assets/location.svg"),
+            };
+            const style = createStyle("Point", options);
+            const feature = addFeature("Point", { coordinates: coords });
+            feature.setStyle(style);
+            that.source && that.source.addFeature(feature);
+            const typeArr = item.type.split(";");
+            const data = {
+              ad_id: item.id,
+              adcode: mapApp.adcode,
+              address: item.address,
+              citycode: mapApp.adcode,
+              cityname: item.cityname,
+              districtcode: mapApp.adcode,
+              lon: tmp[0],
+              lat: tmp[1],
+              name: item.name,
+              pname: item.pname,
+              type: item.type,
+              type1: typeArr[0],
+              type2: typeArr[1],
+              type3: typeArr[1],
+            };
+            let promise = publicDataServices.INSERT_PUBLIC_POI(data);
+            promiseArr.push(promise);
+          }
+        });
+        Promise.all(promiseArr)
+          .then((resp) => {
+            console.log("保存成功");
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }
+    } else {
+      res0.data.forEach((item) => {
+        const temp = [item.lon, item.lat];
+        const coords = TransformCoordinate(temp, "EPSG:4326", "EPSG:3857");
+        const options = {
+          textFillColor: "#3F48CC",
+          textStrokeColor: "#fff",
+          textStrokeWidth: 3,
+          font: "13px sans-serif",
+          placement: "point",
+          iconScale: 1,
+          pointColor: "#fff",
+          showName: true,
+          text: item.name,
+          iconUrl: require("../../assets/location.svg"),
+        };
+        const style = createStyle("Point", options);
+        const feature = addFeature("Point", { coordinates: coords });
+        feature.setStyle(style);
+        that.source && that.source.addFeature(feature);
       });
     }
+  },
+
+  getAdPoi2: (data) => {
+    let promise = publicDataServices.INSERT_PUBLIC_POI(data);
+    Promise.all(promise).then((resp) => {
+      console.log("保存成功");
+    });
   },
 
   //切换底图后切换坐标

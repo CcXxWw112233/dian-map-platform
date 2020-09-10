@@ -101,6 +101,7 @@ export default class Search extends React.Component {
                 adcode: res.addressComponent?.adcode,
                 locationName: locationName,
               };
+              mapApp.adcode = options.adcode;
               this.updateState(options);
             });
         }
