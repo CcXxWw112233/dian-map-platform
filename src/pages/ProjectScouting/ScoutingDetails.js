@@ -770,6 +770,7 @@ export default class ScoutingDetails extends PureComponent {
         this.hiddenDetail();
       }, 50)
       // 添加坐标点的事件
+      val.title = val.name || val.title;
       let coor = await Action.addCollectionCoordinates(false,val).catch(err => console.log(err));
       if(coor){
         coor.longitude = coor.longitude.toString();
