@@ -9,9 +9,7 @@ export default class SearchBtn extends React.Component {
       visible: false,
     };
     this.keywords = "";
-    this.xy = "";
-    Event.Evt.on("displaySearchBtn", ({ visible, keywords, xy }) => {
-      this.xy = xy;
+    Event.Evt.on("displaySearchBtn", ({ visible, keywords }) => {
       this.keywords = keywords;
       this.setState({
         visible: visible,
@@ -19,9 +17,8 @@ export default class SearchBtn extends React.Component {
     });
   }
   handleSearch = () => {
-    const xy = this.xy,
-      keywords = this.keywords;
-    Event.Evt.firEvent("getPoi", { xy: xy, keywords: keywords });
+    const keywords = this.keywords;
+    Event.Evt.firEvent("getPoi", { keywords: keywords });
   };
   render() {
     let style = {

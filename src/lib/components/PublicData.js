@@ -25,6 +25,8 @@ import {
 
 import publicDataServices from "../../services/publicData";
 
+import { message } from "antd";
+
 const { getFeature, GET_GEO_DATA } = publicDataUrl;
 
 const publicData = {
@@ -68,9 +70,9 @@ const publicData = {
       this.currentBaseMap = key;
       this.transCoordinateSystemsByChangeBaseMap();
     });
-    event.Evt.on("getPoi", ({ xy, keywords }) => {
+    event.Evt.on("getPoi", ({ keywords }) => {
       this.source.clear();
-      this.getADPoi(xy, keywords, this);
+      this.getADPoi(keywords, this);
     });
     // 如果有layer，就不addlayer
     let layer = mapApp.findLayerById(this.layer.get("id"));
@@ -254,18 +256,26 @@ const publicData = {
     }
   },
 
-  getADPoi: async (xy, keywords, that) => {
+  getADPoi: async (keywords, that) => {
+    let keys = [];
+    if (that.features) {
+      keys = Object.keys(that.features);
+    }
     if (keywords.length === 0) return;
     let keywords1 = "";
     keywords.forEach((keyword) => {
       keywords1 += keyword + "|";
+      that.features[keyword] = [];
     });
-    keywords1.substr(0, keywords1.len);
+    keywords1 = keywords1.substr(0, keywords1.length - 1);
     let keywords2 = JSON.stringify(keywords);
     keywords2 = keywords2.replace("[", "").replace("]", "");
     keywords2 = keywords2.replace(/\"/g, "'");
 
-    const lonlat = xy.split(",");
+    const view = mapApp.map.getView();
+    const center = view.getCenter();
+    const lonlat = TransformCoordinate(center, "EPSG:3857", "EPSG:4326");
+
     const res0 = await publicDataServices.QUERY_LOCAL_GEOM({
       lon: lonlat[0],
       lat: lonlat[1],
@@ -274,7 +284,7 @@ const publicData = {
     });
     if (!res0.data || (res0.data && res0.data.length === 0)) {
       const res = await window.CallWebMapFunction("searchNearByXY", {
-        xy: xy,
+        xy: `${lonlat[0]},${lonlat[1]}`,
         keywords: keywords1,
         radius: 5000,
         adcode: mapApp.adcode,
@@ -319,8 +329,13 @@ const publicData = {
               type: item.type,
               type1: typeArr[0],
               type2: typeArr[1],
-              type3: typeArr[1],
+              type3: typeArr[2],
             };
+            if (keys.includes(data.type3)) {
+              that.features[data.type3].push(feature);
+            } else {
+              that.features[data.type3].push(feature);
+            }
             let promise = publicDataServices.INSERT_PUBLIC_POI(data);
             promiseArr.push(promise);
           }
@@ -332,6 +347,8 @@ const publicData = {
           .catch((e) => {
             console.log(e);
           });
+      } else {
+        message.info("该区域未查询到数据。");
       }
     } else {
       res0.data.forEach((item) => {
@@ -353,6 +370,11 @@ const publicData = {
         const feature = addFeature("Point", { coordinates: coords });
         feature.setStyle(style);
         that.source && that.source.addFeature(feature);
+        if (keys.includes(item.type3)) {
+          this.features[item.type3].push(feature);
+        } else {
+          this.features[item.type3].push(feature);
+        }
       });
     }
   },
@@ -574,15 +596,16 @@ const publicData = {
   // 清除选到server key 图层
   removeFeatures: function (typeNames) {
     typeNames = typeof typeNames === "string" ? [typeNames] : typeNames;
+    const me = this
     if (Array.isArray(typeNames)) {
       typeNames.forEach((item) => {
-        if (this.features[item]) {
-          this.features[item].forEach((feature) => {
+        if (me.features[item]) {
+          me.features[item].forEach((feature) => {
             // 这里removeFeature有个bug，底层代码中找不到对应的feature，所以这里进行uid判断，有才执行删除
-            if (this.source.getFeatureByUid(feature.ol_uid))
-              this.source.removeFeature(feature);
+            if (me.source.getFeatureByUid(feature.ol_uid))
+            me.source.removeFeature(feature);
           });
-          this.features[item] = null;
+          me.features[item] = null;
         }
       });
     }

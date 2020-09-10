@@ -11,7 +11,7 @@ import lengedListConf from "components/LengedList/config";
 import publicDataServices from "@/services/publicData";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import mapApp from "utils/INITMAP";
-import { TransformCoordinate } from "@/lib/utils";
+
 
 @connect()
 export default class PublicData extends React.Component {
@@ -26,6 +26,7 @@ export default class PublicData extends React.Component {
     };
     this.props.onRef(this);
     this.lastSelectedKeys = [];
+    this.lastKeywords = [];
     this.AllCheckData = publicDataConf;
     this.queryStr = "";
     this.fillColor = null;
@@ -176,24 +177,8 @@ export default class PublicData extends React.Component {
     });
     return newArr;
   };
+  
   onCheck = (checkedKeys, e) => {
-    const { parent } = this.props;
-    const arr = this.getDiff(this.lastSelectedKeys, checkedKeys);
-    // 人口
-    const currentPopup = arr.filter(
-      (item) => item.indexOf("map:population:") > -1
-    )[0];
-    if (currentPopup) {
-      const allPopup = checkedKeys.filter(
-        (item) => item.indexOf("map:population:") > -1
-      );
-      const needDel = this.getDiff([currentPopup], allPopup);
-      if (needDel.length > 0) {
-        const index = checkedKeys.findIndex((item) => item === needDel[0]);
-        checkedKeys.splice(index, 1);
-      }
-    }
-    parent.publicDataCheckedKeys = checkedKeys;
     this.setState(
       {
         checkedKeys: checkedKeys,
@@ -202,40 +187,40 @@ export default class PublicData extends React.Component {
         const { checkedNodes } = e;
         const view = mapApp.map.getView();
         const zoom = view.getZoom();
-        const center = view.getCenter();
-        const newCoord = TransformCoordinate(center, "EPSG:3857", "EPSG:4326");
         let keywords = [];
         for (let i = 0; i < checkedNodes.length; i++) {
           if (checkedNodes[i].type === "3") {
             keywords.push(checkedNodes[i].title);
           }
         }
-        let xy = newCoord[0] + "," + newCoord[1];
         if (checkedKeys.length > 0) {
           if (Math.round(zoom) > 8) {
             Event.Evt.firEvent("displaySearchBtn", {
               visible: true,
               keywords: keywords,
-              xy: xy,
             });
           } else {
             Event.Evt.firEvent("displaySearchBtn", {
               visible: false,
               keywords: keywords,
-              xy: xy,
             });
           }
         } else {
           Event.Evt.firEvent("displaySearchBtn", {
             visible: false,
             keywords: keywords,
-            xy: xy,
           });
         }
+        if (this.lastSelectedKeys.length > checkedKeys.length) {
+          const arr = this.getDiff(this.lastKeywords, keywords);
+          PublicDataActions.removeFeatures(arr);
+        }
         this.lastSelectedKeys = this.state.checkedKeys;
+        this.lastKeywords = keywords;
       }
     );
   };
+
   updateLengedList = (checkedKeys) => {
     const lengedConfs = lengedListConf;
     const diffArr = this.rejectNumberFromDiff(checkedKeys);
