@@ -5,8 +5,8 @@ import config from "../../../services/scouting";
 import { dateFormat, Different } from "../../../utils/utils";
 import { Pointer as PointerInteraction } from "ol/interaction";
 // import Select from 'ol/interaction/Select';
-import {easeOut} from 'ol/easing';
-import {unByKey} from 'ol/Observable';
+import { easeOut } from "ol/easing";
+import { unByKey } from "ol/Observable";
 import InitMap from "../../../utils/INITMAP";
 import {
   drawPoint,
@@ -33,7 +33,7 @@ import {
   settingsOverlay,
   areaDetailOverlay,
   SetCoordinateForCollection,
-  DragCircleRadius
+  DragCircleRadius,
 } from "../../../components/PublicOverlays";
 import { Modify } from "ol/interaction";
 import { extend } from "ol/extent";
@@ -43,10 +43,10 @@ import { message } from "antd";
 import { createPlottingFeature, createPopupOverlay } from "./createPlotting";
 import { plotEdit } from "utils/plotEdit";
 import INITMAP from "../../../utils/INITMAP";
-import AboutAction from './AroundAbout';
+import AboutAction from "./AroundAbout";
 // import { out_of_china } from "../../../utils/transCoordinateSystem";
 import Axios from "axios";
-import Metting from './meetting';
+import Metting from "./meetting";
 import nProgress from "nprogress";
 import { getVectorContext } from "ol/render";
 import { Style, Circle, Stroke, Fill } from "ol/style";
@@ -85,60 +85,64 @@ function Action() {
   this.searchPageIndex = 1;
   Event.Evt.addEventListener("basemapchange", (key) => {
     if (!this.mounted) return;
-    if(InitMap.checkUpdateMapSystem(key)){
-      if(this.searchAroundOverlay){
+    if (InitMap.checkUpdateMapSystem(key)) {
+      if (this.searchAroundOverlay) {
         updateOverlayPosition();
       }
       let needReload = false;
       // 此图层的纠偏操作
       let features = this.Layer.getSource().getFeatures();
       let dic = InitMap.systemDic[key];
-      features.forEach(item => {
-        let type = item.getGeometry().getType()
-        if( type === 'Point'){
+      features.forEach((item) => {
+        let type = item.getGeometry().getType();
+        if (type === "Point") {
           let coordinate = this.transform(item.getGeometry().getCoordinates());
-          let coor = dic(coordinate[0],coordinate[1]);
+          let coor = dic(coordinate[0], coordinate[1]);
           item.getGeometry().setCoordinates(TransformCoordinate(coor));
-        }else if( type === 'Circle'){
+        } else if (type === "Circle") {
           let center = item.getGeometry().getCenter();
           center = this.transform(center);
           center = dic(center[0], center[1]);
           center = TransformCoordinate(center);
           item.getGeometry().setCenter(center);
-        }else if(type === 'MultiPolygon' || type === 'MultiLineString'){
+        } else if (type === "MultiPolygon" || type === "MultiLineString") {
           needReload = true;
         }
-      })
+      });
       // 标绘图层的纠偏操作
-      if(this.layer && this.layer.showLayer && this.layer.showLayer.getSource){
+      if (
+        this.layer &&
+        this.layer.showLayer &&
+        this.layer.showLayer.getSource
+      ) {
         let source = this.layer.showLayer.getSource();
         let fs = source.getFeatures();
 
-        fs.forEach(item => {
+        fs.forEach((item) => {
           let type = item.getGeometry().getType();
-          if(type === 'Point'){
+          if (type === "Point") {
             let coor = item.getGeometry().getCoordinates();
             item.getGeometry().setCoordinates(this.changeCoordinate(coor, dic));
           }
-          if(type === 'Circle'){
+          if (type === "Circle") {
             let coor = item.getGeometry().getCenter();
             item.getGeometry().setCoordinates(this.changeCoordinate(coor, dic));
-          }else if(type === 'Polygon'){
+          } else if (type === "Polygon") {
             let coor = item.getGeometry().getCoordinates();
             let list = coor[0];
-            list = list.map(cor => this.changeCoordinate(cor, dic));
+            list = list.map((cor) => this.changeCoordinate(cor, dic));
             item.getGeometry().setCoordinates([list]);
-          }else if(type === 'LineString'){
+          } else if (type === "LineString") {
             let coor = item.getGeometry().getCoordinates();
-            coor = coor.map(cor => this.changeCoordinate(cor, dic));
+            coor = coor.map((cor) => this.changeCoordinate(cor, dic));
             item.getGeometry().setCoordinates(coor);
-          }else if(type === 'MultiPolygon' || type === 'MultiLineString'){
+          } else if (type === "MultiPolygon" || type === "MultiLineString") {
             needReload = true;
           }
-        })
+        });
       }
-      if(this.imgs && this.imgs.length) needReload = true;
-      if(needReload){
+      if (this.imgs && this.imgs.length) needReload = true;
+      if (needReload) {
         this.renderCollection(this.currentData, this.currentSet);
       }
     }
@@ -174,13 +178,13 @@ function Action() {
       iconScale: 1,
     });
 
-  this.changeCoordinate = (coordinates, dic )=>{
-    if(coordinates && dic){
+  this.changeCoordinate = (coordinates, dic) => {
+    if (coordinates && dic) {
       let center = this.transform(coordinates);
       let coor = dic(center[0], center[1]);
       return TransformCoordinate(coor);
     }
-  }
+  };
   this.init = (dispatch) => {
     this.mounted = true;
     this.Layer.setSource(this.Source);
@@ -204,7 +208,7 @@ function Action() {
             this.handleFeatureCollectionPoint(obj.feature);
             Event.Evt.firEvent(
               "handleCollectionFeature",
-              obj.feature.get("data"),
+              obj.feature.get("data")
             );
           }
         }
@@ -332,10 +336,10 @@ function Action() {
   const Drag = /*@__PURE__*/ (function (PointerInteraction) {
     function Drag() {
       PointerInteraction.call(this, {
-        handleDownEvent: () => { }, //handleDownEvent
-        handleDragEvent: () => { }, //handleDragEvent,
-        handleMoveEvent: () => { }, //handleMoveEvent,
-        handleUpEvent: () => { }, //handleUpEvent,
+        handleDownEvent: () => {}, //handleDownEvent
+        handleDragEvent: () => {}, //handleDragEvent,
+        handleMoveEvent: () => {}, //handleMoveEvent,
+        handleUpEvent: () => {}, //handleUpEvent,
       });
 
       /**
@@ -397,10 +401,10 @@ function Action() {
             crossOrigin: "anonymous",
             anchor: [0.5, 0.8],
           },
-          text:isMultiple ? 'point' : data.title ,
+          text: isMultiple ? "point" : data.title,
           showName: true,
-          textFillColor: isMultiple ? 'rgba(0,0,0,0)': "#ff0000",
-          textStrokeColor: isMultiple ? 'rgba(0,0,0,0)': "#ffffff",
+          textFillColor: isMultiple ? "rgba(0,0,0,0)" : "#ff0000",
+          textStrokeColor: isMultiple ? "rgba(0,0,0,0)" : "#ffffff",
           zIndex: 22,
         });
         let f = addFeature("Point", {
@@ -602,7 +606,7 @@ function Action() {
       style.setZIndex(1);
       // style.getImage().getFill().setColor("#577DFF");
       // style.getImage().setRadius(9);
-      style.setImage(pointUnselect().getImage())
+      style.setImage(pointUnselect().getImage());
       item.setStyle(style);
     });
     if (!data) return;
@@ -623,7 +627,7 @@ function Action() {
       if (style.getImage()) {
         // style.getImage().getFill().setColor("#FE2042");
         // style.getImage().setRadius(12);
-        style.setImage(pointSelect().getImage())
+        style.setImage(pointSelect().getImage());
       }
       item.setStyle(style);
     });
@@ -665,7 +669,7 @@ function Action() {
           text: "回看集合点",
           offsetY: -30,
           icon: {
-            src: require('../../../assets/unselectlocation.png'),
+            src: require("../../../assets/unselectlocation.png"),
             anchor: [0.5, 0.8],
             crossOrigin: "anonymous",
           },
@@ -811,6 +815,7 @@ function Action() {
         this.layer.projectScoutingArr.forEach((item) => {
           INITMAP.map.removeOverlay(item.feature && item.feature.overlay);
           if (item.feature) this.layer.removeFeature(item);
+          this.selectedFeatureOperator = null;
         });
       this.layer.projectScoutingArr = [];
     }
@@ -900,7 +905,7 @@ function Action() {
         ftype: "collection",
         data: coordinate[item],
         multi: coordinate[item].length > 1,
-        ...coordinate[item][0] || null
+        ...(coordinate[item][0] || null),
       });
       let style = createStyle("Point", moreStyle());
 
@@ -928,7 +933,7 @@ function Action() {
     feature.hasPopup = false;
     const plot = feature?.getGeometry();
     // if (plot && !plot.isActive) {
-      if (plot) {
+    if (plot) {
       plot.updatePlot(true);
       feature.isScouting = true;
       // this.layer.plotEdit.activate(feature);
@@ -973,8 +978,8 @@ function Action() {
 
   this.handlePlotClick = (feature, pixel) => {
     if (this.isActivity) return;
-    Event.Evt.firEvent('handleFeatureToLeftMenu', feature.get('id'));
-    Event.Evt.firEvent('handlePlotFeature', { feature, pixel })
+    Event.Evt.firEvent("handleFeatureToLeftMenu", feature.get("id"));
+    Event.Evt.firEvent("handlePlotFeature", { feature, pixel });
     return;
     createPopupOverlay(feature, pixel);
   };
@@ -1111,8 +1116,8 @@ function Action() {
             borderColor: strokeColor,
             font:
               content.selectName === "自定义类型" ||
-                content.selectName === "" ||
-                !content.selectName
+              content.selectName === "" ||
+              !content.selectName
                 ? item.title
                 : content.selectName,
             type: featureLowerType,
@@ -1546,7 +1551,9 @@ function Action() {
             // 等待视图移动到合适地点
             let center = getPoint(box.getGeometry().getExtent(), "center");
             await animate({ center: center });
-            let resp = await GET_PLAN_PIC(collection.content || collection.resource_id);
+            let resp = await GET_PLAN_PIC(
+              collection.content || collection.resource_id
+            );
             let respdata = resp.data;
             let imgUrl = PLAN_IMG_URL(respdata.id);
             // 隐藏页面中的元素
@@ -1792,7 +1799,6 @@ function Action() {
     // });
   };
 
-
   // 设置overlay层叠问题
   this.editZIndexOverlay = (id) => {
     let overlay = InitMap.map.getOverlayById(id);
@@ -1844,7 +1850,7 @@ function Action() {
       };
     }
     if (ele.video) {
-      ele.video.onplay = (e) => { };
+      ele.video.onplay = (e) => {};
     }
 
     ele.on = {
@@ -2291,7 +2297,7 @@ function Action() {
   };
 
   this.handleFeatureCollectionPoint = (feature) => {
-    Event.Evt.firEvent('handleFeatureToLeftMenu', feature.get('id'));
+    Event.Evt.firEvent("handleFeatureToLeftMenu", feature.get("id"));
     this.clearSelectPoint();
     if (feature) {
       let style = feature.getStyle();
@@ -2305,15 +2311,15 @@ function Action() {
       let source = this.layer.showLayer.getSource();
       return source.getFeaturesAtCoordinate(coor);
     }
-    return []
-  }
+    return [];
+  };
   this.getFeatureByCoordinate = (coor) => {
     coor = TransformCoordinate(coor);
     return this.Source.getFeaturesAtCoordinate(coor);
-  }
+  };
   this.getFeatureById = (id) => {
-    return this.features.find(item => item.get('id') === id);
-  }
+    return this.features.find((item) => item.get("id") === id);
+  };
   // 点的数据选中状态
   this.handleCollectionPoint = (data) => {
     // console.log(data);
@@ -2334,7 +2340,7 @@ function Action() {
         feature.forEach((item) => {
           let fstyle = item.getStyle();
           fstyle.setZIndex(50);
-          fstyle.setImage(pointSelect(item.get('multi')).getImage());
+          fstyle.setImage(pointSelect(item.get("multi")).getImage());
           item.setStyle(fstyle);
         });
       }
@@ -2382,29 +2388,36 @@ function Action() {
    * @param transform 传入的坐标点是否需要转换，EPSG:3857 - EPSG:4326
    * @param name 点的名称
    */
-  this.addAnimatePoint = ({ duration = 2000, inOrOut = "out", feature, coordinates, transform = true, name}) => {
-    if(!feature) {
-      if(transform){
+  this.addAnimatePoint = ({
+    duration = 2000,
+    inOrOut = "out",
+    feature,
+    coordinates,
+    transform = true,
+    name,
+  }) => {
+    if (!feature) {
+      if (transform) {
         coordinates = TransformCoordinate(coordinates);
       }
-      feature = addFeature('Point', {coordinates});
-      let fstyle = createStyle('Point',{
+      feature = addFeature("Point", { coordinates });
+      let fstyle = createStyle("Point", {
         radius: 8,
         opacity: 1,
-        fillColor: 'rgba(254, 32, 66, 1)',
+        fillColor: "rgba(254, 32, 66, 1)",
         strokeColor: "#ffffff",
         showName: true,
         text: name,
-        textFillColor:"#ff0000",
+        textFillColor: "#ff0000",
         font: 14,
-        textStrokeColor:"#ffffff",
-        zIndex: 40
-      })
-      feature.setStyle(fstyle)
+        textStrokeColor: "#ffffff",
+        zIndex: 40,
+      });
+      feature.setStyle(fstyle);
       this.Source.addFeature(feature);
-    };
+    }
     let start = new Date().getTime();
-    const animate = (event)=>{
+    const animate = (event) => {
       let vectorContext = getVectorContext(event);
       let frameState = event.frameState;
       let flashGeom = feature.getGeometry().clone();
@@ -2420,24 +2433,24 @@ function Action() {
           }),
           stroke: new Stroke({
             color: `rgba(75, 122, 255,${opacity})`,
-            width: 0.25 + opacity
-          })
-        })
-      })
+            width: 0.25 + opacity,
+          }),
+        }),
+      });
       let s = feature.getStyle();
       s.getImage().setOpacity(opacity);
       feature.setStyle(s);
       vectorContext.setStyle(style);
       vectorContext.drawGeometry(flashGeom);
-      if(elapsed > duration){
+      if (elapsed > duration) {
         unByKey(listenerKey);
         this.Source.removeFeature(feature);
         InitMap.map.render();
-        return ;
+        return;
       }
       InitMap.map.render();
-    }
-    let listenerKey = this.Layer.on('postrender', animate);
+    };
+    let listenerKey = this.Layer.on("postrender", animate);
   };
 
   // 更新江西数据的临时方法
@@ -2529,10 +2542,10 @@ function Action() {
     }
   };
 
-  this.searchByPosition = async ({ position, radius, type, pageIndex}) => {
+  this.searchByPosition = async ({ position, radius, type, pageIndex }) => {
     AboutAction.init(position);
-    AboutAction.searchByPosition({ position, radius, type, pageIndex})
-  }
+    AboutAction.searchByPosition({ position, radius, type, pageIndex });
+  };
 
   // this.renderSearchPoint = (data)=>{
   //   console.log(data);
@@ -2540,56 +2553,65 @@ function Action() {
 
   this.formatUnit = (size) => {
     if (size) {
-      return size < 1000 ? size.toFixed(2) + '米' : (size/ 1000).toFixed(2) + '千米';
+      return size < 1000
+        ? size.toFixed(2) + "米"
+        : (size / 1000).toFixed(2) + "千米";
     }
     return null;
-  }
+  };
 
-
-  const updateRadius = (feature, radius)=> {
+  const updateRadius = (feature, radius) => {
     let f = this.formatUnit(radius);
     feature.getGeometry().setRadius(radius);
     let style = feature.getStyle();
     style.getText().setText(f);
-  }
+  };
 
-  const updateOverlayPosition = ()=>{
+  const updateOverlayPosition = () => {
     let extent = this.searchAroundCircle.getGeometry().getExtent();
-    let rightTop = getPoint(extent, 'topRight');
-    let rightBottom = getPoint(extent, 'bottomRight');
-    let point = [rightTop[0], (rightTop[1] + rightBottom[1]) / 2]
+    let rightTop = getPoint(extent, "topRight");
+    let rightBottom = getPoint(extent, "bottomRight");
+    let point = [rightTop[0], (rightTop[1] + rightBottom[1]) / 2];
     // console.log(coor,coord,overlayElement);
     this.searchAroundOverlay.setPosition(point);
-  }
+  };
 
   this.setSearchIndex = (index) => {
     this.searchPageIndex = index;
-  }
+  };
 
-  this.updateSearch = (id, type, index)=>{
-    let sFeature = this.features.find(item => item.get('id') === id);
+  this.updateSearch = (id, type, index) => {
+    let sFeature = this.features.find((item) => item.get("id") === id);
     let coordinates = [];
-    if(sFeature){
+    if (sFeature) {
       coordinates = sFeature.getGeometry().getCoordinates();
     }
-    this.searchByPosition({position: coordinates, radius: this.circleRadius, type: type, pageIndex: index});
-  }
+    this.searchByPosition({
+      position: coordinates,
+      radius: this.circleRadius,
+      type: type,
+      pageIndex: index,
+    });
+  };
   // 添加周边搜索
-  this.addSearchAround = ({ id, feature, stype ='高速路入口'}) => {
+  this.addSearchAround = ({ id, feature, stype = "高速路入口" }) => {
     let sFeature = null;
     if (id) {
-      sFeature = this.features.find(item => item.get('id') === id);
+      sFeature = this.features.find((item) => item.get("id") === id);
     } else if (feature) {
       sFeature = feature;
     } else return false;
     if (sFeature) {
       let geometry = sFeature.getGeometry();
       let type = geometry.getType();
-      if (type === 'Point') {
+      if (type === "Point") {
         let defaultRadius = 8 * 1000;
         this.circleRadius = defaultRadius;
         let coordinates = geometry.getCoordinates();
-        let f = addFeature('defaultCircle', { coordinates, radius: defaultRadius });
+        let f = addFeature("defaultCircle", {
+          coordinates,
+          radius: defaultRadius,
+        });
         let style = createStyle("Circle", {
           fillColor: "rgba(193, 232, 255, 0.3)",
           strokeColor: "rgba(99, 199, 255, 0.5)",
@@ -2600,15 +2622,24 @@ function Action() {
           offsetY: 0,
           textFillColor: "#ff0000",
           textStrokeColor: "#ffffff",
-          textStrokeWidth: 2
-        })
+          textStrokeWidth: 2,
+        });
         f.setStyle(style);
         this.searchAroundCircle = f;
         this.Source.addFeature(this.searchAroundCircle);
-        let ele = new DragCircleRadius({ format: this.formatUnit(defaultRadius) });
-        this.searchAroundOverlay = createOverlay(ele.element, { offset: [-20, 0] });
+        let ele = new DragCircleRadius({
+          format: this.formatUnit(defaultRadius),
+        });
+        this.searchAroundOverlay = createOverlay(ele.element, {
+          offset: [-20, 0],
+        });
         // 启动搜索功能
-        this.searchByPosition({position: coordinates, radius: defaultRadius, type: stype, pageIndex: this.searchPageIndex})
+        this.searchByPosition({
+          position: coordinates,
+          radius: defaultRadius,
+          type: stype,
+          pageIndex: this.searchPageIndex,
+        });
         updateOverlayPosition(this.searchAroundOverlay, f);
 
         InitMap.map.addOverlay(this.searchAroundOverlay);
@@ -2623,21 +2654,25 @@ function Action() {
             var pixel = [evt.clientX, _pixel[1]];
             coord = InitMap.map.getCoordinateFromPixel(pixel);
             radius = coord[0] - coordinates[0];
-            if(radius <= 5 *100 || radius > 50000){
-
-              return ;
+            if (radius <= 5 * 100 || radius > 50000) {
+              return;
             }
             this.circleRadius = radius;
             this.searchAroundOverlay.setPosition(coord);
-            let text = this.formatUnit(radius)
+            let text = this.formatUnit(radius);
             ele.updateRadius(text);
             updateRadius(f, radius);
           },
           mouseUp: async () => {
-            this.searchByPosition({position: coordinates, radius, type: stype, pageIndex: this.searchPageIndex})
+            this.searchByPosition({
+              position: coordinates,
+              radius,
+              type: stype,
+              pageIndex: this.searchPageIndex,
+            });
             Fit(InitMap.view, f.getGeometry().getExtent(), { duration: 300 });
           },
-          change: (text)=>{
+          change: (text) => {
             let t = +text;
             radius = t;
             this.circleRadius = radius;
@@ -2645,32 +2680,35 @@ function Action() {
             ele.updateRadius(this.formatUnit(t));
             updateOverlayPosition(this.searchAroundOverlay, f);
             Fit(InitMap.view, f.getGeometry().getExtent(), { duration: 300 });
-            this.searchByPosition({position: coordinates, radius: t, type: stype, pageIndex: this.searchPageIndex})
-          }
-        }
-      }
-      else
-      {
-        message.warn('暂时只支持坐标点的周边查询');
+            this.searchByPosition({
+              position: coordinates,
+              radius: t,
+              type: stype,
+              pageIndex: this.searchPageIndex,
+            });
+          },
+        };
+      } else {
+        message.warn("暂时只支持坐标点的周边查询");
         return false;
       }
 
       Fit(InitMap.view, this.searchAroundCircle.getGeometry().getExtent(), {
         size: InitMap.map.getSize(),
         padding: fitPadding,
-        duration: 300
-      })
+        duration: 300,
+      });
       return true;
     }
-  }
+  };
   this.cancelSearchAround = () => {
-    if(!this.searchAroundCircle) return ;
+    if (!this.searchAroundCircle) return;
     if (this.Source.getFeatureByUid(this.searchAroundCircle.ol_uid)) {
       this.Source.removeFeature(this.searchAroundCircle);
-      AboutAction.clearLine()
+      AboutAction.clearLine();
     }
-    InitMap.map.removeOverlay(this.searchAroundOverlay)
-  }
+    InitMap.map.removeOverlay(this.searchAroundOverlay);
+  };
 }
 
 let action = new Action();
