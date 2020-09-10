@@ -314,7 +314,7 @@ const publicData = {
             const data = {
               ad_id: item.id,
               adcode: mapApp.adcode,
-              address: item.address,
+              address: JSON.stringify(item.address),
               citycode: mapApp.adcode,
               cityname: item.cityname,
               districtcode: mapApp.adcode,
@@ -332,6 +332,9 @@ const publicData = {
               const feature = addFeature("Point", { coordinates: coords });
               feature.setStyle(style);
               that.source && that.source.addFeature(feature);
+              if (!that.features[data.type]) {
+                that.features[data.type] = [];
+              }
               that.features[data.type3].push(feature);
             }
             let promise = publicDataServices.INSERT_PUBLIC_POI(data);
