@@ -397,11 +397,11 @@ function Action() {
             crossOrigin: "anonymous",
             anchor: [0.5, 0.8],
           },
-          text: !isMultiple && data.title,
-          showName: !isMultiple,
-          textFillColor: "#ff0000",
-          textStrokeColor: "#ffffff",
-          zIndex: 20,
+          text:isMultiple ? 'point' : data.title ,
+          showName: true,
+          textFillColor: isMultiple ? 'rgba(0,0,0,0)': "#ff0000",
+          textStrokeColor: isMultiple ? 'rgba(0,0,0,0)': "#ffffff",
+          zIndex: 22,
         });
         let f = addFeature("Point", {
           coordinates: coordinate,
@@ -2382,7 +2382,7 @@ function Action() {
    * @param transform 传入的坐标点是否需要转换，EPSG:3857 - EPSG:4326
    * @param name 点的名称
    */
-  this.addAnimatePoint = ({ duration = 3000, inOrOut = "out", feature, coordinates, transform = true, name}) => {
+  this.addAnimatePoint = ({ duration = 2000, inOrOut = "out", feature, coordinates, transform = true, name}) => {
     if(!feature) {
       if(transform){
         coordinates = TransformCoordinate(coordinates);
