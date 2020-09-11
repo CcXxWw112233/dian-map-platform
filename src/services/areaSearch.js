@@ -54,9 +54,4 @@ export default {
     }
     return Promise.reject(response && response.data);
   },
-
-  GET_CITY: async (lon, lat) => {
-    let res = await window.CallWebMapFunction("getCityByLonLat", { lon, lat });
-    
-  },
 };

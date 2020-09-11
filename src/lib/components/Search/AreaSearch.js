@@ -37,6 +37,7 @@ function Action() {
   };
   // 市
   this.getCity = async (province) => {
+    debugger
     return await GET_CITY(province);
   };
   // 县
