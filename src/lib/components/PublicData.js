@@ -281,6 +281,7 @@ const publicData = {
       lat: lonlat[1],
       radius: 5000,
       type: keywords2,
+      adcode: mapApp.adcode,
     });
     if (!res0.data || (res0.data && res0.data.length === 0)) {
       const res = await window.CallWebMapFunction("searchNearByXY", {

@@ -88,21 +88,23 @@ export default class Search extends React.Component {
               lat: newCoord[1],
             })
             .then((res) => {
-              let locationName = "";
-              if (Math.round(zoom) <= 8) {
-                locationName = "全国";
-              } else if (Math.round(zoom) > 8 && Math.round(zoom) <= 12) {
-                locationName = res.addressComponent.province;
-              } else {
-                locationName = res.addressComponent.city;
+              if (res) {
+                let locationName = "";
+                if (Math.round(zoom) <= 8) {
+                  locationName = "全国";
+                } else if (Math.round(zoom) > 8 && Math.round(zoom) <= 12) {
+                  locationName = res.addressComponent.province;
+                } else {
+                  locationName = res.addressComponent.city;
+                }
+                const options = {
+                  type: "districtcode",
+                  adcode: res.addressComponent?.adcode,
+                  locationName: locationName,
+                };
+                mapApp.adcode = options.adcode;
+                this.updateState(options);
               }
-              const options = {
-                type: "districtcode",
-                adcode: res.addressComponent?.adcode,
-                locationName: locationName,
-              };
-              mapApp.adcode = options.adcode;
-              this.updateState(options);
             });
         }
       });
