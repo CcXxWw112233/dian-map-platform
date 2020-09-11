@@ -408,7 +408,7 @@ let callFunctions = {
   },
 
   // 通过经纬度、关键字查询
-  searchNearByXY: ({ xy, keywords, radius, adcode }) => {
+  searchNearByXY: ({ xy, keywords, radius, adcode, page }) => {
     return new Promise((resolve, reject) => {
       let url = protocol + "//restapi.amap.com/v3/place/around";
       let params = {
@@ -420,6 +420,9 @@ let callFunctions = {
       if (adcode) {
         params.city = adcode;
       }
+      if (page) {
+        params.page = page;
+      }
       axios.get(url, { params }).then((res) => {
         if (res.status === 200) {
           let data = res.data;
@@ -430,6 +433,33 @@ let callFunctions = {
       });
     });
   },
+
+    // 通过经纬度、关键字查询
+    searchNearByXY2: ({ xy, keywords, radius, adcode, page }) => {
+      return new Promise((resolve, reject) => {
+        let url = protocol + "//restapi.amap.com/v3/place/around";
+        let params = {
+          key: baseConfig.GAODE_SERVER_APP_KEY,
+          location: xy,
+          keywords: keywords,
+          radius: radius,
+        };
+        if (adcode) {
+          params.city = adcode;
+        }
+        if (page) {
+          params.page = page;
+        }
+        axios.get(url, { params }).then((res) => {
+          if (res.status === 200) {
+            let data = res.data;
+            resolve(data);
+          } else {
+            reject(res);
+          }
+        });
+      });
+    },
 
   // 根据经纬度获取所在城市
   getCityByLonLat: ({ lon, lat }) => {
