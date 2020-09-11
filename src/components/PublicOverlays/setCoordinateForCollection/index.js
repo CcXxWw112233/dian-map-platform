@@ -23,7 +23,7 @@ export default function setCoordinateForCollection(){
         </label>
       </div>
       <div class="${styles.fildset}">
-        <span class="${styles.lenged}">维度</span>
+        <span class="${styles.lenged}">纬度</span>
         <label>
           <input type='text' id="latitude"/>
         </label>
