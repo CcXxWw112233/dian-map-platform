@@ -303,11 +303,11 @@ const publicData = {
         //   that.features[item.type3] = [];
         // }
 
-        const style = createStyle("Point", options);
-        const feature = addFeature("Point", { coordinates: coords });
-        feature.setStyle(style);
-        that.source && that.source.addFeature(feature);
         if (keys.includes(item.type3)) {
+          const style = createStyle("Point", options);
+          const feature = addFeature("Point", { coordinates: coords });
+          feature.setStyle(style);
+          that.source && that.source.addFeature(feature);
           that.features[item.type3].push(feature);
         }
       });
