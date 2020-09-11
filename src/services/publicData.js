@@ -36,10 +36,10 @@ export default {
   },
 
   // 周边查询
-  QUERY_LOCAL_GEOM: async ({ lon, lat, radius, type, adcode }) => {
+  QUERY_LOCAL_GEOM: async ({ lon, lat, radius, type, adcode, key }) => {
     let response = await request(
       "GET",
-      `/map/ad_poi/list?lon=${lon}&lat=${lat}&radii=${radius}&type=${type}&adcode=${adcode}`
+      `/map/ad_poi/list?lon=${lon}&lat=${lat}&radii=${radius}&type=${type}&adcode=${adcode}&key=${key}`
     );
     if (BASIC.checkResponse(response)) {
       return response.data;
