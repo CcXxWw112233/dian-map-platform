@@ -262,6 +262,10 @@ const publicData = {
     if (that.features) {
       keys = Object.keys(that.features);
     }
+    keys = keywords;
+    keys.forEach((item) => {
+      that.features[item] = [];
+    });
     if (keywords.length === 0) return;
     let keywords2 = JSON.stringify(keywords);
     keywords2 = keywords2.replace("[", "").replace("]", "");
@@ -279,7 +283,7 @@ const publicData = {
       adcode: mapApp.adcode,
       key: baseConfig.GAODE_SERVER_APP_KEY,
     });
-    if (!res.data || (res.data && res.data.length === 0)) {
+    if (res.code === "0") {
       res.data.forEach((item) => {
         const temp = [item.lon, item.lat];
         const coords = TransformCoordinate(temp, "EPSG:4326", "EPSG:3857");
@@ -295,11 +299,15 @@ const publicData = {
           text: item.name,
           iconUrl: require("../../assets/location.svg"),
         };
+        // if (!keys.includes(item.type3)) {
+        //   that.features[item.type3] = [];
+        // }
+
+        const style = createStyle("Point", options);
+        const feature = addFeature("Point", { coordinates: coords });
+        feature.setStyle(style);
+        that.source && that.source.addFeature(feature);
         if (keys.includes(item.type3)) {
-          const style = createStyle("Point", options);
-          const feature = addFeature("Point", { coordinates: coords });
-          feature.setStyle(style);
-          that.source && that.source.addFeature(feature);
           that.features[item.type3].push(feature);
         }
       });
