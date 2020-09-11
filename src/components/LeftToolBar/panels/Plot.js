@@ -165,7 +165,6 @@ const SymbolBlock = ({
   );
 };
 
-
 export default class Plot extends PureComponent {
   constructor(props) {
     super(props);
@@ -597,7 +596,9 @@ export default class Plot extends PureComponent {
 
   updateStateCallbackFunc = () => {
     const { parent } = this.props;
-    this.createPlotName();
+    if (!parent.isModifyPlot) {
+      this.createPlotName();
+    }
     if (
       this.props.plotType === "freeLine" ||
       this.props.plotType === "freePolygon"
@@ -787,7 +788,14 @@ export default class Plot extends PureComponent {
       } else {
         this.symbol = typeItem.color || typeItem.imageUrl;
       }
-      this.createPlotName();
+      const { parent } = this.props;
+      if (
+        parent.isModifyPlot &&
+        this.selectName === window.featureOperator.attrs.selectName
+      ) {
+      } else {
+        this.createPlotName();
+      }
     }
     let iconUrl = "";
     if (this.symbol.indexOf("rgb") > -1) {
@@ -930,7 +938,6 @@ export default class Plot extends PureComponent {
         this.symbol = this.refs.defaultSymbol.innerText;
       }
     }
-    this.createPlotName();
     this.setState(
       {
         strokeSelectedIndex: -1,
@@ -959,7 +966,6 @@ export default class Plot extends PureComponent {
         this.selectName = "自定义类型";
       }
     }
-    this.createPlotName();
     this.setState(
       {
         fillSelectedIndex: -1,
