@@ -262,12 +262,6 @@ const publicData = {
       keys = Object.keys(that.features);
     }
     if (keywords.length === 0) return;
-    let keywords1 = "";
-    keywords.forEach((keyword) => {
-      keywords1 += keyword + "|";
-      that.features[keyword] = [];
-    });
-    keywords1 = keywords1.substr(0, keywords1.length - 1);
     let keywords2 = JSON.stringify(keywords);
     keywords2 = keywords2.replace("[", "").replace("]", "");
     keywords2 = keywords2.replace(/\"/g, "");
@@ -276,84 +270,15 @@ const publicData = {
     const center = view.getCenter();
     const lonlat = TransformCoordinate(center, "EPSG:3857", "EPSG:4326");
 
-    const res0 = await publicDataServices.QUERY_LOCAL_GEOM({
+    const res = await publicDataServices.QUERY_LOCAL_GEOM({
       lon: lonlat[0],
       lat: lonlat[1],
       radius: 5000,
       type: keywords2,
       adcode: mapApp.adcode,
     });
-    if (!res0.data || (res0.data && res0.data.length === 0)) {
-      const res = await window.CallWebMapFunction("searchNearByXY", {
-        xy: `${lonlat[0]},${lonlat[1]}`,
-        keywords: keywords1,
-        radius: 5000,
-        adcode: mapApp.adcode,
-      });
-      // 这里渲染要素、查询数据库入库
-      if (res && res.length) {
-        let promiseArr = [];
-        res.forEach((item) => {
-          const location = item.location;
-          if (location) {
-            const tmp = location.split(",");
-            const temp = [tmp[0], tmp[1]];
-            const coords = TransformCoordinate(temp, "EPSG:4326", "EPSG:3857");
-            const options = {
-              textFillColor: "#3F48CC",
-              textStrokeColor: "#fff",
-              textStrokeWidth: 3,
-              font: "13px sans-serif",
-              placement: "point",
-              iconScale: 1,
-              pointColor: "#fff",
-              showName: true,
-              text: item.name,
-              iconUrl: require("../../assets/location.svg"),
-            };
-            const typeArr = item.type.split(";");
-            const data = {
-              ad_id: item.id,
-              adcode: mapApp.adcode,
-              address: JSON.stringify(item.address),
-              citycode: mapApp.adcode,
-              cityname: item.cityname,
-              districtcode: mapApp.adcode,
-              lon: tmp[0],
-              lat: tmp[1],
-              name: item.name,
-              pname: item.pname,
-              type: item.type,
-              type1: typeArr[0],
-              type2: typeArr[1],
-              type3: typeArr[2],
-            };
-            if (keys.includes(data.type3)) {
-              const style = createStyle("Point", options);
-              const feature = addFeature("Point", { coordinates: coords });
-              feature.setStyle(style);
-              that.source && that.source.addFeature(feature);
-              if (!that.features[data.type]) {
-                that.features[data.type] = [];
-              }
-              that.features[data.type3].push(feature);
-            }
-            let promise = publicDataServices.INSERT_PUBLIC_POI(data);
-            promiseArr.push(promise);
-          }
-        });
-        Promise.all(promiseArr)
-          .then((resp) => {
-            console.log("保存成功");
-          })
-          .catch((e) => {
-            console.log(e);
-          });
-      } else {
-        message.info("该区域未查询到数据。");
-      }
-    } else {
-      res0.data.forEach((item) => {
+    if (!res.data || (res.data && res.data.length === 0)) {
+      res.data.forEach((item) => {
         const temp = [item.lon, item.lat];
         const coords = TransformCoordinate(temp, "EPSG:4326", "EPSG:3857");
         const options = {
