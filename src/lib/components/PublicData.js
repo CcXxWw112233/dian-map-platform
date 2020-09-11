@@ -26,6 +26,7 @@ import {
 import publicDataServices from "../../services/publicData";
 
 import { message } from "antd";
+import { baseConfig } from "../../globalSet/config";
 
 const { getFeature, GET_GEO_DATA } = publicDataUrl;
 
@@ -276,6 +277,7 @@ const publicData = {
       radius: 5000,
       type: keywords2,
       adcode: mapApp.adcode,
+      key: baseConfig.GAODE_SERVER_APP_KEY,
     });
     if (!res.data || (res.data && res.data.length === 0)) {
       res.data.forEach((item) => {
