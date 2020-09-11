@@ -34,6 +34,7 @@ instance.interceptors.response.use(config => {
   NProgress.done();
   if(data.code === BASIC.TOKEN_AUTH_ERROR){
     clearTimeout(responseTimer);
+    if(BASIC.getUrlParam.isMobile === "1") return {};
     responseTimer = setTimeout(()=>{
       message.error('权限不足，请重新登录');
       // 调用灵犀
@@ -55,6 +56,7 @@ instance.interceptors.response.use(config => {
   if(err && err.response ){
     if(err.response.status === BASIC.SERVER_ERROR){
       clearTimeout(responseTimer);
+      if(BASIC.getUrlParam.isMobile === "1") return {};
       responseTimer = setTimeout(()=>{
         message.error('系统繁忙,请稍后再试')
       },1000)
@@ -63,6 +65,7 @@ instance.interceptors.response.use(config => {
     // eslint-disable-next-line eqeqeq
     if(err.response.status == BASIC.TOKEN_AUTH_ERROR){
       clearTimeout(responseTimer);
+      if(BASIC.getUrlParam.isMobile === "1") return {};
       responseTimer = setTimeout(()=>{
         message.error('权限不足，请重新登录');
       }, 1000)
