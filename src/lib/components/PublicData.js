@@ -259,9 +259,9 @@ const publicData = {
 
   getADPoi: async (keywords, that) => {
     let keys = [];
-    if (that.features) {
-      keys = Object.keys(that.features);
-    }
+    // if (that.features) {
+    //   keys = Object.keys(that.features);
+    // }
     keys = keywords;
     keys.forEach((item) => {
       that.features[item] = [];
