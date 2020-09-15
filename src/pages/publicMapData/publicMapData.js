@@ -132,7 +132,7 @@ export default class PublicData extends React.Component {
           const data = publicDataConf.filter((item) => item.title === title)[0];
           if (data) {
             let loadFeatureKeys = data.loadFeatureKeys;
-            let a = loadFeatureKeys.map((item) => item.typeName);
+            let a = loadFeatureKeys.map((item) => item.typeName + (item.cql_filter || ""));
             PublicDataActions.removeFeatures(a);
           }
         }

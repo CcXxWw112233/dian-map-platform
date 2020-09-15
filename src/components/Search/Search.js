@@ -123,7 +123,7 @@ export default class Search extends React.Component {
       });
       const queryStr = `${val.type}='${val.adcode}'`;
       const { changeQueryStr } = this.props;
-      if (noNeedUpdate) {
+      if (!noNeedUpdate) {
         changeQueryStr && changeQueryStr(queryStr);
       }
     }
