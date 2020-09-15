@@ -11,6 +11,7 @@ import lengedListConf from "components/LengedList/config";
 import publicDataServices from "@/services/publicData";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import mapApp from "utils/INITMAP";
+import { times } from "lodash";
 
 @connect()
 export default class PublicData extends React.Component {
@@ -26,6 +27,8 @@ export default class PublicData extends React.Component {
     this.props.onRef(this);
     this.lastSelectedKeys = [];
     this.lastKeywords = [];
+    this.lastKeywords2 = [];
+    this.lastSingle = null;
     this.AllCheckData = publicDataConf;
     this.queryStr = "";
     this.fillColor = null;
@@ -49,6 +52,16 @@ export default class PublicData extends React.Component {
 
     publicDataServices.GET_PUBLIC_TREE().then((res) => {
       if (res.code === "0") {
+        let data = res.data;
+        for (let i = 0; i < data.length; i++) {
+          if (data[i].title === "人口用地") {
+            data[i].disabled = true;
+            data[i].children.forEach((item) => {
+              item.isSingle = true;
+            });
+            break;
+          }
+        }
         this.setState({
           publicDataTree: res.data,
         });
@@ -58,42 +71,37 @@ export default class PublicData extends React.Component {
 
   // 区域选择同步更新该区域的选择的公共数据
   getAllData = (queryStr) => {
-    return;
-    this.queryStr = queryStr;
-    const { parent } = this.props;
-    const list = parent.publicDataCheckedKeys || [];
-    const diffArr = this.rejectNumberFromDiff(list);
-    const dataConf = [...publicDataConf] || [];
+    // return;
     PublicDataActions.clear();
-    for (let i = 0; i < diffArr.length; i++) {
-      dataConf.forEach((data) => {
-        for (let j = 0; j < data.children.length; j++) {
-          if (data.children[j].key === diffArr[i]) {
-            let loadFeatureKeys = data.children[j].loadFeatureKeys;
-            loadFeatureKeys.forEach((key) => {
-              if (key.cql_filter) {
-                const index = key.cql_filter.indexOf(" AND");
-                if (index > -1) {
-                  key.cql_filter =
-                    this.queryStr +
-                    key.cql_filter.substring(index, key.cql_filter.length);
-                } else {
-                  if (!key.non_area) {
-                    key.cql_filter = this.queryStr;
-                  }
-                }
-              }
-              this.fillColor = data.children[j].fillColorKeyVals;
-              PublicDataActions.getPublicData({
-                url: "",
-                data: key,
-                fillColor: this.fillColor,
-              });
-            });
+    this.queryStr = queryStr;
+    for (let i = 0; i < publicDataConf.length; i++) {
+      let data = publicDataConf[i].loadFeatureKeys[0];
+      const fillColorKeyVals = data.fillColorKeyVals;
+      this.fillColor = fillColorKeyVals ? fillColorKeyVals : this.fillColor;
+      if (data.cql_filter) {
+        const index = data.cql_filter.indexOf(" AND");
+        if (index > -1) {
+          data.cql_filter =
+            this.queryStr +
+            data.cql_filter.substring(index, data.cql_filter.length);
+        } else {
+          if (!data.non_area) {
+            data.cql_filter = this.queryStr;
           }
         }
-      });
+      }
     }
+    this.lastKeywords2.forEach((item) => {
+      let data = publicDataConf.filter((item2) => item2.title === item)[0];
+      if (data) {
+        let loadFeatureKeys = data.loadFeatureKeys[0];
+        PublicDataActions.getPublicData({
+          url: "",
+          data: loadFeatureKeys,
+          fillColor: this.fillColor,
+        });
+      }
+    });
   };
 
   // 获取两数组的不同值
@@ -103,96 +111,55 @@ export default class PublicData extends React.Component {
     });
   };
 
-  // 获取人口用地的颜色配置
-  getFillColor = (val) => {
-    let color = null;
-    if (!val) {
-      return null;
-    }
-    for (let n = 0; n < this.AllCheckData.length; n++) {
-      let child = this.AllCheckData[n].children;
-      for (let i = 0; i < child.length; i++) {
-        if (child[i].key === val && child[i].fillColorKeyVals) {
-          color = child[i].fillColorKeyVals;
-          break;
+  onCheck = (checkedKeys, e) => {
+    let checkedNodes = e.checkedNodes || e;
+    const newCheckedKeys = JSON.parse(JSON.stringify(checkedKeys));
+    checkedNodes.forEach((item) => {
+      if (item.isSingle) {
+        if (this.lastSingle) {
+          const index = newCheckedKeys.findIndex(
+            (key) => key === this.lastSingle.id
+          );
+          newCheckedKeys.splice(index, 1);
         }
-      }
-      if (color) {
-        break;
-      }
-    }
-    return color;
-  };
-
-  // 查找勾选和取消勾选对应的渲染key
-  getCheckBoxForDatas = (val) => {
-    if (val.length) {
-      let allChild = [],
-        AllLoadFeatureKeys = [];
-      // 取出所有的child
-      this.AllCheckData.forEach((item) => {
-        let child = item.children;
-        for (let i = 0; i < child.length; i++) {
-          if (child[i].loadFeatureKeys) {
-            let loadFeatureKeys = child[i].loadFeatureKeys;
-            for (let j = 0; j < loadFeatureKeys.length; j++) {
-              let cqlFilter = loadFeatureKeys[j].cql_filter;
-              if (cqlFilter) {
-                const index = cqlFilter.indexOf(" AND");
-                if (index > -1) {
-                  cqlFilter =
-                    this.queryStr +
-                    cqlFilter.substring(index, cqlFilter.length);
-                  child[i].loadFeatureKeys[j].cql_filter = cqlFilter;
-                } else {
-                  if (!child[i].loadFeatureKeys[j].non_area) {
-                    child[i].loadFeatureKeys[j].cql_filter = this.queryStr;
-                  }
-                }
-              }
-            }
-          }
-        }
-        allChild = allChild.concat(child);
-      });
-      // 根据传过来的数据，进行整合，获取到数据中保存的wfs数据接口对应的key
-      val.forEach((item) => {
-        let obj = allChild.find((chil) => chil.key === item);
-        if (obj && obj.loadFeatureKeys) {
-          AllLoadFeatureKeys = AllLoadFeatureKeys.concat(obj.loadFeatureKeys);
-        }
-      });
-      return AllLoadFeatureKeys;
-    }
-  };
-
-  // 剔除数字节点
-  rejectNumberFromDiff = (diffArr) => {
-    let newArr = [];
-    diffArr.forEach((item) => {
-      if (isNaN(Number(item))) {
-        newArr.push(item);
+        this.lastSingle = item;
       }
     });
-    return newArr;
-  };
-
-  onCheck = (checkedKeys, e) => {
+    if (checkedNodes.length > 0) {
+      if (this.lastSingle && checkedNodes[0].isSingle) {
+        let title = this.lastSingle.title;
+        if (this.lastSingle) {
+          const data = publicDataConf.filter((item) => item.title === title)[0];
+          if (data) {
+            let loadFeatureKeys = data.loadFeatureKeys;
+            let a = loadFeatureKeys.map((item) => item.typeName);
+            PublicDataActions.removeFeatures(a);
+          }
+        }
+      }
+    }
+    if (checkedKeys.length === 0) {
+      this.lastSingle = null;
+    }
     this.setState(
       {
-        checkedKeys: checkedKeys,
+        checkedKeys: checkedKeys.length > 0 ? newCheckedKeys : checkedKeys,
       },
       () => {
-        let checkedNodes = e.checkedNodes || e;
         const view = mapApp.map.getView();
         const zoom = view.getZoom();
         let keywords = [];
+        let keywords2 = [];
         for (let i = 0; i < checkedNodes.length; i++) {
-          if (checkedNodes[i].type === "3") {
-            keywords.push(checkedNodes[i].title);
+          if (checkedNodes[i].children.length === 0) {
+            if (checkedNodes[i].is_poi === "1") {
+              keywords.push(checkedNodes[i].title);
+            } else {
+              keywords2.push(checkedNodes[i].title);
+            }
           }
         }
-        if (checkedKeys.length > 0) {
+        if (keywords.length > 0) {
           if (Math.round(zoom) > 8) {
             Event.Evt.firEvent("displaySearchBtn", {
               visible: true,
@@ -211,34 +178,49 @@ export default class PublicData extends React.Component {
           });
         }
         if (this.lastSelectedKeys.length > checkedKeys.length) {
-          const arr = this.getDiff(this.lastKeywords, keywords);
+          const newArr = [...this.lastKeywords, ...this.lastKeywords2];
+          const newArr2 = [...keywords, ...keywords2];
+          const arr = this.getDiff(newArr, newArr2);
           PublicDataActions.removeFeatures(arr);
+        } else {
+          if (keywords2.length > 0) {
+            let lengedConfs = [];
+            keywords2.forEach((item) => {
+              for (let i = 0; i < publicDataConf.length; i++) {
+                if (publicDataConf[i].title === item) {
+                  let newLended = lengedListConf.filter(
+                    (item) => item.key === publicDataConf[i].key
+                  )[0];
+                  if (newLended) {
+                    lengedConfs.push(newLended);
+                  }
+                  const fillColorKeyVals = publicDataConf[i].fillColorKeyVals;
+                  this.fillColor = fillColorKeyVals
+                    ? fillColorKeyVals
+                    : this.fillColor;
+                  PublicDataActions.getPublicData({
+                    url: "",
+                    data: publicDataConf[i].loadFeatureKeys[0],
+                    fillColor: publicDataConf[i].fillColorKeyVals,
+                  });
+                  break;
+                }
+              }
+            });
+            const { dispatch } = this.props;
+            dispatch({
+              type: "lengedList/updateLengedList",
+              payload: {
+                config: lengedConfs,
+              },
+            });
+          }
         }
         this.lastSelectedKeys = this.state.checkedKeys;
         this.lastKeywords = keywords;
+        this.lastKeywords2 = keywords2;
       }
     );
-  };
-
-  updateLengedList = (checkedKeys) => {
-    const lengedConfs = lengedListConf;
-    const diffArr = this.rejectNumberFromDiff(checkedKeys);
-    let arr = [];
-    for (let i = 0; i < diffArr.length; i++) {
-      let val = lengedConfs.filter(
-        (item) => item.key.indexOf(diffArr[i]) > -1
-      )[0];
-      if (val) {
-        arr.push(val);
-      }
-    }
-    const { dispatch } = this.props;
-    dispatch({
-      type: "lengedList/updateLengedList",
-      payload: {
-        config: arr,
-      },
-    });
   };
 
   onSelect = (selectedKeys, e) => {
@@ -249,17 +231,17 @@ export default class PublicData extends React.Component {
     // 表示是未勾选的
     if (index === -1) {
       arr.push(node.key);
-      if (node.type === "3") {
+      if (node.children.length === 0) {
         checkedKeys.push(node);
       }
       node.children.forEach((item) => {
         arr.push(item.key);
-        if (item.type === "3") {
+        if (item.children.length === 0) {
           checkedKeys.push(item);
         }
         if (item.children) {
           item.children.forEach((item2) => {
-            if (item2.type === "3") {
+            if (item2.children.length === 0) {
               checkedKeys.push(item2);
             }
             arr.push(item2.key);
@@ -269,18 +251,18 @@ export default class PublicData extends React.Component {
     } else {
       const selectedArr = [];
       selectedArr.push(node.key);
-      if (node.type === "3") {
+      if (node.children.length === 0) {
         checkedKeys.push(node);
       }
       node.children.forEach((item) => {
         selectedArr.push(item.key);
-        if (item.type === "3") {
+        if (item.children.length === 0) {
           checkedKeys.push(item);
         }
         if (item.children) {
           item.children.forEach((item2) => {
             selectedArr.push(item2.key);
-            if (item.type === "3") {
+            if (item.children.length === 0) {
               checkedKeys.push(item);
             }
           });
@@ -321,12 +303,12 @@ export default class PublicData extends React.Component {
     });
   };
   render() {
-    let treeData = publicDataConf;
-    treeData.forEach((data) => {
-      if (data.icon) {
-        data.icon = <MyIcon type={data.icon} />;
-      }
-    });
+    // let treeData = publicDataConf;
+    // treeData.forEach((data) => {
+    //   if (data.icon) {
+    //     data.icon = <MyIcon type={data.icon} />;
+    //   }
+    // });
     return (
       <div className={`${styles.wrapper} ${globalStyle.autoScrollY}`}>
         <Tree

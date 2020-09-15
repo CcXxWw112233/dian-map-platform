@@ -208,7 +208,7 @@ const publicData = {
     // 如果加载完成了，则继续加载
     if (this.status === "ready") {
       this.status = "loading";
-      this.activeTypeName = data.typeName + (data.cql_filter || "");
+      this.activeTypeName = data.typeName + (data.cql_filter || "");;
       if (this.geomData[data.typeName + (data.cql_filter || "")]) {
         // 使用缓存的数据
         this.renderFeatures(
@@ -558,7 +558,10 @@ const publicData = {
   },
 
   clear: function () {
-    this.source.clear();
+    let keys = Object.keys(this.features);
+    this.removeFeatures(keys);
+    this.features = {};
+    this.source && this.source.clear();
     this.circleFeature = null;
     this.removeLpInfo();
     event.Evt.firEvent("removeHousePOI");

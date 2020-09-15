@@ -103,7 +103,7 @@ export default class Search extends React.Component {
                   locationName: locationName,
                 };
                 mapApp.adcode = options.adcode;
-                this.updateState(options);
+                this.updateState(options, true);
               }
             });
         }
@@ -111,7 +111,7 @@ export default class Search extends React.Component {
     }
   }
 
-  updateState = (val) => {
+  updateState = (val, noNeedUpdate = false) => {
     if (val.locationName) {
       const { dispatch } = this.props;
       dispatch({
@@ -123,7 +123,9 @@ export default class Search extends React.Component {
       });
       const queryStr = `${val.type}='${val.adcode}'`;
       const { changeQueryStr } = this.props;
-      changeQueryStr && changeQueryStr(queryStr);
+      if (noNeedUpdate) {
+        changeQueryStr && changeQueryStr(queryStr);
+      }
     }
   };
   handleAreaClick = () => {
