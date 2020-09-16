@@ -191,8 +191,8 @@ const publicData = {
 
   // 获取数据 传入参数为url 和data， data = { @required typeName ,}
   getPublicData: function ({ url, data, fillColor }) {
-    if (!data.typeName) {
-      return new Error('property typeName is required of arguments "data"');
+    if (this.features[data.typeName + (data.cql_filter || "")]) {
+      return;
     }
     // let { getFeature, GET_GEO_DATA } = publicDataUrl;
     // 如果有多个请求同时发起，则挂起保存，
@@ -208,7 +208,7 @@ const publicData = {
     // 如果加载完成了，则继续加载
     if (this.status === "ready") {
       this.status = "loading";
-      this.activeTypeName = data.typeName + (data.cql_filter || "");;
+      this.activeTypeName = data.typeName + (data.cql_filter || "");
       if (this.geomData[data.typeName + (data.cql_filter || "")]) {
         // 使用缓存的数据
         this.renderFeatures(
