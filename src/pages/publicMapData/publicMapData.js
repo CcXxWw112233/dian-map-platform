@@ -33,6 +33,7 @@ export default class PublicData extends React.Component {
     this.queryStr = "";
     this.fillColor = null;
     this.singleNodes = [];
+    this.dclp = [];
   }
 
   componentDidMount() {
@@ -62,6 +63,9 @@ export default class PublicData extends React.Component {
               item.isSingle = true;
             });
             break;
+          }
+          if (data[i].title === "地产楼盘") {
+            this.dclp = data[i].children;
           }
         }
         this.setState({
@@ -208,7 +212,27 @@ export default class PublicData extends React.Component {
           });
         }
         if (this.lastSelectedKeys.length > checkedKeys.length) {
+          if (this.lastKeywords2.length > 0) {
+            let loadFeatureKeys = publicDataConf.filter(
+              (item) => item.title === "新房"
+            )[0].loadFeatureKeys[0];
+            this.lastKeywords2 = [
+              `${
+                loadFeatureKeys.typeName + (loadFeatureKeys.cql_filter || "")
+              }`,
+            ];
+          }
           const newArr = [...this.lastKeywords, ...this.lastKeywords2];
+          if (keywords2.length > 0) {
+            let loadFeatureKeys = publicDataConf.filter(
+              (item) => item.title === "新房"
+            );
+            keywords2 = [
+              `${
+                loadFeatureKeys.typeName + (loadFeatureKeys.cql_filter || "")
+              }`,
+            ];
+          }
           const newArr2 = [...keywords, ...keywords2];
           const arr = this.getDiff(newArr, newArr2);
           PublicDataActions.removeFeatures(arr);
