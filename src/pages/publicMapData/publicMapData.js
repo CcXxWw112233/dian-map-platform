@@ -32,6 +32,7 @@ export default class PublicData extends React.Component {
     this.AllCheckData = publicDataConf;
     this.queryStr = "";
     this.fillColor = null;
+    this.singleNodes = [];
   }
 
   componentDidMount() {
@@ -55,6 +56,7 @@ export default class PublicData extends React.Component {
         let data = res.data;
         for (let i = 0; i < data.length; i++) {
           if (data[i].title === "人口用地") {
+            this.singleNodes = data[i].children;
             data[i].disabled = true;
             data[i].children.forEach((item) => {
               item.isSingle = true;
@@ -111,39 +113,67 @@ export default class PublicData extends React.Component {
     });
   };
 
+  removeLastFeature = () => {
+    const data = publicDataConf.filter(
+      (item) => item.title === this.lastSingle.title
+    )[0];
+    if (data) {
+      let loadFeatureKeys = data.loadFeatureKeys;
+      let a = loadFeatureKeys.map(
+        (item) => item.typeName + (item.cql_filter || "")
+      );
+      PublicDataActions.removeFeatures(a);
+    }
+  };
+
   onCheck = (checkedKeys, e) => {
     let checkedNodes = e.checkedNodes || e;
+    /**
+     * 只有当checkedNodes长度
+     */
     const newCheckedKeys = JSON.parse(JSON.stringify(checkedKeys));
-    checkedNodes.forEach((item) => {
-      if (item.isSingle) {
+    const diffArr = this.getDiff(checkedKeys, this.lastSelectedKeys);
+    if (diffArr.length === 1) {
+      let currentNode = this.singleNodes.filter(
+        (item) => item.id === diffArr[0]
+      )[0];
+      if (currentNode) {
         if (this.lastSingle) {
           const index = newCheckedKeys.findIndex(
             (key) => key === this.lastSingle.id
           );
-          newCheckedKeys.splice(index, 1);
-        }
-        this.lastSingle = item;
-      }
-    });
-    if (checkedNodes.length > 0) {
-      if (this.lastSingle && checkedNodes[0].isSingle) {
-        let title = this.lastSingle.title;
-        if (this.lastSingle) {
-          const data = publicDataConf.filter((item) => item.title === title)[0];
-          if (data) {
-            let loadFeatureKeys = data.loadFeatureKeys;
-            let a = loadFeatureKeys.map((item) => item.typeName + (item.cql_filter || ""));
-            PublicDataActions.removeFeatures(a);
+          if (index > -1) {
+            newCheckedKeys.splice(index, 1);
+            const index2 = checkedNodes.findIndex(
+              (item) => item.id === this.lastSingle.id
+            );
+            if (index2 > -1) {
+              checkedNodes.splice(index2, 1);
+            }
+            this.removeLastFeature();
+          } else {
+            if (this.lastSingle.id === currentNode.id) {
+              const index2 = checkedNodes.findIndex(
+                (item) => item.id === this.lastSingle.id
+              );
+              if (index2 > -1) {
+                checkedNodes.splice(index2, 1);
+              }
+              this.removeLastFeature();
+              currentNode = null;
+            }
           }
         }
       }
+      this.lastSingle = currentNode;
     }
     if (checkedKeys.length === 0) {
       this.lastSingle = null;
+      PublicDataActions.clear();
     }
     this.setState(
       {
-        checkedKeys: checkedKeys.length > 0 ? newCheckedKeys : checkedKeys,
+        checkedKeys: newCheckedKeys,
       },
       () => {
         const view = mapApp.map.getView();
@@ -310,7 +340,12 @@ export default class PublicData extends React.Component {
     //   }
     // });
     return (
-      <div className={`${styles.wrapper} ${globalStyle.autoScrollY}`}>
+      <div
+        className={`${styles.wrapper} ${globalStyle.autoScrollY}`}
+        style={{
+          height: "94%",
+        }}
+      >
         <Tree
           checkable
           expandedKeys={this.state.expandedKeys}
