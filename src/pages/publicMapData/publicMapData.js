@@ -48,6 +48,7 @@ export default class PublicData extends React.Component {
       this.queryStr = getQueryStr();
     }
     this.lastSelectedKeys = parent.publicDataCheckedKeys;
+    this.lastSingle = parent.lastSingle;
     this.setState({
       checkedKeys: parent.publicDataCheckedKeys,
     });
@@ -175,6 +176,9 @@ export default class PublicData extends React.Component {
       this.lastSingle = null;
       PublicDataActions.clear();
     }
+    const { parent } = this.props;
+    parent.publicDataCheckedKeys = checkedKeys;
+    parent.lastSingle = this.lastSingle;
     this.setState(
       {
         checkedKeys: newCheckedKeys,

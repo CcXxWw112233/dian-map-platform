@@ -22,6 +22,7 @@ export default class Project extends React.Component {
     this.queryStr = "";
     this.publicDataChild = null;
     this.publicDataCheckedKeys = [];
+    this.lastSingle = null;
     this.hasRenderPublicData = false;
     this.activePanelKey = "1";
     this.state = {
