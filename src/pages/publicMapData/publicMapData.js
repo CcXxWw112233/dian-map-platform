@@ -48,6 +48,8 @@ export default class PublicData extends React.Component {
       this.queryStr = getQueryStr();
     }
     this.lastSelectedKeys = parent.publicDataCheckedKeys;
+    this.lastKeywords = parent.publicDataLastKeywords;
+    this.lastKeywords2 = parent.publicDataLastKeywords2;
     this.lastSingle = parent.lastSingle;
     this.setState({
       checkedKeys: parent.publicDataCheckedKeys,
@@ -277,6 +279,9 @@ export default class PublicData extends React.Component {
         this.lastSelectedKeys = this.state.checkedKeys;
         this.lastKeywords = keywords;
         this.lastKeywords2 = keywords2;
+        parent.publicDataCheckedKeys = this.lastSelectedKeys;
+        parent.publicDataLastKeywords = this.lastKeywords;
+        parent.publicDataLastKeywords2 = this.lastKeywords2;
       }
     );
   };
