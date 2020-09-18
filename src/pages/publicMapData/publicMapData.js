@@ -29,11 +29,12 @@ export default class PublicData extends React.Component {
     this.lastKeywords = [];
     this.lastKeywords2 = [];
     this.lastSingle = null;
+    this.lastCheckedNodes = [];
     this.AllCheckData = publicDataConf;
     this.queryStr = "";
     this.fillColor = null;
     this.singleNodes = [];
-    this.dclp = [];
+    this.notPois = [];
   }
 
   componentDidMount() {
@@ -59,16 +60,15 @@ export default class PublicData extends React.Component {
       if (res.code === "0") {
         let data = res.data;
         for (let i = 0; i < data.length; i++) {
-          if (data[i].title === "人口用地") {
-            this.singleNodes = data[i].children;
-            data[i].disabled = true;
-            data[i].children.forEach((item) => {
-              item.isSingle = true;
-            });
-            break;
-          }
-          if (data[i].title === "地产楼盘") {
-            this.dclp = data[i].children;
+          if (data[i].is_poi !== "1") {
+            if (data[i].title === "人口用地") {
+              this.singleNodes = data[i].children;
+              data[i].disabled = true;
+              data[i].children.forEach((item) => {
+                item.isSingle = true;
+              });
+            }
+            this.notPois = [...this.notPois, ...data[i].children];
           }
         }
         this.setState({
@@ -181,6 +181,8 @@ export default class PublicData extends React.Component {
     const { parent } = this.props;
     parent.publicDataCheckedKeys = checkedKeys;
     parent.lastSingle = this.lastSingle;
+    this.lastCheckedNodes = checkedNodes;
+    parent.checkedNodes = this.lastCheckedNodes;
     this.setState(
       {
         checkedKeys: newCheckedKeys,
@@ -217,31 +219,23 @@ export default class PublicData extends React.Component {
             keywords: keywords,
           });
         }
+
+        // 需要清除
         if (this.lastSelectedKeys.length > checkedKeys.length) {
-          if (this.lastKeywords2.length > 0) {
-            let loadFeatureKeys = publicDataConf.filter(
-              (item) => item.title === "新房"
-            )[0].loadFeatureKeys[0];
-            this.lastKeywords2 = [
-              `${
-                loadFeatureKeys.typeName + (loadFeatureKeys.cql_filter || "")
-              }`,
-            ];
-          }
-          const newArr = [...this.lastKeywords, ...this.lastKeywords2];
-          if (keywords2.length > 0) {
-            let loadFeatureKeys = publicDataConf.filter(
-              (item) => item.title === "新房"
-            );
-            keywords2 = [
-              `${
-                loadFeatureKeys.typeName + (loadFeatureKeys.cql_filter || "")
-              }`,
-            ];
-          }
-          const newArr2 = [...keywords, ...keywords2];
-          const arr = this.getDiff(newArr, newArr2);
+          const arr = this.getDiff(this.lastKeywords, keywords);
           PublicDataActions.removeFeatures(arr);
+
+          if (this.lastKeywords2.length > keywords2.length) {
+            const tmp = this.getDiff(this.lastKeywords2, keywords2)[0];
+            if (tmp) {
+              let loadFeatureKeys = publicDataConf.filter(
+                (item) => item.title === tmp
+              )[0].loadFeatureKeys[0];
+              const typeName =
+                loadFeatureKeys.typeName + (loadFeatureKeys.cql_filter || "");
+              PublicDataActions.removeFeatures([typeName]);
+            }
+          }
         } else {
           if (keywords2.length > 0) {
             let lengedConfs = [];
@@ -316,21 +310,40 @@ export default class PublicData extends React.Component {
       selectedArr.push(node.key);
       if (node.children.length === 0) {
         checkedKeys.push(node);
+        const index = this.lastCheckedNodes.findIndex(
+          (item) => item.key === node.key
+        );
+        if (index > -1) {
+          this.lastCheckedNodes.splice(index, 1);
+        }
       }
       node.children.forEach((item) => {
         selectedArr.push(item.key);
         if (item.children.length === 0) {
           checkedKeys.push(item);
+          const index = this.lastCheckedNodes.findIndex(
+            (item) => item.key === node.key
+          );
+          if (index > -1) {
+            this.lastCheckedNodes.splice(index, 1);
+          }
         }
         if (item.children) {
           item.children.forEach((item2) => {
             selectedArr.push(item2.key);
             if (item.children.length === 0) {
               checkedKeys.push(item);
+              const index = this.lastCheckedNodes.findIndex(
+                (item) => item.key === node.key
+              );
+              if (index > -1) {
+                this.lastCheckedNodes.splice(index, 1);
+              }
             }
           });
         }
       });
+      checkedKeys = this.lastCheckedNodes;
       const pkey = arr.filter((item) => item === node.pkey)[0];
       if (pkey) {
         selectedArr.push(node.pkey);
