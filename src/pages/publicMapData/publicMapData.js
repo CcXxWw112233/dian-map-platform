@@ -308,38 +308,38 @@ export default class PublicData extends React.Component {
     } else {
       const selectedArr = [];
       selectedArr.push(node.key);
-      if (node.children.length === 0) {
-        checkedKeys.push(node);
+      const index = this.lastCheckedNodes.findIndex(
+        (item) => item.key === node.key
+      );
+      if (index > -1) {
+        this.lastCheckedNodes.splice(index, 1);
+      }
+      // if (node.children.length === 0) {
+      //   checkedKeys.push(node);
+      // }
+      node.children.forEach((item) => {
+        selectedArr.push(item.key);
         const index = this.lastCheckedNodes.findIndex(
-          (item) => item.key === node.key
+          (item2) => item2.key === item.key
         );
         if (index > -1) {
           this.lastCheckedNodes.splice(index, 1);
         }
-      }
-      node.children.forEach((item) => {
-        selectedArr.push(item.key);
-        if (item.children.length === 0) {
-          checkedKeys.push(item);
-          const index = this.lastCheckedNodes.findIndex(
-            (item) => item.key === node.key
-          );
-          if (index > -1) {
-            this.lastCheckedNodes.splice(index, 1);
-          }
-        }
+        // if (item.children.length === 0) {
+        //   checkedKeys.push(item);
+        // }
         if (item.children) {
           item.children.forEach((item2) => {
             selectedArr.push(item2.key);
-            if (item.children.length === 0) {
-              checkedKeys.push(item);
-              const index = this.lastCheckedNodes.findIndex(
-                (item) => item.key === node.key
-              );
-              if (index > -1) {
-                this.lastCheckedNodes.splice(index, 1);
-              }
+            const index = this.lastCheckedNodes.findIndex(
+              (item3) => item3.key === item2.key
+            );
+            if (index > -1) {
+              this.lastCheckedNodes.splice(index, 1);
             }
+            // if (item.children.length === 0) {
+            //   checkedKeys.push(item);
+            // }
           });
         }
       });
@@ -367,6 +367,7 @@ export default class PublicData extends React.Component {
         }
       }
       arr = this.getDiff(arr, selectedArr);
+      checkedKeys = this.lastCheckedNodes;
     }
     arr = Array.from(new Set(arr));
     this.onCheck(arr, checkedKeys);
