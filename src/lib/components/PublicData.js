@@ -72,7 +72,7 @@ const publicData = {
       this.transCoordinateSystemsByChangeBaseMap();
     });
     event.Evt.on("getPoi", ({ keywords }) => {
-      this.source.clear();
+      this.removeFeatures(keywords);
       this.getADPoi(keywords, this);
     });
     // 如果有layer，就不addlayer
