@@ -37,10 +37,12 @@ import { formatSize } from "../../../utils/utils";
 import ExcelRead from "../../../components/ExcelRead";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { MyIcon } from "../../../components/utils";
-import PublicDataTreeComponent from "../components/PublicDataTreeComponent"
+import PublicDataTreeComponent from "../components/PublicDataTreeComponent";
 import Nprogress from "nprogress";
 import Axios from "axios";
 // import { UploadFile } from '../../../utils/XhrUploadFile'
+
+import Search from "../../../components/Search/Search";
 
 export const UploadBgPic = ({ children, onUpload, onStart }) => {
   return (
@@ -101,12 +103,18 @@ export const Title = ({ name, date, cb, data = {}, className = "", mini }) => {
   };
   return (
     <div className={`${styles.title} ${className}`}>
-      <div className={styles.title_goBack} onClick={cb}>
-        <MyIcon type="icon-fanhuijiantou" />
+      <Search
+        onRef={() => {}}
+        style={{ flex: "none", margin: 0, border: "1px solid #3333" }}
+        placeholder="搜索地址"
+      ></Search>
+      <div className={styles.title_goBack}>
+        <MyIcon type="icon-fanhuijiantou" onClick={cb} />
         <span
           className={`${styles.back_name} ${animateCss.animated} ${
             mini ? animateCss.fadeIn : animateCss.fadeOut
           }`}
+          // style={mini ? { display: "" } : { display: "none" }}
         >
           {name}
         </span>
@@ -666,7 +674,11 @@ export const ScoutingItem = ({
                       }
                     });
                     newContent.push(multiContentItem);
-                    return <PublicDataTreeComponent datas={newContent}></PublicDataTreeComponent>
+                    return (
+                      <PublicDataTreeComponent
+                        datas={newContent}
+                      ></PublicDataTreeComponent>
+                    );
                   }
                   return (
                     <Draggable

@@ -36,6 +36,7 @@ export default class Search extends React.Component {
       searchVal: "",
       adcode: "",
     };
+    this.placeholder = "搜索地址或项目";
     this.props.onRef(this);
     this.handleSearch = throttle(this.handleSearch, 1000);
   }
@@ -64,7 +65,7 @@ export default class Search extends React.Component {
     };
     this.updateState(options);
     Event.Evt.firEvent("searchProject");
-  }
+  };
 
   updateState = (val, noNeedUpdate = false) => {
     if (val.locationName) {
@@ -255,7 +256,7 @@ export default class Search extends React.Component {
           <Input.Search
             allowClear={true}
             style={{ height: 32 }}
-            placeholder="搜索地址或项目"
+            placeholder={this.props.placeholder || this.placeholder}
             value={this.state.searchVal}
             loading={this.state.searchLoading}
             onSearch={(value, event) => this.onSearch(value, event)}
