@@ -46,4 +46,29 @@ export default {
     }
     return Promise.reject(response && response.data);
   },
+
+  // 获取人口类的公共数据
+  getPopulationDatas: async (code, type) => {
+    let response = await request(
+      "GET",
+      `/map/area/population/extent?code=${code}&type=${type}`
+    );
+    if (BASIC.checkResponse(response)) {
+      return response.data;
+    }
+    return Promise.reject(response && response.data);
+  },
+
+  setPublicDataIdsToProject: async (groupId, projectId, ids) => {
+    const data = {
+      area_type_id: groupId,
+      board_id: projectId,
+      poi_ids: ids,
+    };
+    let response = await request("POST", "/map/public/poi/import", data);
+    if (BASIC.checkResponse(response)) {
+      return response.data;
+    }
+    return Promise.reject(response && response.data);
+  },
 };

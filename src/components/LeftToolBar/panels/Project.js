@@ -1,5 +1,6 @@
 import React from "react";
 import { Tabs, Spin } from "antd";
+import throttle from "lodash/throttle";
 
 import animateCss from "../../../assets/css/animate.min.css";
 import styles from "../LeftToolBar.less";
@@ -9,7 +10,9 @@ import ScoutingDetails from "../../../pages/ProjectScouting/ScoutingDetails";
 import Main from "../../Main/Main";
 import Search from "../../Search/Search";
 import ScoutAction from "../../../lib/components/ProjectScouting/ScoutingList";
-// import ScoutDetail from "../../../lib/components/ProjectScouting/ScoutingDetail";
+import mapApp from "utils/INITMAP";
+import { TransformCoordinate } from "@/lib/utils";
+
 import { connect } from "dva";
 
 @connect(({ controller: { mainVisible }, openswitch: { openPanel } }) => ({
@@ -21,7 +24,10 @@ export default class Project extends React.Component {
     super(props);
     this.queryStr = "";
     this.publicDataChild = null;
+    this.searchChild = null;
+    this.publicDataTree = null;
     this.publicDataCheckedKeys = [];
+    this.publicDataExpandedKeys = [];
     this.publicDataLastKeywords = [];
     this.publicDataLastKeywords2 = [];
     this.lastSingle = null;
@@ -30,11 +36,49 @@ export default class Project extends React.Component {
     this.state = {
       openPanel: true,
     };
+    this.getLoaction = throttle(this.getLoaction, 1000);
   }
 
   componentDidMount() {
     this.checkListCach();
+    // if (mapApp) {
+    //   mapApp.map.on("moveend", (e) => {
+    //     this.getLoaction();
+    //   });
+    // }
   }
+
+  getLoaction = () => {
+    const map = mapApp.map;
+    const view = map.getView();
+    const center = view.getCenter();
+    const zoom = view.getZoom();
+    const newCoord = TransformCoordinate(center, "EPSG:3857", "EPSG:4326");
+    window
+      .CallWebMapFunction("getCityByLonLat", {
+        lon: newCoord[0],
+        lat: newCoord[1],
+      })
+      .then((res) => {
+        if (res) {
+          let locationName = "";
+          if (Math.round(zoom) <= 6) {
+            locationName = "全国";
+          } else if (Math.round(zoom) > 6 && Math.round(zoom) <= 12) {
+            locationName = res.addressComponent.province;
+          } else {
+            locationName = res.addressComponent.city;
+          }
+          const options = {
+            type: "districtcode",
+            adcode: res.addressComponent?.adcode,
+            locationName: locationName,
+          };
+          mapApp.adcode = options.adcode;
+          this.searchChild && this.searchChild.updateState(options, true);
+        }
+      });
+  };
 
   tabChange = (val) => {
     this.activePanelKey = val;
@@ -54,6 +98,10 @@ export default class Project extends React.Component {
 
   onRef = (ref) => {
     this.publicDataChild = ref;
+  };
+
+  onSearchRef = (ref) => {
+    this.searchChild = ref;
   };
 
   // 检查缓存中是否存在id，进行判断渲染
@@ -96,6 +144,7 @@ export default class Project extends React.Component {
                 <Search
                   changeQueryStr={this.changeQueryStr}
                   parent={this}
+                  onRef={this.onSearchRef}
                 ></Search>
               </div>
               <div

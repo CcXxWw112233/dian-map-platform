@@ -1,11 +1,11 @@
-import React, { useState, Fragment, useMemo} from "react";
+import React, { useState, Fragment, useMemo } from "react";
 import globalStyle from "../../../globalSet/styles/globalStyles.less";
 import animateCss from "../../../assets/css/animate.min.css";
 import styles from "../ScoutingDetails.less";
 import Action from "../../../lib/components/ProjectScouting/ScoutingDetail";
-import ListAction from '../../../lib/components/ProjectScouting/ScoutingList';
+import ListAction from "../../../lib/components/ProjectScouting/ScoutingList";
 import PhotoSwipe from "../../../components/PhotoSwipe/action";
-import InitMap from '../../../utils/INITMAP';
+import InitMap from "../../../utils/INITMAP";
 import {
   Row,
   Input,
@@ -32,30 +32,33 @@ import {
 import { BASIC } from "../../../services/config";
 import Event from "../../../lib/utils/event";
 import mapApp from "../../../utils/INITMAP";
-import { DefaultUpload } from '../../../utils/XhrUploadFile';
+import { DefaultUpload } from "../../../utils/XhrUploadFile";
 import { formatSize } from "../../../utils/utils";
 import ExcelRead from "../../../components/ExcelRead";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { MyIcon } from "../../../components/utils";
-import Nprogress from 'nprogress';
+import PublicDataTreeComponent from "../components/PublicDataTreeComponent"
+import Nprogress from "nprogress";
 import Axios from "axios";
 // import { UploadFile } from '../../../utils/XhrUploadFile'
 
-
-export const UploadBgPic = ({children,onUpload, onStart})=>{
+export const UploadBgPic = ({ children, onUpload, onStart }) => {
   return (
     <Upload
-    action='/api/map/file/upload/public'
-    showUploadList={false}
-    accept=".jpg, .jpeg, .png, .bmp"
-    beforeUpload={()=>{ onStart && onStart(); return true}}
-    headers={{ Authorization: BASIC.getUrlParam.token }}
-    onChange={onUpload}
+      action="/api/map/file/upload/public"
+      showUploadList={false}
+      accept=".jpg, .jpeg, .png, .bmp"
+      beforeUpload={() => {
+        onStart && onStart();
+        return true;
+      }}
+      headers={{ Authorization: BASIC.getUrlParam.token }}
+      onChange={onUpload}
     >
       {children}
     </Upload>
-  )
-}
+  );
+};
 
 export const Title = ({ name, date, cb, data = {}, className = "", mini }) => {
   // 预览图片
@@ -72,30 +75,30 @@ export const Title = ({ name, date, cb, data = {}, className = "", mini }) => {
   const [url, setUrl] = useState(data.bg_image);
   useMemo(() => {
     setUrl(data.bg_image);
-  }, [data])
-  const onUpload = ({file})=>{
-    if(file.response){
+  }, [data]);
+  const onUpload = ({ file }) => {
+    if (file.response) {
       Nprogress.done();
-      if(BASIC.checkResponse(file.response)){
-        let src = file.response.message
+      if (BASIC.checkResponse(file.response)) {
+        let src = file.response.message;
         setUrl(src);
-        ListAction.editBoard(data.board_id,{ bg_image: src }).then(res=> {
-          message.success('设置成功')
-        })
+        ListAction.editBoard(data.board_id, { bg_image: src }).then((res) => {
+          message.success("设置成功");
+        });
       }
     }
-  }
+  };
   // 定位到项目位置
-  const setToCenter = async ()=>{
+  const setToCenter = async () => {
     let coor = [+data.coordinate_x, +data.coordinate_y];
-    if(!InitMap.checkNowIsGcj02System()){
+    if (!InitMap.checkNowIsGcj02System()) {
       // 需要纠偏
       let dic = InitMap.systemDic[InitMap.baseMapKey];
       coor = dic(coor[0], coor[1]);
     }
-    await Action.toCenter({center: coor, transform: true})
-    Action.addAnimatePoint({coordinates: coor, transform: true, name});
-  }
+    await Action.toCenter({ center: coor, transform: true });
+    Action.addAnimatePoint({ coordinates: coor, transform: true, name });
+  };
   return (
     <div className={`${styles.title} ${className}`}>
       <div className={styles.title_goBack} onClick={cb}>
@@ -110,12 +113,17 @@ export const Title = ({ name, date, cb, data = {}, className = "", mini }) => {
       </div>
       <div className={styles.title_name}>
         <span>{name}</span>
-        <span className={styles.atPosition} title="定位到项目位置"
-        onClick={()=> {setToCenter()}}>
-          <MyIcon type="icon-duomeitiicon-"/>
+        <span
+          className={styles.atPosition}
+          title="定位到项目位置"
+          onClick={() => {
+            setToCenter();
+          }}
+        >
+          <MyIcon type="icon-duomeitiicon-" />
         </span>
       </div>
-      <div className={styles.title_remark} style={{flex:"none"}}>
+      <div className={styles.title_remark} style={{ flex: "none" }}>
         <div style={{ textIndent: "1rem" }}>
           {data.remark || "暂无备注信息"}
         </div>
@@ -123,15 +131,20 @@ export const Title = ({ name, date, cb, data = {}, className = "", mini }) => {
       <div className={styles.title_boardBgImg}>
         {url ? (
           <div className={styles.boardBgImg}>
-            <img crossOrigin="anonymous" src={url} alt="" onClick={previewImg} />
+            <img
+              crossOrigin="anonymous"
+              src={url}
+              alt=""
+              onClick={previewImg}
+            />
           </div>
         ) : (
           <div className={styles.boardBgImg}>
             <span>
               暂未设置图片~~
               <UploadBgPic
-              onStart={()=> Nprogress.start() }
-              onUpload={onUpload}
+                onStart={() => Nprogress.start()}
+                onUpload={onUpload}
               >
                 <a>点击设置</a>
               </UploadBgPic>
@@ -193,7 +206,7 @@ const checkFileSize = (file) => {
   let { size, text } = formatSize(file.size);
   text = text.trim();
   if (+size > 60 && text === "MB") {
-    message.error("文件不能大于60MB---"+ file.name);
+    message.error("文件不能大于60MB---" + file.name);
     return false;
   }
   // uploadFiles.push(file);
@@ -210,11 +223,11 @@ const UploadBtn = ({ onChange }) => {
       onChange(e);
     }
   };
-  Event.Evt.on('uploadFileSuccess', (files)=>{
+  Event.Evt.on("uploadFileSuccess", (files) => {
     // setTimeout(()=>{
-    setFiles(file.filter(item => item.uid !== files.uid))
+    setFiles(file.filter((item) => item.uid !== files.uid));
     // }, 2000)
-  })
+  });
 
   // const customRequest = (val)=>{
   //     UploadFile(val.file, val.action,null, BASIC.getUrlParam.token ,(e)=>{
@@ -327,14 +340,15 @@ export const ScoutingHeader = (props) => {
   // 上传规划图
   const onStartUploadPlan = ({ file, fileList }) => {
     let { response } = file;
-    onUploadPlan && onUploadPlan(null, fileList, hasChangeFile,saveData);
+    onUploadPlan && onUploadPlan(null, fileList, hasChangeFile, saveData);
     if (response) {
       BASIC.checkResponse(response)
-        ? onUploadPlan && onUploadPlan(response.data, fileList, hasChangeFile,saveData)
+        ? onUploadPlan &&
+          onUploadPlan(response.data, fileList, hasChangeFile, saveData)
         : onError && onError(response, file);
 
-        hasChangeFile = false;
-        saveData = null;
+      hasChangeFile = false;
+      saveData = null;
     } else {
       // onError && onError(file)
     }
@@ -345,16 +359,18 @@ export const ScoutingHeader = (props) => {
     return Promise.resolve(transformFile);
   };
 
-  const firstUpload = async (file,extent)=> {
+  const firstUpload = async (file, extent) => {
     let formdata = new FormData();
-    formdata.append("file",file);
-    formdata.append("extent",extent);
-    formdata.append("transparency",transparency);
-    formdata.append("coord_sys_type",coordSysType);
-    let resp = await Axios.post(uploadUrl,formdata, {headers:{Authorization: BASIC.getUrlParam.token}});
+    formdata.append("file", file);
+    formdata.append("extent", extent);
+    formdata.append("transparency", transparency);
+    formdata.append("coord_sys_type", coordSysType);
+    let resp = await Axios.post(uploadUrl, formdata, {
+      headers: { Authorization: BASIC.getUrlParam.token },
+    });
     saveData = resp.data;
     return resp.data;
-  }
+  };
   // 上传规划图
   const beforeUploadPlan = (val) => {
     onUploadPlanStart && onUploadPlanStart(val);
@@ -368,7 +384,7 @@ export const ScoutingHeader = (props) => {
     return new Promise((resolve, reject) => {
       let url = window.URL.createObjectURL(val);
       Action.addPlanPictureDraw(url, val, dispatch)
-        .then( async (res) => {
+        .then(async (res) => {
           let { feature } = res;
           let extent = feature.getGeometry().getExtent();
           // console.log(extent)
@@ -392,7 +408,7 @@ export const ScoutingHeader = (props) => {
             hasChangeFile = true;
             setTransformFile(res.blobFile);
             // 如果改变了文件，则先保存一份
-            await firstUpload(val,extent.join(','));
+            await firstUpload(val, extent.join(","));
           } else {
             // 设置原文件
             setTransformFile(val);
@@ -621,116 +637,141 @@ export const ScoutingItem = ({
   onSelectCollection,
   onCheckItem = () => {},
 }) => {
-  const handleSelect = (val)=>{
+  const handleSelect = (val) => {
     // console.log(val);
-    onSelectCollection && onSelectCollection(val)
-  }
+    onSelectCollection && onSelectCollection(val);
+  };
 
   return (
     <DragDropContext onDragEnd={onDragEnd.bind(this, data)}>
       <Droppable droppableId="droppable">
         {(provided, snapshot) => (
           <div {...provided.droppableProps} ref={provided.innerRef}>
-          <Checkbox.Group onChange={handleSelect} style={{width:'100%'}} value={selected}>
-          {dataSource.length ? (
-              dataSource.map((item, index) => {
-                return (
-                  <Draggable key={item.id} draggableId={item.id} index={index}>
-                    {(provided, snapshot) => (
-                      <div ref={provided.innerRef} {...provided.draggableProps}>
+            <Checkbox.Group
+              onChange={handleSelect}
+              style={{ width: "100%" }}
+              value={selected}
+            >
+              {dataSource.length ? (
+                dataSource.map((item, index) => {
+                  let newContent = [];
+                  if (item.collect_type === "8") {
+                    let content = item.content;
+                    let multiContentItem = { children: [] };
+                    content.forEach((item2) => {
+                      if (item2.children.length === 0) {
+                        newContent.push(item2);
+                      } else {
+                        multiContentItem.children.push(item2);
+                      }
+                    });
+                    newContent.push(multiContentItem);
+                    return <PublicDataTreeComponent datas={newContent}></PublicDataTreeComponent>
+                  }
+                  return (
+                    <Draggable
+                      key={item.id}
+                      draggableId={item.id}
+                      index={index}
+                    >
+                      {(provided, snapshot) => (
                         <div
-                          className={`${animateCss.animated} ${animateCss.slideInRight}`}
-                          style={{
-                            animationDuration: "0.3s",
-                            animationDelay: index * 0.02 + "s",
-                            position: "relative",
-                            paddingLeft: "8px",
-                            width: "100%",
-                          }}
-                          key={item.id}
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
                         >
-                          <span
-                            className={styles.handleCollection}
-                            {...provided.dragHandleProps}
+                          <div
+                            className={`${animateCss.animated} ${animateCss.slideInRight}`}
+                            style={{
+                              animationDuration: "0.3s",
+                              animationDelay: index * 0.02 + "s",
+                              position: "relative",
+                              paddingLeft: "8px",
+                              width: "100%",
+                            }}
+                            key={item.id}
                           >
-                            <MyIcon type="icon-tuozhuaitingliu" />
-                          </span>
-                          {item.type !== "groupCollection" ? (
-                            <UploadItem
-                              selected={selected}
-                              Edit={CollectionEdit}
-                              onCheckItem={onCheckItem}
-                              onCopyCollection={onCopyCollection}
-                              onChangeDisplay={onChangeDisplay}
-                              onEditPlanPic={onEditPlanPic}
-                              areaList={areaList}
-                              onSelectGroup={onSelectGroup}
-                              type={Action.checkCollectionType(item.target)}
-                              data={item}
-                              onRemove={onCollectionRemove}
-                              onEditCollection={onEditCollection}
-                              onRemarkSave={onRemarkSave}
-                              onModifyFeature={onModifyFeature}
-                              onStopMofifyFeatureInDetails={
-                                onStopMofifyFeatureInDetails
-                              }
-                              onModifyRemark={onModifyRemark}
-                              onMergeDown={onMergeDown}
-                              onMergeUp={onMergeUp}
-                              index={index}
-                              length={dataSource.length}
-                            />
-                          ) : (
-                            <div className={styles.groupCollection}>
-                              {item.child &&
-                                item.child.map((child, i) => (
-                                  <UploadItem
-                                    selected={selected}
-                                    Edit={CollectionEdit}
-                                    onCheckItem={onCheckItem}
-                                    group_id={item.gid}
-                                    subIndex={i}
-                                    group_length={item.child.length}
-                                    onCopyCollection={onCopyCollection}
-                                    onChangeDisplay={onChangeDisplay}
-                                    onEditPlanPic={onEditPlanPic}
-                                    areaList={areaList}
-                                    onSelectGroup={onSelectGroup}
-                                    type={Action.checkCollectionType(
-                                      child.target
-                                    )}
-                                    data={child}
-                                    onRemove={onCollectionRemove}
-                                    onEditCollection={onEditCollection}
-                                    onRemarkSave={onRemarkSave}
-                                    onModifyFeature={onModifyFeature}
-                                    onStopMofifyFeatureInDetails={
-                                      onStopMofifyFeatureInDetails
-                                    }
-                                    onModifyRemark={onModifyRemark}
-                                    onMergeDown={onMergeDown}
-                                    onMergeUp={onMergeUp}
-                                    index={index}
-                                    key={child.id}
-                                    length={dataSource.length}
-                                    onMergeCancel={onMergeCancel}
-                                  />
-                                ))}
-                            </div>
-                          )}
+                            <span
+                              className={styles.handleCollection}
+                              {...provided.dragHandleProps}
+                            >
+                              <MyIcon type="icon-tuozhuaitingliu" />
+                            </span>
+                            {item.type !== "groupCollection" ? (
+                              <UploadItem
+                                selected={selected}
+                                Edit={CollectionEdit}
+                                onCheckItem={onCheckItem}
+                                onCopyCollection={onCopyCollection}
+                                onChangeDisplay={onChangeDisplay}
+                                onEditPlanPic={onEditPlanPic}
+                                areaList={areaList}
+                                onSelectGroup={onSelectGroup}
+                                type={Action.checkCollectionType(item.target)}
+                                data={item}
+                                onRemove={onCollectionRemove}
+                                onEditCollection={onEditCollection}
+                                onRemarkSave={onRemarkSave}
+                                onModifyFeature={onModifyFeature}
+                                onStopMofifyFeatureInDetails={
+                                  onStopMofifyFeatureInDetails
+                                }
+                                onModifyRemark={onModifyRemark}
+                                onMergeDown={onMergeDown}
+                                onMergeUp={onMergeUp}
+                                index={index}
+                                length={dataSource.length}
+                              />
+                            ) : (
+                              <div className={styles.groupCollection}>
+                                {item.child &&
+                                  item.child.map((child, i) => (
+                                    <UploadItem
+                                      selected={selected}
+                                      Edit={CollectionEdit}
+                                      onCheckItem={onCheckItem}
+                                      group_id={item.gid}
+                                      subIndex={i}
+                                      group_length={item.child.length}
+                                      onCopyCollection={onCopyCollection}
+                                      onChangeDisplay={onChangeDisplay}
+                                      onEditPlanPic={onEditPlanPic}
+                                      areaList={areaList}
+                                      onSelectGroup={onSelectGroup}
+                                      type={Action.checkCollectionType(
+                                        child.target
+                                      )}
+                                      data={child}
+                                      onRemove={onCollectionRemove}
+                                      onEditCollection={onEditCollection}
+                                      onRemarkSave={onRemarkSave}
+                                      onModifyFeature={onModifyFeature}
+                                      onStopMofifyFeatureInDetails={
+                                        onStopMofifyFeatureInDetails
+                                      }
+                                      onModifyRemark={onModifyRemark}
+                                      onMergeDown={onMergeDown}
+                                      onMergeUp={onMergeUp}
+                                      index={index}
+                                      key={child.id}
+                                      length={dataSource.length}
+                                      onMergeCancel={onMergeCancel}
+                                    />
+                                  ))}
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    )}
-                  </Draggable>
-                );
-              })
-            ) : (
-              <Empty
-                style={{ textAlign: "center" }}
-                description="暂无采集数据"
-              />
-            )}
-          </Checkbox.Group>
+                      )}
+                    </Draggable>
+                  );
+                })
+              ) : (
+                <Empty
+                  style={{ textAlign: "center" }}
+                  description="暂无采集数据"
+                />
+              )}
+            </Checkbox.Group>
 
             {provided.placeholder}
             {/* <div
@@ -1121,21 +1162,6 @@ export const UploadItem = ({
           <MyIcon
             type={itemKeyVals[secondSetType] && itemKeyVals[secondSetType].icon}
           />
-          {/* <span>
-              {secondSetType === "pic" ? (
-                <img
-                  src={data.resource_url}
-                  style={{ width: 46, height: 46, borderRadius: 4 }}
-                  alt="图片"
-                  onError={(e) => {
-                    // e.target.src = "";
-                    // e.target.src = data.resource_url;
-                  }}
-                />
-              ) : (
-                  itemKeyVals[secondSetType]
-                )}
-            </span> */}
         </div>
         <div className={styles.uploadDetail}>
           <Row style={{ textAlign: "left" }} align="middle" justify="center">
@@ -1212,20 +1238,22 @@ export const UploadItem = ({
               <MyIcon type="icon-yanjing_xianshi" />
             )}
           </span>
-          { !Edit ?
+          {!Edit ? (
             <Dropdown
-            overlay={menu}
-            trigger="click"
-            onVisibleChange={(val) => setVisible(val)}
-            visible={visible}
-          >
-            <span
-            // style={{ color: "#1769FF" }}
+              overlay={menu}
+              trigger="click"
+              onVisibleChange={(val) => setVisible(val)}
+              visible={visible}
             >
-              <MyIcon type="icon-gengduo2" />
-            </span>
-          </Dropdown>:
-          <Checkbox value={data.id} style={{marginLeft:5}}></Checkbox>}
+              <span
+              // style={{ color: "#1769FF" }}
+              >
+                <MyIcon type="icon-gengduo2" />
+              </span>
+            </Dropdown>
+          ) : (
+            <Checkbox value={data.id} style={{ marginLeft: 5 }}></Checkbox>
+          )}
         </div>
       </div>
       {/* {oldRemark || isAddMark === true ? (

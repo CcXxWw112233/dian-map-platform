@@ -52,7 +52,7 @@ const action = function () {
   this.mounted = false;
 
   event.Evt.on("transCoordinateSystems2ScoutingList", (key) => {
-    if(!this.mounted) return ;
+    if (!this.mounted) return;
     this.lastBaseMap = this.currentBaseMap;
     this.currentBaseMap = key;
     this.renderProjectPoint(this.currentData);
@@ -91,7 +91,7 @@ const action = function () {
     const layer = layers.filter((layer) => {
       return layer.get("id") === "project_point_layer";
     });
-    if(!layer[0]){
+    if (!layer[0]) {
       this.Layer = Layer({ id: "project_point_layer", zIndex: 11 });
       this.Source = Source();
       this.Layer.setSource(this.Source);
@@ -141,33 +141,34 @@ const action = function () {
 
   this.getCoords = (x, y, coordSysType) => {
     let baseMapKey = InitMap.baseMapKey;
-      // gcj02(高德)坐标系
-      if (this.baseMapKeys[0].indexOf(baseMapKey) > -1) {
-        // 数据是在wgs84坐标系产生
-        if (coordSysType === 1) {
-          return TransformCoordinate(wgs84_to_gcj02(x, y));
-        }
+    // gcj02(高德)坐标系
+    if (this.baseMapKeys[0].indexOf(baseMapKey) > -1) {
+      // 数据是在wgs84坐标系产生
+      if (coordSysType === 1) {
+        return TransformCoordinate(wgs84_to_gcj02(x, y));
+      }
+      return TransformCoordinate([x, y]);
+    } else {
+      // wgs84(天地图)坐标系
+      // 数据是在gcj02坐标系产生
+      if (!coordSysType) {
+        return TransformCoordinate(gcj02_to_wgs84(x, y));
+      } else if (coordSysType === 1) {
         return TransformCoordinate([x, y]);
       } else {
-        // wgs84(天地图)坐标系
-        // 数据是在gcj02坐标系产生
-        if (!coordSysType) {
-          return TransformCoordinate(gcj02_to_wgs84(x, y));
-        } else if (coordSysType === 1) {
-          return TransformCoordinate([x, y]);
-        } else {
-          return null;
-        }
+        return null;
       }
+    }
   };
 
   this.renderProjectPoint = (data) => {
     let lastBaseMapKey = InitMap.lastBaseMapKey;
     let baseMapKey = InitMap.baseMapKey;
     if (
-      (lastBaseMapKey && baseMapKey) &&
+      lastBaseMapKey &&
+      baseMapKey &&
       this.baseMapKeys[0].indexOf(lastBaseMapKey) ===
-      this.baseMapKeys[0].indexOf(baseMapKey)
+        this.baseMapKeys[0].indexOf(baseMapKey)
     ) {
       return;
     }
@@ -322,6 +323,13 @@ const action = function () {
     data.lng = coor[0];
     data.lat = coor[1];
     data.coord_sys_type = 0;
+    let resData = await window.CallWebMapFunction("getCityByLonLat", {
+      lon: coor[0],
+      lat: coor[1],
+    });
+    if (resData) {
+      data.districtcode = resData.addressComponent?.adcode;
+    }
     if (this.baseMapKeys[1].indexOf(InitMap.baseMapKey) > -1) {
       data.coord_sys_type = 1;
     }

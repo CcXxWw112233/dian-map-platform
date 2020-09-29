@@ -2,6 +2,7 @@ import React from "react";
 import styles from "./Panel.less";
 import areaSearchAction from "@/lib/components/Search/AreaSearch";
 import { setSession, getSession } from "utils/sessionManage";
+import Event from "../../lib/utils/event";
 
 import { Select, Button } from "antd";
 import { connect } from "dva";
@@ -156,6 +157,7 @@ export default class AreaPanel extends React.Component {
         okDisabled: false,
       },
     });
+    Event.Evt.firEvent("searchProject", {type: "provincecode", code: val})
     const res = await areaSearchAction.getCity(val);
     if (res.code === "0") {
       dispatch({
@@ -190,6 +192,7 @@ export default class AreaPanel extends React.Component {
         villageDisabled: true,
       },
     });
+    Event.Evt.firEvent("searchProject", {type: "citycode", code: val})
     const res = await areaSearchAction.getDistrict(val);
     if (res.code === "0") {
       dispatch({
@@ -221,6 +224,7 @@ export default class AreaPanel extends React.Component {
         villageDisabled: true,
       },
     });
+    Event.Evt.firEvent("searchProject", {type: "districtcode", code: val})
     const res = await areaSearchAction.getTown(val);
     if (res.code === "0") {
       dispatch({
@@ -350,7 +354,9 @@ export default class AreaPanel extends React.Component {
         okDisabled: true,
       },
     });
-    areaSearchAction.clearAreaExtent();
+    const { parent } = this.props; 
+    areaSearchAction.clearAreaExtent(parent);
+    this.props.changeAreaPanelVisible();
   };
 
   render() {
@@ -461,7 +467,7 @@ export default class AreaPanel extends React.Component {
             style={{ marginRight: 20 }}
             disabled={okDisabled}
           >
-            清除
+            返回全国
           </Button>
           <Button
             type="primary"

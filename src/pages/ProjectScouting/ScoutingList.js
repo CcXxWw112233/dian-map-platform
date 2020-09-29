@@ -7,6 +7,7 @@ import Action from "../../lib/components/ProjectScouting/ScoutingList";
 import ScoutingItem from "./components/ScoutingItem";
 import { message, Empty } from "antd";
 import Bitmap from "../../assets/Bitmap.png";
+import Event from "../../lib/utils/event";
 
 const ScoutingAddBtn = ({ cb }) => {
   return (
@@ -25,6 +26,7 @@ export default class ScoutingList extends PureComponent {
     this.state = {
       projects: [],
     };
+    this.projectDatas = [];
   }
 
   componentDidMount() {
@@ -35,8 +37,31 @@ export default class ScoutingList extends PureComponent {
       // console.log(val)
       this.handleClick(val);
     });
+    Event.Evt.on("searchProject", (data) => {
+      let tmpArr = [];
+      if (!data) {
+        tmpArr = this.projectDatas;
+      } else {
+        tmpArr = this.projectDatas.filter((item) => item[data.type] === data.code);
+      }
+      if (!Array.isArray(tmpArr)) {
+        tmpArr = [];
+      }
+      this.setState({
+        projects: tmpArr,
+      });
+      const { dispatch } = this.props;
+      dispatch({
+        type: "scoutingProject/updateList",
+        payload: {
+          projectList: tmpArr,
+          cb: this.handleClick.bind(this),
+        },
+      });
+      this.renderPoint(tmpArr);
+    });
   }
-  componentWillUnmount(){
+  componentWillUnmount() {
     Action.mounted = false;
   }
 
@@ -62,6 +87,7 @@ export default class ScoutingList extends PureComponent {
           this.setState({
             projects: res.data,
           });
+          this.projectDatas = res.data;
           dispatch({
             type: "scoutingProject/updateList",
             payload: {
@@ -152,7 +178,7 @@ export default class ScoutingList extends PureComponent {
           },
           () => {
             Action.renderProjectPoint(projects);
-            Action.projects = projects
+            Action.projects = projects;
             dispatch({
               type: "scoutingProject/updateList",
               payload: {

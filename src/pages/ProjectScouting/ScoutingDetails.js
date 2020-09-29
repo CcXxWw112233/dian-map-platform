@@ -46,8 +46,9 @@ import mapApp from "../../utils/INITMAP";
 import { CSSTransition } from "react-transition-group";
 import Axios from "axios";
 import { BASIC } from "../../services/config";
-import AboutAction from '../../lib/components/ProjectScouting/AroundAbout';
+import AboutAction from "../../lib/components/ProjectScouting/AroundAbout";
 import Meettings from "./components/Meeting";
+import PublicDataTreeComponent from "./components/PublicDataTreeComponent";
 
 const { Evt } = Event;
 const { TabPane } = Tabs;
@@ -179,102 +180,112 @@ export default class ScoutingDetails extends PureComponent {
       this.pushAreaItem();
     });
 
-    Evt.on('handleGroupFeature',(id)=>{
-      if(this.state.activeKey === '1')
-      this.setActiveCollapse(id);
-    })
-    Evt.on('handleCollectionFeature',(val)=>{
-      this.handleCollectionFeature(val, 'edit','collection');
-    })
+    Evt.on("handleGroupFeature", (id) => {
+      if (this.state.activeKey === "1") this.setActiveCollapse(id);
+    });
+    Evt.on("handleCollectionFeature", (val) => {
+      this.handleCollectionFeature(val, "edit", "collection");
+    });
 
-    Evt.addEventListener('handleGroupCollectionFeature', this.handleCollectionFeature);
-    Evt.on('handleFeatureToLeftMenu',(id)=>{
-      this.scrollForFeature(id)
-    })
-    Evt.on('handlePlotFeature', this.handlePlotFeature)
+    Evt.addEventListener(
+      "handleGroupCollectionFeature",
+      this.handleCollectionFeature
+    );
+    Evt.on("handleFeatureToLeftMenu", (id) => {
+      this.scrollForFeature(id);
+    });
+    Evt.on("handlePlotFeature", this.handlePlotFeature);
   }
   // 定位到位置
-  scrollForFeature = (id)=>{
+  scrollForFeature = (id) => {
     let text = "#menu_collection_" + id;
     let dom = document.querySelector(text);
-    if(dom){
+    if (dom) {
       dom.classList.add(styles.hoverActive);
-      dom.scrollIntoView({behavior:"smooth"});
-      this.scrolltoDom = setTimeout(()=>{
+      dom.scrollIntoView({ behavior: "smooth" });
+      this.scrolltoDom = setTimeout(() => {
         dom.classList.remove(styles.hoverActive);
-      }, 3 * 1000)
+      }, 3 * 1000);
     }
-  }
+  };
 
-  getProperties = (type,geometry)=>{
-    switch(type){
+  getProperties = (type, geometry) => {
+    switch (type) {
       case "Point":
-        let coor = Action.transform(geometry.getCoordinates())
-      return {"坐标": `经度: ${coor[0].toFixed(4)} 纬度:${coor[1].toFixed(4)}`};
+        let coor = Action.transform(geometry.getCoordinates());
+        return {
+          坐标: `经度: ${coor[0].toFixed(4)} 纬度:${coor[1].toFixed(4)}`,
+        };
       case "Polygon":
-      return {"面积": formatArea(geometry)};
+        return { 面积: formatArea(geometry) };
       case "LineString":
-      return {"长度": formatLength(geometry)}
-      default:;
+        return { 长度: formatLength(geometry) };
+      default:
     }
-  }
+  };
 
-  handlePlotFeature = ({feature, pixel})=>{
+  handlePlotFeature = ({ feature, pixel }) => {
     // console.log(feature, pixel)
     const { dispatch } = this.props;
-    let collection = this.state.all_collection.find(item => item.id === feature.get('id'));
-    if(collection){
+    let collection = this.state.all_collection.find(
+      (item) => item.id === feature.get("id")
+    );
+    if (collection) {
       let ftype = feature.getGeometry().getType();
       let properties = this.getProperties(ftype, feature.getGeometry());
       collection.properties_map = properties;
       dispatch({
-        type:"collectionDetail/updateDatas",
-        payload:{
+        type: "collectionDetail/updateDatas",
+        payload: {
           selectData: collection,
           type: "edit",
-          isImg: false
-        }
-      })
+          isImg: false,
+        },
+      });
     }
-  }
+  };
   // 点击了坐标点
-  handleCollectionFeature = (data, type = 'view', from ='group')=>{
+  handleCollectionFeature = (data, type = "view", from = "group") => {
     const { dispatch } = this.props;
     // let coordinates = [];
-    let feature = null, geo;
-    for(let i = 0 ; i < data.length; i++){
+    let feature = null,
+      geo;
+    for (let i = 0; i < data.length; i++) {
       let item = data[i];
       let f = Action.getFeatureById(item.id);
-      if(f) feature = f;
+      if (f) feature = f;
       break;
     }
-    if(feature){
+    if (feature) {
       geo = feature.getGeometry();
       // coordinates = geo.getCoordinates();
     }
-    data = data.map(item => {
+    data = data.map((item) => {
       let properties = this.getProperties(geo?.getType(), geo);
       item.properties_map = properties;
       return item;
-    })
+    });
 
     dispatch({
-      type:"collectionDetail/updateDatas",
-      payload:{
+      type: "collectionDetail/updateDatas",
+      payload: {
         selectData: [...data],
         type,
-        isImg: true
-      }
-    })
-    if(from === 'group')
-    Action.setGroupCollectionActive(Array.isArray(data) ? data[0] : data);
-  }
+        isImg: true,
+      },
+    });
+    if (from === "group")
+      Action.setGroupCollectionActive(Array.isArray(data) ? data[0] : data);
+  };
   componentWillUnmount() {
     const { dispatch, config: lengedList } = this.props;
-    AboutAction.clearLine('detail');
+    AboutAction.clearLine("detail");
     Action.mounted = false;
     clearTimeout(this.scrolltoDom);
-    Event.Evt.removeEventListener('handleGroupCollectionFeature', this.handleCollectionFeature);
+    Event.Evt.removeEventListener(
+      "handleGroupCollectionFeature",
+      this.handleCollectionFeature
+    );
     if (this.isGoBack) {
       let newLengedList = [...lengedList];
       if (!Array.isArray(lengedList)) {
@@ -296,14 +307,13 @@ export default class ScoutingDetails extends PureComponent {
       this.clearGroupPointer();
     }
     dispatch({
-      type:"collectionDetail/updateDatas",
-      payload:{
+      type: "collectionDetail/updateDatas",
+      payload: {
         selectData: null,
-        type:'view',
-        isImg: true
-      }
-    })
-
+        type: "view",
+        isImg: true,
+      },
+    });
   }
 
   // 设置正在播放的数据
@@ -397,12 +407,12 @@ export default class ScoutingDetails extends PureComponent {
       // 删除轮询
       Action.clearListen();
       this.setState({
-        isEdit: false
-      })
-      if(activeKey === '2'){
+        isEdit: false,
+      });
+      if (activeKey === "2") {
         // this.renderGroupPointer();
       }
-    }else if(activeKey === '1'){
+    } else if (activeKey === "1") {
       // 显示采集资料
       this.setActiveCollapse(this.state.area_active_key);
       Action.clearGroupCollectionPoint();
@@ -414,13 +424,13 @@ export default class ScoutingDetails extends PureComponent {
     }
     // 隐藏右上角的弹窗
     dispatch({
-      type:"collectionDetail/updateDatas",
-      payload:{
+      type: "collectionDetail/updateDatas",
+      payload: {
         selectData: null,
-        type:'view',
-        isImg: true
-      }
-    })
+        type: "view",
+        isImg: true,
+      },
+    });
   };
 
   onEdit = (targetKey, action) => {
@@ -496,18 +506,21 @@ export default class ScoutingDetails extends PureComponent {
     if (data.board_id) {
       Action.editAreaName(data.id, { name }).then((res) => {
         this.onAreaEdit(false, data);
-        this.setState({
-          area_list: this.state.area_list.map((item) => {
-            if (item.id === data.id) {
-              item.name = name;
-            }
-            return item;
-          }),
-        }, ()=>{
-          Action.CollectionGroup = this.state.area_list;
-          Event.Evt.firEvent('collectionListUpdate1', this.state.area_list)
-          // console.log(Action.CollectionGroup, this.state.area_list)
-        });
+        this.setState(
+          {
+            area_list: this.state.area_list.map((item) => {
+              if (item.id === data.id) {
+                item.name = name;
+              }
+              return item;
+            }),
+          },
+          () => {
+            Action.CollectionGroup = this.state.area_list;
+            Event.Evt.firEvent("collectionListUpdate1", this.state.area_list);
+            // console.log(Action.CollectionGroup, this.state.area_list)
+          }
+        );
       });
       message.success("修改成功");
       return;
@@ -555,10 +568,10 @@ export default class ScoutingDetails extends PureComponent {
   };
 
   // 更新某个采集资料，并且重组，刷新元素,只需要更改all_collection数据
-  updateAllCollectionReset = (data)=>{
+  updateAllCollectionReset = (data) => {
     let array = this.reSetCollection(data);
     this.updateCollection(data, array);
-  }
+  };
   // 更新数据
   updateCollection = (data, area_list) => {
     const { dispatch } = this.props;
@@ -572,34 +585,44 @@ export default class ScoutingDetails extends PureComponent {
       },
       () => {
         dispatch({
-          type:"scoutingDetail/updateDatas",
+          type: "scoutingDetail/updateDatas",
           payload: {
-            collections: this.state.all_collection
-          }
-        })
+            collections: this.state.all_collection,
+          },
+        });
         let arr = [];
-        if(this.state.multipleGroup){
-          let selectArr = this.state.area_list.filter(item => this.state.area_selected.includes(item.id));
-          selectArr.forEach(item => {
+        if (this.state.multipleGroup) {
+          let selectArr = this.state.area_list.filter((item) =>
+            this.state.area_selected.includes(item.id)
+          );
+          selectArr.forEach((item) => {
             arr = arr.concat(item.collection || []);
-          })
-        }else{
-          let obj = this.state.area_list.find(
+          });
+        } else {
+          let obj =
+            this.state.area_list.find(
               (item) => item.id === this.state.area_active_key
             ) || {};
           arr = obj.collection;
-          this.state.area_active_key === "other" && (arr = this.state.not_area_id_collection);
+          this.state.area_active_key === "other" &&
+            (arr = this.state.not_area_id_collection);
         }
         // 之渲染选中的区域数据
 
-          // 只有在整理页面才需要渲染
-        if(this.state.activeKey === '1'){
+        // 只有在整理页面才需要渲染
+        if (this.state.activeKey === "1") {
           this.renderCollection(arr || []);
         }
         // 更新回看的列表
-        let a = area_list.concat([{id:'other',name: '未整理',collection:this.state.not_area_id_collection}]);
-        Evt.firEvent('collectionListUpdate1', a);
-        Evt.firEvent('collectionListUpdate2', a);
+        let a = area_list.concat([
+          {
+            id: "other",
+            name: "未整理",
+            collection: this.state.not_area_id_collection,
+          },
+        ]);
+        Evt.firEvent("collectionListUpdate1", a);
+        Evt.firEvent("collectionListUpdate2", a);
       }
     );
   };
@@ -643,7 +666,7 @@ export default class ScoutingDetails extends PureComponent {
           uid: file.uid,
         },
       });
-      Event.Evt.firEvent('uploadFileSuccess', file);
+      Event.Evt.firEvent("uploadFileSuccess", file);
     }, 3000);
   };
   // 上传完成
@@ -656,7 +679,7 @@ export default class ScoutingDetails extends PureComponent {
       let params = {
         board_id: this.state.current_board.board_id,
         area_type_id: val.id,
-        collect_type: suffix === '.geojson' ? 8 : 3,
+        collect_type: suffix === ".geojson" ? 8 : 3,
         resource_id: file_resource_id,
         target: suffix && suffix.replace(".", ""),
         title: original_file_name,
@@ -709,16 +732,16 @@ export default class ScoutingDetails extends PureComponent {
       });
   };
   // 隐藏右上角的详情框
-  hiddenDetail = ()=>{
+  hiddenDetail = () => {
     const { dispatch } = this.props;
     dispatch({
-      type:"collectionDetail/updateDatas",
-      payload:{
+      type: "collectionDetail/updateDatas",
+      payload: {
         selectData: null,
-        isImg: true
-      }
-    })
-  }
+        isImg: true,
+      },
+    });
+  };
   // 取消新增
   cancelEditCollection = () => {
     message.destroy();
@@ -761,18 +784,19 @@ export default class ScoutingDetails extends PureComponent {
     let params = {};
     let { id } = val;
     if (editType === "editCoordinate") {
-      message.success("点击地图中的任意位置可设定坐标，可以拖动调整",
-        0
-      );
+      message.success("点击地图中的任意位置可设定坐标，可以拖动调整", 0);
       // 隐藏
       this.hideOtherSlide();
-      setTimeout(()=>{
+      setTimeout(() => {
         this.hiddenDetail();
-      }, 50)
+      }, 50);
       // 添加坐标点的事件
       val.title = val.name || val.title;
-      let coor = await Action.addCollectionCoordinates(false,val).catch(err => console.log(err));
-      if(coor){
+      let coor = await Action.addCollectionCoordinates(
+        false,
+        val
+      ).catch((err) => console.log(err));
+      if (coor) {
         coor.longitude = coor.longitude.toString();
         coor.latitude = coor.latitude.toString();
         params = {
@@ -784,16 +808,16 @@ export default class ScoutingDetails extends PureComponent {
           },
         };
         this.setState({
-          all_collection: this.state.all_collection.map(item => {
-            if(item.id === id){
-              item.location = params.location
+          all_collection: this.state.all_collection.map((item) => {
+            if (item.id === id) {
+              item.location = params.location;
             }
             return item;
-          })
-        })
-      }else {
+          }),
+        });
+      } else {
         this.cancelEditCollection();
-        return Promise.reject('取消了');
+        return Promise.reject("取消了");
       }
     } else if (editType === "editName") {
       if (!name || name === val.name) {
@@ -811,13 +835,12 @@ export default class ScoutingDetails extends PureComponent {
         this.cancelEditCollection();
         // this.fetchCollection();
         let arr = Array.from(this.state.all_collection);
-        arr = arr.map(item => {
-          if(item.id === id){
+        arr = arr.map((item) => {
+          if (item.id === id) {
             item.title = name || val.title;
-
           }
           return item;
-        })
+        });
         // 更新数据列表，会更新地图标绘数据
         this.updateAllCollectionReset(arr);
         let f = editType === "editCoordinate" ? "关联坐标完成" : "修改名称完成";
@@ -850,7 +873,7 @@ export default class ScoutingDetails extends PureComponent {
     }
     Action.editCollection(params).then((res) => {
       // console.log(res)
-      if(!isMultiple){
+      if (!isMultiple) {
         message.success(
           <span>
             已将<a>{data.title}</a>
@@ -860,15 +883,14 @@ export default class ScoutingDetails extends PureComponent {
         );
         // this.fetchCollection();
         let arr = Array.from(all_collection);
-        arr = arr.map(item => {
-          if(item.id === data.id){
-            item.area_type_id = group.id
+        arr = arr.map((item) => {
+          if (item.id === data.id) {
+            item.area_type_id = group.id;
           }
           return item;
-        })
+        });
         this.updateAllCollectionReset(arr);
       }
-
     });
   };
 
@@ -980,11 +1002,14 @@ export default class ScoutingDetails extends PureComponent {
     // console.log(resp);
     if (resp) {
       message.success("上传成功");
-      let content = (setData && firstSave)? {
-        content: firstSave.data.id
-      }: {
-        content: resp.id
-      } ;
+      let content =
+        setData && firstSave
+          ? {
+              content: firstSave.data.id,
+            }
+          : {
+              content: resp.id,
+            };
       let { id, name } = resp;
 
       let params = {
@@ -1025,7 +1050,7 @@ export default class ScoutingDetails extends PureComponent {
       return item;
     });
     this.updateAllCollectionReset(arr);
-    Action.editCollection(param)
+    Action.editCollection(param);
   };
   // 编辑规划图
   onEditPlanPic = (val, collection) => {
@@ -1036,7 +1061,7 @@ export default class ScoutingDetails extends PureComponent {
     this.hideOtherSlide();
     this.hiddenDetail();
     let img = Action.findImgLayer(collection.resource_id);
-    Action.setEditPlanPicLayer(val,img, dispatch, collection)
+    Action.setEditPlanPicLayer(val, img, dispatch, collection)
       .then(async (resp) => {
         let param = {
           extent: resp.extent.join(","),
@@ -1045,16 +1070,21 @@ export default class ScoutingDetails extends PureComponent {
         };
         this.showOtherSlide();
         let imgid = collection.resource_id;
-        if(resp.blobFile){
+        if (resp.blobFile) {
           imgid = collection.content;
           let formdata = new FormData();
-          formdata.append("file",resp.blobFile);
-          formdata.append("extent",param.extent);
-          formdata.append("transparency",param.transparency);
-          formdata.append("coord_sys_type",param.coord_sys_type);
-          let saved = await Axios.post(`/api/map/ght/${val.id}`,formdata, {headers: {Authorization:BASIC.getUrlParam.token}});
+          formdata.append("file", resp.blobFile);
+          formdata.append("extent", param.extent);
+          formdata.append("transparency", param.transparency);
+          formdata.append("coord_sys_type", param.coord_sys_type);
+          let saved = await Axios.post(`/api/map/ght/${val.id}`, formdata, {
+            headers: { Authorization: BASIC.getUrlParam.token },
+          });
 
-          await Action.editCollection({id: collection.id, resource_id: saved.data.data.id});
+          await Action.editCollection({
+            id: collection.id,
+            resource_id: saved.data.data.id,
+          });
         }
 
         Action.saveEditPlanPic(imgid, param).then((res) => {
@@ -1082,7 +1112,7 @@ export default class ScoutingDetails extends PureComponent {
 
   //激活编辑几何图形
   onModifyFeatureInDetails = (data) => {
-    const { displayPlotPanel } = this.props
+    const { displayPlotPanel } = this.props;
     Action.modifyFeature(data, displayPlotPanel);
   };
 
@@ -1108,7 +1138,7 @@ export default class ScoutingDetails extends PureComponent {
     };
     // console.log(obj)
     return Action.addCollection(obj).then((res) => {
-      if(!isMultiple){
+      if (!isMultiple) {
         message.success(
           <span>
             已将<a>{collection.title}</a>
@@ -1117,7 +1147,10 @@ export default class ScoutingDetails extends PureComponent {
           </span>
         );
         // this.fetchCollection();
-        this.updateAllCollectionReset([...this.state.all_collection, res.data[0]])
+        this.updateAllCollectionReset([
+          ...this.state.all_collection,
+          res.data[0],
+        ]);
       }
       return res.data[0];
     });
@@ -1436,40 +1469,40 @@ export default class ScoutingDetails extends PureComponent {
       Action.saveMergeCollection({ data_ids: ids }).then((res) => {
         message.success("操作成功");
         // this.fetchCollection();
-        let g_id = [], list = [];
-        let arr = array.filter(item => ids.includes(item.id));
-        g_id = arr.map(item => item.group_id).filter(v => v);
-        if(g_id.length){
+        let g_id = [],
+          list = [];
+        let arr = array.filter((item) => ids.includes(item.id));
+        g_id = arr.map((item) => item.group_id).filter((v) => v);
+        if (g_id.length) {
           // 两个拥有groupId的数据，合并抹除掉其中一个
-          if(g_id.length > 1){
+          if (g_id.length > 1) {
             let oldId = g_id[1];
             let newId = g_id[0];
-            list = array.map(item => {
-              if(ids.includes(item.id)){
+            list = array.map((item) => {
+              if (ids.includes(item.id)) {
                 item.group_id = newId;
               }
-              if(item.group_id === oldId){
+              if (item.group_id === oldId) {
                 item.group_id = newId;
               }
-              return item ;
-            })
-          }else if(g_id.length === 1){
-            list = array.map(item => {
-              if(ids.includes(item.id)){
+              return item;
+            });
+          } else if (g_id.length === 1) {
+            list = array.map((item) => {
+              if (ids.includes(item.id)) {
                 item.group_id = g_id[0];
               }
-              return item ;
-            })
+              return item;
+            });
           }
-        }
-        else {
+        } else {
           let mgId = Math.round(Math.random() * 1000000 + 1);
-          list = array.map(item => {
-            if(ids.includes(item.id)){
+          list = array.map((item) => {
+            if (ids.includes(item.id)) {
               item.group_id = mgId;
             }
             return item;
-          })
+          });
         }
         this.updateAllCollectionReset(list);
       });
@@ -1477,12 +1510,12 @@ export default class ScoutingDetails extends PureComponent {
     if (type === "cancel") {
       await this.CollectionReMerge(collection);
       message.success("操作成功");
-      array = array.map(item => {
-        if(item.id === collection.id){
+      array = array.map((item) => {
+        if (item.id === collection.id) {
           item.group_id = "";
         }
         return item;
-      })
+      });
       this.updateAllCollectionReset(array);
       // this.fetchCollection();
     }
@@ -1504,23 +1537,23 @@ export default class ScoutingDetails extends PureComponent {
     const { dispatch } = this.props;
     let type = Action.checkCollectionType(val.target);
     // if(val.collect_type === '4'){
-      let feature = Action.getFeatureById(val.id);
-      if(feature){
-        let geo = feature.getGeometry();
-        let properties = this.getProperties(geo.getType(), geo);
-        val = Object.assign({},{properties_map :properties},val);
-      }
+    let feature = Action.getFeatureById(val.id);
+    if (feature) {
+      let geo = feature.getGeometry();
+      let properties = this.getProperties(geo.getType(), geo);
+      val = Object.assign({}, { properties_map: properties }, val);
+    }
     // }
     dispatch({
-      type:"collectionDetail/updateDatas",
-      payload:{
+      type: "collectionDetail/updateDatas",
+      payload: {
         selectData: val,
-        type:'edit',
-        isImg: type === 'pic' || type === 'video' || type === 'interview'
-      }
-    })
+        type: "edit",
+        isImg: type === "pic" || type === "video" || type === "interview",
+      },
+    });
     Action.handleCollectionPoint(val);
-  }
+  };
 
   CollectionViewScroll = (e) => {
     // console.log(e)
@@ -1573,12 +1606,16 @@ export default class ScoutingDetails extends PureComponent {
   };
 
   PublicView = ({ children, height }) => {
-    let {miniTitle} = this.state;
-    let h = height ? height: (miniTitle ? "calc(100vh - 150px)":"calc(100vh - 415px)");
+    let { miniTitle } = this.state;
+    let h = height
+      ? height
+      : miniTitle
+      ? "calc(100vh - 150px)"
+      : "calc(100vh - 415px)";
     return (
       <div
         className={styles.publicview}
-        style={{ display: "flex", flexDirection: "column" ,height: h}}
+        style={{ display: "flex", flexDirection: "column", height: h }}
         ref={this.scrollView}
         onScroll={this.CollectionViewScroll}
         onWheel={this.collectionWhell}
@@ -1640,211 +1677,242 @@ export default class ScoutingDetails extends PureComponent {
     }
   };
 
-  selectionCollection = (val)=>{
+  selectionCollection = (val) => {
     this.setState({
-      selections: val
-    })
-  }
-  onNotAreaIdSelection = (val)=>{
+      selections: val,
+    });
+  };
+  onNotAreaIdSelection = (val) => {
     this.setState({
-      notAreaIdSelections: val
-    })
-  }
+      notAreaIdSelections: val,
+    });
+  };
   // 多选删除
-  onMultipleRemove = ()=>{
+  onMultipleRemove = () => {
     let arr = [...this.state.selections, ...this.state.notAreaIdSelections];
     let list = Array.from(this.state.all_collection);
-    if(!arr.length) return ;
-    ( async ()=>{
-      for(let i = 0; i< arr.length; i ++){
-        Action.removeCollection(arr[i]).catch(err=> console.log(err));
+    if (!arr.length) return;
+    (async () => {
+      for (let i = 0; i < arr.length; i++) {
+        Action.removeCollection(arr[i]).catch((err) => console.log(err));
       }
-    })()
-    list = list.filter(item => !arr.includes(item.id));
-    this.setState({
-      all_collection: list,
-      notAreaIdSelections:[],
-      selections: []
-    }, ()=>{
-      message.success('删除成功');
-      this.hiddenDetail();
-      this.updateAllCollectionReset(list);
-      Action.oldData = list;
-    })
-  }
+    })();
+    list = list.filter((item) => !arr.includes(item.id));
+    this.setState(
+      {
+        all_collection: list,
+        notAreaIdSelections: [],
+        selections: [],
+      },
+      () => {
+        message.success("删除成功");
+        this.hiddenDetail();
+        this.updateAllCollectionReset(list);
+        Action.oldData = list;
+      }
+    );
+  };
 
   // 渲染分组列表
-  GroupSelection = ({onSelect}) => {
-    const { area_list, selections, notAreaIdSelections} = this.state;
-    let arr = Array.from([...selections,...notAreaIdSelections]);
-    const selectGroup = (val)=>{
-     onSelect && onSelect(val);
-    }
+  GroupSelection = ({ onSelect }) => {
+    const { area_list, selections, notAreaIdSelections } = this.state;
+    let arr = Array.from([...selections, ...notAreaIdSelections]);
+    const selectGroup = (val) => {
+      onSelect && onSelect(val);
+    };
     // 过滤选中的分组，选中的不能出现在列表中
-    let selectAreaId = this.state.all_collection.filter(item => arr.includes(item.id));
-    selectAreaId = selectAreaId.map(item => item.area_type_id);
+    let selectAreaId = this.state.all_collection.filter((item) =>
+      arr.includes(item.id)
+    );
+    selectAreaId = selectAreaId.map((item) => item.area_type_id);
     return (
       <div className={styles.selectActionGroup}>
-        {area_list.map(item => {
-          if(selectAreaId.includes(item.id)){
+        {area_list.map((item) => {
+          if (selectAreaId.includes(item.id)) {
             return "";
-          }else
-          return (
-            <div key={item.id} onClick={() => selectGroup(item)} style={{cursor:"pointer"}}>
-              {item.name}
-            </div>
-          )
+          } else
+            return (
+              <div
+                key={item.id}
+                onClick={() => selectGroup(item)}
+                style={{ cursor: "pointer" }}
+              >
+                {item.name}
+              </div>
+            );
         })}
       </div>
-    )
-  }
+    );
+  };
 
-  MultipleMenus = ()=>{
-    const onHandle = ({key})=>{
-      if(key === 'coordinates'){
+  MultipleMenus = () => {
+    const onHandle = ({ key }) => {
+      if (key === "coordinates") {
         let arr = [...this.state.selections, ...this.state.notAreaIdSelections];
-        if(!arr.length) return message.warn('未选择任何采集坐标点');
-        let selection = this.state.all_collection.filter(item => arr.includes(item.id));
-        let m = selection.filter(item => item.target === 'feature' || item.target === 'plan');
-        if(m.length) return message.warn('勾选数据存在标绘或者规划图，无法进行批量关联坐标点，请取消');
+        if (!arr.length) return message.warn("未选择任何采集坐标点");
+        let selection = this.state.all_collection.filter((item) =>
+          arr.includes(item.id)
+        );
+        let m = selection.filter(
+          (item) => item.target === "feature" || item.target === "plan"
+        );
+        if (m.length)
+          return message.warn(
+            "勾选数据存在标绘或者规划图，无法进行批量关联坐标点，请取消"
+          );
 
         setHide();
         this.hideOtherSlide();
-        message.success(`点击地图中的任意位置可设定坐标，可以拖动调整`,0);
+        message.success(`点击地图中的任意位置可设定坐标，可以拖动调整`, 0);
         this.hiddenDetail();
-        Action.addCollectionCoordinates(true,{}).then(val => {
-          val.longitude = val.longitude.toString();
-          val.latitude = val.latitude.toString();
-          let p = selection.map(item => {
-            return Action.editCollection({
-              id: item.id,
-              title: item.name,
-              location: {
-                ...val,
-                site_name: val.title,
-              },
-            })
+        Action.addCollectionCoordinates(true, {})
+          .then((val) => {
+            val.longitude = val.longitude.toString();
+            val.latitude = val.latitude.toString();
+            let p = selection.map((item) => {
+              return Action.editCollection({
+                id: item.id,
+                title: item.name,
+                location: {
+                  ...val,
+                  site_name: val.title,
+                },
+              });
+            });
+            Promise.all(p)
+              .then(() => {
+                message.success("保存成功");
+                let array = Array.from(this.state.all_collection);
+                array = array.map((item) => {
+                  if (arr.includes(item.id)) {
+                    item.location = val;
+                  }
+                  return item;
+                });
+                this.updateAllCollectionReset(array);
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+            message.destroy();
+            this.showOtherSlide();
           })
-          Promise.all(p).then(() => {
-            message.success('保存成功');
-            let array = Array.from(this.state.all_collection);
-            array = array.map(item => {
-              if(arr.includes(item.id)){
-                item.location = val;
-              }
-              return item;
-            })
-            this.updateAllCollectionReset(array);
-          }).catch(err => {
+          .catch((err) => {
             console.log(err);
-          })
-          message.destroy();
-          this.showOtherSlide();
-        }).catch(err => {
-          console.log(err);
-          this.showOtherSlide();
-          message.destroy();
-        });
+            this.showOtherSlide();
+            message.destroy();
+          });
       }
-    }
-    const setHide = ()=>{
+    };
+    const setHide = () => {
       this.setState({
-        showMoreAction: false
-      })
-    }
-    const onSelect = (type,val)=>{
+        showMoreAction: false,
+      });
+    };
+    const onSelect = (type, val) => {
       let { selections, notAreaIdSelections } = this.state;
-      let arr = [...selections,...notAreaIdSelections];
-      let selectArr = this.state.all_collection.filter(item => arr.includes(item.id));
-      if(!arr.length) return message.warn('未选择采集资料');
-      if(type === 'copy'){
-        let notA = selectArr.filter(item => item.collect_type !== '4');
-        if(notA.length){
-          return message.warn('非标绘数据暂不支持复制，请取消勾选');
+      let arr = [...selections, ...notAreaIdSelections];
+      let selectArr = this.state.all_collection.filter((item) =>
+        arr.includes(item.id)
+      );
+      if (!arr.length) return message.warn("未选择采集资料");
+      if (type === "copy") {
+        let notA = selectArr.filter((item) => item.collect_type !== "4");
+        if (notA.length) {
+          return message.warn("非标绘数据暂不支持复制，请取消勾选");
         }
       }
-      let promise = selectArr.map(item => {
-        if(type === 'copy'){
-          return this.onCopyCollection(val,item, true);
-        }else {
+      let promise = selectArr.map((item) => {
+        if (type === "copy") {
+          return this.onCopyCollection(val, item, true);
+        } else {
           return this.onSelectGroup(val, item, true);
         }
-      })
-      Promise.all(promise).then(res => {
-        if(type === 'copy'){
+      });
+      Promise.all(promise).then((res) => {
+        if (type === "copy") {
           this.updateAllCollectionReset([...this.state.all_collection, ...res]);
-          message.success(<span>复制到 <a>{val.name}</a> 分组完成</span>);
-        }
-        else {
+          message.success(
+            <span>
+              复制到 <a>{val.name}</a> 分组完成
+            </span>
+          );
+        } else {
           let array = Array.from(this.state.all_collection);
-          array.map(item => {
-            if(arr.includes(item.id)){
+          array.map((item) => {
+            if (arr.includes(item.id)) {
               item.area_type_id = val.id;
             }
             return item;
-          })
+          });
           this.updateAllCollectionReset(array);
-          message.success(<span>移动到 <a>{val.name}</a> 分组完成</span>);
+          message.success(
+            <span>
+              移动到 <a>{val.name}</a> 分组完成
+            </span>
+          );
         }
-        setTimeout(()=>{
+        setTimeout(() => {
           this.setState({
-            notAreaIdSelections:[],
-            selections: []
-          })
-        })
-
-      })
+            notAreaIdSelections: [],
+            selections: [],
+          });
+        });
+      });
       // console.log(type,val)
       setHide();
-    }
+    };
     return (
       <Menu onClick={onHandle}>
         <Menu.Item key="copy">
           <Popover
-          trigger="click"
-          visible={this.state.setCopyVisible}
-          onVisibleChange={(val)=> this.setState({setCopyVisible: val})}
-          title="选择复制到哪个分组"
-          overlayStyle={{zIndex: 1050}}
-          content={()=> this.GroupSelection({onSelect: onSelect.bind(this,'copy')})}>
-            <div>
-              复制到分组
-            </div>
+            trigger="click"
+            visible={this.state.setCopyVisible}
+            onVisibleChange={(val) => this.setState({ setCopyVisible: val })}
+            title="选择复制到哪个分组"
+            overlayStyle={{ zIndex: 1050 }}
+            content={() =>
+              this.GroupSelection({ onSelect: onSelect.bind(this, "copy") })
+            }
+          >
+            <div>复制到分组</div>
           </Popover>
         </Menu.Item>
         <Menu.Item key="move">
-        <Popover
-          trigger="click"
-          visible={this.state.setMoveVisible}
-          onVisibleChange={(val)=> this.setState({setMoveVisible: val})}
-          title="选择移动到哪个分组"
-          overlayStyle={{zIndex: 1050}}
-          content={()=> this.GroupSelection({onSelect: onSelect.bind(this,'move')})}>
-            <div>
-              移动到分组
-            </div>
+          <Popover
+            trigger="click"
+            visible={this.state.setMoveVisible}
+            onVisibleChange={(val) => this.setState({ setMoveVisible: val })}
+            title="选择移动到哪个分组"
+            overlayStyle={{ zIndex: 1050 }}
+            content={() =>
+              this.GroupSelection({ onSelect: onSelect.bind(this, "move") })
+            }
+          >
+            <div>移动到分组</div>
           </Popover>
         </Menu.Item>
-        <Menu.Item key="coordinates">
-          关联坐标
-        </Menu.Item>
+        <Menu.Item key="coordinates">关联坐标</Menu.Item>
         <Menu.Item key="remove">
           <Popconfirm
-          title={`确定删除选中的${[...this.state.selections,...this.state.notAreaIdSelections].length}个采集资料吗？`}
-          onConfirm={()=> {this.onMultipleRemove(); setHide()}}
-          okText="删除"
-          cancelText="取消"
-          overlayStyle={{zIndex: 1050}}
+            title={`确定删除选中的${
+              [...this.state.selections, ...this.state.notAreaIdSelections]
+                .length
+            }个采集资料吗？`}
+            onConfirm={() => {
+              this.onMultipleRemove();
+              setHide();
+            }}
+            okText="删除"
+            cancelText="取消"
+            overlayStyle={{ zIndex: 1050 }}
           >
-            <div className="danger">
-              删除
-            </div>
+            <div className="danger">删除</div>
           </Popconfirm>
         </Menu.Item>
       </Menu>
-    )
-  }
-
+    );
+  };
 
   renderForActive = (key) => {
     const {
@@ -1853,7 +1921,9 @@ export default class ScoutingDetails extends PureComponent {
       activeId,
       current_board,
     } = this.state;
-    const defaultHeight = this.state.miniTitle ? 'calc(100vh - 100px)': "calc(100vh - 370px)";
+    const defaultHeight = this.state.miniTitle
+      ? "calc(100vh - 100px)"
+      : "calc(100vh - 370px)";
     const { dispatch } = this.props;
     const { PublicView } = this;
     switch (key) {
@@ -1975,7 +2045,11 @@ export default class ScoutingDetails extends PureComponent {
                     }
                   >
                     {!!not_area_id_collection.length ? (
-                      <Checkbox.Group onChange={this.onNotAreaIdSelection} style={{width:"100%"}} value={this.state.notAreaIdSelections}>
+                      <Checkbox.Group
+                        onChange={this.onNotAreaIdSelection}
+                        style={{ width: "100%" }}
+                        value={this.state.notAreaIdSelections}
+                      >
                         <div className={styles.norAreaIdsData}>
                           {not_area_id_collection.map((item, index) => {
                             let activeStyle = null;
@@ -1983,6 +2057,19 @@ export default class ScoutingDetails extends PureComponent {
                               activeStyle = {
                                 backgroundColor: "rgba(214,228,255,0.5)",
                               };
+                            }
+                            let newContent = [];
+                            if (item.collect_type === "8") {
+                              let content = item.content;
+                              let multiContentItem = { children: [] };
+                              content.forEach((item2) => {
+                                if (item2.children.length === 0) {
+                                  newContent.push(item2);
+                                } else {
+                                  multiContentItem.children.push(item2);
+                                }
+                              });
+                              newContent.push(multiContentItem);
                             }
                             return (
                               <div
@@ -1994,32 +2081,44 @@ export default class ScoutingDetails extends PureComponent {
                                   width: "100%",
                                 }}
                               >
-                                <UploadItem
-                                  Edit={this.state.isEdit}
-                                  onCheckItem={this.checkItem}
-                                  style={activeStyle}
-                                  data={item}
-                                  type={Action.checkCollectionType(item.target)}
-                                  areaList={area_list}
-                                  onSelectGroup={this.onSelectGroup}
-                                  onRemove={this.onCollectionRemove.bind(
-                                    this,
-                                    item
-                                  )}
-                                  onEditCollection={this.onEditCollection}
-                                  onChangeDisplay={this.onChangeDisplay.bind(
-                                    this,
-                                    item
-                                  )}
-                                  onModifyRemark={this.onModifyRemark}
-                                  onRemarkSave={this.onRemarkSave}
-                                  onModifyFeature={this.onModifyFeatureInDetails}
-                                  onStopMofifyFeatureInDetails={
-                                    this.onStopMofifyFeatureInDetails
-                                  }
-                                  onToggleChangeStyle={this.onToggleChangeStyle}
-                                  onCopyCollection={this.onCopyCollection}
-                                />
+                                {item.collect_type !== "8" ? (
+                                  <UploadItem
+                                    Edit={this.state.isEdit}
+                                    onCheckItem={this.checkItem}
+                                    style={activeStyle}
+                                    data={item}
+                                    type={Action.checkCollectionType(
+                                      item.target
+                                    )}
+                                    areaList={area_list}
+                                    onSelectGroup={this.onSelectGroup}
+                                    onRemove={this.onCollectionRemove.bind(
+                                      this,
+                                      item
+                                    )}
+                                    onEditCollection={this.onEditCollection}
+                                    onChangeDisplay={this.onChangeDisplay.bind(
+                                      this,
+                                      item
+                                    )}
+                                    onModifyRemark={this.onModifyRemark}
+                                    onRemarkSave={this.onRemarkSave}
+                                    onModifyFeature={
+                                      this.onModifyFeatureInDetails
+                                    }
+                                    onStopMofifyFeatureInDetails={
+                                      this.onStopMofifyFeatureInDetails
+                                    }
+                                    onToggleChangeStyle={
+                                      this.onToggleChangeStyle
+                                    }
+                                    onCopyCollection={this.onCopyCollection}
+                                  />
+                                ) : (
+                                  <PublicDataTreeComponent
+                                    datas={newContent}
+                                  ></PublicDataTreeComponent>
+                                )}
                               </div>
                             );
                           })}
@@ -2036,79 +2135,96 @@ export default class ScoutingDetails extends PureComponent {
               </Collapse>
             </PublicView>
             <div className={styles.addAreaBtn}>
-            {!this.state.isEdit ?
-              <Space style={{ paddingBottom: 10 }}>
-                <Button
-                  type="primary"
-                  ghost
-                  icon={<PlusCircleOutlined />}
-                  onClick={this.pushAreaItem}
-                  size="small"
-                >
-                  新增分类
-                </Button>
-                <Button
-                  type="primary"
-                  disabled={area_list.length < 2}
-                  onClick={() => this.setMultipleCheck()}
-                  ghost
-                  size="small"
-                  icon={<MyIcon type="icon-duoxuan" />}
-                >
-                  {this.state.multipleGroup ? "单图层" : "多图层"}
-                </Button>
-                <Button
-                  type="primary"
-                  ghost
-                  size="small"
-                  icon={<MyIcon type="icon-huabi" />}
-                  onClick={()=> {this.setState({isEdit: true})}}
-                >
-                编辑
-                </Button>
-              </Space>
-              :
-              <Space style={{ paddingBottom: 10 }}>
-                <Dropdown
-                trigger="click"
-                visible={this.state.showMoreAction}
-                onVisibleChange={(val)=> this.setState({showMoreAction: val})}
-                overlay={()=> this.MultipleMenus()}
-                >
+              {!this.state.isEdit ? (
+                <Space style={{ paddingBottom: 10 }}>
                   <Button
-                  type="primary"
-                  ghost
-                  size="small"
-                  icon={<MyIcon type="icon-duoxuan"/>}>
-                    操作
+                    type="primary"
+                    ghost
+                    icon={<PlusCircleOutlined />}
+                    onClick={this.pushAreaItem}
+                    size="small"
+                  >
+                    新增分类
                   </Button>
-                </Dropdown>
-                <Button
-                  type="primary"
-                  ghost
-                  icon={<MyIcon type="icon-chexiao"/>}
-                  onClick={()=> {this.setState({isEdit: false,notAreaIdSelections:[],selections:[]})}}
-                  size="small"
-                >
-                  取消
-                </Button>
-              </Space>
-            }
+                  <Button
+                    type="primary"
+                    disabled={area_list.length < 2}
+                    onClick={() => this.setMultipleCheck()}
+                    ghost
+                    size="small"
+                    icon={<MyIcon type="icon-duoxuan" />}
+                  >
+                    {this.state.multipleGroup ? "单图层" : "多图层"}
+                  </Button>
+                  <Button
+                    type="primary"
+                    ghost
+                    size="small"
+                    icon={<MyIcon type="icon-huabi" />}
+                    onClick={() => {
+                      this.setState({ isEdit: true });
+                    }}
+                  >
+                    编辑
+                  </Button>
+                </Space>
+              ) : (
+                <Space style={{ paddingBottom: 10 }}>
+                  <Dropdown
+                    trigger="click"
+                    visible={this.state.showMoreAction}
+                    onVisibleChange={(val) =>
+                      this.setState({ showMoreAction: val })
+                    }
+                    overlay={() => this.MultipleMenus()}
+                  >
+                    <Button
+                      type="primary"
+                      ghost
+                      size="small"
+                      icon={<MyIcon type="icon-duoxuan" />}
+                    >
+                      操作
+                    </Button>
+                  </Dropdown>
+                  <Button
+                    type="primary"
+                    ghost
+                    icon={<MyIcon type="icon-chexiao" />}
+                    onClick={() => {
+                      this.setState({
+                        isEdit: false,
+                        notAreaIdSelections: [],
+                        selections: [],
+                      });
+                    }}
+                    size="small"
+                  >
+                    取消
+                  </Button>
+                </Space>
+              )}
             </div>
           </Fragment>
         );
       case "2":
         return (
           <PublicView height={defaultHeight}>
-            <LookingBack board={current_board} active={this.state.activeKey === '2'}/>
+            <LookingBack
+              board={current_board}
+              active={this.state.activeKey === "2"}
+            />
           </PublicView>
         );
       case "3":
-       return (
-        <PublicView height={defaultHeight}>
-          <Meettings board={current_board} active={this.state.activeKey === '3'}/>
-        </PublicView>
-       )
+        return (
+          <PublicView height={defaultHeight}>
+            <Meettings
+              board={current_board}
+              active={this.state.activeKey === "3"}
+            />
+          </PublicView>
+        );
       case "4":
         return (
           <div
@@ -2201,7 +2317,7 @@ export default class ScoutingDetails extends PureComponent {
         >
           <CollectionDetail />
         </CSSTransition>
-        <BackTop target={()=> this.scrollView.current} style={{right:10}}/>
+        <BackTop target={() => this.scrollView.current} style={{ right: 10 }} />
       </div>
     );
   }

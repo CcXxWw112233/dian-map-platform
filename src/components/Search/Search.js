@@ -11,8 +11,7 @@ import LocationPanel from "./LocationPanel";
 import { getMyPosition } from "utils/getMyPosition";
 import { BASIC } from "../../services/config";
 import { setSession, getSession } from "utils/sessionManage";
-import mapApp from "utils/INITMAP";
-import { TransformCoordinate } from "@/lib/utils";
+import Event from "../../lib/utils/event";
 
 import { connect } from "dva";
 
@@ -37,78 +36,34 @@ export default class Search extends React.Component {
       searchVal: "",
       adcode: "",
     };
+    this.props.onRef(this);
     this.handleSearch = throttle(this.handleSearch, 1000);
   }
   componentDidMount() {
-    getSession("xzqhCode").then((res) => {
-      if (res.code === 0) {
-        if (!res.data) {
-          getMyPosition.getPosition().then((val) => {
-            if (!val) return;
-            setSession(
-              "xzqhCode",
-              `districtcode|${val.addressComponent?.adcode}|${val.addressComponent?.district}`
-            );
+    setSession("xzqhCode", "");
+    setSession("city", "");
+    setSession("province", "");
+    setSession("district", "");
+    const options = {
+      type: "nationcode",
+      adcode: "100000",
+      locationName: "全国",
+    };
+    this.updateState(options);
+  }
 
-            const options = {
-              type: "districtcode",
-              adcode: val.addressComponent?.adcode,
-              locationName: val.addressComponent?.district,
-            };
-            this.updateState(options);
-          });
-        } else {
-          const tempArr = res.data.split("|");
-          const options = {
-            type: tempArr[0],
-            adcode: tempArr[1],
-            // locationName: tempArr[2],
-            locationName: "全国",
-          };
-          this.updateState(options);
-        }
-      }
-    });
-    if (mapApp) {
-      mapApp.map.on("moveend", (e) => {
-        const { parent } = this.props;
-        if (parent.activePanelKey === "2") {
-          const map = mapApp.map;
-          const view = map.getView();
-          const center = view.getCenter();
-          const zoom = view.getZoom();
-          const newCoord = TransformCoordinate(
-            center,
-            "EPSG:3857",
-            "EPSG:4326"
-          );
-          window
-            .CallWebMapFunction("getCityByLonLat", {
-              lon: newCoord[0],
-              lat: newCoord[1],
-            })
-            .then((res) => {
-              if (res) {
-                let locationName = "";
-                if (Math.round(zoom) <= 8) {
-                  locationName = "全国";
-                } else if (Math.round(zoom) > 8 && Math.round(zoom) <= 12) {
-                  locationName = res.addressComponent.province;
-                } else {
-                  locationName = res.addressComponent.city;
-                }
-                const options = {
-                  type: "districtcode",
-                  adcode: res.addressComponent?.adcode,
-                  locationName: locationName,
-                };
-                mapApp.adcode = options.adcode;
-                this.updateState(options, true);
-              }
-            });
-        }
-      });
-    }
+  goBackToNation = () => {
+    setSession("xzqhCode", "");
+    setSession("city", "");
+    setSession("province", "");
+    setSession("district", "");
+    const options = {
+      type: "nationcode",
+      adcode: "100000",
+      locationName: "全国",
+    };
+    this.updateState(options);
+    Event.Evt.firEvent("searchProject");
   }
 
   updateState = (val, noNeedUpdate = false) => {
@@ -265,6 +220,7 @@ export default class Search extends React.Component {
         updateLocationName={this.updateLocationName}
         changeQueryStr={this.props.changeQueryStr}
         changeAreaPanelVisible={this.changeAreaPanelVisible}
+        parent={this}
       ></AreaPanel>
     );
     const locationPanel = (

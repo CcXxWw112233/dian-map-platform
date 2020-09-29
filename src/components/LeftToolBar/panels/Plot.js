@@ -5,7 +5,6 @@ import globalStyle from "@/globalSet/styles/globalStyles.less";
 import styles from "../LeftToolBar.less";
 import ColorPicker from "../../ColorPicker/index";
 import { guid } from "./lib";
-import { connect } from "dva";
 import { symbols } from "./data";
 import { plotEdit } from "../../../utils/plotEdit";
 import FeatureOperatorEvent from "../../../utils/plot2ol/src/events/FeatureOperatorEvent";
