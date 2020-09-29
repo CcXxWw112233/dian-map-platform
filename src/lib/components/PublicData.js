@@ -285,6 +285,9 @@ const publicData = {
     });
     if (keywords.length === 0) return;
 
+    const baseMapKeys = mapApp.baseMapKeys;
+    const baseMapKey = mapApp.baseMapKey;
+    const systemDic = mapApp.systemDic;
     const keywords2 = keywords.join(",");
 
     const view = mapApp.map.getView();
@@ -299,10 +302,14 @@ const publicData = {
       adcode: mapApp.adcode,
       key: baseConfig.GAODE_SERVER_APP_KEY,
     });
+
     if (res.code === "0") {
       res.data.forEach((item) => {
-        const temp = [item.lon, item.lat];
-        const coords = TransformCoordinate(temp, "EPSG:4326", "EPSG:3857");
+        let temp = [item.lon, item.lat];
+        if (baseMapKeys[1].includes(baseMapKey)) {
+          temp = systemDic[baseMapKey](temp[0], temp[1]);
+        }
+        let coords = TransformCoordinate(temp, "EPSG:4326", "EPSG:3857");
         const options = {
           textFillColor: "#3F48CC",
           textStrokeColor: "#fff",
@@ -315,7 +322,7 @@ const publicData = {
           text: item.name,
           iconUrl: require("../../assets/location.svg"),
         };
-        
+
         if (keys.includes(item.type3)) {
           const style = createStyle("Point", options);
           const feature = addFeature("Point", { coordinates: coords });
@@ -458,7 +465,7 @@ const publicData = {
     const baseMapKeys = mapApp.baseMapKeys;
     const baseMapKey = mapApp.baseMapKey;
     const systemDic = mapApp.systemDic;
-    if (baseMapKeys[1].indexOf(baseMapKey) > -1) {
+    if (baseMapKeys[1].includes(baseMapKey)) {
       let coords = newFeature.getGeometry().getCoordinates();
       for (let i = 0; i < coords.length; i++) {
         for (let j = 0; j < coords[i].length; j++) {
