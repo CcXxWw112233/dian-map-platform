@@ -7,6 +7,7 @@ import { MyIcon } from "../../../components/utils";
 import PublicDataAction from "../../../lib/components/PublicData";
 import publicDataConf from "../../publicMapData/public_data";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
+import { guid } from "../../../lib/components/index";
 
 const { Panel } = Collapse;
 
@@ -108,7 +109,7 @@ export default class PublicDataTreeComponent extends react.Component {
         return <DetailItem key={item.id} data={item} />;
       } else {
         return (
-          <Collapse bordered={false} ghost key="multi-00-000">
+          <Collapse bordered={false} ghost key={guid()}>
             {item.children.map((item2) => {
               return (
                 <Panel header={item2.title} key={item2.id}>

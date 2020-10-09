@@ -6,6 +6,7 @@ import Action from "../../../lib/components/ProjectScouting/ScoutingDetail";
 import ListAction from "../../../lib/components/ProjectScouting/ScoutingList";
 import PhotoSwipe from "../../../components/PhotoSwipe/action";
 import InitMap from "../../../utils/INITMAP";
+import { guid } from "../../../lib/components/index";
 import {
   Row,
   Input,
@@ -676,6 +677,7 @@ export const ScoutingItem = ({
                     newContent.push(multiContentItem);
                     return (
                       <PublicDataTreeComponent
+                        key={guid()}
                         datas={newContent}
                       ></PublicDataTreeComponent>
                     );
