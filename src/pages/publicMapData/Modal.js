@@ -1,5 +1,5 @@
 import react from "react";
-import { Modal, Select } from "antd";
+import { message, Modal, Select } from "antd";
 
 import SoutingAction from "../../../src/services/scouting";
 import ScoutDetail from "../../lib/components/ProjectScouting/ScoutingDetail";
@@ -42,11 +42,14 @@ export default class MyModal extends react.Component {
     if (selectedGroupId === "other") {
       groupId = "";
     }
-    publicData.setPublicDataIdsToProject(
-      groupId,
-      this.projectId,
-      data
-    );
+    publicData
+      .setPublicDataIdsToProject(groupId, this.projectId, data)
+      .then((res) => {
+        if (res.code === "0") {
+          message.info("已将所选内容引入到项目,请到项目中查看。");
+        }
+      })
+      .catch((e) => console.log(e));
     this.hideModal();
   };
   onCancel = () => {
