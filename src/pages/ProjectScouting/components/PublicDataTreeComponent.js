@@ -61,12 +61,12 @@ class DetailItem extends react.Component {
             PublicDataAction.removeFeatures(data.title);
           } else {
             const isPopulation = this.populationDatas.includes(data.title);
-            if (isPopulation) { // 人口
+            if (isPopulation) {
+              // 人口
               PublicDataAction.removeFeatures(
                 PublicDataAction.lastPopulationTypeName
               );
             } else {
-
             }
           }
         }
@@ -131,9 +131,8 @@ export default class PublicDataTreeComponent extends react.Component {
                         }
                       })}
                     </Collapse>
-                  ) : (
-                    <DetailItem key={item2.id} data={item2} />
-                  )}
+                  ) : // <DetailItem key={item2.id} data={item2} />
+                  null}
                   {item2.children.length > 0 &&
                   item2.children[0].children.length === 0
                     ? item2.children.map((item3) => {
