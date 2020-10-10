@@ -669,6 +669,7 @@ export const ScoutingItem = ({
                 dataSource.map((item, index) => {
                   let newContent = [];
                   if (item.collect_type === "8") {
+                    return
                     let content = item.content;
                     let multiContentItem = { children: [] };
                     content.forEach((item2) => {

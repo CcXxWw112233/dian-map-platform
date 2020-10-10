@@ -2075,6 +2075,7 @@ export default class ScoutingDetails extends PureComponent {
                             };
                             let publicDataTreeId = "";
                             if (item.collect_type === "8") {
+                              return
                               let content = item.content;
                               publicDataTreeId = item.id;
                               let multiContentItem = { children: [] };
