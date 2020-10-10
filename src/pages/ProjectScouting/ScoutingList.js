@@ -42,7 +42,9 @@ export default class ScoutingList extends PureComponent {
       if (!data) {
         tmpArr = this.projectDatas;
       } else {
-        tmpArr = this.projectDatas.filter((item) => item[data.type] === data.code);
+        tmpArr = this.projectDatas.filter(
+          (item) => item[data.type] === data.code
+        );
       }
       if (!Array.isArray(tmpArr)) {
         tmpArr = [];
@@ -221,6 +223,7 @@ export default class ScoutingList extends PureComponent {
                 projectList: this.state.projects,
               },
             });
+            this.getProjectList();
           }
         );
         try {
@@ -285,6 +288,7 @@ export default class ScoutingList extends PureComponent {
 
   // 添加按钮点击事件
   handleAddClick = () => {
+    Event.Evt.firEvent("returnNation");
     // 隐藏其他不需要的窗体
     this.hideOtherSlide();
     message.success(

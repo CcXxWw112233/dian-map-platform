@@ -132,8 +132,7 @@ export default class PublicDataTreeComponent extends react.Component {
                         }
                       })}
                     </Collapse>
-                  ) : // <DetailItem key={item2.id} data={item2} />
-                  null}
+                  ) : null}
                   {item2.children.length > 0 &&
                   item2.children[0].children.length === 0
                     ? item2.children.map((item3) => {

@@ -2059,8 +2059,26 @@ export default class ScoutingDetails extends PureComponent {
                               };
                             }
                             let newContent = [];
+                            const genExtra = (publicDataTreeId) => {
+                              return (
+                                <i
+                                  className={globalStyle.global_icon}
+                                  onClick={() => {
+                                    Action.removeCollection(
+                                      publicDataTreeId
+                                    ).then(res => {
+                                      
+                                    });
+                                  }}
+                                >
+                                  &#xe7b8;
+                                </i>
+                              );
+                            };
+                            let publicDataTreeId = "";
                             if (item.collect_type === "8") {
                               let content = item.content;
+                              publicDataTreeId = item.id;
                               let multiContentItem = { children: [] };
                               content.forEach((item2) => {
                                 if (item2.children.length === 0) {
@@ -2115,9 +2133,16 @@ export default class ScoutingDetails extends PureComponent {
                                     onCopyCollection={this.onCopyCollection}
                                   />
                                 ) : (
-                                  <PublicDataTreeComponent
-                                    datas={newContent}
-                                  ></PublicDataTreeComponent>
+                                  <Collapse>
+                                    <Collapse.Panel
+                                      header="公共数据引用"
+                                      extra={genExtra(publicDataTreeId)}
+                                    >
+                                      <PublicDataTreeComponent
+                                        datas={newContent}
+                                      ></PublicDataTreeComponent>
+                                    </Collapse.Panel>
+                                  </Collapse>
                                 )}
                               </div>
                             );

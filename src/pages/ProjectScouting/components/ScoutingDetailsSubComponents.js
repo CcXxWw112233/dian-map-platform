@@ -44,6 +44,10 @@ import Axios from "axios";
 // import { UploadFile } from '../../../utils/XhrUploadFile'
 
 import Search from "../../../components/Search/Search";
+import config from "../../../services/scouting";
+
+import { Collapse } from "antd";
+const { Panel } = Collapse;
 
 export const UploadBgPic = ({ children, onUpload, onStart }) => {
   return (
@@ -675,11 +679,28 @@ export const ScoutingItem = ({
                       }
                     });
                     newContent.push(multiContentItem);
+                    const { DELETE_COLLECTION } = config;
+                    const genExtra = (id) => {
+                      return (
+                        <i
+                          className={globalStyle.global_icon}
+                          onClick={() => {
+                            DELETE_COLLECTION(id);
+                          }}
+                        >
+                          &#xe7b8;
+                        </i>
+                      );
+                    };
                     return (
-                      <PublicDataTreeComponent
-                        key={guid()}
-                        datas={newContent}
-                      ></PublicDataTreeComponent>
+                      <Collapse key={guid()}>
+                        <Panel header="公共数据引用" extra={genExtra(item.id)}>
+                          <PublicDataTreeComponent
+                            key={guid()}
+                            datas={newContent}
+                          ></PublicDataTreeComponent>
+                        </Panel>
+                      </Collapse>
                     );
                   }
                   return (
