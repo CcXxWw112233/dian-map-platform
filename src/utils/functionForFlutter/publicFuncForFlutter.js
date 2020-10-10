@@ -65,7 +65,8 @@ const MapMoveSearch = function () {
 Evt.addEventListener("handleGroupCollectionFeature", (data) => {
   // 安卓
   if (window.mapAndroid) {
-    window.mapAndroid.getPoint && window.mapAndroid.getPoint(data);
+    window.mapAndroid.getPoint &&
+      window.mapAndroid.getPoint(JSON.stringify(data));
   }
   // ios
   if (window.webkit) {
