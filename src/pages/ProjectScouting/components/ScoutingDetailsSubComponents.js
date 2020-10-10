@@ -108,11 +108,11 @@ export const Title = ({ name, date, cb, data = {}, className = "", mini }) => {
   };
   return (
     <div className={`${styles.title} ${className}`}>
-      <Search
+      {/* <Search
         onRef={() => {}}
         style={{ flex: "none", margin: 0, border: "1px solid #3333" }}
         placeholder="搜索地址"
-      ></Search>
+      ></Search> */}
       <div className={styles.title_goBack}>
         <MyIcon type="icon-fanhuijiantou" onClick={cb} />
         <span
@@ -693,14 +693,10 @@ export const ScoutingItem = ({
                       );
                     };
                     return (
-                      <Collapse key={guid()}>
-                        <Panel header="公共数据引用" extra={genExtra(item.id)}>
-                          <PublicDataTreeComponent
-                            key={guid()}
-                            datas={newContent}
-                          ></PublicDataTreeComponent>
-                        </Panel>
-                      </Collapse>
+                      <PublicDataTreeComponent
+                        key={guid()}
+                        datas={newContent}
+                      ></PublicDataTreeComponent>
                     );
                   }
                   return (

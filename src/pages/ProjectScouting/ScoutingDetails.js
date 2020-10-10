@@ -2066,9 +2066,7 @@ export default class ScoutingDetails extends PureComponent {
                                   onClick={() => {
                                     Action.removeCollection(
                                       publicDataTreeId
-                                    ).then(res => {
-                                      
-                                    });
+                                    ).then((res) => {});
                                   }}
                                 >
                                   &#xe7b8;
@@ -2133,16 +2131,9 @@ export default class ScoutingDetails extends PureComponent {
                                     onCopyCollection={this.onCopyCollection}
                                   />
                                 ) : (
-                                  <Collapse>
-                                    <Collapse.Panel
-                                      header="公共数据引用"
-                                      extra={genExtra(publicDataTreeId)}
-                                    >
-                                      <PublicDataTreeComponent
-                                        datas={newContent}
-                                      ></PublicDataTreeComponent>
-                                    </Collapse.Panel>
-                                  </Collapse>
+                                  <PublicDataTreeComponent
+                                    datas={newContent}
+                                  ></PublicDataTreeComponent>
                                 )}
                               </div>
                             );

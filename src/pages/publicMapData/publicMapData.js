@@ -454,7 +454,7 @@ export default class PublicData extends React.Component {
       >
         <div
           className={globalStyle.autoScrollY}
-          style={{ height: "calc(88% - 50px)" }}
+          style={{ height: "calc(88% - 0px)" }}
         >
           {this.state.publicDataTree.length > 0 ? (
             <Tree
@@ -472,7 +472,7 @@ export default class PublicData extends React.Component {
             <Skeleton active />
           )}
         </div>
-        <div style={{ height: 50, paddingRight: 10 }}>
+        {/* <div style={{ height: 50, paddingRight: 10 }}>
           <button className={styles.btn} onClick={this.saveTreeToProject}>
             引用到项目
           </button>
@@ -483,7 +483,7 @@ export default class PublicData extends React.Component {
               parent={this}
             ></MyModal>
           ) : null}
-        </div>
+        </div> */}
       </div>
     );
   }
