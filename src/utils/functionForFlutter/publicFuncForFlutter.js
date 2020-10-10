@@ -65,7 +65,7 @@ const MapMoveSearch = function () {
 Evt.addEventListener("handleGroupCollectionFeature", (data) => {
   // 安卓
   if (window.mapAndroid) {
-    window.mapAndroid.getPoint && window.mapAndroid.getPoint({ data });
+    window.mapAndroid.getPoint && window.mapAndroid.getPoint(data);
   }
   // ios
   if (window.webkit) {
@@ -79,7 +79,7 @@ Evt.addEventListener("handleGroupCollectionFeature", (data) => {
 Evt.addEventListener("handleGroupFeature", (id) => {
   // 安卓
   if (window.mapAndroid) {
-    window.mapAndroid.getPoint && window.mapAndroid.getPoint({ id });
+    window.mapAndroid.getPoint && window.mapAndroid.getPoint(id);
   }
   // ios
   if (window.webkit) {
@@ -434,32 +434,32 @@ let callFunctions = {
     });
   },
 
-    // 通过经纬度、关键字查询
-    searchNearByXY2: ({ xy, keywords, radius, adcode, page }) => {
-      return new Promise((resolve, reject) => {
-        let url = protocol + "//restapi.amap.com/v3/place/around";
-        let params = {
-          key: baseConfig.GAODE_SERVER_APP_KEY,
-          location: xy,
-          keywords: keywords,
-          radius: radius,
-        };
-        if (adcode) {
-          params.city = adcode;
+  // 通过经纬度、关键字查询
+  searchNearByXY2: ({ xy, keywords, radius, adcode, page }) => {
+    return new Promise((resolve, reject) => {
+      let url = protocol + "//restapi.amap.com/v3/place/around";
+      let params = {
+        key: baseConfig.GAODE_SERVER_APP_KEY,
+        location: xy,
+        keywords: keywords,
+        radius: radius,
+      };
+      if (adcode) {
+        params.city = adcode;
+      }
+      if (page) {
+        params.page = page;
+      }
+      axios.get(url, { params }).then((res) => {
+        if (res.status === 200) {
+          let data = res.data;
+          resolve(data);
+        } else {
+          reject(res);
         }
-        if (page) {
-          params.page = page;
-        }
-        axios.get(url, { params }).then((res) => {
-          if (res.status === 200) {
-            let data = res.data;
-            resolve(data);
-          } else {
-            reject(res);
-          }
-        });
       });
-    },
+    });
+  },
 
   // 根据经纬度获取所在城市
   getCityByLonLat: ({ lon, lat }) => {
