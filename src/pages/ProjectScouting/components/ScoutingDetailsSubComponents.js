@@ -668,38 +668,37 @@ export const ScoutingItem = ({
               {dataSource.length ? (
                 dataSource.map((item, index) => {
                   let newContent = [];
-                  if (item.collect_type === "8") {
-                    return
-                    let content = item.content;
-                    let multiContentItem = { children: [] };
-                    content.forEach((item2) => {
-                      if (item2.children.length === 0) {
-                        newContent.push(item2);
-                      } else {
-                        multiContentItem.children.push(item2);
-                      }
-                    });
-                    newContent.push(multiContentItem);
-                    const { DELETE_COLLECTION } = config;
-                    const genExtra = (id) => {
-                      return (
-                        <i
-                          className={globalStyle.global_icon}
-                          onClick={() => {
-                            DELETE_COLLECTION(id);
-                          }}
-                        >
-                          &#xe7b8;
-                        </i>
-                      );
-                    };
-                    return (
-                      <PublicDataTreeComponent
-                        key={guid()}
-                        datas={newContent}
-                      ></PublicDataTreeComponent>
-                    );
-                  }
+                  // if (item.collect_type === "8") {
+                  //   let content = item.content;
+                  //   let multiContentItem = { children: [] };
+                  //   content.forEach((item2) => {
+                  //     if (item2.children.length === 0) {
+                  //       newContent.push(item2);
+                  //     } else {
+                  //       multiContentItem.children.push(item2);
+                  //     }
+                  //   });
+                  //   newContent.push(multiContentItem);
+                  //   const { DELETE_COLLECTION } = config;
+                  //   const genExtra = (id) => {
+                  //     return (
+                  //       <i
+                  //         className={globalStyle.global_icon}
+                  //         onClick={() => {
+                  //           DELETE_COLLECTION(id);
+                  //         }}
+                  //       >
+                  //         &#xe7b8;
+                  //       </i>
+                  //     );
+                  //   };
+                  //   return (
+                  //     <PublicDataTreeComponent
+                  //       key={guid()}
+                  //       datas={newContent}
+                  //     ></PublicDataTreeComponent>
+                  //   );
+                  // }
                   return (
                     <Draggable
                       key={item.id}
