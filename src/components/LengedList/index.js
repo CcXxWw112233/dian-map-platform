@@ -43,6 +43,7 @@ export default class LengedList extends React.Component {
       lengedList = [lengedList];
     }
     lengedList = Array.from(new Set(lengedList));
+    debugger
     return (
       <CommonPanel
         panelName="图例"

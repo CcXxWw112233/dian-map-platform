@@ -1984,6 +1984,7 @@ export default class ScoutingDetails extends PureComponent {
                       style={{ backgroundColor: "#fff", marginBottom: "10px" }}
                     >
                       <ScoutingItem
+                        callback={this.renderAreaList}
                         onSelectCollection={this.selectionCollection}
                         CollectionEdit={this.state.isEdit}
                         board={this.state.current_board}
@@ -2058,35 +2059,6 @@ export default class ScoutingDetails extends PureComponent {
                                 backgroundColor: "rgba(214,228,255,0.5)",
                               };
                             }
-                            let newContent = [];
-                            const genExtra = (publicDataTreeId) => {
-                              return (
-                                <i
-                                  className={globalStyle.global_icon}
-                                  onClick={() => {
-                                    Action.removeCollection(
-                                      publicDataTreeId
-                                    ).then((res) => {});
-                                  }}
-                                >
-                                  &#xe7b8;
-                                </i>
-                              );
-                            };
-                            // let publicDataTreeId = "";
-                            // if (item.collect_type === "8") {
-                            //   let content = item.content;
-                            //   publicDataTreeId = item.id;
-                            //   let multiContentItem = { children: [] };
-                            //   content.forEach((item2) => {
-                            //     if (item2.children.length === 0) {
-                            //       newContent.push(item2);
-                            //     } else {
-                            //       multiContentItem.children.push(item2);
-                            //     }
-                            //   });
-                            //   newContent.push(multiContentItem);
-                            // }
                             return (
                               <div
                                 key={item.id}
@@ -2097,35 +2069,7 @@ export default class ScoutingDetails extends PureComponent {
                                   width: "100%",
                                 }}
                               >
-                                <UploadItem
-                                  Edit={this.state.isEdit}
-                                  onCheckItem={this.checkItem}
-                                  style={activeStyle}
-                                  data={item}
-                                  type={Action.checkCollectionType(item.target)}
-                                  areaList={area_list}
-                                  onSelectGroup={this.onSelectGroup}
-                                  onRemove={this.onCollectionRemove.bind(
-                                    this,
-                                    item
-                                  )}
-                                  onEditCollection={this.onEditCollection}
-                                  onChangeDisplay={this.onChangeDisplay.bind(
-                                    this,
-                                    item
-                                  )}
-                                  onModifyRemark={this.onModifyRemark}
-                                  onRemarkSave={this.onRemarkSave}
-                                  onModifyFeature={
-                                    this.onModifyFeatureInDetails
-                                  }
-                                  onStopMofifyFeatureInDetails={
-                                    this.onStopMofifyFeatureInDetails
-                                  }
-                                  onToggleChangeStyle={this.onToggleChangeStyle}
-                                  onCopyCollection={this.onCopyCollection}
-                                />
-                                {/* {item.collect_type !== "8" ? (
+                                {item.collect_type !== "9" ? (
                                   <UploadItem
                                     Edit={this.state.isEdit}
                                     onCheckItem={this.checkItem}
@@ -2160,9 +2104,12 @@ export default class ScoutingDetails extends PureComponent {
                                   />
                                 ) : (
                                   <PublicDataTreeComponent
-                                    datas={newContent}
+                                    datas={item}
+                                    key={item.id}
+                                    areaList={area_list}
+                                    callback={this.renderAreaList}
                                   ></PublicDataTreeComponent>
-                                )} */}
+                                )}
                               </div>
                             );
                           })}

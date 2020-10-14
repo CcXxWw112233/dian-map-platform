@@ -81,6 +81,7 @@ const publicData = {
   ],
   lastPopulationTypeName: "",
   hasInited: false,
+  lenged: null,
   init: function () {
     this.hasInited = true;
     event.Evt.on("transCoordinateSystems2PublicData", (key) => {
@@ -347,7 +348,16 @@ const publicData = {
   //  }
   // },
 
-  getPopulationDatas: async function (fillColor, name, loadFeatureKeys) {
+  getPopulationDatas: async function (
+    fillColor,
+    name,
+    loadFeatureKeys,
+    dispatch,
+    lenged
+  ) {
+    if (lenged) {
+      this.lenged = lenged
+    }
     if (this.lastPopulationTypeName) {
       this.removeFeatures(this.lastPopulationTypeName);
     }
@@ -382,41 +392,71 @@ const publicData = {
         });
         const region = (max - min) / 5;
         fillColor = [];
+        let lengedArr = [];
         fillColor.push({
           fillColor: this.colors[0],
           property: this.popupKeyVals[name],
           scope: `0-${min}`,
         });
+        // lengedArr.push({
+        //   bgColor: this.colors[0],
+        //   font: `0-${min}`,
+        // })
         fillColor.push({
           fillColor: this.colors[1],
           property: this.popupKeyVals[name],
-          scope: `${min}-${min + region}`,
+          scope: `${min.toFixed(0)}-${(min + region).toFixed(0)}`,
         });
+        lengedArr.push({
+          bgColor: this.colors[1],
+          font: `${min.toFixed(0)}-${(min + region).toFixed(0)}`,
+        })
         fillColor.push({
           fillColor: this.colors[2],
           property: this.popupKeyVals[name],
-          scope: `${min + region}-${min + region * 2}`,
+          scope: `${(min + region).toFixed(0)}-${(min + region * 2).toFixed(0)}`,
         });
+        lengedArr.push({
+          bgColor: this.colors[2],
+          font: `${(min + region).toFixed(0)}-${(min + region * 2).toFixed(0)}`,
+        })
         fillColor.push({
           fillColor: this.colors[3],
           property: this.popupKeyVals[name],
-          scope: `${min + region * 2}-${min + region * 3}`,
+          scope: `${(min + region * 2).toFixed(0)}-${(min + region * 3).toFixed(0)}`,
         });
+        lengedArr.push({
+          bgColor: this.colors[3],
+          font: `${(min + region * 2).toFixed(0)}-${(min + region * 3).toFixed(0)}`,
+        })
         fillColor.push({
           fillColor: this.colors[4],
           property: this.popupKeyVals[name],
-          scope: `${min + region * 3}-${min + region * 4}`,
+          scope: `${(min + region * 3).toFixed(0)}-${(min + region * 4).toFixed(0)}`,
         });
+        lengedArr.push({
+          bgColor: this.colors[4],
+          font: `${(min + region * 3).toFixed(0)}-${(min + region * 4).toFixed(0)}`,
+        })
         fillColor.push({
           fillColor: this.colors[5],
           property: this.popupKeyVals[name],
-          scope: `${min + region * 4}-${min + region * 5}`,
+          scope: `${(min + region * 4).toFixed(0)}-${(min + region * 5).toFixed(0)}`,
         });
+        lengedArr.push({
+          bgColor: this.colors[5],
+          font: `${(min + region * 4).toFixed(0)}-${(min + region * 5).toFixed(0)}`,
+        })
         fillColor.push({
           fillColor: this.colors[6],
           property: this.popupKeyVals[name],
-          scope: `-${max}`,
+          scope: `-${max.toFixed(0)}`,
         });
+        lengedArr.push({
+          bgColor: this.colors[6],
+          font: `>${max.toFixed(0)}`,
+        })
+        this.lenged.content = lengedArr
         data.forEach((item) => {
           let newData = {
             source: item.geom,
@@ -440,6 +480,12 @@ const publicData = {
           newFeature.setStyle(style);
           this.features[this.activeTypeName].push(newFeature);
           this.source.addFeature(newFeature);
+        });
+        dispatch({
+          type: "lengedList/updateLengedList",
+          payload: {
+            config: [this.lenged],
+          },
         });
       }
     } else {

@@ -1,6 +1,6 @@
 const config = [
   {
-    title: "人口数量(单位:万人)",
+    title: "人口数量(单位:人)",
     key: "map:population:number",
     content: [
       { bgColor: "rgba(231,185,192,0.8)", font: "0-5" },
@@ -9,7 +9,7 @@ const config = [
     ],
   },
   {
-    title: "人口密度(单位:万人/k㎡)",
+    title: "人口密度(单位:人/k㎡)",
     key: "map:population:density",
     content: [
       { bgColor: "rgba(251,207,208,0.8)", font: "0-200" },
@@ -21,7 +21,7 @@ const config = [
     ],
   },
   {
-    title: "就业岗位(单位:万人)",
+    title: "就业岗位(单位:人)",
     key: "map:population:employment",
     content: [
       { bgColor: "rgba(211,213,245,0.8)", font: "0-1" },

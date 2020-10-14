@@ -276,13 +276,13 @@ export default class PublicData extends React.Component {
             let lengedConfs = [];
             keywords2.forEach((item) => {
               for (let i = 0; i < publicDataConf.length; i++) {
+                let newLended = lengedListConf.filter(
+                  (item) => item.key === publicDataConf[i].key
+                )[0];
+                if (newLended) {
+                  lengedConfs.push(newLended);
+                }
                 if (publicDataConf[i].title === item) {
-                  let newLended = lengedListConf.filter(
-                    (item) => item.key === publicDataConf[i].key
-                  )[0];
-                  if (newLended) {
-                    lengedConfs.push(newLended);
-                  }
                   const fillColorKeyVals = publicDataConf[i].fillColorKeyVals;
                   this.fillColor = fillColorKeyVals
                     ? fillColorKeyVals
@@ -293,23 +293,26 @@ export default class PublicData extends React.Component {
                       data: publicDataConf[i].loadFeatureKeys[0],
                       fillColor: publicDataConf[i].fillColorKeyVals,
                     });
+                    const { dispatch } = this.props;
+                    dispatch({
+                      type: "lengedList/updateLengedList",
+                      payload: {
+                        config: lengedConfs,
+                      },
+                    });
                   } else {
+                    const { dispatch } = this.props;
                     PublicDataActions.getPopulationDatas(
                       this.fillColor,
                       item,
-                      publicDataConf[i].loadFeatureKeys[0]
+                      publicDataConf[i].loadFeatureKeys[0],
+                      dispatch,
+                      newLended
                     );
                   }
                   break;
                 }
               }
-            });
-            const { dispatch } = this.props;
-            dispatch({
-              type: "lengedList/updateLengedList",
-              payload: {
-                config: lengedConfs,
-              },
             });
           }
         }
@@ -454,7 +457,7 @@ export default class PublicData extends React.Component {
       >
         <div
           className={globalStyle.autoScrollY}
-          style={{ height: "calc(88% - 0px)" }}
+          style={{ height: "calc(88% - 50px)" }}
         >
           {this.state.publicDataTree.length > 0 ? (
             <Tree
@@ -472,7 +475,7 @@ export default class PublicData extends React.Component {
             <Skeleton active />
           )}
         </div>
-        {/* <div style={{ height: 50, paddingRight: 10 }}>
+        <div style={{ height: 50, paddingRight: 10 }}>
           <button className={styles.btn} onClick={this.saveTreeToProject}>
             引用到项目
           </button>
@@ -483,7 +486,7 @@ export default class PublicData extends React.Component {
               parent={this}
             ></MyModal>
           ) : null}
-        </div> */}
+        </div>
       </div>
     );
   }

@@ -198,7 +198,7 @@ export const createStyle = function (
     overflow: true,
     text: options.showName
       ? fillColorKeyVals && fillColorKeyVals.length
-        ? `${options.text}(${Number(properties[fillColorKeyVals[0].property]).toFixed(2)})`
+        ? `${options.text}(${Number(properties[fillColorKeyVals[0].property]).toFixed(0)})`
         : options.text
       : "",
     fill: new Fill({
