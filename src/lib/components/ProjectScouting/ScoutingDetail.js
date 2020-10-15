@@ -1054,7 +1054,7 @@ function Action() {
       showName: showFeatureName,
     };
     this.lenged = {
-      title: "项目踏勘",
+      title: "项目数据",
       key: "map:projectScouting",
       content: [],
     };

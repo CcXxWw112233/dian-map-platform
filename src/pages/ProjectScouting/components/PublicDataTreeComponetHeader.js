@@ -175,19 +175,23 @@ export default class PublicDataTreeComponetHeader extends react.Component {
       },
       () => {
         if (this.state.eyeState) {
+          if (!PublicDataAction.hasInited) {
+            PublicDataAction.init();
+          }
           let poiIds = [];
           if (data.content && data.content.length > 0) {
             if (data.content[0].is_poi === "1") {
-              const content = data.content;
-              content.forEach((item) => {
-                if (item.children) {
-                  const child = item.children;
-                  child.forEach((item2) => {
-                    poiIds.push(item2.title);
-                  });
-                }
-              });
-              PublicDataAction.getADPoi(poiIds);
+              // const content = data.content;
+              // content.forEach((item) => {
+              //   if (item.children) {
+              //     const child = item.children;
+              //     child.forEach((item2) => {
+              //       poiIds.push(item2.title);
+              //     });
+              //   }
+              // });
+              poiIds.push(data.title);
+              PublicDataAction.getADPoi(poiIds, 1);
             } else {
               if (data.content) {
                 // 楼盘
@@ -204,8 +208,14 @@ export default class PublicDataTreeComponetHeader extends react.Component {
                 });
               }
             }
+          } else if (data.children && data.children.length > 0) {
+            if (data.children[0].is_poi === "1") {
+              poiIds.push(data.title);
+              PublicDataAction.getADPoi(poiIds, 2);
+            }
           }
         } else {
+          PublicDataAction.removeFeatures(data.title);
         }
       }
     );
@@ -294,10 +304,12 @@ export default class PublicDataTreeComponetHeader extends react.Component {
               e.stopPropagation();
             }}
           >
-            {/* <MyIcon
-              type={this.state.eyeState ? this.eyeOpen : this.eyeClose}
-              onClick={() => this.handleEyeClick(data)}
-            /> */}
+            {!(data.title === "人口用地" || data.title === "地产楼盘") ? (
+              <MyIcon
+                type={this.state.eyeState ? this.eyeOpen : this.eyeClose}
+                onClick={() => this.handleEyeClick(data)}
+              />
+            ) : null}
             {/* <Switch defaultChecked size="small" /> */}
             {this.renderDropdown(data, collectionId)}
           </div>

@@ -275,7 +275,7 @@ const publicData = {
     }
   },
 
-  getADPoi: async function (keywords) {
+  getADPoi: async function (keywords, type = 3) {
     let keys = [];
     // if (that.features) {
     //   keys = Object.keys(that.features);
@@ -323,13 +323,26 @@ const publicData = {
           text: item.name,
           iconUrl: require("../../assets/location.svg"),
         };
-
-        if (keys.includes(item.type3)) {
+        let flag = false;
+        let poiType = null;
+        if (keys.includes(item.type3) && type === 3) {
+          flag = true;
+          poiType = item.type3;
+        }
+        if (keys.includes(item.type2) && type === 2) {
+          flag = true;
+          poiType = item.type2;
+        }
+        if (keys.includes(item.type1) && type === 1) {
+          flag = true;
+          poiType = item.type1;
+        }
+        if (flag) {
           const style = createStyle("Point", options);
           const feature = addFeature("Point", { coordinates: coords });
           feature.setStyle(style);
           this.source && this.source.addFeature(feature);
-          this.features[item.type3].push(feature);
+          this.features[poiType].push(feature);
         }
       });
     }
@@ -356,7 +369,7 @@ const publicData = {
     lenged
   ) {
     if (lenged) {
-      this.lenged = lenged
+      this.lenged = lenged;
     }
     if (this.lastPopulationTypeName) {
       this.removeFeatures(this.lastPopulationTypeName);
@@ -410,43 +423,57 @@ const publicData = {
         lengedArr.push({
           bgColor: this.colors[1],
           font: `${min.toFixed(0)}-${(min + region).toFixed(0)}`,
-        })
+        });
         fillColor.push({
           fillColor: this.colors[2],
           property: this.popupKeyVals[name],
-          scope: `${(min + region).toFixed(0)}-${(min + region * 2).toFixed(0)}`,
+          scope: `${(min + region).toFixed(0)}-${(min + region * 2).toFixed(
+            0
+          )}`,
         });
         lengedArr.push({
           bgColor: this.colors[2],
           font: `${(min + region).toFixed(0)}-${(min + region * 2).toFixed(0)}`,
-        })
+        });
         fillColor.push({
           fillColor: this.colors[3],
           property: this.popupKeyVals[name],
-          scope: `${(min + region * 2).toFixed(0)}-${(min + region * 3).toFixed(0)}`,
+          scope: `${(min + region * 2).toFixed(0)}-${(min + region * 3).toFixed(
+            0
+          )}`,
         });
         lengedArr.push({
           bgColor: this.colors[3],
-          font: `${(min + region * 2).toFixed(0)}-${(min + region * 3).toFixed(0)}`,
-        })
+          font: `${(min + region * 2).toFixed(0)}-${(min + region * 3).toFixed(
+            0
+          )}`,
+        });
         fillColor.push({
           fillColor: this.colors[4],
           property: this.popupKeyVals[name],
-          scope: `${(min + region * 3).toFixed(0)}-${(min + region * 4).toFixed(0)}`,
+          scope: `${(min + region * 3).toFixed(0)}-${(min + region * 4).toFixed(
+            0
+          )}`,
         });
         lengedArr.push({
           bgColor: this.colors[4],
-          font: `${(min + region * 3).toFixed(0)}-${(min + region * 4).toFixed(0)}`,
-        })
+          font: `${(min + region * 3).toFixed(0)}-${(min + region * 4).toFixed(
+            0
+          )}`,
+        });
         fillColor.push({
           fillColor: this.colors[5],
           property: this.popupKeyVals[name],
-          scope: `${(min + region * 4).toFixed(0)}-${(min + region * 5).toFixed(0)}`,
+          scope: `${(min + region * 4).toFixed(0)}-${(min + region * 5).toFixed(
+            0
+          )}`,
         });
         lengedArr.push({
           bgColor: this.colors[5],
-          font: `${(min + region * 4).toFixed(0)}-${(min + region * 5).toFixed(0)}`,
-        })
+          font: `${(min + region * 4).toFixed(0)}-${(min + region * 5).toFixed(
+            0
+          )}`,
+        });
         fillColor.push({
           fillColor: this.colors[6],
           property: this.popupKeyVals[name],
@@ -455,8 +482,8 @@ const publicData = {
         lengedArr.push({
           bgColor: this.colors[6],
           font: `>${max.toFixed(0)}`,
-        })
-        this.lenged.content = lengedArr
+        });
+        this.lenged.content = lengedArr;
         data.forEach((item) => {
           let newData = {
             source: item.geom,

@@ -27,6 +27,9 @@ export default class DetailItem extends react.Component {
       () => {
         // 显示
         if (this.state.eyeState) {
+          if (!PublicDataAction.hasInited) {
+            PublicDataAction.init();
+          }
           if (data && data.is_poi === "1") {
             PublicDataAction.getADPoi([data.title]);
           } else {
@@ -38,9 +41,6 @@ export default class DetailItem extends react.Component {
             let loadFeatureKeys = conf.loadFeatureKeys[0];
             const fillColorKeyVals = data.fillColorKeyVals;
             if (isPopulation) {
-              if (!PublicDataAction.hasInited) {
-                PublicDataAction.init();
-              }
               PublicDataAction.getPopulationDatas(
                 fillColorKeyVals,
                 data.title,
