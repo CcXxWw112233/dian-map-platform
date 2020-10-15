@@ -115,7 +115,7 @@ export default class DetailItem extends react.Component {
     promise = scoutingDetailsAction.DEL_PUBLICDATA_TREE(collectionId, ids);
     Promise.all([promise]).then((res) => {
       const { callback } = this.props;
-        callback && callback();
+      callback && callback();
     });
   };
 
@@ -127,11 +127,11 @@ export default class DetailItem extends react.Component {
       this.setDropDownVisible(false);
       let ids = [data.id];
       if (type === "move") {
-        promise = scoutingDetailsAction.MOVE_PUBLICDATA_TREE(
-          collectionId,
-          item.id,
-          ids
-        );
+        promise = scoutingDetailsAction
+          .MOVE_PUBLICDATA_TREE(collectionId, item.id, ids)
+          .then((res) => {
+            PublicDataAction.removeFeatures(data.title);
+          });
       } else if (type === "copy") {
         promise = scoutingDetailsAction.COPY_PUBLICDATA_TREE(
           collectionId,
@@ -139,7 +139,11 @@ export default class DetailItem extends react.Component {
           ids
         );
       } else if (type === "delete") {
-        promise = scoutingDetailsAction.DEL_PUBLICDATA_TREE(collectionId, ids);
+        promise = scoutingDetailsAction
+          .DEL_PUBLICDATA_TREE(collectionId, ids)
+          .then((res) => {
+            PublicDataAction.removeFeatures(data.title);
+          });
       }
       Promise.all([promise]).then((res) => {
         const { callback } = this.props;

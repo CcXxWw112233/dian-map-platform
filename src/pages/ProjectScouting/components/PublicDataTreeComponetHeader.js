@@ -77,7 +77,11 @@ export default class PublicDataTreeComponetHeader extends react.Component {
     let ids = [];
     let promise = null;
     if (data.content) {
-      promise = scoutingDetailsAction.DELETE_COLLECTION(collectionId);
+      promise = scoutingDetailsAction
+        .DELETE_COLLECTION(collectionId)
+        .then((res) => {
+          PublicDataAction.removeFeatures(data.title);
+        });
     } else {
       ids.push(data.id);
       if (data.children) {
@@ -85,7 +89,11 @@ export default class PublicDataTreeComponetHeader extends react.Component {
           ids.push(item.id);
         });
       }
-      promise = scoutingDetailsAction.DEL_PUBLICDATA_TREE(collectionId, ids);
+      promise = scoutingDetailsAction
+        .DEL_PUBLICDATA_TREE(collectionId, ids)
+        .then((res) => {
+          PublicDataAction.removeFeatures(data.title);
+        });
     }
     Promise.all([promise]).then((res) => {
       const { callback } = this.props;
@@ -113,17 +121,21 @@ export default class PublicDataTreeComponetHeader extends react.Component {
       let promise = null;
       if (type === "move") {
         if (!flag) {
-          promise = scoutingDetailsAction.MOVE_PUBLICDATA_TREE(
-            collectionId,
-            item.id,
-            ids
-          );
+          promise = scoutingDetailsAction
+            .MOVE_PUBLICDATA_TREE(collectionId, item.id, ids)
+            .then((res) => {
+              PublicDataAction.removeFeatures(data.title);
+            });
         } else {
-          const data = {
+          const param = {
             id: collectionId,
             area_type_id: item.id,
           };
-          promise = scoutingDetailsAction.MOVE_PUBLICDATA_TREE2(data);
+          promise = scoutingDetailsAction
+            .MOVE_PUBLICDATA_TREE2(param)
+            .then((res) => {
+              PublicDataAction.removeFeatures(data.title);
+            });
         }
       } else if (type === "copy") {
         if (!flag) {
