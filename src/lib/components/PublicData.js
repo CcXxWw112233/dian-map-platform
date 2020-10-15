@@ -82,6 +82,7 @@ const publicData = {
   lastPopulationTypeName: "",
   hasInited: false,
   lenged: null,
+  dispatch: null,
   init: function () {
     this.hasInited = true;
     event.Evt.on("transCoordinateSystems2PublicData", (key) => {
@@ -368,8 +369,12 @@ const publicData = {
     dispatch,
     lenged
   ) {
+    debugger
     if (lenged) {
       this.lenged = lenged;
+    }
+    if (dispatch) {
+      this.dispatch = dispatch;
     }
     if (this.lastPopulationTypeName) {
       this.removeFeatures(this.lastPopulationTypeName);
@@ -508,7 +513,7 @@ const publicData = {
           this.features[this.activeTypeName].push(newFeature);
           this.source.addFeature(newFeature);
         });
-        dispatch({
+        this.dispatch({
           type: "lengedList/updateLengedList",
           payload: {
             config: [this.lenged],

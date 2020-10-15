@@ -134,6 +134,12 @@ export default class AreaPanel extends React.Component {
     changeQueryStr && changeQueryStr(queryStr);
   };
 
+  goBackToNation = () => {
+    const { parent } = this.props; 
+    this.handleClearClick();
+    areaSearchAction.goBackToNation(parent);
+  }
+
   // 省份选择
   handleProvinceSelectChange = async (val, flag) => {
     this.handleClearClick();
@@ -471,7 +477,7 @@ export default class AreaPanel extends React.Component {
         </div>
         <div className={styles.locatePanelFooter}>
           <Button
-            onClick={this.handleClearClick}
+            onClick={this.goBackToNation}
             style={{ marginRight: 20 }}
             disabled={okDisabled}
           >

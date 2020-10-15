@@ -53,46 +53,77 @@ export default class PublicData extends React.Component {
     if (getQueryStr) {
       this.queryStr = getQueryStr();
     }
-    this.lastSelectedKeys = parent.publicDataCheckedKeys;
-    this.lastKeywords = parent.publicDataLastKeywords;
-    this.lastKeywords2 = parent.publicDataLastKeywords2;
-    this.lastSingle = parent.lastSingle;
-    if (!parent.publicDataTree) {
-      publicDataServices.GET_PUBLIC_TREE().then((res) => {
-        if (res.code === "0") {
-          let data = res.data;
-          for (let i = 0; i < data.length; i++) {
-            if (data[i].is_poi !== "1") {
-              if (data[i].title === "人口用地") {
-                this.singleNodes = data[i].children;
-                data[i].disabled = true;
-                data[i].children.forEach((item) => {
-                  item.isSingle = true;
-                });
-              }
-              this.notPois = [...this.notPois, ...data[i].children];
+    // this.lastSelectedKeys = parent.publicDataCheckedKeys;
+    // this.lastKeywords = parent.publicDataLastKeywords;
+    // this.lastKeywords2 = parent.publicDataLastKeywords2;
+    // this.lastSingle = parent.lastSingle;
+    // this.singleNodes = parent.singleNodes;
+    // if (!parent.publicDataTree) {
+    //   publicDataServices.GET_PUBLIC_TREE().then((res) => {
+    //     if (res.code === "0") {
+    //       let data = res.data;
+    //       for (let i = 0; i < data.length; i++) {
+    //         if (data[i].is_poi !== "1") {
+    //           if (data[i].title === "人口用地") {
+    //             this.singleNodes = data[i].children;
+    //             // parent.singleNodes = data[i].children;
+    //             data[i].disabled = true;
+    //             data[i].children.forEach((item) => {
+    //               item.isSingle = true;
+    //             });
+    //           }
+    //           this.notPois = [...this.notPois, ...data[i].children];
+    //         }
+    //       }
+    //       parent.publicDataTree = res.data;
+    //       this.setState({
+    //         publicDataTree: res.data,
+    //         // checkedKeys: parent.publicDataCheckedKeys,
+    //         // expandedKeys: parent.publicDataExpandedKeys,
+    //       });
+    //     }
+    //   });
+    // } else {
+    //   // this.setState({
+    //   //   publicDataTree: parent.publicDataTree,
+    //   //   checkedKeys: parent.publicDataCheckedKeys,
+    //   //   expandedKeys: parent.publicDataExpandedKeys,
+    //   // });
+    // }
+    publicDataServices.GET_PUBLIC_TREE().then((res) => {
+      if (res.code === "0") {
+        let data = res.data;
+        for (let i = 0; i < data.length; i++) {
+          if (data[i].is_poi !== "1") {
+            if (data[i].title === "人口用地") {
+              this.singleNodes = data[i].children;
+              // parent.singleNodes = data[i].children;
+              data[i].disabled = true;
+              data[i].children.forEach((item) => {
+                item.isSingle = true;
+              });
             }
+            this.notPois = [...this.notPois, ...data[i].children];
           }
-          parent.publicDataTree = res.data;
-          this.setState({
-            publicDataTree: res.data,
-            checkedKeys: parent.publicDataCheckedKeys,
-            expandedKeys: parent.publicDataExpandedKeys,
-          });
         }
-      });
-    } else {
-      this.setState({
-        publicDataTree: parent.publicDataTree,
-        checkedKeys: parent.publicDataCheckedKeys,
-        expandedKeys: parent.publicDataExpandedKeys,
-      });
-    }
+        parent.publicDataTree = res.data;
+        this.setState({
+          publicDataTree: res.data,
+          // checkedKeys: parent.publicDataCheckedKeys,
+          // expandedKeys: parent.publicDataExpandedKeys,
+        });
+      }
+    });
+  }
+
+  componentWillUnmount() {
+    PublicDataActions.clear();
   }
 
   // 区域选择同步更新该区域的选择的公共数据
   getAllData = (queryStr) => {
     // return;
+    debugger
     PublicDataActions.clear();
     this.queryStr = queryStr;
     for (let i = 0; i < publicDataConf.length; i++) {
@@ -213,11 +244,11 @@ export default class PublicData extends React.Component {
       this.lastSingle = null;
       PublicDataActions.clear();
     }
-    const { parent } = this.props;
-    parent.publicDataCheckedKeys = checkedKeys;
-    parent.lastSingle = this.lastSingle;
+    // const { parent } = this.props;
+    // parent.publicDataCheckedKeys = checkedKeys;
+    // parent.lastSingle = this.lastSingle;
     this.lastCheckedNodes = checkedNodes;
-    parent.checkedNodes = this.lastCheckedNodes;
+    // parent.checkedNodes = this.lastCheckedNodes;
     this.setState(
       {
         checkedKeys: newCheckedKeys,
@@ -319,9 +350,9 @@ export default class PublicData extends React.Component {
         this.lastSelectedKeys = this.state.checkedKeys;
         this.lastKeywords = keywords;
         this.lastKeywords2 = keywords2;
-        parent.publicDataCheckedKeys = this.lastSelectedKeys;
-        parent.publicDataLastKeywords = this.lastKeywords;
-        parent.publicDataLastKeywords2 = this.lastKeywords2;
+        // parent.publicDataCheckedKeys = this.lastSelectedKeys;
+        // parent.publicDataLastKeywords = this.lastKeywords;
+        // parent.publicDataLastKeywords2 = this.lastKeywords2;
       }
     );
   };
@@ -443,8 +474,8 @@ export default class PublicData extends React.Component {
       expandedKeys: expandedKeys,
       autoExpandParent: false,
     });
-    const { parent } = this.props;
-    parent.publicDataExpandedKeys = expandedKeys;
+    // const { parent } = this.props;
+    // parent.publicDataExpandedKeys = expandedKeys;
   };
   render() {
     return (

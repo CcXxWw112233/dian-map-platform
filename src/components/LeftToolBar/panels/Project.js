@@ -31,6 +31,7 @@ export default class Project extends React.Component {
     this.publicDataLastKeywords = [];
     this.publicDataLastKeywords2 = [];
     this.lastSingle = null;
+    this.singleNodes = null;
     this.hasRenderPublicData = false;
     this.activePanelKey = "1";
     this.state = {

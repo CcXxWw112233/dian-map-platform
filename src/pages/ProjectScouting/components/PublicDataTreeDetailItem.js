@@ -4,11 +4,14 @@ import { MyIcon } from "../../../components/utils";
 
 import PublicDataAction from "../../../lib/components/PublicData";
 import publicDataConf from "../../publicMapData/public_data";
+import lengedListConf from "components/LengedList/config";
 import publicDataStyles from "../PublicDataTreeComponent.less";
 import styles from "../ScoutingDetails.less";
 import scoutingDetailsAction from "../../../services/scouting";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
+import { connect } from "dva";
 
+@connect()
 export default class DetailItem extends react.Component {
   constructor(props) {
     super(props);
@@ -41,10 +44,16 @@ export default class DetailItem extends react.Component {
             let loadFeatureKeys = conf.loadFeatureKeys[0];
             const fillColorKeyVals = data.fillColorKeyVals;
             if (isPopulation) {
+              const { dispatch } = this.props;
+              const newLended = lengedListConf.filter(
+                (item) => item.key === conf.key
+              )[0];
               PublicDataAction.getPopulationDatas(
                 fillColorKeyVals,
                 data.title,
-                loadFeatureKeys
+                loadFeatureKeys,
+                dispatch,
+                newLended
               );
             } else {
               PublicDataAction.getPublicData({

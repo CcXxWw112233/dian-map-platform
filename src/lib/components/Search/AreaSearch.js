@@ -85,7 +85,11 @@ function Action() {
 
   this.clearAreaExtent = (parent) => {
     this.source && this.source.clear();
-    parent && parent.goBackToNation()
+    // parent && parent.goBackToNation()
+  }
+
+  this.goBackToNation = (parent) => {
+    parent && parent.goBackToNation();
   }
 
   this.addAreaGeomToMap = (data) => {
