@@ -131,6 +131,7 @@ export default class AreaPanel extends React.Component {
     const queryStr = `${type}='${code}'`;
     const { changeQueryStr } = this.props;
     setSession("xzqhCode", `${type}|${code}|${name}`);
+    Event.Evt.firEvent("getPublicData", `${type}|${code}|${name}`);
     changeQueryStr && changeQueryStr(queryStr);
   };
 
@@ -142,7 +143,8 @@ export default class AreaPanel extends React.Component {
 
   // 省份选择
   handleProvinceSelectChange = async (val, flag) => {
-    this.handleClearClick();
+    const { parent } = this.props; 
+    areaSearchAction.clearAreaExtent(parent);
     const { dispatch, provinceOptions } = this.props;
     const name = provinceOptions?.filter((item) => {
       return item.code === val;
@@ -181,7 +183,8 @@ export default class AreaPanel extends React.Component {
 
   // 地市选择
   handleCitySelectChange = async (val, flag) => {
-    this.handleClearClick();
+    const { parent } = this.props; 
+    areaSearchAction.clearAreaExtent(parent);
     const { dispatch, cityOptions } = this.props;
     const name = cityOptions?.filter((item) => {
       return item.code === val;
@@ -216,7 +219,8 @@ export default class AreaPanel extends React.Component {
   };
   // 区县选择
   handleDistrictSelectChange = async (val, flag) => {
-    this.handleClearClick();
+    const { parent } = this.props; 
+    areaSearchAction.clearAreaExtent(parent);
     const { dispatch, districtOptions } = this.props;
     const name = districtOptions?.filter((item) => {
       return item.code === val;
@@ -250,7 +254,8 @@ export default class AreaPanel extends React.Component {
 
   // 乡镇选择
   handleTownSelectChange = async (val) => {
-    this.handleClearClick();
+    const { parent } = this.props; 
+    areaSearchAction.clearAreaExtent(parent);
     const { dispatch, townOptions } = this.props;
     const name = townOptions?.filter((item) => {
       return item.code === val;
@@ -278,7 +283,8 @@ export default class AreaPanel extends React.Component {
 
   // 村、社区选择
   handleVillageSelectChange = (val) => {
-    this.handleClearClick();
+    const { parent } = this.props; 
+    areaSearchAction.clearAreaExtent(parent);
     const { dispatch } = this.props;
     dispatch({
       type: "areaSearch/update",

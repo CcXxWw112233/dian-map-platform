@@ -367,9 +367,9 @@ const publicData = {
     name,
     loadFeatureKeys,
     dispatch,
-    lenged
+    lenged,
+    str
   ) {
-    debugger
     if (lenged) {
       this.lenged = lenged;
     }
@@ -379,17 +379,25 @@ const publicData = {
     if (this.lastPopulationTypeName) {
       this.removeFeatures(this.lastPopulationTypeName);
     }
-    const xzqhSession = await getSession("xzqhCode");
     let type = 0;
     let code = 100000;
-    if (xzqhSession.code === 0) {
-      if (xzqhSession.data) {
-        const tempArr = xzqhSession.data.split("|");
-        if (tempArr[0] === "districtcode") {
-          type = 1;
+    if (!str) {
+      const xzqhSession = await getSession("xzqhCode");
+      if (xzqhSession.code === 0) {
+        if (xzqhSession.data) {
+          const tempArr = xzqhSession.data.split("|");
+          if (tempArr[0] === "districtcode") {
+            type = 1;
+          }
+          code = tempArr[1];
         }
-        code = tempArr[1];
       }
+    } else {
+      const tmpArr = str.split("|");
+      if (tmpArr[0] === "districtcode") {
+        type = 1;
+      }
+      code = tmpArr[1];
     }
     this.activeTypeName = name + "_" + code;
     if (!this.features[this.activeTypeName]) {
@@ -487,6 +495,10 @@ const publicData = {
         lengedArr.push({
           bgColor: this.colors[6],
           font: `>${max.toFixed(0)}`,
+        });
+        lengedArr.push({
+          bgColor: "#E0E0E0",
+          font: "暂无数据",
         });
         this.lenged.content = lengedArr;
         data.forEach((item) => {

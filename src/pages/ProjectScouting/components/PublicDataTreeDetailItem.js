@@ -8,6 +8,7 @@ import lengedListConf from "components/LengedList/config";
 import publicDataStyles from "../PublicDataTreeComponent.less";
 import styles from "../ScoutingDetails.less";
 import scoutingDetailsAction from "../../../services/scouting";
+import Event from "@/lib/utils/event";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import { connect } from "dva";
 
@@ -21,11 +22,53 @@ export default class DetailItem extends react.Component {
     this.state = {
       eyeState: false,
     };
+    Event.Evt.on("getPublicData", (str) => {
+      const { data } = this.props;
+      if (data.is_poi === "0") {
+        this.setState({
+          eyeState: true,
+        });
+        if (!PublicDataAction.hasInited) {
+          PublicDataAction.init();
+        }
+        if (data && data.is_poi === "1") {
+          PublicDataAction.getADPoi([data.title]);
+        } else {
+          const isPopulation = this.populationDatas.includes(data.title);
+          let conf = publicDataConf.filter(
+            (item) => item.title === data.title
+          )[0];
+          if (!conf) return;
+          let loadFeatureKeys = conf.loadFeatureKeys[0];
+          const fillColorKeyVals = conf.fillColorKeyVals;
+          if (isPopulation) {
+            const { dispatch } = this.props;
+            const newLended = lengedListConf.filter(
+              (item) => item.key === conf.key
+            )[0];
+            PublicDataAction.getPopulationDatas(
+              fillColorKeyVals,
+              data.title,
+              loadFeatureKeys,
+              dispatch,
+              newLended,
+              str
+            );
+          } else {
+            PublicDataAction.getPublicData({
+              url: "",
+              data: loadFeatureKeys,
+              fillColor: fillColorKeyVals,
+            });
+          }
+        }
+      }
+    });
   }
-  handleEyeClick = (data) => {
+  handleEyeClick = (data, change) => {
     this.setState(
       {
-        eyeState: !this.state.eyeState,
+        eyeState: change ? true : !this.state.eyeState,
       },
       () => {
         // 显示
@@ -42,7 +85,7 @@ export default class DetailItem extends react.Component {
             )[0];
             if (!conf) return;
             let loadFeatureKeys = conf.loadFeatureKeys[0];
-            const fillColorKeyVals = data.fillColorKeyVals;
+            const fillColorKeyVals = conf.fillColorKeyVals;
             if (isPopulation) {
               const { dispatch } = this.props;
               const newLended = lengedListConf.filter(

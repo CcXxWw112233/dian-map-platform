@@ -123,7 +123,6 @@ export default class PublicData extends React.Component {
   // 区域选择同步更新该区域的选择的公共数据
   getAllData = (queryStr) => {
     // return;
-    debugger
     PublicDataActions.clear();
     this.queryStr = queryStr;
     for (let i = 0; i < publicDataConf.length; i++) {
