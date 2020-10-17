@@ -117,6 +117,11 @@ export default class AreaPanel extends React.Component {
     });
   }
 
+  componentWillUnmount() {
+    const { parent } = this.props; 
+    areaSearchAction.clearAreaExtent(parent);
+  }
+
   updateSession = (type, code, name) => {
     if (type === "province") {
       setSession("city", "");
