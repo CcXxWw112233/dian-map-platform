@@ -72,6 +72,7 @@ export default class ScoutingDetails extends PureComponent {
   constructor(props) {
     super(props);
     this.newTabIndex = 0;
+    this.publicDataLinkArr = [];
     const panes = [
       {
         title: "整理",
@@ -141,7 +142,7 @@ export default class ScoutingDetails extends PureComponent {
     this.isTouch = false;
     this.scrolltoDom = null;
   }
-  componentDidMount() {
+  componentDidMount () {
     this.isGoBack = false;
     const { Evt } = Event;
     const { mainVisible } = this.props;
@@ -277,7 +278,7 @@ export default class ScoutingDetails extends PureComponent {
     if (from === "group")
       Action.setGroupCollectionActive(Array.isArray(data) ? data[0] : data);
   };
-  componentWillUnmount() {
+  componentWillUnmount () {
     const { dispatch, config: lengedList } = this.props;
     AboutAction.clearLine("detail");
     Action.mounted = false;
@@ -1005,11 +1006,11 @@ export default class ScoutingDetails extends PureComponent {
       let content =
         setData && firstSave
           ? {
-              content: firstSave.data.id,
-            }
+            content: firstSave.data.id,
+          }
           : {
-              content: resp.id,
-            };
+            content: resp.id,
+          };
       let { id, name } = resp;
 
       let params = {
@@ -1157,7 +1158,7 @@ export default class ScoutingDetails extends PureComponent {
   };
 
   //
-  onBeforeUploadPlan = () => {};
+  onBeforeUploadPlan = () => { };
   onExcelSuccess = (arr) => {
     this.fetchCollection();
   };
@@ -1610,8 +1611,8 @@ export default class ScoutingDetails extends PureComponent {
     let h = height
       ? height
       : miniTitle
-      ? "calc(100vh - 150px)"
-      : "calc(100vh - 415px)";
+        ? "calc(100vh - 150px)"
+        : "calc(100vh - 415px)";
     return (
       <div
         className={styles.publicview}
@@ -1898,7 +1899,7 @@ export default class ScoutingDetails extends PureComponent {
             title={`确定删除选中的${
               [...this.state.selections, ...this.state.notAreaIdSelections]
                 .length
-            }个采集资料吗？`}
+              }个采集资料吗？`}
             onConfirm={() => {
               this.onMultipleRemove();
               setHide();
@@ -1948,6 +1949,9 @@ export default class ScoutingDetails extends PureComponent {
                   if (item.id === activeId) {
                     activeStyle = { backgroundColor: "rgba(214,228,255,0.5)" };
                   }
+                  if (item.collect_type === "9") {
+                    this.publicDataLinkArr.push({key:"", children:[]})
+                  }
                   return (
                     <Collapse.Panel
                       header={
@@ -1977,13 +1981,15 @@ export default class ScoutingDetails extends PureComponent {
                           onExcelSuccess={this.onExcelSuccess}
                           dispatch={dispatch}
                           onSetCoordinates={this.onSetCoordinates}
-                          // onDragEnter={e => {this.setState({area_active_key: item.id})}}
+                        // onDragEnter={e => {this.setState({area_active_key: item.id})}}
                         />
                       }
                       key={item.id}
                       style={{ backgroundColor: "#fff", marginBottom: "10px" }}
                     >
                       <ScoutingItem
+                        parent={this}
+                        index={this.publicDataLinkArr.length - 1}
                         callback={this.renderAreaList}
                         onSelectCollection={this.selectionCollection}
                         CollectionEdit={this.state.isEdit}
@@ -2039,9 +2045,9 @@ export default class ScoutingDetails extends PureComponent {
                         edit={false}
                         activeKey={this.state.area_active_key}
                         index={area_list.length + 1}
-                        onCancel={() => {}}
-                        onSave={() => {}}
-                        // onDragEnter={e => {this.setState({area_active_key: item.id})}}
+                        onCancel={() => { }}
+                        onSave={() => { }}
+                      // onDragEnter={e => {this.setState({area_active_key: item.id})}}
                       />
                     }
                   >
@@ -2103,24 +2109,26 @@ export default class ScoutingDetails extends PureComponent {
                                     onCopyCollection={this.onCopyCollection}
                                   />
                                 ) : (
-                                  <PublicDataTreeComponent
-                                    datas={item}
-                                    key={item.id}
-                                    areaList={area_list}
-                                    callback={this.renderAreaList}
-                                  ></PublicDataTreeComponent>
-                                )}
+                                    <PublicDataTreeComponent
+                                      datas={item}
+                                      key={item.id}
+                                      areaList={area_list}
+                                      callback={this.renderAreaList}
+                                      parent={this}
+                                      index={this.publicDataLinkArr.length - 1}
+                                    ></PublicDataTreeComponent>
+                                  )}
                               </div>
                             );
                           })}
                         </div>
                       </Checkbox.Group>
                     ) : (
-                      <Empty
-                        style={{ textAlign: "center" }}
-                        description="暂无采集数据"
-                      />
-                    )}
+                        <Empty
+                          style={{ textAlign: "center" }}
+                          description="暂无采集数据"
+                        />
+                      )}
                   </Collapse.Panel>
                 )}
               </Collapse>
@@ -2160,41 +2168,41 @@ export default class ScoutingDetails extends PureComponent {
                   </Button>
                 </Space>
               ) : (
-                <Space style={{ paddingBottom: 10 }}>
-                  <Dropdown
-                    trigger="click"
-                    visible={this.state.showMoreAction}
-                    onVisibleChange={(val) =>
-                      this.setState({ showMoreAction: val })
-                    }
-                    overlay={() => this.MultipleMenus()}
-                  >
+                  <Space style={{ paddingBottom: 10 }}>
+                    <Dropdown
+                      trigger="click"
+                      visible={this.state.showMoreAction}
+                      onVisibleChange={(val) =>
+                        this.setState({ showMoreAction: val })
+                      }
+                      overlay={() => this.MultipleMenus()}
+                    >
+                      <Button
+                        type="primary"
+                        ghost
+                        size="small"
+                        icon={<MyIcon type="icon-duoxuan" />}
+                      >
+                        操作
+                    </Button>
+                    </Dropdown>
                     <Button
                       type="primary"
                       ghost
+                      icon={<MyIcon type="icon-chexiao" />}
+                      onClick={() => {
+                        this.setState({
+                          isEdit: false,
+                          notAreaIdSelections: [],
+                          selections: [],
+                        });
+                      }}
                       size="small"
-                      icon={<MyIcon type="icon-duoxuan" />}
                     >
-                      操作
-                    </Button>
-                  </Dropdown>
-                  <Button
-                    type="primary"
-                    ghost
-                    icon={<MyIcon type="icon-chexiao" />}
-                    onClick={() => {
-                      this.setState({
-                        isEdit: false,
-                        notAreaIdSelections: [],
-                        selections: [],
-                      });
-                    }}
-                    size="small"
-                  >
-                    取消
+                      取消
                   </Button>
-                </Space>
-              )}
+                  </Space>
+                )}
             </div>
           </Fragment>
         );
@@ -2233,7 +2241,7 @@ export default class ScoutingDetails extends PureComponent {
     }
   };
 
-  render() {
+  render () {
     const { current_board, isPlay, playing } = this.state;
     const { selectData } = this.props;
     const panelStyle = {

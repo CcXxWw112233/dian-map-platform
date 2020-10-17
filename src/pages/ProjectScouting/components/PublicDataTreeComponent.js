@@ -5,10 +5,19 @@ import publicDataStyles from "../PublicDataTreeComponent.less";
 import PublicDataTreeDetailItem from "./PublicDataTreeDetailItem";
 import PublicDataTreeComponetHeader from "./PublicDataTreeComponetHeader";
 import datas from "../../publicMapData/public_data";
+import { connect } from "dva";
 
+@connect(({ publicDataLink: { publicDataLinkArr } }) => ({ publicDataLinkArr }))
 export default class PublicDataTreeComponent extends react.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      firstActiveKey: "",
+      activeKeys: []
+    }
+    this.datas = null;
+    this.firstActiveKey = ""
+    this.activeKeys = []
   }
 
   /***
@@ -44,7 +53,7 @@ export default class PublicDataTreeComponent extends react.Component {
     }
     // 删除
     if (type === 3) {
-      
+
     } else if (type === 2) { // 移动
       updateCollection && updateCollection(datas)
     } else { //复制
@@ -52,66 +61,110 @@ export default class PublicDataTreeComponent extends react.Component {
     }
   };
 
-  render() {
-    const { datas, callback } = this.props;
+  firstCollapseChange = (e) => {
+    const { index, publicDataLinkArr, dispatch } = this.props
+    if (!publicDataLinkArr[index]) {
+      publicDataLinkArr[index] = {}
+    }
+    publicDataLinkArr[index].key = e
+    publicDataLinkArr[index].children = []
+
+    if (Array.isArray(e)) {
+      dispatch({
+        type: "publicDataLink/update",
+        payload: {
+          publicDataLinkArr: publicDataLinkArr
+        }
+      })
+      this.setState({
+        firstActiveKey: e
+      })
+    }
+  }
+
+  collapseChange = (e, index) => {
+    const { index: parentIndex, publicDataLinkArr, dispatch } = this.props;
+    if (!publicDataLinkArr[parentIndex].children) {
+      publicDataLinkArr[parentIndex].children = []
+    }
+    publicDataLinkArr[parentIndex].children[index] = e
+    if (Array.isArray(e)) {
+      dispatch({
+        type: "publicDataLink/update",
+        payload: {
+          publicDataLinkArr: publicDataLinkArr
+        }
+      })
+      this.activeKeys[index] = e
+      this.setState({
+        activeKeys: this.activeKeys
+      })
+    }
+  }
+
+  render () {
+    const { datas, callback, index: parentIndex, publicDataLinkArr } = this.props;
     const { Panel } = Collapse;
-    return (
-      <Collapse bordered={false} ghost className={publicDataStyles.wrapper}>
-        <Panel
-          className={publicDataStyles.header}
-          header={
-            <PublicDataTreeComponetHeader
-              data={datas}
-              collectionId={datas.id}
-              areaList={this.props.areaList}
-              callback={callback}
-            />
-          }
-        >
-          {datas.content &&
-            datas.content.map((item) => {
-              if (item.children && item.children.length > 0) {
-                return (
-                  <Collapse bordered={false} ghost key={item.id + "00"}>
-                    <Panel
-                      key={item.id}
-                      header={
-                        <PublicDataTreeComponetHeader
-                          data={item}
-                          collectionId={datas.id}
-                          areaList={this.props.areaList}
-                          callback={callback}
-                        />
-                      }
-                    >
-                      {item.children.map((item2) => {
-                        return (
-                          <PublicDataTreeDetailItem
-                            key={item2.id}
-                            data={item2}
+    if (datas)
+      return (
+        <Collapse activeKey={publicDataLinkArr[parentIndex]?.key || ""} bordered={false} ghost key={datas.id} className={publicDataStyles.wrapper} onChange={(e) => this.firstCollapseChange(e)}>
+          <Panel
+            className={publicDataStyles.header}
+            key={datas.id}
+            header={
+              <PublicDataTreeComponetHeader
+                data={datas}
+                collectionId={datas.id}
+                areaList={this.props.areaList}
+                callback={callback}
+              />
+            }
+          >
+            {datas.content &&
+              datas.content.map((item, index) => {
+                if (item.children && item.children.length > 0) {
+                  this.activeKeys = Array(item.children.length).fill("");
+                  return (
+                    <Collapse bordered={false} ghost key={item.id + "00"} activeKey={publicDataLinkArr[parentIndex]?.children[index] ||""} onChange={(e) => this.collapseChange(e, index)}>
+                      <Panel
+                        key={item.id}
+                        header={
+                          <PublicDataTreeComponetHeader
+                            data={item}
                             collectionId={datas.id}
                             areaList={this.props.areaList}
                             callback={callback}
                           />
-                        );
-                      })}
-                    </Panel>
-                  </Collapse>
-                );
-              } else {
-                return (
-                  <PublicDataTreeDetailItem
-                    key={item.id}
-                    data={item}
-                    collectionId={datas.id}
-                    areaList={this.props.areaList}
-                    callback={callback}
-                  />
-                );
-              }
-            })}
-        </Panel>
-      </Collapse>
-    );
+                        }
+                      >
+                        {item.children.map((item2) => {
+                          return (
+                            <PublicDataTreeDetailItem
+                              key={item2.id}
+                              data={item2}
+                              collectionId={datas.id}
+                              areaList={this.props.areaList}
+                              callback={callback}
+                            />
+                          );
+                        })}
+                      </Panel>
+                    </Collapse>
+                  );
+                } else {
+                  return (
+                    <PublicDataTreeDetailItem
+                      key={item.id}
+                      data={item}
+                      collectionId={datas.id}
+                      areaList={this.props.areaList}
+                      callback={callback}
+                    />
+                  );
+                }
+              })}
+          </Panel>
+        </Collapse>
+      );
   }
 }
