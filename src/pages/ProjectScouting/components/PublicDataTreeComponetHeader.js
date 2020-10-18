@@ -26,8 +26,8 @@ export default class PublicDataTreeComponetHeader extends react.Component {
   componentWillReceiveProps(nextProps) {
     const { showEyeByFirst } = nextProps;
     this.setState({
-      eyeState: showEyeByFirst
-    })
+      eyeState: showEyeByFirst,
+    });
   }
   controlMenu = (key, data) => {
     // switch (key) {
@@ -183,12 +183,23 @@ export default class PublicDataTreeComponetHeader extends react.Component {
     else return "暂无分组可以选择";
   };
 
+
+  getPoiIds = (data) => {
+    let ids = []
+    if (data.children) {
+      data.children.forEach(item => {
+        ids.push(item.title)
+      })
+    }
+    return ids
+  }
+
   handleEyeClick = (data) => {
     if (!data) return;
     if (data.title === "人口用地") {
       return;
     }
-    
+
     this.setState(
       {
         eyeState: !this.state.eyeState,
@@ -199,16 +210,16 @@ export default class PublicDataTreeComponetHeader extends react.Component {
             PublicDataAction.init();
           }
           let poiIds = [];
-          const { parent,isFirst } = this.props;
-          if (isFirst) {
-            parent.setState({
-              firstEyeActive: this.state.eyeState,
-            })
-          } else {
-            parent.setState({
-              secondEyeActive: this.state.eyeState,
-            })
-          }
+          // const { parent,isFirst } = this.props;
+          // if (isFirst) {
+          //   parent.setState({
+          //     firstEyeActive: this.state.eyeState,
+          //   })
+          // } else {
+          //   parent.setState({
+          //     secondEyeActive: this.state.eyeState,
+          //   })
+          // }
           if (data.content && data.content.length > 0) {
             if (data.content[0].is_poi === "1") {
               // const content = data.content;
@@ -240,12 +251,15 @@ export default class PublicDataTreeComponetHeader extends react.Component {
             }
           } else if (data.children && data.children.length > 0) {
             if (data.children[0].is_poi === "1") {
-              poiIds.push(data.title);
+              data.children.forEach(item => {
+                poiIds.push(item.title);
+              })
               PublicDataAction.getADPoi(poiIds, 2);
             }
           }
         } else {
-          PublicDataAction.removeFeatures(data.title);
+          let poiIds = this.getPoiIds(data)
+          PublicDataAction.removeFeatures(poiIds);
         }
       }
     );
@@ -318,7 +332,7 @@ export default class PublicDataTreeComponetHeader extends react.Component {
     );
   };
   render() {
-    const { data, collectionId } = this.props;
+    const { data, collectionId, isFirst } = this.props;
     if (data) {
       return (
         <div
@@ -334,12 +348,18 @@ export default class PublicDataTreeComponetHeader extends react.Component {
               e.stopPropagation();
             }}
           >
-            {!(data.title === "人口用地" || data.title === "地产楼盘") ? (
+            {/* {!(data.title === "人口用地" || data.title === "地产楼盘") ? (
               <MyIcon
                 type={this.state.eyeState ? this.eyeOpen : this.eyeClose}
                 onClick={() => this.handleEyeClick(data)}
               />
-            ) : null}
+            ) : null} */}
+            {/* {!isFirst ? (
+              <MyIcon
+                type={this.state.eyeState ? this.eyeOpen : this.eyeClose}
+                onClick={() => this.handleEyeClick(data)}
+              />
+            ) : null} */}
             {/* <Switch defaultChecked size="small" /> */}
             {this.renderDropdown(data, collectionId)}
           </div>
