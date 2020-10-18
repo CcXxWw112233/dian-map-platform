@@ -13,11 +13,16 @@ export default class PublicDataTreeComponent extends react.Component {
     super(props);
     this.state = {
       firstActiveKey: "",
-      activeKeys: []
+      activeKeys: [],
+      firstEyeActive: false,
+      secondEyeActive: false,
     }
     this.datas = null;
     this.firstActiveKey = ""
+    
     this.activeKeys = []
+    this.firstEyeActive = false;
+    this.secondEyeActive = false;
   }
 
   /***
@@ -111,12 +116,15 @@ export default class PublicDataTreeComponent extends react.Component {
           <Panel
             className={publicDataStyles.header}
             key={datas.id}
+            isFirst={true}
             header={
               <PublicDataTreeComponetHeader
                 data={datas}
                 collectionId={datas.id}
                 areaList={this.props.areaList}
                 callback={callback}
+                parent={this}
+                isFirst={true}
               />
             }
           >
@@ -134,6 +142,9 @@ export default class PublicDataTreeComponent extends react.Component {
                             collectionId={datas.id}
                             areaList={this.props.areaList}
                             callback={callback}
+                            parent={this}
+                            showEyeByFirst={this.state.firstEyeActive}
+                            
                           />
                         }
                       >
@@ -145,6 +156,9 @@ export default class PublicDataTreeComponent extends react.Component {
                               collectionId={datas.id}
                               areaList={this.props.areaList}
                               callback={callback}
+                              parent={this}
+                              showEyeByFirst={this.state.firstEyeActive}
+                              showEyeBySecond={this.state.secondEyeActive}
                             />
                           );
                         })}
@@ -159,6 +173,8 @@ export default class PublicDataTreeComponent extends react.Component {
                       collectionId={datas.id}
                       areaList={this.props.areaList}
                       callback={callback}
+                      parent={this}
+                      showEyeByFirst={this.state.firstEyeActive}
                     />
                   );
                 }

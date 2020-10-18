@@ -10,9 +10,7 @@ import styles from "../ScoutingDetails.less";
 import scoutingDetailsAction from "../../../services/scouting";
 import Event from "@/lib/utils/event";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
-import { connect } from "dva";
 
-@connect()
 export default class DetailItem extends react.Component {
   constructor(props) {
     super(props);
@@ -64,6 +62,16 @@ export default class DetailItem extends react.Component {
         }
       }
     });
+  }
+
+  componentWillReceiveProps (nextProps) {
+    const { showEyeByFirst, showEyeBySecond } = nextProps;
+    this.setState({
+      eyeState: showEyeByFirst,
+    })
+    this.setState({
+      eyeState: showEyeBySecond,
+    })
   }
   handleEyeClick = (data, change) => {
     this.setState(
@@ -321,7 +329,7 @@ export default class DetailItem extends react.Component {
       </Dropdown>
     );
   };
-  render() {
+  render () {
     const { data, collectionId } = this.props;
     return (
       <div

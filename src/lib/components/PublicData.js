@@ -324,26 +324,26 @@ const publicData = {
           text: item.name,
           iconUrl: require("../../assets/location.svg"),
         };
-        let flag = false;
-        let poiType = null;
-        if (keys.includes(item.type3) && type === 3) {
-          flag = true;
-          poiType = item.type3;
-        }
-        if (keys.includes(item.type2) && type === 2) {
-          flag = true;
-          poiType = item.type2;
-        }
-        if (keys.includes(item.type1) && type === 1) {
-          flag = true;
-          poiType = item.type1;
-        }
+        let flag = true;
+        // let poiType = null;
+        // if (keys.includes(item.type3) && type === 3) {
+        //   flag = true;
+        //   poiType = item.type3;
+        // }
+        // if (keys.includes(item.type2) && type === 2) {
+        //   flag = true;
+        //   poiType = item.type2;
+        // }
+        // if (keys.includes(item.type1) && type === 1) {
+        //   flag = true;
+        //   poiType = item.type1;
+        // }
         if (flag) {
           const style = createStyle("Point", options);
           const feature = addFeature("Point", { coordinates: coords });
           feature.setStyle(style);
           this.source && this.source.addFeature(feature);
-          this.features[poiType].push(feature);
+          this.features[keywords2].push(feature);
         }
       });
     }
