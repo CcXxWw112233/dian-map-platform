@@ -23,16 +23,11 @@ export default class PublicDataTreeComponetHeader extends react.Component {
     };
   }
 
-  componentWillReceiveProps (nextProps) {
-    const { showEyeByFirst, showEyeBySecond } = nextProps;
+  componentWillReceiveProps(nextProps) {
+    const { showEyeByFirst } = nextProps;
     this.setState({
       eyeState: showEyeByFirst
     })
-    if (showEyeBySecond) {
-      this.setState({
-        eyeState: showEyeBySecond
-      })
-    }
   }
   controlMenu = (key, data) => {
     // switch (key) {
@@ -188,68 +183,26 @@ export default class PublicDataTreeComponetHeader extends react.Component {
     else return "暂无分组可以选择";
   };
 
-  getPoiIds = (data) => {
-    let poiIds = []
-    if (data.content && data.content.length > 0) {
-      if (data.content[0].is_poi === "1") {
-        const content = data.content;
-        content.forEach((item) => {
-          if (item.children) {
-            const child = item.children;
-            child.forEach((item2) => {
-              poiIds.push(item2.title);
-            });
-          }
-        });
-      } else {
-        if (data.content) {
-          // 楼盘
-          let conf = publicDataConf.filter(
-            (item) => item.title === data.content[0].title
-          )[0];
-          if (!conf) return;
-          let loadFeatureKeys = conf.loadFeatureKeys[0];
-          const fillColorKeyVals = data.fillColorKeyVals;
-          PublicDataAction.getPublicData({
-            url: "",
-            data: loadFeatureKeys,
-            fillColor: fillColorKeyVals,
-          });
-        }
-      }
-    } else if (data.children && data.children.length > 0) {
-      if (data.children[0].is_poi === "1") {
-        // poiIds.push(data.title);
-        data.children.forEach(item => {
-          poiIds.push(item.title)
-        })
-      }
-    }
-    return poiIds
-  }
-
   handleEyeClick = (data) => {
     if (!data) return;
     if (data.title === "人口用地") {
       return;
     }
-
+    
     this.setState(
       {
         eyeState: !this.state.eyeState,
       },
       () => {
-        const poiIds = this.getPoiIds;
         if (this.state.eyeState) {
           if (!PublicDataAction.hasInited) {
             PublicDataAction.init();
           }
           let poiIds = [];
-          const { parent, isFirst } = this.props;
+          const { parent,isFirst } = this.props;
           if (isFirst) {
             parent.setState({
               firstEyeActive: this.state.eyeState,
-              secondEyeActive: this.state.eyeState,
             })
           } else {
             parent.setState({
@@ -258,6 +211,16 @@ export default class PublicDataTreeComponetHeader extends react.Component {
           }
           if (data.content && data.content.length > 0) {
             if (data.content[0].is_poi === "1") {
+              // const content = data.content;
+              // content.forEach((item) => {
+              //   if (item.children) {
+              //     const child = item.children;
+              //     child.forEach((item2) => {
+              //       poiIds.push(item2.title);
+              //     });
+              //   }
+              // });
+              poiIds.push(data.title);
               PublicDataAction.getADPoi(poiIds, 1);
             } else {
               if (data.content) {
@@ -276,10 +239,13 @@ export default class PublicDataTreeComponetHeader extends react.Component {
               }
             }
           } else if (data.children && data.children.length > 0) {
-            PublicDataAction.getADPoi(poiIds, 2);
+            if (data.children[0].is_poi === "1") {
+              poiIds.push(data.title);
+              PublicDataAction.getADPoi(poiIds, 2);
+            }
           }
         } else {
-          PublicDataAction.removeFeatures(poiIds.join(","));
+          PublicDataAction.removeFeatures(data.title);
         }
       }
     );
@@ -351,7 +317,7 @@ export default class PublicDataTreeComponetHeader extends react.Component {
       </Dropdown>
     );
   };
-  render () {
+  render() {
     const { data, collectionId } = this.props;
     if (data) {
       return (
