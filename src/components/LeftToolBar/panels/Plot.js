@@ -489,6 +489,9 @@ export default class Plot extends PureComponent {
   updatePlotList = (list) => {
     const { parent } = this.props;
     parent.updateFeatureOperatorList2(list);
+    if (parent.returnPanel) {
+      parent.leftToolBarRef.displayTempPlot();
+    }
   };
 
   // 从数组中找到operator
@@ -1064,6 +1067,10 @@ export default class Plot extends PureComponent {
             Event.Evt.firEvent("updatePlotFeature");
             this.props.goBackProject();
           });
+      }
+      const { parent } = this.props;
+      if (parent.returnPanel) {
+        parent.leftToolBarRef.displayTempPlot();
       }
     } else {
       message.info("请先标绘或选择要保存的标绘。");

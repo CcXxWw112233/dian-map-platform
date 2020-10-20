@@ -12,11 +12,13 @@ export default {
     // 是否隐藏左侧面板
     openPanel: true,
 
+    isShowMap: true,
     isShowBasemapGallery: isMobile ? false : true, // 是否显示底图切换
     isShowRightTools: isMobile ? false : true, // 是否显示右侧面板
     isShowLeftToolBar: isMobile ? false : true, // 是否显示左侧面板
     isShowPhotoSwipe: isMobile ? false : true, // 是否显示照片编辑
     isInvalidToolBar: false, // 是否让左边工具条点击失效
+    isShowSystemManageMain: false
   },
   effects: {},
   reducers: {

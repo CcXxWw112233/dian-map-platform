@@ -136,7 +136,7 @@ export default class TempPlot extends React.Component {
   handleEditClick = (featureOperator) => {
     const { parent } = this.props;
     parent.activeFeatureOperator = featureOperator;
-    this.props.displayPlotPanel(featureOperator.attrs, featureOperator);
+    this.props.displayPlotPanel(featureOperator.attrs, featureOperator, true);
   };
 
   handleDelClick = (featureOperator) => {

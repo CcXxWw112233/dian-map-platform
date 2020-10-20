@@ -370,6 +370,7 @@ const publicData = {
     lenged,
     str
   ) {
+    debugger
     if (lenged) {
       this.lenged = lenged;
     }
@@ -525,7 +526,7 @@ const publicData = {
           this.features[this.activeTypeName].push(newFeature);
           this.source.addFeature(newFeature);
         });
-        this.dispatch({
+        this.dispatch && this.dispatch({
           type: "lengedList/updateLengedList",
           payload: {
             config: [this.lenged],

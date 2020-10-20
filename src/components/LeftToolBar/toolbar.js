@@ -1,9 +1,10 @@
 import React from "react";
-import { Badge } from "antd";
-
+import { Badge, Tooltip } from "antd";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import styles from "./LeftToolBar.less";
+import { connect } from "dva";
 
+@connect()
 export default class ToolBar extends React.Component {
   constructor(props) {
     super(props);
@@ -22,6 +23,19 @@ export default class ToolBar extends React.Component {
             displayTempPlot: false,
             displayCustomSymbolStore: false,
             displayProjectList: false,
+            displaySystemManage: false,
+          });
+          const { dispatch } = this.props;
+          dispatch({
+            type: "openswitch/updateDatas",
+            payload: {
+              isShowMap: true,
+              isShowBasemapGallery: true,
+              isShowRightTools: true,
+              isShowPhotoSwipe: true,
+              isInvalidToolBar: true,
+              isShowSystemManageMain: false,
+            },
           });
           this.parent.deactivate();
         },
@@ -38,6 +52,19 @@ export default class ToolBar extends React.Component {
             displayTempPlot: false,
             displayCustomSymbolStore: false,
             plotType: "point",
+            displaySystemManage: false,
+          });
+          const { dispatch } = this.props;
+          dispatch({
+            type: "openswitch/updateDatas",
+            payload: {
+              isShowMap: true,
+              isShowBasemapGallery: true,
+              isShowRightTools: true,
+              isShowPhotoSwipe: true,
+              isInvalidToolBar: true,
+              isShowSystemManageMain: false,
+            },
           });
           this.parent.deactivate();
         },
@@ -54,6 +81,19 @@ export default class ToolBar extends React.Component {
             displayTempPlot: false,
             displayCustomSymbolStore: false,
             plotType: "freeLine",
+            displaySystemManage: false,
+          });
+          const { dispatch } = this.props;
+          dispatch({
+            type: "openswitch/updateDatas",
+            payload: {
+              isShowMap: true,
+              isShowBasemapGallery: true,
+              isShowRightTools: true,
+              isShowPhotoSwipe: true,
+              isInvalidToolBar: true,
+              isShowSystemManageMain: false,
+            },
           });
           this.parent.deactivate();
         },
@@ -70,6 +110,19 @@ export default class ToolBar extends React.Component {
             displayTempPlot: false,
             displayCustomSymbolStore: false,
             plotType: "line",
+            displaySystemManage: false,
+          });
+          const { dispatch } = this.props;
+          dispatch({
+            type: "openswitch/updateDatas",
+            payload: {
+              isShowMap: true,
+              isShowBasemapGallery: true,
+              isShowRightTools: true,
+              isShowPhotoSwipe: true,
+              isInvalidToolBar: true,
+              isShowSystemManageMain: false,
+            },
           });
           this.parent.deactivate();
         },
@@ -86,6 +139,19 @@ export default class ToolBar extends React.Component {
             displayTempPlot: false,
             displayCustomSymbolStore: false,
             plotType: "freePolygon",
+            displaySystemManage: false,
+          });
+          const { dispatch } = this.props;
+          dispatch({
+            type: "openswitch/updateDatas",
+            payload: {
+              isShowMap: true,
+              isShowBasemapGallery: true,
+              isShowRightTools: true,
+              isShowPhotoSwipe: true,
+              isInvalidToolBar: true,
+              isShowSystemManageMain: false,
+            },
           });
           this.parent.deactivate();
         },
@@ -102,6 +168,19 @@ export default class ToolBar extends React.Component {
             displayTempPlot: false,
             displayCustomSymbolStore: false,
             plotType: "polygon",
+            displaySystemManage: false,
+          });
+          const { dispatch } = this.props;
+          dispatch({
+            type: "openswitch/updateDatas",
+            payload: {
+              isShowMap: true,
+              isShowBasemapGallery: true,
+              isShowRightTools: true,
+              isShowPhotoSwipe: true,
+              isInvalidToolBar: true,
+              isShowSystemManageMain: false,
+            },
           });
           this.parent.deactivate();
         },
@@ -118,6 +197,19 @@ export default class ToolBar extends React.Component {
             displayTempPlot: false,
             displayCustomSymbolStore: false,
             plotType: "rect",
+            displaySystemManage: false,
+          });
+          const { dispatch } = this.props;
+          dispatch({
+            type: "openswitch/updateDatas",
+            payload: {
+              isShowMap: true,
+              isShowBasemapGallery: true,
+              isShowRightTools: true,
+              isShowPhotoSwipe: true,
+              isInvalidToolBar: true,
+              isShowSystemManageMain: false,
+            },
           });
           this.parent.deactivate();
         },
@@ -134,6 +226,19 @@ export default class ToolBar extends React.Component {
             displayTempPlot: false,
             displayCustomSymbolStore: false,
             plotType: "circle",
+            displaySystemManage: false,
+          });
+          const { dispatch } = this.props;
+          dispatch({
+            type: "openswitch/updateDatas",
+            payload: {
+              isShowMap: true,
+              isShowBasemapGallery: true,
+              isShowRightTools: true,
+              isShowPhotoSwipe: true,
+              isInvalidToolBar: true,
+              isShowSystemManageMain: false,
+            },
           });
           this.parent.deactivate();
         },
@@ -150,6 +255,19 @@ export default class ToolBar extends React.Component {
             displayTempPlot: false,
             displayCustomSymbolStore: false,
             plotType: "arrow",
+            displaySystemManage: false,
+          });
+          const { dispatch } = this.props;
+          dispatch({
+            type: "openswitch/updateDatas",
+            payload: {
+              isShowMap: true,
+              isShowBasemapGallery: true,
+              isShowRightTools: true,
+              isShowPhotoSwipe: true,
+              isInvalidToolBar: true,
+              isShowSystemManageMain: false,
+            },
           });
           this.parent.deactivate();
         },
@@ -166,6 +284,20 @@ export default class ToolBar extends React.Component {
       operatorListLength: len,
     });
   };
+
+  displayTempPlot = () => {
+    this.setState({
+      selectedIndex: -1,
+    });
+    this.parent.setState({
+      displayPlot: false,
+      hidePlot: false,
+      displayProject: false,
+      displayTempPlot: true,
+      displayCustomSymbolStore: false,
+      plotType: "",
+    });
+  }
   render() {
     let tempPlotItemStyle = { bottom: 60, left: 4 };
     let customSymbolStoreStyle = { bottom: 0, left: 4 };
@@ -192,9 +324,41 @@ export default class ToolBar extends React.Component {
           style={{ background: "#fff" }}
         >
           {/* <img crossOrigin="anonymous" alt="" src=""></img> */}
-          <i className={globalStyle.global_icon} style={{ fontSize: 26 }}>
-            &#xe764;
-          </i>
+          <Tooltip title="权限管理" placement="right">
+            <i
+              className={globalStyle.global_icon}
+              style={{ fontSize: 26 }}
+              onClick={() => {
+                this.parent.setState({
+                  displayPlot: false,
+                  hidePlot: false,
+                  displayProject: false,
+                  displayTempPlot: false,
+                  displayCustomSymbolStore: false,
+                  displayProjectList: false,
+                  displaySystemManage: true,
+                });
+                this.setState({
+                  selectedIndex: -1,
+                });
+                const { dispatch } = this.props;
+                dispatch({
+                  type: "openswitch/updateDatas",
+                  payload: {
+                    isShowMap: false,
+                    isShowBasemapGallery: false,
+                    isShowRightTools: false,
+                    isShowLeftToolBar: true,
+                    isShowPhotoSwipe: false,
+                    isInvalidToolBar: false,
+                    isShowSystemManageMain: true,
+                  },
+                });
+              }}
+            >
+              &#xe764;
+            </i>
+          </Tooltip>
         </div>
         <div
           className={`${globalStyle.autoScrollY} ${
@@ -256,21 +420,15 @@ export default class ToolBar extends React.Component {
           })}
         </div>
         {/* 临时标绘 */}
-        <Badge count={this.state.operatorListLength} className={styles.temp} offset={[0, 20]}>
+        <Badge
+          count={this.state.operatorListLength}
+          className={styles.temp}
+          offset={[0, 20]}
+        >
           <div
             className={`${styles.circle} ${styles.temp}`}
             onClick={() => {
-              this.setState({
-                selectedIndex: -1,
-              });
-              this.parent.setState({
-                displayPlot: false,
-                hidePlot: false,
-                displayProject: false,
-                displayTempPlot: true,
-                displayCustomSymbolStore: false,
-                plotType: "",
-              });
+              this.displayTempPlot()
             }}
             style={{
               ...tempPlotItemStyle,

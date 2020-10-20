@@ -25,25 +25,31 @@ import LeftToolBar from "../components/LeftToolBar/index";
 
 import SearchBtn from "../pages/publicMapData/searchBtn";
 
+import SystemManageMain from "../pages/SystemManage/SystemManageMain"
+
 @connect(
   ({
     controller: { mainVisible },
     openswitch: {
+      isShowMap,
       isShowMobile,
       isShowBasemapGallery,
       isShowRightTools,
       isShowLeftToolBar,
       isShowPhotoSwipe,
+      isShowSystemManageMain
     },
     editPicture: { editShow },
   }) => ({
     mainVisible,
+    isShowMap,
     isShowMobile,
     editShow,
     isShowBasemapGallery,
     isShowRightTools,
     isShowLeftToolBar,
     isShowPhotoSwipe,
+    isShowSystemManageMain
   })
 )
 class IndexPage extends React.Component {
@@ -301,17 +307,19 @@ class IndexPage extends React.Component {
 
   render() {
     let {
+      isShowMap,
       isShowMobile,
       editShow,
       isShowBasemapGallery,
       isShowRightTools,
       isShowLeftToolBar,
       isShowPhotoSwipe,
+      isShowSystemManageMain
     } = this.props;
     return (
       <div className={styles.normal} id="IndexPage">
         {/* 地图主体 */}
-        <LayerMap onLoad={this.MapOnload} />
+        {isShowMap && <LayerMap onLoad={this.MapOnload} />}
         {isShowBasemapGallery && <BasemapGallery />}
         {isShowRightTools && <RightTools />}
         <LeftToolBar isShowLeftToolBar={isShowLeftToolBar} />
@@ -323,6 +331,7 @@ class IndexPage extends React.Component {
         {/* {!isShowMobile && } */}
         <UploadNotification />
         <SearchBtn></SearchBtn>
+        {isShowSystemManageMain && <SystemManageMain></SystemManageMain>}
       </div>
     );
   }

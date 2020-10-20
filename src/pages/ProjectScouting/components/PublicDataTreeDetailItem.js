@@ -10,7 +10,9 @@ import styles from "../ScoutingDetails.less";
 import scoutingDetailsAction from "../../../services/scouting";
 import Event from "@/lib/utils/event";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
+import { connect } from "dva";
 
+@connect()
 export default class DetailItem extends react.Component {
   constructor(props) {
     super(props);

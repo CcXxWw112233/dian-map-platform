@@ -7,17 +7,16 @@ import Project from "./panels/Project";
 import TempPlot from "./panels/TempPlot";
 import ProjectList from "./panels/ProjectList";
 import CustomSymbolStore from "./panels/CustomSymbolStore";
+import SystemManage from "./panels/SystemManage";
 import Panel from "./panels/Panel";
 import ToolBar from "./toolbar";
 
 import { lineDrawing, pointDrawing, polygonDrawing } from "utils/drawing";
 
-@connect(
-  ({ openswitch: { isShowLeftToolBar, isInvalidToolBar } }) => ({
-    isShowLeftToolBar,
-    isInvalidToolBar,
-  })
-)
+@connect(({ openswitch: { isShowLeftToolBar, isInvalidToolBar } }) => ({
+  isShowLeftToolBar,
+  isInvalidToolBar,
+}))
 export default class LeftToolBar extends React.Component {
   constructor(props) {
     super(props);
@@ -34,6 +33,7 @@ export default class LeftToolBar extends React.Component {
             displayTempPlot: false,
             displayCustomSymbolStore: false,
             displayProjectList: false,
+            hideSystemManage: false,
           });
           this.deactivate();
         },
@@ -171,6 +171,7 @@ export default class LeftToolBar extends React.Component {
       displayPlot: false,
       hidePlot: false,
       displayProject: true,
+      displaySystemManage: false,
       displayTempPlot: false,
       displayCustomSymbolStore: false,
       displayTempPlotIcon: false,
@@ -196,6 +197,7 @@ export default class LeftToolBar extends React.Component {
     this.leftToolBarRef = null;
     this.projectPlot = null;
     this.plotRef = null;
+    this.returnPanel = null;
   }
 
   deactivate = () => {
@@ -269,8 +271,9 @@ export default class LeftToolBar extends React.Component {
     this.plotRef = ref;
   };
 
-  displayPlotPanel = (attrs, operator) => {
+  displayPlotPanel = (attrs, operator, returnPanel) => {
     this.isModifyPlot = true;
+    this.returnPanel = returnPanel
     this.activeFeatureOperator = operator;
     if (operator.data) {
       operator.attrs.name = operator.data.title || "";
@@ -310,6 +313,11 @@ export default class LeftToolBar extends React.Component {
           selectIndex={this.toolBarSelectedIndex}
         ></ToolBar>
         <Panel>
+          {/* 权限管理 */}
+          {this.state.displaySystemManage ? (
+            <SystemManage
+            ></SystemManage>
+          ) : null}
           <Project
             hidden={this.state.displayProject}
             displayPlotPanel={(attrs, operator) =>
@@ -344,8 +352,8 @@ export default class LeftToolBar extends React.Component {
                   displayTempPlot: false,
                 });
               }}
-              displayPlotPanel={(attrs, operator) =>
-                this.displayPlotPanel(attrs, operator)
+              displayPlotPanel={(attrs, operator, returnPanel) =>
+                this.displayPlotPanel(attrs, operator, returnPanel)
               }
               editPlot={this.editPlot}
             ></TempPlot>
