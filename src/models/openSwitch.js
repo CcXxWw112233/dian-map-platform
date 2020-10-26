@@ -18,7 +18,6 @@ export default {
     isShowLeftToolBar: isMobile ? false : true, // 是否显示左侧面板
     isShowPhotoSwipe: isMobile ? false : true, // 是否显示照片编辑
     isInvalidToolBar: false, // 是否让左边工具条点击失效
-    isShowSystemManageMain: false
   },
   effects: {},
   reducers: {

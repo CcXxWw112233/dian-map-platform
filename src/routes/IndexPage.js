@@ -25,8 +25,6 @@ import LeftToolBar from "../components/LeftToolBar/index";
 
 import SearchBtn from "../pages/publicMapData/searchBtn";
 
-import SystemManageMain from "../pages/SystemManage/SystemManageMain"
-
 @connect(
   ({
     controller: { mainVisible },
@@ -37,7 +35,6 @@ import SystemManageMain from "../pages/SystemManage/SystemManageMain"
       isShowRightTools,
       isShowLeftToolBar,
       isShowPhotoSwipe,
-      isShowSystemManageMain
     },
     editPicture: { editShow },
   }) => ({
@@ -49,7 +46,6 @@ import SystemManageMain from "../pages/SystemManage/SystemManageMain"
     isShowRightTools,
     isShowLeftToolBar,
     isShowPhotoSwipe,
-    isShowSystemManageMain
   })
 )
 class IndexPage extends React.Component {
@@ -314,7 +310,6 @@ class IndexPage extends React.Component {
       isShowRightTools,
       isShowLeftToolBar,
       isShowPhotoSwipe,
-      isShowSystemManageMain
     } = this.props;
     return (
       <div className={styles.normal} id="IndexPage">
@@ -331,7 +326,6 @@ class IndexPage extends React.Component {
         {/* {!isShowMobile && } */}
         <UploadNotification />
         <SearchBtn></SearchBtn>
-        {isShowSystemManageMain && <SystemManageMain></SystemManageMain>}
       </div>
     );
   }

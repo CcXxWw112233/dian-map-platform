@@ -1,7 +1,6 @@
 import React from "react";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 
-import SystemManageMain from "../../../pages/SystemManage/RoleManageMain"
 import styles from "../LeftToolBar.less";
 import { connect } from "dva";
 

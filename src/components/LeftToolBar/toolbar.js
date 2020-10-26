@@ -25,18 +25,6 @@ export default class ToolBar extends React.Component {
             displayProjectList: false,
             displaySystemManage: false,
           });
-          const { dispatch } = this.props;
-          dispatch({
-            type: "openswitch/updateDatas",
-            payload: {
-              isShowMap: true,
-              isShowBasemapGallery: true,
-              isShowRightTools: true,
-              isShowPhotoSwipe: true,
-              isInvalidToolBar: true,
-              isShowSystemManageMain: false,
-            },
-          });
           this.parent.deactivate();
         },
       },
@@ -53,18 +41,6 @@ export default class ToolBar extends React.Component {
             displayCustomSymbolStore: false,
             plotType: "point",
             displaySystemManage: false,
-          });
-          const { dispatch } = this.props;
-          dispatch({
-            type: "openswitch/updateDatas",
-            payload: {
-              isShowMap: true,
-              isShowBasemapGallery: true,
-              isShowRightTools: true,
-              isShowPhotoSwipe: true,
-              isInvalidToolBar: true,
-              isShowSystemManageMain: false,
-            },
           });
           this.parent.deactivate();
         },
@@ -83,18 +59,6 @@ export default class ToolBar extends React.Component {
             plotType: "freeLine",
             displaySystemManage: false,
           });
-          const { dispatch } = this.props;
-          dispatch({
-            type: "openswitch/updateDatas",
-            payload: {
-              isShowMap: true,
-              isShowBasemapGallery: true,
-              isShowRightTools: true,
-              isShowPhotoSwipe: true,
-              isInvalidToolBar: true,
-              isShowSystemManageMain: false,
-            },
-          });
           this.parent.deactivate();
         },
       },
@@ -111,18 +75,6 @@ export default class ToolBar extends React.Component {
             displayCustomSymbolStore: false,
             plotType: "line",
             displaySystemManage: false,
-          });
-          const { dispatch } = this.props;
-          dispatch({
-            type: "openswitch/updateDatas",
-            payload: {
-              isShowMap: true,
-              isShowBasemapGallery: true,
-              isShowRightTools: true,
-              isShowPhotoSwipe: true,
-              isInvalidToolBar: true,
-              isShowSystemManageMain: false,
-            },
           });
           this.parent.deactivate();
         },
@@ -141,18 +93,6 @@ export default class ToolBar extends React.Component {
             plotType: "freePolygon",
             displaySystemManage: false,
           });
-          const { dispatch } = this.props;
-          dispatch({
-            type: "openswitch/updateDatas",
-            payload: {
-              isShowMap: true,
-              isShowBasemapGallery: true,
-              isShowRightTools: true,
-              isShowPhotoSwipe: true,
-              isInvalidToolBar: true,
-              isShowSystemManageMain: false,
-            },
-          });
           this.parent.deactivate();
         },
       },
@@ -169,18 +109,6 @@ export default class ToolBar extends React.Component {
             displayCustomSymbolStore: false,
             plotType: "polygon",
             displaySystemManage: false,
-          });
-          const { dispatch } = this.props;
-          dispatch({
-            type: "openswitch/updateDatas",
-            payload: {
-              isShowMap: true,
-              isShowBasemapGallery: true,
-              isShowRightTools: true,
-              isShowPhotoSwipe: true,
-              isInvalidToolBar: true,
-              isShowSystemManageMain: false,
-            },
           });
           this.parent.deactivate();
         },
@@ -199,18 +127,6 @@ export default class ToolBar extends React.Component {
             plotType: "rect",
             displaySystemManage: false,
           });
-          const { dispatch } = this.props;
-          dispatch({
-            type: "openswitch/updateDatas",
-            payload: {
-              isShowMap: true,
-              isShowBasemapGallery: true,
-              isShowRightTools: true,
-              isShowPhotoSwipe: true,
-              isInvalidToolBar: true,
-              isShowSystemManageMain: false,
-            },
-          });
           this.parent.deactivate();
         },
       },
@@ -228,18 +144,6 @@ export default class ToolBar extends React.Component {
             plotType: "circle",
             displaySystemManage: false,
           });
-          const { dispatch } = this.props;
-          dispatch({
-            type: "openswitch/updateDatas",
-            payload: {
-              isShowMap: true,
-              isShowBasemapGallery: true,
-              isShowRightTools: true,
-              isShowPhotoSwipe: true,
-              isInvalidToolBar: true,
-              isShowSystemManageMain: false,
-            },
-          });
           this.parent.deactivate();
         },
       },
@@ -256,18 +160,6 @@ export default class ToolBar extends React.Component {
             displayCustomSymbolStore: false,
             plotType: "arrow",
             displaySystemManage: false,
-          });
-          const { dispatch } = this.props;
-          dispatch({
-            type: "openswitch/updateDatas",
-            payload: {
-              isShowMap: true,
-              isShowBasemapGallery: true,
-              isShowRightTools: true,
-              isShowPhotoSwipe: true,
-              isInvalidToolBar: true,
-              isShowSystemManageMain: false,
-            },
           });
           this.parent.deactivate();
         },
@@ -340,19 +232,6 @@ export default class ToolBar extends React.Component {
                 });
                 this.setState({
                   selectedIndex: -1,
-                });
-                const { dispatch } = this.props;
-                dispatch({
-                  type: "openswitch/updateDatas",
-                  payload: {
-                    isShowMap: false,
-                    isShowBasemapGallery: false,
-                    isShowRightTools: false,
-                    isShowLeftToolBar: true,
-                    isShowPhotoSwipe: false,
-                    isInvalidToolBar: false,
-                    isShowSystemManageMain: true,
-                  },
                 });
               }}
             >
