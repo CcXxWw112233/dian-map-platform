@@ -192,7 +192,6 @@ export default class ToolBar extends React.Component {
     });
   };
   render() {
-    debugger
     let tempPlotItemStyle = { bottom: 60, left: 4 };
     let customSymbolStoreStyle = { bottom: 0, left: 4 };
     const selectStyle = { background: "rgba(90, 134, 245, 1)" };

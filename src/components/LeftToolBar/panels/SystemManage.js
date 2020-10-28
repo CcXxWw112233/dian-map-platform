@@ -290,7 +290,6 @@ export default class SystemManage extends React.Component {
             if (type === "project") {
               systemManageServices.getSystemRole().then((res) => {
                 if (res && res.code === "0") {
-                  debugger;
                   this.setState({
                     systemRole: res.data,
                   });
