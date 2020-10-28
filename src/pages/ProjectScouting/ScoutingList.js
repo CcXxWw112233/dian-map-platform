@@ -5,6 +5,7 @@ import globalStyle from "../../globalSet/styles/globalStyles.less";
 import { connect } from "dva";
 import Action from "../../lib/components/ProjectScouting/ScoutingList";
 import ScoutingItem from "./components/ScoutingItem";
+import PermissionModal from "./components/permissionModal";
 import { message, Empty } from "antd";
 import Bitmap from "../../assets/Bitmap.png";
 import Event from "../../lib/utils/event";
@@ -25,6 +26,8 @@ export default class ScoutingList extends PureComponent {
     super(props);
     this.state = {
       projects: [],
+      permissionModalVisible: false,
+      selectedProject: null,
     };
     this.projectDatas = [];
   }
@@ -358,6 +361,13 @@ export default class ScoutingList extends PureComponent {
       });
   };
 
+  displayPermissionModal = (data) => {
+    this.setState({
+      permissionModalVisible: true,
+      selectedProject: data,
+    });
+  };
+
   render() {
     const { projects } = this.state;
     return (
@@ -381,13 +391,27 @@ export default class ScoutingList extends PureComponent {
                 onRemove={this.removeBoard.bind(this, item)}
                 onSaveRemark={this.onSaveRemark.bind(this, item)}
                 onSetBgImg={this.onSetBgImg.bind(this, item)}
+                displayPermissionModal={this.displayPermissionModal}
+                data={item}
+                toolParent={this.props.toolParent}
               ></ScoutingItem>
             );
           })
         ) : (
           <Empty description="暂无项目数据" style={{ marginBottom: 10 }} />
         )}
-        <ScoutingAddBtn cb={this.handleAddClick.bind(this)} />
+        <ScoutingAddBtn
+          cb={this.handleAddClick.bind(this)}
+          style={{ ...this.props.toolParent.getStyle("map:board:add", "org") }}
+          disabled={this.props.toolParent.getDisabled("map:board:add", "org")}
+        />
+        {this.state.permissionModalVisible ? (
+          <PermissionModal
+            permissionModal={this.state.permissionModalVisible}
+            data={this.state.selectedProject}
+            parent={this}
+          />
+        ) : null}
         <div className={styles.bgStyleImg}>
           <img crossOrigin="anonymous" src={Bitmap} />
         </div>

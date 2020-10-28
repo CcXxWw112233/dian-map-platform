@@ -370,7 +370,6 @@ const publicData = {
     lenged,
     str
   ) {
-    debugger
     if (lenged) {
       this.lenged = lenged;
     }

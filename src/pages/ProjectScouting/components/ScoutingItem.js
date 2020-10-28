@@ -209,6 +209,7 @@ export default class ScoutingItem extends React.PureComponent {
       date,
       remarkText = "暂无备注信息",
       bgImage,
+      toolParent,
     } = this.props;
     // const menu = (
     //     <Menu onClick={this.onHandleMenu}>
@@ -253,13 +254,44 @@ export default class ScoutingItem extends React.PureComponent {
               className={styles.settings}
               onClick={(e) => e.stopPropagation()}
             >
-              <span className={`${styles.settings_item}`} title="配置权限" >
+              <span
+                className={`${styles.settings_item}`}
+                title="配置权限"
+                onClick={() => {
+                  const { displayPermissionModal, data } = this.props;
+                  displayPermissionModal(data);
+                }}
+                style={{
+                  ...(toolParent &&
+                    toolParent.getStyle(
+                      "map:board:member:manage",
+                      "project",
+                      this.props.data.board_id
+                    )),
+                }}
+                disabled={
+                  toolParent &&
+                  toolParent.getDisabled(
+                    "map:board:member:manage",
+                    "project",
+                    this.props.data.board_id
+                  )
+                }
+              >
                 <MyIcon type="icon-weidenglutouxiang" />
               </span>
               <span
                 className={`${styles.settings_item}`}
                 title="修改项目名称"
                 onClick={() => this.ToEdit()}
+                style={{
+                  ...(toolParent &&
+                    toolParent.getStyle("map:board:update", "org")),
+                }}
+                disabled={
+                  toolParent &&
+                  toolParent.getDisabled("map:board:update", "project")
+                }
               >
                 <MyIcon type="icon-bianzu46" />
               </span>
@@ -287,6 +319,10 @@ export default class ScoutingItem extends React.PureComponent {
                 <span
                   className={`${styles.settings_item} ${styles.removeBtn}`}
                   title="删除项目"
+                  style={{
+                    ...(toolParent &&
+                      toolParent.getStyle("map:board:remove", "org")),
+                  }}
                 >
                   <MyIcon type="icon-bianzu52" />
                 </span>

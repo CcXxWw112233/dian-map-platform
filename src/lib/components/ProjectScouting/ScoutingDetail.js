@@ -1903,11 +1903,11 @@ function Action() {
     this.removePlanPicCollection();
     // if (!flag) InitMap.map.removeLayer(this.Layer);
   };
-  this.RemoveArea = async (id) => {
-    return await DELETE_AREA(id);
+  this.RemoveArea = async (id, board_id) => {
+    return await DELETE_AREA(id, board_id);
   };
-  this.editAreaName = async (id, data) => {
-    return await EDIT_AREA_NAME(id, data);
+  this.editAreaName = async (id, data, board_id) => {
+    return await EDIT_AREA_NAME(id, data, board_id);
   };
 
   // 中断绘制

@@ -308,7 +308,9 @@ export default class ExcelRead extends React.Component {
     } = this.state;
     let { group } = this.props;
     return (
-      <div className={styles.excelContainer}>
+      <div
+        className={styles.excelContainer}
+      >
         <span onClick={this.addFile}>导入表格数据</span>
         {/* <Button onClick={this.addFile}
                 shape="circle"

@@ -10,6 +10,7 @@ import CustomSymbolStore from "./panels/CustomSymbolStore";
 import SystemManage from "./panels/SystemManage";
 import Panel from "./panels/Panel";
 import ToolBar from "./toolbar";
+import systemManageServices from "../../services/systemManage";
 
 import { lineDrawing, pointDrawing, polygonDrawing } from "utils/drawing";
 
@@ -177,6 +178,9 @@ export default class LeftToolBar extends React.Component {
       displayTempPlotIcon: false,
       plotType: "point",
       featureOperatorList: [],
+      projectPermission: null,
+      globalPermission: null,
+      needUpdate: false,
     };
     this.dic = {
       Point: "point",
@@ -198,7 +202,74 @@ export default class LeftToolBar extends React.Component {
     this.projectPlot = null;
     this.plotRef = null;
     this.returnPanel = null;
+    if (!this.state.projectPermission) {
+      systemManageServices.getPersonalPermission2Project().then((res) => {
+        if (res && res.code === "0") {
+          this.setState({
+            projectPermission: res.data,
+          });
+        }
+      });
+    }
+    if (!this.state.globalPermission) {
+      systemManageServices.getPersonalPermission2Global().then((res) => {
+        if (res && res.code === "0") {
+          this.setState(
+            {
+              globalPermission: res.data,
+            },
+            () => {
+              this.leftToolBarRef &&
+                this.leftToolBarRef.setState({
+                  update: true,
+                });
+            }
+          );
+        }
+      });
+    }
   }
+
+  // 权限
+  getIndex = (functionCode, type, projectId) => {
+    const { globalPermission, projectPermission } = this.state;
+    let index = -1;
+    if (type === "org") {
+      if (globalPermission !== null) {
+        const keys = Object.keys(globalPermission);
+        if (keys.length === 1) {
+          let arr = globalPermission[keys[0]];
+          index = arr.findIndex((item) => item === functionCode);
+        }
+      }
+    } else {
+      let arr = [];
+      if (projectId) {
+        if (projectPermission) {
+          arr = projectPermission[projectId];
+          index = arr.findIndex((item) => item === functionCode);
+        }
+      }
+    }
+    return index;
+  };
+
+  getDisabled = (functionCode, type, projectId) => {
+    const index = this.getIndex(functionCode, type, projectId);
+    return index > -1 ? false : true;
+  };
+
+  // 权限
+  getStyle = (functionCode, type, projectId) => {
+    const index = this.getIndex(functionCode, type, projectId);
+    return index === -1
+      ? {
+          pointerEvents: "none",
+          cursor: "not-allowed",
+          background: "hsla(0,0%,100%,.1)",
+        }
+      : {};
+  };
 
   deactivate = () => {
     pointDrawing.deactivate();
@@ -273,7 +344,7 @@ export default class LeftToolBar extends React.Component {
 
   displayPlotPanel = (attrs, operator, returnPanel) => {
     this.isModifyPlot = true;
-    this.returnPanel = returnPanel
+    this.returnPanel = returnPanel;
     this.activeFeatureOperator = operator;
     if (operator.data) {
       operator.attrs.name = operator.data.title || "";
@@ -315,11 +386,11 @@ export default class LeftToolBar extends React.Component {
         <Panel>
           {/* 权限管理 */}
           {this.state.displaySystemManage ? (
-            <SystemManage
-            ></SystemManage>
+            <SystemManage></SystemManage>
           ) : null}
           <Project
             hidden={this.state.displayProject}
+            parent={this}
             displayPlotPanel={(attrs, operator) =>
               this.displayPlotPanel(attrs, operator)
             }

@@ -129,7 +129,7 @@ export default class Project extends React.Component {
 
   render() {
     const { TabPane } = Tabs;
-    const { hidden } = this.props;
+    const { hidden, parent } = this.props;
     return (
       <div
         style={{ width: "100%", height: "100%" }}
@@ -170,11 +170,27 @@ export default class Project extends React.Component {
                   }}
                 >
                   <TabPane tab={<span>项目数据</span>} key="1">
-                    <ProjectScouting></ProjectScouting>
+                    <ProjectScouting
+                      toolParent={this.props.parent}
+                    ></ProjectScouting>
                   </TabPane>
-                  <TabPane tab={<span>公共数据</span>} key="2">
+                  <TabPane
+                    tab={<span>公共数据</span>}
+                    key="2"
+                    style={{
+                      ...this.props.parent.getStyle(
+                        "map:collect:poi:view",
+                        "org"
+                      ),
+                    }}
+                    disabled={this.props.parent.getDisabled(
+                      "map:collect:poi:view",
+                      "org"
+                    )}
+                  >
                     <PublicData
                       parent={this}
+                      toolParent={parent}
                       getQueryStr={this.getQueryStr}
                       onRef={this.onRef}
                     />
@@ -191,6 +207,7 @@ export default class Project extends React.Component {
           <Main>
             <ScoutingDetails
               displayPlotPanel={this.props.displayPlotPanel}
+              parentTool={this.props.parent}
             ></ScoutingDetails>
           </Main>
         )}

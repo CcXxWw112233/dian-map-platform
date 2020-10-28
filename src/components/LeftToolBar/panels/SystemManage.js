@@ -1,5 +1,5 @@
 import React, { Fragment } from "react";
-import { Collapse, Dropdown, Menu, Input, Col, Button } from "antd";
+import { Collapse, Dropdown, Menu, Input, Col, Button, message } from "antd";
 import { CloseOutlined, CheckOutlined } from "@ant-design/icons";
 import { MyIcon } from "../../../components/utils";
 import SystemManageModal from "./SystemManageModal";
@@ -42,12 +42,19 @@ export class ContentItem extends React.Component {
       });
     } else if (type === "copy") {
     } else if (type === "del") {
-      systemManageServices.deleteSystemRole(data && data.id).then((res) => {
-        if (res && res.code === "0") {
-          const { parent } = this.props;
-          parent.onDelRoleClick(data.id);
-        }
-      });
+      systemManageServices
+        .deleteSystemRole(data && data.id)
+        .then((res) => {
+          if (res && res.code === "0") {
+            const { parent } = this.props;
+            parent.onDelRoleClick(data.id);
+          } else {
+            message.info("管理员权限不允许修改");
+          }
+        })
+        .catch((e) => {
+          message.info(e);
+        });
     }
   };
   handleContentItemClick = () => {
@@ -186,6 +193,9 @@ export default class SystemManage extends React.Component {
       systemRole: [],
       selectedId: "",
       selectedData: null,
+      loginUserName: "",
+      loginUserEmail: "",
+      loginUserAvatar: "",
     };
   }
 
@@ -194,6 +204,15 @@ export default class SystemManage extends React.Component {
   }
 
   getAllData = () => {
+    systemManageServices.getLoginUser().then((res) => {
+      if (res && res.data) {
+        this.setState({
+          loginUserName: res.data.name,
+          loginUserEmail: res.data.email,
+          loginUserAvatar: res.data.avatar,
+        });
+      }
+    });
     systemManageServices.getSystemRole().then((res) => {
       if (res && res.code === "0") {
         this.setState({
@@ -232,26 +251,22 @@ export default class SystemManage extends React.Component {
     });
   };
   handleAddNewRolePanelSaveClick = () => {
-    this.setState(
-      {
-        addRolePanelVisible: false,
-        modalVisible: true,
-      },
-      () => {
-        const param = {
-          name: this.state.newRoleName,
-        };
-        systemManageServices.addSystemRole(param).then((res) => {
-          if (res && res.code === "0") {
-            let arr = this.state.systemRole;
-            arr = [...arr, res.data];
-            this.setState({
-              systemRole: arr,
-            });
-          }
+    const param = {
+      name: this.state.newRoleName,
+    };
+    systemManageServices.addSystemRole(param).then((res) => {
+      if (res && res.code === "0") {
+        let arr = this.state.systemRole;
+        arr = [...arr, res.data];
+        this.setState({
+          systemRole: arr,
+          addRolePanelVisible: false,
+          modalVisible: true,
+          selectedId: res.data.id,
+          selectedData: res.data,
         });
       }
-    );
+    });
   };
 
   onModalOk = (keys, type) => {
@@ -275,6 +290,7 @@ export default class SystemManage extends React.Component {
             if (type === "project") {
               systemManageServices.getSystemRole().then((res) => {
                 if (res && res.code === "0") {
+                  debugger;
                   this.setState({
                     systemRole: res.data,
                   });
@@ -312,10 +328,16 @@ export default class SystemManage extends React.Component {
     return (
       <div className={styles.wrapper}>
         <div className={styles.header}>
-          <div className={styles.profilePic}></div>
+          <div className={styles.profilePic}>
+            <img
+              src={this.state.loginUserAvatar}
+              alt=""
+              style={{ width: "100%", height: "100%" }}
+            />
+          </div>
           <div className={styles.info}>
-            <span>张薇</span>
-            <span>zhangw@new-di.com</span>
+            <span>{this.state.loginUserName}</span>
+            <span>{this.state.loginUserEmail}</span>
           </div>
         </div>
         <p className={styles.title}>

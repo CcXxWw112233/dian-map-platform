@@ -169,6 +169,7 @@ export default class ToolBar extends React.Component {
       selectedIndex: 0,
       hoveredIndex: -1,
       operatorListLength: 0,
+      update: false,
     };
   }
   updateListLen = (len = 0) => {
@@ -189,8 +190,9 @@ export default class ToolBar extends React.Component {
       displayCustomSymbolStore: false,
       plotType: "",
     });
-  }
+  };
   render() {
+    debugger
     let tempPlotItemStyle = { bottom: 60, left: 4 };
     let customSymbolStoreStyle = { bottom: 0, left: 4 };
     const selectStyle = { background: "rgba(90, 134, 245, 1)" };
@@ -209,11 +211,16 @@ export default class ToolBar extends React.Component {
           zIndex: 9,
         }}
       >
+        {/* {functionName="map:board:role:manage" type="org"} */}
         <div
           className={`${styles.circle} ${
             this.props.isInvalidToolBar ? "invalid" : ""
           }`}
-          style={{ background: "#fff" }}
+          style={{
+            ...this.parent.getStyle("map:board:role:manage", "org"),
+            ...{ background: "#fff" },
+          }}
+          disabled={this.parent.getDisabled("map:board:role:manage", "org")}
         >
           {/* <img crossOrigin="anonymous" alt="" src=""></img> */}
           <Tooltip title="权限管理" placement="right">
@@ -307,7 +314,7 @@ export default class ToolBar extends React.Component {
           <div
             className={`${styles.circle} ${styles.temp}`}
             onClick={() => {
-              this.displayTempPlot()
+              this.displayTempPlot();
             }}
             style={{
               ...tempPlotItemStyle,
@@ -344,7 +351,11 @@ export default class ToolBar extends React.Component {
               plotType: "",
             });
           }}
-          style={customSymbolStoreStyle}
+          style={{
+            ...customSymbolStoreStyle,
+            ...this.parent.getStyle("map:plot:mark:custom", "org"),
+          }}
+          disabled={this.parent.getDisabled("map:plot:mark:custom", "org")}
         >
           <i
             className={globalStyle.global_icon}
