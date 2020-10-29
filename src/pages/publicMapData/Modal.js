@@ -47,6 +47,8 @@ export default class MyModal extends react.Component {
       .then((res) => {
         if (res.code === "0") {
           message.info("已将所选内容引入到项目,请到项目中查看。");
+        } else {
+          message.info(res.message);
         }
       })
       .catch((e) => console.log(e));

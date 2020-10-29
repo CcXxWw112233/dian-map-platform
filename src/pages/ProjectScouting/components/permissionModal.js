@@ -289,7 +289,7 @@ export default class PermissionModal extends React.Component {
             okText={okText}
           >
             <div className={styles.wrapper}>
-              <div style={{ width: "100%" }}>
+              <div style={{ width: "100%", height: "100%" }}>
                 {this.state.orgUserArr.length === 0 ? (
                   <div
                     style={{
@@ -297,6 +297,7 @@ export default class PermissionModal extends React.Component {
                       flexDirection: "column",
                       textAlign: "center",
                       position: "relative",
+                      top: "30%",
                     }}
                   >
                     <i
