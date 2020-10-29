@@ -416,6 +416,7 @@ export default class LeftToolBar extends React.Component {
             displayPlotPanel={(attrs, operator) =>
               this.displayPlotPanel(attrs, operator)
             }
+            projectPermission={this.state.projectPermission}
           ></Project>
           {this.state.displayPlot ? (
             <Plot

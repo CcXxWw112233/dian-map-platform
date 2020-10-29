@@ -196,6 +196,7 @@ export default class Project extends React.Component {
                       toolParent={parent}
                       getQueryStr={this.getQueryStr}
                       onRef={this.onRef}
+                      projectPermission={this.props.projectPermission}
                     />
                   </TabPane>
                 </Tabs>
