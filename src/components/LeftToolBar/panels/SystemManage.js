@@ -35,11 +35,11 @@ export class ContentItem extends React.Component {
   };
   controlMenu = (type) => {
     const { data } = this.props;
+    this.setState({
+      dropdownVisible: false,
+    });
     if (type === "rename") {
       this.setIsEdit(true);
-      this.setState({
-        dropdownVisible: false,
-      });
     } else if (type === "copy") {
     } else if (type === "del") {
       systemManageServices
@@ -260,10 +260,22 @@ export default class SystemManage extends React.Component {
   };
   handleAddNewRolePanelCancelClick = () => {
     this.setState({
+      newRoleName: "",
       addRolePanelVisible: false,
     });
   };
   handleAddNewRolePanelSaveClick = () => {
+    if (!this.state.newRoleName?.trim()) {
+      message.info("角色名称不能为空！");
+      return;
+    }
+    let oldRoleNameArr = this.state.systemRole.filter(
+      (item) => item.name === this.state.newRoleName
+    );
+    if (oldRoleNameArr.length > 0) {
+      message.info(`已存在名称为${this.state.newRoleName}的角色，请重新输入。`);
+      return;
+    }
     const param = {
       name: this.state.newRoleName,
     };
