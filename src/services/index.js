@@ -67,7 +67,7 @@ instance.interceptors.response.use(
         if (BASIC.getUrlParam.isMobile === "1") return {};
         responseTimer = setTimeout(() => {
           message.error("权限不足，请重新登录");
-          var url = "";
+          let url = "";
           try {
             url = window.top.document.referrer;
           } catch (M) {
@@ -83,7 +83,9 @@ instance.interceptors.response.use(
             url = document.referrer;
           }
           window.location.href =
-            url + "#/login?redirect=/technological/simplemode/home";
+            url ||
+            "https://lingxi.di-an.com/" +
+              "#/login?redirect=/technological/simplemode/home";
         }, 1000);
       }
 

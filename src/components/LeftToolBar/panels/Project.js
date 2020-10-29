@@ -22,6 +22,7 @@ import { connect } from "dva";
 export default class Project extends React.Component {
   constructor(props) {
     super(props);
+    this.props.onRef(this);
     this.queryStr = "";
     this.publicDataChild = null;
     this.searchChild = null;
@@ -36,6 +37,7 @@ export default class Project extends React.Component {
     this.activePanelKey = "1";
     this.state = {
       openPanel: true,
+      update: false,
     };
     this.getLoaction = throttle(this.getLoaction, 1000);
   }
@@ -172,6 +174,7 @@ export default class Project extends React.Component {
                   <TabPane tab={<span>项目数据</span>} key="1">
                     <ProjectScouting
                       toolParent={this.props.parent}
+                      update={this.state.update}
                     ></ProjectScouting>
                   </TabPane>
                   <TabPane

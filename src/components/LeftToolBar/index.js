@@ -201,16 +201,25 @@ export default class LeftToolBar extends React.Component {
     this.leftToolBarRef = null;
     this.projectPlot = null;
     this.plotRef = null;
+    this.projectRef = null;
     this.returnPanel = null;
-    this.getPersonalPermission()
+    this.getPersonalPermission();
   }
 
   getPersonalPermission = () => {
     systemManageServices.getPersonalPermission2Project().then((res) => {
       if (res && res.code === "0") {
-        this.setState({
-          projectPermission: res.data,
-        });
+        this.setState(
+          {
+            projectPermission: res.data,
+          },
+          () => {
+            this.projectRef &&
+              this.projectRef.setState({
+                update: !this.projectRef.state.update,
+              });
+          }
+        );
       }
     });
     systemManageServices.getPersonalPermission2Global().then((res) => {
@@ -222,7 +231,7 @@ export default class LeftToolBar extends React.Component {
           () => {
             this.leftToolBarRef &&
               this.leftToolBarRef.setState({
-                update: true,
+                update: !this.leftToolBarRef.state.update,
               });
           }
         );
@@ -250,7 +259,7 @@ export default class LeftToolBar extends React.Component {
         if (projectPermission) {
           permissionArr = projectPermission[projectId];
           if (!permissionArr) {
-            this.getPersonalPermission()
+            this.getPersonalPermission();
           }
           index =
             permissionArr &&
@@ -350,6 +359,10 @@ export default class LeftToolBar extends React.Component {
     this.plotRef = ref;
   };
 
+  onProjectRef = (ref) => {
+    this.projectRef = ref;
+  };
+
   displayPlotPanel = (attrs, operator, returnPanel) => {
     this.isModifyPlot = true;
     this.returnPanel = returnPanel;
@@ -399,6 +412,7 @@ export default class LeftToolBar extends React.Component {
           <Project
             hidden={this.state.displayProject}
             parent={this}
+            onRef={this.onProjectRef}
             displayPlotPanel={(attrs, operator) =>
               this.displayPlotPanel(attrs, operator)
             }
