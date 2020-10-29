@@ -300,7 +300,18 @@ export default class ScoutingItem extends React.PureComponent {
                 onUpload={this.onUploadImg}
                 onStart={() => Nprogress.start()}
               >
-                <span className={`${styles.settings_item}`} title="上传背景图">
+                <span
+                  className={`${styles.settings_item}`}
+                  title="上传背景图"
+                  style={{
+                    ...(toolParent &&
+                      toolParent.getStyle("map:board:update", "org")),
+                  }}
+                  disabled={
+                    toolParent &&
+                    toolParent.getDisabled("map:board:update", "project")
+                  }
+                >
                   <MyIcon type="icon-bianzu45" />
                 </span>
               </UploadBgPic>

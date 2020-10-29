@@ -136,7 +136,7 @@ export class ContentItem extends React.Component {
             <Fragment>
               <Col span={15}>
                 <Input
-                  style={{ borderRadius: "5px" }}
+                  // style={{ borderRadius: "5px" }}
                   placeholder="请输入名称"
                   size="small"
                   autoFocus
@@ -447,6 +447,8 @@ export default class SystemManage extends React.Component {
                     </div>
                   </div>
                   <Input
+                    allowClear
+                    autoFocus
                     placeholder="输入角色名称"
                     style={{ width: "92%", margin: "0 12px" }}
                     value={this.state.newRoleName}
