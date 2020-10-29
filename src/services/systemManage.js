@@ -28,9 +28,7 @@ export default {
       {},
       { BaseInfo: base64 }
     );
-    if (BASIC.checkResponse(response)) {
-      return response.data;
-    }
+    return response.data;
   },
 
   // 获取应用级权限树
@@ -42,9 +40,7 @@ export default {
       {},
       { BaseInfo: base64 }
     );
-    if (BASIC.checkResponse(response)) {
-      return response.data;
-    }
+    return response.data;
   },
 
   // 角色列表（项目）
@@ -59,9 +55,7 @@ export default {
       },
       { BaseInfo: base64 }
     );
-    if (BASIC.checkResponse(response)) {
-      return response.data;
-    }
+    return response.data;
   },
 
   // 角色列表（全局）
@@ -76,9 +70,7 @@ export default {
       },
       { BaseInfo: base64 }
     );
-    if (BASIC.checkResponse(response)) {
-      return response.data;
-    }
+    return response.data;
   },
 
   // 新增角色
@@ -89,9 +81,7 @@ export default {
     let response = await request("POST", "/map/system/role", param, {
       BaseInfo: base64,
     });
-    if (BASIC.checkResponse(response)) {
-      return response.data;
-    }
+    return response.data;
   },
 
   // 为角色赋权
@@ -100,9 +90,7 @@ export default {
     let response = await request("PUT", "/map/system/role/permission", param, {
       BaseInfo: base64,
     });
-    if (BASIC.checkResponse(response)) {
-      return response.data;
-    }
+    return response.data;
   },
 
   // 全局信息
@@ -113,9 +101,7 @@ export default {
     let response = await request("GET", "/map/system/user/role/global", param, {
       BaseInfo: base64,
     });
-    if (BASIC.checkResponse(response)) {
-      return response.data;
-    }
+    return response.data;
   },
 
   // 修改角色
@@ -131,9 +117,7 @@ export default {
     let response = await request("PUT", `/map/system/role/${id}`, param, {
       BaseInfo: base64,
     });
-    if (BASIC.checkResponse(response)) {
-      return response.data;
-    }
+    return response.data;
   },
 
   // 修改名称
@@ -145,9 +129,7 @@ export default {
     let response = await request("PUT", `/map/system/role/${id}`, param, {
       BaseInfo: base64,
     });
-    if (BASIC.checkResponse(response)) {
-      return response.data;
-    }
+    return response.data;
   },
 
   // 删除角色
@@ -159,9 +141,7 @@ export default {
       {},
       { BaseInfo: base64 }
     );
-    if (BASIC.checkResponse(response)) {
-      return response.data;
-    }
+    return response.data;
   },
 
   // 获取项目成员
@@ -175,9 +155,7 @@ export default {
       },
       { BaseInfo: base64 }
     );
-    if (BASIC.checkResponse(response)) {
-      return response.data;
-    }
+    return response.data;
   },
 
   // 为项目新增成员
@@ -186,9 +164,7 @@ export default {
     let response = await request("POST", "/map/board/user", param, {
       BaseInfo: base64,
     });
-    if (BASIC.checkResponse(response)) {
-      return response.data;
-    }
+    return response.data;
   },
 
   // 修改项目成员角色
@@ -197,9 +173,7 @@ export default {
     let response = await request("PUT", "/map/board/user/role", param, {
       BaseInfo: base64,
     });
-    if (BASIC.checkResponse(response)) {
-      return response.data;
-    }
+    return response.data;
   },
 
   // 删除项目成员
@@ -213,9 +187,7 @@ export default {
         BaseInfo: base64,
       }
     );
-    if (BASIC.checkResponse(response)) {
-      return response.data;
-    }
+    return response.data;
   },
 
   // 获取组织用户
@@ -232,9 +204,7 @@ export default {
         BaseInfo: base64,
       }
     );
-    if (BASIC.checkResponse(response)) {
-      return response.data;
-    }
+    return response.data;
   },
 
   // 获取登录用户
@@ -248,9 +218,7 @@ export default {
         BaseInfo: base64,
       }
     );
-    if (BASIC.checkResponse(response)) {
-      return response.data;
-    }
+    return response.data;
   },
 
   // 获取个人当前组织权限列表（项目）
@@ -265,9 +233,7 @@ export default {
         BaseInfo: base64,
       }
     );
-    if (BASIC.checkResponse(response)) {
-      return response.data;
-    }
+    return response.data;
   },
 
   getPersonalPermission2Global: async () => {
@@ -281,8 +247,6 @@ export default {
         BaseInfo: base64,
       }
     );
-    if (BASIC.checkResponse(response)) {
-      return response.data;
-    }
+    return response.data;
   },
 };

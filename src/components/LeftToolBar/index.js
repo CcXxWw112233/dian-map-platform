@@ -202,52 +202,59 @@ export default class LeftToolBar extends React.Component {
     this.projectPlot = null;
     this.plotRef = null;
     this.returnPanel = null;
-    if (!this.state.projectPermission) {
-      systemManageServices.getPersonalPermission2Project().then((res) => {
-        if (res && res.code === "0") {
-          this.setState({
-            projectPermission: res.data,
-          });
-        }
-      });
-    }
-    if (!this.state.globalPermission) {
-      systemManageServices.getPersonalPermission2Global().then((res) => {
-        if (res && res.code === "0") {
-          this.setState(
-            {
-              globalPermission: res.data,
-            },
-            () => {
-              this.leftToolBarRef &&
-                this.leftToolBarRef.setState({
-                  update: true,
-                });
-            }
-          );
-        }
-      });
-    }
+    this.getPersonalPermission()
   }
+
+  getPersonalPermission = () => {
+    systemManageServices.getPersonalPermission2Project().then((res) => {
+      if (res && res.code === "0") {
+        this.setState({
+          projectPermission: res.data,
+        });
+      }
+    });
+    systemManageServices.getPersonalPermission2Global().then((res) => {
+      if (res && res.code === "0") {
+        this.setState(
+          {
+            globalPermission: res.data,
+          },
+          () => {
+            this.leftToolBarRef &&
+              this.leftToolBarRef.setState({
+                update: true,
+              });
+          }
+        );
+      }
+    });
+  };
 
   // 权限
   getIndex = (functionCode, type, projectId) => {
     const { globalPermission, projectPermission } = this.state;
     let index = -1;
+    let permissionArr = null;
     if (type === "org") {
       if (globalPermission !== null) {
         const keys = Object.keys(globalPermission);
         if (keys.length === 1) {
-          let arr = globalPermission[keys[0]];
-          index = arr.findIndex((item) => item === functionCode);
+          permissionArr = globalPermission[keys[0]];
+          index =
+            permissionArr &&
+            permissionArr.findIndex((item) => item === functionCode);
         }
       }
     } else {
-      let arr = [];
       if (projectId) {
         if (projectPermission) {
-          arr = projectPermission[projectId];
-          index = arr.findIndex((item) => item === functionCode);
+          permissionArr = projectPermission[projectId];
+          if (!permissionArr) {
+            this.getPersonalPermission()
+          }
+          index =
+            permissionArr &&
+            permissionArr.findIndex((item) => item === functionCode);
         }
       }
     }

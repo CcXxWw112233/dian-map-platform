@@ -45,15 +45,17 @@ export class ContentItem extends React.Component {
       systemManageServices
         .deleteSystemRole(data && data.id)
         .then((res) => {
-          if (res && res.code === "0") {
-            const { parent } = this.props;
-            parent.onDelRoleClick(data.id);
-          } else {
-            message.info("管理员权限不允许修改");
+          if (res) {
+            if (res.code === "0") {
+              const { parent } = this.props;
+              parent.onDelRoleClick(data.id);
+            } else {
+              message.info(res.message);
+            }
           }
         })
         .catch((e) => {
-          message.info(e);
+          console.log(e);
         });
     }
   };
@@ -93,9 +95,19 @@ export class ContentItem extends React.Component {
         name: this.state.roleName,
       })
       .then((res) => {
-        this.setState({
-          roleName: this.newRoleName,
-        });
+        if (res.code !== "0") {
+          this.setState(
+            {
+              roleName: data.name,
+            },
+            () => {
+              message.info(res.message);
+            }
+          );
+        }
+      })
+      .catch((e) => {
+        console.log(e);
       });
   };
 
@@ -196,6 +208,7 @@ export default class SystemManage extends React.Component {
       loginUserName: "",
       loginUserEmail: "",
       loginUserAvatar: "",
+      collapseActiveKey: ["1", "2"],
     };
   }
 
@@ -304,6 +317,8 @@ export default class SystemManage extends React.Component {
                 }
               });
             }
+          } else {
+            message.info(res.message);
           }
         });
       }
@@ -323,16 +338,28 @@ export default class SystemManage extends React.Component {
       selectedData: data,
     });
   };
+  handleCollapseChange = (value) => {
+    this.setState({
+      collapseActiveKey: value,
+    });
+  };
+
   render() {
     return (
       <div className={styles.wrapper}>
         <div className={styles.header}>
           <div className={styles.profilePic}>
-            <img
-              src={this.state.loginUserAvatar}
-              alt=""
-              style={{ width: "100%", height: "100%" }}
-            />
+            {this.state.loginUserAvatar ? (
+              <img
+                src={this.state.loginUserAvatar}
+                alt=""
+                style={{ width: "100%", height: "100%" }}
+              />
+            ) : (
+              <i className={globalStyle.global_icon} style={{ fontSize: 36 }}>
+                &#xe764;
+              </i>
+            )}
           </div>
           <div className={styles.info}>
             <span>{this.state.loginUserName}</span>
@@ -343,10 +370,14 @@ export default class SystemManage extends React.Component {
           <span>权限控制</span>
         </p>
         <div
-          className={`${styles.body} ${globalStyle.autoScrollY}`}
+          // className={`${styles.body} ${globalStyle.autoScrollY}`}
           style={{ height: "calc(100% - 140px)" }}
         >
-          <Collapse expandIconPosition="right" activeKey={["1", "2"]}>
+          <Collapse
+            expandIconPosition="right"
+            activeKey={this.state.collapseActiveKey}
+            onChange={(value) => this.handleCollapseChange(value)}
+          >
             <Panel header={<span>项目角色管理</span>} key="1">
               {this.state.systemRole.map((item) => {
                 return (

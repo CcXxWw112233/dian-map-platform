@@ -1,5 +1,6 @@
 import React from "react";
 import { Modal, Button, Tree } from "antd";
+import globalStyle from "@/globalSet/styles/globalStyles.less";
 import styles from "./SystemMnageModal.less";
 import systemManageServices from "../../../services/systemManage";
 import { guid } from "./lib";
@@ -126,15 +127,24 @@ export default class SystemManageModal extends React.Component {
                 return (
                   <div className={styles.infoItem} key={guid()}>
                     <div className={styles.profilePic}>
-                      <img
-                        src={item.avatar}
-                        alt=""
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          borderRadius: 20,
-                        }}
-                      />
+                      {item.avatar ? (
+                        <img
+                          src={item.avatar}
+                          alt=""
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            borderRadius: 20,
+                          }}
+                        />
+                      ) : (
+                        <i
+                          className={globalStyle.global_icon}
+                          style={{ fontSize: 20 }}
+                        >
+                          &#xe764;
+                        </i>
+                      )}
                     </div>
                     <div className={styles.text}>
                       <span>{item.name}</span>
