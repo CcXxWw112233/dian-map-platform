@@ -67,7 +67,7 @@ export const UploadBgPic = ({ children, onUpload, onStart }) => {
   );
 };
 
-export const Title = ({ name, date, cb, data = {}, className = "", mini }) => {
+export const Title = ({ name, date, cb, data = {}, className = "", mini, parentTool, boardId }) => {
   // 预览图片
   const previewImg = (e) => {
     let url = e.target.src;
@@ -159,7 +159,26 @@ export const Title = ({ name, date, cb, data = {}, className = "", mini }) => {
                 onStart={() => Nprogress.start()}
                 onUpload={onUpload}
               >
-                <a>点击设置</a>
+                <a
+                  style={{
+                    ...(parentTool &&
+                      parentTool.getStyle(
+                        "map:collect:add:web",
+                        "project",
+                        boardId
+                      )),
+                  }}
+                  disabled={
+                    parentTool &&
+                    parentTool.getDisabled(
+                      "map:collect:add:web",
+                      "project",
+                      boardId
+                    )
+                  }
+                >
+                  点击设置
+                </a>
               </UploadBgPic>
             </span>
           </div>

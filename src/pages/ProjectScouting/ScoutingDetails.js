@@ -2293,6 +2293,8 @@ export default class ScoutingDetails extends PureComponent {
           id={current_board.board_id}
           data={current_board}
           cb={this.handleGoBackClick.bind(this)}
+          parentTool={this.props.parentTool}
+          boardId={this.state.current_board.board_id}
         ></Title>
         <Tabs
           onChange={this.onChange}
