@@ -80,6 +80,7 @@ export default class ScoutingDetails extends PureComponent {
         key: "1",
         closable: false,
         className: styles.tab_tab1,
+        code: "map:collect:add:web",
       },
       {
         title: "回看",
@@ -87,6 +88,7 @@ export default class ScoutingDetails extends PureComponent {
         key: "2",
         closable: 0,
         className: styles.tab_tab2,
+        code: "map:collect:lookback:view",
       },
       {
         title: "协作",
@@ -94,6 +96,7 @@ export default class ScoutingDetails extends PureComponent {
         key: "3",
         closable: 0,
         className: styles.tab_tab3,
+        code: "map:board:team",
       },
       {
         title: "计划",
@@ -101,6 +104,7 @@ export default class ScoutingDetails extends PureComponent {
         key: "4",
         closable: 0,
         className: styles.tab_tab4,
+        code: "map:board:plan",
       },
     ];
     this.state = {
@@ -2297,17 +2301,28 @@ export default class ScoutingDetails extends PureComponent {
           tabBarGutter={10}
           className={`${styles.detailContentTabs} detailTabs`}
         >
-          {this.state.panes.map((pane) => (
-            <TabPane
-              tab={<span>{pane.title}</span>}
-              key={pane.key}
-              className={pane.className}
-              closable={pane.closable}
-              style={pane.key === "1" ? panelStyle : null}
-            >
-              {this.renderForActive(pane.key)}
-            </TabPane>
-          ))}
+          {this.state.panes.map((pane) => {
+            let style =
+              this.props.parentTool &&
+              this.props.parentTool.getStyle(
+                pane.code,
+                "project",
+                this.state.current_board.board_id
+              );
+            // style.display = "";
+            let oldStyle = pane.key === "1" ? panelStyle : {};
+            return (
+              <TabPane
+                tab={<span>{pane.title}</span>}
+                key={pane.key}
+                className={pane.className}
+                closable={pane.closable}
+                style={{ ...oldStyle, ...style }}
+              >
+                {this.renderForActive(pane.key)}
+              </TabPane>
+            );
+          })}
           {/* <TabPane
             tab={<span>按区域</span>}
             key="1"

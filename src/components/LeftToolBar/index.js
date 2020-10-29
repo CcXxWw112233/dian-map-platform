@@ -266,6 +266,7 @@ export default class LeftToolBar extends React.Component {
       ? {
           pointerEvents: "none",
           cursor: "not-allowed",
+          display: "none",
           background: "hsla(0,0%,100%,.1)",
         }
       : {};
