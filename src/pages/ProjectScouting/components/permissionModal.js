@@ -1,5 +1,5 @@
 import React, { Fragment } from "react";
-import { Modal, Button, Select } from "antd";
+import { Modal, Button, Select, message } from "antd";
 
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import styles from "./permissionModal.less";
@@ -95,6 +95,8 @@ export default class PermissionModal extends React.Component {
         let arr = this.state.projectMemberArr;
         arr.splice(index, 1);
         this.setState({ projectMemberArr: arr });
+      } else {
+        message.info(res.message);
       }
     });
   };
@@ -135,6 +137,8 @@ export default class PermissionModal extends React.Component {
         this.setState({
           projectMemeberRoleArr: arr,
         });
+      } else {
+        message.info(res.message);
       }
     });
   };

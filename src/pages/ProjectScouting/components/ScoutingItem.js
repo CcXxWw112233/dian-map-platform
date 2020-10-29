@@ -256,7 +256,7 @@ export default class ScoutingItem extends React.PureComponent {
             >
               <span
                 className={`${styles.settings_item}`}
-                title="配置权限"
+                title="成员管理"
                 onClick={() => {
                   const { displayPermissionModal, data } = this.props;
                   displayPermissionModal(data);
