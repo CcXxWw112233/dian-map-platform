@@ -399,7 +399,8 @@ const publicData = {
       }
       code = tmpArr[1];
     }
-    this.activeTypeName = name + "_" + code;
+    // this.activeTypeName = name + "_" + code;
+    this.activeTypeName = name;
     if (!this.features[this.activeTypeName]) {
       this.features[this.activeTypeName] = [];
       let res = await publicDataServices.getPopulationDatas(code, type);
@@ -525,12 +526,13 @@ const publicData = {
           this.features[this.activeTypeName].push(newFeature);
           this.source.addFeature(newFeature);
         });
-        this.dispatch && this.dispatch({
-          type: "lengedList/updateLengedList",
-          payload: {
-            config: [this.lenged],
-          },
-        });
+        this.dispatch &&
+          this.dispatch({
+            type: "lengedList/updateLengedList",
+            payload: {
+              config: [this.lenged],
+            },
+          });
       }
     } else {
       this.features[this.activeTypeName].forEach((item) => {
@@ -795,14 +797,15 @@ const publicData = {
   // 清除选到server key 图层
   removeFeatures: function (typeNames) {
     typeNames = typeof typeNames === "string" ? [typeNames] : typeNames;
-    const me = this;
     if (Array.isArray(typeNames)) {
+      let that = this;
       typeNames.forEach((item) => {
-        if (me.features[item]) {
-          me.features[item].forEach((feature) => {
+        if (that.features[item]) {
+          that.features[item].forEach((feature) => {
             // 这里removeFeature有个bug，底层代码中找不到对应的feature，所以这里进行uid判断，有才执行删除
-            if (me.source.getFeatureByUid(feature.ol_uid))
-              me.source.removeFeature(feature);
+            if (that.source.getFeatureByUid(feature.ol_uid)) {
+              that.source.removeFeature(feature);
+            }
           });
           // me.features[item] = null;
         }

@@ -272,20 +272,23 @@ export default class LeftToolBar extends React.Component {
 
   // 获取整理权限
   getCollectVisible = (functionCode, projectId) => {
+    if (!functionCode) return;
+    if (!projectId) return;
     const { projectPermission } = this.state;
+    if (!projectPermission) return;
     let arr = projectPermission[projectId];
-    let visible = false
-    if (arr  && arr.length > 0) {
-      for (let i =0; i < arr.length; i++) {
-        let index = functionCode.findIndex(item => item === arr[i])
+    let visible = false;
+    if (arr && arr.length > 0) {
+      for (let i = 0; i < arr.length; i++) {
+        let index = functionCode.findIndex((item) => item === arr[i]);
         if (index !== -1) {
-          visible = true
+          visible = true;
           break;
         }
       }
     }
-    return visible
-  }
+    return visible;
+  };
 
   getDisabled = (functionCode, type, projectId) => {
     const index = this.getIndex(functionCode, type, projectId);

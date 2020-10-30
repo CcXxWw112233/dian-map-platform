@@ -72,9 +72,11 @@ export default class PermissionModal extends React.Component {
         systemManageServices.addProjectMember(param).then((res) => {
           if (res && res.code === "0") {
             let newProjectMemeberRoleArr = this.state.projectMemeberRoleArr;
-            let role = this.state.roleArr.filter(item => item.is_default === "1")
+            let role = this.state.roleArr.filter(
+              (item) => item.is_default === "1"
+            );
             if (role.length === 1) {
-              newProjectMemeberRoleArr.push(role[0].id)
+              newProjectMemeberRoleArr.push(role[0].id);
             }
             const { projectMemberArr } = this.state;
             this.setState({
@@ -210,17 +212,18 @@ export default class PermissionModal extends React.Component {
             onCancel={this.handleCancel}
             cancelText={cancelText}
             okText={okText}
+            className={styles.wrapper}
           >
-            <div className={styles.wrapper}>
+            <div style={{ height: 500 }}>
               <div className={styles.titleHeader}>
-                <span style={{ width: "70%" }}>成员</span>
+                <span style={{ width: "70%", paddingLeft: 60 }}>成员</span>
                 <span>角色</span>
               </div>
-              <div
-                style={{ height: "calc(100% - 40px" }}
-                className={globalStyle.autoScrollY}
-              >
-                <div style={{ width: "100%" }}>
+              <div style={{ height: "calc(100% - 40px" }}>
+                <div
+                  style={{ width: "100%", height: "calc(100% - 40px)" }}
+                  className={globalStyle.autoScrollY}
+                >
                   {this.state.projectMemberArr.map((item, index) => {
                     return (
                       <div
@@ -271,6 +274,7 @@ export default class PermissionModal extends React.Component {
                   style={{
                     background: "rgba(134, 179, 255, 1)",
                     float: "right",
+                    margin: "0 10px",
                   }}
                   onClick={this.handleAddMember}
                 >
@@ -294,62 +298,61 @@ export default class PermissionModal extends React.Component {
             onCancel={this.handleCancel2}
             cancelText={cancelText}
             okText={okText}
+            className={styles.wrapper}
           >
-            <div className={styles.wrapper}>
-              <div style={{ width: "100%", height: "100%" }}>
-                {this.state.orgUserArr.length === 0 ? (
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      textAlign: "center",
-                      position: "relative",
-                      top: "30%",
-                    }}
+            <div style={{ maxHeight: 400 }} className={globalStyle.autoScrollY}>
+              {this.state.orgUserArr.length === 0 ? (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    textAlign: "center",
+                    position: "relative",
+                    top: "30%",
+                  }}
+                >
+                  <i
+                    className={globalStyle.global_icon}
+                    style={{ fontSize: 50, lineHeight: "50px" }}
                   >
-                    <i
-                      className={globalStyle.global_icon}
-                      style={{ fontSize: 50, lineHeight: "50px" }}
-                    >
-                      &#xe7d1;
-                    </i>
-                    <span>暂无数据</span>
-                  </div>
-                ) : null}
-                {this.state.orgUserArr.map((item) => {
-                  return (
-                    <div
-                      className={`${styles.titleHeader} ${styles.item} ${styles.listItem}`}
-                      key={item.id}
-                      onClick={() => this.handleSelectUser(item.id)}
-                    >
-                      <div className={styles.profilePic}>
-                        {item.avatar ? (
-                          <img src={item.avatar} alt=""></img>
-                        ) : (
-                          <i
-                            className={globalStyle.global_icon}
-                            style={{ fontSize: 24, marginRight: 10 }}
-                          >
-                            &#xe764;
-                          </i>
-                        )}
-                      </div>
-                      <div style={{ width: "calc(100% - 40px)" }}>
-                        <span>{item.name}</span>
-                      </div>
-                      {this.state.selectedUserId === item.id ? (
+                    &#xe7d1;
+                  </i>
+                  <span>暂无数据</span>
+                </div>
+              ) : null}
+              {this.state.orgUserArr.map((item) => {
+                return (
+                  <div
+                    className={`${styles.titleHeader} ${styles.item} ${styles.listItem}`}
+                    key={item.id}
+                    onClick={() => this.handleSelectUser(item.id)}
+                  >
+                    <div className={styles.profilePic}>
+                      {item.avatar ? (
+                        <img src={item.avatar} alt=""></img>
+                      ) : (
                         <i
                           className={globalStyle.global_icon}
-                          style={{ float: "right" }}
+                          style={{ fontSize: 24, marginRight: 10 }}
                         >
-                          &#xe75b;
+                          &#xe764;
                         </i>
-                      ) : null}
+                      )}
                     </div>
-                  );
-                })}
-              </div>
+                    <div style={{ width: "calc(100% - 40px)" }}>
+                      <span>{item.name}</span>
+                    </div>
+                    {this.state.selectedUserId === item.id ? (
+                      <i
+                        className={globalStyle.global_icon}
+                        style={{ float: "right" }}
+                      >
+                        &#xe75b;
+                      </i>
+                    ) : null}
+                  </div>
+                );
+              })}
             </div>
           </Modal>
         )}

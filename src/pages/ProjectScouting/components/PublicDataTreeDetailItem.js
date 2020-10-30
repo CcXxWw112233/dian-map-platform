@@ -31,6 +31,7 @@ export default class DetailItem extends react.Component {
         if (!PublicDataAction.hasInited) {
           PublicDataAction.init();
         }
+        // PublicDataAction.clear()
         if (data && data.is_poi === "1") {
           PublicDataAction.getADPoi([data.title]);
         } else {
@@ -42,6 +43,7 @@ export default class DetailItem extends react.Component {
           let loadFeatureKeys = conf.loadFeatureKeys[0];
           const fillColorKeyVals = conf.fillColorKeyVals;
           if (isPopulation) {
+            // PublicDataAction.removeFeatures(this.populationDatas);
             const { dispatch } = this.props;
             const newLended = lengedListConf.filter(
               (item) => item.key === conf.key
@@ -66,14 +68,14 @@ export default class DetailItem extends react.Component {
     });
   }
 
-  componentWillReceiveProps (nextProps) {
+  componentWillReceiveProps(nextProps) {
     const { showEyeByFirst, showEyeBySecond } = nextProps;
     this.setState({
       eyeState: showEyeByFirst,
-    })
+    });
     this.setState({
       eyeState: showEyeBySecond,
-    })
+    });
   }
   handleEyeClick = (data, change) => {
     this.setState(
@@ -331,7 +333,7 @@ export default class DetailItem extends react.Component {
       </Dropdown>
     );
   };
-  render () {
+  render() {
     const { data, collectionId } = this.props;
     return (
       <div

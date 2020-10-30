@@ -555,7 +555,7 @@ export default class Plot extends PureComponent {
         .catch((err) => {
           reject(err);
           console.log(err);
-          message.error("保存失败，请稍后再试");
+          message.info(err.message);
         });
     });
   };

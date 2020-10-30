@@ -209,6 +209,7 @@ export default class ScoutingDetails extends PureComponent {
     });
     Evt.on("handlePlotFeature", this.handlePlotFeature);
   }
+
   // 定位到位置
   scrollForFeature = (id) => {
     let text = "#menu_collection_" + id;
@@ -686,28 +687,33 @@ export default class ScoutingDetails extends PureComponent {
   // 上传完成
   fileUpload = (val, resp, file, event) => {
     if (resp) {
-      // 清除上传完成的数据
-      this.removeUploadItem(file);
-      message.success("上传成功");
-      let { file_resource_id, suffix, original_file_name } = resp;
-      let params = {
-        board_id: this.state.current_board.board_id,
-        area_type_id: val.id,
-        collect_type: suffix === ".geojson" ? 8 : 3,
-        resource_id: file_resource_id,
-        target: suffix && suffix.replace(".", ""),
-        title: original_file_name,
-      };
-      Action.addCollection(params)
-        .then((res) => {
-          // console.log(res);
-          // 更新上传的列表
-          this.fetchCollection();
-        })
-        .catch((err) => {
-          // 添加失败
-          console.log(err.message);
-        });
+      if (resp.code === "0") {
+        // 清除上传完成的数据
+        this.removeUploadItem(file);
+        message.success("上传成功");
+        let { file_resource_id, suffix, original_file_name } = resp;
+        let params = {
+          board_id: this.state.current_board.board_id,
+          area_type_id: val.id,
+          collect_type: suffix === ".geojson" ? 8 : 3,
+          resource_id: file_resource_id,
+          target: suffix && suffix.replace(".", ""),
+          title: original_file_name,
+        };
+        Action.addCollection(params)
+          .then((res) => {
+            // console.log(res);
+            // 更新上传的列表
+            this.fetchCollection();
+          })
+          .catch((err) => {
+            // 添加失败
+            console.log(err.message);
+            message.error(err.message)
+          });
+      } else {
+        message.error(resp.message)
+      }
     }
   };
 
@@ -941,15 +947,18 @@ export default class ScoutingDetails extends PureComponent {
     }
     Action.RemoveArea(val.id, val.board_id)
       .then((res) => {
-        message.success("删除成功");
-        let arr = this.state.area_list.filter((item) => item.id !== val.id);
-        this.setState({
-          area_list: arr,
-          multipleGroup: this.state.multipleGroup ? arr.length > 1 : false,
-        });
+        if (res && res.code === "0") {
+          message.success("删除成功");
+          let arr = this.state.area_list.filter((item) => item.id !== val.id);
+          this.setState({
+            area_list: arr,
+            multipleGroup: this.state.multipleGroup ? arr.length > 1 : false,
+          });
+        }
       })
       .catch((err) => {
         console.log(err);
+        message.error(`${err.message},请刷新再试。`);
       });
   };
   // 编辑名称
@@ -1016,36 +1025,41 @@ export default class ScoutingDetails extends PureComponent {
     this.showOtherSlide();
     // console.log(resp);
     if (resp) {
-      message.success("上传成功");
-      let content =
-        setData && firstSave
-          ? {
-              content: firstSave.data.id,
-            }
-          : {
-              content: resp.id,
-            };
-      let { id, name } = resp;
+      if (resp && resp.code === "0") {
+        message.success("上传成功");
+        let content =
+          setData && firstSave
+            ? {
+                content: firstSave.data.id,
+              }
+            : {
+                content: resp.id,
+              };
+        let { id, name } = resp;
 
-      let params = {
-        board_id: this.state.current_board.board_id,
-        area_type_id: val.id,
-        collect_type: 5,
-        ...content,
-        resource_id: id,
-        target: "plan",
-        title: name,
-      };
-      Action.addCollection(params)
-        .then((res) => {
-          // console.log(res);
-          // 更新上传的列表
-          this.fetchCollection();
-        })
-        .catch((err) => {
-          // 添加失败
-          console.log(err.message);
-        });
+        let params = {
+          board_id: this.state.current_board.board_id,
+          area_type_id: val.id,
+          collect_type: 5,
+          ...content,
+          resource_id: id,
+          target: "plan",
+          title: name,
+        };
+        Action.addCollection(params)
+          .then((res) => {
+            // console.log(res);
+            // 更新上传的列表
+            this.fetchCollection();
+          })
+          .catch((err) => {
+            // 添加失败
+            console.log(err.message);
+            message.error(err.message);
+          });
+      } else {
+        message.error(resp.message);
+      }
     }
   };
 
@@ -2126,12 +2140,14 @@ export default class ScoutingDetails extends PureComponent {
                                   />
                                 ) : (
                                   <PublicDataTreeComponent
+                                    onRef={this.onPublicDataTreeComponentRef}
                                     datas={item}
                                     key={item.id}
                                     areaList={area_list}
                                     callback={this.renderAreaList}
                                     parent={this}
                                     index={this.publicDataLinkArr.length - 1}
+                                    changeQueryStr={this.props.changeQueryStr}
                                   ></PublicDataTreeComponent>
                                 )}
                               </div>
@@ -2329,6 +2345,9 @@ export default class ScoutingDetails extends PureComponent {
                     display: "none",
                     background: "hsla(0,0%,100%,.1)",
                   };
+              // this.setState({
+              //   notRenderCollection: visible,
+              // });
             } else {
               style =
                 this.props.parentTool &&

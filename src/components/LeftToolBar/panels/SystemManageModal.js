@@ -105,55 +105,60 @@ export default class SystemManageModal extends React.Component {
         onOk={this.onOk}
         onCancel={this.onCancel}
       >
-        <p style={{ height: 40, lineHeight: "40px", background: "#F5F7FA" }}>
-          <span style={{ marginLeft: 24 }}>{selectedData.name}</span>
-        </p>
-        <div style={{ padding: "0 24px" }}>
-          <Tree
-            checkable
-            expandedKeys={this.state.treeExpandedKeys}
-            onCheck={this.onTreeCheck}
-            onSelect={this.onTreeSelect}
-            checkedKeys={this.state.treeCheckedKeys}
-            selectedKeys={this.state.treeSelectedKeys}
-            onExpand={this.onTreeExpand}
-            treeData={this.state.treeData}
-            autoExpandParent={this.state.autoTreeExpandParent}
-          ></Tree>
-          {this.state.roleUsers.length > 0 ? (
-            <div>
-              <p style={{ marginBottom: 20, marginTop: 20 }}>参与成员</p>
-              {this.state.roleUsers.map((item) => {
-                return (
-                  <div className={styles.infoItem} key={guid()}>
-                    <div className={styles.profilePic}>
-                      {item.avatar ? (
-                        <img
-                          src={item.avatar}
-                          alt=""
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            borderRadius: 20,
-                          }}
-                        />
-                      ) : (
-                        <i
-                          className={globalStyle.global_icon}
-                          style={{ fontSize: 20 }}
-                        >
-                          &#xe764;
-                        </i>
-                      )}
+        <div style={{ height: 400 }}>
+          <p style={{ height: 40, lineHeight: "40px", background: "#F5F7FA" }}>
+            <span style={{ marginLeft: 24 }}>{selectedData.name}</span>
+          </p>
+          <div
+            style={{ padding: "0 24px", height: 340 }}
+            className={globalStyle.autoScrollY}
+          >
+            <Tree
+              checkable
+              expandedKeys={this.state.treeExpandedKeys}
+              onCheck={this.onTreeCheck}
+              onSelect={this.onTreeSelect}
+              checkedKeys={this.state.treeCheckedKeys}
+              selectedKeys={this.state.treeSelectedKeys}
+              onExpand={this.onTreeExpand}
+              treeData={this.state.treeData}
+              autoExpandParent={this.state.autoTreeExpandParent}
+            ></Tree>
+            {this.state.roleUsers.length > 0 ? (
+              <div>
+                <p style={{ marginBottom: 20, marginTop: 20 }}>参与成员</p>
+                {this.state.roleUsers.map((item) => {
+                  return (
+                    <div className={styles.infoItem} key={guid()}>
+                      <div className={styles.profilePic}>
+                        {item.avatar ? (
+                          <img
+                            src={item.avatar}
+                            alt=""
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              borderRadius: 20,
+                            }}
+                          />
+                        ) : (
+                          <i
+                            className={globalStyle.global_icon}
+                            style={{ fontSize: 20 }}
+                          >
+                            &#xe764;
+                          </i>
+                        )}
+                      </div>
+                      <div className={styles.text}>
+                        <span>{item.name}</span>
+                      </div>
                     </div>
-                    <div className={styles.text}>
-                      <span>{item.name}</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : null}
+                  );
+                })}
+              </div>
+            ) : null}
+          </div>
         </div>
       </Modal>
     );

@@ -155,6 +155,7 @@ export default class PublicDataTreeComponent extends react.Component {
                               collectionId={datas.id}
                               areaList={this.props.areaList}
                               callback={callback}
+                              changeQueryStr={this.props.changeQueryStr}
                               // parent={this}
                               // showEyeByFirst={this.state.firstEyeActive}
                               // showEyeBySecond={this.state.secondEyeActive}
@@ -172,6 +173,7 @@ export default class PublicDataTreeComponent extends react.Component {
                       collectionId={datas.id}
                       areaList={this.props.areaList}
                       callback={callback}
+                      changeQueryStr={this.props.changeQueryStr}
                       // parent={this}
                       // showEyeByFirst={this.state.firstEyeActive}
                     />

@@ -204,6 +204,7 @@ export default class ToolBar extends React.Component {
       hidePlot: false,
       displayProject: false,
       displayTempPlot: true,
+      displaySystemManage: false,
       displayCustomSymbolStore: false,
       plotType: "",
     });
@@ -367,6 +368,7 @@ export default class ToolBar extends React.Component {
               displayProject: false,
               displayTempPlot: false,
               displayCustomSymbolStore: true,
+              displaySystemManage: false,
               plotType: "",
             });
             this.parent.deactivate();

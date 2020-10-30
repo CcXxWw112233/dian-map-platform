@@ -26,6 +26,7 @@ export default class Project extends React.Component {
     this.queryStr = "";
     this.publicDataChild = null;
     this.searchChild = null;
+    this.scoutingDetailChild = null;
     this.publicDataTree = null;
     this.publicDataCheckedKeys = [];
     this.publicDataExpandedKeys = [];
@@ -95,6 +96,10 @@ export default class Project extends React.Component {
     this.publicDataChild && this.publicDataChild.getAllData(this.queryStr);
   };
 
+  changeQueryStr2 = (value) => {
+    this.scoutingDetailChild && this.scoutingDetailChild.getPopulationData(value)
+  }
+
   getQueryStr = () => {
     return this.queryStr;
   };
@@ -106,6 +111,10 @@ export default class Project extends React.Component {
   onSearchRef = (ref) => {
     this.searchChild = ref;
   };
+
+  onScoutingDetailsRef = (ref) => {
+    this.scoutingDetailChild = ref
+  }
 
   // 检查缓存中是否存在id，进行判断渲染
   checkListCach = () => {
@@ -212,6 +221,7 @@ export default class Project extends React.Component {
             <ScoutingDetails
               displayPlotPanel={this.props.displayPlotPanel}
               parentTool={this.props.parent}
+              changeQueryStr={this.changeQueryStr}
             ></ScoutingDetails>
           </Main>
         )}
