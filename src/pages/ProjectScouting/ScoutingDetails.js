@@ -80,7 +80,14 @@ export default class ScoutingDetails extends PureComponent {
         key: "1",
         closable: false,
         className: styles.tab_tab1,
-        code: "map:collect:add:web",
+        code: [
+          "map:collect:add:app",
+          "map:collect:add:web",
+          "map:collect:push",
+          "map:collect:type:add",
+          "map:collect:type:update",
+          "map:collect:type:remove",
+        ],
       },
       {
         title: "回看",
@@ -135,6 +142,7 @@ export default class ScoutingDetails extends PureComponent {
 
       setCopyVisible: false,
       setMoveVisible: false,
+      notRenderCollection: false,
     };
     this.scrollView = React.createRef();
     this.saveSortTimer = null;
@@ -555,6 +563,7 @@ export default class ScoutingDetails extends PureComponent {
 
   // 获取资源列表，动态分类
   fetchCollection = () => {
+    if (this.state.notRenderCollection) return;
     let params = {
       board_id: this.state.current_board.board_id,
     };
@@ -2304,14 +2313,31 @@ export default class ScoutingDetails extends PureComponent {
           className={`${styles.detailContentTabs} detailTabs`}
         >
           {this.state.panes.map((pane) => {
-            let style =
-              this.props.parentTool &&
-              this.props.parentTool.getStyle(
-                pane.code,
-                "project",
-                this.state.current_board.board_id
-              );
-            // style.display = "";
+            let style = {};
+            if (pane.title === "整理") {
+              let visible =
+                this.props.parentTool &&
+                this.props.parentTool.getCollectVisible(
+                  pane.code,
+                  this.state.current_board.board_id
+                );
+              style = visible
+                ? {}
+                : {
+                    pointerEvents: "none",
+                    cursor: "not-allowed",
+                    display: "none",
+                    background: "hsla(0,0%,100%,.1)",
+                  };
+            } else {
+              style =
+                this.props.parentTool &&
+                this.props.parentTool.getStyle(
+                  pane.code,
+                  "project",
+                  this.state.current_board.board_id
+                );
+            }
             let oldStyle = pane.key === "1" ? panelStyle : {};
             return (
               <TabPane

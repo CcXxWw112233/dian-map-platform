@@ -2,6 +2,7 @@ import React from "react";
 import { Badge, Tooltip } from "antd";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import styles from "./LeftToolBar.less";
+import Event from "../../lib/utils/event";
 import { connect } from "dva";
 
 @connect()
@@ -26,6 +27,7 @@ export default class ToolBar extends React.Component {
             displaySystemManage: false,
           });
           this.parent.deactivate();
+          this.hideSearchBtn();
         },
       },
       {
@@ -43,6 +45,7 @@ export default class ToolBar extends React.Component {
             displaySystemManage: false,
           });
           this.parent.deactivate();
+          this.hideSearchBtn();
         },
       },
       {
@@ -60,6 +63,7 @@ export default class ToolBar extends React.Component {
             displaySystemManage: false,
           });
           this.parent.deactivate();
+          this.hideSearchBtn();
         },
       },
       {
@@ -77,6 +81,7 @@ export default class ToolBar extends React.Component {
             displaySystemManage: false,
           });
           this.parent.deactivate();
+          this.hideSearchBtn();
         },
       },
       {
@@ -94,6 +99,7 @@ export default class ToolBar extends React.Component {
             displaySystemManage: false,
           });
           this.parent.deactivate();
+          this.hideSearchBtn();
         },
       },
       {
@@ -111,6 +117,7 @@ export default class ToolBar extends React.Component {
             displaySystemManage: false,
           });
           this.parent.deactivate();
+          this.hideSearchBtn();
         },
       },
       {
@@ -128,6 +135,7 @@ export default class ToolBar extends React.Component {
             displaySystemManage: false,
           });
           this.parent.deactivate();
+          this.hideSearchBtn();
         },
       },
       {
@@ -145,6 +153,7 @@ export default class ToolBar extends React.Component {
             displaySystemManage: false,
           });
           this.parent.deactivate();
+          this.hideSearchBtn();
         },
       },
       {
@@ -162,6 +171,7 @@ export default class ToolBar extends React.Component {
             displaySystemManage: false,
           });
           this.parent.deactivate();
+          this.hideSearchBtn();
         },
       },
     ];
@@ -172,6 +182,13 @@ export default class ToolBar extends React.Component {
       update: false,
     };
   }
+
+  hideSearchBtn = () => {
+    Event.Evt.firEvent("displaySearchBtn", {
+      visible: false,
+      keywords: [],
+    });
+  };
   updateListLen = (len = 0) => {
     this.setState({
       operatorListLength: len,
@@ -190,6 +207,7 @@ export default class ToolBar extends React.Component {
       displayCustomSymbolStore: false,
       plotType: "",
     });
+    this.hideSearchBtn();
   };
   render() {
     let tempPlotItemStyle = { bottom: 60, left: 4 };
@@ -239,6 +257,8 @@ export default class ToolBar extends React.Component {
                 this.setState({
                   selectedIndex: -1,
                 });
+                this.parent.deactivate();
+                this.hideSearchBtn();
               }}
             >
               &#xe764;
@@ -349,6 +369,8 @@ export default class ToolBar extends React.Component {
               displayCustomSymbolStore: true,
               plotType: "",
             });
+            this.parent.deactivate();
+            this.hideSearchBtn();
           }}
           style={{
             ...customSymbolStoreStyle,

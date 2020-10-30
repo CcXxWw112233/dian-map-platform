@@ -71,9 +71,16 @@ export default class PermissionModal extends React.Component {
         };
         systemManageServices.addProjectMember(param).then((res) => {
           if (res && res.code === "0") {
+            let newProjectMemeberRoleArr = this.state.projectMemeberRoleArr;
+            let role = this.state.roleArr.filter(item => item.is_default === "1")
+            if (role.length === 1) {
+              newProjectMemeberRoleArr.push(role[0].id)
+            }
             const { projectMemberArr } = this.state;
             this.setState({
               projectMemberArr: [...projectMemberArr, res.data],
+              projectMemeberRoleArr: newProjectMemeberRoleArr,
+              selectedUserId: -1,
             });
           }
         });
@@ -317,7 +324,16 @@ export default class PermissionModal extends React.Component {
                       onClick={() => this.handleSelectUser(item.id)}
                     >
                       <div className={styles.profilePic}>
-                        <img src={item.avatar} alt=""></img>
+                        {item.avatar ? (
+                          <img src={item.avatar} alt=""></img>
+                        ) : (
+                          <i
+                            className={globalStyle.global_icon}
+                            style={{ fontSize: 24, marginRight: 10 }}
+                          >
+                            &#xe764;
+                          </i>
+                        )}
                       </div>
                       <div style={{ width: "calc(100% - 40px)" }}>
                         <span>{item.name}</span>

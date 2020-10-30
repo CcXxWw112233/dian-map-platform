@@ -118,6 +118,10 @@ export default class PublicData extends React.Component {
 
   componentWillUnmount() {
     PublicDataActions.clear();
+    Event.Evt.firEvent("displaySearchBtn", {
+      visible: false,
+      keywords: [],
+    });
   }
 
   // 区域选择同步更新该区域的选择的公共数据
