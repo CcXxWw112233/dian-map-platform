@@ -687,33 +687,29 @@ export default class ScoutingDetails extends PureComponent {
   // 上传完成
   fileUpload = (val, resp, file, event) => {
     if (resp) {
-      if (resp.code === "0") {
-        // 清除上传完成的数据
-        this.removeUploadItem(file);
-        message.success("上传成功");
-        let { file_resource_id, suffix, original_file_name } = resp;
-        let params = {
-          board_id: this.state.current_board.board_id,
-          area_type_id: val.id,
-          collect_type: suffix === ".geojson" ? 8 : 3,
-          resource_id: file_resource_id,
-          target: suffix && suffix.replace(".", ""),
-          title: original_file_name,
-        };
-        Action.addCollection(params)
-          .then((res) => {
-            // console.log(res);
-            // 更新上传的列表
-            this.fetchCollection();
-          })
-          .catch((err) => {
-            // 添加失败
-            console.log(err.message);
-            message.error(err.message)
-          });
-      } else {
-        message.error(resp.message)
-      }
+      // 清除上传完成的数据
+      this.removeUploadItem(file);
+      message.success("上传成功");
+      let { file_resource_id, suffix, original_file_name } = resp;
+      let params = {
+        board_id: this.state.current_board.board_id,
+        area_type_id: val.id,
+        collect_type: suffix === ".geojson" ? 8 : 3,
+        resource_id: file_resource_id,
+        target: suffix && suffix.replace(".", ""),
+        title: original_file_name,
+      };
+      Action.addCollection(params)
+        .then((res) => {
+          // console.log(res);
+          // 更新上传的列表
+          this.fetchCollection();
+        })
+        .catch((err) => {
+          // 添加失败
+          console.log(err.message);
+          message.error(err.message);
+        });
     }
   };
 
