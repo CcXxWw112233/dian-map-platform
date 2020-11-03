@@ -239,7 +239,11 @@ export default class PermissionModal extends React.Component {
                         </i>
                         <div className={styles.itemBody}>
                           {item.user.avatar ? (
-                            <img src={item.user.avatar} alt="" />
+                            <img
+                              src={item.user.avatar}
+                              alt=""
+                              style={{ marginTop: 8 }}
+                            />
                           ) : (
                             <i
                               className={globalStyle.global_icon}

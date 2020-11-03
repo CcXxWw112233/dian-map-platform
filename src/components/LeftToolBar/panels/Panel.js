@@ -2,9 +2,10 @@ import React from "react";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 
 import styles from "../LeftToolBar.less";
+import BasemapGallery from "../../BasemapGallery/BasemapGallery"
 import { connect } from "dva";
 
-@connect(({openswitch: {openPanel}})=>({openPanel}))
+@connect(({openswitch: {openPanel, isShowBasemapGallery}})=>({openPanel, isShowBasemapGallery}))
 export default class Panel extends React.Component {
   constructor(props) {
     super(props);
@@ -53,6 +54,7 @@ export default class Panel extends React.Component {
         <a className={styles.changePackage} onClick={this.toOld} target="_self">
           切换旧版
         </a>
+        {this.props.isShowBasemapGallery && <BasemapGallery style={{left: "104%"}}/>}
       </div>
     );
   }

@@ -10,9 +10,7 @@ import styles from "../ScoutingDetails.less";
 import scoutingDetailsAction from "../../../services/scouting";
 import Event from "@/lib/utils/event";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
-import { connect } from "dva";
 
-@connect()
 export default class DetailItem extends react.Component {
   constructor(props) {
     super(props);
@@ -22,12 +20,10 @@ export default class DetailItem extends react.Component {
     this.state = {
       eyeState: false,
     };
-    Event.Evt.on("getPublicData", (str) => {
+    Event.Evt.on("getPublicData", ({ str, dispatch }) => {
+      if (this.state.eyeState === false) return;
       const { data } = this.props;
       if (data.is_poi === "0") {
-        this.setState({
-          eyeState: true,
-        });
         if (!PublicDataAction.hasInited) {
           PublicDataAction.init();
         }
@@ -44,7 +40,7 @@ export default class DetailItem extends react.Component {
           const fillColorKeyVals = conf.fillColorKeyVals;
           if (isPopulation) {
             // PublicDataAction.removeFeatures(this.populationDatas);
-            const { dispatch } = this.props;
+            // const { dispatch } = this.props;
             const newLended = lengedListConf.filter(
               (item) => item.key === conf.key
             )[0];
@@ -68,15 +64,10 @@ export default class DetailItem extends react.Component {
     });
   }
 
-  componentWillReceiveProps(nextProps) {
-    const { showEyeByFirst, showEyeBySecond } = nextProps;
-    this.setState({
-      eyeState: showEyeByFirst,
-    });
-    this.setState({
-      eyeState: showEyeBySecond,
-    });
+  componentWillUnmount() {
+    PublicDataAction.clear();
   }
+
   handleEyeClick = (data, change) => {
     this.setState(
       {

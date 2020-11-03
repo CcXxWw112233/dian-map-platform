@@ -18,7 +18,8 @@ import { BASIC } from "../services/config";
 import UploadNotification from "../components/UploadNotification";
 
 // new ui
-import BasemapGallery from "../components/BasemapGallery/BasemapGallery";
+// import BasemapGallery from "../components/BasemapGallery/BasemapGallery";
+import Zoom from "../components/Zoom/index";
 import RightTools from "../components/RightTools/index";
 
 import LeftToolBar from "../components/LeftToolBar/index";
@@ -315,13 +316,14 @@ class IndexPage extends React.Component {
       <div className={styles.normal} id="IndexPage">
         {/* 地图主体 */}
         {isShowMap && <LayerMap onLoad={this.MapOnload} />}
-        {isShowBasemapGallery && <BasemapGallery />}
+        {/* {isShowBasemapGallery && <BasemapGallery />} */}
         {isShowRightTools && <RightTools />}
         <LeftToolBar isShowLeftToolBar={isShowLeftToolBar} />
         {isShowPhotoSwipe && <PhotoSwipe />}
         {/* 是否显示手机页面 */}
         {isShowMobile && <FlutterComponents />}
         {editShow && <MatrixEdit />}
+        {/* {isShowRightTools && <Zoom />} */}
         {/* 文件上传通知 */}
         {/* {!isShowMobile && } */}
         <UploadNotification />

@@ -45,6 +45,9 @@
 }
 :global {
   .LocalPOI {
+    .ant-tabs-nav {
+      margin: 0px 4px;
+    }
     &.ant-tabs-card.ant-tabs-top > .ant-tabs-nav .ant-tabs-tab {
       width: 50px;
       height: 32px;
@@ -53,8 +56,9 @@
       font-weight: 500;
       color: rgba(255, 255, 255, 1);
       line-height: 14px;
+      font-size: 0.5rem;
       &.ant-tabs-tab-active {
-        width: 60px;
+        width: 55px;
         background: rgba(70, 75, 108, 0.5);
         border-radius: 16px;
         border: #8fc2ff 2px solid;
@@ -74,10 +78,12 @@
       .ant-tabs-tab {
         height: 32px;
         border: none;
+        margin-right: 10px;
         background: none;
         font-weight: 500;
         color: rgba(255, 255, 255, 1);
         line-height: 14px;
+        font-size: 0.5rem;
         &.ant-tabs-tab-active {
           border-bottom: 1px solid #8fc2ff;
         }

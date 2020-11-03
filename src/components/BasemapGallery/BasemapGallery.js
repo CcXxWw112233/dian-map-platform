@@ -96,17 +96,25 @@ export default class BasemapGallery extends PureComponent {
         event.Evt.firEvent("basemapchange", this.selectBaseMapKey);
         event.Evt.firEvent("transCoordinateSystems2ScoutingDetail");
         // event.Evt.firEvent("transCoordinateSystems2Plot");
-        event.Evt.firEvent("transCoordinateSystems2PublicData", this.selectBaseMapKey);
-        event.Evt.firEvent("transCoordinateSystems2ScoutingList", this.selectBaseMapKey);
+        event.Evt.firEvent(
+          "transCoordinateSystems2PublicData",
+          this.selectBaseMapKey
+        );
+        event.Evt.firEvent(
+          "transCoordinateSystems2ScoutingList",
+          this.selectBaseMapKey
+        );
         event.Evt.firEvent("transCoordinateSystems2AreaSearch");
         event.Evt.firEvent("transCoordinateSystems2CommonSearch");
       }
     );
   };
   render() {
+    const { style } = this.props;
     return (
       <div
         className={styles.wrapper}
+        style={style || {}}
         // onMouseEnter={() => {
         //   this.setState({ isOpen: true });
         // }}

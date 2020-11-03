@@ -67,7 +67,16 @@ export const UploadBgPic = ({ children, onUpload, onStart }) => {
   );
 };
 
-export const Title = ({ name, date, cb, data = {}, className = "", mini, parentTool, boardId }) => {
+export const Title = ({
+  name,
+  date,
+  cb,
+  data = {},
+  className = "",
+  mini,
+  parentTool,
+  boardId,
+}) => {
   // 预览图片
   const previewImg = (e) => {
     let url = e.target.src;
