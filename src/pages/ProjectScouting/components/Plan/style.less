@@ -1,0 +1,87 @@
+.wrapper {
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  :global(.ant-collapse-content-box) {
+    padding: 0;
+  }
+  .body {
+    width: 100%;
+    .item {
+      width: 100%;
+      height: 40px;
+      display: flex;
+      flex-direction: row;
+      line-height: 32px;
+      &.addPlan {
+        i {
+          margin-right: 12px;
+          font-weight: 600;
+          color: rgba(101, 143, 255, 1);
+        }
+        .content {
+          text-align: left;
+          border-bottom: 1px #e6e8f1 solid;
+          span {
+            font-weight: 500;
+            color: #658fff;
+          }
+        }
+      }
+      &.planItem {
+        display: flex;
+        flex-direction: row;
+        height: 55px;
+        line-height: 50px;
+        margin: 5px 0;
+        .contentPart1 {
+          width: 25px;
+          text-align: left;
+          margin-right: 10px;
+          .style1 {
+            font-size: 20px;
+            color: rgba(208, 211, 226, 1);
+          }
+          .style2 {
+            color: rgba(141, 185, 255, 1);
+          }
+        }
+        .contentPart2 {
+          display: flex;
+          flex-direction: column;
+          line-height: 25px;
+          text-align: left;
+          // margin: 0 10px;
+          border-bottom: 1px rgba(230, 232, 241, 1) solid;
+          .date {
+            color: rgba(134, 140, 164, 1);
+            font-size: 0.8rem;
+          }
+        }
+        .contentPart3 {
+          display: flex;
+          flex-direction: row;
+          width: 50px;
+          border-bottom: 1px rgba(230, 232, 241, 1) solid;
+          i {
+            margin-right: 5px;
+          }
+        }
+      }
+    }
+  }
+  .footer {
+    width: 100%;
+    height: 50px;
+    padding: 0px 20px;
+    .btn {
+      width: 90%;
+      height: 36px;
+      margin: 12px auto;
+      background: rgba(163, 205, 255, 0.2);
+      border-radius: 4px;
+      border: 2px solid rgba(127, 167, 255, 1);
+      color: rgba(102, 144, 255, 1);
+    }
+  }
+}

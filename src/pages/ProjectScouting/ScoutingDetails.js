@@ -49,6 +49,7 @@ import { BASIC } from "../../services/config";
 import AboutAction from "../../lib/components/ProjectScouting/AroundAbout";
 import Meettings from "./components/Meeting";
 import PublicDataTreeComponent from "./components/PublicDataTreeComponent";
+import Plan from "./components/Plan";
 
 const { Evt } = Event;
 const { TabPane } = Tabs;
@@ -2270,16 +2271,32 @@ export default class ScoutingDetails extends PureComponent {
         );
       case "4":
         return (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: 400,
-            }}
-          >
-            <span>正在加紧开发中...</span>
-          </div>
+          // <div
+          //   style={{
+          //     display: "flex",
+          //     justifyContent: "center",
+          //     alignItems: "center",
+          //     height: 400,
+          //   }}
+          // >
+          //   <span>正在加紧开发中...</span>
+          // </div>
+          <Fragment>
+            <PublicView>
+              <Plan></Plan>
+            </PublicView>
+            <div className={styles.addAreaBtn}>
+              <Button block className={styles.btn}>
+                <i
+                  className={globalStyle.global_icon}
+                  style={{ marginTop: 2, marginRight: 4 }}
+                >
+                  &#xe7dc;
+                </i>
+                <span>添加分组</span>
+              </Button>
+            </div>
+          </Fragment>
         );
       default:
     }
