@@ -13,6 +13,7 @@ import { myFullScreen } from "utils/drawing/public";
 export default class RightTools extends React.Component {
   constructor(props) {
     super(props);
+    this.isToolItem = false;
     this.tools = [
       {
         name: "定位",
@@ -59,6 +60,7 @@ export default class RightTools extends React.Component {
             this.child.setState({
               tools: [...this.child.newTools, ...this.child.tools],
             });
+          this.isToolItem = false;
           this.setState(
             {
               lengedListPanelVisible: !this.state.lengedListPanelVisible,
@@ -89,6 +91,7 @@ export default class RightTools extends React.Component {
             this.child.setState({
               tools: [...this.child.newTools, ...this.child.tools],
             });
+          this.isToolItem = false;
           this.setState(
             {
               lengedListPanelVisible: false,
@@ -136,6 +139,7 @@ export default class RightTools extends React.Component {
         iconfont: "&#xe763;",
         hasPanel: true,
         cb: (args) => {
+          this.isToolItem = true;
           this.toggleButtonStyle(args);
           this.setState(
             {
@@ -168,6 +172,7 @@ export default class RightTools extends React.Component {
       hiddenIndex: -1,
       showToolBox: false,
       tools: this.tools,
+      isToolItem: false,
     };
   }
 
@@ -197,7 +202,7 @@ export default class RightTools extends React.Component {
   };
   render() {
     return (
-      <div className={styles.wrapper} style={{ bottom: 16 }}>
+      <div className={styles.wrapper} style={{ bottom: 16 }} ref="rightTools">
         <div className={styles.toolbar} ref="toolbar1">
           <ul>
             <li>
@@ -213,6 +218,7 @@ export default class RightTools extends React.Component {
                         ? item.iconfont
                         : this.state.fullcreenIcon,
                   }}
+                  ref={item.name}
                 ></i>
               ) : null;
               const btnSelectedStyle =
@@ -267,6 +273,7 @@ export default class RightTools extends React.Component {
                           ? item.iconfont
                           : this.state.fullcreenIcon,
                     }}
+                    ref={`${item.name}2`}
                   ></i>
                 ) : null;
                 const btnSelectedStyle =
@@ -296,6 +303,7 @@ export default class RightTools extends React.Component {
                           this.setState({
                             toolBoxPanelVisible: true,
                             showToolBox: false,
+                            isToolItem: true,
                           });
                         }}
                         style={btnSelectedStyle}
@@ -342,7 +350,12 @@ export default class RightTools extends React.Component {
           ></LocalPOI>
         ) : null}
         {this.state.toolBoxPanelVisible ? (
-          <ToolBox onRef={this.onRef} parent={this} ref="toolbox"></ToolBox>
+          <ToolBox
+            onRef={this.onRef}
+            parent={this}
+            ref="toolbox"
+            istoolItem={this.isToolItem}
+          ></ToolBox>
         ) : null}
       </div>
     );

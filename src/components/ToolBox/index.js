@@ -7,7 +7,7 @@ import { myFullScreen, myDragZoom } from "utils/drawing/public";
 import { downloadCapture } from "../../utils/captureMap";
 import { plotEdit } from "../../utils/plotEdit";
 import { getMyCenter } from "../RightTools/lib";
-import { textHeights } from "ol/render/canvas";
+import throttle from "lodash/throttle";
 
 export default class ToolBox extends React.Component {
   constructor(props) {
@@ -95,24 +95,69 @@ export default class ToolBox extends React.Component {
       fullcreenIcon: "&#xe7f3;",
       tools: this.tools,
     };
+    this.documentClickCallBak = throttle(this.documentClickCallBak, 1000);
   }
   componentDidMount() {
-    // const me = this;
-    // document.addEventListener("click", function (e) {
-    //   let node = e.target;
-    //   let toolBoxRef = me.refs.toolbox;
-    //   if (
-    //     node !== toolBoxRef &&
-    //     !me.props.parent.refs["toolbar1"].querySelector(".toolbar")
-    //   ) {
-    //     me.props.parent.setState({
-    //       toolBoxPanelVisible: false,
-    //       hiddenIndex: -1,
-    //       selectedIndex: -1,
-    //     });
-    //   }
-    // });
+    // document.addEventListener("click", (e) => this.documentClickCallBak(e));
   }
+  documentClickCallBak = (e) => {
+    e.stopPropagation();
+    if (
+      this.props.parent.state.lengedListPanelVisible &&
+      !this.props.parent.state.toolBoxPanelVisible
+    ) {
+      return;
+    }
+    if (
+      this.props.parent.state.POIPanelVisible &&
+      !this.props.parent.state.toolBoxPanelVisible
+    ) {
+      return;
+    }
+    if (this.props.parent.isToolItem) {
+      this.props.parent.isToolItem = false;
+      return;
+    }
+    let node = e.target;
+    let toolBoxRef = this.props.parent.refs.toolbox;
+    let flag = true;
+    if (node === toolBoxRef) {
+      flag = false;
+    }
+    if (node === this.props.parent.refs["定位"]) {
+      flag = false;
+    }
+    if (node === this.props.parent.refs["全屏"]) {
+      flag = false;
+    }
+    if (node === this.props.parent.refs["图例"]) {
+      flag = false;
+    }
+    if (node === this.props.parent.refs["周边"]) {
+      flag = false;
+    }
+    if (node === this.props.parent.refs["工具箱"]) {
+      flag = false;
+    }
+    if (node === this.props.parent.refs["工具箱2"]) {
+      flag = false;
+    }
+    if (flag) {
+      let flag2 = false;
+      if (this.props.parent.state.lengedListPanelVisible) {
+        flag2 = true;
+      }
+      if (this.props.parent.state.POIPanelVisible) {
+        flag2 = true;
+      }
+      this.props.parent.setState({
+        toolBoxPanelVisible: false,
+        hiddenIndex: -1,
+        selectedIndex: -1,
+        showToolBox: flag2,
+      });
+    }
+  };
   hidden = () => {
     let showToolBox = false;
     if (this.props.parent.state.lengedListPanelVisible) {
