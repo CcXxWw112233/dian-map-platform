@@ -12,6 +12,7 @@ import Search from "../../Search/Search";
 import ScoutAction from "../../../lib/components/ProjectScouting/ScoutingList";
 import mapApp from "utils/INITMAP";
 import { TransformCoordinate } from "@/lib/utils";
+import AddPlan from "../../../pages/ProjectScouting/components/Plan/addPlan";
 
 import { connect } from "dva";
 
@@ -39,6 +40,7 @@ export default class Project extends React.Component {
     this.state = {
       openPanel: true,
       update: false,
+      showAddPlan: true
     };
     this.getLoaction = throttle(this.getLoaction, 1000);
   }
@@ -97,8 +99,9 @@ export default class Project extends React.Component {
   };
 
   changeQueryStr2 = (value) => {
-    this.scoutingDetailChild && this.scoutingDetailChild.getPopulationData(value)
-  }
+    this.scoutingDetailChild &&
+      this.scoutingDetailChild.getPopulationData(value);
+  };
 
   getQueryStr = () => {
     return this.queryStr;
@@ -113,8 +116,8 @@ export default class Project extends React.Component {
   };
 
   onScoutingDetailsRef = (ref) => {
-    this.scoutingDetailChild = ref
-  }
+    this.scoutingDetailChild = ref;
+  };
 
   // 检查缓存中是否存在id，进行判断渲染
   checkListCach = () => {
@@ -146,7 +149,7 @@ export default class Project extends React.Component {
         style={{ width: "100%", height: "100%" }}
         className={hidden ? "" : styles.hidden}
       >
-        {this.props.mainVisible === "list" ? (
+        {/* {this.props.mainVisible === "list" ? (
           <div
             className={`${animateCss.animated} ${animateCss.slideInLeft}`}
             style={{ animationDuration: "0.3s", height: "100%" }}
@@ -224,7 +227,8 @@ export default class Project extends React.Component {
               changeQueryStr={this.changeQueryStr}
             ></ScoutingDetails>
           </Main>
-        )}
+        )} */}
+        {this.state.showAddPlan ? <AddPlan /> : null}
       </div>
     );
   }

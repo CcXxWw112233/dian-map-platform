@@ -9,7 +9,7 @@ const CreatePanelHeader = ({ data }) => {
   return (
     <div
       style={{
-        width: "80%",
+        width: "100%",
         height: 28,
         lineHeight: "28px",
         display: "flex",
@@ -72,6 +72,16 @@ const CreatePanelHeader = ({ data }) => {
           &#xe7b8;
         </i>
       ) : null}
+      {/* {data.genExtraIconFont ? (
+        <i
+          className={globalStyle.global_icon}
+          dangerouslySetInnerHTML={{ __html: data.genExtraIconFont }}
+          onClick={(e) => {
+            e.stopPropagation();
+            data.genExtraCallBack(data);
+          }}
+        ></i>
+      ) : null} */}
     </div>
   );
 };
@@ -82,6 +92,7 @@ export default class Plan extends React.Component {
       panels: [
         {
           iconfont: "&#xe616;",
+          type: "plan",
           name: "我的计划",
           color: "rgba(106, 154, 255, 1)",
           canNotDel: true,
@@ -89,14 +100,18 @@ export default class Plan extends React.Component {
         },
         {
           iconfont: "&#xe7c6;",
+          type: "file",
           name: "文件",
           color: "rgba(98, 148, 255, 1)",
           canNotDel: true,
           canNotEdit: true,
+          genExtraIconFont: "&#xe7f5;",
+          genExtraCallBack: (data) => {},
         },
       ],
       datas: [
         {
+          type: "plan",
           finish: "0",
           title: "现场拍照",
           date: "今天  8月24日 周一  10:00",
@@ -105,6 +120,7 @@ export default class Plan extends React.Component {
           overdue: "0",
         },
         {
+          type: "plan",
           finish: "0",
           title: "现场拍照",
           date: "今天  8月24日 周一  10:00",
@@ -113,6 +129,7 @@ export default class Plan extends React.Component {
           overdue: "0",
         },
         {
+          type: "plan",
           finish: "0",
           title: "索取政策文件和图纸",
           date: "",
@@ -121,6 +138,7 @@ export default class Plan extends React.Component {
           overdue: "0",
         },
         {
+          type: "plan",
           finish: "0",
           title: "重点人物访谈",
           date: "9月12日 周五",
@@ -129,6 +147,7 @@ export default class Plan extends React.Component {
           overdue: "0",
         },
         {
+          type: "plan",
           finish: "0",
           title: "惠州市博罗县狮子城",
           date: "计划已过期  7月15日 周一",
@@ -137,12 +156,23 @@ export default class Plan extends React.Component {
           overdue: "1",
         },
         {
+          type: "plan",
           finish: "1",
           title: "发放调查问卷表",
           date: "7月15日 周三",
           star: "0",
           remind: "0",
           overdue: "0",
+        },
+        {
+          type: "file",
+          title: "华侨新村踏勘任务书",
+          remark: "7月15日 周三",
+        },
+        {
+          type: "file",
+          title: "沙寮村文件",
+          remark: "7月15日 周三",
         },
       ],
     };
@@ -159,7 +189,7 @@ export default class Plan extends React.Component {
     );
   };
 
-  createPlanItem = (item) => {
+  createItem = (item) => {
     return (
       <div className={`${styles.item} ${styles.planItem}`}>
         <div className={styles.contentPart1}>
@@ -176,7 +206,9 @@ export default class Plan extends React.Component {
           className={styles.contentPart2}
           style={{
             width: "calc(100% - 85px)",
-            ...(item.date ? {} : { lineHeight: "50px" }),
+            ...(item.date || item.type !== "file"
+              ? {}
+              : { lineHeight: "50px" }),
           }}
         >
           <span>{item.title}</span>
@@ -207,6 +239,7 @@ export default class Plan extends React.Component {
             className={globalStyle.global_icon}
             style={{
               fontSize: 24,
+              visibility: item.star === undefined ? "hidden" : "visible",
               color:
                 item.star === "1"
                   ? "rgba(255, 183, 96, 1)"
@@ -231,6 +264,23 @@ export default class Plan extends React.Component {
 
   onModifyOk = () => {};
 
+  genExtra = (data) => {
+    if (data && data.genExtraIconFont) {
+      return (
+        <i
+          className={globalStyle.global_icon}
+          dangerouslySetInnerHTML={{ __html: data.genExtraIconFont }}
+          style={{ color: "rgba(158, 166, 194, 1)", fontSize: "18px" }}
+          onClick={(e) => {
+            e.stopPropagation();
+            data.genExtraCallBack(data);
+          }}
+        ></i>
+      );
+    }
+    return null;
+  };
+
   handleAddGroupClick = () => {};
   render() {
     const { Panel } = Collapse;
@@ -246,12 +296,18 @@ export default class Plan extends React.Component {
                 <Panel
                   key={index}
                   header={<CreatePanelHeader data={item}></CreatePanelHeader>}
+                  extra={this.genExtra(item)}
                 >
                   <div style={{ padding: 16 }}>
-                    {this.addPlan()}
-                    {this.state.datas.map((item) => {
-                      if (item.finish !== "1") {
-                        return this.createPlanItem(item);
+                    {item.type === "plan" ? this.addPlan() : null}
+                    {this.state.datas.map((item2) => {
+                      if (item.type === item2.type) {
+                        if (item2.finish !== "1" && item2.type === "plan") {
+                          return this.createItem(item2);
+                        }
+                        if (item2.type === "file") {
+                          return this.createItem(item2);
+                        }
                       }
                       return null;
                     })}
@@ -268,7 +324,7 @@ export default class Plan extends React.Component {
                       <div style={{ padding: 16 }}>
                         {this.state.datas.map((item) => {
                           if (item.finish === "1") {
-                            return this.createPlanItem(item);
+                            return this.createItem(item);
                           }
                           return null;
                         })}
