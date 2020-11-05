@@ -149,7 +149,7 @@ export default class Zoom extends React.Component {
     }
     const style = this.state.showSlider ? { display: "" } : { display: "none" };
     return (
-      <div className={styles.wrapper} style={{...newStyle}}>
+      <div className={styles.wrapper} style={{ ...newStyle }}>
         <div className={styles.slider} style={{ ...style }}></div>
         <div
           className={styles.btn}
@@ -178,6 +178,7 @@ export default class Zoom extends React.Component {
         >
           <i
             className={globalStyle.global_icon}
+            style={{ height: 30, marginTop: 16 }}
             onClick={() => {
               myZoomIn();
             }}
@@ -186,6 +187,7 @@ export default class Zoom extends React.Component {
           </i>
           <i
             className={globalStyle.global_icon}
+            style={{ height: 30 }}
             onClick={() => {
               myZoomOut();
             }}

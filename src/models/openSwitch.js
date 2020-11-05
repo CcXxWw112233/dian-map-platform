@@ -11,6 +11,7 @@ export default {
     showFeatureName: true,
     // 是否隐藏左侧面板
     openPanel: true,
+    panelDidMount: false,
 
     isShowMap: true,
     isShowBasemapGallery: isMobile ? false : true, // 是否显示底图切换

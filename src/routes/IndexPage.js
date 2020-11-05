@@ -25,6 +25,7 @@ import RightTools from "../components/RightTools/index";
 import LeftToolBar from "../components/LeftToolBar/index";
 
 import SearchBtn from "../pages/publicMapData/searchBtn";
+import BasemapGallery from "../components/BasemapGallery/BasemapGallery";
 
 @connect(
   ({
@@ -36,6 +37,8 @@ import SearchBtn from "../pages/publicMapData/searchBtn";
       isShowRightTools,
       isShowLeftToolBar,
       isShowPhotoSwipe,
+      panelDidMount,
+      openPanel,
     },
     editPicture: { editShow },
   }) => ({
@@ -47,6 +50,8 @@ import SearchBtn from "../pages/publicMapData/searchBtn";
     isShowRightTools,
     isShowLeftToolBar,
     isShowPhotoSwipe,
+    panelDidMount,
+    openPanel,
   })
 )
 class IndexPage extends React.Component {
@@ -73,6 +78,28 @@ class IndexPage extends React.Component {
     Event.Evt.on("hasFeatureToProject", (data) => {
       console.log(data);
       this.addFeatureForProject(data);
+    });
+    const me = this;
+    window.addEventListener("resize", function () {
+      const width = document.getElementById("leftPanel").clientWidth;
+      const transform = `translateX(${width}px)`;
+      me.setState({
+        transform: transform,
+      });
+    });
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const { openPanel, panelDidMount } = nextProps;
+    let transform = "translateX(0px)";
+    if (panelDidMount) {
+      if (openPanel) {
+        const width = document.getElementById("leftPanel").clientWidth;
+        transform = `translateX(${width}px)`;
+      }
+    }
+    this.setState({
+      transform: transform,
     });
   }
 
@@ -302,7 +329,21 @@ class IndexPage extends React.Component {
     }, 5 * 1000);
   };
 
+  toOld = () => {
+    let search = window.location.search || window.location.hash;
+    let origin = window.location.origin;
+    let href = origin + "/oldpage/" + search.replace("#/", "");
+    setTimeout(() => {
+      window.open(href, "_self");
+    }, 500);
+  };
+
   render() {
+    window.addEventListener('resize', ()=>{
+      this.setState({
+        update: this.state.update + 1
+      })
+    })
     let {
       isShowMap,
       isShowMobile,
@@ -328,6 +369,30 @@ class IndexPage extends React.Component {
         {/* {!isShowMobile && } */}
         <UploadNotification />
         <SearchBtn></SearchBtn>
+        {isShowBasemapGallery && <BasemapGallery />}
+        {isShowBasemapGallery && (
+          <a
+            // className={styles.changePackage}
+            style={{
+              position: "absolute",
+              left: 66,
+              padding: "4px 8px",
+              borderRadius: "50px",
+              backgroundColor: "#fff",
+              top: "24px",
+              color: "#595959",
+              border: "1px solid #dedede",
+              fontSize: "12px",
+              width: "72px",
+              transition: "transform 0.3s cubic-bezier(0.7, 0.3, 0.1, 1)",
+              transform: this.state.transform,
+            }}
+            onClick={this.toOld}
+            target="_self"
+          >
+            切换旧版
+          </a>
+        )}
       </div>
     );
   }
