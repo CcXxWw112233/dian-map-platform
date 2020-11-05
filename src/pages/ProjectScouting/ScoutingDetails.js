@@ -2187,7 +2187,7 @@ export default class ScoutingDetails extends PureComponent {
                       )
                     }
                   >
-                    新增分类
+                    <span style={{ fontSize: "0.6rem" }}>新增分类</span>
                   </Button>
                   <Button
                     type="primary"
@@ -2197,7 +2197,9 @@ export default class ScoutingDetails extends PureComponent {
                     size="small"
                     icon={<MyIcon type="icon-duoxuan" />}
                   >
-                    {this.state.multipleGroup ? "单图层" : "多图层"}
+                    <span style={{ fontSize: "0.6rem" }}>
+                      {this.state.multipleGroup ? "单图层" : "多图层"}
+                    </span>
                   </Button>
                   <Button
                     type="primary"
@@ -2208,7 +2210,7 @@ export default class ScoutingDetails extends PureComponent {
                       this.setState({ isEdit: true });
                     }}
                   >
-                    编辑
+                    <span style={{ fontSize: "0.6rem" }}>编辑</span>
                   </Button>
                 </Space>
               ) : (

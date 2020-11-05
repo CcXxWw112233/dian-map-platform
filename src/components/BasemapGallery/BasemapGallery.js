@@ -10,7 +10,12 @@ import { Row, Switch } from "antd";
 import { baseMapDictionary } from "utils/mapSource";
 
 import event from "../../lib/utils/event";
+import { connect } from "dva";
 
+@connect(({ openswitch: { openPanel, panelDidMount } }) => ({
+  openPanel,
+  panelDidMount,
+}))
 export default class BasemapGallery extends PureComponent {
   constructor(props) {
     super(props);
@@ -19,6 +24,7 @@ export default class BasemapGallery extends PureComponent {
       selectedIndex: 0,
       showRoadLabel: true,
       showPlotLabel: true,
+      transform: "",
     };
     this.selectBaseMapKey = null;
   }
@@ -33,6 +39,28 @@ export default class BasemapGallery extends PureComponent {
           break;
         }
       }
+    });
+    const me = this;
+    window.addEventListener("resize", function () {
+      const width = document.getElementById("leftPanel").clientWidth;
+      const transform = `translateX(${width}px)`;
+      me.setState({
+        transform: transform,
+      });
+    });
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const { openPanel, panelDidMount } = nextProps;
+    let transform = "translateX(0px)";
+    if (panelDidMount) {
+      if (openPanel) {
+        const width = document.getElementById("leftPanel").clientWidth;
+        transform = `translateX(${width}px)`;
+      }
+    }
+    this.setState({
+      transform: transform,
     });
   }
   onRoadLabelChange = (val) => {
@@ -111,10 +139,14 @@ export default class BasemapGallery extends PureComponent {
   };
   render() {
     const { style } = this.props;
+    let left = "66px";
     return (
       <div
         className={styles.wrapper}
-        style={style || {}}
+        style={{
+          ...(style || {}),
+          ...{ left: left, transform: this.state.transform },
+        }}
         // onMouseEnter={() => {
         //   this.setState({ isOpen: true });
         // }}

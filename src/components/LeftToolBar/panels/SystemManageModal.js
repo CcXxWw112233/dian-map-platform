@@ -105,12 +105,12 @@ export default class SystemManageModal extends React.Component {
         onOk={this.onOk}
         onCancel={this.onCancel}
       >
-        <div style={{ height: 400 }}>
+        <div style={{ height: "28vh" }}>
           <p style={{ height: 40, lineHeight: "40px", background: "#F5F7FA" }}>
             <span style={{ marginLeft: 24 }}>{selectedData.name}</span>
           </p>
           <div
-            style={{ padding: "0 24px", height: 340 }}
+            style={{ padding: "0 24px", height: "22vh" }}
             className={globalStyle.autoScrollY}
           >
             <Tree

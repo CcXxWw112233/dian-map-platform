@@ -214,7 +214,7 @@ export default class PermissionModal extends React.Component {
             okText={okText}
             className={styles.wrapper}
           >
-            <div style={{ height: 500 }}>
+            <div style={{ height: "28vh" }}>
               <div className={styles.titleHeader}>
                 <span style={{ width: "70%", paddingLeft: 60 }}>成员</span>
                 <span>角色</span>
@@ -304,7 +304,7 @@ export default class PermissionModal extends React.Component {
             okText={okText}
             className={styles.wrapper}
           >
-            <div style={{ maxHeight: 400 }} className={globalStyle.autoScrollY}>
+            <div style={{ height: "28vh" }} className={globalStyle.autoScrollY}>
               {this.state.orgUserArr.length === 0 ? (
                 <div
                   style={{
