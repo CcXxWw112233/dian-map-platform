@@ -105,7 +105,7 @@ export default class SystemManageModal extends React.Component {
         onOk={this.onOk}
         onCancel={this.onCancel}
       >
-        <div style={{ height: "28vh" }}>
+        <div style={{ height: "28vh", minHeight: 200 }}>
           <p style={{ height: 40, lineHeight: "40px", background: "#F5F7FA" }}>
             <span style={{ marginLeft: 24 }}>{selectedData.name}</span>
           </p>

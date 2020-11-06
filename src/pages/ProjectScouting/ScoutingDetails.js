@@ -1022,41 +1022,37 @@ export default class ScoutingDetails extends PureComponent {
     this.showOtherSlide();
     // console.log(resp);
     if (resp) {
-      if (resp && resp.code === "0") {
-        message.success("上传成功");
-        let content =
-          setData && firstSave
-            ? {
-                content: firstSave.data.id,
-              }
-            : {
-                content: resp.id,
-              };
-        let { id, name } = resp;
+      message.success("上传成功");
+      let content =
+        setData && firstSave
+          ? {
+              content: firstSave.data.id,
+            }
+          : {
+              content: resp.id,
+            };
+      let { id, name } = resp;
 
-        let params = {
-          board_id: this.state.current_board.board_id,
-          area_type_id: val.id,
-          collect_type: 5,
-          ...content,
-          resource_id: id,
-          target: "plan",
-          title: name,
-        };
-        Action.addCollection(params)
-          .then((res) => {
-            // console.log(res);
-            // 更新上传的列表
-            this.fetchCollection();
-          })
-          .catch((err) => {
-            // 添加失败
-            console.log(err.message);
-            message.error(err.message);
-          });
-      } else {
-        message.error(resp.message);
-      }
+      let params = {
+        board_id: this.state.current_board.board_id,
+        area_type_id: val.id,
+        collect_type: 5,
+        ...content,
+        resource_id: id,
+        target: "plan",
+        title: name,
+      };
+      Action.addCollection(params)
+        .then((res) => {
+          // console.log(res);
+          // 更新上传的列表
+          this.fetchCollection();
+        })
+        .catch((err) => {
+          // 添加失败
+          console.log(err.message);
+          message.error(err.message);
+        });
     }
   };
 
