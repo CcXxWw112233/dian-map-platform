@@ -86,8 +86,11 @@ export default class AddPlan extends React.Component {
               >
                 &#xe7f2;
               </i>
-              <div style={{ width: "calc(100% - 20px)", textAlign: "left" }}>
-                <span>现场拍照</span>
+              <div
+                style={{ width: "calc(100% - 48px)" }}
+                className={styles.text}
+              >
+                <span>现场拍照现场拍照现场拍照现场拍照现场拍照现场拍照</span>
               </div>
               <i
                 className={globalStyle.global_icon}
@@ -103,7 +106,7 @@ export default class AddPlan extends React.Component {
               >
                 &#xe7f2;
               </i>
-              <div style={{ width: "calc(100% - 20px)", textAlign: "left" }}>
+              <div style={{ width: "calc(100% - 48px)", textAlign: "left" }}>
                 <span>现场拍照</span>
               </div>
               <i
@@ -120,7 +123,7 @@ export default class AddPlan extends React.Component {
               >
                 &#xe7f2;
               </i>
-              <div style={{ width: "calc(100% - 20px)", textAlign: "left" }}>
+              <div style={{ width: "calc(100% - 48px)", textAlign: "left" }}>
                 <span>现场拍照</span>
               </div>
               <i

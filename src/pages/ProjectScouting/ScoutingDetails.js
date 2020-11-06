@@ -157,6 +157,7 @@ export default class ScoutingDetails extends PureComponent {
   }
   componentDidMount() {
     this.isGoBack = false;
+    this.planRef = null;
     const { Evt } = Event;
     const { mainVisible } = this.props;
     if (mainVisible) this.getDetails();
@@ -1626,6 +1627,9 @@ export default class ScoutingDetails extends PureComponent {
   getTouch = (e) => {
     return { x: e.layerX || e.pageX, y: e.layerY || e.pageY };
   };
+  onPlanRef = (ref) => {
+    this.planRef = ref;
+  };
 
   PublicView = ({ children, height }) => {
     let { miniTitle } = this.state;
@@ -2284,9 +2288,15 @@ export default class ScoutingDetails extends PureComponent {
           // </div>
           <Fragment>
             <PublicView height={defaultHeight2}>
-              <Plan parent={this.props.parent}></Plan>
+              <Plan parent={this.props.parent} onRef={this.onPlanRef}></Plan>
             </PublicView>
-            <div className={styles.addAreaBtn} style={{ paddingTop: 0 }}>
+            <div
+              className={styles.addAreaBtn}
+              style={{ paddingTop: 0 }}
+              onClick={() => {
+                this.planRef && this.planRef.addGroup();
+              }}
+            >
               <Button block className={styles.btn}>
                 <i
                   className={globalStyle.global_icon}

@@ -17,59 +17,72 @@ const CreatePanelHeader = ({ data }) => {
         flexDirection: "row",
       }}
     >
-      <i
-        className={globalStyle.global_icon}
-        style={{ marginRight: 10, color: data.color }}
-        dangerouslySetInnerHTML={{ __html: data.iconfont }}
-      ></i>
-      {!isEdit ? (
-        <span>{data.name}</span>
-      ) : (
-        <Fragment>
-          <Col>
-            <Input
-              // style={{ borderRadius: "5px" }}
-              placeholder="请输入名称"
-              size="small"
-              autoFocus
-              onChange={(e) => setGroupName(e.target.value.trim())}
-              onPressEnter={(e) => {
-                e.stopPropagation();
-                setIsEdit(false);
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
-              allowClear
-              value={groupName}
-            />
-          </Col>
-          <Col span={3} style={{ textAlign: "right" }}>
-            <Button
-              onClick={() => setIsEdit(false)}
-              size="small"
-              shape="circle"
-            >
-              <CloseOutlined />
-            </Button>
-          </Col>
-          <Col span={3} style={{ textAlign: "center" }}>
-            <Button
-              size="small"
-              onClick={() => this.onModifyOk()}
-              shape="circle"
-              type="primary"
-            >
-              <CheckOutlined />
-            </Button>
-          </Col>
-        </Fragment>
-      )}
+      <div style={{ width: "calc(100% - 48px)", textAlign: "left" }}>
+        {data.iconfont ? (
+          <i
+            className={globalStyle.global_icon}
+            style={{ marginRight: 10, color: data.color }}
+            dangerouslySetInnerHTML={{ __html: data.iconfont }}
+          ></i>
+        ) : null}
+        {!isEdit ? (
+          <span>{data.name}</span>
+        ) : (
+          <Fragment>
+            <Col>
+              <Input
+                // style={{ borderRadius: "5px" }}
+                placeholder="请输入名称"
+                size="small"
+                autoFocus
+                onChange={(e) => setGroupName(e.target.value.trim())}
+                onPressEnter={(e) => {
+                  e.stopPropagation();
+                  setIsEdit(false);
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+                allowClear
+                value={groupName}
+              />
+            </Col>
+            <Col span={3} style={{ textAlign: "right" }}>
+              <Button
+                onClick={() => setIsEdit(false)}
+                size="small"
+                shape="circle"
+              >
+                <CloseOutlined />
+              </Button>
+            </Col>
+            <Col span={3} style={{ textAlign: "center" }}>
+              <Button
+                size="small"
+                onClick={() => this.onModifyOk()}
+                shape="circle"
+                type="primary"
+              >
+                <CheckOutlined />
+              </Button>
+            </Col>
+          </Fragment>
+        )}
+      </div>
       {!data.canNotDel ? (
-        <i className={globalStyle.global_icon}>&#xe7b7;</i>
+        <i
+          className={globalStyle.global_icon}
+          style={{ fontSize: 24, color: "rgb(158, 166, 194)" }}
+        >
+          &#xe7b7;
+        </i>
       ) : null}
       {!data.canNotEdit ? (
-        <i className={globalStyle.global_icon} onClick={() => setIsEdit(true)}>
+        <i
+          className={globalStyle.global_icon}
+          style={{ fontSize: 24, color: "rgb(158, 166, 194)" }}
+          onClick={() => setIsEdit(true)}
+        >
           &#xe7b8;
         </i>
       ) : null}
@@ -89,6 +102,7 @@ const CreatePanelHeader = ({ data }) => {
 export default class Plan extends React.Component {
   constructor(props) {
     super(props);
+    this.props.onRef(this);
     this.state = {
       panels: [
         {
@@ -241,6 +255,22 @@ export default class Plan extends React.Component {
     };
   }
 
+  addGroup = () => {
+    let panels = this.state.panels;
+    this.setState({
+      panels: [
+        ...panels,
+        {
+          type: "plan",
+          name: "未命名",
+          color: "rgba(106, 154, 255, 1)",
+          canNotDel: false,
+          canNotEdit: false,
+        },
+      ],
+    });
+  };
+
   addPlan = () => {
     return (
       <div
@@ -262,7 +292,17 @@ export default class Plan extends React.Component {
 
   createItem = (item) => {
     return (
-      <div className={`${styles.item} ${styles.planItem}`}>
+      <div
+        className={`${styles.item} ${styles.planItem}`}
+        onClick={() => {
+          if (item.type === "plan") {
+            const { parent } = this.props;
+            parent.setState({
+              showAddPlan: true,
+            });
+          }
+        }}
+      >
         <div className={styles.contentPart1}>
           {item.type === "plan" ? (
             <i
@@ -285,15 +325,7 @@ export default class Plan extends React.Component {
             ...(item.type !== "file" ? {} : { lineHeight: "50px" }),
           }}
         >
-          <span
-            style={{
-              overflow: "hidden",
-              whiteSpace: "nowrap",
-              textOverflow: "ellipsis",
-            }}
-          >
-            {item.title}
-          </span>
+          <span>{item.title}</span>
           {item.date ? (
             <span
               className={styles.date}
@@ -385,7 +417,7 @@ export default class Plan extends React.Component {
                 <Panel
                   key={index}
                   header={<CreatePanelHeader data={item}></CreatePanelHeader>}
-                  extra={this.genExtra(item)}
+                  // extra={this.genExtra(item)}
                 >
                   <div style={{ padding: 16 }}>
                     {item.type === "plan" ? this.addPlan() : null}
