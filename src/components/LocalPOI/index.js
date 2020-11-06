@@ -204,7 +204,7 @@ export default class LocalPOI extends React.Component {
                       return (
                         <TabPane tab={item2.name} key={item2.name}>
                           <ul
-                            style={{ height: "230px" }}
+                            style={{ height: "167px" }}
                             className={globalStyle.autoScrollY}
                           >
                             {this.state.pois.length > 0 ? (
