@@ -82,7 +82,7 @@ instance.interceptors.response.use(
           if (url === "") {
             url = document.referrer;
           }
-          window.location.href =
+          window.parent.location.href =
             url ||
             "https://lingxi.di-an.com/" +
               "#/login?redirect=/technological/simplemode/home";
