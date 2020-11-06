@@ -1946,6 +1946,9 @@ export default class ScoutingDetails extends PureComponent {
     const defaultHeight = this.state.miniTitle
       ? "calc(100vh - 100px)"
       : "calc(100vh - 370px)";
+    const defaultHeight2 = this.state.miniTitle
+      ? "calc(100vh - 190px)"
+      : "calc(100vh - 430px)";
     const { dispatch } = this.props;
     const { PublicView } = this;
     switch (key) {
@@ -2280,10 +2283,10 @@ export default class ScoutingDetails extends PureComponent {
           //   <span>正在加紧开发中...</span>
           // </div>
           <Fragment>
-            <PublicView>
+            <PublicView height={defaultHeight2}>
               <Plan parent={this.props.parent}></Plan>
             </PublicView>
-            <div className={styles.addAreaBtn}>
+            <div className={styles.addAreaBtn} style={{ paddingTop: 0 }}>
               <Button block className={styles.btn}>
                 <i
                   className={globalStyle.global_icon}

@@ -2,6 +2,7 @@ import React, { useState, Fragment } from "react";
 import { Collapse, Col, Input, Button } from "antd";
 import { CloseOutlined, CheckOutlined } from "@ant-design/icons";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
+import { MyIcon } from "components/utils";
 import styles from "./style.less";
 const CreatePanelHeader = ({ data }) => {
   let [isEdit, setIsEdit] = useState(false);
@@ -168,11 +169,73 @@ export default class Plan extends React.Component {
           type: "file",
           title: "华侨新村踏勘任务书",
           remark: "7月15日 周三",
+          iconType: "icon-bianzu851",
         },
         {
           type: "file",
           title: "沙寮村文件",
           remark: "7月15日 周三",
+          iconType: "icon-bianzu871",
+        },
+        {
+          type: "file",
+          title: "华侨新村踏勘任务书",
+          remark: "7月15日 周三",
+          iconType: "icon-bianzu811",
+        },
+        {
+          type: "file",
+          title: "沙寮村文件",
+          remark: "7月15日 周三",
+          iconType: "icon-bianzu801",
+        },
+        {
+          type: "file",
+          title: "沙寮村文件",
+          remark: "7月15日 周三",
+          iconType: "icon-bianzu831",
+        },
+        {
+          type: "file",
+          title: "沙寮村文件",
+          remark: "7月15日 周三",
+          iconType: "icon-bianzu921",
+        },
+        {
+          type: "file",
+          title: "沙寮村文件",
+          remark: "7月15日 周三",
+          iconType: "icon-bianzu911",
+        },
+        {
+          type: "file",
+          title: "沙寮村文件",
+          remark: "7月15日 周三",
+          iconType: "icon-bianzu901",
+        },
+        {
+          type: "file",
+          title: "沙寮村文件",
+          remark: "7月15日 周三",
+          iconType: "icon-bianzu891",
+        },
+        {
+          type: "file",
+          title: "沙寮村文件",
+          remark: "7月15日 周三",
+          iconType: "icon-bianzu881",
+        },
+        {
+          type: "file",
+          title: "沙寮村文件",
+          remark: "7月15日 周三",
+          iconType: "icon-bianzu861",
+        },
+        {
+          type: "file",
+          title: "沙寮村文件",
+          remark: "7月15日 周三",
+          iconType: "icon-bianzu841",
         },
       ],
     };
@@ -201,14 +264,18 @@ export default class Plan extends React.Component {
     return (
       <div className={`${styles.item} ${styles.planItem}`}>
         <div className={styles.contentPart1}>
-          <i
-            className={`${globalStyle.global_icon} ${
-              item.finish === "0" ? styles.style1 : styles.style2
-            }`}
-            dangerouslySetInnerHTML={{
-              __html: item.finish === "0" ? "&#xe7f2;" : "&#xe7f8;",
-            }}
-          ></i>
+          {item.type === "plan" ? (
+            <i
+              className={`${globalStyle.global_icon} ${
+                item.finish === "0" ? styles.style1 : styles.style2
+              }`}
+              dangerouslySetInnerHTML={{
+                __html: item.finish === "0" ? "&#xe7f2;" : "&#xe7f8;",
+              }}
+            ></i>
+          ) : (
+            <MyIcon type={item.iconType} style={{ fontSize: 24 }}></MyIcon>
+          )}
         </div>
         <div
           className={styles.contentPart2}
@@ -218,9 +285,24 @@ export default class Plan extends React.Component {
             ...(item.type !== "file" ? {} : { lineHeight: "50px" }),
           }}
         >
-          <span>{item.title}</span>
+          <span
+            style={{
+              overflow: "hidden",
+              whiteSpace: "nowrap",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {item.title}
+          </span>
           {item.date ? (
-            <span className={styles.date}>
+            <span
+              className={styles.date}
+              style={{
+                overflow: "hidden",
+                whiteSpace: "nowrap",
+                textOverflow: "ellipsis",
+              }}
+            >
               {item.date}
               {item.remind === "1" ? (
                 <i
@@ -319,25 +401,27 @@ export default class Plan extends React.Component {
                       return null;
                     })}
                   </div>
-                  <Collapse>
-                    <Panel
-                      header={
-                        <div style={{ textAlign: "left", width: "80%" }}>
-                          <span>已完成</span>
+                  {item.type === "plan" ? (
+                    <Collapse>
+                      <Panel
+                        header={
+                          <div style={{ textAlign: "left", width: "80%" }}>
+                            <span>已完成</span>
+                          </div>
+                        }
+                        className="finish"
+                      >
+                        <div style={{ padding: 16 }}>
+                          {this.state.datas.map((item) => {
+                            if (item.finish === "1") {
+                              return this.createItem(item);
+                            }
+                            return null;
+                          })}
                         </div>
-                      }
-                      className="finish"
-                    >
-                      <div style={{ padding: 16 }}>
-                        {this.state.datas.map((item) => {
-                          if (item.finish === "1") {
-                            return this.createItem(item);
-                          }
-                          return null;
-                        })}
-                      </div>
-                    </Panel>
-                  </Collapse>
+                      </Panel>
+                    </Collapse>
+                  ) : null}
                 </Panel>
               );
             })}

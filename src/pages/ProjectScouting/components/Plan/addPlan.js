@@ -53,6 +53,11 @@ export default class AddPlan extends React.Component {
       newStep: value,
     });
   };
+  handleSaveNewStep = (value) => {
+    this.setState({
+      addStepState: false,
+    });
+  };
   render() {
     return (
       <div className={styles.wrapper}>
@@ -155,6 +160,7 @@ export default class AddPlan extends React.Component {
                     placeholder="添加步骤"
                     value={this.state.newStep}
                     onChange={(e) => this.addStepInputChange(e.target.value)}
+                    onPressEnter={(e) => this.handleSaveNewStep(e.target.value)}
                   />
                 </Fragment>
               )}
@@ -179,6 +185,12 @@ export default class AddPlan extends React.Component {
                 disabledTime={this.disabledDateTime}
                 showTime={{ defaultValue: moment("00:00:00", "HH:mm:ss") }}
               />
+              <i
+                className={globalStyle.global_icon}
+                style={{ color: "rgba(209, 213, 228, 1)" }}
+              >
+                &#xe7d0;
+              </i>
             </div>
             <div className={styles.item}>
               <i
@@ -198,6 +210,12 @@ export default class AddPlan extends React.Component {
                 locale={locale}
                 style={{ width: "calc(100% - 50px", padding: 0 }}
               />
+              <i
+                className={globalStyle.global_icon}
+                style={{ color: "rgba(209, 213, 228, 1)" }}
+              >
+                &#xe7d0;
+              </i>
             </div>
           </div>
         </div>

@@ -1,3 +1,4 @@
+
 .wrapper {
   padding: 0;
   width: 100%;
@@ -7,6 +8,12 @@
   }
   :global(.ant-collapse-header) {
     display: flex;
+  }
+  :global(.ant-collapse .ant-collapse-icon-position-left) {
+    border: none;
+  }
+  :global(.finish) {
+    background: #fff;
   }
   .body {
     width: 100%;
@@ -42,10 +49,11 @@
           text-align: left;
           margin-right: 10px;
           .style1 {
-            font-size: 20px;
+            font-size: 24px;
             color: rgba(208, 211, 226, 1);
           }
           .style2 {
+            font-size: 24px;
             color: rgba(141, 185, 255, 1);
           }
         }
