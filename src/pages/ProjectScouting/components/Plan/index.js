@@ -4,9 +4,11 @@ import { CloseOutlined, CheckOutlined } from "@ant-design/icons";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import { MyIcon } from "components/utils";
 import styles from "./style.less";
-const CreatePanelHeader = ({ data }) => {
+const CreatePanelHeader = ({ data, index: dataIndex, delGroup }) => {
   let [isEdit, setIsEdit] = useState(false);
   let [groupName, setGroupName] = useState(data.name);
+  let [showEdit, setHideEdit] = useState(data.canNotEdit);
+  let [showDel, setHideDel] = useState(data.canNotDel);
   return (
     <div
       style={{
@@ -17,7 +19,14 @@ const CreatePanelHeader = ({ data }) => {
         flexDirection: "row",
       }}
     >
-      <div style={{ width: "calc(100% - 48px)", textAlign: "left" }}>
+      <div
+        style={{
+          width: "calc(100% - 48px)",
+          textAlign: "left",
+          display: "flex",
+          flexDirection: "row",
+        }}
+      >
         {data.iconfont ? (
           <i
             className={globalStyle.global_icon}
@@ -49,7 +58,12 @@ const CreatePanelHeader = ({ data }) => {
             </Col>
             <Col span={3} style={{ textAlign: "right" }}>
               <Button
-                onClick={() => setIsEdit(false)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsEdit(false);
+                  setHideEdit(false);
+                  setHideDel(false);
+                }}
                 size="small"
                 shape="circle"
               >
@@ -59,7 +73,13 @@ const CreatePanelHeader = ({ data }) => {
             <Col span={3} style={{ textAlign: "center" }}>
               <Button
                 size="small"
-                onClick={() => this.onModifyOk()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  this.onModifyOk();
+                  setIsEdit(false);
+                  setHideEdit(false);
+                  setHideDel(false);
+                }}
                 shape="circle"
                 type="primary"
               >
@@ -69,19 +89,28 @@ const CreatePanelHeader = ({ data }) => {
           </Fragment>
         )}
       </div>
-      {!data.canNotDel ? (
+      {!showEdit ? (
         <i
           className={globalStyle.global_icon}
           style={{ fontSize: 24, color: "rgb(158, 166, 194)" }}
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsEdit(true);
+            setHideEdit(true);
+            setHideDel(true);
+          }}
         >
           &#xe7b7;
         </i>
       ) : null}
-      {!data.canNotEdit ? (
+      {!showDel ? (
         <i
           className={globalStyle.global_icon}
           style={{ fontSize: 24, color: "rgb(158, 166, 194)" }}
-          onClick={() => setIsEdit(true)}
+          onClick={(e) => {
+            e.stopPropagation();
+            delGroup && delGroup(dataIndex);
+          }}
         >
           &#xe7b8;
         </i>
@@ -271,6 +300,14 @@ export default class Plan extends React.Component {
     });
   };
 
+  delGroup = (index) => {
+    let panels = this.state.panels;
+    panels.splice(index, 1);
+    this.setState({
+      panels: panels,
+    });
+  };
+
   addPlan = () => {
     return (
       <div
@@ -416,7 +453,13 @@ export default class Plan extends React.Component {
               return (
                 <Panel
                   key={index}
-                  header={<CreatePanelHeader data={item}></CreatePanelHeader>}
+                  header={
+                    <CreatePanelHeader
+                      data={item}
+                      index={index}
+                      delGroup={this.delGroup}
+                    ></CreatePanelHeader>
+                  }
                   // extra={this.genExtra(item)}
                 >
                   <div style={{ padding: 16 }}>
