@@ -40,7 +40,7 @@ export default class Project extends React.Component {
     this.state = {
       openPanel: true,
       update: false,
-      showAddPlan: true
+      showAddPlan: false,
     };
     this.getLoaction = throttle(this.getLoaction, 1000);
   }
@@ -143,13 +143,17 @@ export default class Project extends React.Component {
 
   render() {
     const { TabPane } = Tabs;
-    const { hidden, parent } = this.props;
+    let { hidden, parent } = this.props;
+    let style2 = {};
+    if (this.state.showAddPlan) {
+      style2 = { display: "none" };
+    }
     return (
       <div
         style={{ width: "100%", height: "100%" }}
         className={hidden ? "" : styles.hidden}
       >
-        {/* {this.props.mainVisible === "list" ? (
+        {this.props.mainVisible === "list" ? (
           <div
             className={`${animateCss.animated} ${animateCss.slideInLeft}`}
             style={{ animationDuration: "0.3s", height: "100%" }}
@@ -220,15 +224,16 @@ export default class Project extends React.Component {
             <Spin />
           </div>
         ) : (
-          <Main>
+          <Main style={style2}>
             <ScoutingDetails
               displayPlotPanel={this.props.displayPlotPanel}
               parentTool={this.props.parent}
               changeQueryStr={this.changeQueryStr}
+              parent={this}
             ></ScoutingDetails>
           </Main>
-        )} */}
-        {this.state.showAddPlan ? <AddPlan /> : null}
+        )}
+        {this.state.showAddPlan ? <AddPlan parent={this} /> : null}
       </div>
     );
   }

@@ -1,6 +1,22 @@
 .wrapper {
   width: 100%;
   height: 100%;
+  :global(.ant-input-affix-wrapper) {
+    border: none;
+  }
+  :global(.ant-picker-suffix) {
+    display: none;
+  }
+  :global(.ant-input) {
+    border-left: 0;
+    border-top: 0;
+    border-right: 0;
+  }
+  :global(.ant-input:focus) {
+    border-left: 0;
+    border-top: 0;
+    border-right: 0;
+  }
   .header {
     width: 100%;
     height: 30px;
@@ -9,6 +25,8 @@
     line-height: 28px;
     display: flex;
     flex-direction: row;
+    padding: 0px 20px;
+    margin-bottom: 10px;
     i {
       color: rgba(134, 140, 164, 1);
       font-size: 24px;
@@ -21,6 +39,8 @@
     flex-direction: column;
     .content {
       padding: 0 18px 4px 20px;
+      padding-left: 20px;
+      padding-right: 0;
       .item {
         width: 100%;
         height: 40px;
@@ -29,11 +49,11 @@
         line-height: 40px;
         i {
           margin-right: 12px;
-          font-size: 20px;
+          font-size: 24px;
         }
         &.add {
           i {
-            font-weight: 600;
+            // font-weight: 600;
             color: rgba(101, 143, 255, 1);
           }
           .content {

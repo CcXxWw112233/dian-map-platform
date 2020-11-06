@@ -2281,7 +2281,7 @@ export default class ScoutingDetails extends PureComponent {
           // </div>
           <Fragment>
             <PublicView>
-              <Plan></Plan>
+              <Plan parent={this.props.parent}></Plan>
             </PublicView>
             <div className={styles.addAreaBtn}>
               <Button block className={styles.btn}>

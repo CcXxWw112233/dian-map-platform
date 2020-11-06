@@ -180,7 +180,15 @@ export default class Plan extends React.Component {
 
   addPlan = () => {
     return (
-      <div className={`${styles.item} ${styles.addPlan}`}>
+      <div
+        className={`${styles.item} ${styles.addPlan}`}
+        onClick={() => {
+          const { parent } = this.props;
+          parent.setState({
+            showAddPlan: true,
+          });
+        }}
+      >
         <i className={globalStyle.global_icon}>&#xe7dc;</i>
         <div style={{ width: "calc(100% - 44px)" }} className={styles.content}>
           <span>添加计划</span>
@@ -198,7 +206,7 @@ export default class Plan extends React.Component {
               item.finish === "0" ? styles.style1 : styles.style2
             }`}
             dangerouslySetInnerHTML={{
-              __html: item.finish === "0" ? "&#xe7f2;" : "&#xe685;",
+              __html: item.finish === "0" ? "&#xe7f2;" : "&#xe7f8;",
             }}
           ></i>
         </div>
@@ -206,9 +214,8 @@ export default class Plan extends React.Component {
           className={styles.contentPart2}
           style={{
             width: "calc(100% - 85px)",
-            ...(item.date || item.type !== "file"
-              ? {}
-              : { lineHeight: "50px" }),
+            ...(item.date ? {} : { lineHeight: "50px" }),
+            ...(item.type !== "file" ? {} : { lineHeight: "50px" }),
           }}
         >
           <span>{item.title}</span>
