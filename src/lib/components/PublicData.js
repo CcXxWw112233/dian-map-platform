@@ -32,8 +32,10 @@ const { getFeature, GET_GEO_DATA } = publicDataUrl;
 const publicData = {
   // 图层
   layer: Layer({ id: "publicDataLayer", zIndex: 11, declutter: true }),
+  layer2: Layer({ id: "publicDatalayer2", zIndex: 11 }),
   // 数据源
   source: Source(),
+  source2: Source(),
   // key -> value 所有feature
   features: {},
   // 获取到的geo数据
@@ -96,15 +98,19 @@ const publicData = {
     });
     // 如果有layer，就不addlayer
     let layer = mapApp.findLayerById(this.layer.get("id"));
+    let layer2 = mapApp.findLayerById(this.layer2.get("id"));
     getLocal("baseMapKey").then((res) => {
       this.lastBaseMap = res.data;
       this.currentBaseMap = this.lastBaseMap;
     });
     if (layer) {
       this.layer.setVisible(true);
+      this.layer2.setVisible(true);
     } else {
       this.layer.setSource(this.source);
+      this.layer2.setSource(this.source2);
       mapApp.addLayer(this.layer);
+      mapApp.addLayer(this.layer2);
       mapApp.map.on("click", (e) => {
         const feature = mapApp.map.forEachFeatureAtPixel(
           e.pixel,
@@ -227,8 +233,9 @@ const publicData = {
     // 如果加载完成了，则继续加载
     if (this.status === "ready") {
       this.status = "loading";
-      this.activeTypeName = data.typeName + (data.cql_filter || "");
-      if (this.geomData[data.typeName + (data.cql_filter || "")]) {
+      // this.activeTypeName = data.typeName + (data.cql_filter || "");
+      this.activeTypeName = data.typeName;
+      if (this.geomData[data.typeName]) {
         // 使用缓存的数据
         this.renderFeatures(
           this.geomData[this.activeTypeName],
@@ -252,7 +259,8 @@ const publicData = {
         getFeature(url ? url : GET_GEO_DATA, params)
           .then((res) => {
             // 数据缓存，后期优化成本地缓存
-            this.geomData[data.typeName + (data.cql_filter || "")] = res;
+            // this.geomData[data.typeName + (data.cql_filter || "")] = res;
+            this.geomData[data.typeName] = res;
             // 渲染，并且删除加载过后的loadkey
             this.renderFeatures(res, data, fillColor);
             this.status = "ready";
@@ -763,8 +771,11 @@ const publicData = {
 
             feature.setStyle(style);
           }
-
-          this.source.addFeature(feature);
+          if (option.typeName !== "lingxi:dichan_loupan_point") {
+            this.source.addFeature(feature);
+          } else {
+            this.source2.addFeature(feature);
+          }
           if (!this.features[this.activeTypeName]) {
             this.features[this.activeTypeName] = [];
           }
@@ -774,7 +785,12 @@ const publicData = {
       }
     }
     // 视图平移
-    this.areaForExtent(this.source.getExtent());
+    // this.areaForExtent(this.source.getExtent());
+    if (option.typeName !== "lingxi:dichan_loupan_point") {
+      this.areaForExtent(this.source.getExtent());
+    } else {
+      this.areaForExtent(this.source2.getExtent());
+    }
   },
 
   createCircle: function (coordinates) {
@@ -806,6 +822,9 @@ const publicData = {
             if (that.source.getFeatureByUid(feature.ol_uid)) {
               that.source.removeFeature(feature);
             }
+            if (that.source2.getFeatureByUid(feature.ol_uid)) {
+              that.source2.removeFeature(feature);
+            }
           });
           // me.features[item] = null;
         }
@@ -829,6 +848,7 @@ const publicData = {
     this.removeFeatures(keys);
     this.features = {};
     this.source && this.source.clear();
+    this.source2 && this.source2.clear();
     this.circleFeature = null;
     this.removeLpInfo();
     event.Evt.firEvent("removeHousePOI");
