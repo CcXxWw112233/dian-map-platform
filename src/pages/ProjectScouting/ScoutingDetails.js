@@ -2288,7 +2288,7 @@ export default class ScoutingDetails extends PureComponent {
           // </div>
           <Fragment>
             <PublicView height={defaultHeight2}>
-              <Plan parent={this.props.parent} onRef={this.onPlanRef}></Plan>
+              <Plan board={current_board} parent={this.props.parent} onRef={this.onPlanRef}></Plan>
             </PublicView>
             <div
               className={styles.addAreaBtn}

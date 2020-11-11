@@ -1,14 +1,78 @@
 import React, { useState, Fragment } from "react";
-import { Collapse, Col, Input, Button } from "antd";
+import { Collapse, Col, Input, Button, message, Upload } from "antd";
 import { CloseOutlined, CheckOutlined } from "@ant-design/icons";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import { MyIcon } from "components/utils";
 import styles from "./style.less";
-const CreatePanelHeader = ({ data, index: dataIndex, delGroup }) => {
-  let [isEdit, setIsEdit] = useState(false);
+import services from "../../../../services/planServices";
+import planServices from "../../../../services/planServices";
+import { formatSize } from "../../../../utils/utils";
+import { BASIC } from "../../../../services/config";
+const CreatePanelHeader = ({
+  data,
+  index: dataIndex,
+  delGroup,
+  boardId,
+  parent,
+  isAddGroup,
+}) => {
+  let displayEdit = true,
+    displayDel = true;
+  if (!isAddGroup) {
+    displayEdit = false;
+    displayDel = false;
+  }
+  if (data.canNotDel) {
+    displayDel = true;
+  }
+  if (data.canNotEdit) {
+    displayEdit = true;
+  }
+  let [isEdit, setIsEdit] = useState((isAddGroup ? true : false) || false);
   let [groupName, setGroupName] = useState(data.name);
-  let [showEdit, setHideEdit] = useState(data.canNotEdit);
-  let [showDel, setHideDel] = useState(data.canNotDel);
+  let [showEdit, setHideEdit] = useState(displayEdit);
+  let [showDel, setHideDel] = useState(displayDel);
+  let [file, setFiles] = useState([]);
+  const onupload = (e) => {
+    let { size, text } = formatSize(e.file.size);
+    text = text.trim();
+    if (!(+size > 60 && text === "MB")) {
+      setFiles(e.fileList);
+      // onChange(e);
+      // planServices.uploadProjetFile(boardId, e.fileList[0].name, )
+    }
+  };
+  const checkFileSize = (file) => {
+    let { size, text } = formatSize(file.size);
+    text = text.trim();
+    if (+size > 60 && text === "MB") {
+      message.error("文件不能大于60MB---" + file.name);
+      return false;
+    }
+    // uploadFiles.push(file);
+    return true;
+  };
+  const uploadFileAction = (file) => {
+    return new Promise((resolve) => {
+      planServices.uploadFileCommon(file).then((res) => {
+        if (res && res.code === "0") {
+          message.success("文件上传成功。");
+          let file_name = res.data.original_file_name;
+          let resource_id = res.data.file_resource_id;
+          planServices
+            .uploadProjetFile(boardId, file_name, resource_id)
+            .then((res) => {
+              if (res && res.code === "0") {
+                parent && parent.getFileList();
+              }
+            });
+        } else {
+          message.warn(res.message);
+        }
+        resolve(res);
+      });
+    });
+  };
   return (
     <div
       style={{
@@ -40,7 +104,7 @@ const CreatePanelHeader = ({ data, index: dataIndex, delGroup }) => {
           <Fragment>
             <Col>
               <Input
-                // style={{ borderRadius: "5px" }}
+                style={{ borderRadius: "5px" }}
                 placeholder="请输入名称"
                 size="small"
                 autoFocus
@@ -75,10 +139,30 @@ const CreatePanelHeader = ({ data, index: dataIndex, delGroup }) => {
                 size="small"
                 onClick={(e) => {
                   e.stopPropagation();
-                  this.onModifyOk();
+                  // this.onModifyOk();
                   setIsEdit(false);
                   setHideEdit(false);
                   setHideDel(false);
+                  if (isAddGroup) {
+                    planServices
+                      .createBoardTaskGroup(boardId, groupName)
+                      .then((res) => {
+                        if (res && res.code === "0") {
+                          planServices
+                            .getBoardTaskGroupList(boardId)
+                            .then((res) => {
+                              if (res && res.code === "0") {
+                                let oldPanles = parent.state.panels;
+                                parent.setState({
+                                  panels: [...oldPanles, ...res.data],
+                                });
+                              }
+                            });
+                        } else {
+                          message.warn(res.message);
+                        }
+                      });
+                  }
                 }}
                 shape="circle"
                 type="primary"
@@ -109,22 +193,41 @@ const CreatePanelHeader = ({ data, index: dataIndex, delGroup }) => {
           style={{ fontSize: 24, color: "rgb(158, 166, 194)" }}
           onClick={(e) => {
             e.stopPropagation();
-            delGroup && delGroup(dataIndex);
+            delGroup && delGroup(dataIndex, data);
           }}
         >
           &#xe7b8;
         </i>
       ) : null}
-      {/* {data.genExtraIconFont ? (
-        <i
-          className={globalStyle.global_icon}
-          dangerouslySetInnerHTML={{ __html: data.genExtraIconFont }}
-          onClick={(e) => {
-            e.stopPropagation();
-            data.genExtraCallBack(data);
+      {data.genExtraIconFont ? (
+        <Upload
+          // action="/api/map/file/upload"
+          action={(file) => uploadFileAction(file)}
+          beforeUpload={checkFileSize}
+          multiple
+          headers={{ Authorization: BASIC.getUrlParam.token }}
+          onChange={(e) => {
+            onupload(e);
           }}
-        ></i>
-      ) : null} */}
+          showUploadList={false}
+          fileList={file}
+          // customRequest={customRequest}
+        >
+          <i
+            className={globalStyle.global_icon}
+            dangerouslySetInnerHTML={{ __html: data.genExtraIconFont }}
+            style={{
+              fontSize: 24,
+              color: "rgb(158, 166, 194)",
+              marginLeft: 30,
+            }}
+            // onClick={(e) => {
+            //   e.stopPropagation();
+            //   data.genExtraCallBack(data);
+            // }}
+          ></i>
+        </Upload>
+      ) : null}
     </div>
   );
 };
@@ -153,135 +256,56 @@ export default class Plan extends React.Component {
           genExtraCallBack: (data) => {},
         },
       ],
-      datas: [
-        {
-          type: "plan",
-          finish: "0",
-          title: "现场拍照",
-          date: "今天  8月24日 周一  10:00",
-          star: "1",
-          remind: "0",
-          overdue: "0",
-        },
-        {
-          type: "plan",
-          finish: "0",
-          title: "现场拍照",
-          date: "今天  8月24日 周一  10:00",
-          star: "0",
-          remind: "0",
-          overdue: "0",
-        },
-        {
-          type: "plan",
-          finish: "0",
-          title: "索取政策文件和图纸",
-          date: "",
-          star: "0",
-          remind: "0",
-          overdue: "0",
-        },
-        {
-          type: "plan",
-          finish: "0",
-          title: "重点人物访谈",
-          date: "9月12日 周五",
-          star: "0",
-          remind: "1",
-          overdue: "0",
-        },
-        {
-          type: "plan",
-          finish: "0",
-          title: "惠州市博罗县狮子城",
-          date: "计划已过期  7月15日 周一",
-          star: "0",
-          remind: "0",
-          overdue: "1",
-        },
-        {
-          type: "plan",
-          finish: "1",
-          title: "发放调查问卷表",
-          date: "7月15日 周三",
-          star: "0",
-          remind: "0",
-          overdue: "0",
-        },
-        {
-          type: "file",
-          title: "华侨新村踏勘任务书",
-          remark: "7月15日 周三",
-          iconType: "icon-bianzu851",
-        },
-        {
-          type: "file",
-          title: "沙寮村文件",
-          remark: "7月15日 周三",
-          iconType: "icon-bianzu871",
-        },
-        {
-          type: "file",
-          title: "华侨新村踏勘任务书",
-          remark: "7月15日 周三",
-          iconType: "icon-bianzu811",
-        },
-        {
-          type: "file",
-          title: "沙寮村文件",
-          remark: "7月15日 周三",
-          iconType: "icon-bianzu801",
-        },
-        {
-          type: "file",
-          title: "沙寮村文件",
-          remark: "7月15日 周三",
-          iconType: "icon-bianzu831",
-        },
-        {
-          type: "file",
-          title: "沙寮村文件",
-          remark: "7月15日 周三",
-          iconType: "icon-bianzu921",
-        },
-        {
-          type: "file",
-          title: "沙寮村文件",
-          remark: "7月15日 周三",
-          iconType: "icon-bianzu911",
-        },
-        {
-          type: "file",
-          title: "沙寮村文件",
-          remark: "7月15日 周三",
-          iconType: "icon-bianzu901",
-        },
-        {
-          type: "file",
-          title: "沙寮村文件",
-          remark: "7月15日 周三",
-          iconType: "icon-bianzu891",
-        },
-        {
-          type: "file",
-          title: "沙寮村文件",
-          remark: "7月15日 周三",
-          iconType: "icon-bianzu881",
-        },
-        {
-          type: "file",
-          title: "沙寮村文件",
-          remark: "7月15日 周三",
-          iconType: "icon-bianzu861",
-        },
-        {
-          type: "file",
-          title: "沙寮村文件",
-          remark: "7月15日 周三",
-          iconType: "icon-bianzu841",
-        },
-      ],
+      fileList: [],
+      datas: [],
     };
+    this.suffixArr = [
+      { type: "icon-bianzu851", suffix: ["doc", "docx"] },
+      { type: "icon-bianzu871", suffix: ["ppt", "pptx"] },
+      { type: "icon-bianzu811", suffix: ["rar"] },
+      { type: "icon-bianzu801", suffix: ["mov"] },
+      { type: "icon-bianzu831", suffix: ["mp3"] },
+      { type: "icon-bianzu921", suffix: ["mp4"] },
+      { type: "icon-bianzu911", suffix: ["avi"] },
+      { type: "icon-bianzu901", suffix: ["zip"] },
+      { type: "icon-bianzu891", suffix: ["png"] },
+      { type: "icon-bianzu881", suffix: ["jpg"] },
+      { type: "icon-bianzu861", suffix: ["pdf"] },
+      { type: "icon-bianzu841", suffix: ["xls", "xlsx"] },
+    ];
+  }
+
+  componentDidMount() {
+    const { board } = this.props;
+    services.getBoardTaskDefaultList(board.board_id).then((res) => {
+      if (res && res.code === "0") {
+        let datas = [];
+        res.data.forEach((item) => {
+          item.type = "plan";
+          datas.push(item);
+        });
+        this.setState({
+          datas: datas,
+        });
+      }
+    });
+    planServices.getBoardTaskGroupList(board.board_id).then((res) => {
+      if (res && res.code === "0") {
+        let oldPanles = this.state.panels;
+        res.data.forEach((item) => {
+          item.type = "plan";
+          if (item.tasks) {
+            item.tasks.forEach((item2) => {
+              item2.type = "plan";
+            });
+          }
+        });
+        this.setState({
+          panels: [...oldPanles, ...res.data],
+        });
+      }
+    });
+    this.getFileList(board);
   }
 
   addGroup = () => {
@@ -295,28 +319,41 @@ export default class Plan extends React.Component {
           color: "rgba(106, 154, 255, 1)",
           canNotDel: false,
           canNotEdit: false,
+          isAdd: true,
         },
       ],
     });
   };
 
-  delGroup = (index) => {
-    let panels = this.state.panels;
-    panels.splice(index, 1);
-    this.setState({
-      panels: panels,
+  delGroup = (index, item) => {
+    planServices.deleteBoardTaskGroup(item.id).then((res) => {
+      if (res && res.code === "0") {
+        let panels = this.state.panels;
+        panels.splice(index, 1);
+        this.setState({
+          panels: panels,
+        });
+      } else {
+        message.warn(res.message);
+      }
     });
   };
 
-  addPlan = () => {
+  addPlan = (groupId) => {
     return (
       <div
         className={`${styles.item} ${styles.addPlan}`}
         onClick={() => {
-          const { parent } = this.props;
-          parent.setState({
-            showAddPlan: true,
-          });
+          const { parent, board } = this.props;
+          parent.setState(
+            {
+              showAddPlan: true,
+              isAdd: true,
+              boardId: board.board_id,
+              planGroupId: groupId,
+            },
+            () => {}
+          );
         }}
       >
         <i className={globalStyle.global_icon}>&#xe7dc;</i>
@@ -327,15 +364,124 @@ export default class Plan extends React.Component {
     );
   };
 
-  createItem = (item) => {
+  handleDelClick = (e, id, type) => {
+    e.stopPropagation();
+    if (type === "plan") {
+      planServices.deleteBoardTask(id).then((res) => {
+        if (res && res.code === "0") {
+          let datas = this.state.datas;
+          let index = datas.findIndex((item) => item.id === id);
+          datas.splice(index, 1);
+          this.setState({
+            datas: datas,
+          });
+        }
+      });
+    } else {
+      planServices.deleteBoardFile(id).then((res) => {
+        if (res && res.code === "0") {
+          let datas = this.state.fileList;
+          let index = datas.findIndex((item) => item.id === id);
+          datas.splice(index, 1);
+          this.setState({
+            fileList: datas,
+          });
+        }
+      });
+    }
+  };
+
+  finishBoardTask = (item) => {
+    planServices.finishBoardTask(item.id).then((res) => {
+      if (res && res.code === "0") {
+        const { board } = this.props;
+        services.getBoardTaskDefaultList(board.board_id).then((res) => {
+          if (res && res.code === "0") {
+            let datas = [];
+            res.data.forEach((item) => {
+              item.type = "plan";
+              datas.push(item);
+            });
+            this.setState({
+              datas: datas,
+            });
+          }
+        });
+      } else {
+        message.warn(res.message);
+      }
+    });
+  };
+
+  cancelFinishBoardTask = (item) => {
+    planServices.cancelBoardTask(item.id).then((res) => {
+      if (res && res.code === "0") {
+        const { board } = this.props;
+        services.getBoardTaskDefaultList(board.board_id).then((res) => {
+          if (res && res.code === "0") {
+            let datas = [];
+            res.data.forEach((item) => {
+              item.type = "plan";
+              datas.push(item);
+            });
+            this.setState({
+              datas: datas,
+            });
+          }
+        });
+      } else {
+        message.warn(res.message);
+      }
+    });
+  };
+
+  handleCompletePlan = (e, item) => {
+    e.stopPropagation();
+    if (item.is_complete) {
+      if (item.is_complete === "1") {
+      } else {
+        this.finishBoardTask(item);
+      }
+    } else {
+      this.finishBoardTask(item);
+    }
+  };
+
+  getIcon = (item) => {
+    let iconfont = "icon-weizhileixing";
+    if (item.file_name) {
+      let suffixIndex = item.file_name.lastIndexOf(".");
+      const suffixName = item.file_name.substring(
+        suffixIndex + 1,
+        item.file_name.length
+      );
+      for (let i = 0; i < this.suffixArr.length; i++) {
+        if (this.suffixArr[i].suffix.includes(suffixName)) {
+          iconfont = this.suffixArr[i].type;
+          break;
+        }
+      }
+    }
+    return iconfont;
+  };
+
+  createItem = (item, type) => {
     return (
       <div
         className={`${styles.item} ${styles.planItem}`}
         onClick={() => {
+          const { parent, board } = this.props;
           if (item.type === "plan") {
-            const { parent } = this.props;
             parent.setState({
               showAddPlan: true,
+              isAdd: false,
+              planId: item.id,
+              boardId: board.board_id,
+              planGroupId: "",
+            });
+          } else {
+            planServices.downLoadFile(item.resource_id).then((res) => {
+              window.open(res.message, "_blank");
             });
           }
         }}
@@ -344,14 +490,15 @@ export default class Plan extends React.Component {
           {item.type === "plan" ? (
             <i
               className={`${globalStyle.global_icon} ${
-                item.finish === "0" ? styles.style1 : styles.style2
+                !item.complete_time ? styles.style1 : styles.style2
               }`}
               dangerouslySetInnerHTML={{
-                __html: item.finish === "0" ? "&#xe7f2;" : "&#xe7f8;",
+                __html: !item.complete_time ? "&#xe7f2;" : "&#xe7f8;",
               }}
+              onClick={(e) => this.handleCompletePlan(e, item)}
             ></i>
           ) : (
-            <MyIcon type={item.iconType} style={{ fontSize: 24 }}></MyIcon>
+            <MyIcon type={this.getIcon(item)} style={{ fontSize: 24 }}></MyIcon>
           )}
         </div>
         <div
@@ -362,8 +509,8 @@ export default class Plan extends React.Component {
             ...(item.type !== "file" ? {} : { lineHeight: "50px" }),
           }}
         >
-          <span>{item.title}</span>
-          {item.date ? (
+          <span>{item.name || item.file_name}</span>
+          {item.end_time ? (
             <span
               className={styles.date}
               style={{
@@ -372,7 +519,7 @@ export default class Plan extends React.Component {
                 textOverflow: "ellipsis",
               }}
             >
-              {item.date}
+              {item.end_time}
               {item.remind === "1" ? (
                 <i
                   className={globalStyle.global_icon}
@@ -408,6 +555,7 @@ export default class Plan extends React.Component {
           </i>
           <i
             className={globalStyle.global_icon}
+            onClick={(e) => this.handleDelClick(e, item.id, type)}
             style={{
               fontSize: 24,
               color: "rgba(158, 166, 194, 1)",
@@ -439,8 +587,24 @@ export default class Plan extends React.Component {
     return null;
   };
 
+  getFileList = (board) => {
+    if (!board) {
+      board = this.props.board;
+    }
+    services.getBoardFileList(board.board_id).then((res) => {
+      if (res && res.code === "0") {
+        if (res.data) {
+          this.setState({
+            fileList: res.data,
+          });
+        }
+      }
+    });
+  };
+
   handleAddGroupClick = () => {};
   render() {
+    const { board } = this.props;
     const { Panel } = Collapse;
     return (
       <div className={styles.wrapper}>
@@ -448,33 +612,45 @@ export default class Plan extends React.Component {
           className={`${styles.body} ${globalStyle.autoScrollY}`}
           style={{ height: "100%" }}
         >
-          <Collapse>
+          <Collapse defaultActiveKey={[0, 1]}>
             {this.state.panels.map((item, index) => {
               return (
                 <Panel
                   key={index}
                   header={
                     <CreatePanelHeader
+                      boardId={board.board_id}
                       data={item}
                       index={index}
+                      parent={this}
                       delGroup={this.delGroup}
+                      isAddGroup={item.isAdd}
                     ></CreatePanelHeader>
                   }
                   // extra={this.genExtra(item)}
                 >
                   <div style={{ padding: 16 }}>
-                    {item.type === "plan" ? this.addPlan() : null}
-                    {this.state.datas.map((item2) => {
-                      if (item.type === item2.type) {
-                        if (item2.finish !== "1" && item2.type === "plan") {
-                          return this.createItem(item2);
-                        }
-                        if (item2.type === "file") {
-                          return this.createItem(item2);
-                        }
-                      }
-                      return null;
-                    })}
+                    {item.type === "plan" ? this.addPlan(item.id) : null}
+                    {item.canNotDel
+                      ? this.state.datas.map((item2) => {
+                          if (item.type === item2.type) {
+                            if (!item2.complete_time && item2.type === "plan") {
+                              return this.createItem(item2, "plan");
+                            }
+                          }
+                          return null;
+                        })
+                      : item.tasks &&
+                        item.tasks.map((item2) => {
+                          if (!item2.complete_time) {
+                            return this.createItem(item2, "plan");
+                          }
+                          return null;
+                        })}
+                    {item.type === "file" &&
+                      this.state.fileList.map((item2) => {
+                        return this.createItem(item2, "file");
+                      })}
                   </div>
                   {item.type === "plan" ? (
                     <Collapse>
@@ -487,12 +663,25 @@ export default class Plan extends React.Component {
                         className="finish"
                       >
                         <div style={{ padding: 16 }}>
-                          {this.state.datas.map((item) => {
-                            if (item.finish === "1") {
-                              return this.createItem(item);
-                            }
-                            return null;
-                          })}
+                          {item.canNotDel
+                            ? this.state.datas.map((item2) => {
+                                if (item.type === item2.type) {
+                                  if (
+                                    item2.complete_time &&
+                                    item2.type === "plan"
+                                  ) {
+                                    return this.createItem(item2, "plan");
+                                  }
+                                }
+                                return null;
+                              })
+                            : item.tasks &&
+                              item.tasks.map((item2) => {
+                                if (item2.complete_time) {
+                                  return this.createItem(item2, "plan");
+                                }
+                                return null;
+                              })}
                         </div>
                       </Panel>
                     </Collapse>

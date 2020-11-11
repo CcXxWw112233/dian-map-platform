@@ -41,6 +41,9 @@ export default class Project extends React.Component {
       openPanel: true,
       update: false,
       showAddPlan: false,
+      boardId: "",
+      planGroupId: "",
+      planId: ""
     };
     this.getLoaction = throttle(this.getLoaction, 1000);
   }
@@ -233,7 +236,16 @@ export default class Project extends React.Component {
             ></ScoutingDetails>
           </Main>
         )}
-        {this.state.showAddPlan ? <AddPlan parent={this} /> : null}
+        {this.state.showAddPlan ? (
+          <AddPlan
+            parent={this}
+            taskName={this.state.taskName}
+            isAdd={this.state.isAdd}
+            boardId={this.state.boardId}
+            planId={this.state.planId}
+            planGroupId={this.state.planGroupId}
+          />
+        ) : null}
       </div>
     );
   }
