@@ -118,6 +118,11 @@ export default class PublicData extends React.Component {
 
   componentWillUnmount() {
     PublicDataActions.clear();
+    this.lastSelectedKeys = [];
+    this.lastKeywords = [];
+    this.lastKeywords2 = [];
+    this.lastSingle = null;
+    this.lastCheckedNodes = [];
     Event.Evt.firEvent("displaySearchBtn", {
       visible: false,
       keywords: [],
