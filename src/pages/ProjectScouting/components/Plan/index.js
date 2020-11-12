@@ -63,9 +63,9 @@ const CreatePanelHeader = ({
       //     item.type = "plan";
       //   }
       // });
-      let index = oldPanles.findIndex(item => item.id == res.data.id);
+      let index = oldPanles.findIndex((item) => item.id == res.data.id);
       oldPanles[index] = res.data;
-      oldPanles[index].type = "plan"
+      oldPanles[index].type = "plan";
       parent.setState({
         panels: oldPanles,
       });
@@ -472,10 +472,27 @@ export default class Plan extends React.Component {
         if (res && res.code === "0") {
           let datas = this.state.datas;
           let index = datas.findIndex((item) => item.id === id);
-          datas.splice(index, 1);
-          this.setState({
-            datas: datas,
-          });
+          if (index > -1) {
+            datas.splice(index, 1);
+            this.setState({
+              datas: datas,
+            });
+          } else {
+            let panels = this.state.panels;
+            for (let i = 0; i < panels.length; i++) {
+              if (panels[i].tasks) {
+                for (let j = 0; j < panels[i].tasks.length; j++) {
+                  if (panels[i].tasks[j].id === id) {
+                    panels[i].tasks.splice(j, 1);
+                    break;
+                  }
+                }
+              }
+            }
+            this.setState({
+              panels: panels,
+            });
+          }
         }
       });
     } else {
