@@ -141,7 +141,7 @@ export default {
   // 获取采集列表
   GET_COLLECTION_LIST: async (data) => {
     let res = await getSession("ScoutingItemId");
-    let board_id = res.data
+    let board_id = res.data;
     let base64 = getBase64(board_id);
     let response = await request("GET", "/map/collection/list", data, {
       BaseInfo: base64,
@@ -155,7 +155,7 @@ export default {
   // 组合一个采集数据
   MERGE_COLLECTION: async (data) => {
     let res = await getSession("ScoutingItemId");
-    let board_id = res.data
+    let board_id = res.data;
     let base64 = getBase64(board_id);
     let response = await request("POST", "/map/collection/group", data, {
       BaseInfo: base64,
@@ -169,7 +169,7 @@ export default {
   // 解除一个元素的组合
   CANCEL_COLLECTION_MERGE: async (data) => {
     let res = await getSession("ScoutingItemId");
-    let board_id = res.data
+    let board_id = res.data;
     let base64 = getBase64(board_id);
     let response = await request("DELETE", "/map/collection/group", data, {
       BaseInfo: base64,
@@ -183,7 +183,7 @@ export default {
   // 排序采集数据
   SORT_COLLECTION_DATA: async (data) => {
     let res = await getSession("ScoutingItemId");
-    let board_id = res.data
+    let board_id = res.data;
     let base64 = getBase64(board_id);
     let response = await request("POST", `/map/collection/sort`, data, {
       BaseInfo: base64,
@@ -197,7 +197,7 @@ export default {
   // 删除一条采集数据
   DELETE_COLLECTION: async (id) => {
     let res = await getSession("ScoutingItemId");
-    let board_id = res.data
+    let board_id = res.data;
     let base64 = getBase64(board_id);
     let response = await request(
       "DELETE",
@@ -216,7 +216,7 @@ export default {
   // 修改一条采集数据
   EDIT_COLLECTION: async (data) => {
     let res = await getSession("ScoutingItemId");
-    let board_id = res.data
+    let board_id = res.data;
     let base64 = getBase64(board_id);
     let newData = { area_type_id: data.area_type_id, id: data.id };
     let response = await request("PUT", "/map/collection", newData, {
@@ -231,7 +231,7 @@ export default {
   // 删除一条分组数据
   DELETE_AREA: async (id, board_id) => {
     let res = await getSession("ScoutingItemId");
-    board_id = res.data
+    board_id = res.data;
     let base64 = getBase64(board_id);
     let response = await request(
       "DELETE",
@@ -250,7 +250,7 @@ export default {
   // 修改分组名称
   EDIT_AREA_NAME: async (id, data, board_id) => {
     let res = await getSession("ScoutingItemId");
-    board_id = res.data
+    board_id = res.data;
     let base64 = getBase64(board_id);
     let response = await request("PUT", `/map/area_type/${id}`, data, {
       BaseInfo: base64,
@@ -264,7 +264,7 @@ export default {
   // 获取规划图数据
   GET_PLAN_PIC: async (id) => {
     let res = await getSession("ScoutingItemId");
-    let board_id = res.data
+    let board_id = res.data;
     let base64 = getBase64(board_id);
     let response = await request(
       "GET",
@@ -287,7 +287,7 @@ export default {
   // 保存修改的规划图
   SAVE_EDIT_PLAN_IMG: async (id, data) => {
     let res = await getSession("ScoutingItemId");
-    let board_id = res.data
+    let board_id = res.data;
     let base64 = getBase64(board_id);
     let response = await request("PUT", `/map/ght/${id}/extent`, data, {
       BaseInfo: base64,
@@ -301,7 +301,7 @@ export default {
   // 获取下载地址
   GET_DOWNLOAD_URL: async (id) => {
     let res = await getSession("ScoutingItemId");
-    let board_id = res.data
+    let board_id = res.data;
     let base64 = getBase64(board_id);
     let response = await request(
       "POST",
@@ -319,7 +319,7 @@ export default {
   // 发起会议
   METTING_START: async (data) => {
     let res = await getSession("ScoutingItemId");
-    let board_id = res.data
+    let board_id = res.data;
     let base64 = getBase64(board_id);
     let response = await request(
       "POST",
@@ -337,7 +337,7 @@ export default {
   // 获取项目成员数据
   GET_BOARD_USERS: async (data) => {
     let res = await getSession("ScoutingItemId");
-    let board_id = res.data
+    let board_id = res.data;
     let base64 = getBase64(board_id);
     let response = await request("GET", "/map/board/user", data, {
       BaseInfo: base64,
@@ -352,7 +352,7 @@ export default {
       poi_ids: publicDataIds,
     };
     let res = await getSession("ScoutingItemId");
-    let board_id = res.data
+    let board_id = res.data;
     let base64 = getBase64(board_id);
     let response = await request("DELETE", "/map/public/poi/board", data, {
       BaseInfo: base64,
@@ -368,7 +368,7 @@ export default {
       poi_ids: publicDataIds,
     };
     let res = await getSession("ScoutingItemId");
-    let board_id = res.data
+    let board_id = res.data;
     let base64 = getBase64(board_id);
     let response = await request("PUT", "/map/public/poi/board/move", data, {
       BaseInfo: base64,
@@ -378,7 +378,7 @@ export default {
 
   MOVE_PUBLICDATA_TREE2: async (data) => {
     let res = await getSession("ScoutingItemId");
-    let board_id = res.data
+    let board_id = res.data;
     let base64 = getBase64(board_id);
     let response = await request("PUT", "/map/collection", data, {
       BaseInfo: base64,
@@ -394,7 +394,7 @@ export default {
       poi_ids: publicDataIds,
     };
     let res = await getSession("ScoutingItemId");
-    let board_id = res.data
+    let board_id = res.data;
     let base64 = getBase64(board_id);
     let response = await request("PUT", "/map/public/poi/board/copy", data, {
       BaseInfo: base64,
@@ -407,11 +407,29 @@ export default {
       target_area_type_id: targetGroupId,
     };
     let res = await getSession("ScoutingItemId");
-    let board_id = res.data
+    let board_id = res.data;
     let base64 = getBase64(board_id);
     let response = await request("PUT", "/map/collection/copy", data, {
       BaseInfo: base64,
     });
+    return checkResponse(response);
+  },
+
+  GET_AREACENTERPOINT_LIST: async (
+    min_lon,
+    max_lon,
+    min_lat,
+    max_lat,
+    level
+  ) => {
+    const param = {
+      min_lon: min_lon,
+      max_lon: max_lon,
+      min_lat: min_lat,
+      max_lat: max_lat,
+      level: level,
+    };
+    let response = await request("GET", "/map/area/center_point/list", param);
     return checkResponse(response);
   },
 };

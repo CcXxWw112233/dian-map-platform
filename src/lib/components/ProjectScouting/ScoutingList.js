@@ -19,10 +19,6 @@ import {
 
 import { gcj02_to_wgs84, wgs84_to_gcj02 } from "utils/transCoordinateSystem";
 
-import totalOverlay from "../../../components/PublicOverlays/totalOverlay";
-
-// import addFeaturesOverlay from '../../../components/PublicOverlays/addFeaturesOverlay'
-
 const action = function () {
   const {
     GET_SCOUTING_LIST,
@@ -177,26 +173,6 @@ const action = function () {
     this.currentData = JSON.parse(JSON.stringify(data));
     this.Source && this.Source.clear();
     this.clearOverlay();
-
-    // const ele = totalOverlay({name: "龙岗区", wranNumber: 0, total: 100});
-    // let newOverlay = createOverlay(ele);
-    // let coor = TransformCoordinate(
-    //   [114.05233497149, 22.621401401884],
-    //   "EPSG:4326",
-    //   "EPSG:3857"
-    // );
-    // newOverlay.setPosition(coor)
-    // InitMap.map.addOverlay(newOverlay);
-
-    // const ele2 = totalOverlay({name: "龙岗区", wranNumber: 2, total: 100});
-    // let newOverlay2 = createOverlay(ele2);
-    // let coor2 = TransformCoordinate(
-    //   [114.0924397149, 22.621401401884],
-    //   "EPSG:4326",
-    //   "EPSG:3857"
-    // );
-    // newOverlay2.setPosition(coor2)
-    // InitMap.map.addOverlay(newOverlay2);
 
     data &&
       data.forEach((item) => {

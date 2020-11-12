@@ -51,6 +51,8 @@ import nProgress from "nprogress";
 import { getVectorContext } from "ol/render";
 import { Style, Circle, Stroke, Fill } from "ol/style";
 
+import totalOverlay from "../../../components/PublicOverlays/totalOverlay";
+
 function Action() {
   const {
     GET_AREA_LIST,
@@ -83,6 +85,7 @@ function Action() {
   this.geoFeatures = [];
   this.searchAroundCircle = null;
   this.searchPageIndex = 1;
+
   Event.Evt.addEventListener("basemapchange", (key) => {
     if (!this.mounted) return;
     if (InitMap.checkUpdateMapSystem(key)) {
@@ -185,6 +188,31 @@ function Action() {
       return TransformCoordinate(coor);
     }
   };
+
+  this.mapMoveEnd = () => {
+    InitMap.map.on("moveend", (e) => {
+      const extent = InitMap.map
+        .getView()
+        .calculateExtent(InitMap.map.getSize());
+      let coor1 = TransformCoordinate(
+        [extent[0], extent[1]],
+        "EPSG:3857",
+        "EPSG:4326"
+      );
+      let coor2 = TransformCoordinate(
+        [extent[2], extent[3]],
+        "EPSG:3857",
+        "EPSG:4326"
+      );
+
+      config
+        .GET_AREACENTERPOINT_LIST(coor1[0], coor2[0], coor1[1], coor2[1], 3)
+        .then((res) => {
+          debugger;
+        });
+    });
+  };
+
   this.init = (dispatch) => {
     this.mounted = true;
     this.Layer.setSource(this.Source);
@@ -193,6 +221,27 @@ function Action() {
       return layer.get("id") === this.Layer.get("id");
     });
     this.layer = plotEdit.getPlottingLayer(dispatch);
+    this.mapMoveEnd();
+    const extent = InitMap.map.getView().calculateExtent(InitMap.map.getSize());
+    const ele = totalOverlay({ name: "龙岗区", wranNumber: 0, total: 100 });
+    let newOverlay = createOverlay(ele);
+    let coor = TransformCoordinate(
+      [114.05233497149, 22.621401401884],
+      "EPSG:4326",
+      "EPSG:3857"
+    );
+    newOverlay.setPosition(coor);
+    InitMap.map.addOverlay(newOverlay);
+
+    const ele2 = totalOverlay({ name: "龙岗区", wranNumber: 2, total: 100 });
+    let newOverlay2 = createOverlay(ele2);
+    let coor2 = TransformCoordinate(
+      [114.0924397149, 22.621401401884],
+      "EPSG:4326",
+      "EPSG:3857"
+    );
+    newOverlay2.setPosition(coor2);
+    InitMap.map.addOverlay(newOverlay2);
 
     if (!layer[0]) {
       InitMap.map.on("click", (evt) => {

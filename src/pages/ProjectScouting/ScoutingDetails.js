@@ -37,6 +37,9 @@ import {
   UploadItem,
   areaScouting,
 } from "./components/ScoutingDetailsSubComponents";
+
+import { TransformCoordinate, createOverlay } from "../../lib/utils";
+
 import PlayCollectionControl from "./components/playCollectionControl";
 // import { getOffsetTop } from "utils/utils";
 import CollectionDetail from "./components/CollectionDetail";
@@ -50,6 +53,7 @@ import AboutAction from "../../lib/components/ProjectScouting/AroundAbout";
 import Meettings from "./components/Meeting";
 import PublicDataTreeComponent from "./components/PublicDataTreeComponent";
 import Plan from "./components/Plan";
+import totalOverlay from "../../components/PublicOverlays/totalOverlay/index";
 
 const { Evt } = Event;
 const { TabPane } = Tabs;
@@ -211,6 +215,27 @@ export default class ScoutingDetails extends PureComponent {
       this.scrollForFeature(id);
     });
     Evt.on("handlePlotFeature", this.handlePlotFeature);
+
+    debugger
+    const ele = totalOverlay({ name: "龙岗区", wranNumber: 0, total: 100 });
+    let newOverlay = createOverlay(ele);
+    let coor = TransformCoordinate(
+      [114.05233497149, 22.621401401884],
+      "EPSG:4326",
+      "EPSG:3857"
+    );
+    newOverlay.setPosition(coor);
+    mapApp.map.addOverlay(newOverlay);
+
+    // const ele2 = totalOverlay({ name: "龙岗区", wranNumber: 2, total: 100 });
+    // let newOverlay2 = createOverlay(ele2);
+    // let coor2 = TransformCoordinate(
+    //   [114.0924397149, 22.621401401884],
+    //   "EPSG:4326",
+    //   "EPSG:3857"
+    // );
+    // newOverlay2.setPosition(coor2);
+    // mapApp.map.addOverlay(newOverlay2);
   }
 
   // 定位到位置
