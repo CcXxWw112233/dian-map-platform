@@ -244,31 +244,33 @@ const CreatePanelHeader = ({
         </i>
       ) : null}
       {data.genExtraIconFont ? (
-        <Upload
-          action={(file) => uploadFileAction(file)}
-          beforeUpload={checkFileSize}
-          multiple
-          headers={{ Authorization: BASIC.getUrlParam.token }}
-          onChange={(e) => {
-            onupload(e);
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
           }}
-          showUploadList={false}
-          fileList={file}
         >
-          <i
-            className={globalStyle.global_icon}
-            dangerouslySetInnerHTML={{ __html: data.genExtraIconFont }}
-            style={{
-              fontSize: 24,
-              color: "rgb(158, 166, 194)",
-              marginLeft: 30,
+          <Upload
+            action={(file) => uploadFileAction(file)}
+            beforeUpload={checkFileSize}
+            multiple
+            headers={{ Authorization: BASIC.getUrlParam.token }}
+            onChange={(e) => {
+              onupload(e);
             }}
-            onClick={(e) => {
-              // e.stopPropagation();
-              // data.genExtraCallBack(data);
-            }}
-          ></i>
-        </Upload>
+            showUploadList={false}
+            fileList={file}
+          >
+            <i
+              className={globalStyle.global_icon}
+              dangerouslySetInnerHTML={{ __html: data.genExtraIconFont }}
+              style={{
+                fontSize: 24,
+                color: "rgb(158, 166, 194)",
+                marginLeft: 30,
+              }}
+            ></i>
+          </Upload>
+        </div>
       ) : null}
     </div>
   );

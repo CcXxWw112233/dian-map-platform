@@ -254,90 +254,66 @@ export default class ScoutingItem extends React.PureComponent {
               className={styles.settings}
               onClick={(e) => e.stopPropagation()}
             >
-              <span
-                className={`${styles.settings_item}`}
-                title="成员管理"
-                onClick={() => {
-                  const { displayPermissionModal, data } = this.props;
-                  displayPermissionModal(data);
-                }}
-                style={{
-                  ...(toolParent &&
-                    toolParent.getStyle(
-                      "map:board:member:manage",
-                      "project",
-                      this.props.data.board_id
-                    )),
-                }}
-                disabled={
-                  toolParent &&
-                  toolParent.getDisabled(
-                    "map:board:member:manage",
-                    "project",
-                    this.props.data.board_id
-                  )
-                }
-              >
-                <MyIcon type="icon-weidenglutouxiang" />
-              </span>
-              <span
-                className={`${styles.settings_item}`}
-                title="修改项目名称"
-                onClick={() => this.ToEdit()}
-                style={{
-                  ...(toolParent &&
-                    toolParent.getStyle("map:board:update", "org")),
-                }}
-                disabled={
-                  toolParent &&
-                  toolParent.getDisabled("map:board:update", "project")
-                }
-              >
-                <MyIcon type="icon-bianzu46" />
-              </span>
-
-              <UploadBgPic
-                onUpload={this.onUploadImg}
-                onStart={() => Nprogress.start()}
-              >
+              {toolParent.getIndex(
+                "map:board:member:manage",
+                "project",
+                this.props.data.board_id
+              ) > -1 ? (
                 <span
                   className={`${styles.settings_item}`}
-                  title="上传背景图"
-                  style={{
-                    ...(toolParent &&
-                      toolParent.getStyle("map:board:update", "org")),
+                  title="成员管理"
+                  onClick={() => {
+                    const { displayPermissionModal, data } = this.props;
+                    displayPermissionModal(data);
                   }}
-                  disabled={
-                    toolParent &&
-                    toolParent.getDisabled("map:board:update", "project")
-                  }
                 >
-                  <MyIcon type="icon-bianzu45" />
+                  <MyIcon type="icon-weidenglutouxiang" />
                 </span>
-              </UploadBgPic>
-
-              <Popconfirm
-                title="确定删除这个项目吗?"
-                okText="删除"
-                cancelText="取消"
-                overlayStyle={{ zIndex: 10000 }}
-                onConfirm={() => {
-                  this.setState({ visible: false });
-                  onRemove && onRemove();
-                }}
-                placement="topRight"
-              >
+              ) : null}
+              {toolParent.getIndex("map:board:update", "org") > -1 ? (
                 <span
-                  className={`${styles.settings_item} ${styles.removeBtn}`}
-                  title="删除项目"
-                  style={{
-                    ...(toolParent &&
-                      toolParent.getStyle("map:board:remove", "org")),
-                  }}
+                  className={`${styles.settings_item}`}
+                  title="修改项目名称"
+                  onClick={() => this.ToEdit()}
                 >
-                  <MyIcon type="icon-bianzu52" />
+                  <MyIcon type="icon-bianzu46" />
                 </span>
-              </Popconfirm>
+              ) : null}
+
+              {toolParent.getIndex("map:board:update", "org") ? (
+                <UploadBgPic
+                  onUpload={this.onUploadImg}
+                  onStart={() => Nprogress.start()}
+                >
+                  <span
+                    className={`${styles.settings_item}`}
+                    title="上传背景图"
+                  >
+                    <MyIcon type="icon-bianzu45" />
+                  </span>
+                </UploadBgPic>
+              ) : null}
+
+              {toolParent.getIndex("map:board:remove", "org") ? (
+                <Popconfirm
+                  title="确定删除这个项目吗?"
+                  okText="删除"
+                  cancelText="取消"
+                  overlayStyle={{ zIndex: 10000 }}
+                  onConfirm={() => {
+                    this.setState({ visible: false });
+                    onRemove && onRemove();
+                  }}
+                  placement="topRight"
+                >
+                  <span
+                    className={`${styles.settings_item} ${styles.removeBtn}`}
+                    title="删除项目"
+                  >
+                    <MyIcon type="icon-bianzu52" />
+                  </span>
+                </Popconfirm>
+              ) : null}
             </div>
           )}
           <div className={styles.projectModal}></div>
