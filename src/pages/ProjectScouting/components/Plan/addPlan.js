@@ -109,13 +109,13 @@ export default class AddPlan extends React.Component {
     });
     if (!value) return;
     if (value.trim() === "") return;
-    const { boardId, planGroupId, planId } = this.props;
-    let newPlanId = this.planId || planId;
+    const { boardId, planGroupId } = this.props;
+    let planId = this.planId || this.props.planId;
     planServices
-      .createBoardTask(boardId, planGroupId, value, newPlanId)
+      .createBoardTask(boardId, planGroupId, value, planId)
       .then((res) => {
         if (res && res.code === "0") {
-          planServices.getPlanDetail(newPlanId).then((res) => {
+          planServices.getPlanDetail(planId).then((res) => {
             if (res && res.code === "0") {
               if (res.data) {
                 this.setState({
@@ -156,7 +156,7 @@ export default class AddPlan extends React.Component {
   };
   handleDelPlanClick = (data) => {
     if (!data) return;
-    const { planId } = this.props;
+    let planId = this.planId || this.props.planId;
     planServices.deleteBoardTask(data.id).then((res) => {
       if (res && res.code === "0") {
         planServices.getPlanDetail(planId).then((res) => {
@@ -176,7 +176,7 @@ export default class AddPlan extends React.Component {
   };
   handleLastDateClick = (value) => {
     const timestamp = value._d.getTime();
-    const { planId } = this.props;
+    let planId = this.planId || this.props.planId;
     planServices.updateBoardTask(timestamp, planId, "").then((res) => {
       if (res && res.code === "0") {
       } else {
@@ -185,7 +185,7 @@ export default class AddPlan extends React.Component {
     });
   };
   handleClearEndTime = () => {
-    const { planId } = this.props;
+    let planId = this.planId || this.props.planId;
     planServices.updateBoardTask("", planId, "", "1").then((res) => {
       if (res && res.code === "0") {
         this.setState({

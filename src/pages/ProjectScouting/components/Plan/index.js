@@ -245,7 +245,6 @@ const CreatePanelHeader = ({
       ) : null}
       {data.genExtraIconFont ? (
         <Upload
-          // action="/api/map/file/upload"
           action={(file) => uploadFileAction(file)}
           beforeUpload={checkFileSize}
           multiple
@@ -255,7 +254,6 @@ const CreatePanelHeader = ({
           }}
           showUploadList={false}
           fileList={file}
-          // customRequest={customRequest}
         >
           <i
             className={globalStyle.global_icon}
@@ -265,10 +263,10 @@ const CreatePanelHeader = ({
               color: "rgb(158, 166, 194)",
               marginLeft: 30,
             }}
-            // onClick={(e) => {
-            //   e.stopPropagation();
-            //   data.genExtraCallBack(data);
-            // }}
+            onClick={(e) => {
+              // e.stopPropagation();
+              // data.genExtraCallBack(data);
+            }}
           ></i>
         </Upload>
       ) : null}
@@ -580,6 +578,48 @@ export default class Plan extends React.Component {
     return iconfont;
   };
 
+  getTime = (timestamp, isComplete) => {
+    let date = new Date();
+    date.setTime(timestamp);
+    let y = date.getFullYear();
+    let m = date.getMonth() + 1;
+    m = m < 10 ? "0" + m : m;
+    let d = date.getDate();
+    d = d < 10 ? "0" + d : d;
+
+    let currentTimestamp = new Date().getTime();
+    if (!isComplete) {
+      if (Number(currentTimestamp) > Number(timestamp)) {
+        return `计划已逾期 ${m}月${d}日 ${this.getWeek(timestamp)}`;
+      }
+    }
+    return `${m}月${d}日 ${this.getWeek(timestamp)}`;
+  };
+
+  // 获取星期
+  getWeek = (timestamp) => {
+    let date = new Date();
+    date.setTime(timestamp);
+    let week;
+    if (date.getDay() === 0) week = "周日";
+    if (date.getDay() === 1) week = "周一";
+    if (date.getDay() === 2) week = "周二";
+    if (date.getDay() === 3) week = "周三";
+    if (date.getDay() === 4) week = "周四";
+    if (date.getDay() === 5) week = "周五";
+    if (date.getDay() === 6) week = "周六";
+    return week;
+  };
+
+  // 逾期样式
+  getOverdueStyle = (timestamp) => {
+    let currentTimestamp = new Date().getTime();
+    if (Number(currentTimestamp) > Number(timestamp)) {
+      return { color: "rgba(249, 84, 85, 1)" };
+    }
+    return {};
+  };
+
   createItem = (item, type) => {
     return (
       <div
@@ -620,7 +660,9 @@ export default class Plan extends React.Component {
           className={styles.contentPart2}
           style={{
             width: "calc(100% - 85px)",
-            ...(item.date ? {} : { lineHeight: "50px" }),
+            ...(item.complete_time || item.end_time
+              ? {}
+              : { lineHeight: "50px" }),
             ...(item.type !== "file" ? {} : { lineHeight: "50px" }),
           }}
         >
@@ -629,20 +671,28 @@ export default class Plan extends React.Component {
               ...(item.complete_time
                 ? { color: "rgba(210, 212, 222, 1)" }
                 : {}),
+              ...(item.complete_time ? { textDecoration: "line-through" } : {}),
             }}
           >
             {item.name || item.file_name}
           </span>
-          {item.end_time ? (
+          {item.complete_time || item.end_time ? (
             <span
               className={styles.date}
               style={{
                 overflow: "hidden",
                 whiteSpace: "nowrap",
                 textOverflow: "ellipsis",
+                ...(item.complete_time
+                  ? { color: "rgba(210, 212, 222, 1)" }
+                  : {}),
+                ...this.getOverdueStyle(item.end_time),
               }}
             >
-              {item.end_time}
+              {this.getTime(
+                item.complete_time || item.end_time,
+                item.complete_time ? true : false
+              )}
               {item.remind === "1" ? (
                 <i
                   className={globalStyle.global_icon}
