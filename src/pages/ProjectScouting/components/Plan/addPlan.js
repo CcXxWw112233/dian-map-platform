@@ -186,7 +186,7 @@ export default class AddPlan extends React.Component {
     planServices.updateBoardTask("", planId, "", "1").then((res) => {
       if (res && res.code === "0") {
         this.setState({
-          endTime: null,
+          endTime: undefined,
         });
       } else {
         message.warn(res.message);
@@ -348,7 +348,7 @@ export default class AddPlan extends React.Component {
               </i>
               {/* <span>添加截止日期</span> */}
               <DatePicker
-                allowClear
+                // allowClear
                 size="small"
                 placeholder="添加截止日期"
                 bordered={false}
