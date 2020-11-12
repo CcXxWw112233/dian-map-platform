@@ -86,6 +86,7 @@ function Action() {
   this.searchAroundCircle = null;
   this.searchPageIndex = 1;
   this.overlayArr = [];
+  this.xyGroup = {};
 
   Event.Evt.addEventListener("basemapchange", (key) => {
     if (!this.mounted) return;
@@ -190,7 +191,30 @@ function Action() {
     }
   };
 
-  this.mapMoveEnd = () => {
+  this.mapMoveEnd = (data, { lenged, dispatch, showFeatureName }) => {
+    if (data) {
+      this.xyGroup = {};
+      data.forEach((item) => {
+        if (item.provincecode) {
+          if (!this.xyGroup[item.provincecode]) {
+            this.xyGroup[item.provincecode] = [];
+          }
+          this.xyGroup[item.provincecode].push(item);
+        }
+        if (item.citycode) {
+          if (!this.xyGroup[item.citycode]) {
+            this.xyGroup[item.citycode] = [];
+          }
+          this.xyGroup[item.citycode].push(item);
+        }
+        if (item.districtcode) {
+          if (!this.xyGroup[item.districtcode]) {
+            this.xyGroup[item.districtcode] = [];
+          }
+          this.xyGroup[item.districtcode].push(item);
+        }
+      });
+    }
     InitMap.map.on("moveend", (e) => {
       this.overlayArr.forEach((item) => {
         InitMap.map.removeOverlay(item);
@@ -211,36 +235,50 @@ function Action() {
       );
       const zoom = InitMap.map.getView().getZoom();
       let level = 3;
+      this.layer.projectScoutingArr.forEach((item) => {
+        this.layer.removeFeature(item);
+      });
       if (zoom < 10) {
         level = 1;
       }
       if (zoom >= 10 && zoom < 14) {
         level = 2;
       }
-      if (zoom >= 14) {
+      // if (zoom >= 14 && zoom < 16) {
+      if (zoom >= 12) {
         level = 3;
+        this.renderFeaturesCollection(data, {
+          lenged,
+          dispatch,
+          showFeatureName,
+        });
+        return
       }
-
+      // if (zoom >= 16) {
+      //   return;
+      // }
       config
         .GET_AREACENTERPOINT_LIST(coor1[0], coor2[0], coor1[1], coor2[1], level)
         .then((res) => {
           if (res && res.code === "0") {
             if (res.data) {
               res.data.forEach((item) => {
-                let ele = totalOverlay({
-                  name: item.district || item.province || item.city,
-                  wranNumber: 0,
-                  total: 100,
-                });
-                let newOverlay = createOverlay(ele);
-                let coor = TransformCoordinate(
-                  [item.lon, item.lat],
-                  "EPSG:4326",
-                  "EPSG:3857"
-                );
-                newOverlay.setPosition(coor);
-                InitMap.map.addOverlay(newOverlay);
-                this.overlayArr.push(newOverlay);
+                let total = this.xyGroup[item.code]?.length || 0;
+                if (total > 0) {
+                  let ele = totalOverlay({
+                    name: item.district || item.city || item.province,
+                    total: total,
+                  });
+                  let newOverlay = createOverlay(ele);
+                  let coor = TransformCoordinate(
+                    [item.lon, item.lat],
+                    "EPSG:4326",
+                    "EPSG:3857"
+                  );
+                  newOverlay.setPosition(coor);
+                  InitMap.map.addOverlay(newOverlay);
+                  this.overlayArr.push(newOverlay);
+                }
               });
             }
           }
@@ -256,7 +294,6 @@ function Action() {
       return layer.get("id") === this.Layer.get("id");
     });
     this.layer = plotEdit.getPlottingLayer(dispatch);
-    this.mapMoveEnd();
 
     if (!layer[0]) {
       InitMap.map.on("click", (evt) => {
@@ -1378,7 +1415,7 @@ function Action() {
     let features = data.filter((item) => item.collect_type === "4");
     let planPic = data.filter((item) => item.collect_type === "5");
     let geoData = data.filter((item) => item.collect_type === "8");
-
+    this.mapMoveEnd(features, { lenged, dispatch, showFeatureName });
     // 清除变量
     this.layer.style = null;
     this.layer.attrs = null;
@@ -1390,11 +1427,11 @@ function Action() {
     // 渲染geo数据
     await this.renderGeoJson(geoData).catch((err) => console.log(err));
     // 渲染标绘数据
-    await this.renderFeaturesCollection(features, {
-      lenged,
-      dispatch,
-      showFeatureName,
-    });
+    // await this.renderFeaturesCollection(features, {
+    //   lenged,
+    //   dispatch,
+    //   showFeatureName,
+    // });
 
     const sou = this.layer.showLayer.getSource();
     // 渲染规划图

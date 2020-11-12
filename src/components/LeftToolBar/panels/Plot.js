@@ -8,7 +8,7 @@ import { guid } from "./lib";
 import { symbols } from "./data";
 import { plotEdit } from "../../../utils/plotEdit";
 import FeatureOperatorEvent from "../../../utils/plot2ol/src/events/FeatureOperatorEvent";
-import { createStyle } from "../../../lib/utils/index";
+import { createStyle, TransformCoordinate } from "../../../lib/utils/index";
 import Event from "../../../lib/utils/event";
 
 import ListAction from "../../../lib/components/ProjectScouting/ScoutingList";
@@ -542,10 +542,11 @@ export default class Plot extends PureComponent {
         content: JSON.stringify(param),
       };
       if (param.geoType === "Point") {
+        let xy = TransformCoordinate(param.coordinates, "EPSG:3857", "EPSG:4326");
         window
           .CallWebMapFunction("getCityByLonLat", {
-            lon: param.coordinates[0],
-            lat: param.coordinates[1],
+            lon: xy[0],
+            lat: xy[1],
           })
           .then((res) => {
             obj.districtcode = res.addressComponent?.adcode;

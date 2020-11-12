@@ -8,7 +8,7 @@ export default function totalOverlay({ name, wranNumber, total }) {
   div.style.background = "rgb(48,114,246)";
   div.style.textAlign = "center";
   div.style.color = "rgb(255,255,255)";
-  div.style.padding = "10px";
+  div.style.padding = "20px";
   div.style.fontSize = "12px";
   if (wranNumber > 0) {
     div.style.background = "rgb(255,0,0)";
@@ -17,12 +17,12 @@ export default function totalOverlay({ name, wranNumber, total }) {
   span.innerHTML = name;
   div.appendChild(span);
 
-  let span2 = document.createElement("span");
-  span2.innerHTML = wranNumber > 0 ? wranNumber + "个预警" : "正常";
-  div.appendChild(span2);
+  // let span2 = document.createElement("span");
+  // span2.innerHTML = wranNumber > 0 ? wranNumber + "个预警" : "正常";
+  // div.appendChild(span2);
 
   let span3 = document.createElement("span");
-  span3.innerHTML = total + "处";
+  span3.innerHTML = "总数:" + total;
   div.appendChild(span3);
   return div;
 }

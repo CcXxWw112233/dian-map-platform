@@ -5,6 +5,7 @@ import styles from "../LeftToolBar.less";
 import ScoutDetail from "../../../lib/components/ProjectScouting/ScoutingDetail";
 import ListAction from "../../../lib/components/ProjectScouting/ScoutingList";
 import { plotEdit } from "../../../utils/plotEdit";
+import { TransformCoordinate } from "../../../lib/utils/index";
 
 export default class ProjectList extends React.Component {
   constructor(props) {
@@ -104,7 +105,24 @@ export default class ProjectList extends React.Component {
         board_id: this.state.projectId,
         content: JSON.stringify(param),
       };
-      return ScoutDetail.addCollection(obj);
+      if (param.geoType === "Point") {
+        let xy = TransformCoordinate(
+          param.coordinates,
+          "EPSG:3857",
+          "EPSG:4326"
+        );
+        window
+          .CallWebMapFunction("getCityByLonLat", {
+            lon: xy[0],
+            lat: xy[1],
+          })
+          .then((res) => {
+            obj.districtcode = res.addressComponent?.adcode;
+            return ScoutDetail.addCollection(obj);
+          });
+      } else {
+        return ScoutDetail.addCollection(obj);
+      }
     });
     Promise.all(promise)
       .then((resp) => {
