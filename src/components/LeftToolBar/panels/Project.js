@@ -233,6 +233,7 @@ export default class Project extends React.Component {
               parentTool={this.props.parent}
               changeQueryStr={this.changeQueryStr}
               parent={this}
+              showAddPlan={this.state.showAddPlan}
             ></ScoutingDetails>
           </Main>
         )}

@@ -24,6 +24,10 @@ export default class AddPlan extends React.Component {
   }
 
   componentDidMount() {
+    this.getDetails();
+  }
+
+  getDetails = () => {
     const { isAdd, planId } = this.props;
     if (!isAdd) {
       this.setState({
@@ -56,7 +60,7 @@ export default class AddPlan extends React.Component {
         });
       }
     }
-  }
+  };
 
   disabledDate = (current) => {
     return current && current < moment().endOf("day");
@@ -181,6 +185,9 @@ export default class AddPlan extends React.Component {
     const { planId } = this.props;
     planServices.updateBoardTask("", planId, "", "1").then((res) => {
       if (res && res.code === "0") {
+        this.setState({
+          endTime: null,
+        });
       } else {
         message.warn(res.message);
       }
@@ -352,9 +359,7 @@ export default class AddPlan extends React.Component {
                 disabledTime={this.disabledDateTime}
                 style={{ width: "calc(100% - 50px", padding: 0 }}
                 value={
-                  this.state.endTime
-                    ? moment(this.state.endTime)
-                    : undefined
+                  this.state.endTime ? moment(this.state.endTime) : undefined
                 }
                 onChange={(value) => this.handleLastDateClick(value)}
               />

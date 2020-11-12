@@ -15,6 +15,7 @@ const CreatePanelHeader = ({
   boardId,
   parent,
   isAddGroup,
+  scoutingDetail,
 }) => {
   let displayEdit = true,
     displayDel = true;
@@ -51,6 +52,64 @@ const CreatePanelHeader = ({
     }
     // uploadFiles.push(file);
     return true;
+  };
+
+  const updateParent = (res, isModify) => {
+    if (isModify) {
+      let oldPanles = parent.state.panels;
+      // oldPanles.forEach((item) => {
+      //   if (item.id === res.data.id) {
+      //     item = res.data;
+      //     item.type = "plan";
+      //   }
+      // });
+      let index = oldPanles.findIndex(item => item.id == res.data.id);
+      oldPanles[index] = res.data;
+      oldPanles[index].type = "plan"
+      parent.setState({
+        panels: oldPanles,
+      });
+    } else {
+      if (res && res.code === "0") {
+        scoutingDetail.setState({
+          addGroupDisabled: true,
+        });
+        let oldPanles = [];
+        parent.state.panels.forEach((item) => {
+          if (item.iconfont) {
+            oldPanles.push(item);
+          }
+        });
+        res.data.forEach((item) => {
+          item.type = "plan";
+        });
+        parent.setState({
+          panels: [...oldPanles, ...res.data],
+        });
+      }
+    }
+  };
+  const addGroup = (e) => {
+    e.stopPropagation();
+    // this.onModifyOk();
+    setIsEdit(false);
+    setHideEdit(false);
+    setHideDel(false);
+    if (isAddGroup) {
+      planServices.createBoardTaskGroup(boardId, groupName).then((res) => {
+        if (res && res.code === "0") {
+          planServices.getBoardTaskGroupList(boardId).then((res) => {
+            updateParent(res);
+          });
+        } else {
+          message.warn(res.message);
+        }
+      });
+    } else {
+      planServices.updateBoardTaskGroup(data.id, groupName).then((res) => {
+        updateParent(res, true);
+      });
+    }
   };
   const uploadFileAction = (file) => {
     return new Promise((resolve) => {
@@ -112,6 +171,7 @@ const CreatePanelHeader = ({
                 onPressEnter={(e) => {
                   e.stopPropagation();
                   setIsEdit(false);
+                  addGroup(e);
                 }}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -127,6 +187,14 @@ const CreatePanelHeader = ({
                   setIsEdit(false);
                   setHideEdit(false);
                   setHideDel(false);
+                  if (isAddGroup) {
+                    parent.resetGroup();
+                  } else {
+                    setGroupName(data.name);
+                  }
+                  scoutingDetail.setState({
+                    addGroupDisabled: true,
+                  });
                 }}
                 size="small"
                 shape="circle"
@@ -138,31 +206,7 @@ const CreatePanelHeader = ({
               <Button
                 size="small"
                 onClick={(e) => {
-                  e.stopPropagation();
-                  // this.onModifyOk();
-                  setIsEdit(false);
-                  setHideEdit(false);
-                  setHideDel(false);
-                  if (isAddGroup) {
-                    planServices
-                      .createBoardTaskGroup(boardId, groupName)
-                      .then((res) => {
-                        if (res && res.code === "0") {
-                          planServices
-                            .getBoardTaskGroupList(boardId)
-                            .then((res) => {
-                              if (res && res.code === "0") {
-                                let oldPanles = parent.state.panels;
-                                parent.setState({
-                                  panels: [...oldPanles, ...res.data],
-                                });
-                              }
-                            });
-                        } else {
-                          message.warn(res.message);
-                        }
-                      });
-                  }
+                  addGroup(e, true);
                 }}
                 shape="circle"
                 type="primary"
@@ -308,6 +352,47 @@ export default class Plan extends React.Component {
     this.getFileList(board);
   }
 
+  componentWillReceiveProps(nextProps) {
+    const { showAddPlan, board } = nextProps;
+    const { showAddPlan: oldShowAddPlan } = this.props;
+    if (showAddPlan !== oldShowAddPlan) {
+      services.getBoardTaskDefaultList(board.board_id).then((res) => {
+        if (res && res.code === "0") {
+          let datas = [];
+          res.data.forEach((item) => {
+            item.type = "plan";
+            datas.push(item);
+          });
+          this.setState({
+            datas: datas,
+          });
+        }
+      });
+      planServices.getBoardTaskGroupList(board.board_id).then((res) => {
+        if (res && res.code === "0") {
+          res.data.forEach((item) => {
+            item.type = "plan";
+            if (item.tasks) {
+              item.tasks.forEach((item2) => {
+                item2.type = "plan";
+              });
+            }
+          });
+          let oldPanles = [];
+          this.state.panels.forEach((item) => {
+            if (item.iconfont) {
+              oldPanles.push(item);
+            }
+          });
+          this.setState({
+            panels: [...oldPanles, ...res.data],
+          });
+        }
+      });
+      this.getFileList(board);
+    }
+  }
+
   addGroup = () => {
     let panels = this.state.panels;
     this.setState({
@@ -322,6 +407,22 @@ export default class Plan extends React.Component {
           isAdd: true,
         },
       ],
+    });
+  };
+
+  resetGroup = () => {
+    let panels = [];
+    let oldPanels = this.state.panels;
+    oldPanels.forEach((item) => {
+      if (item.iconfont) {
+        panels.push(item);
+      }
+      if (item.id) {
+        panels.push(item);
+      }
+    });
+    this.setState({
+      panels: panels,
     });
   };
 
@@ -437,11 +538,8 @@ export default class Plan extends React.Component {
 
   handleCompletePlan = (e, item) => {
     e.stopPropagation();
-    if (item.is_complete) {
-      if (item.is_complete === "1") {
-      } else {
-        this.finishBoardTask(item);
-      }
+    if (item.complete_time) {
+      this.cancelFinishBoardTask(item);
     } else {
       this.finishBoardTask(item);
     }
@@ -509,7 +607,15 @@ export default class Plan extends React.Component {
             ...(item.type !== "file" ? {} : { lineHeight: "50px" }),
           }}
         >
-          <span>{item.name || item.file_name}</span>
+          <span
+            style={{
+              ...(item.complete_time
+                ? { color: "rgba(210, 212, 222, 1)" }
+                : {}),
+            }}
+          >
+            {item.name || item.file_name}
+          </span>
           {item.end_time ? (
             <span
               className={styles.date}
@@ -604,7 +710,7 @@ export default class Plan extends React.Component {
 
   handleAddGroupClick = () => {};
   render() {
-    const { board } = this.props;
+    const { board, scoutingDetail } = this.props;
     const { Panel } = Collapse;
     return (
       <div className={styles.wrapper}>
@@ -625,6 +731,8 @@ export default class Plan extends React.Component {
                       parent={this}
                       delGroup={this.delGroup}
                       isAddGroup={item.isAdd}
+                      scoutingDetail={scoutingDetail}
+                      resetGroup={this.resetGroup}
                     ></CreatePanelHeader>
                   }
                   // extra={this.genExtra(item)}

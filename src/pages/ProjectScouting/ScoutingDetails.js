@@ -144,6 +144,7 @@ export default class ScoutingDetails extends PureComponent {
       setCopyVisible: false,
       setMoveVisible: false,
       notRenderCollection: false,
+      addGroupDisabled: true,
     };
     this.scrollView = React.createRef();
     this.saveSortTimer = null;
@@ -2288,16 +2289,43 @@ export default class ScoutingDetails extends PureComponent {
           // </div>
           <Fragment>
             <PublicView height={defaultHeight2}>
-              <Plan board={current_board} parent={this.props.parent} onRef={this.onPlanRef}></Plan>
+              <Plan
+                board={current_board}
+                parent={this.props.parent}
+                scoutingDetail={this}
+                showAddPlan={this.props.showAddPlan}
+                onRef={this.onPlanRef}
+              ></Plan>
             </PublicView>
             <div
               className={styles.addAreaBtn}
-              style={{ paddingTop: 0 }}
-              onClick={() => {
-                this.planRef && this.planRef.addGroup();
+              style={{
+                paddingTop: 0,
               }}
             >
-              <Button block className={styles.btn}>
+              <Button
+                block
+                className={styles.btn}
+                onClick={() => {
+                  this.setState(
+                    {
+                      addGroupDisabled: false,
+                    },
+                    () => {
+                      this.planRef && this.planRef.addGroup();
+                    }
+                  );
+                }}
+                style={{
+                  ...(this.state.addGroupDisabled
+                    ? {}
+                    : {
+                        pointerEvents: "none",
+                        cursor: "not-allowed",
+                        background: "hsla(0,0%,100%,.1)",
+                      }),
+                }}
+              >
                 <i
                   className={globalStyle.global_icon}
                   style={{ marginTop: 2, marginRight: 4 }}
