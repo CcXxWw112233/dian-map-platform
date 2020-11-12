@@ -216,17 +216,6 @@ export default class ScoutingDetails extends PureComponent {
     });
     Evt.on("handlePlotFeature", this.handlePlotFeature);
 
-    debugger
-    const ele = totalOverlay({ name: "龙岗区", wranNumber: 0, total: 100 });
-    let newOverlay = createOverlay(ele);
-    let coor = TransformCoordinate(
-      [114.05233497149, 22.621401401884],
-      "EPSG:4326",
-      "EPSG:3857"
-    );
-    newOverlay.setPosition(coor);
-    mapApp.map.addOverlay(newOverlay);
-
     // const ele2 = totalOverlay({ name: "龙岗区", wranNumber: 2, total: 100 });
     // let newOverlay2 = createOverlay(ele2);
     // let coor2 = TransformCoordinate(

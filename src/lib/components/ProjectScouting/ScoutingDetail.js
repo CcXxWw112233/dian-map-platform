@@ -85,6 +85,7 @@ function Action() {
   this.geoFeatures = [];
   this.searchAroundCircle = null;
   this.searchPageIndex = 1;
+  this.overlayArr = [];
 
   Event.Evt.addEventListener("basemapchange", (key) => {
     if (!this.mounted) return;
@@ -191,6 +192,10 @@ function Action() {
 
   this.mapMoveEnd = () => {
     InitMap.map.on("moveend", (e) => {
+      this.overlayArr.forEach((item) => {
+        InitMap.map.removeOverlay(item);
+      });
+      this.overlayArr = [];
       const extent = InitMap.map
         .getView()
         .calculateExtent(InitMap.map.getSize());
@@ -204,11 +209,41 @@ function Action() {
         "EPSG:3857",
         "EPSG:4326"
       );
+      const zoom = InitMap.map.getView().getZoom();
+      let level = 3;
+      if (zoom < 10) {
+        level = 1;
+      }
+      if (zoom >= 10 && zoom < 14) {
+        level = 2;
+      }
+      if (zoom >= 14) {
+        level = 3;
+      }
 
       config
-        .GET_AREACENTERPOINT_LIST(coor1[0], coor2[0], coor1[1], coor2[1], 3)
+        .GET_AREACENTERPOINT_LIST(coor1[0], coor2[0], coor1[1], coor2[1], level)
         .then((res) => {
-          debugger;
+          if (res && res.code === "0") {
+            if (res.data) {
+              res.data.forEach((item) => {
+                let ele = totalOverlay({
+                  name: item.district || item.province || item.city,
+                  wranNumber: 0,
+                  total: 100,
+                });
+                let newOverlay = createOverlay(ele);
+                let coor = TransformCoordinate(
+                  [item.lon, item.lat],
+                  "EPSG:4326",
+                  "EPSG:3857"
+                );
+                newOverlay.setPosition(coor);
+                InitMap.map.addOverlay(newOverlay);
+                this.overlayArr.push(newOverlay);
+              });
+            }
+          }
         });
     });
   };
@@ -222,26 +257,6 @@ function Action() {
     });
     this.layer = plotEdit.getPlottingLayer(dispatch);
     this.mapMoveEnd();
-    const extent = InitMap.map.getView().calculateExtent(InitMap.map.getSize());
-    const ele = totalOverlay({ name: "龙岗区", wranNumber: 0, total: 100 });
-    let newOverlay = createOverlay(ele);
-    let coor = TransformCoordinate(
-      [114.05233497149, 22.621401401884],
-      "EPSG:4326",
-      "EPSG:3857"
-    );
-    newOverlay.setPosition(coor);
-    InitMap.map.addOverlay(newOverlay);
-
-    const ele2 = totalOverlay({ name: "龙岗区", wranNumber: 2, total: 100 });
-    let newOverlay2 = createOverlay(ele2);
-    let coor2 = TransformCoordinate(
-      [114.0924397149, 22.621401401884],
-      "EPSG:4326",
-      "EPSG:3857"
-    );
-    newOverlay2.setPosition(coor2);
-    InitMap.map.addOverlay(newOverlay2);
 
     if (!layer[0]) {
       InitMap.map.on("click", (evt) => {

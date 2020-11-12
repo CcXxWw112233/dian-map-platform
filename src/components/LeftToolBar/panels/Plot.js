@@ -526,6 +526,7 @@ export default class Plot extends PureComponent {
   save2Group = (operator) => {
     return new Promise((resolve, reject) => {
       const { feature } = operator;
+
       let param = {
         coordinates: feature.getGeometry().getCoordinates(),
         geoType: feature.getGeometry().getType(),
@@ -540,23 +541,54 @@ export default class Plot extends PureComponent {
         board_id: this.projectId,
         content: JSON.stringify(param),
       };
-      // console.log(board);
-      DetailAction.addCollection(obj)
-        .then((res) => {
-          let obj = DetailAction.CollectionGroup.find(
-            (item) => item.id === window.ProjectGroupId
-          );
-          message.success(
-            `标绘已成功保存到${this.projectName}的${obj ? obj.name : "未"}分组`
-          );
-          this.plotLayer.removeFeature(operator);
-          resolve(res);
-        })
-        .catch((err) => {
-          reject(err);
-          console.log(err);
-          message.info(err.message);
-        });
+      if (param.geoType === "Point") {
+        window
+          .CallWebMapFunction("getCityByLonLat", {
+            lon: param.coordinates[0],
+            lat: param.coordinates[1],
+          })
+          .then((res) => {
+            obj.districtcode = res.addressComponent?.adcode;
+            // console.log(board);
+            DetailAction.addCollection(obj)
+              .then((res) => {
+                let obj = DetailAction.CollectionGroup.find(
+                  (item) => item.id === window.ProjectGroupId
+                );
+                message.success(
+                  `标绘已成功保存到${this.projectName}的${
+                    obj ? obj.name : "未"
+                  }分组`
+                );
+                this.plotLayer.removeFeature(operator);
+                resolve(res);
+              })
+              .catch((err) => {
+                reject(err);
+                console.log(err);
+                message.info(err.message);
+              });
+          });
+      } else {
+        DetailAction.addCollection(obj)
+          .then((res) => {
+            let obj = DetailAction.CollectionGroup.find(
+              (item) => item.id === window.ProjectGroupId
+            );
+            message.success(
+              `标绘已成功保存到${this.projectName}的${
+                obj ? obj.name : "未"
+              }分组`
+            );
+            this.plotLayer.removeFeature(operator);
+            resolve(res);
+          })
+          .catch((err) => {
+            reject(err);
+            console.log(err);
+            message.info(err.message);
+          });
+      }
     });
   };
   handleInputChange = (val) => {
