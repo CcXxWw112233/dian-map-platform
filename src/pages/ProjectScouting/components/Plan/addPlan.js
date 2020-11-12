@@ -280,6 +280,11 @@ export default class AddPlan extends React.Component {
             <div
               className={`${styles.item} ${styles.add}`}
               onClick={this.addStep}
+              style={{
+                ...(this.state.isAdd
+                  ? { pointerEvents: "none", cursor: "not-allowed" }
+                  : {}),
+              }}
             >
               {!this.state.addStepState ? (
                 <Fragment>
@@ -339,7 +344,14 @@ export default class AddPlan extends React.Component {
                 &#xe7d0;
               </i>
             </div> */}
-            <div className={styles.item}>
+            <div
+              className={styles.item}
+              style={{
+                ...(this.state.isAdd
+                  ? { pointerEvents: "none", cursor: "not-allowed" }
+                  : {}),
+              }}
+            >
               <i
                 className={globalStyle.global_icon}
                 style={{ color: "rgba(106, 154, 255, 1)" }}
