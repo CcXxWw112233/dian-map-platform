@@ -21,6 +21,7 @@ export default class AddPlan extends React.Component {
       taskDetails: [],
       endTime: null,
     };
+    this.planId = "";
   }
 
   componentDidMount() {
@@ -108,12 +109,13 @@ export default class AddPlan extends React.Component {
     });
     if (!value) return;
     if (value.trim() === "") return;
-    const { boardId, planId, planGroupId } = this.props;
+    const { boardId, planGroupId, planId } = this.props;
+    let newPlanId = this.planId || planId;
     planServices
-      .createBoardTask(boardId, planGroupId, value, planId)
+      .createBoardTask(boardId, planGroupId, value, newPlanId)
       .then((res) => {
         if (res && res.code === "0") {
-          planServices.getPlanDetail(planId).then((res) => {
+          planServices.getPlanDetail(newPlanId).then((res) => {
             if (res && res.code === "0") {
               if (res.data) {
                 this.setState({
@@ -143,6 +145,7 @@ export default class AddPlan extends React.Component {
     const { boardId, planGroupId } = this.props;
     planServices.createBoardTask(boardId, planGroupId, value).then((res) => {
       if (res && res.code === "0") {
+        this.planId = res.data.id;
         this.setState({
           isAdd: false,
         });
@@ -360,7 +363,7 @@ export default class AddPlan extends React.Component {
               </i>
               {/* <span>添加截止日期</span> */}
               <DatePicker
-                // allowClear
+                allowClear={false}
                 size="small"
                 placeholder="添加截止日期"
                 bordered={false}

@@ -300,10 +300,10 @@ export default class LeftToolBar extends React.Component {
     const index = this.getIndex(functionCode, type, projectId);
     return index === -1
       ? {
-          pointerEvents: "none",
-          cursor: "not-allowed",
+          // pointerEvents: "none",
+          // cursor: "not-allowed",
           display: "none",
-          background: "hsla(0,0%,100%,.1)",
+          // background: "hsla(0,0%,100%,.1)",
         }
       : {};
   };
