@@ -91,6 +91,13 @@ export default function setCoordinateForCollection(){
         latitude: +div.querySelector('#latitude').value,
       }
       if(!param.longitude || !param.latitude) return ;
+      // window.CallWebMapFunction("getCityByLonLat", {
+      //   lon: param.longitude,
+      //   lat: param.latitude
+      // }).then(res => {
+      //   param.districtcode = res.addressComponent?.adcode;
+      //   this.on['save'] && this.on['save'].call(this, param);
+      // })
       this.on['save'] && this.on['save'].call(this, param);
     }
   }

@@ -86,7 +86,9 @@ function Action() {
   this.searchAroundCircle = null;
   this.searchPageIndex = 1;
   this.overlayArr = [];
-  this.xyGroup = {};
+  this.overlayArr2 = [];
+  this.featuresGroup = {};
+  this.pontsGroup = {};
   this.moveendListener = () => {};
 
   Event.Evt.addEventListener("basemapchange", (key) => {
@@ -192,7 +194,7 @@ function Action() {
     }
   };
 
-  this.mapMoveEnd = (data, { lenged, dispatch, showFeatureName }) => {
+  this.mapMoveEnd = (data, ponts, { lenged, dispatch, showFeatureName }) => {
     if (!data) {
       return;
     }
@@ -200,7 +202,13 @@ function Action() {
       this.overlayArr.forEach((item) => {
         InitMap.map.removeOverlay(item);
       });
+      this.overlayArr2.forEach((item) => {
+        if (this.Source.getFeatureByUid(item.ol_uid)) {
+          this.Source.removeFeature(item);
+        }
+      });
       this.overlayArr = [];
+      this.overlayArr2 = [];
       const extent = InitMap.map
         .getView()
         .calculateExtent(InitMap.map.getSize());
@@ -233,6 +241,10 @@ function Action() {
           dispatch,
           showFeatureName,
         });
+        let pointCollection = this.renderPointCollection(ponts);
+        // this.features = this.features.concat(pointCollection);
+        this.overlayArr2.push(...pointCollection);
+        this.Source.addFeatures(pointCollection);
         return;
       }
       // if (zoom >= 16) {
@@ -244,7 +256,11 @@ function Action() {
           if (res && res.code === "0") {
             if (res.data) {
               res.data.forEach((item) => {
-                let total = this.xyGroup[item.code]?.length || 0;
+                let total =
+                  this.featuresGroup[item.code]?.length ||
+                  0 + this.pontsGroup[item.code]?.length ||
+                  0 ||
+                  0;
                 if (total > 0) {
                   let ele = totalOverlay({
                     name: item.district || item.city || item.province,
@@ -383,6 +399,11 @@ function Action() {
     setSession(listAction.sesstionSaveKey, "");
     this.overlayArr.forEach((item) => {
       INITMAP.map.removeOverlay(item);
+    });
+    this.overlayArr2.forEach((item) => {
+      if (this.Source.getFeatureByUid(item.ol_uid)) {
+        this.Source.removeFeature(item);
+      }
     });
     INITMAP.map.un("moveend", this.moveendListener);
     this.moveendListener = () => {};
@@ -1402,29 +1423,57 @@ function Action() {
     let features = data.filter((item) => item.collect_type === "4");
     let planPic = data.filter((item) => item.collect_type === "5");
     let geoData = data.filter((item) => item.collect_type === "8");
-    this.xyGroup = {};
+    this.featuresGroup = {};
     features.forEach((item) => {
       if (item.provincecode) {
-        if (!this.xyGroup[item.provincecode]) {
-          this.xyGroup[item.provincecode] = [];
+        if (!this.featuresGroup[item.provincecode]) {
+          this.featuresGroup[item.provincecode] = [];
         }
-        this.xyGroup[item.provincecode].push(item);
+        this.featuresGroup[item.provincecode].push(item);
       }
       if (item.citycode) {
-        if (!this.xyGroup[item.citycode]) {
-          this.xyGroup[item.citycode] = [];
+        if (!this.featuresGroup[item.citycode]) {
+          this.featuresGroup[item.citycode] = [];
         }
-        this.xyGroup[item.citycode].push(item);
+        this.featuresGroup[item.citycode].push(item);
       }
       if (item.districtcode) {
-        if (!this.xyGroup[item.districtcode]) {
-          this.xyGroup[item.districtcode] = [];
+        if (!this.featuresGroup[item.districtcode]) {
+          this.featuresGroup[item.districtcode] = [];
         }
-        this.xyGroup[item.districtcode].push(item);
+        this.featuresGroup[item.districtcode].push(item);
       }
     });
-    if (Object.keys(this.xyGroup).length > 0) {
-      this.mapMoveEnd(features, { lenged, dispatch, showFeatureName });
+    this.pontsGroup = {};
+    ponts.forEach((item) => {
+      if (item.provincecode) {
+        if (!this.pontsGroup[item.provincecode]) {
+          this.pontsGroup[item.provincecode] = [];
+        }
+        this.pontsGroup[item.provincecode].push(item);
+      }
+      if (item.citycode) {
+        if (!this.pontsGroup[item.citycode]) {
+          this.pontsGroup[item.citycode] = [];
+        }
+        this.pontsGroup[item.citycode].push(item);
+      }
+      if (item.districtcode) {
+        if (!this.pontsGroup[item.districtcode]) {
+          this.pontsGroup[item.districtcode] = [];
+        }
+        this.pontsGroup[item.districtcode].push(item);
+      }
+    });
+    let needRender = false;
+    if (Object.keys(this.featuresGroup).length > 0) {
+      needRender = true;
+    }
+    if (Object.keys(this.pontsGroup).length > 0) {
+      needRender = true;
+    }
+    if (needRender) {
+      this.mapMoveEnd(features, ponts, { lenged, dispatch, showFeatureName });
     }
     // 清除变量
     this.layer.style = null;
@@ -1434,7 +1483,7 @@ function Action() {
     // 渲染geo数据
     await this.renderGeoJson(geoData).catch((err) => console.log(err));
     // 渲染标绘数据
-    if (Object.keys(this.xyGroup).length === 0) {
+    if (Object.keys(this.featuresGroup).length === 0) {
       await this.renderFeaturesCollection(features, {
         lenged,
         dispatch,
@@ -1446,10 +1495,11 @@ function Action() {
     // 渲染规划图
     let ext = await this.renderPlanPicCollection(planPic);
     // 渲染点的数据
-    let pointCollection = this.renderPointCollection(ponts);
-
-    this.features = this.features.concat(pointCollection);
-    this.Source.addFeatures(pointCollection);
+    if (Object.keys(this.pontsGroup).length === 0) {
+      let pointCollection = this.renderPointCollection(ponts);
+      this.features = this.features.concat(pointCollection);
+      this.Source.addFeatures(pointCollection);
+    }
     this.currentData = data;
     if (!animation) return this.features;
 

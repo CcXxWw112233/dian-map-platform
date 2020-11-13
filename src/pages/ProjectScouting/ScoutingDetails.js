@@ -837,6 +837,11 @@ export default class ScoutingDetails extends PureComponent {
             site_name: val.title,
           },
         };
+        let resData = await window.CallWebMapFunction("getCityByLonLat", {
+          lon: params.location.longitude,
+          lat: params.location.latitude,
+        });
+        params.districtcode = resData.addressComponent?.adcode;
         this.setState({
           all_collection: this.state.all_collection.map((item) => {
             if (item.id === id) {
