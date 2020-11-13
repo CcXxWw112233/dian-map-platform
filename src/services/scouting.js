@@ -128,7 +128,7 @@ export default {
   ADD_COLLECTION: async (data) => {
     let res = await getSession("ScoutingItemId");
     let board_id = res.data;
-    let base64 = getBase64(board_id);
+    let base64 = getBase64(board_id || data.board_id);
     let response = await request("POST", "/map/collection", data, {
       BaseInfo: base64,
     });

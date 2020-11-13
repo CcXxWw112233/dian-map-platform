@@ -280,7 +280,7 @@ export default class ScoutingItem extends React.PureComponent {
                 </span>
               ) : null}
 
-              {toolParent.getIndex("map:board:update", "org") ? (
+              {toolParent.getIndex("map:board:update", "org") > -1 ? (
                 <UploadBgPic
                   onUpload={this.onUploadImg}
                   onStart={() => Nprogress.start()}
@@ -294,7 +294,7 @@ export default class ScoutingItem extends React.PureComponent {
                 </UploadBgPic>
               ) : null}
 
-              {toolParent.getIndex("map:board:remove", "org") ? (
+              {toolParent.getIndex("map:board:remove", "org")  > -1 ? (
                 <Popconfirm
                   title="确定删除这个项目吗?"
                   okText="删除"

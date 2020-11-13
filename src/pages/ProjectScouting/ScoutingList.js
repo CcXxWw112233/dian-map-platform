@@ -321,11 +321,11 @@ export default class ScoutingList extends PureComponent {
 
   // 保存备注
   onSaveRemark = (val, text) => {
-    if (!text || text === val.remark) return;
-    if (text.trim() === "") {
-      message.info("不能输入空格。");
-      return;
-    }
+    // if (!text || text === val.remark) return;
+    // if (text.trim() === "") {
+    //   message.info("不能输入空格。");
+    //   return;
+    // }
     Action.editBoard(val.board_id, { remark: text })
       .then((res) => {
         // console.log(res);
