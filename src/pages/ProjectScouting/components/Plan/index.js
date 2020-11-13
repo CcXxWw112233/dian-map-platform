@@ -317,6 +317,26 @@ export default class Plan extends React.Component {
       { type: "icon-bianzu861", suffix: ["pdf"] },
       { type: "icon-bianzu841", suffix: ["xls", "xlsx"] },
     ];
+    this.panels = [
+      {
+        iconfont: "&#xe616;",
+        type: "plan",
+        name: "我的计划",
+        color: "rgba(106, 154, 255, 1)",
+        canNotDel: true,
+        canNotEdit: true,
+      },
+      {
+        iconfont: "&#xe7c6;",
+        type: "file",
+        name: "文件",
+        color: "rgba(98, 148, 255, 1)",
+        canNotDel: true,
+        canNotEdit: true,
+        genExtraIconFont: "&#xe7f5;",
+        genExtraCallBack: (data) => {},
+      },
+    ];
   }
 
   componentDidMount() {
@@ -400,7 +420,7 @@ export default class Plan extends React.Component {
         ...panels,
         {
           type: "plan",
-          name: "未命名",
+          name: "",
           color: "rgba(106, 154, 255, 1)",
           canNotDel: false,
           canNotEdit: false,
@@ -513,18 +533,41 @@ export default class Plan extends React.Component {
     planServices.finishBoardTask(item.id).then((res) => {
       if (res && res.code === "0") {
         const { board } = this.props;
-        services.getBoardTaskDefaultList(board.board_id).then((res) => {
-          if (res && res.code === "0") {
-            let datas = [];
-            res.data.forEach((item) => {
-              item.type = "plan";
-              datas.push(item);
-            });
-            this.setState({
-              datas: datas,
-            });
-          }
-        });
+        if (item.group_id === "0") {
+          services.getBoardTaskDefaultList(board.board_id).then((res) => {
+            if (res && res.code === "0") {
+              let datas = [];
+              res.data.forEach((item) => {
+                item.type = "plan";
+                datas.push(item);
+              });
+              this.setState({
+                datas: datas,
+              });
+            }
+          });
+        } else {
+          planServices.getBoardTaskGroupList(board.board_id).then((res) => {
+            if (res && res.code === "0") {
+              // let oldPanles = this.state.panels;
+              res.data.forEach((item) => {
+                item.type = "plan";
+                if (item.tasks) {
+                  item.tasks.forEach((item2) => {
+                    item2.type = "plan";
+                  });
+                }
+              });
+              // const index = oldPanles.findIndex(item.id === res.data.id);
+              // if (index > -1) {
+              //   oldPanles.splice(index, 1);
+              // }
+              this.setState({
+                panels: [...this.panels, ...res.data],
+              });
+            }
+          });
+        }
       } else {
         message.warn(res.message);
       }
@@ -535,18 +578,40 @@ export default class Plan extends React.Component {
     planServices.cancelBoardTask(item.id).then((res) => {
       if (res && res.code === "0") {
         const { board } = this.props;
-        services.getBoardTaskDefaultList(board.board_id).then((res) => {
-          if (res && res.code === "0") {
-            let datas = [];
-            res.data.forEach((item) => {
-              item.type = "plan";
-              datas.push(item);
-            });
-            this.setState({
-              datas: datas,
-            });
-          }
-        });
+        if (item.group_id === "0") {
+          services.getBoardTaskDefaultList(board.board_id).then((res) => {
+            if (res && res.code === "0") {
+              let datas = [];
+              res.data.forEach((item) => {
+                item.type = "plan";
+                datas.push(item);
+              });
+              this.setState({
+                datas: datas,
+              });
+            }
+          });
+        } else {
+          services.getBoardTaskGroupList(board.board_id).then((res) => {
+            if (res && res.code === "0") {
+              // let oldPanles = this.state.panels;
+              res.data.forEach((item) => {
+                item.type = "plan";
+                if (item.tasks) {
+                  item.tasks.forEach((item2) => {
+                    item2.type = "plan";
+                  });
+                }
+              });
+              // oldPanles.forEach(item => {
+
+              // })
+              this.setState({
+                panels: [...this.panels, ...res.data],
+              });
+            }
+          });
+        }
       } else {
         message.warn(res.message);
       }
@@ -592,7 +657,7 @@ export default class Plan extends React.Component {
     let currentTimestamp = new Date().getTime();
     if (!isComplete) {
       if (Number(currentTimestamp) > Number(timestamp)) {
-        return `计划已逾期 ${m}月${d}日 ${this.getWeek(timestamp)}`;
+        return `已逾期 ${m}月${d}日 ${this.getWeek(timestamp)}`;
       }
     }
     return `${m}月${d}日 ${this.getWeek(timestamp)}`;
@@ -674,6 +739,9 @@ export default class Plan extends React.Component {
                 ? { color: "rgba(210, 212, 222, 1)" }
                 : {}),
               ...(item.complete_time ? { textDecoration: "line-through" } : {}),
+              overflow: "hidden",
+              whiteSpace: "nowrap",
+              textOverflow: "ellipsis",
             }}
           >
             {item.name || item.file_name}
@@ -688,7 +756,7 @@ export default class Plan extends React.Component {
                 ...(item.complete_time
                   ? { color: "rgba(210, 212, 222, 1)" }
                   : {}),
-                ...this.getOverdueStyle(item.end_time),
+                ...(this.getOverdueStyle(item.end_time)),
               }}
             >
               {this.getTime(
