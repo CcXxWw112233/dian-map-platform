@@ -636,7 +636,12 @@ export default class Plan extends React.Component {
         item.file_name.length
       );
       for (let i = 0; i < this.suffixArr.length; i++) {
-        if (this.suffixArr[i].suffix.includes(suffixName)) {
+        if (
+          this.suffixArr[i].suffix.includes(suffixName) ||
+          this.suffixArr[i].suffix
+            .map((item) => item.toUpperCase())
+            .includes(suffixName)
+        ) {
           iconfont = this.suffixArr[i].type;
           break;
         }
@@ -756,7 +761,7 @@ export default class Plan extends React.Component {
                 ...(item.complete_time
                   ? { color: "rgba(210, 212, 222, 1)" }
                   : {}),
-                ...(this.getOverdueStyle(item.end_time)),
+                ...this.getOverdueStyle(item.end_time),
               }}
             >
               {this.getTime(
