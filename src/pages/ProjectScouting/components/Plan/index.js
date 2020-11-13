@@ -657,7 +657,7 @@ export default class Plan extends React.Component {
     let currentTimestamp = new Date().getTime();
     if (!isComplete) {
       if (Number(currentTimestamp) > Number(timestamp)) {
-        return `计划已逾期 ${m}月${d}日 ${this.getWeek(timestamp)}`;
+        return `已逾期 ${m}月${d}日 ${this.getWeek(timestamp)}`;
       }
     }
     return `${m}月${d}日 ${this.getWeek(timestamp)}`;
@@ -739,6 +739,9 @@ export default class Plan extends React.Component {
                 ? { color: "rgba(210, 212, 222, 1)" }
                 : {}),
               ...(item.complete_time ? { textDecoration: "line-through" } : {}),
+              overflow: "hidden",
+              whiteSpace: "nowrap",
+              textOverflow: "ellipsis",
             }}
           >
             {item.name || item.file_name}
@@ -753,7 +756,7 @@ export default class Plan extends React.Component {
                 ...(item.complete_time
                   ? { color: "rgba(210, 212, 222, 1)" }
                   : {}),
-                ...(!item.complete_time && this.getOverdueStyle(item.end_time)),
+                ...(this.getOverdueStyle(item.end_time)),
               }}
             >
               {this.getTime(
