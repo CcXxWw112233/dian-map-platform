@@ -87,6 +87,7 @@ function Action() {
   this.searchPageIndex = 1;
   this.overlayArr = [];
   this.xyGroup = {};
+  this.moveendListener = () => {};
 
   Event.Evt.addEventListener("basemapchange", (key) => {
     if (!this.mounted) return;
@@ -192,30 +193,10 @@ function Action() {
   };
 
   this.mapMoveEnd = (data, { lenged, dispatch, showFeatureName }) => {
-    if (data) {
-      this.xyGroup = {};
-      data.forEach((item) => {
-        if (item.provincecode) {
-          if (!this.xyGroup[item.provincecode]) {
-            this.xyGroup[item.provincecode] = [];
-          }
-          this.xyGroup[item.provincecode].push(item);
-        }
-        if (item.citycode) {
-          if (!this.xyGroup[item.citycode]) {
-            this.xyGroup[item.citycode] = [];
-          }
-          this.xyGroup[item.citycode].push(item);
-        }
-        if (item.districtcode) {
-          if (!this.xyGroup[item.districtcode]) {
-            this.xyGroup[item.districtcode] = [];
-          }
-          this.xyGroup[item.districtcode].push(item);
-        }
-      });
+    if (!data) {
+      return;
     }
-    InitMap.map.on("moveend", (e) => {
+    this.moveendListener = function (e) {
       this.overlayArr.forEach((item) => {
         InitMap.map.removeOverlay(item);
       });
@@ -252,7 +233,7 @@ function Action() {
           dispatch,
           showFeatureName,
         });
-        return
+        return;
       }
       // if (zoom >= 16) {
       //   return;
@@ -283,7 +264,8 @@ function Action() {
             }
           }
         });
-    });
+    };
+    InitMap.map.on("moveend", (e) => this.moveendListener(e));
   };
 
   this.init = (dispatch) => {
@@ -399,6 +381,11 @@ function Action() {
     this.layer.projectScoutingArr = [];
     this.layer.plotEdit.plotClickCb = null;
     setSession(listAction.sesstionSaveKey, "");
+    this.overlayArr.forEach((item) => {
+      INITMAP.map.removeOverlay(item);
+    });
+    INITMAP.map.un("moveend", this.moveendListener);
+    this.moveendListener = () => {};
   };
   // 获取区域列表
   this.fetchAreaList = async (data) => {
@@ -576,7 +563,7 @@ function Action() {
             });
             let element = evt.map.getTargetElement();
             if (feature && feature.get("ftype") === "select_coordinates") {
-              if (element.style.cursor != this.cursor_) {
+              if (element.style.cursor !== this.cursor_) {
                 this.previousCursor_ = element.style.cursor;
                 element.style.cursor = this.cursor_;
               }
@@ -1415,23 +1402,45 @@ function Action() {
     let features = data.filter((item) => item.collect_type === "4");
     let planPic = data.filter((item) => item.collect_type === "5");
     let geoData = data.filter((item) => item.collect_type === "8");
-    this.mapMoveEnd(features, { lenged, dispatch, showFeatureName });
+    this.xyGroup = {};
+    features.forEach((item) => {
+      if (item.provincecode) {
+        if (!this.xyGroup[item.provincecode]) {
+          this.xyGroup[item.provincecode] = [];
+        }
+        this.xyGroup[item.provincecode].push(item);
+      }
+      if (item.citycode) {
+        if (!this.xyGroup[item.citycode]) {
+          this.xyGroup[item.citycode] = [];
+        }
+        this.xyGroup[item.citycode].push(item);
+      }
+      if (item.districtcode) {
+        if (!this.xyGroup[item.districtcode]) {
+          this.xyGroup[item.districtcode] = [];
+        }
+        this.xyGroup[item.districtcode].push(item);
+      }
+    });
+    if (Object.keys(this.xyGroup).length > 0) {
+      this.mapMoveEnd(features, { lenged, dispatch, showFeatureName });
+    }
     // 清除变量
     this.layer.style = null;
     this.layer.attrs = null;
-    // this.layer.responseData = null;
-    // this.layer.saveCb = null;
-    // this.layer.deleteCb = null;
     this.layer.isDefault = null;
 
     // 渲染geo数据
     await this.renderGeoJson(geoData).catch((err) => console.log(err));
     // 渲染标绘数据
-    // await this.renderFeaturesCollection(features, {
-    //   lenged,
-    //   dispatch,
-    //   showFeatureName,
-    // });
+    if (Object.keys(this.xyGroup).length === 0) {
+      await this.renderFeaturesCollection(features, {
+        lenged,
+        dispatch,
+        showFeatureName,
+      });
+    }
 
     const sou = this.layer.showLayer.getSource();
     // 渲染规划图

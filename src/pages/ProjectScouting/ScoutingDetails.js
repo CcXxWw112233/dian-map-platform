@@ -38,8 +38,6 @@ import {
   areaScouting,
 } from "./components/ScoutingDetailsSubComponents";
 
-import { TransformCoordinate, createOverlay } from "../../lib/utils";
-
 import PlayCollectionControl from "./components/playCollectionControl";
 // import { getOffsetTop } from "utils/utils";
 import CollectionDetail from "./components/CollectionDetail";
@@ -53,7 +51,6 @@ import AboutAction from "../../lib/components/ProjectScouting/AroundAbout";
 import Meettings from "./components/Meeting";
 import PublicDataTreeComponent from "./components/PublicDataTreeComponent";
 import Plan from "./components/Plan";
-import totalOverlay from "../../components/PublicOverlays/totalOverlay/index";
 
 const { Evt } = Event;
 const { TabPane } = Tabs;
