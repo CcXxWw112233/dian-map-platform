@@ -13,6 +13,7 @@ import ToolBar from "./toolbar";
 import systemManageServices from "../../services/systemManage";
 
 import { lineDrawing, pointDrawing, polygonDrawing } from "utils/drawing";
+import { message } from "antd";
 
 @connect(({ openswitch: { isShowLeftToolBar, isInvalidToolBar } }) => ({
   isShowLeftToolBar,
@@ -207,36 +208,74 @@ export default class LeftToolBar extends React.Component {
   }
 
   getPersonalPermission = () => {
-    systemManageServices.getPersonalPermission2Project().then((res) => {
-      if (res && res.code === "0") {
-        this.setState(
-          {
-            projectPermission: res.data,
-          },
-          () => {
-            this.projectRef &&
-              this.projectRef.setState({
-                update: !this.projectRef.state.update,
-              });
+    // systemManageServices.getPersonalPermission2Project().then((res) => {
+    //   if (res && res.code === "0") {
+    //     this.setState(
+    //       {
+    //         projectPermission: res.data,
+    //       },
+    //       () => {
+    //         this.projectRef &&
+    //           this.projectRef.setState({
+    //             update: !this.projectRef.state.update,
+    //           });
+    //       }
+    //     );
+    //   }
+    // });
+    // systemManageServices.getPersonalPermission2Global().then((res) => {
+    //   if (res && res.code === "0") {
+    //     this.setState(
+    //       {
+    //         globalPermission: res.data,
+    //       },
+    //       () => {
+    //         this.leftToolBarRef &&
+    //           this.leftToolBarRef.setState({
+    //             update: !this.leftToolBarRef.state.update,
+    //           });
+    //       }
+    //     );
+    //   }
+    // });
+    let promise1 = systemManageServices.getPersonalPermission2Global();
+    let promise2 = systemManageServices.getPersonalPermission2Project();
+    Promise.all([promise1, promise2])
+      .then((res) => {
+        if (res.length > 0) {
+          let globalPermission = {},
+            projectPermission = {};
+          if (res[0]["code"] === "0") {
+            globalPermission = res[0].data;
+          } else {
+            message.error(res[0].message);
           }
-        );
-      }
-    });
-    systemManageServices.getPersonalPermission2Global().then((res) => {
-      if (res && res.code === "0") {
-        this.setState(
-          {
-            globalPermission: res.data,
-          },
-          () => {
-            this.leftToolBarRef &&
-              this.leftToolBarRef.setState({
-                update: !this.leftToolBarRef.state.update,
-              });
+          if (res[1]["code"] === "0") {
+            projectPermission = res[1].data;
+          } else {
+            message.error(res[1].message);
           }
-        );
-      }
-    });
+          this.setState(
+            {
+              globalPermission: globalPermission,
+              projectPermission: projectPermission,
+            },
+            () => {
+              this.leftToolBarRef &&
+                this.leftToolBarRef.setState({
+                  update: !this.leftToolBarRef.state.update,
+                });
+              this.projectRef &&
+                this.projectRef.setState({
+                  update: !this.projectRef.state.update,
+                });
+            }
+          );
+        }
+      })
+      .catch((e) => {
+        message.error(e);
+      });
   };
 
   // 权限
