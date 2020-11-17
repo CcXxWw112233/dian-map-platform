@@ -43,25 +43,28 @@ export default class AddPlan extends React.Component {
       .getElementById("MapsView")
       .addEventListener("click", this.saveToDB);
     const { boardId, planId } = this.props;
-    systemManageServices.getProjectMember(boardId).then((res) => {
-      if (res && res.code === "0") {
+    systemManageServices.getProjectMember(boardId).then((res0) => {
+      if (res0 && res0.code === "0") {
         this.setState({
-          projectMember: res.data,
-          // selectedUserArr: [],
+          projectMember: res0.data,
         });
-      }
-    });
-    if (planId) {
-      planServices.getTaskRemind(planId).then((res) => {
-        if (res && res.code) {
-          this.remindId = res.data.id;
-          this.getRemindTime(res.data.remind_time || "");
-          this.setState({
-            selectedUserArr: res.data.remind_users || [],
+        if (planId) {
+          planServices.getTaskRemind(planId).then((res) => {
+            if (res && res.code) {
+              this.remindId = res.data.id;
+              this.getRemindTime(res.data.remind_time || "");
+              this.setState({
+                selectedUserArr: res.data.remind_users || [],
+                selectAll:
+                  res0.data.length === res.data.remind_users.length
+                    ? true
+                    : false,
+              });
+            }
           });
         }
-      });
-    }
+      }
+    });
   }
   componentWillUnmount() {
     document
@@ -389,14 +392,20 @@ export default class AddPlan extends React.Component {
     }
   };
   handleProjectMemer = (item, index) => {
+    let selectAll = false;
     let selectedUserArr = this.state.selectedUserArr;
     if (selectedUserArr[index]) {
-      selectedUserArr.splice(index, 1);
+      selectedUserArr[index] = null;
     } else {
       selectedUserArr[index] = item.user;
     }
+    let tmpArr = selectedUserArr.filter((item) => item !== null);
+    if (tmpArr.length === this.state.projectMember.length) {
+      selectAll = true;
+    }
     this.setState({
       selectedUser: selectedUserArr,
+      selectAll: selectAll,
     });
   };
   ondropDownVisibleChange = (e) => {
@@ -481,7 +490,7 @@ export default class AddPlan extends React.Component {
       .map((item) => item.id)
       .join(",");
     planServices
-      .updateTaskRemind(this.remindId, "", selectedUserIdsStr)
+      .updateTaskRemind(this.remindId, "0", selectedUserIdsStr)
       .then((res) => {
         if (res && res.code === "0") {
           this.setState({
@@ -846,7 +855,7 @@ export default class AddPlan extends React.Component {
               >
                 {this.state.selectedUserArr &&
                   this.state.selectedUserArr.map((item) => {
-                    if (item.avatar) {
+                    if (item && item.avatar) {
                       return (
                         <div style={{ width: 32, height: 32, margin: 5 }}>
                           <img
