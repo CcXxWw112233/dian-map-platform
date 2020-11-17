@@ -316,6 +316,7 @@ export default class Plan extends React.Component {
       { type: "icon-bianzu881", suffix: ["jpg"] },
       { type: "icon-bianzu861", suffix: ["pdf"] },
       { type: "icon-bianzu841", suffix: ["xls", "xlsx"] },
+      { type: "icon-bianzu791", suffix: ["txt"] },
     ];
     this.panels = [
       {
@@ -529,45 +530,45 @@ export default class Plan extends React.Component {
     }
   };
 
+  regetData = (groupId) => {
+    const { board } = this.props;
+    if (groupId === "0") {
+      services.getBoardTaskDefaultList(board.board_id).then((res) => {
+        if (res && res.code === "0") {
+          let datas = [];
+          res.data.forEach((item) => {
+            item.type = "plan";
+            datas.push(item);
+          });
+          this.setState({
+            datas: datas,
+          });
+        }
+      });
+    } else {
+      planServices.getBoardTaskGroupList(board.board_id).then((res) => {
+        if (res && res.code === "0") {
+          // let oldPanles = this.state.panels;
+          res.data.forEach((item) => {
+            item.type = "plan";
+            if (item.tasks) {
+              item.tasks.forEach((item2) => {
+                item2.type = "plan";
+              });
+            }
+          });
+          this.setState({
+            panels: [...this.panels, ...res.data],
+          });
+        }
+      });
+    }
+  };
+
   finishBoardTask = (item) => {
     planServices.finishBoardTask(item.id).then((res) => {
       if (res && res.code === "0") {
-        const { board } = this.props;
-        if (item.group_id === "0") {
-          services.getBoardTaskDefaultList(board.board_id).then((res) => {
-            if (res && res.code === "0") {
-              let datas = [];
-              res.data.forEach((item) => {
-                item.type = "plan";
-                datas.push(item);
-              });
-              this.setState({
-                datas: datas,
-              });
-            }
-          });
-        } else {
-          planServices.getBoardTaskGroupList(board.board_id).then((res) => {
-            if (res && res.code === "0") {
-              // let oldPanles = this.state.panels;
-              res.data.forEach((item) => {
-                item.type = "plan";
-                if (item.tasks) {
-                  item.tasks.forEach((item2) => {
-                    item2.type = "plan";
-                  });
-                }
-              });
-              // const index = oldPanles.findIndex(item.id === res.data.id);
-              // if (index > -1) {
-              //   oldPanles.splice(index, 1);
-              // }
-              this.setState({
-                panels: [...this.panels, ...res.data],
-              });
-            }
-          });
-        }
+        this.regetData(item.group_id);
       } else {
         message.warn(res.message);
       }
@@ -577,41 +578,7 @@ export default class Plan extends React.Component {
   cancelFinishBoardTask = (item) => {
     planServices.cancelBoardTask(item.id).then((res) => {
       if (res && res.code === "0") {
-        const { board } = this.props;
-        if (item.group_id === "0") {
-          services.getBoardTaskDefaultList(board.board_id).then((res) => {
-            if (res && res.code === "0") {
-              let datas = [];
-              res.data.forEach((item) => {
-                item.type = "plan";
-                datas.push(item);
-              });
-              this.setState({
-                datas: datas,
-              });
-            }
-          });
-        } else {
-          services.getBoardTaskGroupList(board.board_id).then((res) => {
-            if (res && res.code === "0") {
-              // let oldPanles = this.state.panels;
-              res.data.forEach((item) => {
-                item.type = "plan";
-                if (item.tasks) {
-                  item.tasks.forEach((item2) => {
-                    item2.type = "plan";
-                  });
-                }
-              });
-              // oldPanles.forEach(item => {
-
-              // })
-              this.setState({
-                panels: [...this.panels, ...res.data],
-              });
-            }
-          });
-        }
+        this.regetData(item.group_id);
       } else {
         message.warn(res.message);
       }
@@ -692,6 +659,27 @@ export default class Plan extends React.Component {
     return {};
   };
 
+  handleCollectPlan = (e, data) => {
+    e.stopPropagation();
+    if (data.is_favorite !== "1") {
+      services.collectFavoriteTask(data.id).then((res) => {
+        if (res && res.code === "0") {
+          this.regetData(data.group_id);
+        } else {
+          message.warn(res.message);
+        }
+      });
+    } else {
+      services.cancelFavoriteTask(data.id).then((res) => {
+        if (res && res.code === "0") {
+          this.regetData(data.group_id);
+        } else {
+          message.warn(res.message);
+        }
+      });
+    }
+  };
+
   createItem = (item, type) => {
     return (
       <div
@@ -703,6 +691,7 @@ export default class Plan extends React.Component {
               showAddPlan: true,
               isAdd: false,
               planId: item.id,
+              data: item,
               boardId: board.board_id,
               planGroupId: "",
             });
@@ -768,7 +757,7 @@ export default class Plan extends React.Component {
                 item.complete_time || item.end_time,
                 item.complete_time ? true : false
               )}
-              {item.remind === "1" ? (
+              {item.task_remind?.remind_time ? (
                 <i
                   className={globalStyle.global_icon}
                   style={{
@@ -790,11 +779,12 @@ export default class Plan extends React.Component {
         <div className={styles.contentPart3}>
           <i
             className={globalStyle.global_icon}
+            onClick={(e) => this.handleCollectPlan(e, item)}
             style={{
               fontSize: 24,
-              visibility: item.star === undefined ? "hidden" : "visible",
+              visibility: item.type === "plan" ? "visible" : "hidden",
               color:
-                item.star === "1"
+                item.is_favorite === "1"
                   ? "rgba(255, 183, 96, 1)"
                   : "rgba(209, 213, 228, 1)",
             }}

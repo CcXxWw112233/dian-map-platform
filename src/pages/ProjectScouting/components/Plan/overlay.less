@@ -1,0 +1,44 @@
+.overlayContainer {
+  width: 270px;
+  height: 340px;
+  background: #ffffff;
+  padding: 12px;
+  box-shadow: 0px 16px 30px 0px rgba(102, 144, 255, 0.08),
+    0px 8px 30px 0px rgba(87, 92, 118, 0.08);
+  .profilePhoto {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    margin-left: 10px;
+    img {
+      width: 100%;
+      height: 100%;
+      border-radius: 20px;
+    }
+  }
+  .body {
+    width: 100%;
+    height: 90%;
+    display: flex;
+    flex-direction: column;
+    line-height: 32px;
+    .listItem {
+      width: 100%;
+      height: 32px;
+      display: flex;
+      flex-direction: row;
+      &:hover {
+        background: #f2f4f8;
+      }
+    }
+  }
+  .footer {
+    display: flex;
+    flex-direction: row;
+    button {
+      // width: 56px;
+      height: 32px;
+      text-align: center;
+    }
+  }
+}

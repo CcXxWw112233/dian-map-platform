@@ -256,11 +256,8 @@ function Action() {
           if (res && res.code === "0") {
             if (res.data) {
               res.data.forEach((item) => {
-                let total =
-                  this.featuresGroup[item.code]?.length ||
-                  0 + this.pontsGroup[item.code]?.length ||
-                  0 ||
-                  0;
+                let total = this.featuresGroup[item.code]?.length || 0;
+                total += this.pontsGroup[item.code]?.length || 0;
                 if (total > 0) {
                   let ele = totalOverlay({
                     name: item.district || item.city || item.province,

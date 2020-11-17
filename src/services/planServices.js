@@ -256,4 +256,90 @@ export default {
     }
     return Promise.reject(response && response.data);
   },
+
+  // 收藏一条任务
+  collectFavoriteTask: async (task_id) => {
+    const base64 = getBase64OrgId();
+    let response = await request(
+      "POST",
+      "/map/task/favorite",
+      { task_id: task_id },
+      { BaseInfo: base64 }
+    );
+    if (BASIC.checkResponse(response)) {
+      return response.data;
+    }
+    return Promise.reject(response && response.data);
+  },
+
+  // 取消收藏
+  cancelFavoriteTask: async (task_id) => {
+    const base64 = getBase64OrgId();
+    let response = await request(
+      "DELETE",
+      "/map/task/favorite",
+      { task_id: task_id },
+      { BaseInfo: base64 }
+    );
+    if (BASIC.checkResponse(response)) {
+      return response.data;
+    }
+    return Promise.reject(response && response.data);
+  },
+
+  // 创建一条提醒
+  createTaskRemind: async (remind_time, task_id, user_ids) => {
+    const base64 = getBase64OrgId();
+    let response = await request(
+      "POST",
+      "/map/task/remind",
+      {
+        remind_time: remind_time,
+        task_id: task_id,
+        user_ids: user_ids,
+      },
+      { BaseInfo: base64 }
+    );
+    if (BASIC.checkResponse(response)) {
+      return response.data;
+    }
+    return Promise.reject(response && response.data);
+  },
+
+  // 更新提醒
+  updateTaskRemind: async(remind_id, remind_time,  user_ids) => {
+    const base64 = getBase64OrgId();
+    let response = await request(
+      "PUT",
+      `/map/task/remind/${remind_id}`,
+      {
+        remind_time: remind_time,
+        user_ids: user_ids,
+      },
+      { BaseInfo: base64 }
+    );
+    if (BASIC.checkResponse(response)) {
+      return response.data;
+    }
+    return Promise.reject(response && response.data);
+  },
+
+  // 获取提醒
+  getTaskRemind: async (task_id) => {
+    const base64 = getBase64OrgId();
+    let response = await request(
+      "GET",
+      "/map/task/remind",
+      {
+        task_id: task_id,
+      },
+      {
+        BaseInfo: base64,
+      }
+    );
+    if (BASIC.checkResponse(response)) {
+      return response.data;
+    }
+    return Promise.reject(response && response.data);
+  },
 };

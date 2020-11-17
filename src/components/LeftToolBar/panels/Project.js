@@ -244,6 +244,7 @@ export default class Project extends React.Component {
             isAdd={this.state.isAdd}
             boardId={this.state.boardId}
             planId={this.state.planId}
+            data={this.state.data}
             planGroupId={this.state.planGroupId}
           />
         ) : null}

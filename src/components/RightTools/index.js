@@ -184,18 +184,15 @@ export default class RightTools extends React.Component {
   };
 
   componentDidMount() {
-    // const me = this
-    // document.addEventListener("click", (e) => {
-    //   const target = e.target;
-    //   // 组件已挂载且事件触发对象不在div内
-    //   debugger
-    //   let toolboxRef = me.refs["toolbox"]
-    //   if (me.divElement && !me.divElement.contains(target)) {
-    //     me.setState({
-    //       toolBoxPanelVisible: false,
-    //     });
-    //   }
-    // });
+    const me = this;
+    document.getElementById("MapsView").addEventListener("click", (e) => {
+      e.stopImmediatePropagation();
+      me.setState({
+        toolBoxPanelVisible: false,
+        hiddenIndex: -1,
+        selectedIndex: -1,
+      });
+    });
   }
   onRef = (ref) => {
     this.child = ref;
