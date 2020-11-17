@@ -56,7 +56,7 @@ export default class AddPlan extends React.Component {
               this.setState({
                 selectedUserArr: res.data.remind_users || [],
                 selectAll:
-                  res0.data.length === res.data.remind_users.length
+                  res0.data?.length === res.data.remind_users?.length
                     ? true
                     : false,
               });
