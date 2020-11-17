@@ -39,9 +39,7 @@ export default class AddPlan extends React.Component {
   componentDidMount() {
     this.getDetails();
     // document.addEventListener("click", this.saveToDB);
-    document
-      .getElementById("MapsView")
-      .addEventListener("click", this.saveToDB);
+    document.getElementById("MapsView").onclick = this.saveToDB;
     const { boardId, planId } = this.props;
     systemManageServices.getProjectMember(boardId).then((res0) => {
       if (res0 && res0.code === "0") {
@@ -177,7 +175,7 @@ export default class AddPlan extends React.Component {
   };
 
   disabledDate = (current) => {
-    return current && current < moment().endOf("day");
+    return current && current < moment().add(-1, "day");
   };
   range = (start, end) => {
     const result = [];
@@ -186,17 +184,26 @@ export default class AddPlan extends React.Component {
     }
     return result;
   };
+  getMinutes = (start, end) => {
+    let result = [];
+    for (let i = start; i < end; i++) {
+      if (i % 5 !== 0) {
+        result.push(i);
+      }
+    }
+    return result;
+  };
   disabledDateTime = (_, type) => {
     if (type === "start") {
       return {
         disabledHours: () => this.range(0, 60).splice(4, 20),
-        disabledMinutes: () => this.range(30, 60),
+        disabledMinutes: () => this.getMinutes(0, 60),
         disabledSeconds: () => [55, 56],
       };
     }
     return {
       disabledHours: () => this.range(0, 60).splice(20, 4),
-      // disabledMinutes: () => this.range(0, 0),
+      disabledMinutes: () => this.getMinutes(0, 60),
       // disabledSeconds: () => [55, 56],
     };
   };
@@ -659,7 +666,10 @@ export default class AddPlan extends React.Component {
                   <i
                     className={globalStyle.global_icon}
                     onClick={(e) =>
-                      this.handleCollectPlan(e, this.props.data || this.data)
+                      this.handleCollectPlan(
+                        e,
+                        this.state.data || this.props.data
+                      )
                     }
                     style={{
                       color:
@@ -791,11 +801,11 @@ export default class AddPlan extends React.Component {
                   placeholder="选择提醒时间"
                   bordered={false}
                   style={{ width: "calc(100% - 36px", padding: 0 }}
-                  format="YYYY年MM月DD日 HH时mm分ss秒"
+                  format="YYYY年MM月DD日 HH时mm分"
                   locale={locale}
                   disabledDate={this.disabledDate}
                   disabledTime={this.disabledDateTime}
-                  showTime={{ defaultValue: moment("00:00:00", "HH:mm:ss") }}
+                  showTime={{ defaultValue: moment("00:00", "HH:mm") }}
                   value={
                     this.state.remindTime
                       ? moment(this.state.remindTime)

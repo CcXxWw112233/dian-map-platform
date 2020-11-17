@@ -1,5 +1,5 @@
 import React, { useState, Fragment } from "react";
-import { Collapse, Col, Input, Button, message, Upload } from "antd";
+import { Collapse, Col, Input, Button, message, Upload, Tooltip } from "antd";
 import { CloseOutlined, CheckOutlined } from "@ant-design/icons";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import { MyIcon } from "components/utils";
@@ -681,6 +681,39 @@ export default class Plan extends React.Component {
     }
   };
 
+  getRemindTime = (timestamp) => {
+    if (timestamp) {
+      let date = new Date();
+      date.setTime(timestamp);
+      let y = date.getFullYear();
+      let m = date.getMonth() + 1;
+      m = m < 10 ? "0" + m : m;
+      let d = date.getDate();
+      d = d < 10 ? "0" + d : d;
+      let h = date.getHours();
+      h = h < 10 ? "0" + h : h;
+      let mi = date.getMinutes();
+      mi = mi < 10 ? "0" + mi : mi;
+      let s = date.getSeconds();
+      s = s < 10 ? "0" + s : s;
+      return (
+        y.toString() +
+        "年" +
+        m.toString() +
+        "月" +
+        d.toString() +
+        "日" +
+        " " +
+        h.toString() +
+        "时" +
+        mi.toString() +
+        "分" +
+        s.toString() +
+        "秒"
+      );
+    }
+  };
+
   createItem = (item, type) => {
     return (
       <div
@@ -722,9 +755,11 @@ export default class Plan extends React.Component {
           className={styles.contentPart2}
           style={{
             width: "calc(100% - 85px)",
-            ...(item.complete_time || item.end_time
-              ? {}
-              : { lineHeight: "50px" }),
+            // ...(item.complete_time ||
+            // item.end_time ||
+            // item.task_remind?.remind_time
+            //   ? {}
+            //   : { lineHeight: "50px" }),
             ...(item.type !== "file" ? {} : { lineHeight: "50px" }),
           }}
         >
@@ -741,7 +776,9 @@ export default class Plan extends React.Component {
           >
             {item.name || item.file_name}
           </span>
-          {item.complete_time || item.end_time ? (
+          {item.end_time ||
+          item.complete_time ||
+          item.task_remind?.remind_time ? (
             <span
               className={styles.date}
               style={{
@@ -754,28 +791,35 @@ export default class Plan extends React.Component {
                 ...this.getOverdueStyle(item.end_time),
               }}
             >
-              {this.getTime(
-                item.complete_time || item.end_time,
-                item.complete_time ? true : false
-              )}
+              {item.end_time
+                ? this.getTime(item.end_time, item.complete_time ? true : false)
+                : "请设置截止时间"}
               {item.task_remind?.remind_time ? (
-                <i
-                  className={globalStyle.global_icon}
-                  style={{
-                    color:
-                      item.overdue === "1"
-                        ? "rgba(249, 84, 85, 1)"
-                        : "rgba(106, 154, 255, 1)",
-                    marginLeft: 10,
-                    fontSize: 14,
-                    paddingTop: 6,
-                  }}
+                <Tooltip
+                  placement="top"
+                  title={this.getRemindTime(item.task_remind?.remind_time)}
                 >
-                  &#xe7f4;
-                </i>
+                  <i
+                    className={globalStyle.global_icon}
+                    style={{
+                      color:
+                        Date.parse(new Date()) >
+                        Number(item.task_remind?.remind_time)
+                          ? "rgb(209, 213, 228)"
+                          : "rgba(106, 154, 255, 1)",
+                      marginLeft: 10,
+                      fontSize: 14,
+                      paddingTop: 6,
+                    }}
+                  >
+                    &#xe7f4;
+                  </i>
+                </Tooltip>
               ) : null}
             </span>
-          ) : null}
+          ) : (
+            <span className={styles.date}>请设置截止时间</span>
+          )}
         </div>
         <div className={styles.contentPart3}>
           <i
