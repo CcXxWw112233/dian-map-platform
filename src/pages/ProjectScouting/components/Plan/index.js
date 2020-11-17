@@ -760,7 +760,7 @@ export default class Plan extends React.Component {
             // item.task_remind?.remind_time
             //   ? {}
             //   : { lineHeight: "50px" }),
-            ...(item.type !== "file" ? {} : { lineHeight: "50px" }),
+            ...(type !== "file" ? {} : { lineHeight: "50px" }),
           }}
         >
           <span
@@ -817,9 +817,13 @@ export default class Plan extends React.Component {
                 </Tooltip>
               ) : null}
             </span>
-          ) : (
-            <span className={styles.date}>请设置截止时间</span>
-          )}
+          ) : null}
+          {!item.end_time &&
+          !item.complete_time &&
+          !item.task_remind?.remind_time &&
+          type !== "file" ? (
+            <span className={styles.date}>{"请设置截止时间"}</span>
+          ) : null}
         </div>
         <div className={styles.contentPart3}>
           <i
