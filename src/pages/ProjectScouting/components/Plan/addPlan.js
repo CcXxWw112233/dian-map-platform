@@ -330,8 +330,9 @@ export default class AddPlan extends React.Component {
       .updateBoardTask("", planId, "", "1")
       .then((res) => {
         if (res && res.code === "0") {
+          this.remindTimestamp = "";
           this.setState({
-            endTime: undefined,
+            endTime: "",
           });
         } else {
           message.warn(res.message);
@@ -483,6 +484,9 @@ export default class AddPlan extends React.Component {
       .updateTaskRemind(this.remindId, "", selectedUserIdsStr)
       .then((res) => {
         if (res && res.code === "0") {
+          this.setState({
+            remindTime: "",
+          });
         } else {
           message.warn(res.message);
         }

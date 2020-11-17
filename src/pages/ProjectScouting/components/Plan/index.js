@@ -471,6 +471,7 @@ export default class Plan extends React.Component {
             {
               showAddPlan: true,
               isAdd: true,
+              planId: "",
               boardId: board.board_id,
               planGroupId: groupId,
             },
