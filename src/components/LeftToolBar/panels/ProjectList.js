@@ -6,6 +6,8 @@ import ScoutDetail from "../../../lib/components/ProjectScouting/ScoutingDetail"
 import ListAction from "../../../lib/components/ProjectScouting/ScoutingList";
 import { plotEdit } from "../../../utils/plotEdit";
 import { TransformCoordinate } from "../../../lib/utils/index";
+import Event from "../../../lib/utils/event";
+import { array } from "prop-types";
 
 export default class ProjectList extends React.Component {
   constructor(props) {
@@ -90,7 +92,7 @@ export default class ProjectList extends React.Component {
   };
 
   addFeatureToGroup = (featureOperatorList, name) => {
-    let promise = featureOperatorList.map((item) => {
+    let promise = featureOperatorList.map(async (item) => {
       let { feature } = item;
       let param = {
         coordinates: feature.getGeometry().getCoordinates(),
@@ -111,15 +113,12 @@ export default class ProjectList extends React.Component {
           "EPSG:3857",
           "EPSG:4326"
         );
-        window
-          .CallWebMapFunction("getCityByLonLat", {
-            lon: xy[0],
-            lat: xy[1],
-          })
-          .then((res) => {
-            obj.districtcode = res.addressComponent?.adcode;
-            return ScoutDetail.addCollection(obj);
-          });
+        let res = await window.CallWebMapFunction("getCityByLonLat", {
+          lon: xy[0],
+          lat: xy[1],
+        });
+        obj.districtcode = res.addressComponent?.adcode;
+        return ScoutDetail.addCollection(obj);
       } else {
         return ScoutDetail.addCollection(obj);
       }
@@ -140,7 +139,7 @@ export default class ProjectList extends React.Component {
       });
   };
   addFeatureToProject = (featureOperatorList, name) => {
-    let promise = featureOperatorList.map((item) => {
+    let promise = featureOperatorList.map(async (item) => {
       let { feature } = item;
       let param = {
         coordinates: feature.getGeometry().getCoordinates(),
@@ -155,7 +154,21 @@ export default class ProjectList extends React.Component {
         board_id: this.state.projectId,
         content: JSON.stringify(param),
       };
-      return ScoutDetail.addCollection(obj);
+      if (param.geoType === "Point") {
+        let xy = TransformCoordinate(
+          param.coordinates,
+          "EPSG:3857",
+          "EPSG:4326"
+        );
+        let res = await window.CallWebMapFunction("getCityByLonLat", {
+          lon: xy[0],
+          lat: xy[1],
+        });
+        obj.districtcode = res.addressComponent?.adcode;
+        return ScoutDetail.addCollection(obj);
+      } else {
+        return ScoutDetail.addCollection(obj);
+      }
     });
     Promise.all(promise)
       .then((resp) => {

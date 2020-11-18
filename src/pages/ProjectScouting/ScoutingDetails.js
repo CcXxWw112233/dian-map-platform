@@ -77,7 +77,7 @@ export default class ScoutingDetails extends PureComponent {
     this.publicDataLinkArr = [];
     const panes = [
       {
-        title: "整理",
+        title: "片区",
         content: areaScouting(),
         key: "1",
         closable: false,
@@ -92,7 +92,7 @@ export default class ScoutingDetails extends PureComponent {
         ],
       },
       {
-        title: "回看",
+        title: "检修",
         content: <div>正在加紧开发中...</div>,
         key: "2",
         closable: 0,
@@ -2398,7 +2398,7 @@ export default class ScoutingDetails extends PureComponent {
         >
           {this.state.panes.map((pane) => {
             let style = {};
-            if (pane.title === "整理") {
+            if (pane.key === "1") {
               let visible =
                 this.props.parentTool &&
                 this.props.parentTool.getCollectVisible(

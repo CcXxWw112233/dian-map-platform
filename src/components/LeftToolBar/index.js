@@ -513,6 +513,7 @@ export default class LeftToolBar extends React.Component {
           ) : null}
           {this.state.displayProjectList ? (
             <ProjectList
+              parent={this}
               featureOperatorList={this.featureOperatorList}
               selectFeatureOperatorList={this.selectFeatureOperatorList}
               goBackTempPlot={(list) => {
