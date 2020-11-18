@@ -805,7 +805,10 @@ export default class AddPlan extends React.Component {
                   locale={locale}
                   disabledDate={this.disabledDate}
                   disabledTime={this.disabledDateTime}
-                  showTime={{ defaultValue: moment("00:00", "HH:mm") }}
+                  showTime={{
+                    defaultValue: moment("00:00", "HH:mm"),
+                    minuteStep: 5,
+                  }}
                   value={
                     this.state.remindTime
                       ? moment(this.state.remindTime)
