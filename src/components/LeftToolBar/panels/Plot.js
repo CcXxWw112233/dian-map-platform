@@ -541,55 +541,44 @@ export default class Plot extends PureComponent {
         board_id: this.projectId,
         content: JSON.stringify(param),
       };
+      let xy = [];
       if (param.geoType === "Point") {
-        let xy = TransformCoordinate(param.coordinates, "EPSG:3857", "EPSG:4326");
-        window
-          .CallWebMapFunction("getCityByLonLat", {
-            lon: xy[0],
-            lat: xy[1],
-          })
-          .then((res) => {
-            obj.districtcode = res.addressComponent?.adcode;
-            // console.log(board);
-            DetailAction.addCollection(obj)
-              .then((res) => {
-                let obj = DetailAction.CollectionGroup.find(
-                  (item) => item.id === window.ProjectGroupId
-                );
-                message.success(
-                  `标绘已成功保存到${this.projectName}的${
-                    obj ? obj.name : "未"
-                  }分组`
-                );
-                this.plotLayer.removeFeature(operator);
-                resolve(res);
-              })
-              .catch((err) => {
-                reject(err);
-                console.log(err);
-                message.info(err.message);
-              });
-          });
+        xy = TransformCoordinate(param.coordinates, "EPSG:3857", "EPSG:4326");
       } else {
-        DetailAction.addCollection(obj)
-          .then((res) => {
-            let obj = DetailAction.CollectionGroup.find(
-              (item) => item.id === window.ProjectGroupId
-            );
-            message.success(
-              `标绘已成功保存到${this.projectName}的${
-                obj ? obj.name : "未"
-              }分组`
-            );
-            this.plotLayer.removeFeature(operator);
-            resolve(res);
-          })
-          .catch((err) => {
-            reject(err);
-            console.log(err);
-            message.info(err.message);
-          });
+        const extent = operator.feature.getGeometry().getExtent();
+        let centerPoi = [
+          (extent[0] + extent[2]) / 2,
+          (extent[1] + extent[3]) / 2,
+        ];
+        xy = TransformCoordinate(centerPoi, "EPSG:3857", "EPSG:4326");
       }
+      window
+        .CallWebMapFunction("getCityByLonLat", {
+          lon: xy[0],
+          lat: xy[1],
+        })
+        .then((res) => {
+          obj.districtcode = res.addressComponent?.adcode;
+          // console.log(board);
+          DetailAction.addCollection(obj)
+            .then((res) => {
+              let obj = DetailAction.CollectionGroup.find(
+                (item) => item.id === window.ProjectGroupId
+              );
+              message.success(
+                `标绘已成功保存到${this.projectName}的${
+                  obj ? obj.name : "未"
+                }分组`
+              );
+              this.plotLayer.removeFeature(operator);
+              resolve(res);
+            })
+            .catch((err) => {
+              reject(err);
+              console.log(err);
+              message.info(err.message);
+            });
+        });
     });
   };
   handleInputChange = (val) => {
