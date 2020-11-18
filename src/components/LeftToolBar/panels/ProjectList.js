@@ -7,7 +7,6 @@ import ListAction from "../../../lib/components/ProjectScouting/ScoutingList";
 import { plotEdit } from "../../../utils/plotEdit";
 import { TransformCoordinate } from "../../../lib/utils/index";
 import Event from "../../../lib/utils/event";
-import { array } from "prop-types";
 
 export default class ProjectList extends React.Component {
   constructor(props) {
@@ -107,32 +106,32 @@ export default class ProjectList extends React.Component {
         board_id: this.state.projectId,
         content: JSON.stringify(param),
       };
+      let xy = [];
       if (param.geoType === "Point") {
-        let xy = TransformCoordinate(
-          param.coordinates,
-          "EPSG:3857",
-          "EPSG:4326"
-        );
-        let res = await window.CallWebMapFunction("getCityByLonLat", {
-          lon: xy[0],
-          lat: xy[1],
-        });
-        obj.districtcode = res.addressComponent?.adcode;
-        return ScoutDetail.addCollection(obj);
+        xy = TransformCoordinate(param.coordinates, "EPSG:3857", "EPSG:4326");
       } else {
-        return ScoutDetail.addCollection(obj);
+        const extent = item.feature.getGeometry().getExtent();
+        let centerPoi = [
+          (extent[0] + extent[2]) / 2,
+          (extent[1] + extent[3]) / 2,
+        ];
+        xy = TransformCoordinate(centerPoi, "EPSG:3857", "EPSG:4326");
       }
+      let res = await window.CallWebMapFunction("getCityByLonLat", {
+        lon: xy[0],
+        lat: xy[1],
+      });
+      obj.districtcode = res.addressComponent?.adcode;
+      return ScoutDetail.addCollection(obj);
     });
     Promise.all(promise)
       .then((resp) => {
-        // console.log(resp);
+        Event.Evt.firEvent("updatePlotFeature");
+        Event.Evt.firEvent("addCollectionForFeature", resp);
         message.success(`标绘已成功保存到${this.state.projectName}的${name}`);
-        // Event.Evt.firEvent("appendToProjectSuccess", featureOperatorList);
         featureOperatorList.forEach((operator) => {
           plotEdit.plottingLayer.removeFeature(operator);
         });
-        Event.Evt.firEvent("addCollectionForFeature", resp);
-        Event.Evt.firEvent("updatePlotFeature");
       })
       .catch((err) => {
         console.log(err);
@@ -172,14 +171,12 @@ export default class ProjectList extends React.Component {
     });
     Promise.all(promise)
       .then((resp) => {
-        // console.log(resp);
+        Event.Evt.firEvent("updatePlotFeature");
+        Event.Evt.firEvent("addCollectionForFeature", resp);
         message.success(`添加到${name}项目成功`);
-        // Event.Evt.firEvent("appendToProjectSuccess", featureOperatorList);
         featureOperatorList.forEach((operator) => {
           plotEdit.plottingLayer.removeFeature(operator);
         });
-        Event.Evt.firEvent("addCollectionForFeature", resp);
-        Event.Evt.firEvent("updatePlotFeature");
       })
       .catch((err) => {
         console.log(err);

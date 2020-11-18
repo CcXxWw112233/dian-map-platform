@@ -21,6 +21,7 @@ export default class AddPlan extends React.Component {
       newStep: "",
       newPlan: "",
       isAdd: true,
+      isModify: false,
       taskDetails: [],
       endTime: null,
       remindTime: null,
@@ -202,7 +203,7 @@ export default class AddPlan extends React.Component {
       };
     }
     return {
-      disabledHours: () => this.range(0, 60).splice(20, 4),
+      disabledHours: () => [...this.range(0, 6), ...this.range(23, 24)],
       disabledMinutes: () => this.getMinutes(0, 60),
       // disabledSeconds: () => [55, 56],
     };
@@ -266,26 +267,51 @@ export default class AddPlan extends React.Component {
     if (!value) return;
     if (value.trim() === "") return;
     const { boardId, planGroupId } = this.props;
-    planServices
-      .createBoardTask(boardId, planGroupId, value)
-      .then((res) => {
-        if (res && res.code === "0") {
-          this.planId = res.data.id;
-          planServices.getPlanDetail(res.data.id).then((res) => {
-            if (res && res.code === "0") {
-              this.setState({
-                isAdd: false,
-                data: res.data,
-              });
-            }
-          });
-        } else {
-          message.warn(res.message);
-        }
-      })
-      .catch((e) => {
-        message.error(e.message);
-      });
+    let planId = this.planId || this.props.planId;
+    if (this.state.isModify) {
+      planServices
+        .updateBoardTask("", planId, value, "0")
+        .then((res) => {
+          if (res && res.code === "0") {
+            this.planId = res.data.id;
+            planServices.getPlanDetail(res.data.id).then((res) => {
+              if (res && res.code === "0") {
+                this.setState({
+                  isAdd: false,
+                  isModify: false,
+                  data: res.data,
+                });
+              }
+            });
+          } else {
+            message.warn(res.message);
+          }
+        })
+        .catch((e) => {
+          message.error(e.message);
+        });
+    } else {
+      planServices
+        .createBoardTask(boardId, planGroupId, value)
+        .then((res) => {
+          if (res && res.code === "0") {
+            this.planId = res.data.id;
+            planServices.getPlanDetail(res.data.id).then((res) => {
+              if (res && res.code === "0") {
+                this.setState({
+                  isAdd: false,
+                  data: res.data,
+                });
+              }
+            });
+          } else {
+            message.warn(res.message);
+          }
+        })
+        .catch((e) => {
+          message.error(e.message);
+        });
+    }
   };
   handleDelPlanClick = (data) => {
     if (!data) return;
@@ -656,6 +682,12 @@ export default class AddPlan extends React.Component {
                     width: "calc(100% - 36px)",
                     borderBottom: "1px rgba(230, 232, 241, 1) solid",
                   }}
+                  onClick={() =>
+                    this.setState({
+                      isAdd: true,
+                      isModify: true,
+                    })
+                  }
                 >
                   <div
                     style={{ width: "calc(100% - 36px)" }}

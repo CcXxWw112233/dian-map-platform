@@ -203,12 +203,19 @@ function Action() {
       InitMap.map.removeOverlay(item);
     });
     this.overlayArr2.forEach((item) => {
+      let index = this.features.findIndex(
+        (item2) => item2.ol_uid === item.ol_uid
+      );
+      if (index > -1) {
+        this.features.splice(index, -1);
+      }
       if (this.Source.getFeatureByUid(item.ol_uid)) {
         this.Source.removeFeature(item);
       }
     });
     this.overlayArr = [];
     this.overlayArr2 = [];
+
     const extent = InitMap.map.getView().calculateExtent(InitMap.map.getSize());
     let coor1 = TransformCoordinate(
       [extent[0], extent[1]],
@@ -225,29 +232,27 @@ function Action() {
     this.layer.projectScoutingArr.forEach((item) => {
       this.layer.removeFeature(item);
     });
-    if (zoom < 10) {
+    if (zoom < 8) {
       level = 1;
     }
-    if (zoom >= 10 && zoom < 14) {
+    if (zoom >= 8 && zoom < 12) {
       level = 2;
     }
-    // if (zoom >= 14 && zoom < 16) {
-    if (zoom >= 12) {
+    if (zoom >= 12 && zoom < 14) {
       level = 3;
+    }
+    if (zoom >= 14) {
       this.renderFeaturesCollection(data, {
         lenged,
         dispatch,
         showFeatureName,
       });
       let pointCollection = this.renderPointCollection(ponts);
-      // this.features = this.features.concat(pointCollection);
       this.overlayArr2.push(...pointCollection);
+      this.features.push(...pointCollection);
       this.Source.addFeatures(pointCollection);
       return;
     }
-    // if (zoom >= 16) {
-    //   return;
-    // }
     config
       .GET_AREACENTERPOINT_LIST(coor1[0], coor2[0], coor1[1], coor2[1], level)
       .then((res) => {
