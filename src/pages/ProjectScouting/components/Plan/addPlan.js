@@ -20,6 +20,7 @@ export default class AddPlan extends React.Component {
       addStepState: false,
       newStep: "",
       newPlan: "",
+      data: null,
       isAdd: true,
       isModify: false,
       taskDetails: [],
@@ -166,6 +167,7 @@ export default class AddPlan extends React.Component {
               }
               this.setState({
                 newPlan: res.data.name,
+                data: res.data,
                 taskDetails: res.data.child_tasks || [],
               });
             }
@@ -269,6 +271,12 @@ export default class AddPlan extends React.Component {
     const { boardId, planGroupId } = this.props;
     let planId = this.planId || this.props.planId;
     if (this.state.isModify) {
+      if (this.state.data.name === value) {
+        return;
+      }
+      this.setState({
+        isModify: false,
+      });
       planServices
         .updateBoardTask("", planId, value, "0")
         .then((res) => {
@@ -278,7 +286,6 @@ export default class AddPlan extends React.Component {
               if (res && res.code === "0") {
                 this.setState({
                   isAdd: false,
-                  isModify: false,
                   data: res.data,
                 });
               }
