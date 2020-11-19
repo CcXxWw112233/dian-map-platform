@@ -30,6 +30,7 @@ export default class CollectionPreview extends React.Component {
       update: 0,
       isEdit: false,
       isOverallView: true,
+      imageUrl: "",
     };
     this.imgContent = React.createRef();
     this.touchStart = false;
@@ -90,7 +91,18 @@ export default class CollectionPreview extends React.Component {
         update: this.state.update + 1,
       });
     });
+    // debugger
+    // document.getElementsByClassName("pnlm-container").oncontextmenu = function(e) {
+    //   debugger
+    //   message.info("55555555")
+    // }
   }
+
+  // componentWillReceiveProps(nextProps) {
+  //   this.setState({
+  //     imageUrl: nextProps.currentData?.resource_url,
+  //   });
+  // }
   // 简化坐标
   getPointer = (e) => {
     return { x: e.pageX, y: e.pageY };
@@ -189,20 +201,38 @@ export default class CollectionPreview extends React.Component {
     });
   };
 
+  handleImageClick = (evt, args) => {
+    this.setState({
+      imageUrl:
+        "https://dian-yinyi-map-test.oss-cn-beijing.aliyuncs.com/2020-11-18/22db2e76e0837b985fdf27984e4e0737.jpg?Expires=1605777944&OSSAccessKeyId=LTAIiTOudd9oeHVo&Signature=YEZrK8O7R1ljsBaSPwfUaif1nvk%3D",
+    });
+  };
+
   checkRender = (data = {}, isOverallView = false) => {
+    let imageUrl = data?.resource_url;
+    if (this.state.imageUrl) {
+      imageUrl = this.state.imageUrl;
+    }
     let type = DetailAction.checkCollectionType(data.target);
     if (type === "pic") {
       return this.state.isOverallView ? (
         <Pannellum
           width="100%"
           height="100%"
-          image={data?.resource_url}
+          image={imageUrl}
           pitch={10}
           yaw={180}
           hfov={110}
           autoLoad
           showZoomCtrl={false}
-        ></Pannellum>
+        >
+          {/* <Pannellum.Hotspot
+            type="custom"
+            pitch={31}
+            yaw={150}
+            handleClick={(evt, args) => this.handleImageClick(evt, args)}
+          ></Pannellum.Hotspot> */}
+        </Pannellum>
       ) : (
         <img crossOrigin="anonymous" src={data?.resource_url} alt="" />
       );
@@ -219,6 +249,7 @@ export default class CollectionPreview extends React.Component {
             style={{
               width: "100%",
               height: "100%",
+              paddingTop: 20,
               ...(this.state.isOverallView
                 ? { display: "" }
                 : { display: "none" }),
@@ -226,7 +257,8 @@ export default class CollectionPreview extends React.Component {
           >
             <PannellumVideo
               video={data.resource_url}
-              loop
+              loop={true}
+              controls={true}
               width="100%"
               height="600px"
               pitch={10}
@@ -240,6 +272,7 @@ export default class CollectionPreview extends React.Component {
             style={{
               width: "100%",
               height: "100%",
+              paddingTop: 20,
               ...(this.state.isOverallView
                 ? { display: "none" }
                 : { display: "" }),
