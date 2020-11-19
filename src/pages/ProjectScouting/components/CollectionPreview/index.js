@@ -29,7 +29,7 @@ export default class CollectionPreview extends React.Component {
       active: null,
       update: 0,
       isEdit: false,
-      isOverallView: false,
+      isOverallView: true,
     };
     this.imgContent = React.createRef();
     this.touchStart = false;
