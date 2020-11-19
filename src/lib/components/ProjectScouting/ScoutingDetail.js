@@ -1448,19 +1448,34 @@ function Action() {
         if (!this.featuresGroup[item.provincecode]) {
           this.featuresGroup[item.provincecode] = [];
         }
-        this.featuresGroup[item.provincecode].push(item);
+        let index = this.featuresGroup[item.provincecode].findIndex(
+          (item2) => item2.id === item.id
+        );
+        if (index === -1) {
+          this.featuresGroup[item.provincecode].push(item);
+        }
       }
       if (item.citycode) {
         if (!this.featuresGroup[item.citycode]) {
           this.featuresGroup[item.citycode] = [];
         }
-        this.featuresGroup[item.citycode].push(item);
+        let index = this.featuresGroup[item.citycode].findIndex(
+          (item2) => item2.id === item.id
+        );
+        if (index === -1) {
+          this.featuresGroup[item.citycode].push(item);
+        }
       }
       if (item.districtcode) {
         if (!this.featuresGroup[item.districtcode]) {
           this.featuresGroup[item.districtcode] = [];
         }
-        this.featuresGroup[item.districtcode].push(item);
+        let index = this.featuresGroup[item.districtcode].findIndex(
+          (item2) => item2.id === item.id
+        );
+        if (index === -1) {
+          this.featuresGroup[item.districtcode].push(item);
+        }
       }
     });
     this.pontsGroup = {};
