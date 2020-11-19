@@ -262,8 +262,18 @@ function Action() {
               let total = this.featuresGroup[item.code]?.length || 0;
               total += this.pontsGroup[item.code]?.length || 0;
               if (total > 0) {
+                let name = "";
+                if (level === 1) {
+                  name = item.province;
+                }
+                if (level === 2) {
+                  name = item.city;
+                }
+                if (level === 3) {
+                  name = item.district;
+                }
                 let ele = totalOverlay({
-                  name: item.district || item.city || item.province,
+                  name: name,
                   total: total,
                 });
                 let newOverlay = createOverlay(ele);
