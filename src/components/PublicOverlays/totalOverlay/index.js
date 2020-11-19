@@ -8,8 +8,8 @@ export default function totalOverlay({ name, wranNumber, total }) {
   div.style.background = "rgb(48,114,246)";
   div.style.textAlign = "center";
   div.style.color = "rgb(255,255,255)";
-  div.style.padding = "20px";
   div.style.fontSize = "12px";
+  div.style.justifyContent = "center";
   if (wranNumber > 0) {
     div.style.background = "rgb(255,0,0)";
   }
