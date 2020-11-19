@@ -426,6 +426,7 @@ function Action() {
     });
     INITMAP.map.un("moveend", this.moveendListener);
     this.moveendListener = () => {};
+    this.clearGroupCollectionPoint();
   };
   // 获取区域列表
   this.fetchAreaList = async (data) => {
