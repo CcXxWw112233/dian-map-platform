@@ -208,6 +208,12 @@ export default class CollectionPreview extends React.Component {
     });
   };
 
+  handlePannellumMouseUp = (evt, args) => {
+    debugger
+    let pannellumRef = this.refs["pannellum"];
+    let [pitch, yaw] = pannellumRef.getViewer().mouseEventToCoords(evt);
+  }
+
   checkRender = (data = {}, isOverallView = false) => {
     let imageUrl = data?.resource_url;
     if (this.state.imageUrl) {
@@ -223,8 +229,10 @@ export default class CollectionPreview extends React.Component {
           pitch={10}
           yaw={180}
           hfov={110}
+          ref="pannellum"
           autoLoad
           showZoomCtrl={false}
+          onMouseup={(evt, args) => this.handlePannellumMouseUp(evt, args)}
         >
           {/* <Pannellum.Hotspot
             type="custom"
