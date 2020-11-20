@@ -80,6 +80,11 @@ class IndexPage extends React.Component {
       console.log(data);
       this.addFeatureForProject(data);
     });
+    Event.Evt.on("resetMoveMapMoveedListen", () => {
+      this.setState({
+        isMoveMapMoveedListen: false,
+      });
+    });
     const me = this;
     window.addEventListener("resize", function () {
       const width = document.getElementById("leftPanel").clientWidth;
