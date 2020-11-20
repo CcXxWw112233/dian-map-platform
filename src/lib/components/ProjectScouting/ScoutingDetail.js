@@ -340,6 +340,7 @@ function Action() {
     const me = this;
     // 关闭/开启采集统计
     Event.Evt.on("removeMapMoveEndListen", function (value) {
+      if (!me.oldLenged) return;
       let obj = {
         lenged: me.oldLenged,
         dispatch: me.oldDispatch,
@@ -463,6 +464,14 @@ function Action() {
     this.moveendListener = () => {};
     this.clearGroupCollectionPoint();
     Event.Evt.firEvent("resetMoveMapMoveedListen");
+    this.isMoveMapMoveedListen = false;
+    this.moveendListener = () => {};
+    this.oldFeatures = null;
+    this.oldPonts = null;
+    this.oldLenged = null;
+    this.oldDispatch = null;
+    this.oldShowFeatureName = null;
+    // Event.Evt.removeEventListener("removeMapMoveEndListen");
   };
   // 获取区域列表
   this.fetchAreaList = async (data) => {
