@@ -11,7 +11,7 @@ import PlotFactory from "./PlotFactory";
 import Constants from "./Constants";
 import { combineOpts, deepcopy } from "../util/core";
 import * as ArrTools from "../util/array";
-import DetailAction from '../../../lib/components/ProjectScouting/ScoutingDetail';
+import DetailAction from "../../../lib/components/ProjectScouting/ScoutingDetail";
 // import Ajax from '../util/seieajax';
 
 import * as ol from "ol";
@@ -657,10 +657,12 @@ class PlottingLayer extends Observable {
    * 置顶一个图元
    */
   setToTop(feature_operator) {
-    this._sortByZindex();
-    const curIndex = this._getFeatureOperatorIndex(feature_operator);
-    ArrTools.moveToTop(this.feature_operators, curIndex);
-    this._resetZIndex();
+    if (feature_operator.feature) {
+      this._sortByZindex();
+      const curIndex = this._getFeatureOperatorIndex(feature_operator);
+      ArrTools.moveToTop(this.feature_operators, curIndex);
+      this._resetZIndex();
+    }
   }
   /**
    * @param {FeatureOperator} feature_operator 对象

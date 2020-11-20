@@ -1215,6 +1215,7 @@ export const UploadItem = ({
     // } else {
     //   onCheckItem(null);
     // }
+    Action.zoomToMap();
     onCheckItem(val);
     if (val.is_display === "0") return;
     if (

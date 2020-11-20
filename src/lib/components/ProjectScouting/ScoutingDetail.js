@@ -1613,6 +1613,11 @@ function Action() {
       });
   };
 
+  this.zoomToMap = () => {
+    let zoom = INITMAP.map.getView().getZoom();
+    InitMap.map.getView().setZoom(zoom < 14 ? 14 : zoom);
+  };
+
   // type coordinate or extent
   this.toCenter = async ({
     center,

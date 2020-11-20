@@ -597,6 +597,7 @@ export default class AddPlan extends React.Component {
           {this.state.projectMember.map((item, index) => {
             return (
               <div
+                key={index}
                 className={overlayStyles.listItem}
                 onClick={() => this.handleProjectMemer(item, index)}
               >
@@ -951,10 +952,13 @@ export default class AddPlan extends React.Component {
                 }}
               >
                 {this.state.selectedUserArr &&
-                  this.state.selectedUserArr.map((item) => {
+                  this.state.selectedUserArr.map((item, index) => {
                     if (item && item.avatar) {
                       return (
-                        <div style={{ width: 32, height: 32, margin: 5 }}>
+                        <div
+                          key={index}
+                          style={{ width: 32, height: 32, margin: 5 }}
+                        >
                           <img
                             src={item.avatar}
                             alt=""
