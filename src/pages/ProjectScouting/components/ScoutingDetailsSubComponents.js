@@ -1216,37 +1216,39 @@ export const UploadItem = ({
     //   onCheckItem(null);
     // }
     Action.zoomToMap();
-    onCheckItem(val);
-    if (val.is_display === "0") return;
-    if (
-      val.location &&
-      Object.keys(val.location).length &&
-      val.is_display === "1"
-    ) {
-      let coor = [+val.location.longitude, +val.location.latitude];
-      Action.editZIndexOverlay(val.id);
-      Action.toCenter({ center: coor });
-    }
-
-    // 标注
-    if (val.collect_type === "4") {
-      let feature = Action.findFeature(val.id);
-      let extent = feature && feature.getGeometry().getExtent();
-      if (extent) {
-        Action.toCenter({ type: "extent", center: extent });
+    setTimeout(function () {
+      onCheckItem(val);
+      if (val.is_display === "0") return;
+      if (
+        val.location &&
+        Object.keys(val.location).length &&
+        val.is_display === "1"
+      ) {
+        let coor = [+val.location.longitude, +val.location.latitude];
+        Action.editZIndexOverlay(val.id);
+        Action.toCenter({ center: coor });
       }
-    }
 
-    // 规划图
-    if (val.collect_type === "5") {
-      let layer = Action.findImgLayer(val.resource_id);
-      if (layer) {
-        let extent = layer.getSource().getImageExtent();
-        // console.log()
-        Action.toCenter({ type: "extent", center: extent });
+      // 标注
+      if (val.collect_type === "4") {s
+        let feature = Action.findFeature(val.id);
+        let extent = feature && feature.getGeometry().getExtent();
+        if (extent) {
+          Action.toCenter({ type: "extent", center: extent });
+        }
       }
-    }
-    onToggleChangeStyle && onToggleChangeStyle(val);
+
+      // 规划图
+      if (val.collect_type === "5") {
+        let layer = Action.findImgLayer(val.resource_id);
+        if (layer) {
+          let extent = layer.getSource().getImageExtent();
+          // console.log()
+          Action.toCenter({ type: "extent", center: extent });
+        }
+      }
+      onToggleChangeStyle && onToggleChangeStyle(val);
+    }, 20);
   };
   let oldRemark = data.content && JSON.parse(data.content).remark;
   if (oldRemark?.trim() === "") {
