@@ -684,8 +684,6 @@ export default class AddPlan extends React.Component {
           {this.state.completeTime ? (
             <div
               style={{
-                display: "flex",
-                flexDirection: "row",
                 fontSize: 12,
                 color: "#999",
               }}
