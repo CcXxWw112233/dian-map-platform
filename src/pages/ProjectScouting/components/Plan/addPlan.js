@@ -26,6 +26,7 @@ export default class AddPlan extends React.Component {
       taskDetails: [],
       endTime: null,
       remindTime: null,
+      completeTime: null,
       projectMember: [],
       selectedUserArr: [],
       dropDownVisible: false,
@@ -120,6 +121,23 @@ export default class AddPlan extends React.Component {
     }
   };
 
+  getFormatTime = (timestamp) => {
+    let date = new Date();
+    date.setTime(timestamp);
+    let y = date.getFullYear();
+    let m = date.getMonth() + 1;
+    m = m < 10 ? "0" + m : m;
+    let d = date.getDate();
+    d = d < 10 ? "0" + d : d;
+    let h = date.getHours();
+    h = h < 10 ? "0" + h : h;
+    let mi = date.getMinutes();
+    mi = mi < 10 ? "0" + mi : mi;
+    let s = date.getSeconds();
+    s = s < 10 ? "0" + s : s;
+    return { y: y, m: m, d: d, h: h, mi: mi, s: s };
+  };
+
   getDetails = () => {
     const { isAdd, planId } = this.props;
     if (!isAdd) {
@@ -130,39 +148,47 @@ export default class AddPlan extends React.Component {
         planServices.getPlanDetail(planId).then((res) => {
           if (res && res.code === "0") {
             if (res.data) {
+              let timestamp = "";
+              let result = null;
               if (res.data.end_time) {
-                const timestamp = res.data.end_time;
-                let date = new Date();
-                date.setTime(timestamp);
-                let y = date.getFullYear();
-                let m = date.getMonth() + 1;
-                m = m < 10 ? "0" + m : m;
-                let d = date.getDate();
-                d = d < 10 ? "0" + d : d;
+                timestamp = res.data.end_time;
+                result = this.getFormatTime(timestamp);
                 this.setState({
-                  endTime: y.toString() + m.toString() + d.toString(),
+                  endTime:
+                    result.y.toString() +
+                    result.m.toString() +
+                    result.d.toString(),
                 });
               }
               if (res.data.remind_time) {
-                const timestamp = res.data.remind_time;
-                let date = new Date();
-                date.setTime(timestamp);
-                let y = date.getFullYear();
-                let m = date.getMonth() + 1;
-                m = m < 10 ? "0" + m : m;
-                let d = date.getDate();
-                d = d < 10 ? "0" + d : d;
-                let h = date.getHours();
-                let mi = date.getMinutes();
-                let s = date.getSeconds();
+                timestamp = res.data.remind_time;
+                result = this.getFormatTime(timestamp);
                 this.setState({
                   remindTime:
-                    y.toString() +
-                    m.toString() +
-                    d.toString() +
-                    h.toString() +
-                    mi.toString() +
-                    s.toString(),
+                    result.y.toString() +
+                    result.m.toString() +
+                    result.d.toString() +
+                    result.h.toString() +
+                    result.mi.toString() +
+                    result.s.toString(),
+                });
+              }
+              if (res.data.complete_time) {
+                timestamp = res.data.complete_time;
+                result = this.getFormatTime(timestamp);
+                this.setState({
+                  completeTime:
+                    result.y.toString() +
+                    "/" +
+                    result.m.toString() +
+                    "/" +
+                    result.d.toString() +
+                    " " +
+                    result.h.toString() +
+                    ":" +
+                    result.mi.toString() +
+                    ":" +
+                    result.s.toString()
                 });
               }
               this.setState({
@@ -224,7 +250,6 @@ export default class AddPlan extends React.Component {
     });
   };
 
-  getPlanDetail = () => {};
   handleSaveNewStep = (value) => {
     // planServices.updateBoardTask("", )
     this.setState({
@@ -641,7 +666,10 @@ export default class AddPlan extends React.Component {
     }
     return (
       <div className={styles.wrapper}>
-        <div className={styles.header}>
+        <div
+          className={styles.header}
+          style={{ justifyContent: "space-between" }}
+        >
           <i
             className={globalStyle.global_icon}
             onClick={() => {
@@ -653,6 +681,19 @@ export default class AddPlan extends React.Component {
           >
             &#xe758;
           </i>
+          {this.state.completeTime ? (
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                fontSize: 12,
+                color: "#999",
+              }}
+            >
+              <span>完成时间：</span>
+              <span>{this.state.completeTime}</span>
+            </div>
+          ) : null}
         </div>
         <div
           className={`${styles.body} ${globalStyle.autoScrollY}`}
