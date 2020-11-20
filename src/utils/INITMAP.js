@@ -75,7 +75,7 @@ const initMap = function () {
         projection: "EPSG:3857",
         minZoom: 5,
         zoom: 10,
-        maxZoom: 20,
+        maxZoom: 18,
         enableRotation: false,
       });
       return this.view;
