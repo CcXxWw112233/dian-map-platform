@@ -234,12 +234,12 @@ export default class CollectionPreview extends React.Component {
           showZoomCtrl={false}
           onMouseup={(evt, args) => this.handlePannellumMouseUp(evt, args)}
         >
-          {/* <Pannellum.Hotspot
+          <Pannellum.Hotspot
             type="custom"
             pitch={31}
             yaw={150}
             handleClick={(evt, args) => this.handleImageClick(evt, args)}
-          ></Pannellum.Hotspot> */}
+          ></Pannellum.Hotspot>
         </Pannellum>
       ) : (
         <img crossOrigin="anonymous" src={data?.resource_url} alt="" />
