@@ -262,8 +262,12 @@ function Action() {
               let total = this.featuresGroup[item.code]?.length || 0;
               total += this.pontsGroup[item.code]?.length || 0;
               if (total > 0) {
+<<<<<<< HEAD
                 let name = "";
                 name = item.name;
+=======
+                let name = item.name;
+>>>>>>> develop
                 let ele = totalOverlay({
                   name: name,
                   total: total,
@@ -1612,6 +1616,11 @@ function Action() {
         //   );
         // }
       });
+  };
+
+  this.zoomToMap = () => {
+    let zoom = INITMAP.map.getView().getZoom();
+    InitMap.map.getView().setZoom(zoom < 14 ? 14 : zoom);
   };
 
   // type coordinate or extent

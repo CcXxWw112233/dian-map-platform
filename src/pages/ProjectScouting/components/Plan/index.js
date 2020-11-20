@@ -717,6 +717,7 @@ export default class Plan extends React.Component {
   createItem = (item, type) => {
     return (
       <div
+        key={item.id}
         className={`${styles.item} ${styles.planItem}`}
         onClick={() => {
           const { parent, board } = this.props;
@@ -769,9 +770,6 @@ export default class Plan extends React.Component {
                 ? { color: "rgba(210, 212, 222, 1)" }
                 : {}),
               ...(item.complete_time ? { textDecoration: "line-through" } : {}),
-              overflow: "hidden",
-              whiteSpace: "nowrap",
-              textOverflow: "ellipsis",
             }}
           >
             {item.name || item.file_name}
@@ -782,9 +780,6 @@ export default class Plan extends React.Component {
             <span
               className={styles.date}
               style={{
-                overflow: "hidden",
-                whiteSpace: "nowrap",
-                textOverflow: "ellipsis",
                 ...(item.complete_time
                   ? { color: "rgba(210, 212, 222, 1)" }
                   : {}),
