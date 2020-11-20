@@ -1230,7 +1230,7 @@ export const UploadItem = ({
       }
 
       // 标注
-      if (val.collect_type === "4") {s
+      if (val.collect_type === "4") {
         let feature = Action.findFeature(val.id);
         let extent = feature && feature.getGeometry().getExtent();
         if (extent) {
