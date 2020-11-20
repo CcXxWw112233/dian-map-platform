@@ -183,12 +183,12 @@ export default class AddPlan extends React.Component {
                     result.m.toString() +
                     "/" +
                     result.d.toString() +
-                    " " +
+                    "  " +
                     result.h.toString() +
                     ":" +
                     result.mi.toString() +
                     ":" +
-                    result.s.toString()
+                    result.s.toString(),
                 });
               }
               this.setState({
@@ -716,12 +716,18 @@ export default class AddPlan extends React.Component {
               </div>
             ) : (
               <div className={styles.item}>
+                {/* #8db9ff */}
                 <i
                   className={globalStyle.global_icon}
-                  style={{ color: "rgba(208, 211, 226, 1)" }}
-                >
-                  &#xe7f2;
-                </i>
+                  style={{
+                    color: this.state.completeTime
+                      ? "#8db9ff"
+                      : "rgba(208, 211, 226, 1)",
+                  }}
+                  dangerouslySetInnerHTML={{
+                    __html: this.state.completeTime ? "&#xe7f8;" : " &#xe7f2;",
+                  }}
+                ></i>
                 <div
                   style={{
                     display: "flex",
