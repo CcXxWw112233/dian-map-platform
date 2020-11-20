@@ -89,7 +89,13 @@ function Action() {
   this.overlayArr2 = [];
   this.featuresGroup = {};
   this.pontsGroup = {};
+  this.isMoveMapMoveedListen = false;
   this.moveendListener = () => {};
+  this.oldFeatures = null;
+  this.oldPonts = null;
+  this.oldLenged = null;
+  this.oldDispatch = null;
+  this.oldShowFeatureName = null;
 
   Event.Evt.addEventListener("basemapchange", (key) => {
     if (!this.mounted) return;
@@ -288,8 +294,15 @@ function Action() {
       return;
     }
     this.moveendCallBack(data, ponts, { lenged, dispatch, showFeatureName });
+    const me = this;
     this.moveendListener = function (e) {
-      this.moveendCallBack(data, ponts, { lenged, dispatch, showFeatureName });
+      if (!me.isMoveMapMoveedListen) {
+        this.moveendCallBack(data, ponts, {
+          lenged,
+          dispatch,
+          showFeatureName,
+        });
+      }
     };
     InitMap.map.on("moveend", (e) => this.moveendListener(e));
   };
@@ -324,6 +337,37 @@ function Action() {
       });
       InitMap.map.addLayer(this.Layer);
     }
+    const me = this;
+    // 关闭/开启采集统计
+    Event.Evt.on("removeMapMoveEndListen", function (value) {
+      let obj = {
+        lenged: me.oldLenged,
+        dispatch: me.oldDispatch,
+        showFeatureName: me.oldShowFeatureName,
+      };
+      me.overlayArr.forEach((item) => {
+        InitMap.map.removeOverlay(item);
+      });
+      me.overlayArr2.forEach((item) => {
+        if (me.Source.getFeatureByUid(item.ol_uid)) {
+          me.Source.removeFeature(item);
+        }
+      });
+      me.overlayArr = [];
+      me.overlayArr2 = [];
+      // 关闭
+      if (value) {
+        me.renderFeaturesCollection(me.oldFeatures, obj);
+        let pointCollection = me.renderPointCollection(me.oldPonts);
+        me.overlayArr2 = pointCollection;
+        me.features = me.features.concat(pointCollection);
+        me.Source.addFeatures(pointCollection);
+      } else {
+        //开启
+        me.moveendCallBack(me.oldFeatures, me.oldPonts, obj);
+      }
+      me.isMoveMapMoveedListen = value;
+    });
   };
   this.boxFeature = {};
   this.draw = null;
@@ -1509,6 +1553,11 @@ function Action() {
       needRender = true;
     }
     if (needRender) {
+      this.oldFeatures = features;
+      this.oldPonts = ponts;
+      this.oldLenged = lenged;
+      this.oldDispatch = dispatch;
+      this.oldShowFeatureName = showFeatureName;
       this.mapMoveEnd(features, ponts, { lenged, dispatch, showFeatureName });
     }
     // 清除变量

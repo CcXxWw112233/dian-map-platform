@@ -72,6 +72,7 @@ class IndexPage extends React.Component {
     placement: "left",
     left: "0px",
     draw_visible: false,
+    isMoveMapMoveedListen: false,
   };
   componentDidMount() {
     this.checkListCach();
@@ -339,11 +340,11 @@ class IndexPage extends React.Component {
   };
 
   render() {
-    window.addEventListener('resize', ()=>{
+    window.addEventListener("resize", () => {
       this.setState({
-        update: this.state.update + 1
-      })
-    })
+        update: this.state.update + 1,
+      });
+    });
     let {
       isShowMap,
       isShowMobile,
@@ -391,6 +392,40 @@ class IndexPage extends React.Component {
             target="_self"
           >
             切换旧版
+          </a>
+        )}
+        {isShowBasemapGallery && (
+          <a
+            // className={styles.changePackage}
+            style={{
+              position: "absolute",
+              left: 66,
+              padding: "4px 8px",
+              borderRadius: "50px",
+              backgroundColor: "#fff",
+              bottom: "100px",
+              color: "#595959",
+              border: "1px solid #dedede",
+              fontSize: "12px",
+              width: "100px",
+              transition: "transform 0.3s cubic-bezier(0.7, 0.3, 0.1, 1)",
+              transform: this.state.transform,
+            }}
+            onClick={() => {
+              this.setState(
+                {
+                  isMoveMapMoveedListen: !this.state.isMoveMapMoveedListen,
+                },
+                () => {
+                  Event.Evt.firEvent(
+                    "removeMapMoveEndListen",
+                    this.state.isMoveMapMoveedListen
+                  );
+                }
+              );
+            }}
+          >
+            {this.state.isMoveMapMoveedListen ? "开启采集统计" : "关闭采集统计"}
           </a>
         )}
       </div>
