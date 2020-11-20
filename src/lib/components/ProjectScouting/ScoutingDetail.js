@@ -308,6 +308,7 @@ function Action() {
   };
 
   this.init = (dispatch) => {
+    Event.Evt.firEvent("resetMoveMapMoveedListen");
     this.mounted = true;
     this.Layer.setSource(this.Source);
     const layers = InitMap.map.getLayers().getArray();
