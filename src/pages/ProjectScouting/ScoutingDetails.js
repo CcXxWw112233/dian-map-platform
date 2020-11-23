@@ -429,6 +429,7 @@ export default class ScoutingDetails extends PureComponent {
     this.setState({ activeKey });
     if (this.state.activeKey === activeKey) return;
     this.clearGroupPointer();
+    Action.clearGroupCollectionPoint();
     if (activeKey !== "1") {
       // 删除采集资料显示
       Action.removeLayer();
@@ -443,7 +444,6 @@ export default class ScoutingDetails extends PureComponent {
     } else if (activeKey === "1") {
       // 显示采集资料
       this.setActiveCollapse(this.state.area_active_key);
-      Action.clearGroupCollectionPoint();
       let params = {
         board_id: this.state.current_board.board_id,
       };
@@ -2210,18 +2210,20 @@ export default class ScoutingDetails extends PureComponent {
                   >
                     <span style={{ fontSize: "0.6rem" }}>新增分类</span>
                   </Button>
-                  <Button
-                    type="primary"
-                    disabled={area_list.length < 2}
-                    onClick={() => this.setMultipleCheck()}
-                    ghost
-                    size="small"
-                    icon={<MyIcon type="icon-duoxuan" />}
-                  >
-                    <span style={{ fontSize: "0.6rem" }}>
-                      {this.state.multipleGroup ? "单图层" : "多图层"}
-                    </span>
-                  </Button>
+                  {area_list.length > 2 ? (
+                    <Button
+                      type="primary"
+                      disabled={area_list.length < 2}
+                      onClick={() => this.setMultipleCheck()}
+                      ghost
+                      size="small"
+                      icon={<MyIcon type="icon-duoxuan" />}
+                    >
+                      <span style={{ fontSize: "0.6rem" }}>
+                        {this.state.multipleGroup ? "单图层" : "多图层"}
+                      </span>
+                    </Button>
+                  ) : null}
                   <Button
                     type="primary"
                     ghost
