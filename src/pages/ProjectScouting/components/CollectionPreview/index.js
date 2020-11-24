@@ -209,10 +209,9 @@ export default class CollectionPreview extends React.Component {
   };
 
   handlePannellumMouseUp = (evt, args) => {
-    debugger
     let pannellumRef = this.refs["pannellum"];
     let [pitch, yaw] = pannellumRef.getViewer().mouseEventToCoords(evt);
-  }
+  };
 
   checkRender = (data = {}, isOverallView = false) => {
     let imageUrl = data?.resource_url;
@@ -238,6 +237,7 @@ export default class CollectionPreview extends React.Component {
             type="custom"
             pitch={31}
             yaw={150}
+            // cssClass={}
             handleClick={(evt, args) => this.handleImageClick(evt, args)}
           ></Pannellum.Hotspot>
         </Pannellum>
