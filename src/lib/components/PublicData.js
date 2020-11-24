@@ -321,7 +321,8 @@ const publicData = {
         }
         let coords = TransformCoordinate(temp, "EPSG:4326", "EPSG:3857");
         const options = {
-          textFillColor: "#3F48CC",
+          // textFillColor: "#3F48CC",
+          textFillColor: "rgba(255,0,0,1)",
           textStrokeColor: "#fff",
           textStrokeWidth: 3,
           font: "13px sans-serif",
