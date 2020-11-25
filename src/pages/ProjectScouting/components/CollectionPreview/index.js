@@ -252,7 +252,7 @@ export default class CollectionPreview extends React.Component {
             cssClass={
               this.state.isAddPanorama
                 ? styles.panorama_add
-                : styles.panorama_modify
+                : styles.pa norama_modify
             }
             handleClick={(evt, args) => this.handleImageClick(evt, args)}
           ></Pannellum.Hotspot> */}
@@ -381,6 +381,7 @@ export default class CollectionPreview extends React.Component {
   addNextPanoramaScene = () => {
     message.info('点击图片添加"坐标定位"');
     this.setState({
+      overlayVisible: false,
       isAddPanorama: true,
     });
   };
