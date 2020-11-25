@@ -1,5 +1,6 @@
 import React, { Fragment } from "react";
 import styles from "./index.less";
+import overlayStyle from "./overlay.less";
 import ReactDOM from "react-dom";
 import animateCss from "../../../../assets/css/animate.min.css";
 import { connect } from "dva";
@@ -12,6 +13,8 @@ import EditImage from "./EditImg";
 import ReactPlayer from "react-player";
 import { message } from "antd";
 import { Pannellum, PannellumVideo } from "pannellum-react";
+import { Dropdown, Input, Button } from "antd";
+import globalStyle from "@/globalSet/styles/globalStyles.less";
 
 @connect(
   ({ openswitch: { openPanel }, scoutingDetail: { collections, board } }) => ({
@@ -31,6 +34,11 @@ export default class CollectionPreview extends React.Component {
       isEdit: false,
       isOverallView: true,
       imageUrl: "",
+      overlayVisible: false,
+      activeIndex: -1,
+      isAddPanorama: true,
+      isModifyPanorama: false,
+      hotspot: [],
     };
     this.imgContent = React.createRef();
     this.touchStart = false;
@@ -211,6 +219,10 @@ export default class CollectionPreview extends React.Component {
   handlePannellumMouseUp = (evt, args) => {
     let pannellumRef = this.refs["pannellum"];
     let [pitch, yaw] = pannellumRef.getViewer().mouseEventToCoords(evt);
+    if (this.state.isAddPanorama) {
+      let obj = { pitch: pitch, yaw: yaw, cssClass: styles.panorama_add };
+      this.state.hotspot.push(obj);
+    }
   };
 
   checkRender = (data = {}, isOverallView = false) => {
@@ -233,13 +245,29 @@ export default class CollectionPreview extends React.Component {
           showZoomCtrl={false}
           onMouseup={(evt, args) => this.handlePannellumMouseUp(evt, args)}
         >
-          <Pannellum.Hotspot
+          {/* <Pannellum.Hotspot
             type="custom"
             pitch={31}
             yaw={150}
-            // cssClass={}
+            cssClass={
+              this.state.isAddPanorama
+                ? styles.panorama_add
+                : styles.panorama_modify
+            }
             handleClick={(evt, args) => this.handleImageClick(evt, args)}
-          ></Pannellum.Hotspot>
+          ></Pannellum.Hotspot> */}
+          {this.state.hotspot.map((item, index) => {
+            return (
+              <Pannellum.Hotspot
+                key={index}
+                type="custom"
+                pitch={item.pitch}
+                yaw={item.yaw}
+                cssClass={item.cssClass}
+                handleClick={(evt, args) => this.handleImageClick(evt, args)}
+              ></Pannellum.Hotspot>
+            );
+          })}
         </Pannellum>
       ) : (
         <img crossOrigin="anonymous" src={data?.resource_url} alt="" />
@@ -350,6 +378,69 @@ export default class CollectionPreview extends React.Component {
       this.exit();
     });
   };
+  addNextPanoramaScene = () => {
+    message.info('点击图片添加"坐标定位"');
+    this.setState({
+      isAddPanorama: true,
+    });
+  };
+
+  createOverlay = () => {
+    const { timeData } = this.props;
+    const keys = Object.keys(timeData);
+    let arr = [];
+    keys.forEach((item) => {
+      arr.push(...timeData[item]);
+    });
+    return (
+      <div className={overlayStyle.overlay}>
+        <div
+          className={`${overlayStyle.content} ${globalStyle.autoScrollY}`}
+          style={{ height: "88%" }}
+        >
+          {arr.map((item, index) => {
+            return (
+              <div key={index} className={overlayStyle.item}>
+                {item.data.resource_url ? (
+                  <img src={item.data.resource_url} alt="" />
+                ) : (
+                  <span>视频</span>
+                )}
+                <Input placeholder="请输入名称" />
+                {this.state.activeIndex === index ? (
+                  <Button type="primary">确定</Button>
+                ) : (
+                  <div className={overlayStyle.tools}>
+                    <span>
+                      <i className={globalStyle.global_icon}>&#xe81a;</i>
+                    </span>
+                    <span>
+                      <i className={globalStyle.global_icon}>&#xe819;</i>
+                    </span>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        <div className={overlayStyle.footer} style={{ height: "12%" }}>
+          <Button
+            type="primary"
+            style={{ float: "right", marginRight: 16, marginBottom: 16 }}
+            onClick={() => this.addNextPanoramaScene()}
+          >
+            添加下一个场景
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
+  handleDropdownClick = () => {
+    this.setState({
+      overlayVisible: !this.state.overlayVisible,
+    });
+  };
 
   render() {
     let { updateStyle, isEdit } = this.state;
@@ -395,6 +486,16 @@ export default class CollectionPreview extends React.Component {
               <MyIcon type="icon-huabi" />
             </span>
           )}
+          <Dropdown
+            overlay={this.createOverlay()}
+            placement="topLeft"
+            trigger="click"
+            visible={this.state.overlayVisible}
+          >
+            <span onClick={this.handleDropdownClick}>
+              <MyIcon type="icon-bianzu45" />
+            </span>
+          </Dropdown>
           <span
             onClick={() =>
               this.setState({

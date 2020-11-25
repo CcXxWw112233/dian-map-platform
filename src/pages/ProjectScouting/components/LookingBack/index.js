@@ -378,6 +378,7 @@ export default class LookingBack extends React.Component {
         >
           <AllCollection
             board={board}
+            timeData={this.state.timeData}
             onClose={() => {
               dispatch({
                 type: "collectionDetail/updateDatas",
