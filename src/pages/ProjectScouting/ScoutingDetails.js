@@ -2281,6 +2281,7 @@ export default class ScoutingDetails extends PureComponent {
             <LookingBack
               board={current_board}
               active={this.state.activeKey === "2"}
+              miniTitle={this.state.miniTitle}
             />
           </PublicView>
         );

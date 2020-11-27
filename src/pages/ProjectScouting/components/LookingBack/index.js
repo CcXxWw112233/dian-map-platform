@@ -236,7 +236,7 @@ export default class LookingBack extends React.Component {
       timeData,
       activeItem,
     } = this.state;
-    const { dispatch, showCollectionsModal, board } = this.props;
+    const { dispatch, showCollectionsModal, board, miniTitle } = this.props;
     return (
       <div className={styles.lookingback}>
         <div className={styles.lookGroupTitle}>
@@ -295,7 +295,7 @@ export default class LookingBack extends React.Component {
               display: "flex",
               flexFlow: "row wrap",
               width: "100%",
-              height: "calc(100% - 30px)",
+              height: miniTitle ? "calc(100% - 65px)" : "calc(100% - 30px)",
             }}
           >
             {Object.keys(timeData).map((item) => {

@@ -284,6 +284,20 @@ export default class AllCollection extends React.Component {
     let arr = data.map((item) => item.data);
     if (arr.length) this.handleCollectionFeature(arr, "time");
   };
+  toggleSelectResource = (data) => {
+    const { timeData } = this.props;
+    const keys = Object.keys(timeData);
+    let tmpArr = [];
+    keys.forEach((item) => {
+      tmpArr.push(...timeData[item]);
+    });
+    let selectData = tmpArr.filter(
+      (item) => data.target_id === item.data.id
+    )[0];
+    this.setState({
+      active: selectData.data,
+    });
+  };
   render() {
     const { data, timeTree, hasFilter } = this.state;
     const { board, onClose, showCollectionsModal } = this.props;
@@ -364,6 +378,8 @@ export default class AllCollection extends React.Component {
                 previewFull: false,
               });
             }}
+            isOutside={true}
+            parent={this}
             timeData={this.props.timeData}
           />
         </CSSTransition>
