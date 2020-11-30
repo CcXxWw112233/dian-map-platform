@@ -375,7 +375,7 @@ class PlottingLayer extends Observable {
     const showlayer = new VectorLayer({
       zIndex: 20,
       source: new VectorSource(),
-      declutter: true,
+      // declutter: true,
     });
     // showlayer.setStyle(drawStyle);
     showlayer.setMap(this.map);

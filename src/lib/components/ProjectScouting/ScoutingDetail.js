@@ -52,6 +52,7 @@ import { getVectorContext } from "ol/render";
 import { Style, Circle, Stroke, Fill } from "ol/style";
 
 import totalOverlay from "../../../components/PublicOverlays/totalOverlay";
+import throttle from "lodash/throttle";
 
 function Action() {
   const {
@@ -97,6 +98,8 @@ function Action() {
   this.oldLenged = null;
   this.oldDispatch = null;
   this.oldShowFeatureName = null;
+  this.extentSource = Source();
+  this.oldZoom = null;
 
   Event.Evt.addEventListener("basemapchange", (key) => {
     if (!this.mounted) return;
@@ -206,6 +209,19 @@ function Action() {
     ponts,
     { lenged, dispatch, showFeatureName }
   ) => {
+    const zoom = InitMap.map.getView().getZoom();
+    if (zoom < 8 && this.oldZoom < 8) {
+      return;
+    }
+    if (zoom >= 8 && zoom < 12 && this.oldZoom >= 8 && this.oldZoom < 12) {
+      return;
+    }
+    if (zoom >= 12 && zoom < 14 && this.oldZoom >= 12 && this.oldZoom < 14) {
+      return;
+    }
+    if (zoom >= 14 && this.oldZoom >= 14) {
+      return;
+    }
     this.overlayArr.forEach((item) => {
       InitMap.map.removeOverlay(item);
     });
@@ -222,7 +238,7 @@ function Action() {
     });
     this.overlayArr = [];
     this.overlayArr2 = [];
-
+    this.features = [];
     const extent = InitMap.map.getView().calculateExtent(InitMap.map.getSize());
     let coor1 = TransformCoordinate(
       [extent[0], extent[1]],
@@ -234,7 +250,6 @@ function Action() {
       "EPSG:3857",
       "EPSG:4326"
     );
-    const zoom = InitMap.map.getView().getZoom();
     let level = 3;
     this.layer.projectScoutingArr.forEach((item) => {
       this.layer.removeFeature(item);
@@ -265,21 +280,56 @@ function Action() {
       .then((res) => {
         if (res && res.code === "0") {
           if (res.data) {
+            this.extentSource && this.extentSource.clear();
             res.data.forEach((item) => {
               let total = this.featuresGroup[item.code]?.length || 0;
               total += this.pontsGroup[item.code]?.length || 0;
               if (total > 0) {
                 let name = item.name;
-                let ele = totalOverlay({
-                  name: name,
-                  total: total,
-                });
-                let newOverlay = createOverlay(ele);
                 let coor = TransformCoordinate(
                   [item.lon, item.lat],
                   "EPSG:4326",
                   "EPSG:3857"
                 );
+                const me = this;
+                let ele = totalOverlay({
+                  name: name,
+                  total: total,
+                  cb: function (e) {
+                    if (zoom < 8) {
+                      InitMap.map.getView().setZoom(10);
+                    }
+                    if (zoom >= 8 && zoom < 12) {
+                      InitMap.map.getView().setZoom(13);
+                    }
+                    if (zoom >= 12 && zoom < 14) {
+                      InitMap.map.getView().setZoom(14);
+                    }
+                    if (zoom >= 14) {
+                    }
+                    InitMap.map.getView().setCenter(coor);
+                    if (level === 3) {
+                      setTimeout(function () {
+                        let currentAreaFeatures =
+                          me.features &&
+                          me.features.filter(
+                            (item2) => item2.get("districtcode") === item.code
+                          );
+                        me.extentSource.addFeatures(currentAreaFeatures);
+                        let { getUrlParam } = config;
+                        let size = InitMap.map.getSize();
+                        let flag = getUrlParam.isMobile === "1";
+                        let obj = {
+                          size: flag ? size.map((item) => item / 2) : size,
+                          padding: !flag ? [200, 150, 80, 400] : [0, 0, 0, 0],
+                          nearest: true,
+                        };
+                        Fit(InitMap.view, me.extentSource.getExtent(), obj);
+                      }, 100);
+                    }
+                  },
+                });
+                let newOverlay = createOverlay(ele);
                 newOverlay.setPosition(coor);
                 InitMap.map.addOverlay(newOverlay);
                 this.overlayArr.push(newOverlay);
@@ -288,6 +338,7 @@ function Action() {
           }
         }
       });
+    this.oldZoom = zoom;
   };
 
   this.mapMoveEnd = (data, ponts, { lenged, dispatch, showFeatureName }) => {
@@ -306,6 +357,7 @@ function Action() {
       }
     };
     InitMap.map.on("moveend", (e) => this.moveendListener(e));
+    this.moveendListener = throttle(this.moveendListener, 1000);
   };
 
   this.init = (dispatch) => {

@@ -2004,6 +2004,7 @@ export default class ScoutingDetails extends PureComponent {
                           selected={this.state.area_selected}
                           onSelect={this.onMultipleSelectGroup}
                           onAreaEdit={this.onAreaEdit.bind(this, true)}
+                          total={item.length}
                           data={item}
                           activeKey={this.state.area_active_key}
                           index={index + 1}
@@ -2089,6 +2090,7 @@ export default class ScoutingDetails extends PureComponent {
                     header={
                       <ScoutingHeader
                         data={{ name: "未整理", id: "other" }}
+                        total={not_area_id_collection.length}
                         edit={false}
                         activeKey={this.state.area_active_key}
                         index={area_list.length + 1}

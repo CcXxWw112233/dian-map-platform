@@ -880,53 +880,52 @@ export default class Plot extends PureComponent {
   };
 
   // 更新亚朵数据的临时方法
-  loadGeoJson2 = async (props = {}) => {
-    return await Axios.get(require("../../../assets/json/yaduo.geojson")).then(
-      (res) => {
-        debugger;
-        let operatorList = [];
-        let { data } = res;
-        let features = loadFeatureJSON(data, "GeoJSON");
-        let p = [];
-        features.forEach((item, index) => {
-          let type = item.getGeometry().getType();
-          let name = item.get("name");
-          let options = {
-            PointColor: "#fff",
-            commonFunc: null,
-            font: "13px sans-serif",
-            iconScale: 1,
-            iconUrl:
-              "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACYAAAAmCAYAAACoPemuAAADKElEQVRYR+2YzWtUZxTGfyeTNFGrC0s3/Qe6EhdduNFNI1JQuwihVoqgjbnjTEyigq6EVnQX6lfNTGZibKEfEgldtBU/ULuoGxcuxJX+AYKIEWLNR/PxyE0movHOfd+5NwYFZ3ufc87vnvPOO+cZ4y39WBKunT+padkErWZ8g/EZ4iOMutlcYgbjMeK2xG9jjQz9vMvGa61TE9i3A1rZNM0RiawZy32KSYyaURrP8N25NnvqExNqvMHy/WpFnAI+8U2+QPcAo7vQbkM+8W4wyXJljgEHzWjwSVpNIzEJ9BQDDmOmuFzxYHNQxw26XpyhNGSVMyg4XQw4EAcXC5YrqQM4kbZTC9+l0rn9xaz1VnvPqmB7S1ozY1xOcaZcvX1QJ744k7W7UcJosLkRnjdjmyt7mucSg8WA7VEjjQTLl7QeuIixKk1hZ6wYATYXsnZzoTYarKyTQLcz8eIIThUC2+cEy/fqQ+q5hrFuceo6sohbTLGx0GH/vax8rWO5AX1q0/wLfLwkYPBIGTYU2+xeLFi+pE0YfwArlgjsGaKlkLWr78E8O/6Od+ytPfxtZ7X6g2lumLHWcxSpZBJ3/s/w+cBuG449/OHDfFlloD1VRf/g/kJggfOCDQV7ytpSJy5gLPPPn0ApxmaMr/oC+9sLrPO0GqcbZ38rmxOU8w8R1zMTbP6xyya8wEJRR5+aFV60b+qHXIyYaOndY9f9155Q+Sa213kCMePaYmM32FmbNsmgwZf+83ErBX+ONbAtztY5zUjFsv2C2Jp675/znH+NZ9jhsnJOsPD9w84tn+QsCrfNirF1N+ZVxRzUwGgDXT4G2AssrPD9P6p/eJ+eJI6pFts2/zbeYLMBCTymIPx74FCxnTMuL+m8+WOnJFm+ny6JHqetEyOCXDFrv9c6+do69lL2fFl5wQ8GTVFFJZ7I2N4X2JVaoUJ9YrAwuJohTguVGizyEg7HZ3xdDOxSkk4lO/wRlV65hD1udF/YVKOcLxIul0wRmoknUbuVL0y6b2WVKrmyjpoYLmTtRBIQ7+2i1uSdv2rVxDOmylkbrTU2Sr8oo1wMkIU5ngPc8D421O3HTQAAAABJRU5ErkJggg==",
-            placement: "Point",
-            showName: true,
-            text: name,
-            textFillColor: "rgba(255,0,0,1)",
-            textStrokeColor: "#fff",
-            textStrokeWidth: 3,
-          };
-          let style = createStyle(type, options);
-          item.setStyle(style);
-          let operator = plotEdit.plottingLayer._addFeature(item);
-          operator.setName(name);
-          operator.attrs = {
-            coordSysType: 0,
-            featureType:
-              "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACYAAAAmCAYAAACoPemuAAADKElEQVRYR+2YzWtUZxTGfyeTNFGrC0s3/Qe6EhdduNFNI1JQuwihVoqgjbnjTEyigq6EVnQX6lfNTGZibKEfEgldtBU/ULuoGxcuxJX+AYKIEWLNR/PxyE0movHOfd+5NwYFZ3ufc87vnvPOO+cZ4y39WBKunT+padkErWZ8g/EZ4iOMutlcYgbjMeK2xG9jjQz9vMvGa61TE9i3A1rZNM0RiawZy32KSYyaURrP8N25NnvqExNqvMHy/WpFnAI+8U2+QPcAo7vQbkM+8W4wyXJljgEHzWjwSVpNIzEJ9BQDDmOmuFzxYHNQxw26XpyhNGSVMyg4XQw4EAcXC5YrqQM4kbZTC9+l0rn9xaz1VnvPqmB7S1ozY1xOcaZcvX1QJ744k7W7UcJosLkRnjdjmyt7mucSg8WA7VEjjQTLl7QeuIixKk1hZ6wYATYXsnZzoTYarKyTQLcz8eIIThUC2+cEy/fqQ+q5hrFuceo6sohbTLGx0GH/vax8rWO5AX1q0/wLfLwkYPBIGTYU2+xeLFi+pE0YfwArlgjsGaKlkLWr78E8O/6Od+ytPfxtZ7X6g2lumLHWcxSpZBJ3/s/w+cBuG449/OHDfFlloD1VRf/g/kJggfOCDQV7ytpSJy5gLPPPn0ApxmaMr/oC+9sLrPO0GqcbZ38rmxOU8w8R1zMTbP6xyya8wEJRR5+aFV60b+qHXIyYaOndY9f9155Q+Sa213kCMePaYmM32FmbNsmgwZf+83ErBX+ONbAtztY5zUjFsv2C2Jp675/znH+NZ9jhsnJOsPD9w84tn+QsCrfNirF1N+ZVxRzUwGgDXT4G2AssrPD9P6p/eJ+eJI6pFts2/zbeYLMBCTymIPx74FCxnTMuL+m8+WOnJFm+ny6JHqetEyOCXDFrv9c6+do69lL2fFl5wQ8GTVFFJZ7I2N4X2JVaoUJ9YrAwuJohTguVGizyEg7HZ3xdDOxSkk4lO/wRlV65hD1udF/YVKOcLxIul0wRmoknUbuVL0y6b2WVKrmyjpoYLmTtRBIQ7+2i1uSdv2rVxDOmylkbrTU2Sr8oo1wMkIU5ngPc8D421O3HTQAAAABJRU5ErkJggg==",
-            geometryType: "Point",
-            name: name,
-            plotType: "point",
-            remark: "",
-            selectName: "自定义类型",
-            strokeColor: "rgba(106, 154, 255, 1)",
-          };
-          // parent.featureOperatorList.push(operator);
-          operatorList.push(operator);
-        });
-        this.updatePlotList(operatorList);
-      }
-    );
-  };
+  // loadGeoJson2 = async (props = {}) => {
+  //   return await Axios.get(require("../../../assets/json/yaduo.geojson")).then(
+  //     (res) => {
+  //       debugger;
+  //       let operatorList = [];
+  //       let { data } = res;
+  //       let features = loadFeatureJSON(data, "GeoJSON");
+  //       let p = [];
+  //       features.forEach((item, index) => {
+  //         let type = item.getGeometry().getType();
+  //         let name = item.get("name");
+  //         let options = {
+  //           PointColor: "#fff",
+  //           commonFunc: null,
+  //           font: "13px sans-serif",
+  //           iconScale: 1,
+  //           iconUrl:
+  //             "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACYAAAAmCAYAAACoPemuAAADKElEQVRYR+2YzWtUZxTGfyeTNFGrC0s3/Qe6EhdduNFNI1JQuwihVoqgjbnjTEyigq6EVnQX6lfNTGZibKEfEgldtBU/ULuoGxcuxJX+AYKIEWLNR/PxyE0movHOfd+5NwYFZ3ufc87vnvPOO+cZ4y39WBKunT+padkErWZ8g/EZ4iOMutlcYgbjMeK2xG9jjQz9vMvGa61TE9i3A1rZNM0RiawZy32KSYyaURrP8N25NnvqExNqvMHy/WpFnAI+8U2+QPcAo7vQbkM+8W4wyXJljgEHzWjwSVpNIzEJ9BQDDmOmuFzxYHNQxw26XpyhNGSVMyg4XQw4EAcXC5YrqQM4kbZTC9+l0rn9xaz1VnvPqmB7S1ozY1xOcaZcvX1QJ744k7W7UcJosLkRnjdjmyt7mucSg8WA7VEjjQTLl7QeuIixKk1hZ6wYATYXsnZzoTYarKyTQLcz8eIIThUC2+cEy/fqQ+q5hrFuceo6sohbTLGx0GH/vax8rWO5AX1q0/wLfLwkYPBIGTYU2+xeLFi+pE0YfwArlgjsGaKlkLWr78E8O/6Od+ytPfxtZ7X6g2lumLHWcxSpZBJ3/s/w+cBuG449/OHDfFlloD1VRf/g/kJggfOCDQV7ytpSJy5gLPPPn0ApxmaMr/oC+9sLrPO0GqcbZ38rmxOU8w8R1zMTbP6xyya8wEJRR5+aFV60b+qHXIyYaOndY9f9155Q+Sa213kCMePaYmM32FmbNsmgwZf+83ErBX+ONbAtztY5zUjFsv2C2Jp675/znH+NZ9jhsnJOsPD9w84tn+QsCrfNirF1N+ZVxRzUwGgDXT4G2AssrPD9P6p/eJ+eJI6pFts2/zbeYLMBCTymIPx74FCxnTMuL+m8+WOnJFm+ny6JHqetEyOCXDFrv9c6+do69lL2fFl5wQ8GTVFFJZ7I2N4X2JVaoUJ9YrAwuJohTguVGizyEg7HZ3xdDOxSkk4lO/wRlV65hD1udF/YVKOcLxIul0wRmoknUbuVL0y6b2WVKrmyjpoYLmTtRBIQ7+2i1uSdv2rVxDOmylkbrTU2Sr8oo1wMkIU5ngPc8D421O3HTQAAAABJRU5ErkJggg==",
+  //           placement: "Point",
+  //           showName: true,
+  //           text: name,
+  //           textFillColor: "rgba(255,0,0,1)",
+  //           textStrokeColor: "#fff",
+  //           textStrokeWidth: 3,
+  //         };
+  //         let style = createStyle(type, options);
+  //         item.setStyle(style);
+  //         let operator = plotEdit.plottingLayer._addFeature(item);
+  //         operator.setName(name);
+  //         operator.attrs = {
+  //           coordSysType: 0,
+  //           featureType:
+  //             "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACYAAAAmCAYAAACoPemuAAADKElEQVRYR+2YzWtUZxTGfyeTNFGrC0s3/Qe6EhdduNFNI1JQuwihVoqgjbnjTEyigq6EVnQX6lfNTGZibKEfEgldtBU/ULuoGxcuxJX+AYKIEWLNR/PxyE0movHOfd+5NwYFZ3ufc87vnvPOO+cZ4y39WBKunT+padkErWZ8g/EZ4iOMutlcYgbjMeK2xG9jjQz9vMvGa61TE9i3A1rZNM0RiawZy32KSYyaURrP8N25NnvqExNqvMHy/WpFnAI+8U2+QPcAo7vQbkM+8W4wyXJljgEHzWjwSVpNIzEJ9BQDDmOmuFzxYHNQxw26XpyhNGSVMyg4XQw4EAcXC5YrqQM4kbZTC9+l0rn9xaz1VnvPqmB7S1ozY1xOcaZcvX1QJ744k7W7UcJosLkRnjdjmyt7mucSg8WA7VEjjQTLl7QeuIixKk1hZ6wYATYXsnZzoTYarKyTQLcz8eIIThUC2+cEy/fqQ+q5hrFuceo6sohbTLGx0GH/vax8rWO5AX1q0/wLfLwkYPBIGTYU2+xeLFi+pE0YfwArlgjsGaKlkLWr78E8O/6Od+ytPfxtZ7X6g2lumLHWcxSpZBJ3/s/w+cBuG449/OHDfFlloD1VRf/g/kJggfOCDQV7ytpSJy5gLPPPn0ApxmaMr/oC+9sLrPO0GqcbZ38rmxOU8w8R1zMTbP6xyya8wEJRR5+aFV60b+qHXIyYaOndY9f9155Q+Sa213kCMePaYmM32FmbNsmgwZf+83ErBX+ONbAtztY5zUjFsv2C2Jp675/znH+NZ9jhsnJOsPD9w84tn+QsCrfNirF1N+ZVxRzUwGgDXT4G2AssrPD9P6p/eJ+eJI6pFts2/zbeYLMBCTymIPx74FCxnTMuL+m8+WOnJFm+ny6JHqetEyOCXDFrv9c6+do69lL2fFl5wQ8GTVFFJZ7I2N4X2JVaoUJ9YrAwuJohTguVGizyEg7HZ3xdDOxSkk4lO/wRlV65hD1udF/YVKOcLxIul0wRmoknUbuVL0y6b2WVKrmyjpoYLmTtRBIQ7+2i1uSdv2rVxDOmylkbrTU2Sr8oo1wMkIU5ngPc8D421O3HTQAAAABJRU5ErkJggg==",
+  //           geometryType: "Point",
+  //           name: name,
+  //           plotType: "point",
+  //           remark: "",
+  //           selectName: "自定义类型",
+  //           strokeColor: "rgba(106, 154, 255, 1)",
+  //         };
+  //         operatorList.push(operator);
+  //       });
+  //       this.updatePlotList(operatorList);
+  //     }
+  //   );
+  // };
 
   // 创建标绘入口
   createPlot = (options, iconUrl) => {

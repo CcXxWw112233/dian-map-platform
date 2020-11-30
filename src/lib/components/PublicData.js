@@ -112,6 +112,13 @@ const publicData = {
       mapApp.addLayer(this.layer);
       mapApp.addLayer(this.layer2);
       mapApp.map.on("click", (e) => {
+        console.log(e.coordinate)
+        let temp = TransformCoordinate(
+          e.coordinate,
+          "EPSG:3857",
+          "EPSG:4326"
+        );
+        console.log(temp)
         const feature = mapApp.map.forEachFeatureAtPixel(
           e.pixel,
           (feature, layer) => {
