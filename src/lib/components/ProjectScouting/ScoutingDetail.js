@@ -74,7 +74,8 @@ function Action() {
   } = config;
   this.activeFeature = {};
   this.layerId = "scoutingDetailLayer";
-  this.Layer = Layer({ id: this.layerId, zIndex: 40, declutter: true });
+  this.Layer = Layer({ id: this.layerId, zIndex: 40 });
+  // this.Layer = Layer({ id: this.layerId, zIndex: 40, declutter: true });
   this.Source = Source();
   this.features = [];
   this.overlays = [];

@@ -137,6 +137,7 @@ export default class ProjectList extends React.Component {
         console.log(err);
       });
   };
+  
   addFeatureToProject = (featureOperatorList, name) => {
     let promise = featureOperatorList.map(async (item) => {
       let { feature } = item;

@@ -32,7 +32,8 @@ export default class TempPlot extends React.Component {
     parent.featureOperatorList.forEach((operator, index) => {
       let feature = operator.feature;
       if (feature && feature.getGeometry()) {
-        feature.getGeometry().updatePlot(false);
+        feature.getGeometry().updatePlot &&
+          feature.getGeometry().updatePlot(false);
         newFeatureOperatorList.push(operator);
       }
     });
@@ -54,7 +55,8 @@ export default class TempPlot extends React.Component {
   componentWillUnmount() {
     plotEdit.deactivate();
     this.state.featureOperatorList.forEach((operator) => {
-      operator.feature.getGeometry().updatePlot(true);
+      operator.feature.getGeometry().updatePlot &&
+        operator.feature.getGeometry().updatePlot(true);
     });
   }
   onChange = (e) => {
@@ -347,7 +349,9 @@ export default class TempPlot extends React.Component {
                           marginRight: 5,
                           color: "rgba(134,140,164,1)",
                         }}
-                        onClick={(e) => this.handleEditClick(e, featureOperator)}
+                        onClick={(e) =>
+                          this.handleEditClick(e, featureOperator)
+                        }
                       >
                         &#xe759;
                       </i>
