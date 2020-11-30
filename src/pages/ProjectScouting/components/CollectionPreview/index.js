@@ -11,7 +11,7 @@ import { Fit, getExtentIsEmpty } from "../../../../lib/utils";
 import Event from "../../../../lib/utils/event";
 import EditImage from "./EditImg";
 import ReactPlayer from "react-player";
-import { message } from "antd";
+import { message, Tooltip } from "antd";
 import { Pannellum, PannellumVideo } from "pannellum-react";
 import { Dropdown, Button } from "antd";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
@@ -152,6 +152,13 @@ export default class CollectionPreview extends React.Component {
     let viewer = pannellumRef.getViewer();
     viewer.setPitch(item.pitch);
     viewer.setYaw(item.yaw);
+    let arr = this.state.hotspot;
+    let selectIndex = arr.findIndex((item0) => item0.id === item.id);
+    arr[selectIndex].cssClass = styles.panorama_modify;
+    this.setState({
+      hotspot: arr,
+      isModifyPanorama: true,
+    });
   };
 
   getList = (id) => {
@@ -408,6 +415,7 @@ export default class CollectionPreview extends React.Component {
                 type="custom"
                 pitch={item.pitch}
                 yaw={item.yaw}
+                title={item.name}
                 cssClass={item.cssClass}
                 handleClick={(evt, args) =>
                   this.handleImageClick(evt, args, item)
@@ -553,7 +561,7 @@ export default class CollectionPreview extends React.Component {
           panoramaServices.getList(currentData.id).then((res) => {
             if (res && res.code === "0") {
               let arr = res.data;
-              arr.map((item) => item.cssClass = styles.panorama_arrow);
+              arr.map((item) => (item.cssClass = styles.panorama_arrow));
               this.setState({
                 panoramaList: res.data,
                 hotspot: arr,
@@ -635,7 +643,7 @@ export default class CollectionPreview extends React.Component {
             onClick={() =>
               this.setState({
                 isOverallView: !this.state.isOverallView,
-                overlayVisible: false
+                overlayVisible: false,
               })
             }
           >

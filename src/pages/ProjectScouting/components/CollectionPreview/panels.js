@@ -174,6 +174,7 @@ const ImagePanel = ({ timeData, parent }) => {
         {arr.map((item, index) => {
           return (
             <div
+              key={item.id}
               className={panelStyle.item}
               onClick={() => setSelectIndex(index)}
             >
