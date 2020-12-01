@@ -255,33 +255,62 @@ export default class LookingBack extends React.Component{
           </div>
         </div>
         <div className={styles.lookingback_collection}>
-          {Object.keys(timeData).map(item => {
-            if(timeData[item].length){
-              return (
-                <div key={item}>
-                  <span className={styles.timeTitle}>{!isNaN(+item) ? item+' 时' : item}</span>
-                  <div className={styles.lookingback_item}>
-                    { timeData[item].map((data) => {
-                      return (
-                        <div className={
-                          `${styles.looking_item}
+        {Object.keys(timeData).map((item) => {
+              if (timeData[item].length) {
+                return (
+                  <div key={item} style={{ width: "100%" }}>
+                    <span className={styles.timeTitle}>
+                      {!isNaN(+item) ? item + " 时" : item}
+                    </span>
+                    <div className={styles.lookingback_item}>
+                      {timeData[item].map((data) => {
+                        return (
+                          <div
+                            className={`${styles.looking_item}
                            ${animateCss.animated}
-                          `
-                          } key={data.data.id} onClick={()=> this.pictureView(data.data)}
-                          onDoubleClick={()=> this.toViewCenter(data.data)}>
-                          <div style={{backgroundColor:"rgba(71, 74, 91, 1)"}} className={ activeItem === data.data.id ? styles.active :''}>
-                            <span>{data.data.title}</span>
-                            {DetailAction.checkCollectionType(data.data.target) === 'pic' ?
-                            <img crossOrigin="anonymous" src={data.data.resource_url} alt="" width='100%'/>: <div></div>}
+                          `}
+                            key={data.data.id}
+                            onClick={() => this.pictureView(data.data)}
+                            onDoubleClick={() => this.toViewCenter(data.data)}
+                          >
+                            <div
+                              style={{
+                                backgroundColor: "rgba(71, 74, 91, 1)",
+                                display: "table",
+                              }}
+                              className={
+                                activeItem === data.data.id ? styles.active : ""
+                              }
+                            >
+                              <span
+                                style={{
+                                  display: "table-cell",
+                                  verticalAlign: "middle",
+                                }}
+                              >
+                                {data.data.title}
+                              </span>
+                              {DetailAction.checkCollectionType(
+                                data.data.target
+                              ) === "pic" ? (
+                                <img
+                                  crossOrigin="anonymous"
+                                  src={data.data.resource_url}
+                                  alt=""
+                                  width="100%"
+                                />
+                              ) : (
+                                <div></div>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      )
-                    })}
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              )
-            }else return <span key={item}></span>
-          })}
+                );
+              } else return <span key={item}></span>;
+            })}
           {/* <div className={styles.lookingback_item}>
             {selectData.map((item, index) => {
               return (
