@@ -207,38 +207,10 @@ function Action() {
   this.moveendCallBack = (
     data,
     ponts,
-    { lenged, dispatch, showFeatureName }
+    { lenged, dispatch, showFeatureName },
+    totalSwitch
   ) => {
     const zoom = InitMap.map.getView().getZoom();
-    if (zoom < 8 && this.oldZoom < 8) {
-      return;
-    }
-    if (zoom >= 8 && zoom < 12 && this.oldZoom >= 8 && this.oldZoom < 12) {
-      return;
-    }
-    if (zoom >= 12 && zoom < 14 && this.oldZoom >= 12 && this.oldZoom < 14) {
-      return;
-    }
-    if (zoom >= 14 && this.oldZoom >= 14) {
-      return;
-    }
-    this.overlayArr.forEach((item) => {
-      InitMap.map.removeOverlay(item);
-    });
-    this.overlayArr2.forEach((item) => {
-      let index = this.features.findIndex(
-        (item2) => item2.ol_uid === item.ol_uid
-      );
-      if (index > -1) {
-        this.features.splice(index, -1);
-      }
-      if (this.Source.getFeatureByUid(item.ol_uid)) {
-        this.Source.removeFeature(item);
-      }
-    });
-    this.overlayArr = [];
-    this.overlayArr2 = [];
-    this.features = [];
     const extent = InitMap.map.getView().calculateExtent(InitMap.map.getSize());
     let coor1 = TransformCoordinate(
       [extent[0], extent[1]],
@@ -280,6 +252,23 @@ function Action() {
       .then((res) => {
         if (res && res.code === "0") {
           if (res.data) {
+            this.overlayArr.forEach((item) => {
+              InitMap.map.removeOverlay(item);
+            });
+            this.overlayArr2.forEach((item) => {
+              let index = this.features.findIndex(
+                (item2) => item2.ol_uid === item.ol_uid
+              );
+              if (index > -1) {
+                this.features.splice(index, -1);
+              }
+              if (this.Source.getFeatureByUid(item.ol_uid)) {
+                this.Source.removeFeature(item);
+              }
+            });
+            this.overlayArr = [];
+            this.overlayArr2 = [];
+            this.features = [];
             this.extentSource && this.extentSource.clear();
             res.data.forEach((item) => {
               let total = this.featuresGroup[item.code]?.length || 0;
