@@ -304,7 +304,8 @@ function Action() {
                           me.features.filter(
                             (item2) => item2.get("districtcode") === item.code
                           );
-                        me.extentSource.addFeatures(currentAreaFeatures);
+                        me.extentSource &&
+                          me.extentSource.addFeatures(currentAreaFeatures);
                         let { getUrlParam } = config;
                         let size = InitMap.map.getSize();
                         let flag = getUrlParam.isMobile === "1";
@@ -313,7 +314,9 @@ function Action() {
                           padding: !flag ? [200, 150, 80, 400] : [0, 0, 0, 0],
                           nearest: true,
                         };
-                        Fit(InitMap.view, me.extentSource.getExtent(), obj);
+                        if(me.extentSource) {
+                          Fit(InitMap.view, me.extentSource.getExtent(), obj);
+                        }
                       }, 100);
                     }
                   },
