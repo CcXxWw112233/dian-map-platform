@@ -245,6 +245,9 @@ function Action() {
       this.overlayArr2.push(...pointCollection);
       this.features.push(...pointCollection);
       this.Source.addFeatures(pointCollection);
+      this.overlayArr.forEach((item) => {
+        InitMap.map.removeOverlay(item);
+      });
       return;
     }
     config
