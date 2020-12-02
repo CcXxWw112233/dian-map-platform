@@ -2,7 +2,7 @@ import React, { PureComponent, Fragment } from "react";
 import globalStyle from "../../globalSet/styles/globalStyles.less";
 import animateCss from "../../assets/css/animate.min.css";
 import styles from "./ScoutingDetails.less";
-import Action from "../../lib/components/ProjectScouting/ScoutingDetail";
+import Action from "../../lib/components/ProjectScouting/ScoutingDetail2";
 import ScouListAction from "../../lib/components/ProjectScouting/ScoutingList";
 import PlayCollectionAction from "../../lib/components/ProjectScouting/playCollection";
 import { connect } from "dva";

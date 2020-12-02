@@ -1246,12 +1246,22 @@ function Action() {
         iconUrl = icon ? require("../../../assets" + icon) : null;
         strokeColor = feature.get("strokeColor") || "rgba(255,0,0,0.3)";
         fillColor = feature.get("fillColor") || "rgba(255,0,0,0.3)";
+        // let style = createStyle(type, {
+        //   showName: (type !== "Point" && index < 15) || type === "Point",
+        //   text: feature.get("name") || geojson.name,
+        //   iconUrl: iconUrl,
+        //   strokeColor: strokeColor,
+        //   fillColor: fillColor,
+        //   textFillColor: "rgba(255,0,0,0.9)",
+        //   textStrokeColor: "#FFFFFF",
+        //   font: 14,
+        // });
         let style = createStyle(type, {
           showName: (type !== "Point" && index < 15) || type === "Point",
           text: feature.get("name") || geojson.name,
-          iconUrl: iconUrl,
-          strokeColor: strokeColor,
-          fillColor: fillColor,
+          iconUrl: icon ? require("../../../assets" + icon) : null,
+          strokeColor: feature.get("strokeColor") || "rgba(255,0,0,0.3)",
+          fillColor: feature.get("fillColor") || "rgba(255,0,0,0.3)",
           textFillColor: "rgba(255,0,0,0.9)",
           textStrokeColor: "#FFFFFF",
           font: 14,
@@ -1259,48 +1269,48 @@ function Action() {
         feature.setStyle(style);
         this.geoFeatures.push(feature);
       });
-      this.lenged = {
-        title: "项目数据",
-        key: "map:projectScouting",
-        content: [],
-      };
-      if (geojson.features.length > 0) {
-        let type = geojson.features[0].geometry.type;
-        let obj = {
-          font: geojson.name,
-          type: geojson.features[0].geometry.type,
-        };
-        if (type === "MultiPolygon") {
-          obj.borderColor = strokeColor;
-          obj.bgColor = fillColor;
-        }
-        if (type === "Point") {
-          obj.imgSrc = iconUrl;
-        }
-        if (type === "MultiLineString") {
-          obj.borderColor = strokeColor;
-          obj.type = "line";
-        }
-        this.lenged.content.push(obj);
-      }
-      if (!lenged) {
-        lenged = [];
-      }
-      if (!Array.isArray(lenged)) {
-        lenged = [lenged];
-      }
-      const lengedIndex = lenged.findIndex(
-        (lenged) => lenged.key === this.lenged.key
-      );
-      if (lengedIndex > -1) {
-        lenged[lengedIndex] = this.lenged;
-        newConfig = [...lenged];
-      } else {
-        newConfig = [...lenged.concat(this.lenged)];
-      }
-      if (newConfig.length === 1 && !newConfig[0].content.length) {
-        newConfig = [];
-      }
+      // this.lenged = {
+      //   title: "项目数据",
+      //   key: "map:projectScouting",
+      //   content: [],
+      // };
+      // if (geojson.features.length > 0) {
+      //   let type = geojson.features[0].geometry.type;
+      //   let obj = {
+      //     font: geojson.name,
+      //     type: geojson.features[0].geometry.type,
+      //   };
+      //   if (type === "MultiPolygon") {
+      //     obj.borderColor = strokeColor;
+      //     obj.bgColor = fillColor;
+      //   }
+      //   if (type === "Point") {
+      //     obj.imgSrc = iconUrl;
+      //   }
+      //   if (type === "MultiLineString") {
+      //     obj.borderColor = strokeColor;
+      //     obj.type = "line";
+      //   }
+      //   this.lenged.content.push(obj);
+      // }
+      // if (!lenged) {
+      //   lenged = [];
+      // }
+      // if (!Array.isArray(lenged)) {
+      //   lenged = [lenged];
+      // }
+      // const lengedIndex = lenged.findIndex(
+      //   (lenged) => lenged.key === this.lenged.key
+      // );
+      // if (lengedIndex > -1) {
+      //   lenged[lengedIndex] = this.lenged;
+      //   newConfig = [...lenged];
+      // } else {
+      //   newConfig = [...lenged.concat(this.lenged)];
+      // }
+      // if (newConfig.length === 1 && !newConfig[0].content.length) {
+      //   newConfig = [];
+      // }
       this.Source.addFeatures(features);
     });
     // dispatch &&
