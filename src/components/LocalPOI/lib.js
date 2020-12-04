@@ -6,6 +6,7 @@ import { Layer, Source, createStyle, addFeature } from "@/lib/utils/index";
 import LPPoiOverlay from "../PublicOverlays/LPPoiOverlay/index";
 import baseOverlay from "../PublicOverlays/baseOverlay";
 import { createOverlay } from "../../lib/utils";
+import { textHeights } from "ol/render/canvas";
 
 // 计算poi点到楼盘的距离
 export const getDistance2 = (pt1, pt2) => {
@@ -53,6 +54,7 @@ export const poiLayer = {
   layer: null,
   source: null,
   poi2Overlay: null,
+  poiList:[],
   init: function () {
     if (!this.layer) {
       let layers = mapApp.map.getLayers();
@@ -125,10 +127,16 @@ export const poiLayer = {
       ...data,
     });
     newFeature.setStyle(style);
+    this.poiList.push(newFeature);
     this.source.addFeature(newFeature);
   },
   removePoi: function () {
-    this.source && this.source.clear();
+    // this.source && this.source.clear();
+    this.poiList.forEach(feature => {
+      if (this.source.getFeatureByUid(feature.ol_uid)) {
+        this.source.removeFeature(feature);
+      }
+    })
     this.poi2Overlay && mapApp.map.removeOverlay(this.poi2Overlay);
   },
 };

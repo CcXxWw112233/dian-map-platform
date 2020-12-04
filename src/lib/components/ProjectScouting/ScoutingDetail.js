@@ -314,7 +314,7 @@ function Action() {
                           padding: !flag ? [200, 150, 80, 400] : [0, 0, 0, 0],
                           nearest: true,
                         };
-                        if(me.extentSource) {
+                        if (me.extentSource) {
                           Fit(InitMap.view, me.extentSource.getExtent(), obj);
                         }
                       }, 100);
@@ -795,6 +795,7 @@ function Action() {
   };
   // 点击事件
   const mapClick = (evt) => {
+    let pixel = evt.pixel
     const obj = InitMap.map.forEachFeatureAtPixel(
       evt.pixel,
       (feature, layer) => {
@@ -806,7 +807,10 @@ function Action() {
       let p_type = feature.get("p_type");
       if (p_type === "group") {
         Event.Evt.firEvent("handleGroupFeature", feature.get("p_id"));
-      }
+      } 
+      let coords = feature.getGeometry().getCoordinates();
+      coords = TransformCoordinate(coords, "EPSG:3857", "EPSG:4326");
+      Event.Evt.firEvent("HouseDetailGetPoi", coords.join(","));
       // console.log(p_type)
     }
   };
@@ -1213,8 +1217,9 @@ function Action() {
     createPopupOverlay(feature, pixel);
   };
 
-  this.renderGeoJson = async (data) => {
-    // return new Promise((resolve) => {
+  this.renderGeoJson = async (data, { lenged, dispatch }) => {
+    INITMAP.map.un("click", mapClick)
+    InitMap.map.on("click", mapClick);
     let promise = [];
     if (data && data.length) {
       nProgress.start();
@@ -1233,19 +1238,31 @@ function Action() {
     }
     let res = await Promise.all(promise);
     nProgress.done();
+    let newConfig = [];
+    this.lenged = {
+      title: "项目数据",
+      key: "map:projectScouting",
+      content: [],
+    };
     res.forEach((item) => {
       let geojson = item.data;
       let features = loadFeatureJSON(geojson, "GeoJSON");
+      let iconUrl = "",
+        strokeColor = "",
+        fillColor = "";
       features.forEach((feature, index) => {
         let type = feature.getGeometry().getType();
         let icon = feature.get("iconUrl");
         icon = icon && icon.replace("../../../assets", "");
+        iconUrl = icon ? require("../../../assets" + icon) : null;
+        strokeColor = feature.get("strokeColor") || "rgba(255,0,0,0.3)";
+        fillColor = feature.get("fillColor") || "rgba(255,0,0,0.3)";
         let style = createStyle(type, {
           showName: (type !== "Point" && index < 15) || type === "Point",
           text: feature.get("name") || geojson.name,
-          iconUrl: icon ? require("../../../assets" + icon) : null,
-          strokeColor: feature.get("strokeColor") || "rgba(255,0,0,0.3)",
-          fillColor: feature.get("fillColor") || "rgba(255,0,0,0.3)",
+          iconUrl: iconUrl,
+          strokeColor: strokeColor,
+          fillColor: fillColor,
           textFillColor: "rgba(255,0,0,0.9)",
           textStrokeColor: "#FFFFFF",
           font: 14,
@@ -1253,8 +1270,47 @@ function Action() {
         feature.setStyle(style);
         this.geoFeatures.push(feature);
       });
+      if (geojson.features.length > 0) {
+        if (geojson.lenged) {
+          geojson.lenged.forEach(item => {
+            if (item.imgSrc) {
+              let imgSrc = item.imgSrc;
+              imgSrc = imgSrc.replace("../../../assets", "");
+              imgSrc = require("../../../assets" + imgSrc);
+              item.imgSrc = imgSrc;
+            }
+            this.lenged.content.push(item);
+          })
+        }
+      }
+      if (!lenged) {
+        lenged = [];
+      }
+      if (!Array.isArray(lenged)) {
+        lenged = [lenged];
+      }
+      const lengedIndex = lenged.findIndex(
+        (lenged) => lenged.key === this.lenged.key
+      );
+      if (lengedIndex > -1) {
+        lenged[lengedIndex] = this.lenged;
+        newConfig = [...lenged];
+      } else {
+        newConfig = [...lenged.concat(this.lenged)];
+      }
+      if (newConfig.length === 1 && !newConfig[0].content.length) {
+        newConfig = [];
+      }
       this.Source.addFeatures(features);
     });
+    // Event.Evt.firEvent("updateGeojson", this.geoFeatures);
+    dispatch &&
+      dispatch({
+        type: "lengedList/updateLengedList",
+        payload: {
+          config: newConfig,
+        },
+      });
     return res;
   };
   this.clearGeoFeatures = () => {
@@ -1270,7 +1326,8 @@ function Action() {
   // 渲染标绘数据
   this.renderFeaturesCollection = async (
     data,
-    { lenged, dispatch, addSource = true, showFeatureName }
+    { lenged, dispatch, addSource = true, showFeatureName },
+    geoData
   ) => {
     const commonStyleOption = {
       textFillColor: "rgba(255,0,0,1)",
@@ -1491,13 +1548,15 @@ function Action() {
     if (newConfig.length === 1 && !newConfig[0].content.length) {
       newConfig = [];
     }
-    dispatch &&
-      dispatch({
-        type: "lengedList/updateLengedList",
-        payload: {
-          config: newConfig,
-        },
-      });
+    if (!geoData) {
+      dispatch &&
+        dispatch({
+          type: "lengedList/updateLengedList",
+          payload: {
+            config: newConfig,
+          },
+        });
+    }
 
     // 添加区域选择
     this.addAreaSelect();
@@ -1621,14 +1680,20 @@ function Action() {
     this.layer.isDefault = null;
 
     // 渲染geo数据
-    await this.renderGeoJson(geoData).catch((err) => console.log(err));
+    await this.renderGeoJson(geoData, { lenged, dispatch }).catch((err) =>
+      console.log(err)
+    );
     // 渲染标绘数据
     if (Object.keys(this.featuresGroup).length === 0) {
-      await this.renderFeaturesCollection(features, {
-        lenged,
-        dispatch,
-        showFeatureName,
-      });
+      await this.renderFeaturesCollection(
+        features,
+        {
+          lenged,
+          dispatch,
+          showFeatureName,
+        },
+        geoData
+      );
     }
 
     const sou = this.layer.showLayer.getSource();

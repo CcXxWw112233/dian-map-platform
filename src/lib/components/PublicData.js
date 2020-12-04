@@ -15,7 +15,7 @@ import PopupOverlay from "../../components/PublicOverlays/PopupOverlay/index";
 import baseOverlay from "../../components/PublicOverlays/baseOverlay/index";
 import { createOverlay } from "../../lib/utils/index";
 import { getLocal } from "../../utils/sessionManage";
-import DetailAction from "../../lib/components/ProjectScouting/ScoutingDetail";
+import DetailAction from "./ProjectScouting/ScoutingDetail";
 import {
   gcj02_to_wgs84,
   wgs84_to_gcj02,

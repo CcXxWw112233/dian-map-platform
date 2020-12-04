@@ -91,6 +91,7 @@ export default class LengedList extends React.Component {
                       if (itemContent.type.indexOf("line") > -1) {
                         style.height = 0;
                         style.border = `1px solid ${itemContent.bgColor}`;
+                        style.marginTop = 10
                       }
                       if (itemContent.type.indexOf("point") > -1) {
                         style.borderRadius = 7;
