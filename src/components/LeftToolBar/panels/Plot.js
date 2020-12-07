@@ -18,7 +18,7 @@ import symbolStoreServices from "../../../services/symbolStore";
 import mapApp from "utils/INITMAP";
 import { DragPan } from "ol/interaction";
 
-import { loadGeoJson } from "./tmp"
+// import { loadGeoJson } from "./tmp"
 
 const SymbolBlock = ({
   data,
