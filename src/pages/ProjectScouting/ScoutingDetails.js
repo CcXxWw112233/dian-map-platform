@@ -157,6 +157,7 @@ export default class ScoutingDetails extends PureComponent {
     this.touchStartClient = {};
     this.isTouch = false;
     this.scrolltoDom = null;
+    this.scoutingDetailInstance = null;
   }
   componentDidMount() {
     this.isGoBack = false;
@@ -1990,7 +1991,9 @@ export default class ScoutingDetails extends PureComponent {
       case "1":
         return (
           <Fragment>
-            <PublicView>
+            <PublicView
+              ref="scoutingDetailRef"
+            >
               <Collapse
                 onChange={(e) => {
                   this.setActiveCollapse(e);
@@ -2120,6 +2123,7 @@ export default class ScoutingDetails extends PureComponent {
                       >
                         <div className={styles.norAreaIdsData}>
                           {not_area_id_collection.map((item, index) => {
+                            console.log(this.refs["scoutingDetailRef"])
                             let activeStyle = null;
                             if (item.id === activeId) {
                               activeStyle = {

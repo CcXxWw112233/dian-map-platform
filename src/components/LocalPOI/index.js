@@ -27,6 +27,7 @@ export default class LocalPOI extends React.Component {
         children: [
           { name: "地铁站", icon: "&#xe63c;" },
           { name: "公交站", icon: "&#xe63e;" },
+          { name: "停车场", icon: "&#xe63e;" },
         ],
       },
       {
@@ -84,6 +85,7 @@ export default class LocalPOI extends React.Component {
     this.poiKeyVal = {
       地铁站: "ditiezhan",
       公交站: "gongjiaozhan",
+      停车场: "tingchechang",
       幼儿园: "youeryuan",
       小学: "xiaoxue",
       中学: "zhongxue",
@@ -297,14 +299,10 @@ export default class LocalPOI extends React.Component {
   };
 
   removePoi = () => {
-    this.setState(
-      {
-        pois: [],
-      },
-      () => {
-        poiLayer.removePoi();
-      }
-    );
+    poiLayer.removePoi();
+    this.setState({
+      pois: [],
+    });
   };
   closePanel = () => {
     this.props.closePanel();
