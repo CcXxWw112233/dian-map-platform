@@ -89,7 +89,7 @@ function Action() {
   this.overlayArr2 = [];
   this.featuresGroup = {};
   this.pontsGroup = {};
-  this.isMoveMapMoveedListen = false;
+  this.isNeedMoveMapMoveedListen = false;
   this.moveendListener = () => {};
   this.oldFeatures = null;
   this.oldPonts = null;
@@ -236,7 +236,7 @@ function Action() {
       this.renderFeaturesCollection(data, {
         lenged,
         dispatch,
-        showFeatureName,
+        showFeatureName: true,
       });
       let pointCollection = this.renderPointCollection(ponts);
       this.overlayArr2.push(...pointCollection);
@@ -340,7 +340,7 @@ function Action() {
     this.moveendCallBack(data, ponts, { lenged, dispatch, showFeatureName });
     const me = this;
     this.moveendListener = function (e) {
-      if (!me.isMoveMapMoveedListen) {
+      if (!me.isNeedMoveMapMoveedListen) {
         this.moveendCallBack(data, ponts, {
           lenged,
           dispatch,
@@ -380,6 +380,27 @@ function Action() {
           }
         }
       });
+      InitMap.map.on("moveend", (e) => {
+        if (!this.oldData) return;
+        let zoom = InitMap.map.getView().getZoom();
+        let obj = {
+          lenged: this.oldLenged,
+          dispatch: this.oldDispatch,
+          showFeatureName: true,
+        };
+        if (zoom > 14) {
+          if (this.oldZoom && this.oldZoom <= 14) {
+            this.renderFeaturesCollection(this.oldData, obj);
+            this.oldZoom = zoom;
+          }
+        } else {
+          if (this.oldZoom && this.oldZoom > 14) {
+            obj.showFeatureName = false;
+            this.renderFeaturesCollection(this.oldData, obj);
+            this.oldZoom = zoom;
+          }
+        }
+      });
       InitMap.map.addLayer(this.Layer);
     }
     const me = this;
@@ -412,7 +433,7 @@ function Action() {
         //开启
         me.moveendCallBack(me.oldFeatures, me.oldPonts, obj, value);
       }
-      me.isMoveMapMoveedListen = value;
+      me.isNeedMoveMapMoveedListen = value;
     });
   };
   this.boxFeature = {};
@@ -509,7 +530,7 @@ function Action() {
     this.moveendListener = () => {};
     this.clearGroupCollectionPoint();
     Event.Evt.firEvent("resetMoveMapMoveedListen");
-    this.isMoveMapMoveedListen = false;
+    this.isNeedMoveMapMoveedListen = false;
     this.moveendListener = () => {};
     this.oldFeatures = null;
     this.oldPonts = null;
@@ -795,7 +816,7 @@ function Action() {
   };
   // 点击事件
   const mapClick = (evt) => {
-    let pixel = evt.pixel
+    let pixel = evt.pixel;
     const obj = InitMap.map.forEachFeatureAtPixel(
       evt.pixel,
       (feature, layer) => {
@@ -807,7 +828,7 @@ function Action() {
       let p_type = feature.get("p_type");
       if (p_type === "group") {
         Event.Evt.firEvent("handleGroupFeature", feature.get("p_id"));
-      } 
+      }
       let coords = feature.getGeometry().getCoordinates();
       coords = TransformCoordinate(coords, "EPSG:3857", "EPSG:4326");
       Event.Evt.firEvent("HouseDetailGetPoi", coords.join(","));
@@ -1218,7 +1239,7 @@ function Action() {
   };
 
   this.renderGeoJson = async (data, { lenged, dispatch }) => {
-    INITMAP.map.un("click", mapClick)
+    INITMAP.map.un("click", mapClick);
     InitMap.map.on("click", mapClick);
     let promise = [];
     if (data && data.length) {
@@ -1272,7 +1293,7 @@ function Action() {
       });
       if (geojson.features.length > 0) {
         if (geojson.lenged) {
-          geojson.lenged.forEach(item => {
+          geojson.lenged.forEach((item) => {
             if (item.imgSrc) {
               let imgSrc = item.imgSrc;
               imgSrc = imgSrc.replace("../../../assets", "");
@@ -1280,7 +1301,7 @@ function Action() {
               item.imgSrc = imgSrc;
             }
             this.lenged.content.push(item);
-          })
+          });
         }
       }
       if (!lenged) {
@@ -1565,7 +1586,7 @@ function Action() {
   // 渲染feature
   this.renderCollection = async (
     data,
-    { lenged, dispatch, animation = true, showFeatureName = true }
+    { lenged, dispatch, animation = true, showFeatureName = false }
   ) => {
     this.currentSet = { lenged, dispatch, animation, showFeatureName };
     // 删除元素

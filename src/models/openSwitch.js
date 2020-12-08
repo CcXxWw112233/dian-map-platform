@@ -8,7 +8,7 @@ export default {
     // 是否显示规划图编辑
     isShowPlanPicEdit: false,
     // 是否显示元素的text名称
-    showFeatureName: true,
+    showFeatureName: false,
     // 是否隐藏左侧面板
     openPanel: true,
     panelDidMount: false,
