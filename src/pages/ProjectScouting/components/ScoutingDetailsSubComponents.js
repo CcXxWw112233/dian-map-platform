@@ -303,6 +303,49 @@ const UploadBtn = ({ onChange, parentTool, boardId }) => {
     </Upload>
   );
 };
+const Upload360PicBtn = ({ onChange, parentTool, boardId, parent }) => {
+  let [file, setFiles] = useState([]);
+  const onupload = (e) => {
+    let { size, text } = formatSize(e.file.size);
+    text = text.trim();
+    if (!(+size > 60 && text === "MB")) {
+      setFiles(e.fileList);
+      onChange(e);
+    }
+  };
+  Event.Evt.on("uploadFileSuccess", (files) => {
+    // setTimeout(()=>{
+    setFiles(file.filter((item) => item.uid !== files.uid));
+    // }, 2000)
+  });
+
+  // const customRequest = (val)=>{
+  //     UploadFile(val.file, val.action,null, BASIC.getUrlParam.token ,(e)=>{
+  //       // console.log(e);
+  //     },val)
+  // }
+  return (
+    <Upload
+      action="/api/map/file/upload"
+      accept=".jpg, .jpeg, .png, .bmp"
+      beforeUpload={checkFileSize}
+      multiple
+      headers={{ Authorization: BASIC.getUrlParam.token }}
+      onChange={(e) => {
+        onupload(e);
+      }}
+      showUploadList={false}
+      fileList={file}
+      // customRequest={customRequest}
+    >
+      <span onClick={() => {
+        if (parent) {
+          parent.is360Pic = true
+        } 
+      }}>上传全景图/视频</span>
+    </Upload>
+  );
+};
 let hasChangeFile = false;
 let saveData = null;
 export const ScoutingHeader = (props) => {
@@ -332,6 +375,7 @@ export const ScoutingHeader = (props) => {
     onAreaEdit = () => {},
     parentTool,
     boardId,
+    parent
   } = props;
   let [areaName, setAreaName] = useState(data.name);
   let [isEdit, setIsEdit] = useState(edit);
@@ -500,6 +544,14 @@ export const ScoutingHeader = (props) => {
           parentTool={parentTool}
           boardId={boardId}
         />
+      </Menu.Item>
+      <Menu.Item>
+        <Upload360PicBtn
+          onChange={startUpload}
+          parentTool={parentTool}
+          boardId={boardId}
+          parent={parent}
+        ></Upload360PicBtn>
       </Menu.Item>
       <Menu.Item
         key="uploadPlan"
@@ -771,9 +823,7 @@ export const ScoutingItem = ({
     onSelectCollection && onSelectCollection(val);
   };
   return (
-    <DragDropContext
-      onDragEnd={() =>onDragEnd.bind(this, data)}
-    >
+    <DragDropContext onDragEnd={() => onDragEnd.bind(this, data)}>
       <Droppable droppableId="droppable">
         {(provided, snapshot) => (
           <div {...provided.droppableProps} ref={provided.innerRef}>

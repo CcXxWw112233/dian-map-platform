@@ -158,6 +158,7 @@ export default class ScoutingDetails extends PureComponent {
     this.isTouch = false;
     this.scrolltoDom = null;
     this.scoutingDetailInstance = null;
+    this.is360Pic = false;
   }
   componentDidMount() {
     this.isGoBack = false;
@@ -728,6 +729,10 @@ export default class ScoutingDetails extends PureComponent {
         target: suffix && suffix.replace(".", ""),
         title: original_file_name,
       };
+      if (this.is360Pic) {
+        params.collect_type = "10";
+        this.is360Pic = false;
+      }
       Action.addCollection(params)
         .then((res) => {
           // console.log(res);
@@ -1991,9 +1996,7 @@ export default class ScoutingDetails extends PureComponent {
       case "1":
         return (
           <Fragment>
-            <PublicView
-              ref="scoutingDetailRef"
-            >
+            <PublicView ref="scoutingDetailRef">
               <Collapse
                 onChange={(e) => {
                   this.setActiveCollapse(e);
@@ -2046,6 +2049,7 @@ export default class ScoutingDetails extends PureComponent {
                           onSetCoordinates={this.onSetCoordinates}
                           parentTool={this.props.parentTool}
                           boardId={this.state.current_board.board_id}
+                          parent={this}
                           // onDragEnter={e => {this.setState({area_active_key: item.id})}}
                         />
                       }
@@ -2125,7 +2129,7 @@ export default class ScoutingDetails extends PureComponent {
                       >
                         <div className={styles.norAreaIdsData}>
                           {not_area_id_collection.map((item, index) => {
-                            console.log(this.refs["scoutingDetailRef"])
+                            console.log(this.refs["scoutingDetailRef"]);
                             let activeStyle = null;
                             if (item.id === activeId) {
                               activeStyle = {

@@ -389,7 +389,7 @@ export default class CollectionPreview extends React.Component {
     }
     let type = DetailAction.checkCollectionType(data.target);
     if (type === "pic") {
-      return this.state.isOverallView ? (
+      return this.state.isOverallView && data.collect_type === "10" ? (
         <Pannellum
           width="100%"
           height="100%"
@@ -441,7 +441,7 @@ export default class CollectionPreview extends React.Component {
               width: "100%",
               height: "100%",
               paddingTop: 20,
-              ...(this.state.isOverallView
+              ...(this.state.isOverallView && data.collect_type === "10"
                 ? { display: "" }
                 : { display: "none" }),
             }}
@@ -623,32 +623,36 @@ export default class CollectionPreview extends React.Component {
               <MyIcon type="icon-huabi" />
             </span>
           )}
-          <Dropdown
-            overlay={
-              <PanoramaOverlay
-                list={this.state.panoramaList}
-                parent={this}
-                timeData={this.props.timeData}
-              />
-            }
-            placement="topLeft"
-            trigger="click"
-            visible={this.state.overlayVisible}
-          >
-            <span onClick={this.handleDropdownClick}>
-              <MyIcon type="icon-bianzu45" />
+          {currentData?.collect_type === "10" ? (
+            <Dropdown
+              overlay={
+                <PanoramaOverlay
+                  list={this.state.panoramaList}
+                  parent={this}
+                  timeData={this.props.timeData}
+                />
+              }
+              placement="topLeft"
+              trigger="click"
+              visible={this.state.overlayVisible}
+            >
+              <span onClick={this.handleDropdownClick}>
+                <MyIcon type="icon-bianzu45" />
+              </span>
+            </Dropdown>
+          ) : null}
+          {currentData?.collect_type === "10" ? (
+            <span
+              onClick={() =>
+                this.setState({
+                  isOverallView: !this.state.isOverallView,
+                  overlayVisible: false,
+                })
+              }
+            >
+              {this.state.isOverallView ? "退出" : "全景"}
             </span>
-          </Dropdown>
-          <span
-            onClick={() =>
-              this.setState({
-                isOverallView: !this.state.isOverallView,
-                overlayVisible: false,
-              })
-            }
-          >
-            {this.state.isOverallView ? "退出" : "全景"}
-          </span>
+          ) : null}
           <span
             className={styles.prevImg}
             onClick={() => {
