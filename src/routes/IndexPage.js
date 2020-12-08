@@ -376,7 +376,7 @@ class IndexPage extends React.Component {
         <UploadNotification />
         <SearchBtn></SearchBtn>
         {isShowBasemapGallery && <BasemapGallery />}
-        {isShowBasemapGallery && (
+        {/* {isShowBasemapGallery && (
           <a
             // className={styles.changePackage}
             style={{
@@ -398,7 +398,7 @@ class IndexPage extends React.Component {
           >
             切换旧版
           </a>
-        )}
+        )} */}
         {isShowBasemapGallery && (
           <a
             // className={styles.changePackage}

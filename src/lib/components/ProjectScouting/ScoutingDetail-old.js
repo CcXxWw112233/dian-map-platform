@@ -52,7 +52,6 @@ import { getVectorContext } from "ol/render";
 import { Style, Circle, Stroke, Fill } from "ol/style";
 
 import totalOverlay from "../../../components/PublicOverlays/totalOverlay";
-import throttle from "lodash/throttle";
 
 function Action() {
   const {
@@ -75,8 +74,7 @@ function Action() {
   } = config;
   this.activeFeature = {};
   this.layerId = "scoutingDetailLayer";
-  this.Layer = Layer({ id: this.layerId, zIndex: 40 });
-  // this.Layer = Layer({ id: this.layerId, zIndex: 40, declutter: true });
+  this.Layer = Layer({ id: this.layerId, zIndex: 40, declutter: true });
   this.Source = Source();
   this.features = [];
   this.overlays = [];
@@ -91,7 +89,7 @@ function Action() {
   this.overlayArr2 = [];
   this.featuresGroup = {};
   this.pontsGroup = {};
-  this.isNeedMoveMapMoveedListen = false;
+  this.isMoveMapMoveedListen = false;
   this.moveendListener = () => {};
   this.oldFeatures = null;
   this.oldPonts = null;
@@ -238,7 +236,7 @@ function Action() {
       this.renderFeaturesCollection(data, {
         lenged,
         dispatch,
-        showFeatureName: true,
+        showFeatureName,
       });
       let pointCollection = this.renderPointCollection(ponts);
       this.overlayArr2.push(...pointCollection);
@@ -316,7 +314,7 @@ function Action() {
                           padding: !flag ? [200, 150, 80, 400] : [0, 0, 0, 0],
                           nearest: true,
                         };
-                        if (me.extentSource) {
+                        if(me.extentSource) {
                           Fit(InitMap.view, me.extentSource.getExtent(), obj);
                         }
                       }, 100);
@@ -342,7 +340,7 @@ function Action() {
     this.moveendCallBack(data, ponts, { lenged, dispatch, showFeatureName });
     const me = this;
     this.moveendListener = function (e) {
-      if (!me.isNeedMoveMapMoveedListen) {
+      if (!me.isMoveMapMoveedListen) {
         this.moveendCallBack(data, ponts, {
           lenged,
           dispatch,
@@ -351,7 +349,6 @@ function Action() {
       }
     };
     InitMap.map.on("moveend", (e) => this.moveendListener(e));
-    this.moveendListener = throttle(this.moveendListener, 1000);
   };
 
   this.init = (dispatch) => {
@@ -380,27 +377,6 @@ function Action() {
               "handleCollectionFeature",
               obj.feature.get("data")
             );
-          }
-        }
-      });
-      InitMap.map.on("moveend", (e) => {
-        if (!this.oldData) return;
-        let zoom = InitMap.map.getView().getZoom();
-        let obj = {
-          lenged: this.oldLenged,
-          dispatch: this.oldDispatch,
-          showFeatureName: true,
-        };
-        if (zoom > 14) {
-          if (this.oldZoom && this.oldZoom <= 14) {
-            this.renderFeaturesCollection(this.oldData, obj);
-            this.oldZoom = zoom;
-          }
-        } else {
-          if (this.oldZoom && this.oldZoom > 14) {
-            obj.showFeatureName = false;
-            this.renderFeaturesCollection(this.oldData, obj);
-            this.oldZoom = zoom;
           }
         }
       });
@@ -436,7 +412,7 @@ function Action() {
         //开启
         me.moveendCallBack(me.oldFeatures, me.oldPonts, obj, value);
       }
-      me.isNeedMoveMapMoveedListen = value;
+      me.isMoveMapMoveedListen = value;
     });
   };
   this.boxFeature = {};
@@ -533,7 +509,7 @@ function Action() {
     this.moveendListener = () => {};
     this.clearGroupCollectionPoint();
     Event.Evt.firEvent("resetMoveMapMoveedListen");
-    this.isNeedMoveMapMoveedListen = false;
+    this.isMoveMapMoveedListen = false;
     this.moveendListener = () => {};
     this.oldFeatures = null;
     this.oldPonts = null;
@@ -819,7 +795,6 @@ function Action() {
   };
   // 点击事件
   const mapClick = (evt) => {
-    let pixel = evt.pixel;
     const obj = InitMap.map.forEachFeatureAtPixel(
       evt.pixel,
       (feature, layer) => {
@@ -832,9 +807,6 @@ function Action() {
       if (p_type === "group") {
         Event.Evt.firEvent("handleGroupFeature", feature.get("p_id"));
       }
-      let coords = feature.getGeometry().getCoordinates();
-      coords = TransformCoordinate(coords, "EPSG:3857", "EPSG:4326");
-      Event.Evt.firEvent("HouseDetailGetPoi", coords.join(","));
       // console.log(p_type)
     }
   };
@@ -1241,9 +1213,8 @@ function Action() {
     createPopupOverlay(feature, pixel);
   };
 
-  this.renderGeoJson = async (data, { lenged, dispatch }) => {
-    INITMAP.map.un("click", mapClick);
-    InitMap.map.on("click", mapClick);
+  this.renderGeoJson = async (data) => {
+    // return new Promise((resolve) => {
     let promise = [];
     if (data && data.length) {
       nProgress.start();
@@ -1262,31 +1233,19 @@ function Action() {
     }
     let res = await Promise.all(promise);
     nProgress.done();
-    let newConfig = [];
-    this.lenged = {
-      title: "项目数据",
-      key: "map:projectScouting",
-      content: [],
-    };
     res.forEach((item) => {
       let geojson = item.data;
       let features = loadFeatureJSON(geojson, "GeoJSON");
-      let iconUrl = "",
-        strokeColor = "",
-        fillColor = "";
       features.forEach((feature, index) => {
         let type = feature.getGeometry().getType();
         let icon = feature.get("iconUrl");
         icon = icon && icon.replace("../../../assets", "");
-        iconUrl = icon ? require("../../../assets" + icon) : null;
-        strokeColor = feature.get("strokeColor") || "rgba(255,0,0,0.3)";
-        fillColor = feature.get("fillColor") || "rgba(255,0,0,0.3)";
         let style = createStyle(type, {
           showName: (type !== "Point" && index < 15) || type === "Point",
           text: feature.get("name") || geojson.name,
-          iconUrl: iconUrl,
-          strokeColor: strokeColor,
-          fillColor: fillColor,
+          iconUrl: icon ? require("../../../assets" + icon) : null,
+          strokeColor: feature.get("strokeColor") || "rgba(255,0,0,0.3)",
+          fillColor: feature.get("fillColor") || "rgba(255,0,0,0.3)",
           textFillColor: "rgba(255,0,0,0.9)",
           textStrokeColor: "#FFFFFF",
           font: 14,
@@ -1294,47 +1253,8 @@ function Action() {
         feature.setStyle(style);
         this.geoFeatures.push(feature);
       });
-      if (geojson.features.length > 0) {
-        if (geojson.lenged) {
-          geojson.lenged.forEach((item) => {
-            if (item.imgSrc) {
-              let imgSrc = item.imgSrc;
-              imgSrc = imgSrc.replace("../../../assets", "");
-              imgSrc = require("../../../assets" + imgSrc);
-              item.imgSrc = imgSrc;
-            }
-            this.lenged.content.push(item);
-          });
-        }
-      }
-      if (!lenged) {
-        lenged = [];
-      }
-      if (!Array.isArray(lenged)) {
-        lenged = [lenged];
-      }
-      const lengedIndex = lenged.findIndex(
-        (lenged) => lenged.key === this.lenged.key
-      );
-      if (lengedIndex > -1) {
-        lenged[lengedIndex] = this.lenged;
-        newConfig = [...lenged];
-      } else {
-        newConfig = [...lenged.concat(this.lenged)];
-      }
-      if (newConfig.length === 1 && !newConfig[0].content.length) {
-        newConfig = [];
-      }
       this.Source.addFeatures(features);
     });
-    // Event.Evt.firEvent("updateGeojson", this.geoFeatures);
-    dispatch &&
-      dispatch({
-        type: "lengedList/updateLengedList",
-        payload: {
-          config: newConfig,
-        },
-      });
     return res;
   };
   this.clearGeoFeatures = () => {
@@ -1350,8 +1270,7 @@ function Action() {
   // 渲染标绘数据
   this.renderFeaturesCollection = async (
     data,
-    { lenged, dispatch, addSource = true, showFeatureName },
-    geoData
+    { lenged, dispatch, addSource = true, showFeatureName }
   ) => {
     const commonStyleOption = {
       textFillColor: "rgba(255,0,0,1)",
@@ -1572,15 +1491,13 @@ function Action() {
     if (newConfig.length === 1 && !newConfig[0].content.length) {
       newConfig = [];
     }
-    if (!geoData) {
-      dispatch &&
-        dispatch({
-          type: "lengedList/updateLengedList",
-          payload: {
-            config: newConfig,
-          },
-        });
-    }
+    dispatch &&
+      dispatch({
+        type: "lengedList/updateLengedList",
+        payload: {
+          config: newConfig,
+        },
+      });
 
     // 添加区域选择
     this.addAreaSelect();
@@ -1589,7 +1506,7 @@ function Action() {
   // 渲染feature
   this.renderCollection = async (
     data,
-    { lenged, dispatch, animation = true, showFeatureName = false }
+    { lenged, dispatch, animation = true, showFeatureName = true }
   ) => {
     this.currentSet = { lenged, dispatch, animation, showFeatureName };
     // 删除元素
@@ -1704,20 +1621,14 @@ function Action() {
     this.layer.isDefault = null;
 
     // 渲染geo数据
-    await this.renderGeoJson(geoData, { lenged, dispatch }).catch((err) =>
-      console.log(err)
-    );
+    await this.renderGeoJson(geoData).catch((err) => console.log(err));
     // 渲染标绘数据
     if (Object.keys(this.featuresGroup).length === 0) {
-      await this.renderFeaturesCollection(
-        features,
-        {
-          lenged,
-          dispatch,
-          showFeatureName,
-        },
-        geoData
-      );
+      await this.renderFeaturesCollection(features, {
+        lenged,
+        dispatch,
+        showFeatureName,
+      });
     }
 
     const sou = this.layer.showLayer.getSource();

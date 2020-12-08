@@ -770,9 +770,10 @@ export const ScoutingItem = ({
     // console.log(val);
     onSelectCollection && onSelectCollection(val);
   };
-
   return (
-    <DragDropContext onDragEnd={onDragEnd.bind(this, data)}>
+    <DragDropContext
+      onDragEnd={() =>onDragEnd.bind(this, data)}
+    >
       <Droppable droppableId="droppable">
         {(provided, snapshot) => (
           <div {...provided.droppableProps} ref={provided.innerRef}>

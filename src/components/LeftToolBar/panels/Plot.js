@@ -23,7 +23,7 @@ import mapApp from "utils/INITMAP";
 import { DragPan } from "ol/interaction";
 import Axios from "axios";
 
-// import { loadGeoJson } from "../tmp"
+// import { loadGeoJson } from "./tmp"
 
 const SymbolBlock = ({
   data,
@@ -375,7 +375,7 @@ export default class Plot extends PureComponent {
     } else {
       this.getCustomSymbol();
     }
-    // this.loadGeoJson2();
+    // loadGeoJson(this)
   }
   componentWillUnmount() {
     const { parent } = this.props;

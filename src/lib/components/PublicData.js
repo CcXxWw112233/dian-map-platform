@@ -15,7 +15,7 @@ import PopupOverlay from "../../components/PublicOverlays/PopupOverlay/index";
 import baseOverlay from "../../components/PublicOverlays/baseOverlay/index";
 import { createOverlay } from "../../lib/utils/index";
 import { getLocal } from "../../utils/sessionManage";
-import DetailAction from "../../lib/components/ProjectScouting/ScoutingDetail";
+import DetailAction from "./ProjectScouting/ScoutingDetail";
 import {
   gcj02_to_wgs84,
   wgs84_to_gcj02,
@@ -328,7 +328,8 @@ const publicData = {
         }
         let coords = TransformCoordinate(temp, "EPSG:4326", "EPSG:3857");
         const options = {
-          textFillColor: "#3F48CC",
+          // textFillColor: "#3F48CC",
+          textFillColor: "rgba(255,0,0,1)",
           textStrokeColor: "#fff",
           textStrokeWidth: 3,
           font: "13px sans-serif",

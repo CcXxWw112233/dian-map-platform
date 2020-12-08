@@ -201,12 +201,15 @@ export default function Meettings(props) {
           )}
         </div>
       </div>
-      <div className={styles.renderList}>
+      <div
+        className={styles.renderList}
+        style={{ height: "calc(100% - 122px)" }}
+      >
         {getUsersRender().map((item, index) => {
           return (
             <div
               className={`${styles.users} ${animateCss.animated} ${animateCss.fadeInUp}`}
-              key={item.user_id  || index}
+              key={item.user_id || index}
             >
               {item._type === "phone" ? (
                 <Avatar

@@ -368,7 +368,7 @@ export default class LookingBack extends React.Component {
               )
             })}
           </div> */}
-          <div
+          {/* <div
             style={{
               display: "flex",
               flexDirection: "row",
@@ -376,8 +376,8 @@ export default class LookingBack extends React.Component {
             }}
           >
             <Button onClick={this.Full}>全屏预览</Button>
-            {/* <Button style={{ marginLeft: 10 }}>播放</Button> */}
-          </div>
+            <Button style={{ marginLeft: 10 }}>播放</Button>
+          </div> */}
         </div>
         {/* 左侧的所有列表 */}
         <CSSTransition

@@ -5,12 +5,18 @@ export default function totalOverlay({ name, wranNumber, total, cb }) {
   div.style.borderRadius = "76px";
   div.style.display = "flex";
   div.style.flexDirection = "column";
-  div.style.background = "rgb(48,114,246)";
+  div.style.background = "rgb(48,114,246, 0.8)";
   div.style.textAlign = "center";
   div.style.color = "rgb(255,255,255)";
   div.style.fontSize = "12px";
   div.style.justifyContent = "center";
   div.style.cursor = "pointer";
+  div.onmouseover= function(){
+    div.style.background="rgba(255,50,0, 0.8)"
+  }
+  div.onmouseleave = function() {
+    div.style.background = "rgb(48,114,246, 0.8)";
+  }
   if (cb) {
     div.onclick = cb;
   }

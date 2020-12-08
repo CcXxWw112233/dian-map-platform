@@ -51,6 +51,7 @@ import AboutAction from "../../lib/components/ProjectScouting/AroundAbout";
 import Meettings from "./components/Meeting";
 import PublicDataTreeComponent from "./components/PublicDataTreeComponent";
 import Plan from "./components/Plan";
+import { TransformCoordinate } from "../../lib/utils";
 
 const { Evt } = Event;
 const { TabPane } = Tabs;
@@ -156,6 +157,7 @@ export default class ScoutingDetails extends PureComponent {
     this.touchStartClient = {};
     this.isTouch = false;
     this.scrolltoDom = null;
+    this.scoutingDetailInstance = null;
   }
   componentDidMount() {
     this.isGoBack = false;
@@ -213,6 +215,8 @@ export default class ScoutingDetails extends PureComponent {
     });
     Evt.on("handlePlotFeature", this.handlePlotFeature);
 
+    // Evt.on("updateGeojson", this.updateGeojsonCollection)
+
     // const ele2 = totalOverlay({ name: "龙岗区", wranNumber: 2, total: 100 });
     // let newOverlay2 = createOverlay(ele2);
     // let coor2 = TransformCoordinate(
@@ -261,6 +265,11 @@ export default class ScoutingDetails extends PureComponent {
     if (collection) {
       let ftype = feature.getGeometry().getType();
       let properties = this.getProperties(ftype, feature.getGeometry());
+      if (ftype === "Point") {
+        let coords = feature.getGeometry().getCoordinates();
+        coords = TransformCoordinate(coords, "EPSG:3857", "EPSG:4326");
+        Evt.firEvent("HouseDetailGetPoi", coords.join(","));
+      }
       collection.properties_map = properties;
       dispatch({
         type: "collectionDetail/updateDatas",
@@ -594,6 +603,12 @@ export default class ScoutingDetails extends PureComponent {
       this.updateCollection(data, array);
       Action.addToListen(params);
     });
+  };
+
+  // 更新geojson数据
+  updateGeojsonCollection = (data) => {
+    let array = this.reSetCollection(data);
+    this.updateCollection(data, array);
   };
 
   // 更新某个采集资料，并且重组，刷新元素,只需要更改all_collection数据
@@ -1976,7 +1991,9 @@ export default class ScoutingDetails extends PureComponent {
       case "1":
         return (
           <Fragment>
-            <PublicView>
+            <PublicView
+              ref="scoutingDetailRef"
+            >
               <Collapse
                 onChange={(e) => {
                   this.setActiveCollapse(e);
@@ -2108,6 +2125,7 @@ export default class ScoutingDetails extends PureComponent {
                       >
                         <div className={styles.norAreaIdsData}>
                           {not_area_id_collection.map((item, index) => {
+                            console.log(this.refs["scoutingDetailRef"])
                             let activeStyle = null;
                             if (item.id === activeId) {
                               activeStyle = {

@@ -5,6 +5,16 @@ import globalStyle from "@/globalSet/styles/globalStyles.less";
 import event from "../../lib/utils/event";
 import styles from "./LocalPOI.less";
 import { getDistance2, jumpToPoi, poiLayer } from "./lib";
+import {
+  createStyle,
+  addFeature,
+  createOverlay,
+  TransformCoordinate,
+  getPoint,
+  Fit,
+} from "../../lib/utils";
+import { DragCircleRadius } from "../PublicOverlays";
+import InitMap from "@/utils/INITMAP";
 
 import { Tabs } from "antd";
 const { TabPane } = Tabs;
@@ -17,6 +27,7 @@ export default class LocalPOI extends React.Component {
         children: [
           { name: "地铁站", icon: "&#xe63c;" },
           { name: "公交站", icon: "&#xe63e;" },
+          { name: "停车场", icon: "&#xe63e;" },
         ],
       },
       {
@@ -74,6 +85,7 @@ export default class LocalPOI extends React.Component {
     this.poiKeyVal = {
       地铁站: "ditiezhan",
       公交站: "gongjiaozhan",
+      停车场: "tingchechang",
       幼儿园: "youeryuan",
       小学: "xiaoxue",
       中学: "zhongxue",
@@ -94,24 +106,74 @@ export default class LocalPOI extends React.Component {
     };
     this.selectTabPanel = this.setting[0].children[0].name;
     this.housePoi = null;
-    this.getPoi(this.selectTabPanels[0]);
+    this.keywords = this.selectTabPanels[0];
+    this.circleRadius = 5000;
+    this.searchAroundOverlay = null;
+    this.getPoi(this.keywords);
     event.Evt.on("HouseDetailGetPoi", (housePoi) => {
+      this.setState({
+        pois: [],
+      });
+      this.clear();
       this.housePoi = housePoi;
+      this.createPoiCircle();
       this.getPoi(this.selectTabPanel);
     });
     event.Evt.on("removeHousePOI", () => {
       this.setState({
         pois: [],
       });
+      this.clear();
       this.removePoi();
     });
   }
+
+  createPoiCircle = () => {
+    let coords = this.housePoi.split(",");
+    coords = TransformCoordinate(coords, "EPSG:4326", "EPSG:3857");
+    this.searchAroundCircle = addFeature("defaultCircle", {
+      coordinates: coords,
+      radius: this.circleRadius,
+    });
+    let ele = new DragCircleRadius({
+      format: this.formatUnit(this.circleRadius),
+    });
+    this.searchAroundOverlay = createOverlay(ele.element, {
+      offset: [-20, 0],
+    });
+    let style = createStyle("Circle", {
+      fillColor: "rgba(193, 232, 255, 0.3)",
+      strokeColor: "rgba(99, 199, 255, 0.5)",
+      strokeWidth: 2,
+      radius: this.circleRadius,
+      showName: false,
+      text: this.formatUnit(this.circleRadius),
+      offsetY: 0,
+      textFillColor: "#ff0000",
+      textStrokeColor: "#ffffff",
+      textStrokeWidth: 2,
+    });
+    this.searchAroundCircle.setStyle(style);
+    if (!poiLayer.layer) {
+      poiLayer.init();
+    }
+    poiLayer.source.addFeature(this.searchAroundCircle);
+    this.updateOverlayPosition();
+    InitMap.map.addOverlay(this.searchAroundOverlay);
+    this.bindDragCircleRadius(
+      ele,
+      coords,
+      this.searchAroundCircle,
+      this.keywords
+    );
+  };
 
   // 一级tab change回调
   handle1stTabChange = (e) => {
     const index = e.split("-")[0];
     this.selectTabPanel = this.selectTabPanels[index];
-    this.getPoi(this.selectTabPanels[index]);
+    this.keywords = this.selectTabPanels[index];
+    this.getPoi(this.keywords);
   };
 
   // 二级tab change回调
@@ -121,14 +183,25 @@ export default class LocalPOI extends React.Component {
     this.getPoi(e);
   };
 
+  formatUnit = (size) => {
+    if (size) {
+      return size < 1000
+        ? size.toFixed(2) + "米"
+        : (size / 1000).toFixed(2) + "千米";
+    }
+    return null;
+  };
+
   getPoi = (keywords) => {
+    this.removePoi();
+    this.circleRadius = Math.ceil(Number(this.circleRadius));
     const housePoi = this.housePoi || window.housePoi;
     if (!housePoi) return;
     window
       .CallWebMapFunction("searchNearByXY", {
         xy: housePoi,
         keywords: keywords,
-        radius: 5000,
+        radius: this.circleRadius,
       })
       .then((res) => {
         if (Array.isArray(res)) {
@@ -137,8 +210,6 @@ export default class LocalPOI extends React.Component {
               pois: res,
             },
             () => {
-              poiLayer.init();
-              poiLayer.removePoi();
               res.forEach((item) => {
                 if (item.name) {
                   const distance = this.getDistance(item.location);
@@ -160,6 +231,60 @@ export default class LocalPOI extends React.Component {
         }
       });
   };
+
+  updateRadius = (feature, radius) => {
+    let f = this.formatUnit(radius);
+    feature.getGeometry().setRadius(radius);
+    let style = feature.getStyle();
+    style.getText().setText(f);
+  };
+
+  updateOverlayPosition = () => {
+    let extent = this.searchAroundCircle.getGeometry().getExtent();
+    let rightTop = getPoint(extent, "topRight");
+    let rightBottom = getPoint(extent, "bottomRight");
+    let point = [rightTop[0], (rightTop[1] + rightBottom[1]) / 2];
+    // console.log(coor,coord,overlayElement);
+    this.searchAroundOverlay.setPosition(point);
+  };
+
+  bindDragCircleRadius = (ele, coordinates, f, keywords) => {
+    let _pixel = InitMap.map.getPixelFromCoordinate(coordinates);
+    let coord = null;
+    let radius;
+    ele.on = {
+      mouseDown: () => {
+        _pixel = InitMap.map.getPixelFromCoordinate(coordinates);
+      },
+      mouseMove: (evt, step) => {
+        // poiLayer.source && poiLayer.source.clear();
+        var pixel = [evt.clientX, _pixel[1]];
+        coord = InitMap.map.getCoordinateFromPixel(pixel);
+        radius = coord[0] - coordinates[0];
+        if (radius <= 5 * 100 || radius > 50000) {
+          return;
+        }
+        this.circleRadius = radius;
+        this.searchAroundOverlay.setPosition(coord);
+        let text = this.formatUnit(radius);
+        ele.updateRadius(text);
+        this.updateRadius(f, radius);
+      },
+      mouseUp: async () => {
+        this.getPoi(this.keywords);
+        Fit(InitMap.view, f.getGeometry().getExtent(), { duration: 300 });
+      },
+      change: (text) => {
+        let t = +text;
+        radius = t;
+        this.circleRadius = radius;
+        this.updateRadius(f, t);
+        ele.updateRadius(this.formatUnit(t));
+        this.updateOverlayPosition(this.searchAroundOverlay, f);
+        Fit(InitMap.view, f.getGeometry().getExtent(), { duration: 300 });
+      },
+    };
+  };
   getDistance = (pt) => {
     if (!pt) return;
     const housePoi = this.housePoi || window.housePoi;
@@ -175,9 +300,19 @@ export default class LocalPOI extends React.Component {
 
   removePoi = () => {
     poiLayer.removePoi();
+    this.setState({
+      pois: [],
+    });
   };
   closePanel = () => {
     this.props.closePanel();
+    this.clear();
+  };
+  clear = () => {
+    this.removePoi();
+    poiLayer.poiList = [];
+    poiLayer.source && poiLayer.source.clear();
+    InitMap.map.removeOverlay(this.searchAroundOverlay);
   };
   render() {
     return (
