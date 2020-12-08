@@ -78,7 +78,7 @@ export default class ScoutingDetails extends PureComponent {
     this.publicDataLinkArr = [];
     const panes = [
       {
-        title: "片区",
+        title: "整理",
         content: areaScouting(),
         key: "1",
         closable: false,
@@ -93,7 +93,7 @@ export default class ScoutingDetails extends PureComponent {
         ],
       },
       {
-        title: "检修",
+        title: "回看",
         content: <div>正在加紧开发中...</div>,
         key: "2",
         closable: 0,
