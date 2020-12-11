@@ -17,7 +17,10 @@ import { DragCircleRadius } from "../PublicOverlays";
 import InitMap from "@/utils/INITMAP";
 
 import { Tabs } from "antd";
+import { connect } from "dva";
 const { TabPane } = Tabs;
+
+@connect(({ collectionDetail: { selectPoi } }) => ({ selectPoi }))
 export default class LocalPOI extends React.Component {
   constructor(props) {
     super(props);
@@ -128,8 +131,29 @@ export default class LocalPOI extends React.Component {
     });
   }
 
+  componentDidMount() {
+    const { selectPoi } = this.props;
+    if (selectPoi) {
+      this.setState({
+        pois: [],
+      });
+      this.clear();
+      this.housePoi = selectPoi;
+      this.createPoiCircle();
+      this.getPoi(this.selectTabPanel);
+    }
+  }
+  // componentWillUnmount() {
+  //   this.searchAroundOverlay && InitMap.map.removeOverlay(this.searchAroundOverlay)
+  // }
+
   createPoiCircle = () => {
     let coords = this.housePoi.split(",");
+    const baseMapKey = InitMap.baseMapKey;
+    const baseMapKeys = InitMap.baseMapKeys;
+    if (baseMapKeys[1].includes(baseMapKey)) {
+      coords = InitMap.systemDic[InitMap.baseMapKey](coords[0], coords[1]);
+    }
     coords = TransformCoordinate(coords, "EPSG:4326", "EPSG:3857");
     this.searchAroundCircle = addFeature("defaultCircle", {
       coordinates: coords,
@@ -193,6 +217,7 @@ export default class LocalPOI extends React.Component {
   };
 
   getPoi = (keywords) => {
+    this.keywords = keywords
     this.removePoi();
     this.circleRadius = Math.ceil(Number(this.circleRadius));
     const housePoi = this.housePoi || window.housePoi;

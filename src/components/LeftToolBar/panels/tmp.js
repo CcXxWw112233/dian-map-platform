@@ -9,6 +9,11 @@ const loadGeoJson = (parent) => {
     features.forEach((item, index) => {
       let type = item.getGeometry().getType();
       let name = item.get("name");
+      let address = item.get("address");
+      let tel = item.get("tel")
+      if (tel === "[]") {
+        tel = ""
+      }
       let content = {
         geometryType: "Point",
         geoType: "Point",
@@ -18,6 +23,8 @@ const loadGeoJson = (parent) => {
         selectName: "自定义类型",
         title: name,
         name: name,
+        address: address,
+        tel: tel,
         coordSysType: 0,
         // strokeColor: "rgba(255,255,255,1)",
       };

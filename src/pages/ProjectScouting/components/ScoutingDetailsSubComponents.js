@@ -76,6 +76,7 @@ export const Title = ({
   mini,
   parentTool,
   boardId,
+  collectData,
 }) => {
   // 预览图片
   const previewImg = (e) => {
@@ -119,8 +120,10 @@ export const Title = ({
     <div className={`${styles.title} ${className}`}>
       <Search
         onRef={() => {}}
+        collectData={collectData}
+        inProject={true}
         style={{ flex: "none", margin: 0, border: "1px solid #3333" }}
-        placeholder="搜索地址"
+        placeholder="请输入名称"
       ></Search>
       <div className={styles.title_goBack}>
         <MyIcon type="icon-fanhuijiantou" onClick={cb} />
@@ -327,7 +330,7 @@ const Upload360PicBtn = ({ onChange, parentTool, boardId, parent }) => {
   return (
     <Upload
       action="/api/map/file/upload"
-      accept=".jpg, .jpeg, .png, .bmp"
+      accept=".jpg, .jpeg, .png, .bmp, .mp4, .avi, .wmv"
       beforeUpload={checkFileSize}
       multiple
       headers={{ Authorization: BASIC.getUrlParam.token }}
@@ -338,11 +341,15 @@ const Upload360PicBtn = ({ onChange, parentTool, boardId, parent }) => {
       fileList={file}
       // customRequest={customRequest}
     >
-      <span onClick={() => {
-        if (parent) {
-          parent.is360Pic = true
-        } 
-      }}>上传全景图/视频</span>
+      <span
+        onClick={() => {
+          if (parent) {
+            parent.is360Pic = true;
+          }
+        }}
+      >
+        上传全景图片/视频
+      </span>
     </Upload>
   );
 };
@@ -375,7 +382,7 @@ export const ScoutingHeader = (props) => {
     onAreaEdit = () => {},
     parentTool,
     boardId,
-    parent
+    parent,
   } = props;
   let [areaName, setAreaName] = useState(data.name);
   let [isEdit, setIsEdit] = useState(edit);
@@ -1301,6 +1308,10 @@ export const UploadItem = ({
       onToggleChangeStyle && onToggleChangeStyle(val);
     }, 20);
   };
+  Event.Evt.un("moveToCollect");
+  Event.Evt.on("moveToCollect", (val) => {
+    itemClick(val);
+  });
   let oldRemark = data.content && JSON.parse(data.content).remark;
   if (oldRemark?.trim() === "") {
     oldRemark = null;

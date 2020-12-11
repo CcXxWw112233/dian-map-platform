@@ -5,7 +5,8 @@ import { Layer, Source, createStyle, addFeature } from "@/lib/utils/index";
 
 import LPPoiOverlay from "../PublicOverlays/LPPoiOverlay/index";
 import baseOverlay from "../PublicOverlays/baseOverlay";
-import { createOverlay } from "../../lib/utils";
+import { createOverlay, TransformCoordinate } from "../../lib/utils";
+import event from "../../lib/utils/event";
 
 // 计算poi点到楼盘的距离
 export const getDistance2 = (pt1, pt2) => {
@@ -29,9 +30,9 @@ export const jumpToPoi = (data, keywords) => {
     address: data.address,
     keywords: keywords,
     distance: data.distance + "米",
-    cb: function() {
+    cb: function () {
       mapApp.map.removeOverlay(poiLayer.poi2Overlay);
-    }
+    },
   };
   let poi2Ele = new LPPoiOverlay(data2);
   poi2Ele = new baseOverlay(poi2Ele, {
@@ -41,7 +42,7 @@ export const jumpToPoi = (data, keywords) => {
   const poi2Overlay = createOverlay(poi2Ele, {
     offset: [-10, -90],
   });
-  poiLayer.poi2Overlay = poi2Overlay
+  poiLayer.poi2Overlay = poi2Overlay;
   newFeature.overlay = poi2Overlay;
   mapApp.map.addOverlay(newFeature.overlay);
   newFeature.overlay &&
@@ -53,6 +54,7 @@ export const poiLayer = {
   layer: null,
   source: null,
   poi2Overlay: null,
+  features: [],
   init: function () {
     if (!this.layer) {
       let layers = mapApp.map.getLayers();
@@ -109,6 +111,44 @@ export const poiLayer = {
           }
         });
       }
+    //     event.Evt.on("transCoordinateSystems2Local", () => {
+    //       const baseMapKey = mapApp.baseMapKey;
+    //       const lastBaseMapKey = mapApp.lastBaseMapKey;
+    //       const baseMapKeys = mapApp.baseMapKeys;
+    //       const isSame =
+    //         baseMapKeys[0].indexOf(baseMapKey) ===
+    //         baseMapKeys[0].indexOf(lastBaseMapKey);
+    //       if (isSame === false) {
+    //         let newFeatures = [];
+    //         let features = this.source.getFeatures();
+    //         features.forEach((item) => {
+    //           let coords = item.getGeometry().getCoordinates();
+    //           let type = features.getGeometry().getType();
+    //           if (type === "Point") {
+    //             coords = TransformCoordinate(coords, "EPSG:3857", "EPSG:4326");
+    //             coords = mapApp.systemDic[baseMapKey](coords[0], coords[1]);
+    //             let feature = addFeature("Point", { coordinates: coords });
+    //             feature.setStyle(item.getStyle());
+    //             newFeatures.push(feature);
+    //           }
+    //           if (type === "Polygon") {
+    //             for (let j = 0; j < coords.length; j++) {
+    //               for (let k = 0; k < coords[j].length; k++) {
+    //                 let temp = mapApp.systemDic[baseMapKey](coords[j][k][0], coords[j][k][1]);
+    //                 if (!temp) {
+    //                   continue;
+    //                 }
+    //                 coords[j][k] = temp;
+    //               }
+    //             }
+    //             let feature = addFeature("Polygon", { coordinates:coords })
+    //         this.source.clear();
+    //         this.source.addFeatures(newFeatures);
+    //       }
+    //     });
+    //   }
+    // }
+    event.Evt.on()
     }
   },
   addPoiToMap: function (pt, iconName, poiName, data) {
@@ -120,10 +160,20 @@ export const poiLayer = {
       textFillColor: "rgb(254, 32, 66)",
       font: "14px sans-serif",
     });
-    let newFeature = addFeature("Point", {
-      coordinates: olProj.fromLonLat(pt, "EPSG:3857"),
-      ...data,
-    });
+    const baseMapKey = mapApp.baseMapKey;
+    const baseMapKeys = mapApp.baseMapKeys;
+    let newFeature = null
+    if (baseMapKeys[1].includes(baseMapKey)) {
+      newFeature = addFeature("Point", {
+        coordinates: olProj.fromLonLat(pt, "EPSG:3857"),
+        ...data,
+      });
+    } else {
+      newFeature = addFeature("Point", {
+        coordinates: olProj.fromLonLat(pt, "EPSG:3857"),
+        ...data
+      })
+    }
     newFeature.setStyle(style);
     this.source.addFeature(newFeature);
   },

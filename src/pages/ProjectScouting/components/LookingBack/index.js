@@ -9,6 +9,7 @@ import { connect } from "dva";
 import Event from "../../../../lib/utils/event";
 import AllCollection from "../AllCollectionList";
 import { CSSTransition } from "react-transition-group";
+import globalStyle from "@/globalSet/styles/globalStyles.less";
 // import CollectionPreview from '../CollectionPreview';
 
 const times = (() => {
@@ -297,6 +298,7 @@ export default class LookingBack extends React.Component {
               width: "100%",
               height: miniTitle ? "calc(100% - 65px)" : "calc(100% - 30px)",
             }}
+            className={globalStyle.autoScrollY}
           >
             {Object.keys(timeData).map((item) => {
               if (timeData[item].length) {
@@ -311,12 +313,13 @@ export default class LookingBack extends React.Component {
                           <div
                             className={`${styles.looking_item}
                            ${animateCss.animated}
-                          `}
+                          ${activeItem === data.data.id ? styles.active : ""}`}
                             key={data.data.id}
                             onClick={() => this.pictureView(data.data)}
                             onDoubleClick={() => this.toViewCenter(data.data)}
+                            style={{ flexDirection: "column" }}
                           >
-                            <div
+                            {/* <div
                               style={{
                                 backgroundColor: "rgba(71, 74, 91, 1)",
                                 display: "table",
@@ -324,29 +327,31 @@ export default class LookingBack extends React.Component {
                               className={
                                 activeItem === data.data.id ? styles.active : ""
                               }
-                            >
-                              <span
+                            > */}
+                            {DetailAction.checkCollectionType(
+                              data.data.target
+                            ) === "pic" ? (
+                              <div
                                 style={{
-                                  display: "table-cell",
-                                  verticalAlign: "middle",
+                                  backgroundColor: "rgba(71, 74, 91, 1)",
                                 }}
                               >
-                                {data.data.title}
-                              </span>
-                              {DetailAction.checkCollectionType(
-                                data.data.target
-                              ) === "pic" ? (
                                 <img
                                   crossOrigin="anonymous"
                                   src={data.data.resource_url}
                                   alt=""
                                   width="100%"
                                 />
-                              ) : (
-                                <div></div>
-                              )}
-                            </div>
+                              </div>
+                            ) : null}
+                            <p>
+                              <span
+                              >
+                                {data.data.title}
+                              </span>
+                            </p>
                           </div>
+                          // </div>
                         );
                       })}
                     </div>

@@ -99,6 +99,8 @@ function Action() {
   this.oldDispatch = null;
   this.oldShowFeatureName = null;
   this.oldZoom = null;
+  this.oldPlotFeatures = null;
+  this.needRenderFetureStyle = true;
 
   Event.Evt.addEventListener("basemapchange", (key) => {
     if (!this.mounted) return;
@@ -384,7 +386,8 @@ function Action() {
         }
       });
       InitMap.map.on("moveend", (e) => {
-        if (!this.oldData) return;
+        if (!this.oldPlotFeatures) return;
+        if (!this.needRenderFetureStyle) return;
         let zoom = InitMap.map.getView().getZoom();
         let obj = {
           lenged: this.oldLenged,
@@ -393,16 +396,15 @@ function Action() {
         };
         if (zoom > 14) {
           if (this.oldZoom && this.oldZoom <= 14) {
-            this.renderFeaturesCollection(this.oldData, obj);
-            this.oldZoom = zoom;
+            this.renderFeaturesCollection(this.oldPlotFeatures, obj);
           }
         } else {
           if (this.oldZoom && this.oldZoom > 14) {
             obj.showFeatureName = false;
-            this.renderFeaturesCollection(this.oldData, obj);
-            this.oldZoom = zoom;
+            this.renderFeaturesCollection(this.oldPlotFeatures, obj);
           }
         }
+        this.oldZoom = zoom;
       });
       InitMap.map.addLayer(this.Layer);
     }
@@ -619,6 +621,18 @@ function Action() {
     return Drag;
   })(PointerInteraction);
 
+  // 定位到项目位置
+  this.setToCenter = async (data) => {
+    let coor = [+data.coordinate_x, +data.coordinate_y];
+    if (!InitMap.checkNowIsGcj02System()) {
+      // 需要纠偏
+      let dic = InitMap.systemDic[InitMap.baseMapKey];
+      coor = dic(coor[0], coor[1]);
+    }
+    await this.toCenter({ center: coor, transform: true });
+    this.addAnimatePoint({ coordinates: coor, transform: true, name: data.name });
+  };
+
   // 添加坐标点
   this.addCollectionCoordinates = (isMultiple, data) => {
     this.dragEvt = new Drag();
@@ -832,7 +846,14 @@ function Action() {
       if (p_type === "group") {
         Event.Evt.firEvent("handleGroupFeature", feature.get("p_id"));
       }
+      let isGeojson = feature.get("isGeojson");
+      let featureType = feature.getGeometry().getType();
+      if (isGeojson && featureType === "Point") {
+        this.isActivity = null;
+        this.handlePlotClick(feature)
+      }
       let coords = feature.getGeometry().getCoordinates();
+      if (!coords) return;
       coords = TransformCoordinate(coords, "EPSG:3857", "EPSG:4326");
       Event.Evt.firEvent("HouseDetailGetPoi", coords.join(","));
       // console.log(p_type)
@@ -1233,6 +1254,7 @@ function Action() {
     }
   };
 
+  // 标绘数据点击回调
   this.handlePlotClick = (feature, pixel) => {
     if (this.isActivity) return;
     Event.Evt.firEvent("handleFeatureToLeftMenu", feature.get("id"));
@@ -1292,6 +1314,7 @@ function Action() {
           font: 14,
         });
         feature.setStyle(style);
+        feature.values_.isGeojson = true
         this.geoFeatures.push(feature);
       });
       if (geojson.features.length > 0) {
@@ -1624,6 +1647,7 @@ function Action() {
         item.collect_type !== "group"
     );
     let features = data.filter((item) => item.collect_type === "4");
+    this.oldPlotFeatures = features;
     let planPic = data.filter((item) => item.collect_type === "5");
     let geoData = data.filter((item) => item.collect_type === "8");
     this.featuresGroup = {};

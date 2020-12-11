@@ -51,6 +51,7 @@ export default class CollectionDetail extends React.Component{
   componentDidMount(){
     this.InitActiveImg(this.props);
   }
+
   // 预览图片
   previewImg = (e)=>{
     let { selectData = {} } = this.props;

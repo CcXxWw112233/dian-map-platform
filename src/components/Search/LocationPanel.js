@@ -3,6 +3,7 @@ import React from "react";
 import styles from "./Panel.less";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import commonSearchAction from "@/lib/components/Search/CommonSeach";
+import Event from "../../lib/utils/event";
 import { connect } from "dva";
 
 @connect(({ scoutingProject: { cb } }) => ({ cb }))
@@ -16,7 +17,7 @@ export default class LocationPanel extends React.Component {
   }
   componentWillUnmount() {
     // document.removeEventListener("click", this.outDivClickHandler);
-    commonSearchAction.removePOI()
+    commonSearchAction.removePOI();
   }
   outDivClickHandler = (e) => {
     const target = e.target;
@@ -38,8 +39,15 @@ export default class LocationPanel extends React.Component {
       this.props.updateSearchValue(item);
     } else {
       if (item.id) {
-        this.props.updateSearchValue(item.name);
-        commonSearchAction.addPOIToMap(item);
+        if (item.pname) {
+          this.props.updateSearchValue(item.name);
+          commonSearchAction.addPOIToMap(item);
+        } else {
+          Event.Evt.firEvent("openSelectGroup", item);
+          // Event.Evt.firEvent("handleFeatureToLeftMenu", item.id);
+          Event.Evt.firEvent("moveToCollect", item);
+          this.props.parent && this.props.parent.changeLocationPanelVisible();
+        }
       } else {
         this.props.cb(item);
       }
@@ -55,7 +63,7 @@ export default class LocationPanel extends React.Component {
     }
     return (
       <div
-        className={styles.locatePanel}
+        className={`${styles.locatePanel} ${globalStyle.autoScrollY}`}
         style={{ maxHeight: 600, ...newDivStyle }}
         ref={(node) => (this.divElement = node)}
       >
@@ -91,12 +99,14 @@ export default class LocationPanel extends React.Component {
                     style={{ color: "rgb(23, 105, 251)" }}
                     dangerouslySetInnerHTML={{ __html: iconfont }}
                   ></i>
-                  <span>{item.name || item.board_name}</span>
-                  {item.id ? (
+                  <span>{item.name || item.board_name || item.title}</span>
+                  {item.pname ? (
                     <span
                       className={styles.area}
                     >{`${item.pname}${item.cityname}${item.adname}`}</span>
-                  ) : null}
+                  ) : (
+                    <span className={styles.area}>项目数据</span>
+                  )}
                 </p>
               );
             })}

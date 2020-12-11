@@ -159,6 +159,7 @@ export default class ScoutingDetails extends PureComponent {
     this.scrolltoDom = null;
     this.scoutingDetailInstance = null;
     this.is360Pic = false;
+    this.props.onRef && this.props.onRef(this);
   }
   componentDidMount() {
     this.isGoBack = false;
@@ -216,17 +217,18 @@ export default class ScoutingDetails extends PureComponent {
     });
     Evt.on("handlePlotFeature", this.handlePlotFeature);
 
-    // Evt.on("updateGeojson", this.updateGeojsonCollection)
-
-    // const ele2 = totalOverlay({ name: "龙岗区", wranNumber: 2, total: 100 });
-    // let newOverlay2 = createOverlay(ele2);
-    // let coor2 = TransformCoordinate(
-    //   [114.0924397149, 22.621401401884],
-    //   "EPSG:4326",
-    //   "EPSG:3857"
-    // );
-    // newOverlay2.setPosition(coor2);
-    // mapApp.map.addOverlay(newOverlay2);
+    const me = this;
+    Evt.on("openSelectGroup", (val) => {
+      let area_active_key = val.area_type_id || "other";
+      if (this.state.area_active_key === area_active_key) {
+        this.scrollForFeature(val.id);
+      } else {
+        this.setActiveCollapse(area_active_key)
+        setTimeout(function () {
+          me.scrollForFeature(val.id);
+        }, 1);
+      }
+    });
   }
 
   // 定位到位置
@@ -263,6 +265,7 @@ export default class ScoutingDetails extends PureComponent {
     let collection = this.state.all_collection.find(
       (item) => item.id === feature.get("id")
     );
+    // let isGeojson = feature.get("isGeojson");
     if (collection) {
       let ftype = feature.getGeometry().getType();
       let properties = this.getProperties(ftype, feature.getGeometry());
@@ -270,6 +273,10 @@ export default class ScoutingDetails extends PureComponent {
         let coords = feature.getGeometry().getCoordinates();
         coords = TransformCoordinate(coords, "EPSG:3857", "EPSG:4326");
         Evt.firEvent("HouseDetailGetPoi", coords.join(","));
+        dispatch({
+          type: "collectionDetail/updateDatas",
+          payload: { selectPoi: coords.join(",") },
+        });
       }
       collection.properties_map = properties;
       dispatch({
@@ -388,6 +395,7 @@ export default class ScoutingDetails extends PureComponent {
           current_board: data,
         },
         () => {
+          Action.setToCenter(data)
           if (!flag) this.renderAreaList();
           let param = { board_id: this.state.current_board.board_id };
           Action.addToListen(param);
@@ -445,6 +453,7 @@ export default class ScoutingDetails extends PureComponent {
       Action.removeLayer();
       // 删除轮询
       Action.clearListen();
+      Action.needRenderFetureStyle = false;
       this.setState({
         isEdit: false,
       });
@@ -457,6 +466,7 @@ export default class ScoutingDetails extends PureComponent {
       let params = {
         board_id: this.state.current_board.board_id,
       };
+      Action.needRenderFetureStyle = true;
       // 添加轮询
       Action.addToListen(params);
     }
@@ -2129,7 +2139,6 @@ export default class ScoutingDetails extends PureComponent {
                       >
                         <div className={styles.norAreaIdsData}>
                           {not_area_id_collection.map((item, index) => {
-                            console.log(this.refs["scoutingDetailRef"]);
                             let activeStyle = null;
                             if (item.id === activeId) {
                               activeStyle = {
@@ -2412,6 +2421,7 @@ export default class ScoutingDetails extends PureComponent {
           mini={this.state.miniTitle}
           id={current_board.board_id}
           data={current_board}
+          collectData={this.state.all_collection}
           cb={this.handleGoBackClick.bind(this)}
           parentTool={this.props.parentTool}
           boardId={this.state.current_board.board_id}

@@ -147,31 +147,56 @@ export default class Search extends React.Component {
   //     });
   //   });
   // };
-  handleSearch = (address, locationName, offset) => {
+  handleSearch = (address, localtionName, offset) => {
     this.setState({
       searchLoading: true,
     });
-    commonSearchAction
-      .getPOI(address, locationName, offset)
-      .then((res) => {
-        let scoutingProjectList = [];
-        if (!this.props.isOnMap) {
-          scoutingProjectList = this.props.projectList.filter((item) => {
-            return item.board_name.indexOf(address) > -1;
-          });
-        }
-        this.setState({
-          searchResult: scoutingProjectList.concat(res),
-          searchLoading: false,
-          searchPanelVisible: res.length ? true : false,
-        });
-      })
-      .catch((e) => {
-        this.setState({
-          searchLoading: false,
-          searchPanelVisible: false,
-        });
+    if (address === "") {
+      this.setState({
+        searchResult: [],
+        searchLoading: false,
+        searchPanelVisible: false,
       });
+      return;
+    }
+    let scoutingProjectList = [];
+    const { collectData } = this.props;
+    if (collectData) {
+      let tmp = collectData.filter((item) => {
+        return item.title.includes(address);
+      });
+      scoutingProjectList = tmp;
+    }
+    if (!this.props.inProject) {
+      localtionName = localtionName === "全国" ? "" : localtionName;
+      commonSearchAction
+        .getPOI(address, localtionName, offset)
+        .then((res) => {
+          if (!this.props.isOnMap) {
+            let tmp = this.props.projectList.filter((item) => {
+              return item.board_name.indexOf(address) > -1;
+            });
+            scoutingProjectList = [...scoutingProjectList, ...tmp];
+          }
+          this.setState({
+            searchResult: scoutingProjectList.concat(res),
+            searchLoading: false,
+            searchPanelVisible: scoutingProjectList.length ? true : false,
+          });
+        })
+        .catch((e) => {
+          this.setState({
+            searchLoading: false,
+            searchPanelVisible: false,
+          });
+        });
+    } else {
+      this.setState({
+        searchResult: scoutingProjectList,
+        searchLoading: false,
+        searchPanelVisible: scoutingProjectList.length ? true : false,
+      });
+    }
   };
   changeAreaPanelVisible = () => {
     this.setState({
@@ -230,22 +255,25 @@ export default class Search extends React.Component {
         getSearchHistory={this.getSearchHistory}
         searchResult={this.state.searchResult}
         updateSearchValue={this.updateSearchValue}
+        parent={this}
         changeLocationPanelVisible={this.changeLocationPanelVisible}
       ></LocationPanel>
     );
     return (
       <div className={styles.wrap} style={this.props.style}>
-        <Dropdown
-          overlay={areaPanel}
-          trigger="click"
-          visible={this.state.areaPanelVisible}
-          onVisibleChange={(e) => this.onAreaPanelVisibleChange(e)}
-        >
-          <Button style={{ borderRadius: 0 }}>
-            {this.props.locationName}
-            <DownOutlined />
-          </Button>
-        </Dropdown>
+        {!this.props.inProject ? (
+          <Dropdown
+            overlay={areaPanel}
+            trigger="click"
+            visible={this.state.areaPanelVisible}
+            onVisibleChange={(e) => this.onAreaPanelVisibleChange(e)}
+          >
+            <Button style={{ borderRadius: 0 }}>
+              {this.props.locationName}
+              <DownOutlined />
+            </Button>
+          </Dropdown>
+        ) : null}
         <Dropdown
           overlay={locationPanel}
           visible={this.state.searchPanelVisible}

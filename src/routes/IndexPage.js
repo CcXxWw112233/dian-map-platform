@@ -63,17 +63,14 @@ class IndexPage extends React.Component {
     this.positionTimer = null;
     this.queryStr = "";
     this.publicDataChild = null;
-    // this.state = {
-    //   draw_
-    // }
+    this.state = {
+      visible: true,
+      placement: "left",
+      left: "0px",
+      draw_visible: false,
+      isMoveMapMoveedListen: false,
+    };
   }
-  state = {
-    visible: true,
-    placement: "left",
-    left: "0px",
-    draw_visible: false,
-    isMoveMapMoveedListen: false,
-  };
   componentDidMount() {
     this.checkListCach();
     Event.Evt.on("hasFeatureToProject", (data) => {

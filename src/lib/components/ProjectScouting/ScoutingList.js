@@ -103,6 +103,7 @@ const action = function () {
     // }))
     return InitMap.map;
   };
+
   // 获取项目列表
   this.getList = async (data = {}) => {
     let id = config.getUrlParam.orgId;
