@@ -6,7 +6,6 @@ import { Layer, Source, createStyle, addFeature } from "@/lib/utils/index";
 import LPPoiOverlay from "../PublicOverlays/LPPoiOverlay/index";
 import baseOverlay from "../PublicOverlays/baseOverlay";
 import { createOverlay } from "../../lib/utils";
-import { textHeights } from "ol/render/canvas";
 
 // 计算poi点到楼盘的距离
 export const getDistance2 = (pt1, pt2) => {

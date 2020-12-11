@@ -143,9 +143,12 @@ export default class LocalPOI extends React.Component {
       this.getPoi(this.selectTabPanel);
     }
   }
-  // componentWillUnmount() {
-  //   this.searchAroundOverlay && InitMap.map.removeOverlay(this.searchAroundOverlay)
-  // }
+  componentWillUnmount() {
+    this.searchAroundOverlay && InitMap.map.removeOverlay(this.searchAroundOverlay);
+    this.searchAroundOverlay = null;
+    event.Evt.un("HouseDetailGetPoi");
+    event.Evt.un("HouseDetailGetPoi");
+  }
 
   createPoiCircle = () => {
     let coords = this.housePoi.split(",");

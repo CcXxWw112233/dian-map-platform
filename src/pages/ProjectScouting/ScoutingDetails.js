@@ -2006,7 +2006,7 @@ export default class ScoutingDetails extends PureComponent {
       case "1":
         return (
           <Fragment>
-            <PublicView ref="scoutingDetailRef">
+            <PublicView>
               <Collapse
                 onChange={(e) => {
                   this.setActiveCollapse(e);

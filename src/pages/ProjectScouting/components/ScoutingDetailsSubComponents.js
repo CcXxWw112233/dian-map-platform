@@ -1152,7 +1152,7 @@ export const UploadItem = ({
       {/* {data.content && JSON.parse(data.content)?.remark === "" ? (
         <Menu.Item key="addRemark">新增备注</Menu.Item>
       ) : null} */}
-      {data.collect_type === "9" &&
+      {data.collect_type === "4" &&
       data.content &&
       JSON.parse(data.content)?.featureType ? (
         <Menu.Item key="modifyFeature">标绘编辑</Menu.Item>

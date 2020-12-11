@@ -93,6 +93,7 @@ function Action() {
   this.pontsGroup = {};
   this.isNeedMoveMapMoveedListen = false;
   this.moveendListener = () => {};
+  this.changeFeatureTitleShowListener = () => {};
   this.oldFeatures = null;
   this.oldPonts = null;
   this.oldLenged = null;
@@ -101,6 +102,7 @@ function Action() {
   this.oldZoom = null;
   this.oldPlotFeatures = null;
   this.needRenderFetureStyle = true;
+  this.hasFeatureTotal  = true;
 
   Event.Evt.addEventListener("basemapchange", (key) => {
     if (!this.mounted) return;
@@ -385,28 +387,32 @@ function Action() {
           }
         }
       });
-      InitMap.map.on("moveend", (e) => {
-        if (this.oldPlotFeatures) {
-          if (!this.needRenderFetureStyle) return;
-          let zoom = InitMap.map.getView().getZoom();
-          let obj = {
-            lenged: this.oldLenged,
-            dispatch: this.oldDispatch,
-            showFeatureName: true,
-          };
-          if (zoom > 14) {
-            if (this.oldZoom && this.oldZoom <= 14) {
-              this.renderFeaturesCollection(this.oldPlotFeatures, obj);
+      const me = this;
+      this.changeFeatureTitleShowListener = function (e) {
+        if (me.hasFeatureTotal) {
+          if (me.oldPlotFeatures) {
+            if (!me.needRenderFetureStyle) return;
+            let zoom = InitMap.map.getView().getZoom();
+            let obj = {
+              lenged: me.oldLenged,
+              dispatch: me.oldDispatch,
+              showFeatureName: true,
+            };
+            if (zoom > 14) {
+              if (me.oldZoom && me.oldZoom <= 14) {
+                me.renderFeaturesCollection(me.oldPlotFeatures, obj);
+              }
+            } else {
+              if (me.oldZoom && me.oldZoom > 14) {
+                obj.showFeatureName = false;
+                me.renderFeaturesCollection(me.oldPlotFeatures, obj);
+              }
             }
-          } else {
-            if (this.oldZoom && this.oldZoom > 14) {
-              obj.showFeatureName = false;
-              this.renderFeaturesCollection(this.oldPlotFeatures, obj);
-            }
+            me.oldZoom = zoom;
           }
-          this.oldZoom = zoom;
         }
-      });
+      };
+      InitMap.map.on("moveend", this.changeFeatureTitleShowListener);
       InitMap.map.addLayer(this.Layer);
     }
     const me = this;
@@ -430,14 +436,18 @@ function Action() {
       me.overlayArr2 = [];
       // 关闭
       if (value) {
+        this.hasFeatureTotal = false;
         me.renderFeaturesCollection(me.oldFeatures, obj);
         let pointCollection = me.renderPointCollection(me.oldPonts);
         me.overlayArr2 = pointCollection;
         me.features = me.features.concat(pointCollection);
         me.Source.addFeatures(pointCollection);
+        INITMAP.map.un("moveend", me.moveendListener);
+        me.moveendListener = () => {};
       } else {
         //开启
-        me.moveendCallBack(me.oldFeatures, me.oldPonts, obj, value);
+        this.hasFeatureTotal = true;
+        me.mapMoveEnd(me.oldFeatures, me.oldPonts, obj, value);
       }
       me.isNeedMoveMapMoveedListen = value;
     });
@@ -537,7 +547,6 @@ function Action() {
     this.clearGroupCollectionPoint();
     Event.Evt.firEvent("resetMoveMapMoveedListen");
     this.isNeedMoveMapMoveedListen = false;
-    this.moveendListener = () => {};
     this.oldFeatures = null;
     this.oldPonts = null;
     this.oldLenged = null;
@@ -2658,6 +2667,7 @@ function Action() {
     });
   };
   this.clearListen = () => {
+    this.changeFeatureTitleShowListener = () => {};
     if (this.repeatRequst) {
       clearTimeout(this.repeatRequst);
     }
