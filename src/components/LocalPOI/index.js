@@ -147,7 +147,7 @@ export default class LocalPOI extends React.Component {
     this.searchAroundOverlay && InitMap.map.removeOverlay(this.searchAroundOverlay);
     this.searchAroundOverlay = null;
     event.Evt.un("HouseDetailGetPoi");
-    event.Evt.un("HouseDetailGetPoi");
+    event.Evt.un("removeHousePOI");
   }
 
   createPoiCircle = () => {
