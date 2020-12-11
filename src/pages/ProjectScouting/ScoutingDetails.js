@@ -2421,6 +2421,7 @@ export default class ScoutingDetails extends PureComponent {
           mini={this.state.miniTitle}
           id={current_board.board_id}
           data={current_board}
+          groupId={this.state.area_active_key}
           collectData={this.state.all_collection}
           cb={this.handleGoBackClick.bind(this)}
           parentTool={this.props.parentTool}

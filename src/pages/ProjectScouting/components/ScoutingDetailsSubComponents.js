@@ -77,6 +77,7 @@ export const Title = ({
   parentTool,
   boardId,
   collectData,
+  groupId
 }) => {
   // 预览图片
   const previewImg = (e) => {
@@ -121,6 +122,7 @@ export const Title = ({
       <Search
         onRef={() => {}}
         collectData={collectData}
+        groupId={groupId}
         inProject={true}
         style={{ flex: "none", margin: 0, border: "1px solid #3333" }}
         placeholder="请输入名称"

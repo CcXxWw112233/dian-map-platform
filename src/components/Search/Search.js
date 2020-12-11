@@ -160,9 +160,15 @@ export default class Search extends React.Component {
       return;
     }
     let scoutingProjectList = [];
-    const { collectData } = this.props;
+    const { collectData, groupId } = this.props;
     if (collectData) {
-      let tmp = collectData.filter((item) => {
+      let tmp = [];
+      let groupData = [];
+      let newGroupId = groupId === "other" ? "" : groupId;
+      groupData = collectData.filter((item) => {
+        return item.area_type_id === newGroupId;
+      });
+      tmp = groupData.filter((item) => {
         return item.title.includes(address);
       });
       scoutingProjectList = tmp;

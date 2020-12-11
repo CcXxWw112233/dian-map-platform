@@ -386,25 +386,26 @@ function Action() {
         }
       });
       InitMap.map.on("moveend", (e) => {
-        if (!this.oldPlotFeatures) return;
-        if (!this.needRenderFetureStyle) return;
-        let zoom = InitMap.map.getView().getZoom();
-        let obj = {
-          lenged: this.oldLenged,
-          dispatch: this.oldDispatch,
-          showFeatureName: true,
-        };
-        if (zoom > 14) {
-          if (this.oldZoom && this.oldZoom <= 14) {
-            this.renderFeaturesCollection(this.oldPlotFeatures, obj);
+        if (this.oldPlotFeatures) {
+          if (!this.needRenderFetureStyle) return;
+          let zoom = InitMap.map.getView().getZoom();
+          let obj = {
+            lenged: this.oldLenged,
+            dispatch: this.oldDispatch,
+            showFeatureName: true,
+          };
+          if (zoom > 14) {
+            if (this.oldZoom && this.oldZoom <= 14) {
+              this.renderFeaturesCollection(this.oldPlotFeatures, obj);
+            }
+          } else {
+            if (this.oldZoom && this.oldZoom > 14) {
+              obj.showFeatureName = false;
+              this.renderFeaturesCollection(this.oldPlotFeatures, obj);
+            }
           }
-        } else {
-          if (this.oldZoom && this.oldZoom > 14) {
-            obj.showFeatureName = false;
-            this.renderFeaturesCollection(this.oldPlotFeatures, obj);
-          }
+          this.oldZoom = zoom;
         }
-        this.oldZoom = zoom;
       });
       InitMap.map.addLayer(this.Layer);
     }
@@ -630,7 +631,11 @@ function Action() {
       coor = dic(coor[0], coor[1]);
     }
     await this.toCenter({ center: coor, transform: true });
-    this.addAnimatePoint({ coordinates: coor, transform: true, name: data.name });
+    this.addAnimatePoint({
+      coordinates: coor,
+      transform: true,
+      name: data.name,
+    });
   };
 
   // 添加坐标点
@@ -688,11 +693,12 @@ function Action() {
         this.dragEvt.handleDownEvent = (evt) => {
           let map = evt.map;
 
-          let feature = map.forEachFeatureAtPixel(evt.pixel, function (
-            feature
-          ) {
-            return feature;
-          });
+          let feature = map.forEachFeatureAtPixel(
+            evt.pixel,
+            function (feature) {
+              return feature;
+            }
+          );
 
           if (feature && feature.get("ftype") === "select_coordinates") {
             this.coordinate_ = evt.coordinate;
@@ -725,11 +731,12 @@ function Action() {
         this.dragEvt.handleMoveEvent = (evt) => {
           if (this.cursor_) {
             let map = evt.map;
-            let feature = map.forEachFeatureAtPixel(evt.pixel, function (
-              feature
-            ) {
-              return feature;
-            });
+            let feature = map.forEachFeatureAtPixel(
+              evt.pixel,
+              function (feature) {
+                return feature;
+              }
+            );
             let element = evt.map.getTargetElement();
             if (feature && feature.get("ftype") === "select_coordinates") {
               if (element.style.cursor !== this.cursor_) {
@@ -850,7 +857,7 @@ function Action() {
       let featureType = feature.getGeometry().getType();
       if (isGeojson && featureType === "Point") {
         this.isActivity = null;
-        this.handlePlotClick(feature)
+        this.handlePlotClick(feature);
       }
       let coords = feature.getGeometry().getCoordinates();
       if (!coords) return;
@@ -1314,7 +1321,7 @@ function Action() {
           font: 14,
         });
         feature.setStyle(style);
-        feature.values_.isGeojson = true
+        feature.values_.isGeojson = true;
         this.geoFeatures.push(feature);
       });
       if (geojson.features.length > 0) {
