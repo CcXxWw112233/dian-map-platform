@@ -6,6 +6,7 @@ import Action from "../../../lib/components/ProjectScouting/ScoutingDetail";
 import ListAction from "../../../lib/components/ProjectScouting/ScoutingList";
 import PhotoSwipe from "../../../components/PhotoSwipe/action";
 import InitMap from "../../../utils/INITMAP";
+// import { dataURLtoFile } from "../../../utils/compressImg"
 import { guid } from "../../../lib/components/index";
 import {
   Row,
@@ -77,7 +78,7 @@ export const Title = ({
   parentTool,
   boardId,
   collectData,
-  groupId
+  groupId,
 }) => {
   // 预览图片
   const previewImg = (e) => {
@@ -259,6 +260,78 @@ const checkFileSize = (file) => {
   return true;
 };
 
+const checkFileSize360Pic = (file) => {
+  return new Promise((resolve, reject) => {
+    let { size, text } = formatSize(file.size);
+    text = text.trim();
+    if (+size > 60 && text === "MB") {
+      message.error("文件不能大于60MB---" + file.name);
+      reject();
+    } else {
+      if (file.type.includes("image")) {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = function () {
+          let image = new Image();
+          image.crossorigin = "anonymous";
+          image.src = reader.result;
+          image.onload = function async() {
+            if (image.width > 16384 || image.height > 16384) {
+              const { width: originWidth, height: originHeight } = image;
+              // 最大尺寸限制
+              const maxWidth = 16384;
+              const maxHeight = 16384;
+              // 目标尺寸
+              let targetWidth = originWidth;
+              let targetHeight = originHeight;
+              if (originWidth > maxWidth && originHeight > maxHeight) {
+                if (originWidth / originHeight > 1) {
+                  // 宽图片
+                  targetWidth = maxWidth;
+                  targetHeight = Math.round(
+                    maxWidth * (originHeight / originWidth)
+                  );
+                } else {
+                  // 高图片
+                  targetHeight = maxHeight;
+                  targetWidth = Math.round(
+                    maxHeight * (originWidth / originHeight)
+                  );
+                }
+              }
+              const canvas = document.createElement("canvas");
+              const context = canvas.getContext("2d");
+              canvas.width = targetWidth;
+              canvas.height = targetHeight;
+              context.clearRect(0, 0, targetWidth, targetHeight);
+              // 图片绘制，新设置一个图片宽高，达到压缩图片的目地
+              context.drawImage(image, 0, 0, targetWidth, targetHeight);
+              const dataUrl = canvas.toDataURL(file.type);
+              // let newFile = dataURLtoFile(dataUrl, file[0].name);
+              var arr = dataUrl.split(",");
+              var mime = arr[0].match(/:(.*?);/)[1];
+              var bstr = atob(arr[1]);
+              var n = bstr.length;
+              var u8arr = new Uint8Array(n);
+              while (n--) {
+                u8arr[n] = bstr.charCodeAt(n);
+              }
+              //转换成file对象
+              file = new File([u8arr], file.name, { type: mime });
+              resolve(file);
+            } else {
+              resolve(true);
+            }
+          };
+        };
+      } else {
+        resolve(true);
+      }
+    }
+    // uploadFiles.push(file);
+  });
+};
+
 const UploadBtn = ({ onChange, parentTool, boardId }) => {
   let [file, setFiles] = useState([]);
   const onupload = (e) => {
@@ -308,16 +381,24 @@ const UploadBtn = ({ onChange, parentTool, boardId }) => {
     </Upload>
   );
 };
-const Upload360PicBtn = ({ onChange, parentTool, boardId, parent }) => {
+const Upload360PicBtn = ({
+  onChange,
+  parentTool,
+  boardId,
+  parent,
+  uploadPanorama,
+}) => {
   let [file, setFiles] = useState([]);
   const onupload = (e) => {
     let { size, text } = formatSize(e.file.size);
     text = text.trim();
+    // setFiles(e.fileList);
     if (!(+size > 60 && text === "MB")) {
       setFiles(e.fileList);
       onChange(e);
     }
   };
+
   Event.Evt.on("uploadFileSuccess", (files) => {
     // setTimeout(()=>{
     setFiles(file.filter((item) => item.uid !== files.uid));
@@ -333,8 +414,7 @@ const Upload360PicBtn = ({ onChange, parentTool, boardId, parent }) => {
     <Upload
       action="/api/map/file/upload"
       accept=".jpg, .jpeg, .png, .bmp, .mp4, .avi, .wmv"
-      beforeUpload={checkFileSize}
-      multiple
+      beforeUpload={checkFileSize360Pic}
       headers={{ Authorization: BASIC.getUrlParam.token }}
       onChange={(e) => {
         onupload(e);
@@ -385,6 +465,7 @@ export const ScoutingHeader = (props) => {
     parentTool,
     boardId,
     parent,
+    uploadPanorama,
   } = props;
   let [areaName, setAreaName] = useState(data.name);
   let [isEdit, setIsEdit] = useState(edit);
@@ -431,6 +512,11 @@ export const ScoutingHeader = (props) => {
     } else {
       // onError && onError(file)
     }
+  };
+
+  const startUpload360Pic = ({ file, fileList, event }) => {
+    // console.log({ file, fileList, event })
+    onChange && onChange(file, fileList, event);
   };
 
   // 上传规划图
@@ -560,6 +646,7 @@ export const ScoutingHeader = (props) => {
           parentTool={parentTool}
           boardId={boardId}
           parent={parent}
+          uploadPanorama={uploadPanorama}
         ></Upload360PicBtn>
       </Menu.Item>
       <Menu.Item

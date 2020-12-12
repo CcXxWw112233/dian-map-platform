@@ -117,7 +117,10 @@ export default {
   },
   // 文件上传
   UPLOAD_FILE: async (data) => {
-    let response = await request("POST", "/map/file/upload", data);
+    let res = await getSession("ScoutingItemId");
+    let board_id = res.data;
+    let base64 = getBase64(board_id);
+    let response = await request("POST", "/map/file/upload", data, {BaseInfo: base64});
     if (BASIC.checkResponse(response)) {
       return response.data;
     }

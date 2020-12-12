@@ -72,6 +72,7 @@ function Action() {
     CANCEL_COLLECTION_MERGE,
     GET_DOWNLOAD_URL,
     EDIT_AREA_MESSAGE,
+    UPLOAD_FILE
   } = config;
   this.activeFeature = {};
   this.layerId = "scoutingDetailLayer";

@@ -223,7 +223,7 @@ export default class ScoutingDetails extends PureComponent {
       if (this.state.area_active_key === area_active_key) {
         this.scrollForFeature(val.id);
       } else {
-        this.setActiveCollapse(area_active_key)
+        this.setActiveCollapse(area_active_key);
         setTimeout(function () {
           me.scrollForFeature(val.id);
         }, 1);
@@ -395,7 +395,7 @@ export default class ScoutingDetails extends PureComponent {
           current_board: data,
         },
         () => {
-          Action.setToCenter(data)
+          Action.setToCenter(data);
           if (!flag) this.renderAreaList();
           let param = { board_id: this.state.current_board.board_id };
           Action.addToListen(param);
@@ -723,6 +723,12 @@ export default class ScoutingDetails extends PureComponent {
       });
       Event.Evt.firEvent("uploadFileSuccess", file);
     }, 3000);
+  };
+
+  uploadPanorama = (file) => {
+    Action.uploadPanorama(file).then((res) => {
+      this.fileUpload({ id: this.state.area_active_key }, res.data, file);
+    });
   };
   // 上传完成
   fileUpload = (val, resp, file, event) => {
@@ -2048,6 +2054,7 @@ export default class ScoutingDetails extends PureComponent {
                             this,
                             item
                           )}
+                          uploadPanorama={this.uploadPanorama}
                           onChange={this.filesChange.bind(this, item)}
                           onUpload={this.fileUpload.bind(this, item)}
                           onUploadPlan={this.onUploadPlan.bind(this, item)}

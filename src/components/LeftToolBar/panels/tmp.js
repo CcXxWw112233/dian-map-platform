@@ -1,8 +1,8 @@
 import { createStyle, loadFeatureJSON } from "../../../lib/utils/index";
 import Axios from "axios";
-// 更新江西数据的临时方法
 const loadGeoJson = (parent) => {
-  Axios.get(require("../../../assets/json/惠州市3857.geojson")).then((res) => {
+  // let arr = ["../../../assets/json/惠州市3857.geojson"]
+  Axios.get(require("../../../assets/json/yaduo.geojson")).then((res) => {
     let { data } = res;
     let features = loadFeatureJSON(data, "GeoJSON");
     let operatorList = [];
