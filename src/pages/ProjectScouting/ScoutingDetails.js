@@ -260,6 +260,7 @@ export default class ScoutingDetails extends PureComponent {
     }
   };
 
+  // 标绘点击回调
   handlePlotFeature = ({ feature, pixel }) => {
     // console.log(feature, pixel)
     const { dispatch } = this.props;
@@ -286,6 +287,7 @@ export default class ScoutingDetails extends PureComponent {
           selectData: collection,
           type: "edit",
           isImg: false,
+          selectedFeature: feature 
         },
       });
     }

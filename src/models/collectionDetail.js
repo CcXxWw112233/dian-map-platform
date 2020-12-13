@@ -8,7 +8,8 @@ export default {
     type:'view',
     isImg: true,
     small: false,
-    selectPoi: ""
+    selectPoi: "",
+    selectedFeature: null
   },
   effects:{
 
