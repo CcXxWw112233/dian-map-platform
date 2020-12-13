@@ -274,7 +274,7 @@ const checkFileSize360Pic = (file) => {
           let image = new Image();
           image.crossorigin = "anonymous";
           image.src = reader.result;
-          image.onload = function async () {
+          image.onload = function () {
             if (image.width > 16384) {
               const { width: originWidth, height: originHeight } = image;
               // 最大尺寸限制
