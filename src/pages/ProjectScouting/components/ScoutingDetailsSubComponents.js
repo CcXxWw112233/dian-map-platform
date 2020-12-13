@@ -280,7 +280,7 @@ const checkFileSize360Pic = (file) => {
               const { width: originWidth, height: originHeight } = image;
               // 最大尺寸限制
               const maxWidth = 16384;
-              const maxHeight = 16384;
+              const maxHeight = 8192;
               // 目标尺寸
               let targetWidth = originWidth;
               let targetHeight = originHeight;
