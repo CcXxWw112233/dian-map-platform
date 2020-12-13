@@ -276,28 +276,19 @@ const checkFileSize360Pic = (file) => {
           image.crossorigin = "anonymous";
           image.src = reader.result;
           image.onload = function async() {
-            if (image.width > 16384 || image.height > 16384) {
+            if (image.width > 16384) {
               const { width: originWidth, height: originHeight } = image;
               // 最大尺寸限制
               const maxWidth = 16384;
-              const maxHeight = 8192;
+              // const maxHeight = 16384;
               // 目标尺寸
               let targetWidth = originWidth;
               let targetHeight = originHeight;
-              if (originWidth > maxWidth && originHeight > maxHeight) {
-                if (originWidth / originHeight > 1) {
-                  // 宽图片
-                  targetWidth = maxWidth;
-                  targetHeight = Math.round(
-                    maxWidth * (originHeight / originWidth)
-                  );
-                } else {
-                  // 高图片
-                  targetHeight = maxHeight;
-                  targetWidth = Math.round(
-                    maxHeight * (originWidth / originHeight)
-                  );
-                }
+              if (originWidth > maxWidth) {
+                targetWidth = maxWidth;
+                targetHeight = Math.round(
+                      maxWidth * (originHeight / originWidth)
+                    );
               }
               const canvas = document.createElement("canvas");
               const context = canvas.getContext("2d");
