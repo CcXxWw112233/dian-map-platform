@@ -641,7 +641,7 @@ export default class CollectionPreview extends React.Component {
               </span>
             </Dropdown>
           ) : null}
-          {currentData?.collect_type === "10" ? (
+          {/* {currentData?.collect_type === "10" ? (
             <span
               onClick={() =>
                 this.setState({
@@ -652,7 +652,7 @@ export default class CollectionPreview extends React.Component {
             >
               {this.state.isOverallView ? "退出" : "全景"}
             </span>
-          ) : null}
+          ) : null} */}
           <span
             className={styles.prevImg}
             onClick={() => {
