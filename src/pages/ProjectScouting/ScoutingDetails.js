@@ -40,7 +40,8 @@ import {
 
 import PlayCollectionControl from "./components/playCollectionControl";
 // import { getOffsetTop } from "utils/utils";
-import CollectionDetail from "./components/CollectionDetail";
+// import CollectionDetail from "./components/CollectionDetail";
+import CollectionDetail from "./components/CollectionDetail/index-new"
 import LookingBack from "./components/LookingBack";
 import mapApp from "../../utils/INITMAP";
 
