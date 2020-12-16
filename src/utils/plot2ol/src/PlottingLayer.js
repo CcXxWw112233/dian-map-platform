@@ -121,6 +121,7 @@ class PlottingLayer extends Observable {
     this._ls_mapclick = null;
 
     this.projectScoutingArr = [];
+    this.plotOverlayArr = [];
     //--合并地图选项
     combineOpts(this.opts, this.defaults, opts);
     //--创建layer

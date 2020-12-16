@@ -197,8 +197,11 @@ export const createStyle = function (
   });
   // 文字样式
   let text = new Text({
-    offsetX: 0,
-    offsetY: options.offsetY === undefined ? -25 : options.offsetY,
+    // offsetX: 0,
+    // offsetY: options.offsetY === undefined ? -25 : options.offsetY,
+    offsetX: 25,
+    offsetY: options.offsetY === undefined ? 0 : options.offsetY,
+    textAlign: "left",
     overflow: true,
     text: options.showName
       ? fillColorKeyVals && fillColorKeyVals.length

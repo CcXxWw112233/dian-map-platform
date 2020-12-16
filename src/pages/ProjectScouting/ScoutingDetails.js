@@ -41,7 +41,7 @@ import {
 import PlayCollectionControl from "./components/playCollectionControl";
 // import { getOffsetTop } from "utils/utils";
 // import CollectionDetail from "./components/CollectionDetail";
-import CollectionDetail from "./components/CollectionDetail/index-new"
+import CollectionDetail from "./components/CollectionDetail/index-new";
 import LookingBack from "./components/LookingBack";
 import mapApp from "../../utils/INITMAP";
 
@@ -287,7 +287,7 @@ export default class ScoutingDetails extends PureComponent {
           selectData: collection,
           type: "edit",
           isImg: false,
-          selectedFeature: feature 
+          selectedFeature: feature,
         },
       });
     }
@@ -457,6 +457,11 @@ export default class ScoutingDetails extends PureComponent {
       // 删除轮询
       Action.clearListen();
       Action.needRenderFetureStyle = false;
+      
+      // 惠州电信展示需求
+      Action.selectedFeature = null;
+      Action.lastSelectedFeature = null;
+      Action.removeFeatureOverlay();
       this.setState({
         isEdit: false,
       });
@@ -1627,6 +1632,7 @@ export default class ScoutingDetails extends PureComponent {
       type: "collectionDetail/updateDatas",
       payload: {
         selectData: val,
+        selectedFeature: feature,
         type: "edit",
         isImg: type === "pic" || type === "video" || type === "interview",
       },

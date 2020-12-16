@@ -44,7 +44,7 @@ const getBaseUrl = () => {
   if(NODE_ENV === 'production'){
     return {
       BASE_URL:"https://map.di-an.com",
-      API_URL: '/dian_map',
+      API_URL: '/api',
       Geo_WFS:"https://map.di-an.com/geoserver/wfs",
       ...config,
     }

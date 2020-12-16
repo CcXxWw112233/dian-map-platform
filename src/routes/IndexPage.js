@@ -16,6 +16,7 @@ import FlutterComponents from "../pages/FlutterComponents";
 import MatrixEdit from "../components/MatrixEdit";
 import { BASIC } from "../services/config";
 import UploadNotification from "../components/UploadNotification";
+import ImagePreview from "../pages/ProjectScouting/components/CollectionDetail/imagePreview";
 
 // new ui
 // import BasemapGallery from "../components/BasemapGallery/BasemapGallery";
@@ -29,7 +30,7 @@ import BasemapGallery from "../components/BasemapGallery/BasemapGallery";
 
 @connect(
   ({
-    controller: { mainVisible },
+    controller: { mainVisible, },
     openswitch: {
       isShowMap,
       isShowMobile,
@@ -39,7 +40,9 @@ import BasemapGallery from "../components/BasemapGallery/BasemapGallery";
       isShowPhotoSwipe,
       panelDidMount,
       openPanel,
+      imagePreviewVisible
     },
+    
     editPicture: { editShow },
   }) => ({
     mainVisible,
@@ -52,6 +55,7 @@ import BasemapGallery from "../components/BasemapGallery/BasemapGallery";
     isShowPhotoSwipe,
     panelDidMount,
     openPanel,
+    imagePreviewVisible
   })
 )
 class IndexPage extends React.Component {
@@ -355,6 +359,7 @@ class IndexPage extends React.Component {
       isShowRightTools,
       isShowLeftToolBar,
       isShowPhotoSwipe,
+      imagePreviewVisible
     } = this.props;
     return (
       <div className={styles.normal} id="IndexPage">
@@ -430,6 +435,7 @@ class IndexPage extends React.Component {
             {this.state.isMoveMapMoveedListen ? "开启采集统计" : "关闭采集统计"}
           </a>
         )}
+        {imagePreviewVisible && <ImagePreview />}
       </div>
     );
   }

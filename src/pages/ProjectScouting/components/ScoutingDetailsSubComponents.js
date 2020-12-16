@@ -1113,6 +1113,7 @@ export const UploadItem = ({
     word: { text: "文档", icon: "icon-wenjian" },
     annotate: { text: "批注", icon: "icon-pizhu1" },
     plotting: { text: "标绘", icon: "icon-biaohui2" },
+    Point: { text: "标记点", icon: "icon-zuobiao2" },
     unknow: { text: "未知", icon: "icon-bianzu612" },
     planPic: { text: "规划", icon: "icon-bianzu581" },
     address: { text: "地址", icon: "icon-zuobiao2" },
@@ -1122,6 +1123,14 @@ export const UploadItem = ({
   let hours = Action.dateFormat(create_time, "HH:mm");
 
   let secondSetType = type;
+
+  if (data.content) {
+    let content = JSON.parse(data.content);
+    const geometryType = content.geometryType;
+    if (geometryType === "Point") {
+      secondSetType = "Point"
+    }
+  }
 
   const onHandleMenu = ({ key }) => {
     // 添加坐标点

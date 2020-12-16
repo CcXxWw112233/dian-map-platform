@@ -214,6 +214,28 @@ class PlotEdit extends Observable {
       this.map.removeOverlay(lastOverlay);
     }
   }
+  createPlotOverlay2(ele, operator) {
+    let feature = operator.feature;
+    let type = feature.getGeometry().getType();
+    if (type === "Point") {
+      let coords = feature.getGeometry().getCoordinates();
+      const overlay = new Overlay({
+        id: `${operator.guid}-total`,
+        element: ele,
+        position: coords,
+        offset: [0, -25],
+        positioning: "bottom-center",
+      });
+      this.layer.plotOverlayArr.push(overlay);
+      this.map.addOverlay(overlay);
+    }  
+  }
+
+  removePlotOverlay2() {
+    this.layer.plotOverlayArr.forEach(item => {
+      this.map.removeOverlay(item)
+    })
+  }
 
   // 创建标绘的overlay
   createPlotOverlay(imgUrl, operator) {

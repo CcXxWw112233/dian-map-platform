@@ -40,7 +40,11 @@ import { extend } from "ol/extent";
 import { always, never } from "ol/events/condition";
 import Event from "../../utils/event";
 import { message } from "antd";
-import { createPlottingFeature, createPopupOverlay } from "./createPlotting";
+import {
+  createPlottingFeature,
+  createPopupOverlay,
+  createFeatureOverlay,
+} from "./createPlotting";
 import { plotEdit } from "utils/plotEdit";
 import INITMAP from "../../../utils/INITMAP";
 import AboutAction from "./AroundAbout";
@@ -52,7 +56,9 @@ import { getVectorContext } from "ol/render";
 import { Style, Circle, Stroke, Fill } from "ol/style";
 
 import totalOverlay from "../../../components/PublicOverlays/totalOverlay";
+import featureOverlay from "../../../components/PublicOverlays/featureOverlay";
 import throttle from "lodash/throttle";
+import { getPlotImages } from "./plotOverlayAction";
 
 function Action() {
   const {
@@ -72,7 +78,6 @@ function Action() {
     CANCEL_COLLECTION_MERGE,
     GET_DOWNLOAD_URL,
     EDIT_AREA_MESSAGE,
-    UPLOAD_FILE
   } = config;
   this.activeFeature = {};
   this.layerId = "scoutingDetailLayer";
@@ -103,7 +108,10 @@ function Action() {
   this.oldZoom = null;
   this.oldPlotFeatures = null;
   this.needRenderFetureStyle = true;
-  this.hasFeatureTotal  = true;
+  this.hasFeatureTotal = true;
+  this.featureOverlay2 = null;
+  this.selectedFeature = null;
+  this.lastSelectedFeature = null;
 
   Event.Evt.addEventListener("basemapchange", (key) => {
     if (!this.mounted) return;
@@ -230,6 +238,7 @@ function Action() {
     this.layer.projectScoutingArr.forEach((item) => {
       this.layer.removeFeature(item);
     });
+    plotEdit.plottingLayer.plotEdit.removePlotOverlay2();
     if (zoom < 8) {
       level = 1;
     }
@@ -252,6 +261,8 @@ function Action() {
       this.overlayArr.forEach((item) => {
         InitMap.map.removeOverlay(item);
       });
+      this.changeLastSelectedFeatureStyle();
+      this.changeSelectedFeatureStyle();
       return;
     }
     config
@@ -340,6 +351,14 @@ function Action() {
     this.oldZoom = zoom;
   };
 
+  this.removeFeatureOverlay = () => {
+    plotEdit.plottingLayer.plotEdit.removePlotOverlay2();
+    this.featureOverlay2 && InitMap.map.removeOverlay(this.featureOverlay2);
+    this.featureOverlay2 = null;
+    this.lastSelectedFeature = null;
+    this.selectedFeature = null;
+  }
+
   this.mapMoveEnd = (data, ponts, { lenged, dispatch, showFeatureName }) => {
     if (!data) {
       return;
@@ -359,6 +378,30 @@ function Action() {
     this.moveendListener = throttle(this.moveendListener, 1000);
   };
 
+  this.changeLastSelectedFeatureStyle = () => {
+    this.lastSelectedFeature = this.selectedFeature;
+    if (this.lastSelectedFeature) {
+      let index = this.layer.projectScoutingArr.findIndex(
+        (item) => item.feature.get("id") === this.lastSelectedFeature.get("id")
+      );
+
+      let lastSelectedFetureStyle = this.lastSelectedFeature.getStyle();
+      lastSelectedFetureStyle.setImage(this.getImage(false));
+      this.layer.projectScoutingArr[index].feature.setStyle(lastSelectedFetureStyle);
+    }
+  };
+
+  this.changeSelectedFeatureStyle = () => {
+    if (this.selectedFeature) {
+      let index = this.layer.projectScoutingArr.findIndex(
+        (item) => item.feature.get("id") === this.selectedFeature.get("id")
+      );
+      let selectedFetureStyle = this.selectedFeature.getStyle();
+      selectedFetureStyle.setImage(this.getImage(true));
+      this.layer.projectScoutingArr[index].feature.setStyle(selectedFetureStyle);
+    }
+  };
+
   this.init = (dispatch) => {
     Event.Evt.firEvent("resetMoveMapMoveedListen");
     this.mounted = true;
@@ -371,6 +414,7 @@ function Action() {
 
     if (!layer[0]) {
       InitMap.map.on("click", (evt) => {
+        this.featureOverlay2 && InitMap.map.removeOverlay(this.featureOverlay2);
         let obj = evt.map.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
           return { feature, layer };
         });
@@ -402,11 +446,19 @@ function Action() {
             if (zoom > 14) {
               if (me.oldZoom && me.oldZoom <= 14) {
                 me.renderFeaturesCollection(me.oldPlotFeatures, obj);
+                setTimeout(function () {
+                  me.changeLastSelectedFeatureStyle();
+                  me.changeSelectedFeatureStyle();
+                }, 100);
               }
             } else {
               if (me.oldZoom && me.oldZoom > 14) {
                 obj.showFeatureName = false;
                 me.renderFeaturesCollection(me.oldPlotFeatures, obj);
+                setTimeout(function () {
+                  me.changeLastSelectedFeatureStyle();
+                  me.changeSelectedFeatureStyle();
+                }, 100);
               }
             }
             me.oldZoom = zoom;
@@ -433,6 +485,8 @@ function Action() {
           me.Source.removeFeature(item);
         }
       });
+      plotEdit.plottingLayer &&
+        plotEdit.plottingLayer.plotEdit.removePlotOverlay2();
       me.overlayArr = [];
       me.overlayArr2 = [];
       // 关闭
@@ -532,6 +586,9 @@ function Action() {
         INITMAP.map.removeOverlay(item.feature && item.feature.overlay);
         if (item.feature) this.layer.removeFeature(item);
       });
+    this.layer.plotOverlayArr.forEach((item) => {
+      INITMAP.map.removeOverlay(item);
+    });
     this.layer.projectScoutingArr = [];
     this.layer.plotEdit.plotClickCb = null;
     setSession(listAction.sesstionSaveKey, "");
@@ -543,6 +600,7 @@ function Action() {
         this.Source.removeFeature(item);
       }
     });
+    this.layer.plotEdit.removePlotOverlay2();
     INITMAP.map.un("moveend", this.moveendListener);
     this.moveendListener = () => {};
     this.clearGroupCollectionPoint();
@@ -553,6 +611,11 @@ function Action() {
     this.oldLenged = null;
     this.oldDispatch = null;
     this.oldShowFeatureName = null;
+    this.hasFeatureTotal = false;
+    this.featureOverlay2 && INITMAP.map.removeOverlay(this.featureOverlay2);
+    this.lastSelectedFeature = null;
+    this.selectedFeature = null;
+    this.featureOverlay2 = null;
     // Event.Evt.removeEventListener("removeMapMoveEndListen");
   };
   // 获取区域列表
@@ -1271,13 +1334,65 @@ function Action() {
     }
   };
 
+  this.getImage = (selected = true) => {
+    let src = "";
+    if (selected) {
+      src = require("../../../assets/selectedplot.png");
+    } else {
+      src = require("../../../assets/newplot.png");
+    }
+    let style = createStyle("Point", {
+      icon: {
+        src: src,
+        scale: 1,
+        crossOrigin: "anonymous",
+      },
+    });
+    return style.getImage();
+  };
+
   // 标绘数据点击回调
   this.handlePlotClick = (feature, pixel) => {
     if (this.isActivity) return;
+
+    this.featureOverlay2 && InitMap.map.removeOverlay(this.featureOverlay2);
+    // 切换图标需求
+    this.changeLastSelectedFeatureStyle();
+    Fit(InitMap.view, feature.getGeometry().getExtent(), { duration: 300 });
     Event.Evt.firEvent("handleFeatureToLeftMenu", feature.get("id"));
-    Event.Evt.firEvent("handlePlotFeature", { feature, pixel });
-    return;
-    createPopupOverlay(feature, pixel);
+    // Event.Evt.firEvent("handlePlotFeature", { feature, pixel });
+    // return;
+    // createPopupOverlay(feature, pixel);
+    if (feature.get("meetingRoomNum") !== undefined) {
+      this.oldDispatch && this.oldDispatch({
+        type: "collectionDetail/updateDatas",
+        payload: { selectData: null },
+      });
+      this.featureOverlay2 && INITMAP.map.removeOverlay(this.featureOverlay2);
+      let style = feature.getStyle();
+      style.setImage(this.getImage());
+      feature.setStyle(style);
+      this.selectedFeature = feature;
+      const me = this;
+      let cb = function () {
+        me.featureOverlay2 && INITMAP.map.removeOverlay(me.featureOverlay2);
+        Event.Evt.firEvent("handlePlotFeature", { feature, pixel });
+      };
+
+      let id = feature.get("id");
+      getPlotImages(id).then((res) => {
+        if (res) {
+          this.featureOverlay2 = createFeatureOverlay(
+            feature,
+            feature.get("title"),
+            feature.get("meetingRoomNum"),
+            res[0]?.image_url,
+            cb
+          );
+          InitMap.map.addOverlay(this.featureOverlay2);
+        }
+      });
+    }
   };
 
   this.renderGeoJson = async (data, { lenged, dispatch }) => {
@@ -1394,7 +1509,8 @@ function Action() {
     geoData
   ) => {
     const commonStyleOption = {
-      textFillColor: "rgba(255,0,0,1)",
+      // textFillColor: "rgba(255,0,0,1)",
+      textFillColor: "rgba(0, 0, 0, 1)",
       textStrokeColor: "#fff",
       textStrokeWidth: 3,
       font: "13px sans-serif",
@@ -1415,7 +1531,11 @@ function Action() {
           this.layer.removeFeature(item);
         }
       });
+      this.layer.plotOverlayArr.forEach((item) => {
+        InitMap.map.removeOverlay(item);
+      });
       this.layer.projectScoutingArr = [];
+      this.layer.plotOverlayArr = [];
       this.layer.plotEdit.updateCb = null;
     }
 
@@ -1560,7 +1680,12 @@ function Action() {
         this.layer.plotEdit.plotClickCb = this.handlePlotClick.bind(this);
         operator.data = item;
         operator.updateFeatueToDB = this.updateFeatueToDB.bind(this);
-
+        if (content.geoType === "Point") {
+          if (content.meetingRoomNum !== undefined) {
+            const ele = featureOverlay(content.meetingRoomNum);
+            plotEdit.plottingLayer.plotEdit.createPlotOverlay2(ele, operator);
+          }
+        }
         // 单个图片的多边形
         if (content.sigleImage) {
           let iconUrl = "";
