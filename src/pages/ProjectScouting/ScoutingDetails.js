@@ -417,6 +417,9 @@ export default class ScoutingDetails extends PureComponent {
         // 当前激活的区域
         let active =
           this.state.area_active_key || (respData[0] && respData[0].id);
+        if (!active) {
+          active = "other";
+        }
         this.setState({
           area_list: respData.map((item) =>
             Object.assign(item, { _edit: false, _remarkEdit: false })
@@ -457,7 +460,7 @@ export default class ScoutingDetails extends PureComponent {
       // 删除轮询
       Action.clearListen();
       Action.needRenderFetureStyle = false;
-      
+
       // 惠州电信展示需求
       Action.selectedFeature = null;
       Action.lastSelectedFeature = null;

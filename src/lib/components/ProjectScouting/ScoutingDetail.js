@@ -1392,6 +1392,8 @@ function Action() {
           InitMap.map.addOverlay(this.featureOverlay2);
         }
       });
+    } else {
+      Event.Evt.firEvent("handlePlotFeature", { feature, pixel });
     }
   };
 
