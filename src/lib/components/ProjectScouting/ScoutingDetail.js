@@ -707,7 +707,7 @@ function Action() {
     this.addAnimatePoint({
       coordinates: coor,
       transform: true,
-      name: data.name,
+      name: data.board_name,
     });
   };
 
