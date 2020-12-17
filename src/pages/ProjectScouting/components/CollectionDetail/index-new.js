@@ -18,6 +18,7 @@ import plotImageAction from "@/services/plotImage";
 import PhotoSwipe from "../../../../components/PhotoSwipe/action";
 // import Event from "@/lib/utils/event";
 import Event from "../../../../lib/utils/event";
+import { compress } from "../../../../utils/pictureCompress";
 import { connect } from "dva";
 
 @connect(
@@ -191,14 +192,17 @@ export default class NewCollectionDetail extends React.Component {
   };
 
   checkFileSize = (file) => {
-    let { size, text } = formatSize(file.size);
-    text = text.trim();
-    if (+size > 60 && text === "MB") {
-      message.error("文件不能大于60MB---" + file.name);
-      return false;
-    }
-    // uploadFiles.push(file);
-    return true;
+    return new Promise((resolve) => {
+      let { size, text } = formatSize(file.size);
+      text = text.trim();
+      if (+size > 60 && text === "MB") {
+        message.error("文件不能大于60MB---" + file.name);
+        return false;
+      }
+      compress(file, 16384).then((res) => {
+        resolve(res);
+      });
+    });
   };
 
   getImages = () => {

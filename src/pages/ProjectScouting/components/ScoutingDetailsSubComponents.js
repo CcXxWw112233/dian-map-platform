@@ -6,7 +6,6 @@ import Action from "../../../lib/components/ProjectScouting/ScoutingDetail";
 import ListAction from "../../../lib/components/ProjectScouting/ScoutingList";
 import PhotoSwipe from "../../../components/PhotoSwipe/action";
 import InitMap from "../../../utils/INITMAP";
-// import { dataURLtoFile } from "../../../utils/compressImg"
 import { guid } from "../../../lib/components/index";
 import {
   Row,
@@ -46,6 +45,7 @@ import Axios from "axios";
 
 import Search from "../../../components/Search/Search";
 import config from "../../../services/scouting";
+import { compress } from "../../../utils/pictureCompress";
 
 import { Collapse } from "antd";
 const { Panel } = Collapse;
@@ -121,7 +121,7 @@ export const Title = ({
   return (
     <div className={`${styles.title} ${className}`}>
       <Search
-        onRef={() => { }}
+        onRef={() => {}}
         collectData={collectData}
         groupId={groupId}
         inProject={true}
@@ -131,9 +131,10 @@ export const Title = ({
       <div className={styles.title_goBack}>
         <MyIcon type="icon-fanhuijiantou" onClick={cb} />
         <span
-          className={`${styles.back_name} ${animateCss.animated} ${mini ? animateCss.fadeIn : animateCss.fadeOut
-            }`}
-        // style={mini ? { display: "" } : { display: "none" }}
+          className={`${styles.back_name} ${animateCss.animated} ${
+            mini ? animateCss.fadeIn : animateCss.fadeOut
+          }`}
+          // style={mini ? { display: "" } : { display: "none" }}
         >
           {name}
         </span>
@@ -166,37 +167,37 @@ export const Title = ({
             />
           </div>
         ) : (
-            <div className={styles.boardBgImg}>
-              <span>
-                暂未设置图片~~
+          <div className={styles.boardBgImg}>
+            <span>
+              暂未设置图片~~
               <UploadBgPic
-                  onStart={() => Nprogress.start()}
-                  onUpload={onUpload}
-                >
-                  <a
-                    style={{
-                      ...(parentTool &&
-                        parentTool.getStyle(
-                          "map:collect:add:web",
-                          "project",
-                          boardId
-                        )),
-                    }}
-                    disabled={
-                      parentTool &&
-                      parentTool.getDisabled(
+                onStart={() => Nprogress.start()}
+                onUpload={onUpload}
+              >
+                <a
+                  style={{
+                    ...(parentTool &&
+                      parentTool.getStyle(
                         "map:collect:add:web",
                         "project",
                         boardId
-                      )
-                    }
-                  >
-                    点击设置
+                      )),
+                  }}
+                  disabled={
+                    parentTool &&
+                    parentTool.getDisabled(
+                      "map:collect:add:web",
+                      "project",
+                      boardId
+                    )
+                  }
+                >
+                  点击设置
                 </a>
-                </UploadBgPic>
-              </span>
-            </div>
-          )}
+              </UploadBgPic>
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -268,50 +269,9 @@ const checkFileSize360Pic = (file) => {
       reject();
     } else {
       if (file.type.includes("image")) {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = function () {
-          let image = new Image();
-          image.crossorigin = "anonymous";
-          image.src = reader.result;
-          image.onload = function () {
-            if (image.width > 16384) {
-              const { width: originWidth, height: originHeight } = image;
-              // 最大尺寸限制
-              const maxWidth = 16384;
-              // const maxHeight = 16384;
-              // 目标尺寸
-              let targetWidth = originWidth;
-              let targetHeight = originHeight;
-              if (originWidth > maxWidth) {
-                targetWidth = maxWidth;
-                targetHeight = Math.round(originHeight * maxWidth / originWidth)
-              }
-              const canvas = document.createElement("canvas");
-              const context = canvas.getContext("2d");
-              canvas.width = targetWidth;
-              canvas.height = targetHeight;
-              context.clearRect(0, 0, targetWidth, targetHeight);
-              // 图片绘制，新设置一个图片宽高，达到压缩图片的目地
-              context.drawImage(image, 0, 0, targetWidth, targetHeight);
-              const dataUrl = canvas.toDataURL(file.type);
-              // let newFile = dataURLtoFile(dataUrl, file[0].name);
-              var arr = dataUrl.split(",");
-              var mime = arr[0].match(/:(.*?);/)[1];
-              var bstr = atob(arr[1]);
-              var n = bstr.length;
-              var u8arr = new Uint8Array(n);
-              while (n--) {
-                u8arr[n] = bstr.charCodeAt(n);
-              }
-              //转换成file对象
-              file = new File([u8arr], file.name, { type: mime });
-              resolve(file);
-            } else {
-              resolve(true);
-            }
-          };
-        };
+        compress(file, 16384).then((res) => {
+          resolve(res);
+        });
       } else {
         resolve(true);
       }
@@ -352,7 +312,7 @@ const UploadBtn = ({ onChange, parentTool, boardId }) => {
       }}
       showUploadList={false}
       fileList={file}
-    // customRequest={customRequest}
+      // customRequest={customRequest}
     >
       <span>上传采集资料</span>
       {/* <Button
@@ -409,7 +369,7 @@ const Upload360PicBtn = ({
       }}
       showUploadList={false}
       fileList={file}
-    // customRequest={customRequest}
+      // customRequest={customRequest}
     >
       <span
         onClick={() => {
@@ -432,11 +392,11 @@ export const ScoutingHeader = (props) => {
     onError,
     dispatch,
     board,
-    onUploadPlan = () => { },
-    onUploadPlanStart = () => { },
-    onUploadPlanCancel = () => { },
-    onAreaDelete = () => { },
-    onExcelSuccess = () => { },
+    onUploadPlan = () => {},
+    onUploadPlanStart = () => {},
+    onUploadPlanCancel = () => {},
+    onAreaDelete = () => {},
+    onExcelSuccess = () => {},
     selected,
     edit,
     // remarkEdit,
@@ -448,8 +408,8 @@ export const ScoutingHeader = (props) => {
     onDragEnter,
     activeKey,
     multiple = false,
-    onSelect = () => { },
-    onAreaEdit = () => { },
+    onSelect = () => {},
+    onAreaEdit = () => {},
     parentTool,
     boardId,
     parent,
@@ -514,7 +474,7 @@ export const ScoutingHeader = (props) => {
     if (response) {
       BASIC.checkResponse(response)
         ? onUploadPlan &&
-        onUploadPlan(response.data, fileList, hasChangeFile, saveData)
+          onUploadPlan(response.data, fileList, hasChangeFile, saveData)
         : onError && onError(response, file);
 
       hasChangeFile = false;
@@ -628,7 +588,16 @@ export const ScoutingHeader = (props) => {
           boardId={boardId}
         />
       </Menu.Item>
-      <Menu.Item>
+      <Menu.Item
+        style={{
+          ...(parentTool &&
+            parentTool.getStyle("map:collect:add:web", "project", boardId)),
+        }}
+        disabled={
+          parentTool &&
+          parentTool.getDisabled("map:collect:add:web", "project", boardId)
+        }
+      >
         <Upload360PicBtn
           onChange={startUpload}
           parentTool={parentTool}
@@ -784,92 +753,92 @@ export const ScoutingHeader = (props) => {
               ></Button>
             </Fragment>
           ) : (
-              <div className={styles.groupTitle}>
-                {data.name}
-                {data.id === "other" &&
-                  (!showTips ? (
-                    <MyIcon
-                      tip="点击查看帮助"
-                      type="icon-wenhao"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setShowTips(true);
-                      }}
-                      style={{ marginLeft: 15, color: "#1769FF" }}
-                    />
-                  ) : (
-                      <span
-                        tip="点击关闭帮助"
-                        style={{ color: "#1769FF", fontSize: "12px" }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setShowTips(false);
-                        }}
-                      >
-                        （来自手机端采集的资料或转存的标绘）
-                      </span>
-                    ))}
-
-                <div className={styles.headerTools}>
-                  <span className={styles.checkBoxForHeader}>
-                    {multiple && (
-                      <Checkbox
-                        checked={
-                          selected.length && selected.indexOf(data.id) !== -1
-                        }
-                        onChange={checkColletion}
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                    )}
+            <div className={styles.groupTitle}>
+              {data.name}
+              {data.id === "other" &&
+                (!showTips ? (
+                  <MyIcon
+                    tip="点击查看帮助"
+                    type="icon-wenhao"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowTips(true);
+                    }}
+                    style={{ marginLeft: 15, color: "#1769FF" }}
+                  />
+                ) : (
+                  <span
+                    tip="点击关闭帮助"
+                    style={{ color: "#1769FF", fontSize: "12px" }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowTips(false);
+                    }}
+                  >
+                    （来自手机端采集的资料或转存的标绘）
                   </span>
-                  {!isEdit && data.id !== "other" && (
-                    <span
-                      className={styles.editNames}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onAreaEdit(data);
-                      }}
-                      style={{
-                        ...(parentTool &&
-                          parentTool.getStyle(
-                            "map:collect:type:update",
-                            "project",
-                            boardId
-                          )),
-                      }}
-                      disabled={
-                        parentTool &&
-                        parentTool.getDisabled(
+                ))}
+
+              <div className={styles.headerTools}>
+                <span className={styles.checkBoxForHeader}>
+                  {multiple && (
+                    <Checkbox
+                      checked={
+                        selected.length && selected.indexOf(data.id) !== -1
+                      }
+                      onChange={checkColletion}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  )}
+                </span>
+                {!isEdit && data.id !== "other" && (
+                  <span
+                    className={styles.editNames}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onAreaEdit(data);
+                    }}
+                    style={{
+                      ...(parentTool &&
+                        parentTool.getStyle(
                           "map:collect:type:update",
                           "project",
                           boardId
-                        )
-                      }
+                        )),
+                    }}
+                    disabled={
+                      parentTool &&
+                      parentTool.getDisabled(
+                        "map:collect:type:update",
+                        "project",
+                        boardId
+                      )
+                    }
+                  >
+                    <MyIcon type="icon-bianjimingcheng" />
+                  </span>
+                )}
+                {/* 只有不是未分组的才可以显示 */}
+                {data.id !== "other" && (
+                  <span
+                    className={styles.moreOperations}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Dropdown
+                      visible={menuShow}
+                      overlay={menu}
+                      onVisibleChange={(val) => {
+                        setMenuShow(val);
+                      }}
+                      trigger="click"
                     >
-                      <MyIcon type="icon-bianjimingcheng" />
-                    </span>
-                  )}
-                  {/* 只有不是未分组的才可以显示 */}
-                  {data.id !== "other" && (
-                    <span
-                      className={styles.moreOperations}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <Dropdown
-                        visible={menuShow}
-                        overlay={menu}
-                        onVisibleChange={(val) => {
-                          setMenuShow(val);
-                        }}
-                        trigger="click"
-                      >
-                        <MyIcon type="icon-gengduo1" />
-                      </Dropdown>
-                    </span>
-                  )}
-                </div>
+                      <MyIcon type="icon-gengduo1" />
+                    </Dropdown>
+                  </span>
+                )}
               </div>
-            )}
+            </div>
+          )}
         </div>
       </Fragment>
     </div>
@@ -883,21 +852,21 @@ export const ScoutingItem = ({
   onEditCollection,
   areaList,
   onSelectGroup,
-  onChangeDisplay = () => { },
-  onEditPlanPic = () => { },
+  onChangeDisplay = () => {},
+  onEditPlanPic = () => {},
   onCopyCollection,
   selected = [],
-  onModifyFeature = () => { },
-  onModifyRemark = () => { },
-  onRemarkSave = () => { },
+  onModifyFeature = () => {},
+  onModifyRemark = () => {},
+  onRemarkSave = () => {},
   onStopMofifyFeatureInDetails,
-  onDragEnd = () => { },
+  onDragEnd = () => {},
   onMergeUp,
   onMergeDown,
   onMergeCancel,
   CollectionEdit = false,
   onSelectCollection,
-  onCheckItem = () => { },
+  onCheckItem = () => {},
   callback,
   parent,
   index,
@@ -984,43 +953,43 @@ export const ScoutingItem = ({
                                 length={dataSource.length}
                               />
                             ) : (
-                                <div className={styles.groupCollection}>
-                                  {item.child &&
-                                    item.child.map((child, i) => (
-                                      <UploadItem
-                                        selected={selected}
-                                        Edit={CollectionEdit}
-                                        onCheckItem={onCheckItem}
-                                        group_id={item.gid}
-                                        subIndex={i}
-                                        group_length={item.child.length}
-                                        onCopyCollection={onCopyCollection}
-                                        onChangeDisplay={onChangeDisplay}
-                                        onEditPlanPic={onEditPlanPic}
-                                        areaList={areaList}
-                                        onSelectGroup={onSelectGroup}
-                                        type={Action.checkCollectionType(
-                                          child.target
-                                        )}
-                                        data={child}
-                                        onRemove={onCollectionRemove}
-                                        onEditCollection={onEditCollection}
-                                        onRemarkSave={onRemarkSave}
-                                        onModifyFeature={onModifyFeature}
-                                        onStopMofifyFeatureInDetails={
-                                          onStopMofifyFeatureInDetails
-                                        }
-                                        onModifyRemark={onModifyRemark}
-                                        onMergeDown={onMergeDown}
-                                        onMergeUp={onMergeUp}
-                                        index={index}
-                                        key={child.id}
-                                        length={dataSource.length}
-                                        onMergeCancel={onMergeCancel}
-                                      />
-                                    ))}
-                                </div>
-                              )}
+                              <div className={styles.groupCollection}>
+                                {item.child &&
+                                  item.child.map((child, i) => (
+                                    <UploadItem
+                                      selected={selected}
+                                      Edit={CollectionEdit}
+                                      onCheckItem={onCheckItem}
+                                      group_id={item.gid}
+                                      subIndex={i}
+                                      group_length={item.child.length}
+                                      onCopyCollection={onCopyCollection}
+                                      onChangeDisplay={onChangeDisplay}
+                                      onEditPlanPic={onEditPlanPic}
+                                      areaList={areaList}
+                                      onSelectGroup={onSelectGroup}
+                                      type={Action.checkCollectionType(
+                                        child.target
+                                      )}
+                                      data={child}
+                                      onRemove={onCollectionRemove}
+                                      onEditCollection={onEditCollection}
+                                      onRemarkSave={onRemarkSave}
+                                      onModifyFeature={onModifyFeature}
+                                      onStopMofifyFeatureInDetails={
+                                        onStopMofifyFeatureInDetails
+                                      }
+                                      onModifyRemark={onModifyRemark}
+                                      onMergeDown={onMergeDown}
+                                      onMergeUp={onMergeUp}
+                                      index={index}
+                                      key={child.id}
+                                      length={dataSource.length}
+                                      onMergeCancel={onMergeCancel}
+                                    />
+                                  ))}
+                              </div>
+                            )}
                           </div>
                         </div>
                       )}
@@ -1028,11 +997,11 @@ export const ScoutingItem = ({
                   );
                 })
               ) : (
-                  <Empty
-                    style={{ textAlign: "center" }}
-                    description="暂无采集数据"
-                  />
-                )}
+                <Empty
+                  style={{ textAlign: "center" }}
+                  description="暂无采集数据"
+                />
+              )}
             </Checkbox.Group>
 
             {provided.placeholder}
@@ -1056,17 +1025,17 @@ export const UploadItem = ({
   data,
   onRemove,
   Edit = false,
-  onEditCollection = () => { },
+  onEditCollection = () => {},
   areaList,
   onSelectGroup,
   onChangeDisplay,
-  onEditPlanPic = () => { },
-  onCopyCollection = () => { },
-  onModifyRemark = () => { },
-  onModifyFeature = () => { },
+  onEditPlanPic = () => {},
+  onCopyCollection = () => {},
+  onModifyRemark = () => {},
+  onModifyFeature = () => {},
   onStopMofifyFeatureInDetails,
-  onRemarkSave = () => { },
-  onToggleChangeStyle = () => { },
+  onRemarkSave = () => {},
+  onToggleChangeStyle = () => {},
   onMergeUp,
   onMergeDown,
   index,
@@ -1074,8 +1043,8 @@ export const UploadItem = ({
   subIndex,
   group_length,
   group_id,
-  onCheckItem = () => { },
-  onMergeCancel = () => { },
+  onCheckItem = () => {},
+  onMergeCancel = () => {},
 }) => {
   let obj = { ...data };
   // 过滤后缀
@@ -1128,7 +1097,7 @@ export const UploadItem = ({
     let content = JSON.parse(data.content);
     const geometryType = content.geometryType;
     if (geometryType === "Point") {
-      secondSetType = "Point"
+      secondSetType = "Point";
     }
   }
 
@@ -1229,18 +1198,18 @@ export const UploadItem = ({
         <Menu.Item key="editPlanPic">编辑</Menu.Item>
       )}
       {data.collect_type === "9" &&
-        data.content &&
-        JSON.parse(data.content)?.remark ? (
-          <Menu.Item key="modifyRemark">编辑备注</Menu.Item>
-        ) : null}
+      data.content &&
+      JSON.parse(data.content)?.remark ? (
+        <Menu.Item key="modifyRemark">编辑备注</Menu.Item>
+      ) : null}
       {/* {data.content && JSON.parse(data.content)?.remark === "" ? (
         <Menu.Item key="addRemark">新增备注</Menu.Item>
       ) : null} */}
       {data.collect_type === "4" &&
-        data.content &&
-        JSON.parse(data.content)?.featureType ? (
-          <Menu.Item key="modifyFeature">标绘编辑</Menu.Item>
-        ) : null}
+      data.content &&
+      JSON.parse(data.content)?.featureType ? (
+        <Menu.Item key="modifyFeature">标绘编辑</Menu.Item>
+      ) : null}
       {data.collect_type === "4" && !isPlotEdit ? (
         <Menu.Item key="copyToGroup">
           <Popover
@@ -1298,30 +1267,30 @@ export const UploadItem = ({
           </Popconfirm>
         </Menu.Item>
       ) : (
-          <Menu.Item key="selectGroup">
-            <Popover
-              overlayStyle={{ zIndex: 10000 }}
-              trigger="click"
-              placement="rightTop"
-              visible={groupVisible}
-              onVisibleChange={(val) => setGroupVisible(val)}
-              title={`移动 ${data.title} 到`}
-              content={<AreaItem type="select" />}
-            >
-              <div style={{ width: "100%" }}>移动到分组</div>
-            </Popover>
-          </Menu.Item>
-        )}
+        <Menu.Item key="selectGroup">
+          <Popover
+            overlayStyle={{ zIndex: 10000 }}
+            trigger="click"
+            placement="rightTop"
+            visible={groupVisible}
+            onVisibleChange={(val) => setGroupVisible(val)}
+            title={`移动 ${data.title} 到`}
+            content={<AreaItem type="select" />}
+          >
+            <div style={{ width: "100%" }}>移动到分组</div>
+          </Popover>
+        </Menu.Item>
+      )}
       {((index !== 0 && onMergeUp && subIndex === undefined) ||
         (index !== 0 && onMergeUp && subIndex === 0)) && (
-          <Menu.Item key="mergeUp">向上组合</Menu.Item>
-        )}
+        <Menu.Item key="mergeUp">向上组合</Menu.Item>
+      )}
       {((index < length - 1 && onMergeDown && subIndex === undefined) ||
         (index < length - 1 &&
           onMergeDown &&
           subIndex === group_length - 1)) && (
-          <Menu.Item key="mergeDown">向下组合</Menu.Item>
-        )}
+        <Menu.Item key="mergeDown">向下组合</Menu.Item>
+      )}
       {group_id && <Menu.Item key="mergeCancel">退出组合</Menu.Item>}
       {/* <Menu.Item key="display">
           {data.is_display === "0" ? "显示" : "隐藏"}
@@ -1488,14 +1457,14 @@ export const UploadItem = ({
                 </Col>
               </Fragment>
             ) : (
-                <span
-                  // style={{ minHeight: "1rem" }}
-                  // title={title}
-                  className={`${styles.firstRow} ${styles.text_overflow} text_ellipsis`}
-                >
-                  {title}
-                </span>
-              )}
+              <span
+                // style={{ minHeight: "1rem" }}
+                // title={title}
+                className={`${styles.firstRow} ${styles.text_overflow} text_ellipsis`}
+              >
+                {title}
+              </span>
+            )}
           </Row>
           {/* <Row>
               <Space size={8} style={{ fontSize: 12 }}>
@@ -1517,8 +1486,8 @@ export const UploadItem = ({
             {data.is_display === "0" ? (
               <MyIcon type="icon-yanjing_yincang" />
             ) : (
-                <MyIcon type="icon-yanjing_xianshi" />
-              )}
+              <MyIcon type="icon-yanjing_xianshi" />
+            )}
           </span>
           {!Edit ? (
             <Dropdown
@@ -1534,8 +1503,8 @@ export const UploadItem = ({
               </span>
             </Dropdown>
           ) : (
-              <Checkbox value={data.id} style={{ marginLeft: 5 }}></Checkbox>
-            )}
+            <Checkbox value={data.id} style={{ marginLeft: 5 }}></Checkbox>
+          )}
         </div>
       </div>
       {/* {oldRemark || isAddMark === true ? (

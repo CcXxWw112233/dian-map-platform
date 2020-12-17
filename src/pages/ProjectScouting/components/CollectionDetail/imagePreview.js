@@ -3,8 +3,9 @@ import ReactDOM from "react-dom";
 import styles from "./imagePreviewStyle.less";
 import { MyIcon } from "../../../../components/utils";
 import Event from "../../../../lib/utils/event";
-import { message } from "antd"
+import { message } from "antd";
 import { connect } from "dva";
+import { Pannellum, PannellumVideo } from "pannellum-react";
 
 @connect(({ openswitch: { selectedImageData, imageDatas } }) => ({
   selectedImageData,
@@ -16,6 +17,7 @@ export default class ImagePreview extends React.Component {
     this.isPlay = false;
     this.state = {
       selectedImageData: null,
+      isAllView: false,
     };
     this.selectedImageData = null;
   }
@@ -26,7 +28,7 @@ export default class ImagePreview extends React.Component {
   handleDeleteClick = () => {
     this.isPlay = false;
     Event.Evt.firEvent("deletePlotImage", this.selectedImageData.id);
-  }
+  };
   //上一张
   toPreImage = () => {
     this.isPlay = true;
@@ -76,11 +78,34 @@ export default class ImagePreview extends React.Component {
           <MyIcon type="icon-guanbi2" />
         </span>
         <div className={styles.imageContainer}>
-          <img alt="" src={this.selectedImageData.image_url} />
+          {this.state.isAllView ? (
+            <Pannellum
+              width="100%"
+              height="100%"
+              image={this.selectedImageData.image_url}
+              pitch={10}
+              yaw={180}
+              hfov={110}
+              ref="pannellum"
+              autoLoad
+              showZoomCtrl={false}
+            ></Pannellum>
+          ) : (
+            <img alt="" src={this.selectedImageData.image_url} />
+          )}
         </div>
         <div className={styles.tools}>
           <span onClick={this.handleDeleteClick}>
             <MyIcon type="icon-bianzu52" />
+          </span>
+          <span
+            onClick={() => {
+              this.setState({
+                isAllView: !this.state.isAllView,
+              });
+            }}
+          >
+            {!this.state.isAllView ? "全景" : "退出"}
           </span>
           <span onClick={this.toPreImage}>
             <MyIcon type="icon-bianzu681" />

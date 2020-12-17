@@ -72,7 +72,7 @@ class IndexPage extends React.Component {
       placement: "left",
       left: "0px",
       draw_visible: false,
-      isMoveMapMoveedListen: false,
+      isMoveMapMoveedListen: true,
     };
   }
   componentDidMount() {

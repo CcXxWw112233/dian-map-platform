@@ -262,6 +262,7 @@ export default class ScoutingDetails extends PureComponent {
 
   // 标绘点击回调
   handlePlotFeature = ({ feature, pixel }) => {
+    if (!feature) return;
     // console.log(feature, pixel)
     const { dispatch } = this.props;
     let collection = this.state.all_collection.find(

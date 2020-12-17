@@ -1,5 +1,5 @@
 export default function featureOverlay(num) {
-  let div = document.createElement("div");
+  let div = document.createElement("p");
   div.style.width = "40px";
   div.style.height = "20px";
   div.style.borderRadius = "10px";
@@ -7,6 +7,7 @@ export default function featureOverlay(num) {
   div.style.color = "rgba(255, 255, 255, 1)";
   div.style.background = "rgba(46, 156, 99, 1)";
   div.style.lineHeight = "13px";
+  div.style.marginBottom = "0px";
   if (num === 0) {
     div.style.background = "rgba(255, 129, 129, 1)";
   }

@@ -48,6 +48,7 @@ const loadGeoJson = (parent) => {
       operator.setName(content.title);
       operatorList.push(operator);
     });
+    operatorList = operatorList.reverse();
     parent.updatePlotList(operatorList);
   });
 };
