@@ -31,6 +31,7 @@ import { connect } from "dva";
       small,
       selectedFeature,
     },
+    permission: { globalPermission },
   }) => ({
     selectData,
     zIndex,
@@ -38,6 +39,7 @@ import { connect } from "dva";
     isImg,
     small,
     selectedFeature,
+    globalPermission,
   })
 )
 export default class NewCollectionDetail extends React.Component {
@@ -316,6 +318,21 @@ export default class NewCollectionDetail extends React.Component {
     return arr;
   };
 
+  getPermission = () => {
+    let index = -1;
+    const { globalPermission } = this.props;
+    if (globalPermission !== null) {
+      const keys = Object.keys(globalPermission);
+      if (keys.length === 1) {
+        let permissionArr = globalPermission[keys[0]];
+        index =
+          permissionArr &&
+          permissionArr.findIndex((item) => item === "map:board:remove");
+      }
+    }
+    return index;
+  };
+
   render() {
     const { selectedFeature } = this.props;
     if (!selectedFeature) return <CollectionDetail />;
@@ -374,57 +391,61 @@ export default class NewCollectionDetail extends React.Component {
                   <span>{tel || "暂无联系方式"}</span>
                 </div>
                 <p className={styles.space}></p>
-                <p className={styles.title} style={{ fontSize: "1em" }}>
-                  <span>照片</span>
-                </p>
-                <div
-                  className={`${styles.imgLongContainer}  ${globalStyle.autoScrollX}`}
-                >
-                  {this.state.imgs.length > 0 ? (
-                    this.state.imgs.map((item, index) => {
-                      return (
-                        <img
-                          key={index}
-                          crossOrigin="anonymous"
-                          src={item.image_url}
-                          alt=""
-                          // onClick={() => this.handleImgClick(item)}
-                          onClick={() =>
-                            this.handleImgClick(item, this.state.imgs)
-                          }
-                        />
-                      );
-                    })
-                  ) : (
-                    <i
-                      className={globalStyle.global_icon}
-                      style={{
-                        fontSize: 50,
-                        lineHeight: "50px",
-                        margin: "30px auto",
-                        color: "#5a86f5",
-                      }}
+                {this.getPermission() > -1 ? (
+                  <Fragment>
+                    <p className={styles.title} style={{ fontSize: "1em" }}>
+                      <span>照片</span>
+                    </p>
+                    <div
+                      className={`${styles.imgLongContainer}  ${globalStyle.autoScrollX}`}
                     >
-                      &#xe7d1;
-                    </i>
-                  )}
-                </div>
-                <div style={{ width: 144, margin: "0 auto" }}>
-                  <Upload
-                    action={(file) => this.uploadFileAction(file)}
-                    accept=".jpg, .jpeg, .png, .bmp"
-                    beforeUpload={this.checkFileSize}
-                    headers={{ Authorization: BASIC.getUrlParam.token }}
-                    onChange={this.onUpload}
-                    fileList={this.fileList}
-                  >
-                    <div className={styles.addImgBtn}>
-                      <i className={globalStyle.global_icon}>&#xe834;</i>
-                      <span>添加照片</span>
+                      {this.state.imgs.length > 0 ? (
+                        this.state.imgs.map((item, index) => {
+                          return (
+                            <img
+                              key={index}
+                              crossOrigin="anonymous"
+                              src={item.image_url}
+                              alt=""
+                              // onClick={() => this.handleImgClick(item)}
+                              onClick={() =>
+                                this.handleImgClick(item, this.state.imgs)
+                              }
+                            />
+                          );
+                        })
+                      ) : (
+                        <i
+                          className={globalStyle.global_icon}
+                          style={{
+                            fontSize: 50,
+                            lineHeight: "50px",
+                            margin: "30px auto",
+                            color: "#5a86f5",
+                          }}
+                        >
+                          &#xe7d1;
+                        </i>
+                      )}
                     </div>
-                  </Upload>
-                </div>
-                <p className={styles.space}></p>
+                    <div style={{ width: 144, margin: "0 auto" }}>
+                      <Upload
+                        action={(file) => this.uploadFileAction(file)}
+                        accept=".jpg, .jpeg, .png, .bmp"
+                        beforeUpload={this.checkFileSize}
+                        headers={{ Authorization: BASIC.getUrlParam.token }}
+                        onChange={this.onUpload}
+                        fileList={this.fileList}
+                      >
+                        <div className={styles.addImgBtn}>
+                          <i className={globalStyle.global_icon}>&#xe834;</i>
+                          <span>添加照片</span>
+                        </div>
+                      </Upload>
+                    </div>
+                    <p className={styles.space}></p>
+                  </Fragment>
+                ) : null}
                 <div className={styles.title} style={{ fontSize: 12 }}>
                   <span>周边快查</span>
                 </div>

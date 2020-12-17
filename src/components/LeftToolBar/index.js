@@ -208,36 +208,6 @@ export default class LeftToolBar extends React.Component {
   }
 
   getPersonalPermission = () => {
-    // systemManageServices.getPersonalPermission2Project().then((res) => {
-    //   if (res && res.code === "0") {
-    //     this.setState(
-    //       {
-    //         projectPermission: res.data,
-    //       },
-    //       () => {
-    //         this.projectRef &&
-    //           this.projectRef.setState({
-    //             update: !this.projectRef.state.update,
-    //           });
-    //       }
-    //     );
-    //   }
-    // });
-    // systemManageServices.getPersonalPermission2Global().then((res) => {
-    //   if (res && res.code === "0") {
-    //     this.setState(
-    //       {
-    //         globalPermission: res.data,
-    //       },
-    //       () => {
-    //         this.leftToolBarRef &&
-    //           this.leftToolBarRef.setState({
-    //             update: !this.leftToolBarRef.state.update,
-    //           });
-    //       }
-    //     );
-    //   }
-    // });
     let promise1 = systemManageServices.getPersonalPermission2Global();
     let promise2 = systemManageServices.getPersonalPermission2Project();
     Promise.all([promise1, promise2])
@@ -261,6 +231,14 @@ export default class LeftToolBar extends React.Component {
               projectPermission: projectPermission,
             },
             () => {
+              const { dispatch } = this.props;
+              dispatch({
+                type: "permission/updateDatas",
+                payload: {
+                  globalPermission: globalPermission,
+                  projectPermission: projectPermission,
+                },
+              });
               this.leftToolBarRef &&
                 this.leftToolBarRef.setState({
                   update: !this.leftToolBarRef.state.update,
