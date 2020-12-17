@@ -112,6 +112,7 @@ function Action() {
   this.featureOverlay2 = null;
   this.selectedFeature = null;
   this.lastSelectedFeature = null;
+  this.isCollectionTotal = false;
 
   Event.Evt.addEventListener("basemapchange", (key) => {
     if (!this.mounted) return;
@@ -357,7 +358,7 @@ function Action() {
     this.featureOverlay2 = null;
     this.lastSelectedFeature = null;
     this.selectedFeature = null;
-  }
+  };
 
   this.mapMoveEnd = (data, ponts, { lenged, dispatch, showFeatureName }) => {
     if (!data) {
@@ -387,7 +388,9 @@ function Action() {
 
       let lastSelectedFetureStyle = this.lastSelectedFeature.getStyle();
       lastSelectedFetureStyle.setImage(this.getImage(false));
-      this.layer.projectScoutingArr[index].feature.setStyle(lastSelectedFetureStyle);
+      this.layer.projectScoutingArr[index].feature.setStyle(
+        lastSelectedFetureStyle
+      );
     }
   };
 
@@ -398,12 +401,14 @@ function Action() {
       );
       let selectedFetureStyle = this.selectedFeature.getStyle();
       selectedFetureStyle.setImage(this.getImage(true));
-      this.layer.projectScoutingArr[index].feature.setStyle(selectedFetureStyle);
+      this.layer.projectScoutingArr[index].feature.setStyle(
+        selectedFetureStyle
+      );
     }
   };
 
   this.init = (dispatch) => {
-    Event.Evt.firEvent("resetMoveMapMoveedListen");
+    // Event.Evt.firEvent("resetMoveMapMoveedListen");
     this.mounted = true;
     this.Layer.setSource(this.Source);
     const layers = InitMap.map.getLayers().getArray();
@@ -471,6 +476,7 @@ function Action() {
     const me = this;
     // 关闭/开启采集统计
     Event.Evt.on("removeMapMoveEndListen", function (value) {
+      this.isCollectionTotal = !value;
       if (!me.oldLenged) return;
       let obj = {
         lenged: me.oldLenged,
@@ -489,9 +495,8 @@ function Action() {
         plotEdit.plottingLayer.plotEdit.removePlotOverlay2();
       me.overlayArr = [];
       me.overlayArr2 = [];
-      // 关闭
+      // 关闭统计则渲染
       if (value) {
-        this.hasFeatureTotal = false;
         me.renderFeaturesCollection(me.oldFeatures, obj);
         let pointCollection = me.renderPointCollection(me.oldPonts);
         me.overlayArr2 = pointCollection;
@@ -501,7 +506,6 @@ function Action() {
         me.moveendListener = () => {};
       } else {
         //开启
-        this.hasFeatureTotal = true;
         me.mapMoveEnd(me.oldFeatures, me.oldPonts, obj, value);
       }
       me.isNeedMoveMapMoveedListen = value;
@@ -1364,10 +1368,11 @@ function Action() {
     // return;
     // createPopupOverlay(feature, pixel);
     if (feature.get("meetingRoomNum") !== undefined) {
-      this.oldDispatch && this.oldDispatch({
-        type: "collectionDetail/updateDatas",
-        payload: { selectData: null },
-      });
+      this.oldDispatch &&
+        this.oldDispatch({
+          type: "collectionDetail/updateDatas",
+          payload: { selectData: null },
+        });
       this.featureOverlay2 && INITMAP.map.removeOverlay(this.featureOverlay2);
       let style = feature.getStyle();
       style.setImage(this.getImage());
@@ -1851,19 +1856,12 @@ function Action() {
         this.pontsGroup[item.districtcode].push(item);
       }
     });
-    let needRender = false;
-    if (Object.keys(this.featuresGroup).length > 0) {
-      needRender = true;
-    }
-    if (Object.keys(this.pontsGroup).length > 0) {
-      needRender = true;
-    }
-    if (needRender) {
-      this.oldFeatures = features;
-      this.oldPonts = ponts;
-      this.oldLenged = lenged;
-      this.oldDispatch = dispatch;
-      this.oldShowFeatureName = showFeatureName;
+    this.oldFeatures = features;
+    this.oldPonts = ponts;
+    this.oldLenged = lenged;
+    this.oldDispatch = dispatch;
+    this.oldShowFeatureName = showFeatureName;
+    if (this.isCollectionTotal) {
       this.mapMoveEnd(features, ponts, { lenged, dispatch, showFeatureName });
     }
     // 清除变量
@@ -1876,7 +1874,7 @@ function Action() {
       console.log(err)
     );
     // 渲染标绘数据
-    if (Object.keys(this.featuresGroup).length === 0) {
+    if (!this.isCollectionTotal) {
       await this.renderFeaturesCollection(
         features,
         {
@@ -1892,7 +1890,7 @@ function Action() {
     // 渲染规划图
     let ext = await this.renderPlanPicCollection(planPic);
     // 渲染点的数据
-    if (Object.keys(this.pontsGroup).length === 0) {
+    if (!this.isCollectionTotal) {
       let pointCollection = this.renderPointCollection(ponts);
       this.features = this.features.concat(pointCollection);
       this.Source.addFeatures(pointCollection);
