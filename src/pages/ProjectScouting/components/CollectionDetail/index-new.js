@@ -19,6 +19,7 @@ import PhotoSwipe from "../../../../components/PhotoSwipe/action";
 // import Event from "@/lib/utils/event";
 import Event from "../../../../lib/utils/event";
 import { compress } from "../../../../utils/pictureCompress";
+import { getSession } from "utils/sessionManage";
 import { connect } from "dva";
 
 @connect(
@@ -31,7 +32,7 @@ import { connect } from "dva";
       small,
       selectedFeature,
     },
-    permission: { globalPermission },
+    permission: { projectPermission, projectId },
   }) => ({
     selectData,
     zIndex,
@@ -39,7 +40,8 @@ import { connect } from "dva";
     isImg,
     small,
     selectedFeature,
-    globalPermission,
+    projectPermission,
+    projectId
   })
 )
 export default class NewCollectionDetail extends React.Component {
@@ -79,11 +81,13 @@ export default class NewCollectionDetail extends React.Component {
       showQrPanel: false,
       qrPanelX: null,
       qrPanelY: null,
+      showUploadImage: false
     };
     this.checkedData = null;
     this.checkedImage = null;
   }
   componentDidMount() {
+    this.getPermission();
     this.getImages();
     Event.Evt.on("deletePlotImage", (id) => {
       const index = this.state.imgs.findIndex((item) => item.id === id);
@@ -313,24 +317,22 @@ export default class NewCollectionDetail extends React.Component {
       arr.push({ id: i, subscribe: true });
     }
     if (num < 10) {
-      for (let i = num; i < 10; i++) arr.push({ id: i, subscribe: false });
+      for (let i = num; i < 3; i++) arr.push({ id: i, subscribe: false });
     }
     return arr;
   };
 
   getPermission = () => {
-    let index = -1;
-    const { globalPermission } = this.props;
-    if (globalPermission !== null) {
-      const keys = Object.keys(globalPermission);
-      if (keys.length === 1) {
-        let permissionArr = globalPermission[keys[0]];
-        index =
-          permissionArr &&
-          permissionArr.findIndex((item) => item === "map:board:remove");
+    const { projectPermission, projectId } = this.props;
+    if (projectPermission) {
+      if (projectPermission[projectId] !== null) {
+          if(projectPermission[projectId].includes("map:collect:plot:upload")) {
+            this.setState({
+              showUploadImage: true
+            })
+          }
       }
     }
-    return index;
   };
 
   render() {
@@ -367,14 +369,28 @@ export default class NewCollectionDetail extends React.Component {
               className={`${styles.body} ${globalStyle.autoScrollY}`}
               style={{ height: "calc(100% - 40px)" }}
             >
-              <div className={styles.imgContainer}>
+              <div
+                className={styles.imgContainer}
+                style={{
+                  ...(this.state.imgs[0]?.image_url
+                    ? {}
+                    : { display: "table" }),
+                }}
+              >
                 {this.state.imgs[0]?.image_url ? (
                   <img
                     crossorigin="anonymous"
                     src={this.state.imgs[0]?.image_url}
                     alt=""
                   />
-                ) : null}
+                ) : (
+                  <i
+                    className={globalStyle.global_icon}
+                    style={{ fontSize: 50 }}
+                  >
+                    &#xe697;
+                  </i>
+                )}
               </div>
               <div className={styles.content}>
                 <p className={styles.title}>
@@ -391,7 +407,7 @@ export default class NewCollectionDetail extends React.Component {
                   <span>{tel || "暂无联系方式"}</span>
                 </div>
                 <p className={styles.space}></p>
-                {this.getPermission() > -1 ? (
+                {this.state.showUploadImage ? (
                   <Fragment>
                     <p className={styles.title} style={{ fontSize: "1em" }}>
                       <span>照片</span>

@@ -43,7 +43,7 @@ export default class Project extends React.Component {
       showAddPlan: false,
       boardId: "",
       planGroupId: "",
-      planId: ""
+      planId: "",
     };
     this.getLoaction = throttle(this.getLoaction, 1000);
   }
@@ -131,6 +131,12 @@ export default class Project extends React.Component {
           type: "controller/updateMainVisible",
           payload: {
             mainVisible: res.code === 0 ? "detail" : "list",
+          },
+        });
+        dispatch({
+          type: "permission/updateDatas",
+          payload: {
+            projectId: res.data.board_id,
           },
         });
       })

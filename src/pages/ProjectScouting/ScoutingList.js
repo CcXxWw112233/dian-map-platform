@@ -35,7 +35,8 @@ export default class ScoutingList extends PureComponent {
   componentDidMount() {
     // 检查数据
     this.renderBoardList();
-    Action.init();
+    const { dispatch } = this.props;
+    Action.init(dispatch);
     Action.on("projectClick", (val) => {
       // console.log(val)
       this.handleClick(val);

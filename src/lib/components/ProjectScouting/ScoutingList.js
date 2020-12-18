@@ -83,7 +83,8 @@ const action = function () {
     }
   };
 
-  this.init = async () => {
+  this.init = async (dispatch) => {
+    this.dispatch = dispatch
     this.mounted = true;
     const layers = InitMap.map.getLayers().getArray();
     const layer = layers.filter((layer) => {
@@ -340,6 +341,12 @@ const action = function () {
   this.handleClickBoard = (data) => {
     // 保存选中数据到本地
     setSession(this.sesstionSaveKey, data.board_id);
+    this.dispatch && this.dispatch({
+      type: "permission/updateDatas",
+      payload: {
+        projectId: data.board_id
+      }
+    })
     try {
       if (window.parent) {
         window.parent.postMessage("map_board_change_" + data.board_id, "*");

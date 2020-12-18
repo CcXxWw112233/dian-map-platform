@@ -249,6 +249,7 @@ export default class Search extends React.Component {
     const areaPanel = (
       <AreaPanel
         handleClose={this.handleAreaClose}
+        inProject={this.props.inProject}
         updateLocationName={this.updateLocationName}
         changeQueryStr={this.props.changeQueryStr}
         changeAreaPanelVisible={this.changeAreaPanelVisible}
@@ -267,7 +268,7 @@ export default class Search extends React.Component {
     );
     return (
       <div className={styles.wrap} style={this.props.style}>
-        {!this.props.inProject ? (
+        {/* {!this.props.inProject ? (
           <Dropdown
             overlay={areaPanel}
             trigger="click"
@@ -279,7 +280,18 @@ export default class Search extends React.Component {
               <DownOutlined />
             </Button>
           </Dropdown>
-        ) : null}
+        ) : null} */}
+        <Dropdown
+          overlay={areaPanel}
+          trigger="click"
+          visible={this.state.areaPanelVisible}
+          onVisibleChange={(e) => this.onAreaPanelVisibleChange(e)}
+        >
+          <Button style={{ borderRadius: 0 }}>
+            {this.props.locationName}
+            <DownOutlined />
+          </Button>
+        </Dropdown>
         <Dropdown
           overlay={locationPanel}
           visible={this.state.searchPanelVisible}

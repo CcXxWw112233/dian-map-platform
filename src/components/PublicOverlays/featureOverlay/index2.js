@@ -1,3 +1,4 @@
+import globalStyle from "../../../globalSet/styles/globalStyles.less";
 export default function featureOverlay2(name, num, imgSrc, cb) {
   let div = document.createElement("div");
   div.style.width = "320px";
@@ -15,6 +16,10 @@ export default function featureOverlay2(name, num, imgSrc, cb) {
   imgContainer.style.height = "120px";
   imgContainer.style.width = "100%";
   imgContainer.style.overflow = "hidden";
+  if (!imgSrc) {
+    imgContainer.style.display = "table";
+  }
+
   div.appendChild(imgContainer);
   if (imgSrc) {
     let img = document.createElement("img");
@@ -22,6 +27,16 @@ export default function featureOverlay2(name, num, imgSrc, cb) {
     img.style.height = "120px";
     img.src = imgSrc;
     imgContainer.appendChild(img);
+  } else{
+    let i = document.createElement("i");
+    i.classList.add(globalStyle.global_icon);
+    i.style.display = "table-cell";
+    i.style.verticalAlign = "middle";
+    i.style.fontSize = "50px";
+    i.style.textAlign = "center";
+    i.style.color = "#ffffff63";
+    i.innerHTML = " &#xe697;"
+    imgContainer.appendChild(i);
   }
 
   let div2 = document.createElement("div");

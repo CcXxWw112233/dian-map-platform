@@ -106,6 +106,7 @@ function Action() {
   this.oldDispatch = null;
   this.oldShowFeatureName = null;
   this.oldZoom = null;
+  this.oldZoom2 = null;
   this.oldPlotFeatures = null;
   this.needRenderFetureStyle = true;
   this.hasFeatureTotal = true;
@@ -113,6 +114,8 @@ function Action() {
   this.selectedFeature = null;
   this.lastSelectedFeature = null;
   this.isCollectionTotal = false;
+  this.timeInterval = null;
+  this.hasMeetingRoom = null;
 
   Event.Evt.addEventListener("basemapchange", (key) => {
     if (!this.mounted) return;
@@ -217,13 +220,8 @@ function Action() {
     }
   };
 
-  this.moveendCallBack = (
-    data,
-    ponts,
-    { lenged, dispatch, showFeatureName },
-    totalSwitch
-  ) => {
-    const zoom = InitMap.map.getView().getZoom();
+  // 查询出该范围内的点的省市县code，
+  this.getCollectionTotal = (data, ponts, level) => {
     const extent = InitMap.map.getView().calculateExtent(InitMap.map.getSize());
     let coor1 = TransformCoordinate(
       [extent[0], extent[1]],
@@ -235,11 +233,72 @@ function Action() {
       "EPSG:3857",
       "EPSG:4326"
     );
+    let minLon = coor1[0];
+    let maxLon = coor2[0];
+    let minLat = coor1[1];
+    let maxLat = coor2[1];
+    let totalObj = {};
+    let newwArr = [...data, ...ponts];
+    let propertyLonLat = "";
+    let propertyName = "";
+    let propertyCode = "";
+    if (level === 1) {
+      propertyLonLat = "province_lon_lat";
+      propertyName = "province_name";
+      propertyCode = "provincecode";
+    }
+    if (level === 2) {
+      propertyLonLat = "city_lon_lat";
+      propertyName = "city_name";
+      propertyCode = "citycode";
+    }
+    if (level === 3) {
+      propertyLonLat = "district_lon_lat";
+      propertyName = "district_name";
+      propertyCode = "districtcode";
+    }
+    newwArr.forEach((item) => {
+      if (item[propertyLonLat]) {
+        let lonlatArr = item[propertyLonLat].split(",");
+        if (
+          parseFloat(lonlatArr[0]) >= minLon &&
+          parseFloat(lonlatArr[0]) <= maxLon &&
+          parseFloat(lonlatArr[1]) >= minLat &&
+          parseFloat(lonlatArr[1]) <= maxLat
+        ) {
+          if (!totalObj[item[propertyCode]]) {
+            totalObj[item[propertyCode]] = {
+              name: item[propertyName],
+              total: 1,
+              lon: lonlatArr[0],
+              lat: lonlatArr[1],
+            };
+          } else {
+            totalObj[item[propertyCode]].total++;
+          }
+        }
+      }
+    });
+    return totalObj;
+  };
+
+  this.moveendCallBack = (
+    data,
+    ponts,
+    { lenged, dispatch, showFeatureName },
+    totalSwitch
+  ) => {
+    const zoom = InitMap.map.getView().getZoom();
     let level = 3;
     this.layer.projectScoutingArr.forEach((item) => {
       this.layer.removeFeature(item);
     });
-    plotEdit.plottingLayer.plotEdit.removePlotOverlay2();
+    const me = this;
+    me.overlayArr.forEach((item) => {
+      InitMap.map.removeOverlay(item);
+    });
+    me.overlayArr = [];
+    this.layer.plotEdit.removePlotOverlay2();
     if (zoom < 8) {
       level = 1;
     }
@@ -249,111 +308,81 @@ function Action() {
     if (zoom >= 12 && zoom < 14) {
       level = 3;
     }
-    if (zoom >= 14) {
-      this.renderFeaturesCollection(data, {
-        lenged,
-        dispatch,
-        showFeatureName: true,
+    if (zoom < 14) {
+      let totalObj = this.getCollectionTotal(data, ponts, level);
+      let keys = Object.keys(totalObj);
+      keys.forEach((item) => {
+        let coor = TransformCoordinate(
+          [totalObj[item].lon, totalObj[item].lat],
+          "EPSG:4326",
+          "EPSG:3857"
+        );
+        let ele = totalOverlay({
+          name: totalObj[item].name,
+          total: totalObj[item].total,
+          cb: function (e) {
+            if (zoom < 8) {
+              InitMap.map.getView().setZoom(10);
+            }
+            if (zoom >= 8 && zoom < 12) {
+              InitMap.map.getView().setZoom(13);
+            }
+            if (zoom >= 12 && zoom < 14) {
+              InitMap.map.getView().setZoom(14);
+            }
+            InitMap.map.getView().setCenter(coor);
+            if (level === 3) {
+              setTimeout(function () {
+                let currentAreaFeatures =
+                  me.features &&
+                  me.features.filter(
+                    (item2) => item2.get("districtcode") === item.code
+                  );
+                me.extentSource &&
+                  me.extentSource.addFeatures(currentAreaFeatures);
+                let { getUrlParam } = config;
+                let size = InitMap.map.getSize();
+                let flag = getUrlParam.isMobile === "1";
+                let obj = {
+                  size: flag ? size.map((item) => item / 2) : size,
+                  padding: !flag ? [200, 150, 80, 400] : [0, 0, 0, 0],
+                  nearest: true,
+                };
+                if (me.extentSource) {
+                  Fit(InitMap.view, me.extentSource.getExtent(), obj);
+                }
+              }, 100);
+            }
+          },
+        });
+        let newOverlay = createOverlay(ele);
+        newOverlay.setPosition(coor);
+        InitMap.map.addOverlay(newOverlay);
+        this.overlayArr.push(newOverlay);
       });
-      let pointCollection = this.renderPointCollection(ponts);
-      this.overlayArr2.push(...pointCollection);
-      this.features.push(...pointCollection);
-      this.Source.addFeatures(pointCollection);
-      this.overlayArr.forEach((item) => {
-        InitMap.map.removeOverlay(item);
-      });
+    } else {
+      // if (this.oldZoom2 !== zoom) {
+        this.renderFeaturesCollection(data, {
+          lenged,
+          dispatch,
+          showFeatureName: true,
+        });
+        let pointCollection = this.renderPointCollection(ponts);
+        this.overlayArr2.push(...pointCollection);
+        this.features.push(...pointCollection);
+        this.Source.addFeatures(pointCollection);
+        this.overlayArr.forEach((item) => {
+          InitMap.map.removeOverlay(item);
+        });
+      // }
       this.changeLastSelectedFeatureStyle();
       this.changeSelectedFeatureStyle();
-      return;
     }
-    config
-      .GET_AREACENTERPOINT_LIST(coor1[0], coor2[0], coor1[1], coor2[1], level)
-      .then((res) => {
-        if (res && res.code === "0") {
-          if (res.data) {
-            this.overlayArr.forEach((item) => {
-              InitMap.map.removeOverlay(item);
-            });
-            this.overlayArr2.forEach((item) => {
-              let index = this.features.findIndex(
-                (item2) => item2.ol_uid === item.ol_uid
-              );
-              if (index > -1) {
-                this.features.splice(index, -1);
-              }
-              if (this.Source.getFeatureByUid(item.ol_uid)) {
-                this.Source.removeFeature(item);
-              }
-            });
-            this.overlayArr = [];
-            this.overlayArr2 = [];
-            this.features = [];
-            this.extentSource && this.extentSource.clear();
-            res.data.forEach((item) => {
-              let total = this.featuresGroup[item.code]?.length || 0;
-              total += this.pontsGroup[item.code]?.length || 0;
-              if (total > 0) {
-                let name = item.name;
-                let coor = TransformCoordinate(
-                  [item.lon, item.lat],
-                  "EPSG:4326",
-                  "EPSG:3857"
-                );
-                const me = this;
-                let ele = totalOverlay({
-                  name: name,
-                  total: total,
-                  cb: function (e) {
-                    if (zoom < 8) {
-                      InitMap.map.getView().setZoom(10);
-                    }
-                    if (zoom >= 8 && zoom < 12) {
-                      InitMap.map.getView().setZoom(13);
-                    }
-                    if (zoom >= 12 && zoom < 14) {
-                      InitMap.map.getView().setZoom(14);
-                    }
-                    if (zoom >= 14) {
-                    }
-                    InitMap.map.getView().setCenter(coor);
-                    if (level === 3) {
-                      setTimeout(function () {
-                        let currentAreaFeatures =
-                          me.features &&
-                          me.features.filter(
-                            (item2) => item2.get("districtcode") === item.code
-                          );
-                        me.extentSource &&
-                          me.extentSource.addFeatures(currentAreaFeatures);
-                        let { getUrlParam } = config;
-                        let size = InitMap.map.getSize();
-                        let flag = getUrlParam.isMobile === "1";
-                        let obj = {
-                          size: flag ? size.map((item) => item / 2) : size,
-                          padding: !flag ? [200, 150, 80, 400] : [0, 0, 0, 0],
-                          nearest: true,
-                        };
-                        if (me.extentSource) {
-                          Fit(InitMap.view, me.extentSource.getExtent(), obj);
-                        }
-                      }, 100);
-                    }
-                  },
-                });
-                let newOverlay = createOverlay(ele);
-                newOverlay.setPosition(coor);
-                InitMap.map.addOverlay(newOverlay);
-                this.overlayArr.push(newOverlay);
-              }
-            });
-          }
-        }
-      });
-    this.oldZoom = zoom;
+    this.oldZoom2 = JSON.parse(JSON.stringify(zoom));
   };
 
   this.removeFeatureOverlay = () => {
-    plotEdit.plottingLayer.plotEdit.removePlotOverlay2();
+    this.layer.plotEdit.removePlotOverlay2();
     this.featureOverlay2 && InitMap.map.removeOverlay(this.featureOverlay2);
     this.featureOverlay2 = null;
     this.lastSelectedFeature = null;
@@ -383,7 +412,7 @@ function Action() {
     this.lastSelectedFeature = this.selectedFeature;
     if (this.lastSelectedFeature) {
       let index = this.layer.projectScoutingArr.findIndex(
-        (item) => item.feature.get("id") === this.lastSelectedFeature.get("id")
+        (item) => item.feature?.get("id") === this.lastSelectedFeature.get("id")
       );
 
       let lastSelectedFetureStyle = this.lastSelectedFeature.getStyle();
@@ -466,7 +495,7 @@ function Action() {
                 }, 100);
               }
             }
-            me.oldZoom = zoom;
+            me.oldZoom = JSON.parse(JSON.stringify(zoom));
           }
         }
       };
@@ -506,10 +535,27 @@ function Action() {
         me.moveendListener = () => {};
       } else {
         //开启
+        me.featureOverlay2 && InitMap.map.removeOverlay(me.featureOverlay2);
         me.mapMoveEnd(me.oldFeatures, me.oldPonts, obj, value);
       }
       me.isNeedMoveMapMoveedListen = value;
     });
+
+    // 惠州电信演示
+    this.timeInterval && clearInterval(this.timeInterval);
+    this.timeInterval = setInterval(function () {
+      if (me.hasMeetingRoom) {
+        me.featureOverlay2 && InitMap.map.removeOverlay(me.featureOverlay2);
+        me.layer.plotEdit.removePlotOverlay2();
+        me.layer.projectScoutingArr.forEach((item) => {
+          if (item.feature) {
+            item.feature.values_.meetingRoomNum = Math.round(Math.random() * 3);
+            const ele = featureOverlay(item.feature.get("meetingRoomNum"));
+            me.layer.plotEdit.createPlotOverlay2(ele, item);
+          }
+        });
+      }
+    }, 30000);
   };
   this.boxFeature = {};
   this.draw = null;
@@ -608,7 +654,7 @@ function Action() {
     INITMAP.map.un("moveend", this.moveendListener);
     this.moveendListener = () => {};
     this.clearGroupCollectionPoint();
-    Event.Evt.firEvent("resetMoveMapMoveedListen");
+    // Event.Evt.firEvent("resetMoveMapMoveedListen");
     this.isNeedMoveMapMoveedListen = false;
     this.oldFeatures = null;
     this.oldPonts = null;
@@ -1159,6 +1205,7 @@ function Action() {
       this.polygonOverlay.setPosition(null);
       InitMap.map.removeOverlay(this.polygonOverlay);
     }
+    this.removeFeatureOverlay();
   };
   this.removeFeatures = () => {
     this.removeOverlay();
@@ -1689,6 +1736,7 @@ function Action() {
         operator.updateFeatueToDB = this.updateFeatueToDB.bind(this);
         if (content.geoType === "Point") {
           if (content.meetingRoomNum !== undefined) {
+            this.hasMeetingRoom = true;
             const ele = featureOverlay(content.meetingRoomNum);
             plotEdit.plottingLayer.plotEdit.createPlotOverlay2(ele, operator);
           }
@@ -1766,6 +1814,7 @@ function Action() {
     this.currentSet = { lenged, dispatch, animation, showFeatureName };
     // 删除元素
     this.removeFeatures();
+    this.removeOverlay();
     if (!data.length) {
       dispatch({
         type: "lengedList/updateLengedList",

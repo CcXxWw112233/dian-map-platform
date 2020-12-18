@@ -2,7 +2,8 @@ export default {
   namespace: "permission",
   state: {
     globalPermission: null,
-    projectPermission: null
+    projectPermission: null,
+    projectId: null
   },
   effects: {},
   reducers: {

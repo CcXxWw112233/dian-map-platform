@@ -22,7 +22,7 @@ const loadGeoJson = (parent) => {
         selectName: "自定义类型",
         title: name,
         name: name,
-        meetingRoomNum: Math.round(Math.random() * 10),
+        meetingRoomNum: Math.round(Math.random() * 3),
         address: address,
         tel: tel,
         coordSysType: 0,

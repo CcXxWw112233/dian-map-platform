@@ -79,7 +79,7 @@ export default class ScoutingDetails extends PureComponent {
     this.publicDataLinkArr = [];
     const panes = [
       {
-        title: "整理",
+        title: "图层",
         content: areaScouting(),
         key: "1",
         closable: false,
@@ -94,7 +94,7 @@ export default class ScoutingDetails extends PureComponent {
         ],
       },
       {
-        title: "回看",
+        title: "查看",
         content: <div>正在加紧开发中...</div>,
         key: "2",
         closable: 0,
@@ -160,6 +160,7 @@ export default class ScoutingDetails extends PureComponent {
     this.scrolltoDom = null;
     this.scoutingDetailInstance = null;
     this.is360Pic = false;
+    this.allFeatureList = [];
     this.props.onRef && this.props.onRef(this);
   }
   componentDidMount() {
@@ -179,6 +180,13 @@ export default class ScoutingDetails extends PureComponent {
         area_active_key: "other",
       });
       this.fetchCollection();
+    });
+    Event.Evt.on("searchProjectData", (val) => {
+      let tmpArr =this.allFeatureList.filter(item => {
+        return item[val.type] === val.code
+      })
+      const { config: lenged, dispatch, showFeatureName } = this.props;
+      Action.renderCollection(tmpArr || [], { lenged, dispatch, showFeatureName });
     });
     // 有音频正在播放
     Event.Evt.on("hasAudioStart", (data) => {
@@ -605,6 +613,7 @@ export default class ScoutingDetails extends PureComponent {
   // 渲染带坐标的数据
   renderCollection = (data) => {
     const { config: lenged, dispatch, showFeatureName } = this.props;
+    this.allFeatureList = data;
     Action.renderCollection(data || [], { lenged, dispatch, showFeatureName });
   };
 

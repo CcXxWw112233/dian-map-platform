@@ -177,7 +177,12 @@ export default class AreaPanel extends React.Component {
         okDisabled: false,
       },
     });
-    Event.Evt.firEvent("searchProject", { type: "provincecode", code: val });
+    let obj = { type: "provincecode", code: val };
+    if (this.props.inProject) {
+      Event.Evt.firEvent("searchProjectData", obj);
+    } else {
+      Event.Evt.firEvent("searchProject", obj);
+    }
     const res = await areaSearchAction.getCity(val);
     if (res.code === "0") {
       dispatch({
@@ -214,7 +219,12 @@ export default class AreaPanel extends React.Component {
         villageDisabled: true,
       },
     });
-    Event.Evt.firEvent("searchProject", { type: "citycode", code: val });
+    let obj = { type: "citycode", code: val };
+    if (this.props.inProject) {
+      Event.Evt.firEvent("searchProjectData", obj);
+    } else {
+      Event.Evt.firEvent("searchProject", obj);
+    }
     const res = await areaSearchAction.getDistrict(val);
     if (res.code === "0") {
       dispatch({
@@ -248,7 +258,12 @@ export default class AreaPanel extends React.Component {
         villageDisabled: true,
       },
     });
-    Event.Evt.firEvent("searchProject", { type: "districtcode", code: val });
+    let obj = { type: "districtcode", code: val };
+    if (this.props.inProject) {
+      Event.Evt.firEvent("searchProjectData", obj);
+    } else {
+      Event.Evt.firEvent("searchProject", obj);
+    }
     const res = await areaSearchAction.getTown(val);
     if (res.code === "0") {
       dispatch({
