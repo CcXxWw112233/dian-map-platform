@@ -416,14 +416,20 @@ function Action() {
       );
 
       let lastSelectedFetureStyle = this.lastSelectedFeature.getStyle();
-      lastSelectedFetureStyle.setImage(this.getImage(false));
+      lastSelectedFetureStyle.setImage(this.getImage(false, this.lastSelectedFeature));
       this.layer.projectScoutingArr[index].feature.setStyle(
         lastSelectedFetureStyle
       );
     }
   };
 
-  this.changeSelectedFeatureStyle = () => {
+  this.changeSelectedFeatureStyle = (feature) => {
+    if (feature) {
+      let type = feature.getGeometry().getType();
+      if (type === "Point") {
+        this.selectedFeature = feature;
+      }
+    }
     if (this.selectedFeature) {
       let index = this.layer.projectScoutingArr.findIndex(
         (item) => item.feature.get("id") === this.selectedFeature.get("id")
@@ -1387,30 +1393,52 @@ function Action() {
     }
   };
 
-  this.getImage = (selected = true) => {
+  this.getImage = (selected = true, feature) => {
     let src = "";
     if (selected) {
       src = require("../../../assets/selectedplot.png");
     } else {
-      src = require("../../../assets/newplot.png");
+      if (feature) {
+        src = feature.get("featureType");
+      } else {
+        src = require("../../../assets/newplot.png");
+      }
     }
     let style = createStyle("Point", {
       icon: {
         src: src,
-        scale: selected ? 1 : 0.6,
+        scale: selected ? 0.8 : 0.6,
         crossOrigin: "anonymous",
       },
     });
     return style.getImage();
   };
 
+  this.fitFeature = (feature) => {
+    Fit(InitMap.view, feature.getGeometry().getExtent(), { duration: 300 });
+  };
+
+  // 切换标绘选中状态
+  this.toggleFeatureStyle = (feature) => {
+
+      this.changeLastSelectedFeatureStyle();
+      this.changeSelectedFeatureStyle(feature)
+  }
+
   // 标绘数据点击回调
   this.handlePlotClick = (feature, pixel) => {
     if (this.isActivity) return;
-
-    this.featureOverlay2 && InitMap.map.removeOverlay(this.featureOverlay2);
     // 切换图标需求
-    this.changeLastSelectedFeatureStyle();
+    if (!feature) return;
+    let geometryType = feature.getGeometry().getType();
+    if (geometryType === "Point") {
+      this.changeLastSelectedFeatureStyle();
+      let style = feature.getStyle();
+      style.setImage(this.getImage());
+      feature.setStyle(style);
+      this.selectedFeature = feature;
+    }
+    this.featureOverlay2 && InitMap.map.removeOverlay(this.featureOverlay2);
     this.cancelSearchAround();
     // Fit(InitMap.view, feature.getGeometry().getExtent(), { duration: 300 });
     Event.Evt.firEvent("handleFeatureToLeftMenu", feature.get("id"));
@@ -1423,11 +1451,6 @@ function Action() {
           type: "collectionDetail/updateDatas",
           payload: { selectData: null },
         });
-      this.featureOverlay2 && INITMAP.map.removeOverlay(this.featureOverlay2);
-      let style = feature.getStyle();
-      style.setImage(this.getImage());
-      feature.setStyle(style);
-      this.selectedFeature = feature;
       const me = this;
       let cb = function () {
         me.featureOverlay2 && INITMAP.map.removeOverlay(me.featureOverlay2);
@@ -1635,6 +1658,7 @@ function Action() {
         } else {
           featureType = featureType.replace("img", "");
           iconUrl = require("../../../assets" + featureType);
+          content.featureType = iconUrl;
         }
         if (hasIndex < 0) {
           obj = {

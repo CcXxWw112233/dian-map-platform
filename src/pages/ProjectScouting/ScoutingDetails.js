@@ -1715,15 +1715,15 @@ export default class ScoutingDetails extends PureComponent {
       val = Object.assign({}, { properties_map: properties }, val);
     }
     // }
-    dispatch({
-      type: "collectionDetail/updateDatas",
-      payload: {
-        selectData: val,
-        selectedFeature: feature,
-        type: "edit",
-        isImg: type === "pic" || type === "video" || type === "interview",
-      },
-    });
+      dispatch({
+        type: "collectionDetail/updateDatas",
+        payload: {
+          selectData: val,
+          selectedFeature: feature,
+          type: "edit",
+          isImg: type === "pic" || type === "video" || type === "interview",
+        },
+      });
     Action.handleCollectionPoint(val);
   };
 

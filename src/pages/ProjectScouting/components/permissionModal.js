@@ -139,17 +139,23 @@ export default class PermissionModal extends React.Component {
       role_id: roleId,
       user_id: user.id,
     };
-    systemManageServices.modifyProjectMember(param).then((res) => {
-      if (res && res.code === "0") {
-        let arr = this.state.projectMemeberRoleArr;
-        arr[index] = roleId;
-        this.setState({
-          projectMemeberRoleArr: arr,
-        });
-      } else {
-        message.info(res.message);
-      }
-    });
+    systemManageServices
+      .modifyProjectMember(param)
+      .then((res) => {
+        if (res && res.code === "0") {
+          message.success("修改角色成功！");
+          let arr = this.state.projectMemeberRoleArr;
+          arr[index] = roleId;
+          this.setState({
+            projectMemeberRoleArr: arr,
+          });
+        } else {
+          message.info(res.message);
+        }
+      })
+      .catch((e) => {
+        message.error(e.message);
+      });
   };
   handleSelectUser = (userId) => {
     this.setState({

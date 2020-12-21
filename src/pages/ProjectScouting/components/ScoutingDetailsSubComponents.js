@@ -79,7 +79,7 @@ export const Title = ({
   boardId,
   collectData,
   groupId,
-  currentBoard
+  currentBoard,
 }) => {
   // 预览图片
   const previewImg = (e) => {
@@ -1323,47 +1323,46 @@ export const UploadItem = ({
   };
 
   const itemClick = (val) => {
-    // let ty = Action.checkCollectionType(val.target);
-    // if (ty === "pic") {
-    //   // 点击的是图片
-    //   onCheckItem(val);
-    // } else {
-    //   onCheckItem(null);
-    // }
-    Action.zoomToMap();
-    setTimeout(function () {
-      onCheckItem(val);
-      if (val.is_display === "0") return;
-      if (
-        val.location &&
-        Object.keys(val.location).length &&
-        val.is_display === "1"
-      ) {
-        let coor = [+val.location.longitude, +val.location.latitude];
-        Action.editZIndexOverlay(val.id);
-        Action.toCenter({ center: coor });
-      }
-
-      // 标注
-      if (val.collect_type === "4") {
-        let feature = Action.findFeature(val.id);
-        let extent = feature && feature.getGeometry().getExtent();
-        if (extent) {
-          Action.toCenter({ type: "extent", center: extent });
+    let feature = Action.findFeature(val.id);
+    if (feature.get("meetingRoomNum") !== undefined) {
+      Action.fitFeature(feature);
+      Action.handlePlotClick(feature);
+    } else {
+      Action.zoomToMap();
+      setTimeout(function () {
+        onCheckItem(val);
+        if (val.is_display === "0") return;
+        if (
+          val.location &&
+          Object.keys(val.location).length &&
+          val.is_display === "1"
+        ) {
+          let coor = [+val.location.longitude, +val.location.latitude];
+          Action.editZIndexOverlay(val.id);
+          Action.toCenter({ center: coor });
         }
-      }
 
-      // 规划图
-      if (val.collect_type === "5") {
-        let layer = Action.findImgLayer(val.resource_id);
-        if (layer) {
-          let extent = layer.getSource().getImageExtent();
-          // console.log()
-          Action.toCenter({ type: "extent", center: extent });
+        // 标注
+        if (val.collect_type === "4") {
+          let extent = feature && feature.getGeometry().getExtent();
+          if (extent) {
+            Action.toCenter({ type: "extent", center: extent });
+            Action.toggleFeatureStyle(feature);
+          }
         }
-      }
-      onToggleChangeStyle && onToggleChangeStyle(val);
-    }, 20);
+
+        // 规划图
+        if (val.collect_type === "5") {
+          let layer = Action.findImgLayer(val.resource_id);
+          if (layer) {
+            let extent = layer.getSource().getImageExtent();
+            // console.log()
+            Action.toCenter({ type: "extent", center: extent });
+          }
+        }
+        onToggleChangeStyle && onToggleChangeStyle(val);
+      }, 20);
+    }
   };
   Event.Evt.un("moveToCollect");
   Event.Evt.on("moveToCollect", (val) => {

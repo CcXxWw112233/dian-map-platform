@@ -224,7 +224,7 @@ class PlotEdit extends Observable {
         element: ele,
         position: coords,
         // insertFirst: false,
-        offset: [0, -25],
+        offset: [0, -20],
         positioning: "bottom-center",
       });
       this.layer.plotOverlayArr.push(overlay);
