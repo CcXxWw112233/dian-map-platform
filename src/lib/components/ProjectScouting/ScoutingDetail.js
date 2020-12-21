@@ -631,6 +631,8 @@ function Action() {
 
   this.dateFormat = dateFormat;
   this.onBack = () => {
+    this.timeInterval && clearInterval(this.timeInterval);
+    this.hasMeetingRoom = null;
     this.layer.projectScoutingArr &&
       this.layer.projectScoutingArr.forEach((item) => {
         INITMAP.map.removeOverlay(item.feature && item.feature.overlay);
@@ -1792,7 +1794,7 @@ function Action() {
     if (newConfig.length === 1 && !newConfig[0].content.length) {
       newConfig = [];
     }
-    if (!geoData) {
+    if (!geoData || geoData.length === 0) {
       dispatch &&
         dispatch({
           type: "lengedList/updateLengedList",

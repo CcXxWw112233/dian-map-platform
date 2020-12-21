@@ -52,6 +52,7 @@ export default class LengedList extends React.Component {
           <Collapse
             expandIconPosition="right"
             className={`${styles.wrapper} ${globalStyle.autoScrollY}`}
+            defaultActiveKey={lengedList[0].key}
             style={{
               height: "100%",
               background: "rgba(255,255,255,0)",

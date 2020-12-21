@@ -375,8 +375,8 @@ export default class Plot extends PureComponent {
     } else {
       this.getCustomSymbol();
     }
-    Event.Evt.on("resolveGeojson", () => {
-      loadGeoJson(this)
+    Event.Evt.on("resolveGeojson", (name) => {
+      loadGeoJson(this, name)
     })
   }
   componentWillUnmount() {

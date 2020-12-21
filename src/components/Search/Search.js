@@ -12,6 +12,7 @@ import { getMyPosition } from "utils/getMyPosition";
 import { BASIC } from "../../services/config";
 import { setSession, getSession } from "utils/sessionManage";
 import Event from "../../lib/utils/event";
+import areaSearchAction from "@/lib/components/Search/AreaSearch";
 
 import { connect } from "dva";
 
@@ -39,13 +40,42 @@ export default class Search extends React.Component {
     this.placeholder = "搜索地址或项目";
     this.props.onRef(this);
     this.handleSearch = throttle(this.handleSearch, 1000);
+    // Event.Evt.on("changeAreaInSearch", (data) => {
+    //   if (!data) return;
+    //   let promise0 = areaSearchAction.getCity(data.provincecode);
+    //   let promise1 = areaSearchAction.getDistrict(data.citycode);
+    //   Promise.all([promise0, promise1]).then((res) => {
+    //     if (res.length > 0) {
+    //       let currentCity = res[0].data.filter(
+    //         (item) => item.code === data.citycode
+    //       )[0];
+    //       let cityOptions = res[0].data;
+    //       let districtOptions = res[1].data;
+    //       const { dispatch } = this.props;
+    //       dispatch({
+    //         type: "areaSearch/update",
+    //         payload: {
+    //           provinceCode: data.provincecode,
+    //           cityCode: data.citycode,
+    //           cityOptions: cityOptions,
+    //           districtOptions: districtOptions,
+    //           cityDisabled: false,
+    //           districtDisabled: false,
+    //           okDisabled: false,
+    //           locationName: currentCity.name,
+    //           adcode: data.citycode,
+    //         },
+    //       });
+    //     }
+    //   });
+    // });
   }
   componentDidMount() {
     setSession("xzqhCode", "");
     setSession("city", "");
     setSession("province", "");
     setSession("district", "");
-    const options = {
+    let options = {
       type: "nationcode",
       adcode: "100000",
       locationName: "全国",
@@ -65,9 +95,11 @@ export default class Search extends React.Component {
     };
     this.updateState(options);
     Event.Evt.firEvent("searchProject");
+    Event.Evt.firEvent("searchProjectData");
   };
 
   updateState = (val, noNeedUpdate = false) => {
+    if (!val) return;
     if (val.locationName) {
       const { dispatch } = this.props;
       dispatch({
@@ -268,19 +300,6 @@ export default class Search extends React.Component {
     );
     return (
       <div className={styles.wrap} style={this.props.style}>
-        {/* {!this.props.inProject ? (
-          <Dropdown
-            overlay={areaPanel}
-            trigger="click"
-            visible={this.state.areaPanelVisible}
-            onVisibleChange={(e) => this.onAreaPanelVisibleChange(e)}
-          >
-            <Button style={{ borderRadius: 0 }}>
-              {this.props.locationName}
-              <DownOutlined />
-            </Button>
-          </Dropdown>
-        ) : null} */}
         <Dropdown
           overlay={areaPanel}
           trigger="click"

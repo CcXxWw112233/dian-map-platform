@@ -118,7 +118,22 @@ export default class AreaPanel extends React.Component {
   }
 
   componentWillUnmount() {
-    const { parent } = this.props;
+    const { parent, dispatch } = this.props;
+    dispatch({
+      type: "areaSearch/update",
+      payload: {
+        provinceCode: null,
+        cityCode: null,
+        districtCode: null,
+        townCode: null,
+        villageCode: null,
+        cityDisabled: true,
+        districtDisabled: true,
+        townDisabled: true,
+        villageDisabled: true,
+        okDisabled: true,
+      },
+    });
     areaSearchAction.clearAreaExtent(parent);
   }
 
@@ -145,6 +160,9 @@ export default class AreaPanel extends React.Component {
 
   goBackToNation = () => {
     const { parent } = this.props;
+    if (this.props.inProject) {
+      Event.Evt.firEvent("searchProjectData");
+    }
     this.handleClearClick();
     areaSearchAction.goBackToNation(parent);
   };
@@ -153,6 +171,7 @@ export default class AreaPanel extends React.Component {
   handleProvinceSelectChange = async (val, flag) => {
     const { parent } = this.props;
     areaSearchAction.clearAreaExtent(parent);
+    // this.props.changeAreaPanelVisible();
     const { dispatch, provinceOptions } = this.props;
     const name = provinceOptions?.filter((item) => {
       return item.code === val;
@@ -198,6 +217,7 @@ export default class AreaPanel extends React.Component {
   handleCitySelectChange = async (val, flag) => {
     const { parent } = this.props;
     areaSearchAction.clearAreaExtent(parent);
+    // this.props.changeAreaPanelVisible();
     const { dispatch, cityOptions } = this.props;
     const name = cityOptions?.filter((item) => {
       return item.code === val;
@@ -239,6 +259,7 @@ export default class AreaPanel extends React.Component {
   handleDistrictSelectChange = async (val, flag) => {
     const { parent } = this.props;
     areaSearchAction.clearAreaExtent(parent);
+    // this.props.changeAreaPanelVisible();
     const { dispatch, districtOptions } = this.props;
     const name = districtOptions?.filter((item) => {
       return item.code === val;
@@ -279,6 +300,7 @@ export default class AreaPanel extends React.Component {
   handleTownSelectChange = async (val) => {
     const { parent } = this.props;
     areaSearchAction.clearAreaExtent(parent);
+    // this.props.changeAreaPanelVisible();
     const { dispatch, townOptions } = this.props;
     const name = townOptions?.filter((item) => {
       return item.code === val;
@@ -308,6 +330,7 @@ export default class AreaPanel extends React.Component {
   handleVillageSelectChange = (val) => {
     const { parent } = this.props;
     areaSearchAction.clearAreaExtent(parent);
+    // this.props.changeAreaPanelVisible();
     const { dispatch } = this.props;
     dispatch({
       type: "areaSearch/update",

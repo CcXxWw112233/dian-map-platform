@@ -162,6 +162,13 @@ export default class ScoutingDetails extends PureComponent {
     this.is360Pic = false;
     this.allFeatureList = [];
     this.props.onRef && this.props.onRef(this);
+    this.notAreaIdCollection = [];
+    this.areaList = [];
+
+    // codeType区域筛选用
+    this.codeType = null;
+    // code区域筛选用
+    this.code = null;
   }
   componentDidMount() {
     this.isGoBack = false;
@@ -182,11 +189,45 @@ export default class ScoutingDetails extends PureComponent {
       this.fetchCollection();
     });
     Event.Evt.on("searchProjectData", (val) => {
-      let tmpArr =this.allFeatureList.filter(item => {
-        return item[val.type] === val.code
-      })
+      if (this.state.activeKey !== "1") return;
+      let tmpArr = [];
+      if (val) {
+        this.codeType = val.type;
+        this.code = val.code;
+        tmpArr = this.allFeatureList.filter((item) => {
+          return item[val.type] === val.code;
+        });
+        let tmpAreaList = [],
+          tmpNotAreaIdCollection = [];
+        this.areaList.forEach((item) => {
+          let data = JSON.parse(JSON.stringify(item));
+          if (data.collection) {
+            data.collection = data.collection.filter((item2) => {
+              return item2[val.type] === val.code;
+            });
+          }
+          tmpAreaList.push(data);
+        });
+        tmpNotAreaIdCollection = this.notAreaIdCollection.filter((item) => {
+          return item[val.type] === val.code;
+        });
+        this.setState({
+          area_list: tmpAreaList,
+          not_area_id_collection: tmpNotAreaIdCollection,
+        });
+      } else {
+        tmpArr = this.allFeatureList;
+        this.setState({
+          area_list: this.areaList,
+          not_area_id_collection: this.notAreaIdCollection,
+        });
+      }
       const { config: lenged, dispatch, showFeatureName } = this.props;
-      Action.renderCollection(tmpArr || [], { lenged, dispatch, showFeatureName });
+      Action.renderCollection(tmpArr || [], {
+        lenged,
+        dispatch,
+        showFeatureName,
+      });
     });
     // 有音频正在播放
     Event.Evt.on("hasAudioStart", (data) => {
@@ -402,6 +443,7 @@ export default class ScoutingDetails extends PureComponent {
     ScouListAction.checkItem().then((res) => {
       // console.log(res)
       let { data } = res;
+      Event.Evt.firEvent("changeAreaInSearch", data);
       this.setState(
         {
           current_board: data,
@@ -429,10 +471,15 @@ export default class ScoutingDetails extends PureComponent {
         if (!active) {
           active = "other";
         }
+        this.areaList = JSON.parse(
+          JSON.stringify(
+            respData.map((item) =>
+              Object.assign(item, { _edit: false, _remarkEdit: false })
+            )
+          )
+        );
         this.setState({
-          area_list: respData.map((item) =>
-            Object.assign(item, { _edit: false, _remarkEdit: false })
-          ),
+          area_list: this.areaList,
           area_active_key: active,
           area_selected: [active],
         });
@@ -643,6 +690,23 @@ export default class ScoutingDetails extends PureComponent {
     this.updateCollection(data, array);
   };
 
+  filterAreaListByCode = (area_list) => {
+    let tmpAreaList = [];
+    area_list.forEach((item) => {
+      let data = JSON.parse(JSON.stringify(item));
+      if (data.collection) {
+        data.collection = data.collection.filter(
+          (item2) => item2[this.codeType] === this.code
+        );
+      }
+      tmpAreaList.push(data);
+    });
+    return tmpAreaList;
+  };
+  filterNotAreaIdCollectionByCode = (data) => {
+    return data.filter((item) => item[this.codeType] === this.code);
+  };
+
   // 更新某个采集资料，并且重组，刷新元素,只需要更改all_collection数据
   updateAllCollectionReset = (data) => {
     let array = this.reSetCollection(data);
@@ -650,14 +714,24 @@ export default class ScoutingDetails extends PureComponent {
   };
   // 更新数据
   updateCollection = (data, area_list) => {
+    this.areaList = area_list;
+    this.notAreaIdCollection = data
+      .filter((i) => !i.area_type_id)
+      .sort((a, b) => a.create_time - b.create_time);
+    let tmpAreaList = this.areaList;
+    let tmpNotAreaIdCollection = this.notAreaIdCollection;
     const { dispatch } = this.props;
+    if (this.code) {
+      tmpAreaList = this.filterAreaListByCode(area_list);
+      tmpNotAreaIdCollection = this.filterNotAreaIdCollectionByCode(
+        tmpNotAreaIdCollection
+      );
+    }
     this.setState(
       {
         all_collection: data,
-        area_list: area_list,
-        not_area_id_collection: data
-          .filter((i) => !i.area_type_id)
-          .sort((a, b) => a.create_time - b.create_time),
+        area_list: tmpAreaList,
+        not_area_id_collection: tmpNotAreaIdCollection,
       },
       () => {
         dispatch({
@@ -2064,6 +2138,7 @@ export default class ScoutingDetails extends PureComponent {
                           onAreaEdit={this.onAreaEdit.bind(this, true)}
                           total={item.length}
                           data={item}
+                          board={item}
                           activeKey={this.state.area_active_key}
                           index={index + 1}
                           edit={item._edit}

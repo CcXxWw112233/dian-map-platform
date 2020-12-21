@@ -125,6 +125,7 @@ export const Title = ({
         collectData={collectData}
         groupId={groupId}
         inProject={true}
+        currentBoard={data}
         style={{ flex: "none", margin: 0, border: "1px solid #3333" }}
         placeholder="请输入名称"
       ></Search>

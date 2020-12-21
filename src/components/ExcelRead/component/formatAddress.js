@@ -81,7 +81,9 @@ export default class FormatAddress extends React.Component{
                 if(res.length){
                     this.config.renderPoint(res);
                 }
-                else Action.Source.clear();
+                else {
+                  Action.Source && Action.Source.clear();
+                }
             })
         }
     }

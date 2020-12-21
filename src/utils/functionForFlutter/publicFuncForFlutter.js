@@ -567,8 +567,8 @@ let callFunctions = {
     DetailAction.savePoint(val);
   },
 
-  resolveGeojson: () => {
-    Event.Evt.firEvent("resolveGeojson")
+  resolveGeojson: (name) => {
+    Event.Evt.firEvent("resolveGeojson", name)
   }
 };
 

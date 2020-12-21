@@ -41,7 +41,7 @@ import { connect } from "dva";
     small,
     selectedFeature,
     projectPermission,
-    projectId
+    projectId,
   })
 )
 export default class NewCollectionDetail extends React.Component {
@@ -81,7 +81,7 @@ export default class NewCollectionDetail extends React.Component {
       showQrPanel: false,
       qrPanelX: null,
       qrPanelY: null,
-      showUploadImage: false
+      showUploadImage: false,
     };
     this.checkedData = null;
     this.checkedImage = null;
@@ -230,27 +230,34 @@ export default class NewCollectionDetail extends React.Component {
       let id = selectedFeature.get("id");
       let formData = new FormData();
       formData.append("file", file);
-      plotImageAction.upload_file(formData).then((res) => {
-        if (res && res.code === "0") {
-          let resource_id = res.data.file_resource_id;
-          plotImageAction
-            .add(resource_id, id)
-            .then((res2) => {
-              if (res2 && res2.code === "0") {
-                plotImageAction.getList(id).then((res3) => {
-                  if (res3 && res3.code === "0") {
-                    this.setState({
-                      imgs: res3.data,
-                    });
-                  }
-                });
-              }
-            })
-            .catch((e) => {
-              inject(e);
-            });
-        }
-      });
+      plotImageAction
+        .upload_file(formData)
+        .then((res) => {
+          if (res && res.code === "0") {
+            let resource_id = res.data.file_resource_id;
+            plotImageAction
+              .add(resource_id, id)
+              .then((res2) => {
+                if (res2 && res2.code === "0") {
+                  plotImageAction.getList(id).then((res3) => {
+                    if (res3 && res3.code === "0") {
+                      this.setState({
+                        imgs: res3.data,
+                      });
+                    }
+                  });
+                }
+              })
+              .catch((e) => {
+                inject(e);
+              });
+          } else {
+            message.error(res.message);
+          }
+        })
+        .catch((e) => {
+          message.error(e.message);
+        });
     });
   };
 
@@ -326,11 +333,11 @@ export default class NewCollectionDetail extends React.Component {
     const { projectPermission, projectId } = this.props;
     if (projectPermission) {
       if (projectPermission[projectId] !== null) {
-          if(projectPermission[projectId].includes("map:collect:plot:upload")) {
-            this.setState({
-              showUploadImage: true
-            })
-          }
+        if (projectPermission[projectId].includes("map:collect:plot:upload")) {
+          this.setState({
+            showUploadImage: true,
+          });
+        }
       }
     }
   };
@@ -407,61 +414,59 @@ export default class NewCollectionDetail extends React.Component {
                   <span>{tel || "暂无联系方式"}</span>
                 </div>
                 <p className={styles.space}></p>
-                {this.state.showUploadImage ? (
-                  <Fragment>
-                    <p className={styles.title} style={{ fontSize: "1em" }}>
-                      <span>照片</span>
-                    </p>
-                    <div
-                      className={`${styles.imgLongContainer}  ${globalStyle.autoScrollX}`}
+                <p className={styles.title} style={{ fontSize: "1em" }}>
+                  <span>照片</span>
+                </p>
+                <div
+                  className={`${styles.imgLongContainer}  ${globalStyle.autoScrollX}`}
+                >
+                  {this.state.imgs.length > 0 ? (
+                    this.state.imgs.map((item, index) => {
+                      return (
+                        <img
+                          key={index}
+                          crossOrigin="anonymous"
+                          src={item.image_url}
+                          alt=""
+                          // onClick={() => this.handleImgClick(item)}
+                          onClick={() =>
+                            this.handleImgClick(item, this.state.imgs)
+                          }
+                        />
+                      );
+                    })
+                  ) : (
+                    <i
+                      className={globalStyle.global_icon}
+                      style={{
+                        fontSize: 50,
+                        lineHeight: "50px",
+                        margin: "30px auto",
+                        color: "#5a86f5",
+                      }}
                     >
-                      {this.state.imgs.length > 0 ? (
-                        this.state.imgs.map((item, index) => {
-                          return (
-                            <img
-                              key={index}
-                              crossOrigin="anonymous"
-                              src={item.image_url}
-                              alt=""
-                              // onClick={() => this.handleImgClick(item)}
-                              onClick={() =>
-                                this.handleImgClick(item, this.state.imgs)
-                              }
-                            />
-                          );
-                        })
-                      ) : (
-                        <i
-                          className={globalStyle.global_icon}
-                          style={{
-                            fontSize: 50,
-                            lineHeight: "50px",
-                            margin: "30px auto",
-                            color: "#5a86f5",
-                          }}
-                        >
-                          &#xe7d1;
-                        </i>
-                      )}
-                    </div>
-                    <div style={{ width: 144, margin: "0 auto" }}>
-                      <Upload
-                        action={(file) => this.uploadFileAction(file)}
-                        accept=".jpg, .jpeg, .png, .bmp"
-                        beforeUpload={this.checkFileSize}
-                        headers={{ Authorization: BASIC.getUrlParam.token }}
-                        onChange={this.onUpload}
-                        fileList={this.fileList}
-                      >
-                        <div className={styles.addImgBtn}>
-                          <i className={globalStyle.global_icon}>&#xe834;</i>
-                          <span>添加照片</span>
-                        </div>
-                      </Upload>
-                    </div>
-                    <p className={styles.space}></p>
-                  </Fragment>
+                      &#xe7d1;
+                    </i>
+                  )}
+                </div>
+                {this.state.showUploadImage ? (
+                  <div style={{ width: 144, margin: "0 auto" }}>
+                    <Upload
+                      action={(file) => this.uploadFileAction(file)}
+                      accept=".jpg, .jpeg, .png, .bmp"
+                      beforeUpload={this.checkFileSize}
+                      headers={{ Authorization: BASIC.getUrlParam.token }}
+                      onChange={this.onUpload}
+                      fileList={this.fileList}
+                    >
+                      <div className={styles.addImgBtn}>
+                        <i className={globalStyle.global_icon}>&#xe834;</i>
+                        <span>添加照片</span>
+                      </div>
+                    </Upload>
+                  </div>
                 ) : null}
+                <p className={styles.space}></p>
                 <div className={styles.title} style={{ fontSize: 12 }}>
                   <span>周边快查</span>
                 </div>
