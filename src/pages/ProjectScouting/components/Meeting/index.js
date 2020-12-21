@@ -203,7 +203,11 @@ export default function Meettings(props) {
       </div>
       <div
         className={styles.renderList}
-        style={{ height: "calc(100% - 122px)" }}
+        style={{
+          ...(props.miniTitle
+            ? { height: "calc(100% - 172px)" }
+            : { height: "calc(100% - 122px)" }),
+        }}
       >
         {getUsersRender().map((item, index) => {
           return (

@@ -88,7 +88,7 @@ export default function featureOverlay2(name, num, imgSrc, cb) {
   col2.innerHTML = "最大容量：";
   row1.appendChild(col2);
   let col3 = document.createElement("div");
-  col3.innerHTML = "100人";
+  col3.innerHTML = "20人";
   row1.style.display = "inline-flex";
   row1.appendChild(col3);
   info_div.appendChild(row1);

@@ -41,6 +41,7 @@ export default function TrafficDetail(props){
       center: coor,
     }
     DetailAction.toCenter(param);
+    // Event.Evt.firEvent("changeAroundAboutSelectdFeatureStyle", val);
   }
 
   return (

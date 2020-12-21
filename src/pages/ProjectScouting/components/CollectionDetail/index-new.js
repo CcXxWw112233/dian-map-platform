@@ -238,6 +238,7 @@ export default class NewCollectionDetail extends React.Component {
             plotImageAction
               .add(resource_id, id)
               .then((res2) => {
+                message.success("上传照片成功！")
                 if (res2 && res2.code === "0") {
                   plotImageAction.getList(id).then((res3) => {
                     if (res3 && res3.code === "0") {
@@ -246,10 +247,12 @@ export default class NewCollectionDetail extends React.Component {
                       });
                     }
                   });
+                } else {
+                  message.error(res.message);
                 }
               })
               .catch((e) => {
-                inject(e);
+                message.error(e.message);
               });
           } else {
             message.error(res.message);
@@ -524,7 +527,7 @@ export default class NewCollectionDetail extends React.Component {
                           <p className={styles.describe}>
                             设备：65寸交互大屏/投影/音响
                           </p>
-                          <p className={styles.describe}>容纳人数：50人</p>
+                          <p className={styles.describe}>容纳人数：20人</p>
                         </div>
                         <div
                           className={styles.qrCode}

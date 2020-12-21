@@ -2428,6 +2428,7 @@ export default class ScoutingDetails extends PureComponent {
             <Meettings
               board={current_board}
               active={this.state.activeKey === "3"}
+              miniTitle={this.state.miniTitle}
             />
           </PublicView>
         );
@@ -2530,6 +2531,7 @@ export default class ScoutingDetails extends PureComponent {
           cb={this.handleGoBackClick.bind(this)}
           parentTool={this.props.parentTool}
           boardId={this.state.current_board.board_id}
+          currentBoard={this.state.current_board}
         ></Title>
         <Tabs
           onChange={this.onChange}

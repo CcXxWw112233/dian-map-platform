@@ -79,6 +79,7 @@ export const Title = ({
   boardId,
   collectData,
   groupId,
+  currentBoard
 }) => {
   // 预览图片
   const previewImg = (e) => {
@@ -125,7 +126,7 @@ export const Title = ({
         collectData={collectData}
         groupId={groupId}
         inProject={true}
-        currentBoard={data}
+        currentBoard={currentBoard}
         style={{ flex: "none", margin: 0, border: "1px solid #3333" }}
         placeholder="请输入名称"
       ></Search>

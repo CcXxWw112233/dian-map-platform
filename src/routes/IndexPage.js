@@ -431,7 +431,7 @@ class IndexPage extends React.Component {
               );
             }}
           >
-            {this.state.isMoveMapMoveedListen ? "开启采集统计" : "关闭采集统计"}
+            {this.state.isMoveMapMoveedListen ? "开启统计" : "关闭统计"}
           </a>
         )}
         {imagePreviewVisible && <ImagePreview />}

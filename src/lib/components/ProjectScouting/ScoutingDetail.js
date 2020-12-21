@@ -362,18 +362,18 @@ function Action() {
       });
     } else {
       // if (this.oldZoom2 !== zoom) {
-        this.renderFeaturesCollection(data, {
-          lenged,
-          dispatch,
-          showFeatureName: true,
-        });
-        let pointCollection = this.renderPointCollection(ponts);
-        this.overlayArr2.push(...pointCollection);
-        this.features.push(...pointCollection);
-        this.Source.addFeatures(pointCollection);
-        this.overlayArr.forEach((item) => {
-          InitMap.map.removeOverlay(item);
-        });
+      this.renderFeaturesCollection(data, {
+        lenged,
+        dispatch,
+        showFeatureName: true,
+      });
+      let pointCollection = this.renderPointCollection(ponts);
+      this.overlayArr2.push(...pointCollection);
+      this.features.push(...pointCollection);
+      this.Source.addFeatures(pointCollection);
+      this.overlayArr.forEach((item) => {
+        InitMap.map.removeOverlay(item);
+      });
       // }
       this.changeLastSelectedFeatureStyle();
       this.changeSelectedFeatureStyle();
@@ -1397,7 +1397,7 @@ function Action() {
     let style = createStyle("Point", {
       icon: {
         src: src,
-        scale: 1,
+        scale: selected ? 1 : 0.6,
         crossOrigin: "anonymous",
       },
     });
@@ -1411,7 +1411,8 @@ function Action() {
     this.featureOverlay2 && InitMap.map.removeOverlay(this.featureOverlay2);
     // 切换图标需求
     this.changeLastSelectedFeatureStyle();
-    Fit(InitMap.view, feature.getGeometry().getExtent(), { duration: 300 });
+    this.cancelSearchAround();
+    // Fit(InitMap.view, feature.getGeometry().getExtent(), { duration: 300 });
     Event.Evt.firEvent("handleFeatureToLeftMenu", feature.get("id"));
     // Event.Evt.firEvent("handlePlotFeature", { feature, pixel });
     // return;
@@ -1444,6 +1445,17 @@ function Action() {
             cb
           );
           InitMap.map.addOverlay(this.featureOverlay2);
+          this.layer.plotEdit.removePlotOverlay2();
+          let operatorArr = this.layer.projectScoutingArr;
+          operatorArr.forEach((item) => {
+            let feature = item.feature;
+            let meetingRoomNum = null;
+            if (feature) {
+              meetingRoomNum = feature.get("meetingRoomNum");
+              const ele = featureOverlay(meetingRoomNum);
+              this.layer.plotEdit.createPlotOverlay2(ele, item);
+            }
+          });
         }
       });
     } else {
@@ -1571,7 +1583,7 @@ function Action() {
       textStrokeWidth: 3,
       font: "13px sans-serif",
       placement: "point",
-      iconScale: 1,
+      iconScale: 0.6,
       pointColor: "#fff",
       showName: showFeatureName,
     };
