@@ -92,7 +92,7 @@ export default class LengedList extends React.Component {
                       if (itemContent.type.indexOf("line") > -1) {
                         style.height = 0;
                         style.border = `1px solid ${itemContent.bgColor}`;
-                        style.marginTop = 10
+                        style.marginTop = 10;
                       }
                       if (itemContent.type.indexOf("point") > -1) {
                         style.borderRadius = 10;
@@ -104,7 +104,17 @@ export default class LengedList extends React.Component {
                     return (
                       <Row className={styles.row} key={item.key + index}>
                         <div style={style}></div>
-                        <span>{itemContent.font}</span>
+                        <div
+                          style={{
+                            textAlign: "left",
+                            overflow: "hidden",
+                            whiteSpace: "nowrap",
+                            textOverflow: "ellipsis",
+                            width: "calc(100% - 30px)"
+                          }}
+                        >
+                          <span>{itemContent.font}</span>
+                        </div>
                       </Row>
                     );
                   })}

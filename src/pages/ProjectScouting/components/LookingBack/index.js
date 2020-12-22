@@ -343,12 +343,20 @@ export default class LookingBack extends React.Component {
                                   width="100%"
                                 />
                               </div>
-                            ) : null}
-                            <p>
-                              <span
+                            ) : (
+                              <div
+                                style={{
+                                  backgroundColor: "rgba(71, 74, 91, 1)",
+                                  padding: 14
+                                }}
                               >
-                                {data.data.title}
-                              </span>
+                                <i className={globalStyle.global_icon} style={{fontSize: 28}}>
+                                  &#xe68b;
+                                </i>
+                              </div>
+                            )}
+                            <p>
+                              <span>{data.data.title}</span>
                             </p>
                           </div>
                           // </div>
