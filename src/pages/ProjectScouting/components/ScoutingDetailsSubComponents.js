@@ -1324,7 +1324,7 @@ export const UploadItem = ({
 
   const itemClick = (val) => {
     let feature = Action.findFeature(val.id);
-    if (feature.get("meetingRoomNum") !== undefined) {
+    if (feature && feature.get("meetingRoomNum") !== undefined) {
       Action.fitFeature(feature);
       Action.handlePlotClick(feature);
     } else {
