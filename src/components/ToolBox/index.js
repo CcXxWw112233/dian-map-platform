@@ -54,7 +54,7 @@ export default class ToolBox extends React.Component {
         iconfont: "&#xe75f;",
         cb: () => {
           this.hidden();
-          myDragZoom.setVal.bind(myDragZoom);
+          myDragZoom.setVal();
         },
       },
       {
