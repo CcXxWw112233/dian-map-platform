@@ -441,7 +441,7 @@ export default class CollectionPreview extends React.Component {
               width: "100%",
               height: "100%",
               paddingTop: 20,
-              ...(this.state.isOverallView && data.collect_type === "10"
+              ...(data.collect_type === "10"
                 ? { display: "" }
                 : { display: "none" }),
             }}
@@ -464,7 +464,7 @@ export default class CollectionPreview extends React.Component {
               width: "100%",
               height: "100%",
               paddingTop: 20,
-              ...(this.state.isOverallView
+              ...(data.collect_type === "10"
                 ? { display: "none" }
                 : { display: "" }),
             }}
