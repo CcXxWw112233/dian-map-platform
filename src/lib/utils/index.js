@@ -367,6 +367,14 @@ export const drawBox = (source, data) => {
   });
 };
 
+export const drawCircle = (source, geometryFunction) => {
+  return new Draw({
+    source: source,
+    type: "Circle",
+    geometryFunction: geometryFunction
+  })
+}
+
 // 添加source
 export const Source = function (data) {
   return new VectorSource({ ...data });

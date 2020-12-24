@@ -169,6 +169,15 @@ export default class ScoutingDetails extends PureComponent {
     this.codeType = null;
     // code区域筛选用
     this.code = null;
+    this.needSingleDisplayGroup = ["人口"];
+    this.needDisplayAll = [
+      "交通",
+      "产业设施",
+      "基础设施",
+      "人文景观",
+      "农林耕地",
+      "地籍地貌",
+    ];
   }
   componentDidMount() {
     this.isGoBack = false;
@@ -658,8 +667,29 @@ export default class ScoutingDetails extends PureComponent {
   };
 
   // 渲染带坐标的数据
-  renderCollection = (data) => {
+  renderCollection = (data = [], obj, isPanelStateChange) => {
     const { config: lenged, dispatch, showFeatureName } = this.props;
+    if (isPanelStateChange) {
+      if (obj) {
+        if (this.needDisplayAll.includes(obj.name)) {
+          if (data.length > 0) {
+            const nonGeojsonIndex = data.findIndex((item) => {
+              return item.target !== "geojson";
+            });
+            const isDisplayIndex = data.findIndex((item) => {
+              return item.is_display === "1";
+            });
+            if (nonGeojsonIndex === -1) {
+              if (isDisplayIndex === -1) {
+                data.forEach((item) => {
+                  item.is_display = "1";
+                });
+              }
+            }
+          }
+        }
+      }
+    }
     this.allFeatureList = data;
     Action.renderCollection(data || [], { lenged, dispatch, showFeatureName });
   };
@@ -740,7 +770,8 @@ export default class ScoutingDetails extends PureComponent {
             collections: this.state.all_collection,
           },
         });
-        let arr = [];
+        let arr = [],
+          obj;
         if (this.state.multipleGroup) {
           let selectArr = this.state.area_list.filter((item) =>
             this.state.area_selected.includes(item.id)
@@ -749,7 +780,7 @@ export default class ScoutingDetails extends PureComponent {
             arr = arr.concat(item.collection || []);
           });
         } else {
-          let obj =
+          obj =
             this.state.area_list.find(
               (item) => item.id === this.state.area_active_key
             ) || {};
@@ -761,7 +792,7 @@ export default class ScoutingDetails extends PureComponent {
 
         // 只有在整理页面才需要渲染
         if (this.state.activeKey === "1") {
-          this.renderCollection(arr || []);
+          this.renderCollection(arr || [], obj);
         }
         // 更新回看的列表
         let a = area_list.concat([
@@ -1149,7 +1180,7 @@ export default class ScoutingDetails extends PureComponent {
       let obj = this.state.area_list.find((item) => item.id === key);
       if (obj) {
         window.ProjectGroupName = obj.name;
-        this.renderCollection(obj.collection || []);
+        this.renderCollection(obj.collection || [], obj, true);
       } else {
         this.renderCollection(this.state.not_area_id_collection || []);
       }
@@ -1207,21 +1238,63 @@ export default class ScoutingDetails extends PureComponent {
 
   // 切换显示隐藏
   onChangeDisplay = (val, collection) => {
-    // console.log(val, collection)
-    let is_display = collection.is_display;
-    let param = {
-      id: collection.id,
-      is_display: is_display === "1" ? "0" : "1",
-    };
-    let arr = this.state.all_collection.map((item) => {
-      if (item.id === collection.id) {
-        collection.is_display = param.is_display;
-        item = collection;
+    // 如果是要单个展示的分组
+    if (this.needSingleDisplayGroup.includes(val.name)) {
+      if (val.collection.length > 0) {
+        let is_display = collection.is_display;
+        let param = {
+          id: collection.id,
+          is_display: is_display === "1" ? "0" : "1",
+        };
+        let tmpAllCollection = this.state.all_collection;
+        let index = tmpAllCollection.findIndex((item) => {
+          return item.id === param.id;
+        });
+        if (index > -1) {
+          tmpAllCollection[index].is_display = param.is_display;
+        }
+        Action.editCollection(param);
+        if (param.is_display === "1") {
+          let currentCollection = val.collection;
+          for (let i = 0; i < currentCollection.length; i++) {
+            if (currentCollection[i].target === "geojson") {
+              if (currentCollection[i].id === collection.id) {
+                continue;
+              }
+              if (currentCollection[i].is_display === "1") {
+                Action.editCollection({
+                  id: currentCollection[i].id,
+                  is_display: 0,
+                });
+                let index = tmpAllCollection.findIndex((item) => {
+                  return item.id === currentCollection[i].id;
+                });
+                if (index > -1) {
+                  tmpAllCollection[index].is_display = "0";
+                }
+              }
+            }
+          }
+          this.updateAllCollectionReset(tmpAllCollection);
+        }
       }
-      return item;
-    });
-    this.updateAllCollectionReset(arr);
-    Action.editCollection(param);
+    } else {
+      // console.log(val, collection)
+      let is_display = collection.is_display;
+      let param = {
+        id: collection.id,
+        is_display: is_display === "1" ? "0" : "1",
+      };
+      let arr = this.state.all_collection.map((item) => {
+        if (item.id === collection.id) {
+          collection.is_display = param.is_display;
+          item = collection;
+        }
+        return item;
+      });
+      this.updateAllCollectionReset(arr);
+      Action.editCollection(param);
+    }
   };
   // 编辑规划图
   onEditPlanPic = (val, collection) => {
@@ -1715,15 +1788,15 @@ export default class ScoutingDetails extends PureComponent {
       val = Object.assign({}, { properties_map: properties }, val);
     }
     // }
-      dispatch({
-        type: "collectionDetail/updateDatas",
-        payload: {
-          selectData: val,
-          selectedFeature: feature,
-          type: "edit",
-          isImg: type === "pic" || type === "video" || type === "interview",
-        },
-      });
+    dispatch({
+      type: "collectionDetail/updateDatas",
+      payload: {
+        selectData: val,
+        selectedFeature: feature,
+        type: "edit",
+        isImg: type === "pic" || type === "video" || type === "interview",
+      },
+    });
     Action.handleCollectionPoint(val);
   };
 

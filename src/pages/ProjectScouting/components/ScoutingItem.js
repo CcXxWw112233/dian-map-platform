@@ -41,6 +41,11 @@ export default class ScoutingItem extends React.PureComponent {
 
   ToEdit = () => {
     let name = this.props.name;
+    let data = this.props.data;
+    if (data.radius) {
+      const { parent } = this.props;
+      parent && parent.addProjectExtent(data);
+    }
     this.setState({
       editName: true,
       visible: false,
@@ -53,6 +58,8 @@ export default class ScoutingItem extends React.PureComponent {
       editName: false,
       remarkStatus: "small",
     });
+    const { parent } = this.props;
+    parent && parent.removeFeatureAndOvelay();
   };
 
   onHandleMenu = ({ key }) => {

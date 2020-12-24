@@ -9,6 +9,8 @@ import PermissionModal from "./components/permissionModal";
 import { message, Empty } from "antd";
 import Bitmap from "../../assets/Bitmap.png";
 import Event from "../../lib/utils/event";
+import { feature } from "@turf/turf";
+import { addFeature } from "../../lib/utils";
 
 const ScoutingAddBtn = ({ cb }) => {
   return (
@@ -208,6 +210,7 @@ export default class ScoutingList extends PureComponent {
       remark,
       lng: val.coordinates[0],
       lat: val.coordinates[1],
+      radius: val.radius,
     })
       .then((res) => {
         let { data } = res;
@@ -295,21 +298,41 @@ export default class ScoutingList extends PureComponent {
     Event.Evt.firEvent("returnNation");
     // 隐藏其他不需要的窗体
     this.hideOtherSlide();
+    // message.success(
+    //   <span>
+    //     请选择项目地点 或 <a onClick={this.cancelAdd}>取消新建</a>
+    //   </span>,
+    //   0
+    // );
+    // // 添加绘制功能
+    // Action.addDrawBoard().then((evt) => {
+    //   let { feature } = evt;
+    //   let coor = feature.getGeometry().getCoordinates();
+    //   // 添加overlay
+    //   Action.addBoardOverlay(coor, { viewToCenter: true })
+    //     .then((data) => {
+    //       // console.log(data);
+    //       data.coordinates = coor;
+    //       this.addBoard(data);
+    //     })
+    //     .catch((err) => {
+    //       // 取消新增
+    //       this.cancelAdd();
+    //       message.warn("已取消新建操作");
+    //     });
+    // });
     message.success(
       <span>
-        请选择项目地点 或 <a onClick={this.cancelAdd}>取消新建</a>
+        请在地图圈选范围或 <a onClick={this.cancelAdd}>取消新建</a>
       </span>,
       0
     );
-    // 添加绘制功能
-    Action.addDrawBoard().then((evt) => {
-      let { feature } = evt;
-      let coor = feature.getGeometry().getCoordinates();
-      // 添加overlay
-      Action.addBoardOverlay(coor, { viewToCenter: true })
+    Action.addBoardRadius().then((feature) => {
+      let center = feature.getGeometry().getCenter();
+      Action.addBoardOverlay(center, { viewToCenter: true })
         .then((data) => {
-          // console.log(data);
-          data.coordinates = coor;
+          data.coordinates = center;
+          data.radius = Math.round(feature.getGeometry().getRadius());
           this.addBoard(data);
         })
         .catch((err) => {
@@ -373,6 +396,14 @@ export default class ScoutingList extends PureComponent {
     });
   };
 
+  addProjectExtent = (data) => {
+    Action.addProjectExtent(data)
+  }
+
+  removeFeatureAndOvelay =() => {
+    Action.removeFeatureAndOvelay();
+  }
+
   render() {
     const { projects } = this.state;
     return (
@@ -398,6 +429,7 @@ export default class ScoutingList extends PureComponent {
                 onSetBgImg={this.onSetBgImg.bind(this, item)}
                 displayPermissionModal={this.displayPermissionModal}
                 data={item}
+                parent={this}
                 toolParent={this.props.toolParent}
               ></ScoutingItem>
             );
