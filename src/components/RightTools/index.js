@@ -175,9 +175,9 @@ export default class RightTools extends React.Component {
       tools: this.tools,
       isToolItem: false,
     };
-    Event.Evt.on("openLengedListPanel", () => {
+    Event.Evt.on("openLengedListPanel", (value) => {
       this.setState({
-        lengedListPanelVisible: true,
+        lengedListPanelVisible: value,
       });
     });
   }

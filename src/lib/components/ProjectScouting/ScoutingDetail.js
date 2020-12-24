@@ -645,6 +645,7 @@ function Action() {
 
   this.dateFormat = dateFormat;
   this.onBack = () => {
+    Event.Evt.firEvent("openLengedListPanel", false);
     this.timeInterval && clearInterval(this.timeInterval);
     this.hasMeetingRoom = null;
     this.layer.projectScoutingArr &&
