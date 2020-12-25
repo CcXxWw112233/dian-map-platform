@@ -125,35 +125,25 @@ function action() {
       this.Layer.setSource(source);
       InitMap.map.addLayer(this.Layer);
     }
-    // Event.Evt.on("changeAroundAboutSelectdFeatureStyle", ({val, isLeave}) => {
-    //   if (val) {
-    //     let feature = null;
-    //     let style = null;
-    //     let index = this.points.findIndex((item) => item.getId() === val.id);
-    //     if (index > -1) {
-    //       this.Source.removeFeature(this.points[index]);
-    //       if (!isLeave) {
-    //         style = this.getStyle();
-    //       } else {
-    //         style = this.getStyle(false);
-    //       }
-    //       if (style) {
-    //         feature = addFeature("Point", {
-    //           coordinates: TransformCoordinate([
-    //             val.location.lng,
-    //             val.location.lat,
-    //           ]),
-    //         });
-    //         feature.setId(val.id);
-    //         feature.setStyle(style);
-    //       }
-    //     }
-    //     if (feature) {
-    //       this.Source.addFeature(feature);
-    //       this.points.push(feature);
-    //     }
-    //   }
-    // });
+    Event.Evt.on("changeAroundAboutSelectdFeatureStyle", (val) => {
+      if (val) {
+        let feature = null;
+        let style = null;
+        let index = this.points.findIndex((item) => item.getId() === val.id);
+        if (index > -1) {
+          this.Source.removeFeature(this.points[index]);
+          feature = this.points[index];
+          style = feature.getStyle();
+          let newStyle = this.getStyle();
+          this.points[index].setStyle(newStyle)
+          this.Source.addFeature(this.points[index])
+        }
+        // if (feature) {
+        //   this.Source.addFeatures([feature]);
+        //   this.points.push(feature);
+        // }
+      }
+    });
     // Event.Evt.on("removeAroundAboutSelectdFeature", () => {
     //  if (this.lastSelectedFeature) {
     //    let style = this.getStyle(false);
