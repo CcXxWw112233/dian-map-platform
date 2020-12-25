@@ -301,13 +301,13 @@ function Action() {
     });
     me.overlayArr = [];
     this.layer.plotEdit.removePlotOverlay2();
-    if (zoom < 8) {
+    if (zoom < 6) {
       level = 1;
     }
-    if (zoom >= 8 && zoom < 12) {
+    if (zoom >= 6 && zoom <= 9) {
       level = 2;
     }
-    if (zoom >= 12 && zoom < 14) {
+    if (zoom > 9 && zoom <= 14) {
       level = 3;
     }
     if (zoom < 14) {
@@ -323,13 +323,13 @@ function Action() {
           name: totalObj[item].name,
           total: totalObj[item].total,
           cb: function (e) {
-            if (zoom < 8) {
-              InitMap.map.getView().setZoom(10);
+            if (zoom < 6) {
+              InitMap.map.getView().setZoom(9);
             }
-            if (zoom >= 8 && zoom < 12) {
+            if (zoom >= 6 && zoom < 9) {
               InitMap.map.getView().setZoom(13);
             }
-            if (zoom >= 12 && zoom < 14) {
+            if (zoom >= 9 && zoom < 14) {
               InitMap.map.getView().setZoom(14);
             }
             InitMap.map.getView().setCenter(coor);
