@@ -1,6 +1,7 @@
 import Observable from "ol/Observable";
 import Feature from "ol/Feature";
 import Overlay from "ol/Overlay";
+import { Cluster } from "ol/source";
 import PlotDraw from "./PlotDraw";
 import PlotEdit from "./PlotEdit";
 import FeatureEvent from "./events/FeatureEvent";
@@ -379,6 +380,7 @@ class PlottingLayer extends Observable {
       // declutter: true,
     });
     // showlayer.setStyle(drawStyle);
+    // showlayer.setSource()
     showlayer.setMap(this.map);
     return showlayer;
   }

@@ -65,13 +65,16 @@ export default function TrafficDetail(props) {
                   className={styles.content_item}
                   onClick={() => setActiveItem(item)}
                   // onPointerEnter={() => {
-                  //   Event.Evt.firEvent(
-                  //     "changeAroundAboutSelectdFeatureStyle",
-                  //     item
-                  //   );
+                  //   Event.Evt.firEvent("changeAroundAboutSelectdFeatureStyle", {
+                  //     val: item,
+                  //     isLeave: false,
+                  //   });
                   // }}
                   // onPointerLeave={() => {
-                  //   Event.Evt.firEvent("removeAroundAboutSelectdFeature")
+                  //   Event.Evt.firEvent("removeAroundAboutSelectdFeature", {
+                  //     val: item,
+                  //     isLeave: true,
+                  //   });
                   // }}
                 >
                   <span className={`${styles.item_icon}`}></span>

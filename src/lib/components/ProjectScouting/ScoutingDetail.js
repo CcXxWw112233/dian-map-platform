@@ -1557,16 +1557,20 @@ function Action() {
         iconUrl = icon ? require("../../../assets" + icon) : null;
         strokeColor = feature.get("strokeColor") || "rgba(255,0,0,0.3)";
         fillColor = feature.get("fillColor") || "rgba(255,0,0,0.3)";
-        let style = createStyle(type, {
+        let options = {
           showName: (type !== "Point" && index < 15) || type === "Point",
           text: geojson.hideName ? "" : feature.get("name") || geojson.name,
           iconUrl: iconUrl,
           strokeColor: strokeColor,
           fillColor: fillColor,
-          textFillColor: "rgba(255,0,0,0.9)",
+          textFillColor: "rgba(0,0,0,0.9)",
           textStrokeColor: "#FFFFFF",
           font: 14,
-        });
+        };
+        if (type === "MultiLineString") {
+          options.strokeWidth = 4
+        }
+        let style = createStyle(type, options);
         feature.setStyle(style);
         feature.values_.isGeojson = true;
         feature.values_.featureType = iconUrl;
