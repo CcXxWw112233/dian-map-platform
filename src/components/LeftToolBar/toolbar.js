@@ -5,7 +5,7 @@ import styles from "./LeftToolBar.less";
 import Event from "../../lib/utils/event";
 import { connect } from "dva";
 
-@connect()
+@connect(({openswitch: {openPanel}}) => ({openPanel}))
 export default class ToolBar extends React.Component {
   constructor(props) {
     super(props);
@@ -27,6 +27,7 @@ export default class ToolBar extends React.Component {
             displaySystemManage: false,
           });
           this.parent.deactivate();
+          this.openPanel();
           this.hideSearchBtn();
         },
       },
@@ -46,6 +47,7 @@ export default class ToolBar extends React.Component {
           });
           this.parent.deactivate();
           this.hideSearchBtn();
+          this.openPanel();
         },
       },
       {
@@ -64,6 +66,7 @@ export default class ToolBar extends React.Component {
           });
           this.parent.deactivate();
           this.hideSearchBtn();
+          this.openPanel();
         },
       },
       {
@@ -82,6 +85,7 @@ export default class ToolBar extends React.Component {
           });
           this.parent.deactivate();
           this.hideSearchBtn();
+          this.openPanel();
         },
       },
       {
@@ -100,6 +104,7 @@ export default class ToolBar extends React.Component {
           });
           this.parent.deactivate();
           this.hideSearchBtn();
+          this.openPanel();
         },
       },
       {
@@ -118,6 +123,7 @@ export default class ToolBar extends React.Component {
           });
           this.parent.deactivate();
           this.hideSearchBtn();
+          this.openPanel();
         },
       },
       {
@@ -136,6 +142,7 @@ export default class ToolBar extends React.Component {
           });
           this.parent.deactivate();
           this.hideSearchBtn();
+          this.openPanel();
         },
       },
       {
@@ -154,6 +161,7 @@ export default class ToolBar extends React.Component {
           });
           this.parent.deactivate();
           this.hideSearchBtn();
+          this.openPanel();
         },
       },
       {
@@ -172,6 +180,7 @@ export default class ToolBar extends React.Component {
           });
           this.parent.deactivate();
           this.hideSearchBtn();
+          this.openPanel();
         },
       },
     ];
@@ -182,6 +191,18 @@ export default class ToolBar extends React.Component {
       update: false,
     };
   }
+
+  openPanel = () => {
+    const { dispatch, openPanel } = this.props;
+    if (!openPanel) {
+      dispatch({
+        type: "openswitch/updateDatas",
+        payload: {
+          openPanel: true,
+        },
+      });
+    }
+  };
 
   hideSearchBtn = () => {
     Event.Evt.firEvent("displaySearchBtn", {
@@ -259,6 +280,7 @@ export default class ToolBar extends React.Component {
                   selectedIndex: -1,
                 });
                 this.parent.deactivate();
+                this.openPanel();
                 this.hideSearchBtn();
               }}
             >
@@ -334,6 +356,7 @@ export default class ToolBar extends React.Component {
           <div
             className={`${styles.circle} ${styles.temp}`}
             onClick={() => {
+              this.openPanel();
               this.displayTempPlot();
             }}
             style={{
@@ -372,6 +395,7 @@ export default class ToolBar extends React.Component {
               plotType: "",
             });
             this.parent.deactivate();
+            this.openPanel();
             this.hideSearchBtn();
           }}
           style={{

@@ -1465,6 +1465,7 @@ function Action() {
     // return;
     // createPopupOverlay(feature, pixel);
     if (feature.get("meetingRoomNum") !== undefined) {
+      this.fitFeature(feature);
       this.oldDispatch &&
         this.oldDispatch({
           type: "collectionDetail/updateDatas",
@@ -1893,6 +1894,7 @@ function Action() {
     this.removeFeatures();
     this.removeOverlay();
     if (!data.length) {
+      this.oldPlotFeatures = [];
       dispatch({
         type: "lengedList/updateLengedList",
         payload: {
@@ -3139,54 +3141,6 @@ function Action() {
     };
     let listenerKey = this.Layer.on("postrender", animate);
   };
-
-  // 更新江西数据的临时方法
-  this.loadGeoJson = async (props = {}) => {
-    let { boardId, areaTypeId } = props;
-    return await Axios.get(require("../../../assets/json/3_3857.geojson")).then(
-      (res) => {
-        let { data } = res;
-        let features = loadFeatureJSON(data, "GeoJSON");
-        let p = [];
-        features.forEach((item, index) => {
-          let type = item.getGeometry().getType();
-          let name = item.get("Name");
-          let style = createStyle(type, {
-            fillColor: "rgba(255,0,0,0.45)",
-            showName: true,
-            text: name,
-          });
-          item.setStyle(style);
-          let param = {
-            area_type_id: areaTypeId,
-            board_id: boardId,
-            collect_type: 4,
-            target: "feature",
-            title: name,
-          };
-
-          let content = {
-            coordinates: item.getGeometry().getCoordinates()[0],
-            geoType: "Polygon",
-            featureType: "rgba(255,0,0,0.45)",
-            selectName: "自定义类型",
-            name: name,
-            coordSysType: 0,
-            strokeColor: "rgba(255,255,255,1)",
-          };
-          param.content = JSON.stringify(content);
-          // console.log(param);
-          p.push(this.addCollection(param));
-        });
-        Promise.all(p).then((res) => {
-          console.log(res);
-        });
-        // this.Source.addFeatures(features)
-        // console.log(features);
-      }
-    );
-  };
-
   this.savePoint = (val) => {
     let { data = [], featureType, board_id } = val;
     if (data.length) {

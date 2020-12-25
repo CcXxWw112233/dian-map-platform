@@ -117,7 +117,7 @@ export const createFeatureOverlay = (feature, name, num, imgSrc, cb) => {
     position: coords,
     offset: [0, 30],
     positioning: "top-center",
-    autoPan: true
+    // autoPan: true
   });
   return overlay;
 };

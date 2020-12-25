@@ -223,7 +223,6 @@ class PlotEdit extends Observable {
         id: `${operator.guid}-total`,
         element: ele,
         position: coords,
-        // insertFirst: false,
         offset: [0, -20],
         positioning: "bottom-center",
       });

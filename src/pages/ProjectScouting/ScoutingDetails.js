@@ -77,6 +77,8 @@ export default class ScoutingDetails extends PureComponent {
     super(props);
     this.newTabIndex = 0;
     this.publicDataLinkArr = [];
+    this.lastSelectedDom = null;
+    this.isClickInPanel = false;
     const panes = [
       {
         title: "图层",
@@ -290,16 +292,27 @@ export default class ScoutingDetails extends PureComponent {
     });
   }
 
+  setItemClickState = (val) => {
+    this.isClickInPanel = val;
+  }
+
   // 定位到位置
   scrollForFeature = (id) => {
     let text = "#menu_collection_" + id;
     let dom = document.querySelector(text);
+    if (this.lastSelectedDom) {
+      this.lastSelectedDom.classList.remove(styles.hoverActive);
+    }
     if (dom) {
       dom.classList.add(styles.hoverActive);
-      dom.scrollIntoView({ behavior: "smooth" });
-      this.scrolltoDom = setTimeout(() => {
-        dom.classList.remove(styles.hoverActive);
-      }, 3 * 1000);
+      if (!this.isClickInPanel) {
+        dom.scrollIntoView({ behavior: "smooth" });
+      }
+      this.isClickInPanel = false;
+      // this.scrolltoDom = setTimeout(() => {
+      //   dom.classList.remove(styles.hoverActive);
+      // }, 3 * 1000);
+      this.lastSelectedDom = dom;
     }
   };
 
@@ -683,6 +696,28 @@ export default class ScoutingDetails extends PureComponent {
               if (isDisplayIndex === -1) {
                 data.forEach((item) => {
                   item.is_display = "1";
+                });
+              }
+            }
+          }
+        }
+        if (this.needSingleDisplayGroup.includes(obj.name)) {
+          if (data.length > 0) {
+            const nonGeojsonIndex = data.findIndex((item) => {
+              return item.target !== "geojson";
+            });
+            const isDisplayData = data.filter((item) => {
+              return item.is_display === "1";
+            });
+            if (nonGeojsonIndex === -1) {
+              if (isDisplayData.length > 1) {
+                isDisplayData.forEach((item, index) => {
+                  if (index > 0) {
+                    const index = data.findIndex(
+                      (item2) => item2.id === item.id
+                    );
+                    data[index].is_display = "0";
+                  }
                 });
               }
             }
@@ -1275,8 +1310,8 @@ export default class ScoutingDetails extends PureComponent {
               }
             }
           }
-          this.updateAllCollectionReset(tmpAllCollection);
         }
+        this.updateAllCollectionReset(tmpAllCollection);
       }
     } else {
       // console.log(val, collection)
@@ -2338,6 +2373,7 @@ export default class ScoutingDetails extends PureComponent {
                                     onCheckItem={this.checkItem}
                                     style={activeStyle}
                                     data={item}
+                                    parent={this}
                                     type={Action.checkCollectionType(
                                       item.target
                                     )}

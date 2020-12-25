@@ -222,12 +222,12 @@ export const Title = ({
                     display: "block",
                     fontSize: 50,
                     color: "rgb(134,179,255)",
-                    cursor: "pointer"
+                    cursor: "pointer",
                   }}
                 >
                   &#xe697;
                 </i>
-                <span style={{color: "rgb(134,179,255)"}}>点击上传封面</span>
+                <span style={{ color: "rgb(134,179,255)" }}>点击上传封面</span>
               </UploadBgPic>
             </span>
           </div>
@@ -973,6 +973,7 @@ export const ScoutingItem = ({
                                 onSelectGroup={onSelectGroup}
                                 type={Action.checkCollectionType(item.target)}
                                 data={item}
+                                parent={parent}
                                 onRemove={onCollectionRemove}
                                 onEditCollection={onEditCollection}
                                 onRemarkSave={onRemarkSave}
@@ -1077,6 +1078,7 @@ export const UploadItem = ({
   subIndex,
   group_length,
   group_id,
+  parent,
   onCheckItem = () => {},
   onMergeCancel = () => {},
 }) => {
@@ -1355,10 +1357,13 @@ export const UploadItem = ({
   };
 
   const itemClick = (val) => {
+    parent.setItemClickState(true);
     let feature = Action.findFeature(val.id);
     if (feature && feature.get("meetingRoomNum") !== undefined) {
       Action.fitFeature(feature);
-      Action.handlePlotClick(feature);
+      setTimeout(function () {
+        Action.handlePlotClick(feature);
+      }, 100);
     } else {
       Action.zoomToMap();
       setTimeout(function () {
