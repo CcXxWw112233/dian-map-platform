@@ -9,6 +9,7 @@ import LocalPOI from "../LocalPOI/index";
 import Zoom from "../Zoom/index";
 import ToolBox from "../ToolBox/index";
 import { myFullScreen } from "utils/drawing/public";
+import Event from "../../lib/utils/event";
 
 export default class RightTools extends React.Component {
   constructor(props) {
@@ -174,6 +175,11 @@ export default class RightTools extends React.Component {
       tools: this.tools,
       isToolItem: false,
     };
+    Event.Evt.on("openLengedListPanel", (value) => {
+      this.setState({
+        lengedListPanelVisible: value,
+      });
+    });
   }
 
   // 切换按钮样式

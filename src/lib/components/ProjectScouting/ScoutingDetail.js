@@ -116,6 +116,8 @@ function Action() {
   this.isCollectionTotal = false;
   this.timeInterval = null;
   this.hasMeetingRoom = null;
+  this.lastSelectedFeatureStyle = null;
+  this.geojsonData = {};
 
   Event.Evt.addEventListener("basemapchange", (key) => {
     if (!this.mounted) return;
@@ -299,13 +301,13 @@ function Action() {
     });
     me.overlayArr = [];
     this.layer.plotEdit.removePlotOverlay2();
-    if (zoom < 8) {
+    if (zoom < 6) {
       level = 1;
     }
-    if (zoom >= 8 && zoom < 12) {
+    if (zoom >= 6 && zoom <= 9) {
       level = 2;
     }
-    if (zoom >= 12 && zoom < 14) {
+    if (zoom > 9 && zoom <= 14) {
       level = 3;
     }
     if (zoom < 14) {
@@ -321,13 +323,13 @@ function Action() {
           name: totalObj[item].name,
           total: totalObj[item].total,
           cb: function (e) {
-            if (zoom < 8) {
-              InitMap.map.getView().setZoom(10);
+            if (zoom < 6) {
+              InitMap.map.getView().setZoom(9);
             }
-            if (zoom >= 8 && zoom < 12) {
+            if (zoom >= 6 && zoom < 9) {
               InitMap.map.getView().setZoom(13);
             }
-            if (zoom >= 12 && zoom < 14) {
+            if (zoom >= 9 && zoom < 14) {
               InitMap.map.getView().setZoom(14);
             }
             InitMap.map.getView().setCenter(coor);
@@ -414,14 +416,18 @@ function Action() {
       let index = this.layer.projectScoutingArr.findIndex(
         (item) => item.feature?.get("id") === this.lastSelectedFeature.get("id")
       );
-
       let lastSelectedFetureStyle = this.lastSelectedFeature.getStyle();
-      lastSelectedFetureStyle.setImage(
-        this.getImage(false, this.lastSelectedFeature)
-      );
-      this.layer.projectScoutingArr[index].feature.setStyle(
-        lastSelectedFetureStyle
-      );
+      let image = this.getImage(false, this.lastSelectedFeature);
+      if (image) {
+        lastSelectedFetureStyle.setImage(
+          this.getImage(false, this.lastSelectedFeature)
+        );
+      }
+      if (index > -1 && image) {
+        this.layer.projectScoutingArr[index].feature.setStyle(
+          lastSelectedFetureStyle
+        );
+      }
     }
   };
 
@@ -437,10 +443,13 @@ function Action() {
         (item) => item.feature.get("id") === this.selectedFeature.get("id")
       );
       let selectedFetureStyle = this.selectedFeature.getStyle();
+
       selectedFetureStyle.setImage(this.getImage(true));
-      this.layer.projectScoutingArr[index].feature.setStyle(
-        selectedFetureStyle
-      );
+      if (index > -1) {
+        this.layer.projectScoutingArr[index].feature.setStyle(
+          selectedFetureStyle
+        );
+      }
     }
   };
 
@@ -639,6 +648,7 @@ function Action() {
 
   this.dateFormat = dateFormat;
   this.onBack = () => {
+    Event.Evt.firEvent("openLengedListPanel", false);
     this.timeInterval && clearInterval(this.timeInterval);
     this.hasMeetingRoom = null;
     this.layer.projectScoutingArr &&
@@ -763,12 +773,20 @@ function Action() {
       let dic = InitMap.systemDic[InitMap.baseMapKey];
       coor = dic(coor[0], coor[1]);
     }
-    await this.toCenter({ center: coor, transform: true });
     this.addAnimatePoint({
       coordinates: coor,
       transform: true,
       name: data.board_name,
     });
+    if (data.radius) {
+      let feature = addFeature("defaultCircle", {
+        coordinates: TransformCoordinate(coor),
+        radius: Number(data.radius),
+      });
+      this.fitFeature(feature);
+    } else {
+      await this.toCenter({ center: coor, transform: true });
+    }
   };
 
   // 添加坐标点
@@ -986,9 +1004,9 @@ function Action() {
       if (p_type === "group") {
         Event.Evt.firEvent("handleGroupFeature", feature.get("p_id"));
       }
-      let isGeojson = feature.get("isGeojson");
+      // let isGeojson = feature.get("isGeojson");
       let featureType = feature.getGeometry().getType();
-      if (isGeojson && featureType === "Point") {
+      if (featureType === "Point") {
         this.isActivity = null;
         this.handlePlotClick(feature);
       }
@@ -1406,14 +1424,17 @@ function Action() {
         src = require("../../../assets/newplot.png");
       }
     }
-    let style = createStyle("Point", {
-      icon: {
-        src: src,
-        scale: selected ? 0.8 : 0.6,
-        crossOrigin: "anonymous",
-      },
-    });
-    return style.getImage();
+    if (src) {
+      let style = createStyle("Point", {
+        icon: {
+          src: src,
+          scale: selected ? 0.8 : 0.6,
+          crossOrigin: "anonymous",
+        },
+      });
+      return style.getImage();
+    }
+    return null;
   };
 
   this.fitFeature = (feature) => {
@@ -1434,10 +1455,13 @@ function Action() {
     let geometryType = feature.getGeometry().getType();
     if (geometryType === "Point") {
       this.changeLastSelectedFeatureStyle();
-      let style = feature.getStyle();
-      style.setImage(this.getImage());
-      feature.setStyle(style);
-      this.selectedFeature = feature;
+      let isGeojson = feature.get("isGeojson");
+      if (!isGeojson) {
+        let style = feature.getStyle();
+        style.setImage(this.getImage());
+        feature.setStyle(style);
+        this.selectedFeature = feature;
+      }
     }
     this.featureOverlay2 && InitMap.map.removeOverlay(this.featureOverlay2);
     this.cancelSearchAround();
@@ -1447,6 +1471,7 @@ function Action() {
     // return;
     // createPopupOverlay(feature, pixel);
     if (feature.get("meetingRoomNum") !== undefined) {
+      this.fitFeature(feature);
       this.oldDispatch &&
         this.oldDispatch({
           type: "collectionDetail/updateDatas",
@@ -1491,22 +1516,33 @@ function Action() {
     INITMAP.map.un("click", mapClick);
     InitMap.map.on("click", mapClick);
     let promise = [];
+    let res = [],
+      ids = [];
     if (data && data.length) {
       nProgress.start();
       data.forEach((item) => {
-        if (item.resource_url) {
-          promise.push(
-            Axios.get(item.resource_url, {
-              headers: {
-                "Access-Control-Allow-Origin": "*",
-                "Content-Type": "application/json",
-              },
-            })
-          );
+        if (this.geojsonData[item.id]) {
+          res.push(this.geojsonData[item.id]);
+        } else {
+          ids.push(item.id);
+          if (item.resource_url) {
+            promise.push(
+              Axios.get(item.resource_url, {
+                headers: {
+                  "Access-Control-Allow-Origin": "*",
+                  "Content-Type": "application/json",
+                },
+              })
+            );
+          }
         }
       });
+      let newRes = await Promise.all(promise);
+      newRes.forEach((item, index) => {
+        this.geojsonData[ids[index]] = item;
+      });
+      res = [...res, ...newRes];
     }
-    let res = await Promise.all(promise);
     nProgress.done();
     console.log(res);
     let newConfig = [];
@@ -1515,7 +1551,7 @@ function Action() {
       key: "map:projectScouting",
       content: [],
     };
-    res.forEach((item) => {
+    res.forEach((item, i) => {
       let geojson = item.data;
       let features = loadFeatureJSON(geojson, "GeoJSON");
       let iconUrl = "",
@@ -1528,28 +1564,35 @@ function Action() {
         iconUrl = icon ? require("../../../assets" + icon) : null;
         strokeColor = feature.get("strokeColor") || "rgba(255,0,0,0.3)";
         fillColor = feature.get("fillColor") || "rgba(255,0,0,0.3)";
-        let style = createStyle(type, {
+        let options = {
           showName: (type !== "Point" && index < 15) || type === "Point",
-          text: feature.get("name") || geojson.name,
+          text: geojson.hideName ? "" : feature.get("name") || geojson.name,
           iconUrl: iconUrl,
           strokeColor: strokeColor,
           fillColor: fillColor,
-          textFillColor: "rgba(255,0,0,0.9)",
+          textFillColor: "rgba(0,0,0,0.9)",
           textStrokeColor: "#FFFFFF",
           font: 14,
-        });
+        };
+        if (type === "MultiLineString") {
+          options.strokeWidth = 4;
+        }
+        let style = createStyle(type, options);
         feature.setStyle(style);
         feature.values_.isGeojson = true;
+        feature.values_.featureType = iconUrl;
         this.geoFeatures.push(feature);
       });
       if (geojson.features.length > 0) {
         if (geojson.lenged) {
           geojson.lenged.forEach((item) => {
             if (item.imgSrc) {
-              let imgSrc = item.imgSrc;
-              imgSrc = imgSrc.replace("../../../assets", "");
-              imgSrc = require("../../../assets" + imgSrc);
-              item.imgSrc = imgSrc;
+              if (item.imgSrc.includes("../../../assets")) {
+                let imgSrc = item.imgSrc;
+                imgSrc = imgSrc.replace("../../../assets", "");
+                imgSrc = require("../../../assets" + imgSrc);
+                item.imgSrc = imgSrc;
+              }
             }
             this.lenged.content.push(item);
           });
@@ -1574,6 +1617,9 @@ function Action() {
         newConfig = [];
       }
       this.Source.addFeatures(features);
+      if (features.length > 0) {
+        Event.Evt.firEvent("openLengedListPanel", true);
+      }
     });
     // Event.Evt.firEvent("updateGeojson", this.geoFeatures);
     dispatch &&
@@ -1841,6 +1887,9 @@ function Action() {
           },
         });
     }
+    if (data.length > 0) {
+      Event.Evt.firEvent("openLengedListPanel", true);
+    }
 
     // 添加区域选择
     this.addAreaSelect();
@@ -1856,6 +1905,7 @@ function Action() {
     this.removeFeatures();
     this.removeOverlay();
     if (!data.length) {
+      this.oldPlotFeatures = [];
       dispatch({
         type: "lengedList/updateLengedList",
         payload: {
@@ -3102,54 +3152,6 @@ function Action() {
     };
     let listenerKey = this.Layer.on("postrender", animate);
   };
-
-  // 更新江西数据的临时方法
-  this.loadGeoJson = async (props = {}) => {
-    let { boardId, areaTypeId } = props;
-    return await Axios.get(require("../../../assets/json/3_3857.geojson")).then(
-      (res) => {
-        let { data } = res;
-        let features = loadFeatureJSON(data, "GeoJSON");
-        let p = [];
-        features.forEach((item, index) => {
-          let type = item.getGeometry().getType();
-          let name = item.get("Name");
-          let style = createStyle(type, {
-            fillColor: "rgba(255,0,0,0.45)",
-            showName: true,
-            text: name,
-          });
-          item.setStyle(style);
-          let param = {
-            area_type_id: areaTypeId,
-            board_id: boardId,
-            collect_type: 4,
-            target: "feature",
-            title: name,
-          };
-
-          let content = {
-            coordinates: item.getGeometry().getCoordinates()[0],
-            geoType: "Polygon",
-            featureType: "rgba(255,0,0,0.45)",
-            selectName: "自定义类型",
-            name: name,
-            coordSysType: 0,
-            strokeColor: "rgba(255,255,255,1)",
-          };
-          param.content = JSON.stringify(content);
-          // console.log(param);
-          p.push(this.addCollection(param));
-        });
-        Promise.all(p).then((res) => {
-          console.log(res);
-        });
-        // this.Source.addFeatures(features)
-        // console.log(features);
-      }
-    );
-  };
-
   this.savePoint = (val) => {
     let { data = [], featureType, board_id } = val;
     if (data.length) {

@@ -15,160 +15,16 @@ import systemManageServices from "../../services/systemManage";
 import { lineDrawing, pointDrawing, polygonDrawing } from "utils/drawing";
 import { message } from "antd";
 
-@connect(({ openswitch: { isShowLeftToolBar, isInvalidToolBar } }) => ({
-  isShowLeftToolBar,
-  isInvalidToolBar,
-}))
+@connect(
+  ({ openswitch: { isShowLeftToolBar, isInvalidToolBar, openPanel } }) => ({
+    isShowLeftToolBar,
+    isInvalidToolBar,
+    openPanel,
+  })
+)
 export default class LeftToolBar extends React.Component {
   constructor(props) {
     super(props);
-    this.leftTools = [
-      {
-        name: "项目",
-        displayText: false,
-        iconfont: "&#xe756;",
-        cb: () => {
-          this.setState({
-            displayPlot: false,
-            hidePlot: false,
-            displayProject: true,
-            displayTempPlot: false,
-            displayCustomSymbolStore: false,
-            displayProjectList: false,
-            hideSystemManage: false,
-          });
-          this.deactivate();
-        },
-      },
-      {
-        name: "标记点",
-        displayText: true,
-        iconfont: "&#xe757;",
-        cb: () => {
-          this.setState({
-            displayPlot: true,
-            hidePlot: false,
-            displayProject: false,
-            displayTempPlot: false,
-            displayCustomSymbolStore: false,
-            plotType: "point",
-          });
-          this.deactivate();
-        },
-      },
-      {
-        name: "描绘",
-        displayText: true,
-        iconfont: "&#xe63b;",
-        cb: () => {
-          this.setState({
-            displayPlot: true,
-            hidePlot: false,
-            displayProject: false,
-            displayTempPlot: false,
-            displayCustomSymbolStore: false,
-            plotType: "freeLine",
-          });
-          this.deactivate();
-        },
-      },
-      {
-        name: "直线",
-        displayText: true,
-        iconfont: "&#xe624;",
-        cb: () => {
-          this.setState({
-            displayPlot: true,
-            hidePlot: false,
-            displayProject: false,
-            displayTempPlot: false,
-            displayCustomSymbolStore: false,
-            plotType: "line",
-          });
-          this.deactivate();
-        },
-      },
-      {
-        name: "自由面",
-        displayText: true,
-        iconfont: "&#xe631;",
-        cb: () => {
-          this.setState({
-            displayPlot: true,
-            hidePlot: false,
-            displayProject: false,
-            displayTempPlot: false,
-            displayCustomSymbolStore: false,
-            plotType: "freePolygon",
-          });
-          this.deactivate();
-        },
-      },
-      {
-        name: "标面",
-        displayText: true,
-        iconfont: "&#xe7cc;",
-        cb: () => {
-          this.setState({
-            displayPlot: true,
-            hidePlot: false,
-            displayProject: false,
-            displayTempPlot: false,
-            displayCustomSymbolStore: false,
-            plotType: "polygon",
-          });
-          this.deactivate();
-        },
-      },
-      {
-        name: "矩形",
-        displayText: true,
-        iconfont: "&#xe62e;",
-        cb: () => {
-          this.setState({
-            displayPlot: true,
-            hidePlot: false,
-            displayProject: false,
-            displayTempPlot: false,
-            displayCustomSymbolStore: false,
-            plotType: "rect",
-          });
-          this.deactivate();
-        },
-      },
-      {
-        name: "圆形",
-        displayText: true,
-        iconfont: "&#xe62f;",
-        cb: () => {
-          this.setState({
-            displayPlot: true,
-            hidePlot: false,
-            displayProject: false,
-            displayTempPlot: false,
-            displayCustomSymbolStore: false,
-            plotType: "circle",
-          });
-          this.deactivate();
-        },
-      },
-      {
-        name: "箭头",
-        displayText: true,
-        iconfont: "&#xe62d;",
-        cb: () => {
-          this.setState({
-            displayPlot: true,
-            hidePlot: false,
-            displayProject: false,
-            displayTempPlot: false,
-            displayCustomSymbolStore: false,
-            plotType: "arrow",
-          });
-          this.deactivate();
-        },
-      },
-    ];
     this.state = {
       displayPlot: false,
       hidePlot: false,

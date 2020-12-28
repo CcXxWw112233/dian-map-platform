@@ -50,7 +50,8 @@ function action() {
   this.center = null;
   this.moveLine = null;
   this.mounted = false;
-  this.lastSelectedFeature = null;
+  this.source = null;
+  this.lastCoordnates = null;
   this.init = (center) => {
     const layers = InitMap.map.getLayers().getArray();
     const layer = layers.find((layer) => {
@@ -86,12 +87,12 @@ function action() {
           }
         }
       });
-      let source = new Cluster({
+      this.source = new Cluster({
         distance: this.distance,
         source: this.Source,
       });
 
-      source.on("addfeature", (options) => {
+      this.source.on("addfeature", (options) => {
         // 如果加载的时候不是天地图。或者是高德底图类型切换，则不需要纠偏
 
         if (
@@ -122,30 +123,57 @@ function action() {
         }
       });
       this.mounted = true;
-      this.Layer.setSource(source);
+      this.Layer.setSource(this.source);
       InitMap.map.addLayer(this.Layer);
     }
-    // Event.Evt.on("changeAroundAboutSelectdFeatureStyle", (val) => {
-    //   if (val) {
-    //     let style = null;
-    //     if (this.lastSelectedFeature) {
-    //       style = this.lastSelectedFeature.getStyle();
-    //       style.setImage(this.getImage(false));
-    //       this.lastSelectedFeature.setStyle(style);
-    //     }
-    //     let features = this.Layer.getSource().getFeatures();
-    //     let selectedFeatures = features.filter((item) => {
-    //       return item.get("id") === val.id;
-    //     })
-    //     style = selectedFeature.getStyle();
-    //     style.setImage(this.getImage());
-    //     selectedFeature.setStyle(style);
-    //     this.lastSelectedFeature = selectedFeature;
-    //   }
-    // });
+    const me = this;
+    Event.Evt.on("changeAroundAboutSelectdFeatureStyle", (val) => {
+      if (val) {
+        let feature = null;
+        if (this.lastCoordnates) {
+          let features = me.source.getFeaturesAtCoordinate(this.lastCoordnates);
+          if (features.length > 0) {
+            me.source.removeFeature(features[0]);
+            let newStyle = me.getStyle(false, val.name);
+            feature = addFeature("Point", {
+              coordinates: this.lastCoordnates,
+            });
+            feature.setStyle(newStyle);
+            me.source.addFeature(feature);
+          }
+        }
+        let features = me.source.getFeaturesAtCoordinate(
+          TransformCoordinate([val.location.lng, val.location.lat])
+        );
+        if (features.length > 0) {
+          me.source.removeFeature(features[0]);
+        }
+        feature = addFeature("Point", {
+          coordinates: TransformCoordinate([
+            val.location.lng,
+            val.location.lat,
+          ]),
+        });
+        let newStyle = me.getStyle(true, val.name);
+        feature.setStyle(newStyle);
+        me.source.addFeature(feature);
+        this.lastCoordnates = feature.getGeometry().getCoordinates();
+      }
+    });
+    // Event.Evt.on("removeAroundAboutSelectdFeature", () => {
+    //  if (this.lastSelectedFeature) {
+    //    let style = this.getStyle(false);
+    //    this.lastSelectedFeature.setStyle(style)
+    //    let features = this.Source.getFeatures();
+    //    let index = features.findIndex(item => item.getId() === this.lastSelectedFeature.getId());
+    //    if (index > -1) {
+    //      features
+    //    }
+    //  }
+    // })
   };
 
-  this.getImage = (selected = true) => {
+  this.getStyle = (selected = true, name) => {
     let src = "";
     if (selected) {
       src = require("../../../assets/multiselect.png");
@@ -155,11 +183,12 @@ function action() {
     let style = createStyle("Point", {
       icon: {
         src: src,
-        scale: 1,
+        scale: selected ? 1 : 0.8,
         crossOrigin: "anonymous",
       },
+      text: name,
     });
-    return style.getImage();
+    return style;
   };
 
   this.createRenderList = (data) => {
@@ -243,8 +272,9 @@ function action() {
           name: item.name,
           zIndex: 60,
         });
-        const iconUrl = require("../../../assets/multiunselect.png");
-        let style = feature.getStyle();
+        feature.setId(item.id);
+        // const iconUrl = require("../../../assets/multiunselect.png");
+        // let style = feature.getStyle();
         this.points.push(feature);
       });
       this.Source.addFeatures(this.points);

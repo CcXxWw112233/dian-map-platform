@@ -169,14 +169,34 @@ export const Title = ({
             />
           </div>
         ) : (
-          <div className={styles.boardBgImg}>
-            <span>
-              暂未设置图片~~
+          <div
+            className={styles.boardBgImg}
+            style={{ background: "rgb(238,248,255)", textAlign: "center" }}
+          >
+            <span
+              style={{
+                ...(parentTool &&
+                  parentTool.getStyle(
+                    "map:collect:add:web",
+                    "project",
+                    boardId
+                  )),
+              }}
+              disabled={
+                parentTool &&
+                parentTool.getDisabled(
+                  "map:collect:add:web",
+                  "project",
+                  boardId
+                )
+              }
+            >
+              {/* 暂未设置图片~~ */}
               <UploadBgPic
                 onStart={() => Nprogress.start()}
                 onUpload={onUpload}
               >
-                <a
+                {/* <a
                   style={{
                     ...(parentTool &&
                       parentTool.getStyle(
@@ -195,7 +215,19 @@ export const Title = ({
                   }
                 >
                   点击设置
-                </a>
+                </a> */}
+                <i
+                  className={globalStyle.global_icon}
+                  style={{
+                    display: "block",
+                    fontSize: 50,
+                    color: "rgb(134,179,255)",
+                    cursor: "pointer",
+                  }}
+                >
+                  &#xe697;
+                </i>
+                <span style={{ color: "rgb(134,179,255)" }}>点击上传封面</span>
               </UploadBgPic>
             </span>
           </div>
@@ -941,6 +973,7 @@ export const ScoutingItem = ({
                                 onSelectGroup={onSelectGroup}
                                 type={Action.checkCollectionType(item.target)}
                                 data={item}
+                                parent={parent}
                                 onRemove={onCollectionRemove}
                                 onEditCollection={onEditCollection}
                                 onRemarkSave={onRemarkSave}
@@ -1045,6 +1078,7 @@ export const UploadItem = ({
   subIndex,
   group_length,
   group_id,
+  parent,
   onCheckItem = () => {},
   onMergeCancel = () => {},
 }) => {
@@ -1323,10 +1357,13 @@ export const UploadItem = ({
   };
 
   const itemClick = (val) => {
+    parent.setItemClickState(true);
     let feature = Action.findFeature(val.id);
     if (feature && feature.get("meetingRoomNum") !== undefined) {
       Action.fitFeature(feature);
-      Action.handlePlotClick(feature);
+      setTimeout(function () {
+        Action.handlePlotClick(feature);
+      }, 100);
     } else {
       Action.zoomToMap();
       setTimeout(function () {
