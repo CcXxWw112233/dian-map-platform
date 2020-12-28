@@ -252,7 +252,7 @@ export default class LeftToolBar extends React.Component {
         }
       })
       .catch((e) => {
-        message.error(e);
+        message.error(e.message);
       });
   };
 

@@ -416,7 +416,9 @@ function Action() {
       );
 
       let lastSelectedFetureStyle = this.lastSelectedFeature.getStyle();
-      lastSelectedFetureStyle.setImage(this.getImage(false, this.lastSelectedFeature));
+      lastSelectedFetureStyle.setImage(
+        this.getImage(false, this.lastSelectedFeature)
+      );
       this.layer.projectScoutingArr[index].feature.setStyle(
         lastSelectedFetureStyle
       );
@@ -1420,10 +1422,9 @@ function Action() {
 
   // 切换标绘选中状态
   this.toggleFeatureStyle = (feature) => {
-
-      this.changeLastSelectedFeatureStyle();
-      this.changeSelectedFeatureStyle(feature)
-  }
+    this.changeLastSelectedFeatureStyle();
+    this.changeSelectedFeatureStyle(feature);
+  };
 
   // 标绘数据点击回调
   this.handlePlotClick = (feature, pixel) => {
@@ -1507,6 +1508,7 @@ function Action() {
     }
     let res = await Promise.all(promise);
     nProgress.done();
+    console.log(res);
     let newConfig = [];
     this.lenged = {
       title: "项目数据",
