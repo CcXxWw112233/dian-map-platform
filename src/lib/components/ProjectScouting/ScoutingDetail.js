@@ -417,10 +417,13 @@ function Action() {
         (item) => item.feature?.get("id") === this.lastSelectedFeature.get("id")
       );
       let lastSelectedFetureStyle = this.lastSelectedFeature.getStyle();
-      lastSelectedFetureStyle.setImage(
-        this.getImage(false, this.lastSelectedFeature)
-      );
-      if (index > -1) {
+      let image = this.getImage(false, this.lastSelectedFeature);
+      if (image) {
+        lastSelectedFetureStyle.setImage(
+          this.getImage(false, this.lastSelectedFeature)
+        );
+      }
+      if (index > -1 && image) {
         this.layer.projectScoutingArr[index].feature.setStyle(
           lastSelectedFetureStyle
         );
@@ -1421,14 +1424,17 @@ function Action() {
         src = require("../../../assets/newplot.png");
       }
     }
-    let style = createStyle("Point", {
-      icon: {
-        src: src,
-        scale: selected ? 0.8 : 0.6,
-        crossOrigin: "anonymous",
-      },
-    });
-    return style.getImage();
+    if(src){
+      let style = createStyle("Point", {
+        icon: {
+          src: src,
+          scale: selected ? 0.8 : 0.6,
+          crossOrigin: "anonymous",
+        },
+      });
+      return style.getImage();
+    }
+    return null;
   };
 
   this.fitFeature = (feature) => {
