@@ -149,7 +149,7 @@ const getPolygonFillColor = (properties = {}, fillColorKeyVals = []) => {
     });
     const val = Number(properties[proerty]);
     if (val === 0) {
-      fillColor = "#E0E0E0"
+      fillColor = "#E0E0E0";
     } else {
       for (let i = 0; i < splitScope.length; i++) {
         const scopeVal = splitScope[i];
@@ -203,6 +203,7 @@ export const createStyle = function (
     offsetY: options.offsetY === undefined ? 0 : options.offsetY,
     textAlign: "left",
     overflow: true,
+    placement: options.placement || "point",
     text: options.showName
       ? fillColorKeyVals && fillColorKeyVals.length
         ? `${options.text}(${
@@ -237,12 +238,14 @@ export const createStyle = function (
             src: options.iconUrl,
             color: options.pointColor || defaultColor,
             scale: options.iconScale || 0.8,
+            anchor: [0.5, 0.5],
             ...options.icon,
           })
         : new Circle({
             radius: options.radius || 5,
             fill: fill,
             stroke: stroke,
+            anchor: [0.5, 0.5],
           }),
       text: text,
       zIndex: options.zIndex || Infinity,
@@ -281,6 +284,7 @@ export const createStyle = function (
         src: options.iconUrl,
         color: options.pointColor ? options.pointColor : defaultColor,
         scale: options.iconScale || 0.6,
+        ...options.icon
       }),
       text: text,
       zIndex: options.zIndex || Infinity,
@@ -371,9 +375,9 @@ export const drawCircle = (source, geometryFunction) => {
   return new Draw({
     source: source,
     type: "Circle",
-    geometryFunction: geometryFunction
-  })
-}
+    geometryFunction: geometryFunction,
+  });
+};
 
 // 添加source
 export const Source = function (data) {
