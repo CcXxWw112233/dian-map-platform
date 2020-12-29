@@ -60,6 +60,7 @@ export default class LeftToolBar extends React.Component {
     this.plotRef = null;
     this.projectRef = null;
     this.returnPanel = null;
+    this.isGeojsonMifyIcon = false;
     this.getPersonalPermission();
   }
 
@@ -314,6 +315,7 @@ export default class LeftToolBar extends React.Component {
           {this.state.displayPlot ? (
             <Plot
               parent={this}
+              isGeojsonMifyIcon={this.state.isGeojsonMifyIcon}
               plotType={this.state.plotType}
               hidden={this.state.hidePlot}
               onRef={this.onPlotRef}

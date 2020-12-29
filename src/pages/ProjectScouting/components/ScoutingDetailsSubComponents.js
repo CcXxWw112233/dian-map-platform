@@ -900,6 +900,8 @@ export const ScoutingItem = ({
   onMergeCancel,
   CollectionEdit = false,
   onSelectCollection,
+  onModifyGeojsonIcon = () => {},
+  onRecoverGeojsonIcon = () => {},
   onCheckItem = () => {},
   callback,
   parent,
@@ -984,6 +986,8 @@ export const ScoutingItem = ({
                                 onModifyRemark={onModifyRemark}
                                 onMergeDown={onMergeDown}
                                 onMergeUp={onMergeUp}
+                                onModifyGeojsonIcon={onModifyGeojsonIcon}
+                                onRecoverGeojsonIcon={onRecoverGeojsonIcon}
                                 index={index}
                                 length={dataSource.length}
                               />
@@ -1071,6 +1075,8 @@ export const UploadItem = ({
   onStopMofifyFeatureInDetails,
   onRemarkSave = () => {},
   onToggleChangeStyle = () => {},
+  onModifyGeojsonIcon = () => {},
+  onRecoverGeojsonIcon = () => {},
   onMergeUp,
   onMergeDown,
   index,
@@ -1144,6 +1150,16 @@ export const UploadItem = ({
       onEditCollection && onEditCollection("editCoordinate", data);
     }
     if (key === "selectGroup") {
+    }
+
+    if (key === "modifyGeojsonIcon") {
+      setVisible(false);
+      onModifyGeojsonIcon && onModifyGeojsonIcon(data);
+    }
+
+    if (key === "recoverGeojsonIcon") {
+      setVisible(false);
+      onRecoverGeojsonIcon && onRecoverGeojsonIcon(data);
     }
 
     if (key === "eidtTitle") {
@@ -1230,6 +1246,12 @@ export const UploadItem = ({
         <Menu.Item key="editCollection">关联坐标</Menu.Item>
       )}
       <Menu.Item key="eidtTitle">修改名称</Menu.Item>
+      {data.collect_type === "8" && (
+        <Menu.Item key="modifyGeojsonIcon">更换图标</Menu.Item>
+      )}
+      {data.collect_type === "8" && (
+        <Menu.Item key="recoverGeojsonIcon">恢复默认图标</Menu.Item>
+      )}
       {data.collect_type === "5" && (
         <Menu.Item key="editPlanPic">编辑</Menu.Item>
       )}

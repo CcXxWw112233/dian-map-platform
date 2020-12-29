@@ -45,7 +45,9 @@ export default class LengedList extends React.Component {
     lengedList = Array.from(new Set(lengedList));
     let content = [];
     lengedList.forEach((item) => {
-      content = [...content, ...item.content];
+      if (Array.isArray(item.content)) {
+        content = [...content, ...item.content];
+      }
     });
     return (
       <CommonPanel

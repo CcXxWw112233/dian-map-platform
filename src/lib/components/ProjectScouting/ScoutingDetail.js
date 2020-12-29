@@ -2,6 +2,7 @@ import { setSession } from "../../../utils/sessionManage";
 import listAction from "./ScoutingList";
 import PhotoSwipe from "../../../components/PhotoSwipe/action";
 import config from "../../../services/scouting";
+import geojsonResourceServices from "../../../services/geojsonResource";
 import { dateFormat, Different } from "../../../utils/utils";
 import { Pointer as PointerInteraction } from "ol/interaction";
 // import Select from 'ol/interaction/Select';
@@ -118,6 +119,8 @@ function Action() {
   this.hasMeetingRoom = null;
   this.lastSelectedFeatureStyle = null;
   this.geojsonData = {};
+  this.geojsonResources = {};
+  this.geojsonRenderData = {};
 
   Event.Evt.addEventListener("basemapchange", (key) => {
     if (!this.mounted) return;
@@ -496,20 +499,24 @@ function Action() {
             };
             if (zoom > 14) {
               if (me.oldZoom && me.oldZoom <= 14) {
-                me.renderFeaturesCollection(me.oldPlotFeatures, obj);
-                setTimeout(function () {
-                  me.changeLastSelectedFeatureStyle();
-                  me.changeSelectedFeatureStyle();
-                }, 100);
+                if (me.oldFeatures && me.oldFeatures.length > 0) {
+                  me.renderFeaturesCollection(me.oldPlotFeatures, obj);
+                  setTimeout(function () {
+                    me.changeLastSelectedFeatureStyle();
+                    me.changeSelectedFeatureStyle();
+                  }, 100);
+                }
               }
             } else {
               if (me.oldZoom && me.oldZoom > 14) {
-                obj.showFeatureName = false;
-                me.renderFeaturesCollection(me.oldPlotFeatures, obj);
-                setTimeout(function () {
-                  me.changeLastSelectedFeatureStyle();
-                  me.changeSelectedFeatureStyle();
-                }, 100);
+                if (me.oldFeatures && me.oldFeatures.length > 0) {
+                  obj.showFeatureName = false;
+                  me.renderFeaturesCollection(me.oldPlotFeatures, obj);
+                  setTimeout(function () {
+                    me.changeLastSelectedFeatureStyle();
+                    me.changeSelectedFeatureStyle();
+                  }, 100);
+                }
               }
             }
             me.oldZoom = JSON.parse(JSON.stringify(zoom));
@@ -1424,7 +1431,7 @@ function Action() {
         src = require("../../../assets/newplot.png");
       }
     }
-    if(src){
+    if (src) {
       let style = createStyle("Point", {
         icon: {
           src: src,
@@ -1512,15 +1519,31 @@ function Action() {
     }
   };
 
+  this.getGeojsonIcon = () => {
+    return this.geojsonResources;
+  };
+
+  this.reRenderGeojson = () => {
+    this.clearGeoFeatures();
+    this.renderGeoJson(this.geojsonRenderData, {
+      lenged: this.oldDispatch,
+      dispatch: this.oldDispatch,
+    });
+  };
+
   this.renderGeoJson = async (data, { lenged, dispatch }) => {
+    this.geojsonRenderData = data;
     INITMAP.map.un("click", mapClick);
     InitMap.map.on("click", mapClick);
     let promise = [];
     let res = [],
       ids = [];
+    let newIds = [];
+    let geojsonResponseData = [];
     if (data && data.length) {
       nProgress.start();
       data.forEach((item) => {
+        newIds.push(item.id);
         if (this.geojsonData[item.id]) {
           res.push(this.geojsonData[item.id]);
         } else {
@@ -1542,6 +1565,14 @@ function Action() {
         this.geojsonData[ids[index]] = item;
       });
       res = [...res, ...newRes];
+      if (newIds && newIds.length > 0) {
+        let geojsonResponse = await geojsonResourceServices.getList(
+          newIds.join(",")
+        );
+        if (geojsonResponse && geojsonResponse.code === "0") {
+          geojsonResponseData = geojsonResponse.data;
+        }
+      }
     }
     nProgress.done();
     let newConfig = [];
@@ -1556,6 +1587,7 @@ function Action() {
       let iconUrl = "",
         strokeColor = "",
         fillColor = "";
+      let currentData = [];
       features.forEach((feature, index) => {
         let type = feature.getGeometry().getType();
         let icon = feature.get("iconUrl");
@@ -1573,8 +1605,14 @@ function Action() {
           textStrokeColor: "#FFFFFF",
           font: 14,
         };
+        currentData = geojsonResponseData.filter((item) => {
+          return item.geojson_id === newIds[i];
+        });
+        if (currentData && currentData.length === 1) {
+          options.iconUrl = currentData[0].image_base64;
+        }
         if (type === "MultiLineString") {
-          options.strokeWidth = 4
+          options.strokeWidth = 4;
         }
         let style = createStyle(type, options);
         feature.setStyle(style);
@@ -1586,14 +1624,29 @@ function Action() {
         if (geojson.lenged) {
           geojson.lenged.forEach((item) => {
             if (item.imgSrc) {
+              let imgSrc = null;
               if (item.imgSrc.includes("../../../assets")) {
-                let imgSrc = item.imgSrc;
+                imgSrc = item.imgSrc;
                 imgSrc = imgSrc.replace("../../../assets", "");
                 imgSrc = require("../../../assets" + imgSrc);
                 item.imgSrc = imgSrc;
               }
+              if (currentData && currentData.length === 1) {
+                let newItem = JSON.parse(JSON.stringify(item));
+                newItem.imgSrc = currentData[0].image_base64;
+                if (!this.geojsonResources[newIds[i]]) {
+                  this.geojsonResources[newIds[i]] = newItem.imgSrc;
+                }
+                this.lenged.content.push(newItem);
+              } else {
+                if (!this.geojsonResources[newIds[i]]) {
+                  this.geojsonResources[newIds[i]] = item.imgSrc;
+                }
+                this.lenged.content.push(item);
+              }
+            } else {
+              this.lenged.content.push(item);
             }
-            this.lenged.content.push(item);
           });
         }
       }

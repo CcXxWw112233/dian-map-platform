@@ -53,6 +53,7 @@ import Meettings from "./components/Meeting";
 import PublicDataTreeComponent from "./components/PublicDataTreeComponent";
 import Plan from "./components/Plan";
 import { TransformCoordinate } from "../../lib/utils";
+import geojsonResource from "../../services/geojsonResource";
 
 const { Evt } = Event;
 const { TabPane } = Tabs;
@@ -294,7 +295,7 @@ export default class ScoutingDetails extends PureComponent {
 
   setItemClickState = (val) => {
     this.isClickInPanel = val;
-  }
+  };
 
   // 定位到位置
   scrollForFeature = (id) => {
@@ -2028,6 +2029,47 @@ export default class ScoutingDetails extends PureComponent {
     );
   };
 
+  onRecoverGeojsonIcon = (data) => {
+    geojsonResource
+      .delete(data.id)
+      .then((res) => {
+        if (res && res.code === "0") {
+          message.success("已恢复默认图标");
+          Action.reRenderGeojson();
+        }
+      })
+      .catch((e) => {
+        message.error(e.message);
+      });
+  };
+
+  onModifyGeojsonIcon = (data) => {
+    let geojsonResources = Action.getGeojsonIcon();
+    let icon = geojsonResources[data.id];
+    if (!icon) {
+      message.info("该图层不支持更换图标。");
+    } else {
+      Event.Evt.firEvent("openModifyPointPanel", icon);
+      Event.Evt.un("modifyGeojsonIcon");
+      Event.Evt.on("modifyGeojsonIcon", (icon) => {
+        geojsonResource
+          .add({
+            geojson_id: data.id,
+            image_base64: icon,
+          })
+          .then((res) => {
+            if (res && res.code === "0") {
+              message.success("更改图标完成。");
+              Action.reRenderGeojson();
+            }
+          })
+          .catch((e) => {
+            message.error(e.message);
+          });
+      });
+    }
+  };
+
   MultipleMenus = () => {
     const onHandle = ({ key }) => {
       if (key === "coordinates") {
@@ -2321,6 +2363,8 @@ export default class ScoutingDetails extends PureComponent {
                           "cancel",
                           item
                         )}
+                        onRecoverGeojsonIcon={this.onRecoverGeojsonIcon}
+                        onModifyGeojsonIcon={this.onModifyGeojsonIcon}
                       />
                     </Collapse.Panel>
                   );
