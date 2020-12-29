@@ -573,9 +573,13 @@ function Action() {
         me.layer.plotEdit.removePlotOverlay2();
         me.layer.projectScoutingArr.forEach((item) => {
           if (item.feature) {
-            item.feature.values_.meetingRoomNum = Math.round(Math.random() * 3);
-            const ele = featureOverlay(item.feature.get("meetingRoomNum"));
-            me.layer.plotEdit.createPlotOverlay2(ele, item);
+            if (item.feature.get("meetingRoomNum")) {
+              item.feature.values_.meetingRoomNum = Math.round(
+                Math.random() * 3
+              );
+              const ele = featureOverlay(item.feature.get("meetingRoomNum"));
+              me.layer.plotEdit.createPlotOverlay2(ele, item);
+            }
           }
         });
       }
