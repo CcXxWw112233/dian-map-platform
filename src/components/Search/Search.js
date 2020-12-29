@@ -13,6 +13,7 @@ import { BASIC } from "../../services/config";
 import { setSession, getSession } from "utils/sessionManage";
 import Event from "../../lib/utils/event";
 import areaSearchAction from "@/lib/components/Search/AreaSearch";
+import NewAreaPanel from "./NewAreaPanel"
 
 import { connect } from "dva";
 
@@ -311,6 +312,7 @@ export default class Search extends React.Component {
             <DownOutlined />
           </Button>
         </Dropdown>
+        {/* <NewAreaPanel></NewAreaPanel> */}
         <Dropdown
           overlay={locationPanel}
           visible={this.state.searchPanelVisible}

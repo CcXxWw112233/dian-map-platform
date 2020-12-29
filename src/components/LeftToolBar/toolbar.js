@@ -190,6 +190,21 @@ export default class ToolBar extends React.Component {
       operatorListLength: 0,
       update: false,
     };
+    Event.Evt.on("openModifyPointPanel", (icon) => {
+      this.parent.setState({
+        displayPlot: true,
+        hidePlot: false,
+        displayProject: false,
+        displayTempPlot: false,
+        displayCustomSymbolStore: false,
+        plotType: "point",
+        displaySystemManage: false,
+      });
+      this.parent.deactivate();
+      this.parent.isGeojsonMifyIcon = true;
+      this.hideSearchBtn();
+      this.openPanel();
+    })
   }
 
   openPanel = () => {
