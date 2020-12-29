@@ -301,7 +301,7 @@ export default class Search extends React.Component {
     );
     return (
       <div className={styles.wrap} style={this.props.style}>
-        {/* <Dropdown
+        <Dropdown
           overlay={areaPanel}
           trigger="click"
           visible={this.state.areaPanelVisible}
@@ -311,8 +311,8 @@ export default class Search extends React.Component {
             {this.props.locationName}
             <DownOutlined />
           </Button>
-        </Dropdown> */}
-        <NewAreaPanel></NewAreaPanel>
+        </Dropdown>
+        {/* <NewAreaPanel></NewAreaPanel> */}
         <Dropdown
           overlay={locationPanel}
           visible={this.state.searchPanelVisible}
