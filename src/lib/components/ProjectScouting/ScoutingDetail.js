@@ -784,7 +784,7 @@ function Action() {
     let coor = [+data.coordinate_x, +data.coordinate_y];
     if (!InitMap.checkNowIsGcj02System()) {
       // 需要纠偏
-      let dic = InitMap.systemDic[InitMap.baseMapKey];
+      let dic = InitMap.systemDic[InitMap.baseMapKey] || function (val) { return val };
       coor = dic(coor[0], coor[1]);
     }
     this.addAnimatePoint({
