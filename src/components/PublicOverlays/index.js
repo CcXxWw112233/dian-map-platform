@@ -51,3 +51,17 @@ Object.defineProperty(exports, "areaDetailOverlay", {
     return require('./areaDetailOverlay/index').default;
   }
 });
+
+Object.defineProperty(exports, "SetCoordinateForCollection", {
+  enumerable: true,
+  get: function get() {
+    return require('./setCoordinateForCollection/index').default;
+  }
+})
+
+Object.defineProperty(exports, "DragCircleRadius", {
+  enumerable: true,
+  get: function get() {
+    return require('./dragCircleRadius/index').default;
+  }
+})

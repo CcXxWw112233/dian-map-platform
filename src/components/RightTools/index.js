@@ -8,16 +8,13 @@ import LengedList from "../LengedList/index";
 import LocalPOI from "../LocalPOI/index";
 import Zoom from "../Zoom/index";
 import ToolBox from "../ToolBox/index";
+import { myFullScreen } from "utils/drawing/public";
+import Event from "../../lib/utils/event";
 
 export default class RightTools extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      selectedIndex: -1,
-      lengedListPanelVisible: false,
-      POIPanelVisible: false,
-      toolBoxPanelVisible: false,
-    };
+    this.isToolItem = false;
     this.tools = [
       {
         name: "定位",
@@ -29,14 +26,48 @@ export default class RightTools extends React.Component {
         },
       },
       {
+        name: "全屏",
+        iconfont: "&#xe7f3;",
+        cb: () => {
+          myFullScreen.change();
+          this.setState(
+            {
+              isFull: !this.state.isFull,
+            },
+            () => {
+              if (this.state.isFull) {
+                this.setState({
+                  fullcreenIcon: "&#xe7f7;",
+                });
+              } else {
+                this.setState({
+                  fullcreenIcon: "&#xe7f3;",
+                });
+              }
+            }
+          );
+        },
+      },
+      {
         name: "图例",
         hasPanel: true,
         cb: (args) => {
           this.toggleButtonStyle(args);
+          let showToolBox = !this.state.POIPanelVisible;
+          if (this.state.toolBoxPanelVisible) {
+            showToolBox = false;
+          }
+          this.child &&
+            this.child.setState({
+              tools: [...this.child.newTools, ...this.child.tools],
+            });
+          this.isToolItem = false;
           this.setState(
             {
               lengedListPanelVisible: !this.state.lengedListPanelVisible,
               POIPanelVisible: false,
+              tools: [],
+              showToolBox: showToolBox,
             },
             () => {
               if (!this.state.lengedListPanelVisible) {
@@ -53,10 +84,21 @@ export default class RightTools extends React.Component {
         hasPanel: true,
         cb: (args) => {
           this.toggleButtonStyle(args);
+          let showToolBox = !this.state.POIPanelVisible;
+          if (this.state.toolBoxPanelVisible) {
+            showToolBox = false;
+          }
+          this.child &&
+            this.child.setState({
+              tools: [...this.child.newTools, ...this.child.tools],
+            });
+          this.isToolItem = false;
           this.setState(
             {
               lengedListPanelVisible: false,
               POIPanelVisible: !this.state.POIPanelVisible,
+              tools: [],
+              showToolBox: showToolBox,
             },
             () => {
               if (!this.state.POIPanelVisible) {
@@ -77,10 +119,11 @@ export default class RightTools extends React.Component {
           this.setState(
             {
               toolBoxPanelVisible: !this.state.toolBoxPanelVisible,
+              hiddenIndex: 4,
             },
             () => {
               if (!this.state.toolBoxPanelVisible) {
-                this.child.deactivate();
+                this.child && this.child.deactivate();
                 this.setState({
                   selectedIndex: -1,
                 });
@@ -90,6 +133,53 @@ export default class RightTools extends React.Component {
         },
       },
     ];
+    this.divElement = null;
+    this.newTools = [
+      {
+        name: "工具箱",
+        iconfont: "&#xe763;",
+        hasPanel: true,
+        cb: (args) => {
+          this.isToolItem = true;
+          this.toggleButtonStyle(args);
+          this.setState(
+            {
+              toolBoxPanelVisible: !this.state.toolBoxPanelVisible,
+              hiddenIndex: 4,
+            },
+            () => {
+              this.child &&
+                this.child.setState({
+                  tools: [...this.child.newTools, ...this.child.tools],
+                });
+              if (!this.state.toolBoxPanelVisible) {
+                this.child && this.child.deactivate();
+                this.setState({
+                  selectedIndex: -1,
+                });
+              }
+            }
+          );
+        },
+      },
+    ];
+    this.state = {
+      selectedIndex: -1,
+      isFull: false,
+      lengedListPanelVisible: false,
+      POIPanelVisible: false,
+      toolBoxPanelVisible: false,
+      fullcreenIcon: "&#xe7f3;",
+      hiddenIndex: -1,
+      showToolBox: false,
+      tools: this.tools,
+      isToolItem: false,
+    };
+    Event.Evt.on("openLengedListPanel", (value) => {
+      this.setState({
+        lengedListPanelVisible: value,
+      });
+    });
   }
 
   // 切换按钮样式
@@ -98,57 +188,151 @@ export default class RightTools extends React.Component {
       selectedIndex: index,
     });
   };
+
+  componentDidMount() {
+    const me = this;
+    document.getElementById("MapsView").addEventListener("click", (e) => {
+      e.stopImmediatePropagation();
+      me.setState({
+        toolBoxPanelVisible: false,
+        hiddenIndex: -1,
+        selectedIndex: -1,
+      });
+    });
+  }
   onRef = (ref) => {
     this.child = ref;
   };
   render() {
     return (
-      <div className={styles.wrapper}>
-        <ul>
-          <li>
-            <Zoom></Zoom>
-          </li>
-          {this.tools.map((item, index) => {
-            const icon = item.iconfont ? (
-              <i
-                className={globalStyle.global_icon}
-                dangerouslySetInnerHTML={{ __html: item.iconfont }}
-              ></i>
-            ) : null;
-            const btnSelectedStyle =
-              this.state.selectedIndex === index && item.hasPanel === true
-                ? {
-                    color: "#fff",
-                    backgroundColor: "rgba(106,113,145,1)",
-                    border: "none",
+      <div className={styles.wrapper} style={{ bottom: 16 }} ref="rightTools">
+        <div className={styles.toolbar} ref="toolbar1">
+          <ul>
+            <li>
+              <Zoom parent={this}></Zoom>
+            </li>
+            {this.state.tools.map((item, index) => {
+              const icon = item.iconfont ? (
+                <i
+                  className={globalStyle.global_icon}
+                  dangerouslySetInnerHTML={{
+                    __html:
+                      item.name !== "全屏"
+                        ? item.iconfont
+                        : this.state.fullcreenIcon,
+                  }}
+                  ref={item.name}
+                ></i>
+              ) : null;
+              const btnSelectedStyle =
+                this.state.selectedIndex === index && item.hasPanel === true
+                  ? {
+                      color: "#fff",
+                      backgroundColor: "rgba(106,113,145,1)",
+                      border: "none",
+                    }
+                  : {};
+              return (
+                <li
+                  key={`${item.name}-${index}`}
+                  style={
+                    index === this.state.hiddenIndex
+                      ? { visibility: "hidden" }
+                      : {}
                   }
-                : {};
-            return (
-              <li key={`${item.name}-${index}`}>
-                <Tooltip title={item.name} placement="left">
-                  <Button
-                    shape="circle"
-                    size="large"
-                    icon={icon}
-                    onClick={() => {
-                      item.cb(index);
+                >
+                  <Tooltip title={item.name} placement="left">
+                    <Button
+                      shape="circle"
+                      size="large"
+                      icon={icon}
+                      onClick={() => {
+                        item.cb(index);
+                      }}
+                      style={btnSelectedStyle}
+                    >
+                      {item.iconfont ? "" : item.name}
+                    </Button>
+                  </Tooltip>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+        {this.state.showToolBox === true ? (
+          <div
+            className={styles.toolbar}
+            style={{ transform: "translateX(-270px)" }}
+            ref="toolbar2"
+          >
+            <ul>
+              {this.newTools.map((item, index) => {
+                const icon = item.iconfont ? (
+                  <i
+                    className={globalStyle.global_icon}
+                    dangerouslySetInnerHTML={{
+                      __html:
+                        item.name !== "全屏"
+                          ? item.iconfont
+                          : this.state.fullcreenIcon,
                     }}
-                    style={btnSelectedStyle}
+                    ref={`${item.name}2`}
+                  ></i>
+                ) : null;
+                const btnSelectedStyle =
+                  this.state.selectedIndex === index && item.hasPanel === true
+                    ? {
+                        color: "#fff",
+                        backgroundColor: "rgba(106,113,145,1)",
+                        border: "none",
+                      }
+                    : {};
+                return (
+                  <li
+                    key={`${item.name}-${index}`}
+                    style={
+                      index === this.state.hiddenIndex
+                        ? { visibility: "hidden" }
+                        : {}
+                    }
                   >
-                    {item.iconfont ? "" : item.name}
-                  </Button>
-                </Tooltip>
-              </li>
-            );
-          })}
-        </ul>
+                    <Tooltip title={item.name} placement="left">
+                      <Button
+                        shape="circle"
+                        size="large"
+                        icon={icon}
+                        onClick={() => {
+                          item.cb(index);
+                          this.setState({
+                            toolBoxPanelVisible: true,
+                            showToolBox: false,
+                            isToolItem: true,
+                          });
+                        }}
+                        style={btnSelectedStyle}
+                      >
+                        {item.iconfont ? "" : item.name}
+                      </Button>
+                    </Tooltip>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ) : null}
         {this.state.lengedListPanelVisible ? (
           <LengedList
             closePanel={() => {
               this.setState({
                 selectedIndex: -1,
                 lengedListPanelVisible: false,
+                tools: this.tools,
+                showToolBox: false,
               });
+              this.child &&
+                this.child.setState({
+                  tools: this.child.tools,
+                });
             }}
           ></LengedList>
         ) : null}
@@ -158,12 +342,23 @@ export default class RightTools extends React.Component {
               this.setState({
                 selectedIndex: -1,
                 POIPanelVisible: false,
+                tools: this.tools,
+                showToolBox: false,
               });
+              this.child &&
+                this.child.setState({
+                  tools: this.child.tools,
+                });
             }}
           ></LocalPOI>
         ) : null}
         {this.state.toolBoxPanelVisible ? (
-          <ToolBox onRef={this.onRef}></ToolBox>
+          <ToolBox
+            onRef={this.onRef}
+            parent={this}
+            ref="toolbox"
+            istoolItem={this.isToolItem}
+          ></ToolBox>
         ) : null}
       </div>
     );

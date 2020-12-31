@@ -29,9 +29,9 @@ export const jumpToPoi = (data, keywords) => {
     address: data.address,
     keywords: keywords,
     distance: data.distance + "米",
-    cb: function() {
+    cb: function () {
       mapApp.map.removeOverlay(poiLayer.poi2Overlay);
-    }
+    },
   };
   let poi2Ele = new LPPoiOverlay(data2);
   poi2Ele = new baseOverlay(poi2Ele, {
@@ -41,7 +41,7 @@ export const jumpToPoi = (data, keywords) => {
   const poi2Overlay = createOverlay(poi2Ele, {
     offset: [-10, -90],
   });
-  poiLayer.poi2Overlay = poi2Overlay
+  poiLayer.poi2Overlay = poi2Overlay;
   newFeature.overlay = poi2Overlay;
   mapApp.map.addOverlay(newFeature.overlay);
   newFeature.overlay &&
@@ -53,6 +53,7 @@ export const poiLayer = {
   layer: null,
   source: null,
   poi2Overlay: null,
+  poiList: [],
   init: function () {
     if (!this.layer) {
       let layers = mapApp.map.getLayers();
@@ -125,10 +126,18 @@ export const poiLayer = {
       ...data,
     });
     newFeature.setStyle(style);
+    this.poiList.push(newFeature);
     this.source.addFeature(newFeature);
   },
   removePoi: function () {
-    this.source && this.source.clear();
+    // this.source && this.source.clear();
+    this.poi2Overlay && mapApp.map.removeOverlay(this.poi2Overlay);
+    this.poi2Overlay = null;
+    this.poiList.forEach((feature) => {
+      if (this.source.getFeatureByUid(feature.ol_uid)) {
+        this.source.removeFeature(feature);
+      }
+    });
     this.poi2Overlay && mapApp.map.removeOverlay(this.poi2Overlay);
   },
 };

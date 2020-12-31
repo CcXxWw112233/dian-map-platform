@@ -19,6 +19,7 @@ export default function EditDescription (props){
     var clp = (e.originalEvent || e).clipboardData;
     if (clp === undefined || clp === null) {
         text = window.clipboardData.getData('text') || ''
+
         if (text !== '') {
         if (window.getSelection) {
             var newNode = document.createElement('span')
@@ -80,25 +81,35 @@ export default function EditDescription (props){
         { isEdit ? <MyIcon type="icon-bianzu7beifen"/> : <MyIcon type="icon-huabi" onClick={()=> toEdit()}/>}
       </span>)
       :"" }
-        <ReactMarkdown source={text || '未添加备注哦'}
-        className={`${styles.data_remark} ${ props.isMaxHeight ? styles.maxHeight :""} ${isEdit ? styles.hidden: styles.show}`}
-        />
-        <textarea className={`${styles.data_remark}
-        ${ props.isMaxHeight ? styles.maxHeight :""}
-        ${isEdit ? styles.activeEdit :""} ${!isEdit ? styles.hidden: styles.show}`}
-        suppressContentEditableWarning
-        // onPaste={textFormat}
-        ref={content}
-        // defaultValue={text}
-        value={text}
-        placeholder="未添加备注哦"
-        onBlur={() => setTimeout(()=> {editEnd()},100)}
-        onDoubleClick={toEdit}
-        readOnly={!isEdit}
-        onInput={(e)=>{setText(e.target.value.trim())}}
-        contentEditable={isEdit}>
-          {data?.description?.trim()}
-        </textarea>
+        {
+          !isEdit ? (
+            <div onDoubleClick={toEdit}>
+              <ReactMarkdown source={text || '未添加备注哦'}
+              className={`${styles.data_remark} ${ props.isMaxHeight ? styles.maxHeight :""}`}
+              />
+            </div>
+          ):
+          (
+            <textarea className={`${styles.data_remark}
+            ${ props.isMaxHeight ? styles.maxHeight :""}
+            ${isEdit ? styles.activeEdit :""}`}
+            suppressContentEditableWarning
+            // onPaste={textFormat}
+            ref={content}
+            // defaultValue={text}
+            value={text}
+            placeholder="未添加备注哦"
+            onBlur={() => setTimeout(()=> {editEnd()},100)}
+            onDoubleClick={toEdit}
+            readOnly={!isEdit}
+            onInput={(e)=>{setText(e.target.value)}}
+            contentEditable={isEdit}>
+              {data?.description?.trim()}
+            </textarea>
+          )
+        }
+
+
     </div>
   )
 }

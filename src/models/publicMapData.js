@@ -11,6 +11,7 @@ export default {
       { indeterminate: false, checkAll: false, checkedList: [] },
       { indeterminate: false, checkAll: false, checkedList: [] },
     ],
+    checkedKeys: [],
   },
   effects: {
     *updateSateByIndex({ payload }, { put, select }) {
@@ -23,7 +24,7 @@ export default {
       yield put({
         type: "updateDataItemStateList",
         payload: {
-          dataItemStateList
+          dataItemStateList,
         },
       });
     },

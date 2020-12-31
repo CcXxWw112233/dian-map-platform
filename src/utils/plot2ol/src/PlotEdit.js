@@ -77,9 +77,9 @@ class PlotEdit extends Observable {
         dom,
         "mousedown",
         () => {
-          if (!this.activePlot.isScouting) {
-            this.layer.saveCb && this.layer.saveCb();
-          }
+          // if (!this.activePlot.isScouting) {
+          //   this.layer.saveCb && this.layer.saveCb();
+          // }
         },
         this
       );
@@ -185,7 +185,7 @@ class PlotEdit extends Observable {
       () => {
         window.featureOperator &&
           this.layer.removeFeature(window.featureOperator);
-        window.featureOperator && delete window.featureOperator;
+        // window.featureOperator && delete window.featureOperator;
 
         // 标绘回调更新redux
         const tempList = this.layer.getArrDifference(
@@ -213,6 +213,28 @@ class PlotEdit extends Observable {
       const lastOverlay = this.map.getOverlayById(overlayId);
       this.map.removeOverlay(lastOverlay);
     }
+  }
+  createPlotOverlay2(ele, operator) {
+    let feature = operator.feature;
+    let type = feature.getGeometry().getType();
+    if (type === "Point") {
+      let coords = feature.getGeometry().getCoordinates();
+      const overlay = new Overlay({
+        id: `${operator.guid}-total`,
+        element: ele,
+        position: coords,
+        offset: [0, -20],
+        positioning: "bottom-center",
+      });
+      this.layer.plotOverlayArr.push(overlay);
+      this.map.addOverlay(overlay);
+    }  
+  }
+
+  removePlotOverlay2() {
+    this.layer.plotOverlayArr.forEach(item => {
+      this.map.removeOverlay(item)
+    })
   }
 
   // 创建标绘的overlay
@@ -305,8 +327,9 @@ class PlotEdit extends Observable {
     this.controlPoints = [];
     var cPnts = this.getControlPoints();
     // cPnts = douglasPeucker(cPnts, 100);
+
+    this.createSaveBtn(cPnts[cPnts.length - 1]);
     if (!isScouting) {
-      this.createSaveBtn(cPnts[cPnts.length - 1]);
       this.createDelBtn(cPnts[cPnts.length - 1]);
     }
     for (var i = 0; i < cPnts.length; i++) {

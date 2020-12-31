@@ -4,6 +4,8 @@ import {
   defaults as defaultInteractions,
   DragRotateAndZoom,
   DragPan,
+  Modify,
+  Select,
 } from "ol/interaction";
 
 import TileLayer from "ol/layer/Tile";
@@ -23,6 +25,7 @@ const initMap = function () {
     lastBaseMapKey: "",
     baseMapKey: "",
     operationLayers: [],
+    adcode: "",
     baseMapKeys: ["gd_vec|gd_img|gg_img", "td_vec|td_img|td_ter"],
     systemDic: {
       gd_vec: wgs84_to_gcj02,
@@ -32,12 +35,34 @@ const initMap = function () {
       td_img: gcj02_to_wgs84,
       td_ter: gcj02_to_wgs84,
     },
+    // 检查现在的图层是否是Gcj02类型
+    checkNowIsGcj02System: function(){
+      let arr1 = ['gd_vec','gd_img','gg_img'];
+      return arr1.includes(this.baseMapKey);
+    },
+    checkUpdateMapSystem: function(to){
+      let arr1 = ['gd_vec','gd_img','gg_img'];
+      let arr2 = ['td_vec','td_img','td_ter'];
+      // 如果从两个分组中找出都找除了from和to，那代表是不同坐标系转换
+      if((arr1.includes(this.lastBaseMapKey) && arr2.includes(to)) ||
+      (arr2.includes(this.lastBaseMapKey) && arr1.includes(to))){
+        // 需要更新
+        return true;
+      }
+      return false;
+    },
     init: function (mapId) {
       this.mapId = mapId;
       this.status = "rendering";
+      var select = new Select({
+        wrapX: false,
+      });
+      let modify = new Modify({
+        features: select.getFeatures(),
+      });
       return new Promise((resolve, reject) => {
         this.map = new Map({
-          interactions: defaultInteractions().extend([new DragRotateAndZoom()]),
+          interactions: defaultInteractions().extend([ new DragRotateAndZoom()]),
           layers: [],
           target: mapId,
           view: this.initView(),

@@ -1,4 +1,32 @@
-import axios from 'axios'
+import axios from 'axios';
+import { BASIC } from '../services/config';
+import checkResponse from '../services/checkResponse';
+import NProgress from 'nprogress';
+
+export const DefaultUpload = (file, data)=>{
+  return new Promise((resolve,reject) => {
+    NProgress.start();
+    let param = new FormData();
+    param.append('file',file);
+    for(let key in data){
+      param.append(key,data[key])
+    }
+    axios.post('/api/map/file/upload', param , {
+      headers:{
+        Authorization:BASIC.getUrlParam.token
+      }
+    }).then(resp => {
+      if(checkResponse(resp.data)){
+        resolve(resp.data);
+      }else reject(resp);
+      NProgress.done();
+    }).catch(err => {
+      reject(err)
+      NProgress.done();
+    })
+  })
+
+}
 
 export const UploadFile = (file,url,data,token ,callback,event)=>{
     let formData = new FormData();
@@ -41,6 +69,6 @@ export const UploadFile = (file,url,data,token ,callback,event)=>{
     //     })
     // }
     // xhr.setRequestHeader('Authorization',token);
-    
+
     // xhr.send(formData);
 }

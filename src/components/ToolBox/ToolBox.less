@@ -2,22 +2,28 @@
   margin: 0;
   padding: 5px 10px;
   position: absolute;
-  right: 65px;
+  right: 0px;
   bottom: 8px;
   font-size: 12px;
-  width: 350px;
-  height: 64px;
+  width: 210px;
+  height: 40px;
   background: rgba(106, 113, 145, 0.9);
   border-radius: 18px;
   display: -ms-flexbox;
   display: flex;
   -ms-flex-direction: row;
   flex-direction: row;
+  &.vertical {
+    padding: 10px 5px;
+    height: 10vw;
+    max-width: 40px;
+    flex-direction: column;
+  }
   .content {
-    width: 48px;
-    height: 48px;
+    width: 32px;
+    height: 32px;
     /* padding: 4px; */
-    margin: 4px;
+    // margin: 4px;
     display: -ms-flexbox;
     display: flex;
     -ms-flex-direction: column;

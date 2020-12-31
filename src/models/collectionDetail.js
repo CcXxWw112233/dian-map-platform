@@ -6,7 +6,10 @@ export default {
     showCollectionsModal: false,
     zIndex:10,
     type:'view',
-    isImg: true
+    isImg: true,
+    small: false,
+    selectPoi: "",
+    selectedFeature: null
   },
   effects:{
 

@@ -19,26 +19,20 @@ export default class TempPlot extends React.Component {
       featureOperatorList: [],
       displayCreateProject: false,
       openPanel: true,
+      isInProject: false,
     };
     this.plotLayer = null;
   }
   componentDidMount() {
     this.plotLayer = plotEdit.getPlottingLayer();
     const { parent } = this.props;
-    this.operatorDeactive = function (e) {
-      if (!e.feature_operator.isScouting) {
-        let operator = e.feature_operator;
-        parent.updateFeatureOperatorList(operator);
-        window.featureOperator && delete window.featureOperator;
-      }
-    };
     this.plotLayer &&
       this.plotLayer.on(FeatureOperatorEvent.DEACTIVATE, this.operatorDeactive);
     let newFeatureOperatorList = [];
     parent.featureOperatorList.forEach((operator, index) => {
       let feature = operator.feature;
       if (feature && feature.getGeometry()) {
-        feature.getGeometry().updatePlot(false);
+        feature.getGeometry().updatePlot && feature.getGeometry().updatePlot(false);
         newFeatureOperatorList.push(operator);
       }
     });
@@ -59,9 +53,8 @@ export default class TempPlot extends React.Component {
   }
   componentWillUnmount() {
     plotEdit.deactivate();
-    this.plotLayer.un(FeatureOperatorEvent.DEACTIVATE, this.operatorDeactive);
     this.state.featureOperatorList.forEach((operator) => {
-      operator.feature.getGeometry().updatePlot(true);
+      operator.feature.getGeometry().updatePlot && operator.feature.getGeometry().updatePlot(true);
     });
   }
   onChange = (e) => {
@@ -114,6 +107,7 @@ export default class TempPlot extends React.Component {
       message.info("请先选择需要保存的标绘。");
     }
   };
+
   onCheckAllChange = (e) => {
     if (e.target.checked) {
       let newCheckedList = [];
@@ -139,13 +133,15 @@ export default class TempPlot extends React.Component {
     parent.hideTempPlotPanel();
   };
 
-  handleEditClick = (featureOperator) => {
+  handleEditClick = (e, featureOperator) => {
+    e.stopPropagation();
     const { parent } = this.props;
     parent.activeFeatureOperator = featureOperator;
-    this.props.displayPlotPanel(featureOperator.attrs);
+    this.props.displayPlotPanel(featureOperator.attrs, featureOperator, true);
   };
 
-  handleDelClick = (featureOperator) => {
+  handleDelClick = (e, featureOperator) => {
+    e.stopPropagation();
     if (featureOperator && featureOperator.guid) {
       let newList = [...this.state.featureOperatorList];
       const index = newList.findIndex((item) => {
@@ -183,7 +179,7 @@ export default class TempPlot extends React.Component {
           image = attrs.featureType;
         } else {
           tempIconUrl = attrs.featureType.replace("img", "");
-          image = require("../../assets" + tempIconUrl);
+          image = require("../../../assets" + tempIconUrl);
         }
         style = {
           ...style,
@@ -229,6 +225,18 @@ export default class TempPlot extends React.Component {
     return null;
   };
 
+  deleteSelectedFeature = () => {
+    let arr = this.getSelectedData();
+    if (arr.length > 0) {
+      let arr = this.getSelectedData();
+      arr.forEach((operator) => {
+        this.handleDelClick(operator);
+      });
+    } else {
+      message.info("请先选择需要删除的标绘。");
+    }
+  };
+
   getSelectedData = () => {
     let { parent } = this.props;
     let { checkedList } = this.state;
@@ -242,13 +250,14 @@ export default class TempPlot extends React.Component {
     return list;
   };
 
-  handleRowClick = (featureOperator) => {
+  handleRowClick = (e, featureOperator) => {
+    e.stopPropagation();
     if (featureOperator && featureOperator.guid) {
       this.setState({
         selectedGuid: featureOperator.guid,
       });
-      this.plotLayer.setToTop(featureOperator);
       if (featureOperator.feature) {
+        this.plotLayer.setToTop(featureOperator);
         plotEdit.map
           .getView()
           .fit(featureOperator.feature?.getGeometry().getExtent(), {
@@ -277,7 +286,7 @@ export default class TempPlot extends React.Component {
           {this.state.featureOperatorList.length > 0 ? (
             <div
               className={`${styles.content} ${globalStyle.autoScrollY}`}
-              style={{ height: "calc(100% - 70px)", padding: 0 }}
+              style={{ height: "calc(100% - 80px)", padding: 0 }}
             >
               <div className={styles.checkAll} style={{ marginLeft: 10 }}>
                 <Checkbox
@@ -299,7 +308,7 @@ export default class TempPlot extends React.Component {
                         ? styles.active
                         : ""
                     }`}
-                    onClick={() => this.handleRowClick(featureOperator)}
+                    onClick={(e) => this.handleRowClick(e, featureOperator)}
                   >
                     <div
                       style={{
@@ -338,7 +347,9 @@ export default class TempPlot extends React.Component {
                           marginRight: 5,
                           color: "rgba(134,140,164,1)",
                         }}
-                        onClick={() => this.handleEditClick(featureOperator)}
+                        onClick={(e) =>
+                          this.handleEditClick(e, featureOperator)
+                        }
                       >
                         &#xe759;
                       </i>
@@ -348,7 +359,7 @@ export default class TempPlot extends React.Component {
                           fontSize: 18,
                           color: "rgba(134,140,164,1)",
                         }}
-                        onClick={() => this.handleDelClick(featureOperator)}
+                        onClick={(e) => this.handleDelClick(e, featureOperator)}
                       >
                         &#xe75a;
                       </i>
@@ -359,9 +370,39 @@ export default class TempPlot extends React.Component {
             </div>
           ) : null}
           {this.state.featureOperatorList.length > 0 ? (
-            <div className={styles.footer}>
-              <Button type="primary" block onClick={this.saveToProject}>
-                转存到项目
+            <div
+              className={styles.footer}
+              style={{ display: "flex", flexDirection: "row" }}
+            >
+              <Button
+                block
+                onClick={this.deleteSelectedFeature}
+                style={{
+                  width: 140,
+                  height: 36,
+                  margin: "12px auto",
+                  background: "rgba(255,85,85,0.2)",
+                  borderRadius: 4,
+                  border: "2px solid rgba(255,85,85,0.2)",
+                  color: "rgba(255, 85, 85, 1)",
+                }}
+              >
+                删除
+              </Button>
+              <Button
+                block
+                onClick={this.saveToProject}
+                style={{
+                  width: 140,
+                  height: 36,
+                  margin: "12px auto",
+                  background: "rgba(163,205,255,0.2)",
+                  borderRadius: 4,
+                  border: "2px solid rgba(127,167,255,1)",
+                  color: "rgba(102, 144, 255, 1)",
+                }}
+              >
+                转存项目/分组
               </Button>
             </div>
           ) : (

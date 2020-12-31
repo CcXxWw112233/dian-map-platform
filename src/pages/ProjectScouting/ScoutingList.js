@@ -7,8 +7,11 @@ import Action from "../../lib/components/ProjectScouting/ScoutingList";
 import ScoutingItem from "./components/ScoutingItem";
 import { message } from "antd";
 import Empty from "../../components/Empty";
-
+import PermissionModal from "./components/permissionModal";
 import Bitmap from "../../assets/Bitmap.png";
+import Event from "../../lib/utils/event";
+import { feature } from "@turf/turf";
+import { addFeature } from "../../lib/utils";
 
 const ScoutingAddBtn = ({ cb }) => {
   return (
@@ -26,17 +29,49 @@ export default class ScoutingList extends PureComponent {
     super(props);
     this.state = {
       projects: [],
+      permissionModalVisible: false,
+      selectedProject: null,
     };
+    this.projectDatas = [];
   }
 
   componentDidMount() {
     // 检查数据
     this.renderBoardList();
-    Action.init();
+    const { dispatch } = this.props;
+    Action.init(dispatch);
     Action.on("projectClick", (val) => {
       // console.log(val)
       this.handleClick(val);
     });
+    Event.Evt.on("searchProject", (data) => {
+      let tmpArr = [];
+      if (!data) {
+        tmpArr = this.projectDatas;
+      } else {
+        tmpArr = this.projectDatas.filter(
+          (item) => item[data.type] === data.code
+        );
+      }
+      if (!Array.isArray(tmpArr)) {
+        tmpArr = [];
+      }
+      this.setState({
+        projects: tmpArr,
+      });
+      const { dispatch } = this.props;
+      dispatch({
+        type: "scoutingProject/updateList",
+        payload: {
+          projectList: tmpArr,
+          cb: this.handleClick.bind(this),
+        },
+      });
+      this.renderPoint(tmpArr);
+    });
+  }
+  componentWillUnmount() {
+    Action.mounted = false;
   }
 
   renderBoardList = () => {
@@ -61,6 +96,7 @@ export default class ScoutingList extends PureComponent {
           this.setState({
             projects: res.data,
           });
+          this.projectDatas = res.data;
           dispatch({
             type: "scoutingProject/updateList",
             payload: {
@@ -151,7 +187,7 @@ export default class ScoutingList extends PureComponent {
           },
           () => {
             Action.renderProjectPoint(projects);
-            Action.projects = projects
+            Action.projects = projects;
             dispatch({
               type: "scoutingProject/updateList",
               payload: {
@@ -175,6 +211,7 @@ export default class ScoutingList extends PureComponent {
       remark,
       lng: val.coordinates[0],
       lat: val.coordinates[1],
+      radius: val.radius,
     })
       .then((res) => {
         let { data } = res;
@@ -194,6 +231,7 @@ export default class ScoutingList extends PureComponent {
                 projectList: this.state.projects,
               },
             });
+            this.getProjectList();
           }
         );
         try {
@@ -258,23 +296,44 @@ export default class ScoutingList extends PureComponent {
 
   // 添加按钮点击事件
   handleAddClick = () => {
+    Event.Evt.firEvent("returnNation");
     // 隐藏其他不需要的窗体
     this.hideOtherSlide();
+    // message.success(
+    //   <span>
+    //     请选择项目地点 或 <a onClick={this.cancelAdd}>取消新建</a>
+    //   </span>,
+    //   0
+    // );
+    // // 添加绘制功能
+    // Action.addDrawBoard().then((evt) => {
+    //   let { feature } = evt;
+    //   let coor = feature.getGeometry().getCoordinates();
+    //   // 添加overlay
+    //   Action.addBoardOverlay(coor, { viewToCenter: true })
+    //     .then((data) => {
+    //       // console.log(data);
+    //       data.coordinates = coor;
+    //       this.addBoard(data);
+    //     })
+    //     .catch((err) => {
+    //       // 取消新增
+    //       this.cancelAdd();
+    //       message.warn("已取消新建操作");
+    //     });
+    // });
     message.success(
       <span>
-        请选择项目地点 或 <a onClick={this.cancelAdd}>取消新建</a>
+        请在地图圈选范围或 <a onClick={this.cancelAdd}>取消新建</a>
       </span>,
       0
     );
-    // 添加绘制功能
-    Action.addDrawBoard().then((evt) => {
-      let { feature } = evt;
-      let coor = feature.getGeometry().getCoordinates();
-      // 添加overlay
-      Action.addBoardOverlay(coor, { viewToCenter: true })
+    Action.addBoardRadius().then((feature) => {
+      let center = feature.getGeometry().getCenter();
+      Action.addBoardOverlay(center, { viewToCenter: true })
         .then((data) => {
-          // console.log(data);
-          data.coordinates = coor;
+          data.coordinates = center;
+          data.radius = Math.round(feature.getGeometry().getRadius());
           this.addBoard(data);
         })
         .catch((err) => {
@@ -287,7 +346,11 @@ export default class ScoutingList extends PureComponent {
 
   // 保存备注
   onSaveRemark = (val, text) => {
-    if (!text || text === val.remark) return;
+    // if (!text || text === val.remark) return;
+    // if (text.trim() === "") {
+    //   message.info("不能输入空格。");
+    //   return;
+    // }
     Action.editBoard(val.board_id, { remark: text })
       .then((res) => {
         // console.log(res);
@@ -327,6 +390,21 @@ export default class ScoutingList extends PureComponent {
       });
   };
 
+  displayPermissionModal = (data) => {
+    this.setState({
+      permissionModalVisible: true,
+      selectedProject: data,
+    });
+  };
+
+  addProjectExtent = (data) => {
+    Action.addProjectExtent(data)
+  }
+
+  removeFeatureAndOvelay =() => {
+    Action.removeFeatureAndOvelay();
+  }
+
   render() {
     const { projects } = this.state;
     return (
@@ -350,15 +428,30 @@ export default class ScoutingList extends PureComponent {
                 onRemove={this.removeBoard.bind(this, item)}
                 onSaveRemark={this.onSaveRemark.bind(this, item)}
                 onSetBgImg={this.onSetBgImg.bind(this, item)}
+                displayPermissionModal={this.displayPermissionModal}
+                data={item}
+                parent={this}
+                toolParent={this.props.toolParent}
               ></ScoutingItem>
             );
           })
         ) : (
           <Empty description="暂无项目数据" style={{ marginBottom: 10 }} />
         )}
-        <ScoutingAddBtn cb={this.handleAddClick.bind(this)} />
+        <ScoutingAddBtn
+          cb={this.handleAddClick.bind(this)}
+          style={{ ...this.props.toolParent.getStyle("map:board:add", "org") }}
+          disabled={this.props.toolParent.getDisabled("map:board:add", "org")}
+        />
+        {this.state.permissionModalVisible ? (
+          <PermissionModal
+            permissionModal={this.state.permissionModalVisible}
+            data={this.state.selectedProject}
+            parent={this}
+          />
+        ) : null}
         <div className={styles.bgStyleImg}>
-          <img src={Bitmap} />
+          <img crossOrigin="anonymous" src={Bitmap} />
         </div>
       </div>
     );

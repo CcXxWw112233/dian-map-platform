@@ -12,6 +12,9 @@ import LocationPanel from "./LocationPanel";
 import { getMyPosition } from "utils/getMyPosition";
 import { BASIC } from "../../services/config";
 import { setSession, getSession } from "utils/sessionManage";
+import Event from "../../lib/utils/event";
+import areaSearchAction from "@/lib/components/Search/AreaSearch";
+import NewAreaPanel from "./NewAreaPanel"
 
 import { connect } from "dva";
 
@@ -25,50 +28,80 @@ export default class Search extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      locationName: "中国",
+      locationName: "全国",
       showArea: false,
       showLocation: false,
       searchResult: [],
       searchPanelVisible: false,
+      areaPanelVisible: false,
       searchLoading: false,
       searchHistory: [],
       searchVal: "",
       adcode: "",
     };
+    this.placeholder = "搜索地址或项目";
+    this.props.onRef(this);
     this.handleSearch = throttle(this.handleSearch, 1000);
+    // Event.Evt.on("changeAreaInSearch", (data) => {
+    //   if (!data) return;
+    //   let promise0 = areaSearchAction.getCity(data.provincecode);
+    //   let promise1 = areaSearchAction.getDistrict(data.citycode);
+    //   Promise.all([promise0, promise1]).then((res) => {
+    //     if (res.length > 0) {
+    //       let currentCity = res[0].data.filter(
+    //         (item) => item.code === data.citycode
+    //       )[0];
+    //       let cityOptions = res[0].data;
+    //       let districtOptions = res[1].data;
+    //       const { dispatch } = this.props;
+    //       dispatch({
+    //         type: "areaSearch/update",
+    //         payload: {
+    //           provinceCode: data.provincecode,
+    //           cityCode: data.citycode,
+    //           cityOptions: cityOptions,
+    //           districtOptions: districtOptions,
+    //           cityDisabled: false,
+    //           districtDisabled: false,
+    //           okDisabled: false,
+    //           locationName: currentCity.name,
+    //           adcode: data.citycode,
+    //         },
+    //       });
+    //     }
+    //   });
+    // });
   }
   componentDidMount() {
-    getSession("xzqhCode").then((res) => {
-      if (res.code === 0) {
-        if (!res.data) {
-          getMyPosition.getPosition().then((val) => {
-            if (!val) return;
-            setSession(
-              "xzqhCode",
-              `districtcode|${val.addressComponent?.adcode}|${val.addressComponent?.district}`
-            );
-
-            const options = {
-              type: "districtcode",
-              adcode: val.addressComponent?.adcode,
-              locationName: val.addressComponent?.district,
-            };
-            this.updateState(options);
-          });
-        } else {
-          const tempArr = res.data.split("|");
-          const options = {
-            type: tempArr[0],
-            adcode: tempArr[1],
-            locationName: tempArr[2],
-          };
-          this.updateState(options);
-        }
-      }
-    });
+    setSession("xzqhCode", "");
+    setSession("city", "");
+    setSession("province", "");
+    setSession("district", "");
+    let options = {
+      type: "nationcode",
+      adcode: "100000",
+      locationName: "全国",
+    };
+    this.updateState(options);
   }
 
-  updateState = (val) => {
+  goBackToNation = () => {
+    setSession("xzqhCode", "");
+    setSession("city", "");
+    setSession("province", "");
+    setSession("district", "");
+    const options = {
+      type: "nationcode",
+      adcode: "100000",
+      locationName: "全国",
+    };
+    this.updateState(options);
+    Event.Evt.firEvent("searchProject");
+    Event.Evt.firEvent("searchProjectData");
+  };
+
+  updateState = (val, noNeedUpdate = false) => {
+    if (!val) return;
     if (val.locationName) {
       const { dispatch } = this.props;
       dispatch({
@@ -80,7 +113,9 @@ export default class Search extends React.Component {
       });
       const queryStr = `${val.type}='${val.adcode}'`;
       const { changeQueryStr } = this.props;
-      changeQueryStr && changeQueryStr(queryStr);
+      if (!noNeedUpdate) {
+        changeQueryStr && changeQueryStr(queryStr);
+      }
     }
   };
   handleAreaClick = () => {
@@ -146,31 +181,67 @@ export default class Search extends React.Component {
   //     });
   //   });
   // };
-  handleSearch = (address, locationName, offset) => {
+  handleSearch = (address, localtionName, offset) => {
     this.setState({
       searchLoading: true,
     });
-    commonSearchAction
-      .getPOI(address, locationName, offset)
-      .then((res) => {
-        let scoutingProjectList = [];
-        if (!this.props.isOnMap) {
-          scoutingProjectList = this.props.projectList.filter((item) => {
-            return item.board_name.indexOf(address) > -1;
-          });
-        }
-        this.setState({
-          searchResult: scoutingProjectList.concat(res),
-          searchLoading: false,
-          searchPanelVisible: res.length ? true : false,
-        });
-      })
-      .catch((e) => {
-        this.setState({
-          searchLoading: false,
-          searchPanelVisible: false,
-        });
+    if (address === "") {
+      this.setState({
+        searchResult: [],
+        searchLoading: false,
+        searchPanelVisible: false,
       });
+      return;
+    }
+    let scoutingProjectList = [];
+    const { collectData, groupId } = this.props;
+    if (collectData) {
+      let tmp = [];
+      let groupData = [];
+      let newGroupId = groupId === "other" ? "" : groupId;
+      groupData = collectData.filter((item) => {
+        return item.area_type_id === newGroupId;
+      });
+      tmp = groupData.filter((item) => {
+        return item.title.includes(address);
+      });
+      scoutingProjectList = tmp;
+    }
+    if (!this.props.inProject) {
+      localtionName = localtionName === "全国" ? "" : localtionName;
+      commonSearchAction
+        .getPOI(address, localtionName, offset)
+        .then((res) => {
+          if (!this.props.isOnMap) {
+            let tmp = this.props.projectList.filter((item) => {
+              return item.board_name.indexOf(address) > -1;
+            });
+            scoutingProjectList = [...scoutingProjectList, ...tmp];
+          }
+          this.setState({
+            searchResult: scoutingProjectList.concat(res),
+            searchLoading: false,
+            searchPanelVisible: scoutingProjectList.length ? true : false,
+          });
+        })
+        .catch((e) => {
+          this.setState({
+            searchLoading: false,
+            searchPanelVisible: false,
+          });
+        });
+    } else {
+      this.setState({
+        searchResult: scoutingProjectList,
+        searchLoading: false,
+        searchPanelVisible: scoutingProjectList.length ? true : false,
+      });
+    }
+  };
+  changeAreaPanelVisible = () => {
+    this.setState({
+      areaPanelVisible: false,
+    });
   };
   changeLocationPanelVisible = () => {
     this.setState({
@@ -186,6 +257,13 @@ export default class Search extends React.Component {
   onSearchFocus = async (e) => {
     this.getSearchHistory();
   };
+
+  onAreaPanelVisibleChange = (value) => {
+    this.setState({
+      areaPanelVisible: value,
+    });
+  };
+
   onLocationPanelVisibleChange = (value) => {
     const { searchHistory } = this.state;
     let newState = false;
@@ -205,8 +283,11 @@ export default class Search extends React.Component {
     const areaPanel = (
       <AreaPanel
         handleClose={this.handleAreaClose}
+        inProject={this.props.inProject}
         updateLocationName={this.updateLocationName}
         changeQueryStr={this.props.changeQueryStr}
+        changeAreaPanelVisible={this.changeAreaPanelVisible}
+        parent={this}
       ></AreaPanel>
     );
     const locationPanel = (
@@ -215,17 +296,24 @@ export default class Search extends React.Component {
         getSearchHistory={this.getSearchHistory}
         searchResult={this.state.searchResult}
         updateSearchValue={this.updateSearchValue}
+        parent={this}
         changeLocationPanelVisible={this.changeLocationPanelVisible}
       ></LocationPanel>
     );
     return (
       <div className={styles.wrap} style={this.props.style}>
-        <Dropdown overlay={areaPanel} trigger="click">
+        <Dropdown
+          overlay={areaPanel}
+          trigger="click"
+          visible={this.state.areaPanelVisible}
+          onVisibleChange={(e) => this.onAreaPanelVisibleChange(e)}
+        >
           <Button style={{ borderRadius: 0 }}>
             {this.props.locationName}
             <Icon type="down" />
           </Button>
         </Dropdown>
+        {/* <NewAreaPanel></NewAreaPanel> */}
         <Dropdown
           overlay={locationPanel}
           visible={this.state.searchPanelVisible}
@@ -236,7 +324,7 @@ export default class Search extends React.Component {
           <Input.Search
             allowClear={true}
             style={{ height: 32 }}
-            placeholder="搜索地址或项目"
+            placeholder={this.props.placeholder || this.placeholder}
             value={this.state.searchVal}
             loading={this.state.searchLoading}
             onSearch={(value, event) => this.onSearch(value, event)}

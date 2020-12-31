@@ -1,187 +1,43 @@
 import React from "react";
-import { Badge } from "antd";
+import { connect } from "dva";
 
-import globalStyle from "@/globalSet/styles/globalStyles.less";
 import styles from "./LeftToolBar.less";
 import Plot from "./panels/Plot";
 import Project from "./panels/Project";
 import TempPlot from "./panels/TempPlot";
 import ProjectList from "./panels/ProjectList";
 import CustomSymbolStore from "./panels/CustomSymbolStore";
+import SystemManage from "./panels/SystemManage";
 import Panel from "./panels/Panel";
-import Event from "../../lib/utils/event";
-import mapApp from "../../utils/INITMAP";
-import { TransformCoordinate } from "../../lib/utils/index";
-import { plotEdit } from "../../utils/plotEdit";
+import ToolBar from "./toolbar";
+import systemManageServices from "../../services/systemManage";
 
 import { lineDrawing, pointDrawing, polygonDrawing } from "utils/drawing";
-import ListAction from "@/lib/components/ProjectScouting/ScoutingList";
-import { connect } from "dva";
+import { message } from "antd";
 
-@connect(({ openswitch: { isShowLeftToolBar, isInvalidToolBar } }) => ({
-  isShowLeftToolBar,
-  isInvalidToolBar,
-}))
+@connect(
+  ({ openswitch: { isShowLeftToolBar, isInvalidToolBar, openPanel } }) => ({
+    isShowLeftToolBar,
+    isInvalidToolBar,
+    openPanel,
+  })
+)
 export default class LeftToolBar extends React.Component {
   constructor(props) {
     super(props);
-    this.leftTools = [
-      {
-        name: "项目",
-        displayText: false,
-        iconfont: "&#xe756;",
-        cb: () => {
-          this.setState({
-            displayPlot: false,
-            hidePlot: false,
-            displayProject: true,
-            displayTempPlot: false,
-            displayCustomSymbolStore: false,
-            displayProjectList: false,
-          });
-          this.deactivate();
-        },
-      },
-      {
-        name: "标记点",
-        displayText: true,
-        iconfont: "&#xe757;",
-        cb: () => {
-          this.setState({
-            displayPlot: true,
-            hidePlot: false,
-            displayProject: false,
-            displayTempPlot: false,
-            displayCustomSymbolStore: false,
-            plotType: "point",
-          });
-          this.deactivate();
-        },
-      },
-      {
-        name: "描绘",
-        displayText: true,
-        iconfont: "&#xe63b;",
-        cb: () => {
-          this.setState({
-            displayPlot: true,
-            hidePlot: false,
-            displayProject: false,
-            displayTempPlot: false,
-            displayCustomSymbolStore: false,
-            plotType: "freeLine",
-          });
-          this.deactivate();
-        },
-      },
-      {
-        name: "直线",
-        displayText: true,
-        iconfont: "&#xe624;",
-        cb: () => {
-          this.setState({
-            displayPlot: true,
-            hidePlot: false,
-            displayProject: false,
-            displayTempPlot: false,
-            displayCustomSymbolStore: false,
-            plotType: "line",
-          });
-          this.deactivate();
-        },
-      },
-      {
-        name: "自由面",
-        displayText: true,
-        iconfont: "&#xe631;",
-        cb: () => {
-          this.setState({
-            displayPlot: true,
-            hidePlot: false,
-            displayProject: false,
-            displayTempPlot: false,
-            displayCustomSymbolStore: false,
-            plotType: "freePolygon",
-          });
-          this.deactivate();
-        },
-      },
-      {
-        name: "标面",
-        displayText: true,
-        iconfont: "&#xe7cc;",
-        cb: () => {
-          this.setState({
-            displayPlot: true,
-            hidePlot: false,
-            displayProject: false,
-            displayTempPlot: false,
-            displayCustomSymbolStore: false,
-            plotType: "polygon",
-          });
-          this.deactivate();
-        },
-      },
-      {
-        name: "矩形",
-        displayText: true,
-        iconfont: "&#xe62e;",
-        cb: () => {
-          this.setState({
-            displayPlot: true,
-            hidePlot: false,
-            displayProject: false,
-            displayTempPlot: false,
-            displayCustomSymbolStore: false,
-            plotType: "rect",
-          });
-          this.deactivate();
-        },
-      },
-      {
-        name: "圆形",
-        displayText: true,
-        iconfont: "&#xe62f;",
-        cb: () => {
-          this.setState({
-            displayPlot: true,
-            hidePlot: false,
-            displayProject: false,
-            displayTempPlot: false,
-            displayCustomSymbolStore: false,
-            plotType: "circle",
-          });
-          this.deactivate();
-        },
-      },
-      {
-        name: "箭头",
-        displayText: true,
-        iconfont: "&#xe62d;",
-        cb: () => {
-          this.setState({
-            displayPlot: true,
-            hidePlot: false,
-            displayProject: false,
-            displayTempPlot: false,
-            displayCustomSymbolStore: false,
-            plotType: "arrow",
-          });
-          this.deactivate();
-        },
-      },
-    ];
     this.state = {
-      selectedIndex: 0,
-      hoveredIndex: -1,
       displayPlot: false,
       hidePlot: false,
       displayProject: true,
+      displaySystemManage: false,
       displayTempPlot: false,
       displayCustomSymbolStore: false,
       displayTempPlotIcon: false,
       plotType: "point",
       featureOperatorList: [],
+      projectPermission: null,
+      globalPermission: null,
+      needUpdate: false,
     };
     this.dic = {
       Point: "point",
@@ -199,7 +55,132 @@ export default class LeftToolBar extends React.Component {
     this.currentBaseMap = null;
     this.baseMapKeys = null;
     this.activeFeatureOperator = null;
+    this.leftToolBarRef = null;
+    this.projectPlot = null;
+    this.plotRef = null;
+    this.projectRef = null;
+    this.returnPanel = null;
+    this.isGeojsonMifyIcon = false;
+    this.getPersonalPermission();
   }
+
+  getPersonalPermission = () => {
+    let promise1 = systemManageServices.getPersonalPermission2Global();
+    let promise2 = systemManageServices.getPersonalPermission2Project();
+    Promise.all([promise1, promise2])
+      .then((res) => {
+        if (res.length > 0) {
+          let globalPermission = {},
+            projectPermission = {};
+          if (res[0]["code"] === "0") {
+            globalPermission = res[0].data;
+          } else {
+            message.error(res[0].message);
+          }
+          if (res[1]["code"] === "0") {
+            projectPermission = res[1].data;
+          } else {
+            message.error(res[1].message);
+          }
+          this.setState(
+            {
+              globalPermission: globalPermission,
+              projectPermission: projectPermission,
+            },
+            () => {
+              const { dispatch } = this.props;
+              dispatch({
+                type: "permission/updateDatas",
+                payload: {
+                  globalPermission: globalPermission,
+                  projectPermission: projectPermission,
+                },
+              });
+              this.leftToolBarRef &&
+                this.leftToolBarRef.setState({
+                  update: !this.leftToolBarRef.state.update,
+                });
+              this.projectRef &&
+                this.projectRef.setState({
+                  update: !this.projectRef.state.update,
+                });
+            }
+          );
+        }
+      })
+      .catch((e) => {
+        message.error(e.message);
+      });
+  };
+
+  // 权限
+  getIndex = (functionCode, type, projectId) => {
+    const { globalPermission, projectPermission } = this.state;
+    let index = -1;
+    let permissionArr = null;
+    if (type === "org") {
+      if (globalPermission !== null) {
+        const keys = Object.keys(globalPermission);
+        if (keys.length === 1) {
+          permissionArr = globalPermission[keys[0]];
+          index =
+            permissionArr &&
+            permissionArr.findIndex((item) => item === functionCode);
+        }
+      }
+    } else {
+      if (projectId) {
+        if (projectPermission) {
+          permissionArr = projectPermission[projectId];
+          if (!permissionArr) {
+            this.getPersonalPermission();
+          }
+          index =
+            permissionArr &&
+            permissionArr.findIndex((item) => item === functionCode);
+        }
+      }
+    }
+    return index;
+  };
+
+  // 获取整理权限
+  getCollectVisible = (functionCode, projectId) => {
+    if (!functionCode) return;
+    if (!projectId) return;
+    const { projectPermission } = this.state;
+    if (!projectPermission) return;
+    let arr = projectPermission[projectId];
+    let visible = false;
+    if (arr && arr.length > 0) {
+      for (let i = 0; i < arr.length; i++) {
+        let index = functionCode.findIndex((item) => item === arr[i]);
+        if (index !== -1) {
+          visible = true;
+          break;
+        }
+      }
+    }
+    return visible;
+  };
+
+  getDisabled = (functionCode, type, projectId) => {
+    const index = this.getIndex(functionCode, type, projectId);
+    return index > -1 ? false : true;
+  };
+
+  // 权限
+  getStyle = (functionCode, type, projectId) => {
+    const index = this.getIndex(functionCode, type, projectId);
+    return index === -1
+      ? {
+          // pointerEvents: "none",
+          // cursor: "not-allowed",
+          display: "none",
+          // background: "hsla(0,0%,100%,.1)",
+        }
+      : {};
+  };
 
   deactivate = () => {
     pointDrawing.deactivate();
@@ -208,17 +189,7 @@ export default class LeftToolBar extends React.Component {
   };
 
   updateFeatureOperatorList = (operator) => {
-    ListAction.checkItem()
-      .then((res) => {
-        if (res) {
-          if (res.code !== 0) {
-            this._updateFeatureOperatorList(operator);
-          }
-        }
-      })
-      .catch((e) => {
-        this._updateFeatureOperatorList(operator);
-      });
+    this._updateFeatureOperatorList(operator);
   };
 
   _updateFeatureOperatorList = (operator) => {
@@ -229,10 +200,12 @@ export default class LeftToolBar extends React.Component {
     } else {
       this.featureOperatorList[index] = operator;
     }
+    this.leftToolBarRef.updateListLen(this.featureOperatorList.length);
   };
 
   updateFeatureOperatorList2 = (list) => {
     this.featureOperatorList = Array.from(new Set(list));
+    this.leftToolBarRef.updateListLen(this.featureOperatorList.length);
   };
 
   // 从数组中找到operator
@@ -272,20 +245,46 @@ export default class LeftToolBar extends React.Component {
     }
   };
 
-  handleItemOver = () => {};
+  onRef = (ref) => {
+    this.leftToolBarRef = ref;
+  };
 
-  handleItemLeave = () => {};
+  onPlotRef = (ref) => {
+    this.plotRef = ref;
+  };
 
+  onProjectRef = (ref) => {
+    this.projectRef = ref;
+  };
+
+  displayPlotPanel = (attrs, operator, returnPanel) => {
+    this.isModifyPlot = true;
+    this.returnPanel = returnPanel;
+    this.activeFeatureOperator = operator;
+    if (operator.data) {
+      operator.attrs.name = operator.data.title || "";
+      operator.setName(operator.attrs.name);
+    }
+    this.oldPlotName = operator.getName() || operator.attrs.name;
+    this.oldRemark = operator.attrs.remark;
+    if (!this.state.displayPlot) {
+      this.setState({
+        plotType: this.dic[attrs.geometryType || attrs.geoType],
+        displayPlot: true,
+        hidePlot: false,
+        displayTempPlot: false,
+        displayProject: false,
+      });
+    } else {
+      this.setState({
+        plotType: this.dic[attrs.geometryType || attrs.geoType],
+        hidePlot: false,
+        displayTempPlot: false,
+        displayProject: false,
+      });
+    }
+  };
   render() {
-    let tempPlotItemStyle = { bottom: 60, left: 4 };
-    let customSymbolStoreStyle = { bottom: 0, left: 4 };
-    const selectStyle = { background: "rgba(90, 134, 245, 1)" };
-    if (this.state.displayTempPlot) {
-      tempPlotItemStyle = { ...tempPlotItemStyle, ...selectStyle };
-    }
-    if (this.state.displayCustomSymbolStore) {
-      customSymbolStoreStyle = { ...customSymbolStoreStyle, ...selectStyle };
-    }
     return (
       <div
         className={`${styles.wrapper} ${
@@ -294,188 +293,80 @@ export default class LeftToolBar extends React.Component {
         style={{ position: "absolute", top: 0, left: 0 }}
         id="leftToolBar"
       >
-        <div
-          style={{
-            width: "100%",
-            height: "100%",
-            background: "#6a9aff",
-            zIndex: 9,
-          }}
-        >
-          <div
-            className={`${styles.circle} ${
-              this.props.isInvalidToolBar ? "invalid" : ""
-            }`}
-            style={{ background: "#fff" }}
-          >
-            {/* <img alt="" src=""></img> */}
-            <i className={globalStyle.global_icon} style={{ fontSize: 26 }}>
-              &#xe764;
-            </i>
-          </div>
-          <div
-            className={`${globalStyle.autoScrollY} ${
-              this.props.isInvalidToolBar ? "invalid" : ""
-            }`}
-            style={{ height: "calc(100% - 210px)" }}
-          >
-            {this.leftTools.map((item, index) => {
-              let displayText = true;
-              if (
-                item.displayText === false ||
-                this.state.selectedIndex === index
-              ) {
-                displayText = false;
-              }
-              if (this.state.hoveredIndex === index) {
-                displayText = false;
-              }
-              const divStyle = displayText ? {} : { display: "table" };
-              const iStyle = displayText
-                ? {}
-                : { display: "table-cell", verticalAlign: "middle" };
-              return (
-                <div
-                  key={`${item.iconfont}-${index}`}
-                  className={`${styles.item} ${
-                    this.state.selectedIndex === index ? styles.active : ""
-                  }`}
-                  style={divStyle}
-                  onPointerOver={() => {
-                    this.setState({
-                      hoveredIndex: index,
-                    });
-                  }}
-                  onPointerLeave={() => {
-                    this.setState({
-                      hoveredIndex: -1,
-                    });
-                  }}
-                  onPointerDown={() => {
-                    this.setState({
-                      selectedIndex: index,
-                    });
-                    item.cb && item.cb();
-                  }}
-                >
-                  <i
-                    className={globalStyle.global_icon}
-                    dangerouslySetInnerHTML={{ __html: item.iconfont }}
-                    style={iStyle}
-                  ></i>
-                  {displayText ? (
-                    <p>
-                      <span>{item.name}</span>
-                    </p>
-                  ) : null}
-                </div>
-              );
-            })}
-          </div>
-          <div
-            className={`${styles.circle} ${styles.temp}`}
-            onClick={() => {
-              this.setState({
-                selectedIndex: -1,
-                displayPlot: false,
-                hidePlot: false,
-                displayProject: false,
-                displayTempPlot: true,
-                displayCustomSymbolStore: false,
-                plotType: "",
-              });
-            }}
-            style={{ ...tempPlotItemStyle, display: "table" }}
-          >
-            <i
-              className={globalStyle.global_icon}
-              style={{ fontSize: 30, color: "#fff" }}
-            >
-              &#xe765;
-            </i>
-          </div>
-          <div
-            className={`${styles.circle} ${styles.temp}`}
-            onClick={() => {
-              this.setState({
-                selectedIndex: -1,
-                displayPlot: false,
-                hidePlot: false,
-                displayProject: false,
-                displayTempPlot: false,
-                displayCustomSymbolStore: true,
-                plotType: "",
-              });
-            }}
-            style={customSymbolStoreStyle}
-          >
-            <i
-              className={globalStyle.global_icon}
-              style={{ fontSize: 30, color: "#fff" }}
-            >
-              &#xe7b6;
-            </i>
-          </div>
-        </div>
+        <ToolBar
+          parent={this}
+          onRef={this.onRef}
+          selectIndex={this.toolBarSelectedIndex}
+        ></ToolBar>
         <Panel>
-            <Project hidden={this.state.displayProject}></Project>
-            {this.state.displayPlot ? (
-              <Plot
-                parent={this}
-                plotType={this.state.plotType}
-                hidden={this.state.hidePlot}
-                updateFeatureOperatorList={this.updateFeatureOperatorList}
-                updateFeatureOperatorList2={this.updateFeatureOperatorList2}
-                goBackProject={() => {
-                  this.setState({
-                    hidePlot: true,
-                    displayProject: true,
-                    selectedIndex: 0,
-                  });
-                }}
-              ></Plot>
-            ) : null}
-            {this.state.displayTempPlot ? (
-              <TempPlot
-                parent={this}
-                displayProjctList={() => {
-                  this.setState({
-                    displayProjectList: true,
-                    displayTempPlot: false,
-                  });
-                }}
-                displayPlotPanel={(attrs) => {
-                  this.isModifyPlot = true;
-                  this.oldPlotName = attrs.name;
-                  this.oldRemark = attrs.remark;
-                  this.setState({
-                    plotType: this.dic[attrs.geometryType],
-                    displayPlot: true,
-                    displayTempPlot: false,
-                  });
-                }}
-                editPlot={this.editPlot}
-              ></TempPlot>
-            ) : null}
-            {this.state.displayProjectList ? (
-              <ProjectList
-                featureOperatorList={this.featureOperatorList}
-                selectFeatureOperatorList={this.selectFeatureOperatorList}
-                goBackTempPlot={(list) => {
-                  this.featureOperatorList = this.getArrDifference(
-                    list,
-                    this.featureOperatorList
-                  );
-                  this.setState({
-                    displayProjectList: false,
-                    displayTempPlot: true,
-                  });
-                }}
-              ></ProjectList>
-            ) : null}
-            {this.state.displayCustomSymbolStore ? (
-              <CustomSymbolStore parent={this}></CustomSymbolStore>
-            ) : null}
+          {/* 权限管理 */}
+          {this.state.displaySystemManage ? (
+            <SystemManage></SystemManage>
+          ) : null}
+          <Project
+            hidden={this.state.displayProject}
+            parent={this}
+            onRef={this.onProjectRef}
+            displayPlotPanel={(attrs, operator) =>
+              this.displayPlotPanel(attrs, operator)
+            }
+            projectPermission={this.state.projectPermission}
+          ></Project>
+          {this.state.displayPlot ? (
+            <Plot
+              parent={this}
+              isGeojsonMifyIcon={this.state.isGeojsonMifyIcon}
+              plotType={this.state.plotType}
+              hidden={this.state.hidePlot}
+              onRef={this.onPlotRef}
+              updateFeatureOperatorList={this.updateFeatureOperatorList}
+              updateFeatureOperatorList2={this.updateFeatureOperatorList2}
+              goBackProject={() => {
+                this.leftToolBarRef.setState({
+                  selectedIndex: 0,
+                });
+                this.setState({
+                  hidePlot: true,
+                  displayProject: true,
+                });
+              }}
+            ></Plot>
+          ) : null}
+          {this.state.displayTempPlot ? (
+            <TempPlot
+              parent={this}
+              displayProjctList={() => {
+                this.setState({
+                  displayProjectList: true,
+                  displayTempPlot: false,
+                });
+              }}
+              displayPlotPanel={(attrs, operator, returnPanel) =>
+                this.displayPlotPanel(attrs, operator, returnPanel)
+              }
+              editPlot={this.editPlot}
+            ></TempPlot>
+          ) : null}
+          {this.state.displayProjectList ? (
+            <ProjectList
+              parent={this}
+              featureOperatorList={this.featureOperatorList}
+              selectFeatureOperatorList={this.selectFeatureOperatorList}
+              goBackTempPlot={(list) => {
+                this.featureOperatorList = this.getArrDifference(
+                  list,
+                  this.featureOperatorList
+                );
+                this.setState({
+                  displayProjectList: false,
+                  displayTempPlot: true,
+                });
+              }}
+            ></ProjectList>
+          ) : null}
+          {this.state.displayCustomSymbolStore ? (
+            <CustomSymbolStore parent={this}></CustomSymbolStore>
+          ) : null}
         </Panel>
       </div>
     );

@@ -19,7 +19,7 @@ export default {
     townDisabled: true,
     villageDisabled: true,
     okDisabled: true,
-    locationName: "中国", 
+    locationName: "全国", 
     adcode: ""
   },
   effects: {},

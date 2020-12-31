@@ -81,7 +81,9 @@ export default class FormatAddress extends React.Component{
                 if(res.length){
                     this.config.renderPoint(res);
                 }
-                else Action.Source.clear();
+                else {
+                  Action.Source && Action.Source.clear();
+                }
             })
         }
     }
@@ -171,7 +173,7 @@ export default class FormatAddress extends React.Component{
                         onSearch={this.searchAddress}/>
                     </div>
                     <div className={styles.addressName}>
-                        <img src={require('../../../assets/location.png')} width='20px' alt=""/>
+                        <img crossOrigin="anonymous" src={require('../../../assets/location.png')} width='20px' alt=""/>
                         <span>{address}</span>
                         {this.state.currentObj.uid
                          && <Button size='small'
@@ -181,7 +183,7 @@ export default class FormatAddress extends React.Component{
 
                     </div>
                     <div className={styles.pointCenter}>
-                        <img src={require('../../../assets/addPointLocation.png')} alt=""/>
+                        <img crossOrigin="anonymous" src={require('../../../assets/addPointLocation.png')} alt=""/>
                     </div>
                     <div id="getAddressMap"></div>
                 </div>

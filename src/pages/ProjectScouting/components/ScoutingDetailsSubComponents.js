@@ -1,10 +1,12 @@
-import React, { useState, Fragment, useMemo} from "react";
+import React, { useState, Fragment, useMemo } from "react";
 import globalStyle from "../../../globalSet/styles/globalStyles.less";
 import animateCss from "../../../assets/css/animate.min.css";
 import styles from "../ScoutingDetails.less";
 import Action from "../../../lib/components/ProjectScouting/ScoutingDetail";
-import ListAction from '../../../lib/components/ProjectScouting/ScoutingList';
+import ListAction from "../../../lib/components/ProjectScouting/ScoutingList";
 import PhotoSwipe from "../../../components/PhotoSwipe/action";
+import InitMap from "../../../utils/INITMAP";
+import { guid } from "../../../lib/components/index";
 import {
   Row,
   Input,
@@ -35,30 +37,54 @@ import { Icon } from 'antd'
 import { BASIC } from "../../../services/config";
 import Event from "../../../lib/utils/event";
 import mapApp from "../../../utils/INITMAP";
+import { DefaultUpload } from "../../../utils/XhrUploadFile";
 import { formatSize } from "../../../utils/utils";
 import ExcelRead from "../../../components/ExcelRead";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { MyIcon } from "../../../components/utils";
-import Nprogress from 'nprogress';
+import PublicDataTreeComponent from "../components/PublicDataTreeComponent";
+import Nprogress from "nprogress";
+import Axios from "axios";
 // import { UploadFile } from '../../../utils/XhrUploadFile'
 
+import Search from "../../../components/Search/Search";
+import config from "../../../services/scouting";
+import { compress } from "../../../utils/pictureCompress";
 
-export const UploadBgPic = ({children,onUpload, onStart})=>{
+import { Collapse } from "antd";
+const { Panel } = Collapse;
+
+export const UploadBgPic = ({ children, onUpload, onStart }) => {
   return (
     <Upload
-    action='/api/map/file/upload/public'
-    showUploadList={false}
-    accept=".jpg, .jpeg, .png, .bmp"
-    beforeUpload={()=>{ onStart && onStart(); return true}}
-    headers={{ Authorization: BASIC.getUrlParam.token }}
-    onChange={onUpload}
+      action="/api/map/file/upload/public"
+      showUploadList={false}
+      accept=".jpg, .jpeg, .png, .bmp"
+      beforeUpload={() => {
+        onStart && onStart();
+        return true;
+      }}
+      headers={{ Authorization: BASIC.getUrlParam.token }}
+      onChange={onUpload}
     >
       {children}
     </Upload>
-  )
-}
+  );
+};
 
-export const Title = ({ name, date, cb, data = {}, className = "", mini }) => {
+export const Title = ({
+  name,
+  date,
+  cb,
+  data = {},
+  className = "",
+  mini,
+  parentTool,
+  boardId,
+  collectData,
+  groupId,
+  currentBoard,
+}) => {
   // 预览图片
   const previewImg = (e) => {
     let url = e.target.src;
@@ -73,39 +99,65 @@ export const Title = ({ name, date, cb, data = {}, className = "", mini }) => {
   const [url, setUrl] = useState(data.bg_image);
   useMemo(() => {
     setUrl(data.bg_image);
-  }, [data])
-  const onUpload = ({file})=>{
-    if(file.response){
+  }, [data]);
+  const onUpload = ({ file }) => {
+    if (file.response) {
       Nprogress.done();
-      if(BASIC.checkResponse(file.response)){
-        let src = file.response.message
+      if (BASIC.checkResponse(file.response)) {
+        let src = file.response.message;
         setUrl(src);
-        ListAction.editBoard(data.board_id,{ bg_image: src }).then(res=> {
-          message.success('设置成功')
-        })
+        ListAction.editBoard(data.board_id, { bg_image: src }).then((res) => {
+          message.success("设置成功");
+        });
       }
     }
-  }
+  };
+  // 定位到项目位置
+  const setToCenter = async () => {
+    let coor = [+data.coordinate_x, +data.coordinate_y];
+    if (!InitMap.checkNowIsGcj02System()) {
+      // 需要纠偏
+      let dic = InitMap.systemDic[InitMap.baseMapKey];
+      coor = dic(coor[0], coor[1]);
+    }
+    await Action.toCenter({ center: coor, transform: true });
+    Action.addAnimatePoint({ coordinates: coor, transform: true, name });
+  };
   return (
     <div className={`${styles.title} ${className}`}>
-      <div className={styles.title_goBack} onClick={cb}>
-        <MyIcon type="icon-fanhuijiantou" />
+      <Search
+        onRef={() => {}}
+        collectData={collectData}
+        groupId={groupId}
+        inProject={true}
+        currentBoard={currentBoard}
+        style={{ flex: "none", margin: 0, border: "1px solid #3333" }}
+        placeholder="请输入名称"
+      ></Search>
+      <div className={styles.title_goBack}>
+        <MyIcon type="icon-fanhuijiantou" onClick={cb} />
         <span
           className={`${styles.back_name} ${animateCss.animated} ${
             mini ? animateCss.fadeIn : animateCss.fadeOut
           }`}
+          // style={mini ? { display: "" } : { display: "none" }}
         >
           {name}
         </span>
       </div>
       <div className={styles.title_name}>
         <span>{name}</span>
-        <span className={styles.atPosition} title="定位到项目位置"
-        onClick={()=> {Action.toCenter({center: [data.coordinate_x, data.coordinate_y], transform: true})}}>
-          <MyIcon type="icon-duomeitiicon-"/>
+        <span
+          className={styles.atPosition}
+          title="定位到项目位置"
+          onClick={() => {
+            setToCenter();
+          }}
+        >
+          <MyIcon type="icon-duomeitiicon-" />
         </span>
       </div>
-      <div className={styles.title_remark}>
+      <div className={styles.title_remark} style={{ flex: "none" }}>
         <div style={{ textIndent: "1rem" }}>
           {data.remark || "暂无备注信息"}
         </div>
@@ -113,17 +165,73 @@ export const Title = ({ name, date, cb, data = {}, className = "", mini }) => {
       <div className={styles.title_boardBgImg}>
         {url ? (
           <div className={styles.boardBgImg}>
-            <img src={url} alt="" onClick={previewImg} />
+            <img
+              crossOrigin="anonymous"
+              src={url}
+              alt=""
+              onClick={previewImg}
+            />
           </div>
         ) : (
-          <div className={styles.boardBgImg}>
-            <span>
-              暂未设置图片~~
+          <div
+            className={styles.boardBgImg}
+            style={{ background: "rgb(238,248,255)", textAlign: "center" }}
+          >
+            <span
+              style={{
+                ...(parentTool &&
+                  parentTool.getStyle(
+                    "map:collect:add:web",
+                    "project",
+                    boardId
+                  )),
+              }}
+              disabled={
+                parentTool &&
+                parentTool.getDisabled(
+                  "map:collect:add:web",
+                  "project",
+                  boardId
+                )
+              }
+            >
+              {/* 暂未设置图片~~ */}
               <UploadBgPic
-              onStart={()=> Nprogress.start() }
-              onUpload={onUpload}
+                onStart={() => Nprogress.start()}
+                onUpload={onUpload}
               >
-                <a>点击设置</a>
+                {/* <a
+                  style={{
+                    ...(parentTool &&
+                      parentTool.getStyle(
+                        "map:collect:add:web",
+                        "project",
+                        boardId
+                      )),
+                  }}
+                  disabled={
+                    parentTool &&
+                    parentTool.getDisabled(
+                      "map:collect:add:web",
+                      "project",
+                      boardId
+                    )
+                  }
+                >
+                  点击设置
+                </a> */}
+                <i
+                  className={globalStyle.global_icon}
+                  style={{
+                    display: "block",
+                    fontSize: 50,
+                    color: "rgb(134,179,255)",
+                    cursor: "pointer",
+                  }}
+                >
+                  &#xe697;
+                </i>
+                <span style={{ color: "rgb(134,179,255)" }}>点击上传封面</span>
               </UploadBgPic>
             </span>
           </div>
@@ -138,7 +246,7 @@ export const Title = ({ name, date, cb, data = {}, className = "", mini }) => {
 //       <div className={`${styles.title}`}>
 //         {data.bg_image && (
 //           <div className={styles.boardBgImg}>
-//             <img src={data.bg_image} alt=""/>
+//             <img crossOrigin="anonymous" src={data.bg_image} alt=""/>
 //           </div>
 //         )}
 //         <div className={styles.projectModal}></div>
@@ -178,18 +286,39 @@ export const Title = ({ name, date, cb, data = {}, className = "", mini }) => {
 //     );
 //   };
 
+let uploadFiles = [];
 const checkFileSize = (file) => {
-  // console.log(file);
   let { size, text } = formatSize(file.size);
   text = text.trim();
   if (+size > 60 && text === "MB") {
-    message.error("文件不能大于60MB");
+    message.error("文件不能大于60MB---" + file.name);
     return false;
   }
+  // uploadFiles.push(file);
   return true;
 };
 
-const UploadBtn = ({ onChange }) => {
+const checkFileSize360Pic = (file) => {
+  return new Promise((resolve, reject) => {
+    let { size, text } = formatSize(file.size);
+    text = text.trim();
+    if (+size > 60 && text === "MB") {
+      message.error("文件不能大于60MB---" + file.name);
+      reject();
+    } else {
+      if (file.type.includes("image")) {
+        compress(file, 16384).then((res) => {
+          resolve(res);
+        });
+      } else {
+        resolve(true);
+      }
+    }
+    // uploadFiles.push(file);
+  });
+};
+
+const UploadBtn = ({ onChange, parentTool, boardId }) => {
   let [file, setFiles] = useState([]);
   const onupload = (e) => {
     let { size, text } = formatSize(e.file.size);
@@ -197,13 +326,14 @@ const UploadBtn = ({ onChange }) => {
     if (!(+size > 60 && text === "MB")) {
       setFiles(e.fileList);
       onChange(e);
-      // 清空上传列表
-      if (e.file.response) {
-        let fFile = file.filter((item) => item.uid !== e.file.uid);
-        setFiles(fFile);
-      }
     }
   };
+  Event.Evt.on("uploadFileSuccess", (files) => {
+    // setTimeout(()=>{
+    setFiles(file.filter((item) => item.uid !== files.uid));
+    // }, 2000)
+  });
+
   // const customRequest = (val)=>{
   //     UploadFile(val.file, val.action,null, BASIC.getUrlParam.token ,(e)=>{
   //       // console.log(e);
@@ -213,6 +343,7 @@ const UploadBtn = ({ onChange }) => {
     <Upload
       action="/api/map/file/upload"
       beforeUpload={checkFileSize}
+      multiple
       headers={{ Authorization: BASIC.getUrlParam.token }}
       onChange={(e) => {
         onupload(e);
@@ -236,7 +367,62 @@ const UploadBtn = ({ onChange }) => {
     </Upload>
   );
 };
+const Upload360PicBtn = ({
+  onChange,
+  parentTool,
+  boardId,
+  parent,
+  uploadPanorama,
+}) => {
+  let [file, setFiles] = useState([]);
+  const onupload = (e) => {
+    let { size, text } = formatSize(e.file.size);
+    text = text.trim();
+    // setFiles(e.fileList);
+    if (!(+size > 60 && text === "MB")) {
+      setFiles(e.fileList);
+      onChange(e);
+    }
+  };
 
+  Event.Evt.on("uploadFileSuccess", (files) => {
+    // setTimeout(()=>{
+    setFiles(file.filter((item) => item.uid !== files.uid));
+    // }, 2000)
+  });
+
+  // const customRequest = (val)=>{
+  //     UploadFile(val.file, val.action,null, BASIC.getUrlParam.token ,(e)=>{
+  //       // console.log(e);
+  //     },val)
+  // }
+  return (
+    <Upload
+      action="/api/map/file/upload"
+      accept=".jpg, .jpeg, .png, .bmp, .mp4, .avi, .wmv"
+      beforeUpload={checkFileSize360Pic}
+      headers={{ Authorization: BASIC.getUrlParam.token }}
+      onChange={(e) => {
+        onupload(e);
+      }}
+      showUploadList={false}
+      fileList={file}
+      // customRequest={customRequest}
+    >
+      <span
+        onClick={() => {
+          if (parent) {
+            parent.is360Pic = true;
+          }
+        }}
+      >
+        上传全景图片/视频
+      </span>
+    </Upload>
+  );
+};
+let hasChangeFile = false;
+let saveData = null;
 export const ScoutingHeader = (props) => {
   let {
     onUpload,
@@ -262,6 +448,10 @@ export const ScoutingHeader = (props) => {
     multiple = false,
     onSelect = () => {},
     onAreaEdit = () => {},
+    parentTool,
+    boardId,
+    parent,
+    uploadPanorama,
   } = props;
   let [areaName, setAreaName] = useState(data.name);
   let [isEdit, setIsEdit] = useState(edit);
@@ -272,6 +462,8 @@ export const ScoutingHeader = (props) => {
   let [coordSysType, setCoordSysType] = useState(0);
   let [transparency, setTransparency] = useState("1");
   let [transformFile, setTransformFile] = useState(null);
+  // let [ saveData, setSaveData ] = useState();
+  let [uploadUrl, setUploadUrl] = useState(`/api/map/ght/${data.id}`);
   // 保存事件
   const saveItem = () => {
     onSave && onSave(areaName);
@@ -308,14 +500,23 @@ export const ScoutingHeader = (props) => {
     }
   };
 
+  const startUpload360Pic = ({ file, fileList, event }) => {
+    // console.log({ file, fileList, event })
+    onChange && onChange(file, fileList, event);
+  };
+
   // 上传规划图
   const onStartUploadPlan = ({ file, fileList }) => {
     let { response } = file;
-    onUploadPlan && onUploadPlan(null, fileList);
+    onUploadPlan && onUploadPlan(null, fileList, hasChangeFile, saveData);
     if (response) {
       BASIC.checkResponse(response)
-        ? onUploadPlan && onUploadPlan(response.data, fileList)
+        ? onUploadPlan &&
+          onUploadPlan(response.data, fileList, hasChangeFile, saveData)
         : onError && onError(response, file);
+
+      hasChangeFile = false;
+      saveData = null;
     } else {
       // onError && onError(file)
     }
@@ -326,6 +527,18 @@ export const ScoutingHeader = (props) => {
     return Promise.resolve(transformFile);
   };
 
+  const firstUpload = async (file, extent) => {
+    let formdata = new FormData();
+    formdata.append("file", file);
+    formdata.append("extent", extent);
+    formdata.append("transparency", transparency);
+    formdata.append("coord_sys_type", coordSysType);
+    let resp = await Axios.post(uploadUrl, formdata, {
+      headers: { Authorization: BASIC.getUrlParam.token },
+    });
+    saveData = resp.data;
+    return resp.data;
+  };
   // 上传规划图
   const beforeUploadPlan = (val) => {
     onUploadPlanStart && onUploadPlanStart(val);
@@ -339,41 +552,111 @@ export const ScoutingHeader = (props) => {
     return new Promise((resolve, reject) => {
       let url = window.URL.createObjectURL(val);
       Action.addPlanPictureDraw(url, val, dispatch)
-        .then((res) => {
+        .then(async (res) => {
           let { feature } = res;
           let extent = feature.getGeometry().getExtent();
-          if (res.blobFile) {
-            // 设置文件
-            setTransformFile(res.blobFile);
-          } else {
-            setTransformFile(val);
-          }
+          // console.log(extent)
           // 设置透明度,设置范围大小
           setTransparency(res.opacity);
           setPlanExtent(extent.join(","));
           const baseMapKeys = mapApp.baseMapKeys;
           const baseMapKey = mapApp.baseMapKey;
           setCoordSysType(baseMapKeys[0].indexOf(baseMapKey) > -1 ? 0 : 1);
+          // await (()=>{
+          //   return new Promise(resolve => {
+          //     setTimeout(()=>{
+          //       resolve()
+          //     },300)
+          //   })
+
+          // })()
+          // console.log(planExtent)
+          if (res.blobFile) {
+            // 设置文件
+            hasChangeFile = true;
+            setTransformFile(res.blobFile);
+            // 如果改变了文件，则先保存一份
+            await firstUpload(val, extent.join(","));
+          } else {
+            // 设置原文件
+            setTransformFile(val);
+          }
           resolve({ ...val });
           // resolve({})
         })
         .catch((err) => {
           reject(err);
           onUploadPlanCancel && onUploadPlanCancel(err);
+          hasChangeFile = false;
+          saveData = null;
         });
     });
   };
 
   const menu = (
     <Menu onClick={handleClick}>
-      <Menu.Item key="setCoordinates">设置分类坐标</Menu.Item>
-      <Menu.Item key="upload">
-        {/* 上传采集资料 */}
-        <UploadBtn onChange={startUpload} />
+      <Menu.Item
+        key="setCoordinates"
+        style={{
+          ...(parentTool &&
+            parentTool.getStyle("map:collect:add:web", "project", boardId)),
+        }}
+        disabled={
+          parentTool &&
+          parentTool.getDisabled("map:collect:add:web", "project", boardId)
+        }
+      >
+        设置分类坐标
       </Menu.Item>
-      <Menu.Item key="uploadPlan">
+      <Menu.Item
+        key="upload"
+        style={{
+          ...(parentTool &&
+            parentTool.getStyle("map:collect:add:web", "project", boardId)),
+        }}
+        disabled={
+          parentTool &&
+          parentTool.getDisabled("map:collect:add:web", "project", boardId)
+        }
+      >
+        {/* 上传采集资料 */}
+        <UploadBtn
+          onChange={startUpload}
+          parentTool={parentTool}
+          boardId={boardId}
+        />
+      </Menu.Item>
+      <Menu.Item
+        style={{
+          ...(parentTool &&
+            parentTool.getStyle("map:collect:add:web", "project", boardId)),
+        }}
+        disabled={
+          parentTool &&
+          parentTool.getDisabled("map:collect:add:web", "project", boardId)
+        }
+      >
+        <Upload360PicBtn
+          onChange={startUpload}
+          parentTool={parentTool}
+          boardId={boardId}
+          parent={parent}
+          uploadPanorama={uploadPanorama}
+        ></Upload360PicBtn>
+      </Menu.Item>
+      <Menu.Item
+        key="uploadPlan"
+        style={{
+          ...(parentTool &&
+            parentTool.getStyle("map:collect:add:web", "project", boardId)),
+        }}
+        disabled={
+          parentTool &&
+          parentTool.getDisabled("map:collect:add:web", "project", boardId)
+        }
+      >
         <Upload
-          action={`/api/map/ght/${data.id}`}
+          action={uploadUrl}
           accept=".jpg, .jpeg, .png, .bmp"
           headers={{ Authorization: BASIC.getUrlParam.token }}
           beforeUpload={beforeUploadPlan}
@@ -389,12 +672,23 @@ export const ScoutingHeader = (props) => {
           <div>上传规划图</div>
         </Upload>
       </Menu.Item>
-      <Menu.Item key="uploadExcel">
+      <Menu.Item
+        key="uploadExcel"
+        style={{
+          ...(parentTool &&
+            parentTool.getStyle("map:collect:add:web", "project", boardId)),
+        }}
+        disabled={
+          parentTool &&
+          parentTool.getDisabled("map:collect:add:web", "project", boardId)
+        }
+      >
         {/* 导入数据 */}
         <ExcelRead
           id={data.id}
           group={data}
           board={board}
+          parent={this}
           onExcelSuccess={onExcelSuccess}
         />
       </Menu.Item>
@@ -416,7 +710,27 @@ export const ScoutingHeader = (props) => {
             onAreaDelete.call(this, data);
           }}
         >
-          <div className="danger">删除</div>
+          <div
+            className="danger"
+            style={{
+              ...(parentTool &&
+                parentTool.getStyle(
+                  "map:collect:type:remove",
+                  "project",
+                  boardId
+                )),
+            }}
+            disabled={
+              parentTool &&
+              parentTool.getDisabled(
+                "map:collect:type:remove",
+                "project",
+                boardId
+              )
+            }
+          >
+            删除
+          </div>
         </Popconfirm>
       </Menu.Item>
     </Menu>
@@ -522,6 +836,22 @@ export const ScoutingHeader = (props) => {
                       e.stopPropagation();
                       onAreaEdit(data);
                     }}
+                    style={{
+                      ...(parentTool &&
+                        parentTool.getStyle(
+                          "map:collect:type:update",
+                          "project",
+                          boardId
+                        )),
+                    }}
+                    disabled={
+                      parentTool &&
+                      parentTool.getDisabled(
+                        "map:collect:type:update",
+                        "project",
+                        boardId
+                      )
+                    }
                   >
                     <MyIcon type="icon-bianjimingcheng" />
                   </span>
@@ -553,125 +883,173 @@ export const ScoutingHeader = (props) => {
   );
 };
 
-export const ScoutingItem = ({
-  data,
-  dataSource = [],
-  onCollectionRemove,
-  onEditCollection,
-  areaList,
-  onSelectGroup,
-  onChangeDisplay = () => {},
-  onEditPlanPic = () => {},
-  onCopyCollection,
-  onModifyFeature = () => {},
-  onModifyRemark = () => {},
-  onRemarkSave = () => {},
-  onStopMofifyFeatureInDetails,
-  onDragEnd = () => {},
-  onMergeUp,
-  onMergeDown,
-  onMergeCancel,
-  onCheckItem = () => {},
-}) => {
+export const ScoutingItem = (props) => {
+  const {
+    data,
+    dataSource = [],
+    onCollectionRemove,
+    onEditCollection,
+    areaList,
+    onSelectGroup,
+    onChangeDisplay = () => {},
+    onEditPlanPic = () => {},
+    onCopyCollection,
+    selected = [],
+    onModifyFeature = () => {},
+    onModifyRemark = () => {},
+    onRemarkSave = () => {},
+    onStopMofifyFeatureInDetails,
+    onDragEnd = () => {},
+    onMergeUp,
+    onMergeDown,
+    onMergeCancel,
+    CollectionEdit = false,
+    onSelectCollection,
+    onModifyGeojsonIcon = () => {},
+    onRecoverGeojsonIcon = () => {},
+    onCheckItem = () => {},
+    callback,
+    parent,
+    index,
+  } = props
+  const handleSelect = (val) => {
+    // console.log(val);
+    onSelectCollection && onSelectCollection(val);
+  };
   return (
-    <DragDropContext onDragEnd={onDragEnd.bind(this, data)}>
+    <DragDropContext onDragEnd={() => onDragEnd.bind(this, data)}>
       <Droppable droppableId="droppable">
         {(provided, snapshot) => (
           <div {...provided.droppableProps} ref={provided.innerRef}>
-            {dataSource.length ? (
-              dataSource.map((item, index) => {
-                return (
-                  <Draggable key={item.id} draggableId={item.id} index={index}>
-                    {(provided, snapshot) => (
-                      <div ref={provided.innerRef} {...provided.draggableProps}>
+            <Checkbox.Group
+              onChange={handleSelect}
+              style={{ width: "100%" }}
+              value={selected}
+            >
+              {dataSource.length ? (
+                dataSource.map((item, index) => {
+                  if (item.collect_type === "9") {
+                    return (
+                      <PublicDataTreeComponent
+                        key={guid()}
+                        datas={item}
+                        areaList={areaList}
+                        callback={callback}
+                        index={index}
+                        parent={parent}
+                      ></PublicDataTreeComponent>
+                    );
+                  }
+                  return (
+                    <Draggable
+                      key={item.id}
+                      draggableId={item.id}
+                      index={index}
+                    >
+                      {(provided, snapshot) => (
                         <div
-                          className={`${animateCss.animated} ${animateCss.slideInRight}`}
-                          style={{
-                            animationDuration: "0.3s",
-                            animationDelay: index * 0.02 + "s",
-                            position: "relative",
-                            paddingLeft: "8px",
-                            width: "100%",
-                          }}
-                          key={item.id}
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
                         >
-                          <span
-                            className={styles.handleCollection}
-                            {...provided.dragHandleProps}
+                          <div
+                            className={`${animateCss.animated} ${animateCss.slideInRight}`}
+                            style={{
+                              animationDuration: "0.3s",
+                              animationDelay: index * 0.02 + "s",
+                              position: "relative",
+                              paddingLeft: "8px",
+                              width: "100%",
+                            }}
+                            key={item.id}
                           >
-                            <MyIcon type="icon-tuozhuaitingliu" />
-                          </span>
-                          {item.type !== "groupCollection" ? (
-                            <UploadItem
-                              onCheckItem={onCheckItem}
-                              onCopyCollection={onCopyCollection}
-                              onChangeDisplay={onChangeDisplay}
-                              onEditPlanPic={onEditPlanPic}
-                              areaList={areaList}
-                              onSelectGroup={onSelectGroup}
-                              type={Action.checkCollectionType(item.target)}
-                              data={item}
-                              onRemove={onCollectionRemove}
-                              onEditCollection={onEditCollection}
-                              onRemarkSave={onRemarkSave}
-                              onModifyFeature={onModifyFeature}
-                              onStopMofifyFeatureInDetails={
-                                onStopMofifyFeatureInDetails
-                              }
-                              onModifyRemark={onModifyRemark}
-                              onMergeDown={onMergeDown}
-                              onMergeUp={onMergeUp}
-                              index={index}
-                              length={dataSource.length}
-                            />
-                          ) : (
-                            <div className={styles.groupCollection}>
-                              {item.child &&
-                                item.child.map((child, i) => (
-                                  <UploadItem
-                                    onCheckItem={onCheckItem}
-                                    group_id={item.gid}
-                                    subIndex={i}
-                                    group_length={item.child.length}
-                                    onCopyCollection={onCopyCollection}
-                                    onChangeDisplay={onChangeDisplay}
-                                    onEditPlanPic={onEditPlanPic}
-                                    areaList={areaList}
-                                    onSelectGroup={onSelectGroup}
-                                    type={Action.checkCollectionType(
-                                      child.target
-                                    )}
-                                    data={child}
-                                    onRemove={onCollectionRemove}
-                                    onEditCollection={onEditCollection}
-                                    onRemarkSave={onRemarkSave}
-                                    onModifyFeature={onModifyFeature}
-                                    onStopMofifyFeatureInDetails={
-                                      onStopMofifyFeatureInDetails
-                                    }
-                                    onModifyRemark={onModifyRemark}
-                                    onMergeDown={onMergeDown}
-                                    onMergeUp={onMergeUp}
-                                    index={index}
-                                    key={child.id}
-                                    length={dataSource.length}
-                                    onMergeCancel={onMergeCancel}
-                                  />
-                                ))}
-                            </div>
-                          )}
+                            <span
+                              className={styles.handleCollection}
+                              {...provided.dragHandleProps}
+                            >
+                              <MyIcon type="icon-tuozhuaitingliu" />
+                            </span>
+                            {item.type !== "groupCollection" ? (
+                              <UploadItem
+                                {...props}
+                                selected={selected}
+                                Edit={CollectionEdit}
+                                onCheckItem={onCheckItem}
+                                onCopyCollection={onCopyCollection}
+                                onChangeDisplay={onChangeDisplay}
+                                onEditPlanPic={onEditPlanPic}
+                                areaList={areaList}
+                                onSelectGroup={onSelectGroup}
+                                type={Action.checkCollectionType(item.target)}
+                                data={item}
+                                parent={parent}
+                                onRemove={onCollectionRemove}
+                                onEditCollection={onEditCollection}
+                                onRemarkSave={onRemarkSave}
+                                onModifyFeature={onModifyFeature}
+                                onStopMofifyFeatureInDetails={
+                                  onStopMofifyFeatureInDetails
+                                }
+                                onModifyRemark={onModifyRemark}
+                                onMergeDown={onMergeDown}
+                                onMergeUp={onMergeUp}
+                                onModifyGeojsonIcon={onModifyGeojsonIcon}
+                                onRecoverGeojsonIcon={onRecoverGeojsonIcon}
+                                index={index}
+                                length={dataSource.length}
+                              />
+                            ) : (
+                              <div className={styles.groupCollection}>
+                                {item.child &&
+                                  item.child.map((child, i) => (
+                                    <UploadItem
+                                      {...props}
+                                      selected={selected}
+                                      Edit={CollectionEdit}
+                                      onCheckItem={onCheckItem}
+                                      group_id={item.gid}
+                                      subIndex={i}
+                                      group_length={item.child.length}
+                                      onCopyCollection={onCopyCollection}
+                                      onChangeDisplay={onChangeDisplay}
+                                      onEditPlanPic={onEditPlanPic}
+                                      areaList={areaList}
+                                      onSelectGroup={onSelectGroup}
+                                      type={Action.checkCollectionType(
+                                        child.target
+                                      )}
+                                      data={child}
+                                      onRemove={onCollectionRemove}
+                                      onEditCollection={onEditCollection}
+                                      onRemarkSave={onRemarkSave}
+                                      onModifyFeature={onModifyFeature}
+                                      onStopMofifyFeatureInDetails={
+                                        onStopMofifyFeatureInDetails
+                                      }
+                                      onModifyRemark={onModifyRemark}
+                                      onMergeDown={onMergeDown}
+                                      onMergeUp={onMergeUp}
+                                      index={index}
+                                      key={child.id}
+                                      length={dataSource.length}
+                                      onMergeCancel={onMergeCancel}
+                                    />
+                                  ))}
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    )}
-                  </Draggable>
-                );
-              })
-            ) : (
-              <Empty
-                style={{ textAlign: "center" }}
-                description="暂无采集数据"
-              />
-            )}
+                      )}
+                    </Draggable>
+                  );
+                })
+              ) : (
+                <Empty
+                  style={{ textAlign: "center" }}
+                  description="暂无采集数据"
+                />
+              )}
+            </Checkbox.Group>
+
             {provided.placeholder}
             {/* <div
               style={{
@@ -692,6 +1070,7 @@ export const UploadItem = ({
   type,
   data,
   onRemove,
+  Edit = false,
   onEditCollection = () => {},
   areaList,
   onSelectGroup,
@@ -703,6 +1082,8 @@ export const UploadItem = ({
   onStopMofifyFeatureInDetails,
   onRemarkSave = () => {},
   onToggleChangeStyle = () => {},
+  onModifyGeojsonIcon = () => {},
+  onRecoverGeojsonIcon = () => {},
   onMergeUp,
   onMergeDown,
   index,
@@ -710,8 +1091,11 @@ export const UploadItem = ({
   subIndex,
   group_length,
   group_id,
+  parent,
   onCheckItem = () => {},
-  onMergeCancel = () => {},
+  onMergeCancel = () => { },
+  onChangeAnimate = () => { },
+  disabledAnimateToggle = false
 }) => {
   let obj = { ...data };
   // 过滤后缀
@@ -749,6 +1133,7 @@ export const UploadItem = ({
     word: { text: "文档", icon: "icon-wenjian" },
     annotate: { text: "批注", icon: "icon-pizhu1" },
     plotting: { text: "标绘", icon: "icon-biaohui2" },
+    Point: { text: "标记点", icon: "icon-zuobiao2" },
     unknow: { text: "未知", icon: "icon-bianzu612" },
     planPic: { text: "规划", icon: "icon-bianzu581" },
     address: { text: "地址", icon: "icon-zuobiao2" },
@@ -759,6 +1144,14 @@ export const UploadItem = ({
 
   let secondSetType = type;
 
+  if (data.content) {
+    let content = JSON.parse(data.content);
+    const geometryType = content.geometryType;
+    if (geometryType === "Point") {
+      secondSetType = "Point";
+    }
+  }
+
   const onHandleMenu = ({ key }) => {
     // 添加坐标点
     if (key === "editCollection") {
@@ -766,6 +1159,16 @@ export const UploadItem = ({
       onEditCollection && onEditCollection("editCoordinate", data);
     }
     if (key === "selectGroup") {
+    }
+
+    if (key === "modifyGeojsonIcon") {
+      setVisible(false);
+      onModifyGeojsonIcon && onModifyGeojsonIcon(data);
+    }
+
+    if (key === "recoverGeojsonIcon") {
+      setVisible(false);
+      onRecoverGeojsonIcon && onRecoverGeojsonIcon(data);
     }
 
     if (key === "eidtTitle") {
@@ -852,17 +1255,27 @@ export const UploadItem = ({
         <Menu.Item key="editCollection">关联坐标</Menu.Item>
       )}
       <Menu.Item key="eidtTitle">修改名称</Menu.Item>
+      {data.collect_type === "8" && (
+        <Menu.Item key="modifyGeojsonIcon">更换图标</Menu.Item>
+      )}
+      {data.collect_type === "8" && (
+        <Menu.Item key="recoverGeojsonIcon">恢复默认图标</Menu.Item>
+      )}
       {data.collect_type === "5" && (
         <Menu.Item key="editPlanPic">编辑</Menu.Item>
       )}
-      {data.content && JSON.parse(data.content)?.remark ? (
+      {data.collect_type === "9" &&
+      data.content &&
+      JSON.parse(data.content)?.remark ? (
         <Menu.Item key="modifyRemark">编辑备注</Menu.Item>
       ) : null}
       {/* {data.content && JSON.parse(data.content)?.remark === "" ? (
         <Menu.Item key="addRemark">新增备注</Menu.Item>
       ) : null} */}
-      {data.content && JSON.parse(data.content)?.featureType ? (
-        <Menu.Item key="modifyFeature">编辑几何图形</Menu.Item>
+      {data.collect_type === "4" &&
+      data.content &&
+      JSON.parse(data.content)?.featureType ? (
+        <Menu.Item key="modifyFeature">标绘编辑</Menu.Item>
       ) : null}
       {data.collect_type === "4" && !isPlotEdit ? (
         <Menu.Item key="copyToGroup">
@@ -949,6 +1362,21 @@ export const UploadItem = ({
       {/* <Menu.Item key="display">
           {data.is_display === "0" ? "显示" : "隐藏"}
         </Menu.Item> */}
+      { data.collect_type === '8' &&
+      <Menu.Item key="showAnimate">
+        <div className={styles.toogleAnimate} onClick={(e)=> e.stopPropagation() }>
+          <span>
+            路线动画
+          </span>
+          <span>
+            <Switch size='small'
+              onChange={(val) => { onChangeAnimate && onChangeAnimate(val, data); }}
+            />
+          </span>
+        </div>
+      </Menu.Item>
+      }
+
       <Menu.Item key="removeBoard">
         <Popconfirm
           title="确定删除此资料吗?"
@@ -975,45 +1403,54 @@ export const UploadItem = ({
   };
 
   const itemClick = (val) => {
-    let ty = Action.checkCollectionType(val.target);
-    // if (ty === "pic") {
-    //   // 点击的是图片
-    //   onCheckItem(val);
-    // } else {
-    //   onCheckItem(null);
-    // }
-    onCheckItem(val);
-    if (val.is_display === "0") return;
-    if (
-      val.location &&
-      Object.keys(val.location).length &&
-      val.is_display === "1"
-    ) {
-      let coor = [+val.location.longitude, +val.location.latitude];
-      Action.editZIndexOverlay(val.id);
-      Action.toCenter({ center: coor });
-    }
+    parent.setItemClickState(true);
+    let feature = Action.findFeature(val.id);
+    if (feature && feature.get("meetingRoomNum") !== undefined) {
+      Action.fitFeature(feature);
+      setTimeout(function () {
+        Action.handlePlotClick(feature);
+      }, 100);
+    } else {
+      Action.zoomToMap();
+      setTimeout(function () {
+        onCheckItem(val);
+        if (val.is_display === "0") return;
+        if (
+          val.location &&
+          Object.keys(val.location).length &&
+          val.is_display === "1"
+        ) {
+          let coor = [+val.location.longitude, +val.location.latitude];
+          Action.editZIndexOverlay(val.id);
+          Action.toCenter({ center: coor });
+        }
 
-    // 标注
-    if (val.collect_type === "4") {
-      let feature = Action.findFeature(val.id);
-      let extent = feature && feature.getGeometry().getExtent();
-      if (extent) {
-        Action.toCenter({ type: "extent", center: extent });
-      }
-    }
+        // 标注
+        if (val.collect_type === "4") {
+          let extent = feature && feature.getGeometry().getExtent();
+          if (extent) {
+            Action.toCenter({ type: "extent", center: extent });
+            Action.toggleFeatureStyle(feature);
+          }
+        }
 
-    // 规划图
-    if (val.collect_type === "5") {
-      let layer = Action.findImgLayer(val.resource_id);
-      if (layer) {
-        let extent = layer.getSource().getImageExtent();
-        // console.log()
-        Action.toCenter({ type: "extent", center: extent });
-      }
+        // 规划图
+        if (val.collect_type === "5") {
+          let layer = Action.findImgLayer(val.resource_id);
+          if (layer) {
+            let extent = layer.getSource().getImageExtent();
+            // console.log()
+            Action.toCenter({ type: "extent", center: extent });
+          }
+        }
+        onToggleChangeStyle && onToggleChangeStyle(val);
+      }, 20);
     }
-    onToggleChangeStyle && onToggleChangeStyle(val);
   };
+  Event.Evt.un("moveToCollect");
+  Event.Evt.on("moveToCollect", (val) => {
+    itemClick(val);
+  });
   let oldRemark = data.content && JSON.parse(data.content).remark;
   if (oldRemark?.trim() === "") {
     oldRemark = null;
@@ -1039,6 +1476,7 @@ export const UploadItem = ({
       draggable={true}
       // style={myStyle}
       onClick={() => itemClick(data)}
+      id={`menu_collection_${data.id}`}
     >
       <div
         style={{
@@ -1059,21 +1497,6 @@ export const UploadItem = ({
           <MyIcon
             type={itemKeyVals[secondSetType] && itemKeyVals[secondSetType].icon}
           />
-          {/* <span>
-              {secondSetType === "pic" ? (
-                <img
-                  src={data.resource_url}
-                  style={{ width: 46, height: 46, borderRadius: 4 }}
-                  alt="图片"
-                  onError={(e) => {
-                    // e.target.src = "";
-                    // e.target.src = data.resource_url;
-                  }}
-                />
-              ) : (
-                  itemKeyVals[secondSetType]
-                )}
-            </span> */}
         </div>
         <div className={styles.uploadDetail}>
           <Row style={{ textAlign: "left" }} align="middle" justify="center">
@@ -1150,18 +1573,23 @@ export const UploadItem = ({
               <MyIcon type="icon-yanjing_xianshi" />
             )}
           </span>
-          <Dropdown
-            overlay={menu}
-            trigger="click"
-            onVisibleChange={(val) => setVisible(val)}
-            visible={visible}
-          >
-            <span
-            // style={{ color: "#1769FF" }}
+          {!Edit ? (
+            <Dropdown
+              overlay={menu}
+              trigger="click"
+              onVisibleChange={(val) => setVisible(val)}
+              visible={visible}
             >
-              <MyIcon type="icon-gengduo2" />
-            </span>
-          </Dropdown>
+              <span
+              // style={{ color: "#1769FF" }}
+                onClick={ e => e.stopPropagation()}
+              >
+                <MyIcon type="icon-gengduo2" />
+              </span>
+            </Dropdown>
+          ) : (
+            <Checkbox value={data.id} style={{ marginLeft: 5 }}></Checkbox>
+          )}
         </div>
       </div>
       {/* {oldRemark || isAddMark === true ? (

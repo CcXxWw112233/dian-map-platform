@@ -11,10 +11,11 @@ import axios from "axios";
 import { baseConfig } from "../../globalSet/config";
 // import { draw } from "utils/draw";
 import scoutingProjectAction from "../../lib/components/ProjectScouting/ScoutingList";
-import DetailAction from '../../lib/components/ProjectScouting/ScoutingDetail';
-import lib from './drawForMap'
+import DetailAction from "../../lib/components/ProjectScouting/ScoutingDetail";
+import lib from "./drawForMap";
 import { setLocal } from "../sessionManage";
-import Event from '../../lib/utils/event';
+import Event from "../../lib/utils/event";
+import { reject } from "lodash";
 const { Evt } = Event;
 
 // 获取地图和视图
@@ -61,31 +62,34 @@ const MapMoveSearch = function () {
   }, 1000);
 };
 
-Evt.addEventListener('handleGroupCollectionFeature', (data)=>{
+Evt.addEventListener("handleGroupCollectionFeature", (data) => {
   // 安卓
-  if(window.mapAndroid){
-    window.mapAndroid.getPoint && window.mapAndroid.getPoint({data})
+  if (window.mapAndroid) {
+    window.mapAndroid.getPoint &&
+      window.mapAndroid.getPoint(JSON.stringify(data));
   }
   // ios
-  if(window.webkit){
-    window.webkit.messageHandlers && window.webkit.messageHandlers.viewCollectionDetails &&
-    window.webkit.messageHandlers.viewCollectionDetails.postMessage &&
-    window.webkit.messageHandlers.viewCollectionDetails.postMessage({data})
+  if (window.webkit) {
+    window.webkit.messageHandlers &&
+      window.webkit.messageHandlers.viewCollectionDetails &&
+      window.webkit.messageHandlers.viewCollectionDetails.postMessage &&
+      window.webkit.messageHandlers.viewCollectionDetails.postMessage({ data });
   }
-})
+});
 
-Evt.addEventListener('handleGroupFeature', (id) => {
+Evt.addEventListener("handleGroupFeature", (id) => {
   // 安卓
-  if(window.mapAndroid){
-    window.mapAndroid.getPoint && window.mapAndroid.getPoint({id})
+  if (window.mapAndroid) {
+    window.mapAndroid.getPoint && window.mapAndroid.getPoint(id);
   }
   // ios
-  if(window.webkit){
-    window.webkit.messageHandlers && window.webkit.messageHandlers.viewCollectionGroup &&
-    window.webkit.messageHandlers.viewCollectionGroup.postMessage &&
-    window.webkit.messageHandlers.viewCollectionGroup.postMessage({id})
+  if (window.webkit) {
+    window.webkit.messageHandlers &&
+      window.webkit.messageHandlers.viewCollectionGroup &&
+      window.webkit.messageHandlers.viewCollectionGroup.postMessage &&
+      window.webkit.messageHandlers.viewCollectionGroup.postMessage({ id });
   }
-})
+});
 
 // 所有暴露在外面的方法
 let callFunctions = {
@@ -118,7 +122,7 @@ let callFunctions = {
     return view.getCenter();
   },
   // 添加图层
-  addLayer:()=>{
+  addLayer: () => {
     if (!callFunctions.isMounted) {
       callFunctions.Init();
       callFunctions.isMounted = true;
@@ -192,7 +196,10 @@ let callFunctions = {
       getMyPosition.setPosition(coor);
     } else {
       // 没有绘制就进行绘制，并设置样式
-      getMyPosition.drawPosition({ isMove: val.isMove === undefined ? true : val.isMove , ...val });
+      getMyPosition.drawPosition({
+        isMove: val.isMove === undefined ? true : val.isMove,
+        ...val,
+      });
     }
   },
   // 切换底图
@@ -213,7 +220,13 @@ let callFunctions = {
     map.un("moveend", MapMoveSearch);
   },
   // 搜索地址
-  getAddressPublicFunction:({ address = "", offset = 1, fromCity = "" ,types,page = 1})=>{
+  getAddressPublicFunction: ({
+    address = "",
+    offset = 1,
+    fromCity = "",
+    types,
+    page = 1,
+  }) => {
     return new Promise((resolve, reject) => {
       let url = protocol + "//restapi.amap.com/v3/place/text";
       let params = {
@@ -223,7 +236,7 @@ let callFunctions = {
         city: fromCity,
         extensions: "base",
         types: types,
-        page
+        page,
       };
       axios
         .get(url, { params })
@@ -232,10 +245,12 @@ let callFunctions = {
           if (res.status === 200) {
             let data = res.data;
             if (data.info === "OK") {
-              if (offset === 1) {resolve(data.pois[0]) ; return }
-              else {
+              if (offset === 1) {
+                resolve(data.pois[0]);
+                return;
+              } else {
                 resolve(data.pois);
-                return ;
+                return;
               }
             } else {
               reject(data);
@@ -250,17 +265,32 @@ let callFunctions = {
     });
   },
   // 逆编码转换坐标
-  getAddressForName: async ({ address = "", offset = 1, fromCity = "" ,types,page = 1}) => {
+  getAddressForName: async ({
+    address = "",
+    offset = 1,
+    fromCity = "",
+    types,
+    page = 1,
+  }) => {
     if (!address) return Promise.reject({ status: 403 });
-    let pois = await callFunctions.getAddressPublicFunction({ address, offset, fromCity ,types,page});
-    if(window.getAddress){
+    let pois = await callFunctions.getAddressPublicFunction({
+      address,
+      offset,
+      fromCity,
+      types,
+      page,
+    });
+    if (window.getAddress) {
       let p = pois;
-      p = p.map(item => {
-        let splitLocation = item.location && item.location.split(',');
-        let location = {lng: splitLocation && splitLocation[0],lat: splitLocation && splitLocation[1]};
+      p = p.map((item) => {
+        let splitLocation = item.location && item.location.split(",");
+        let location = {
+          lng: splitLocation && splitLocation[0],
+          lat: splitLocation && splitLocation[1],
+        };
         item.location = location;
         return item;
-      })
+      });
       window.getAddress.postMessage(JSON.stringify(p));
     }
     return pois;
@@ -268,7 +298,14 @@ let callFunctions = {
 
   // 通过点搜索周围数据
   SearchForPoint: async (val) => {
-    let { position, radius = 200, locationName } = val;
+    let {
+      position,
+      radius = 200,
+      locationName,
+      type,
+      pageSize,
+      pageIndex,
+    } = val;
     if (locationName) {
       let data = await callFunctions.getAddressForName({
         address: locationName,
@@ -278,14 +315,15 @@ let callFunctions = {
         position = data && data.location.split(",").map((item) => +item);
       }
     }
-    let data = await new Promise((resolve,reject) => {
+    let data = await new Promise((resolve, reject) => {
       AMap.service(["AMap.PlaceSearch"], function () {
         let placeSearch = new AMap.PlaceSearch({
-          pageSize: 10,
-          pageIndex: 1,
+          pageSize: pageSize ? pageSize : 10,
+          pageIndex: pageIndex ? pageIndex : 1,
+          type: type,
         });
         placeSearch.searchNearBy("", position, radius, (status, result) => {
-          resolve(result.poiList)
+          resolve(result.poiList);
           // 调用移动端的监听发送数据
           window.getNearbyAddressInfo &&
             result.poiList &&
@@ -295,22 +333,25 @@ let callFunctions = {
         });
       });
       // 调用启动监听
-      callFunctions.StartMove();
-    })
+      // callFunctions.StartMove();
+    });
     return data;
   },
 
   // 通过坐标获取信息数据并且启动地图监听
-  getAddressForLocation:({location,city,offset = 15,radius})=>{
+  getAddressForLocation: ({ location, city, offset = 15, radius }) => {
     // 通过GPS地址查询当前位置
-    callFunctions.SearchPoint({position: location,city ,radius}).then(res => {
-      // 通过GPS的地址查询附近的poi数据
-      callFunctions.getAddressPublicFunction({address:res, offset}).then(pois => {
-        window.getNearbyAddressInfo && window.getNearbyAddressInfo.postMessage(
-          JSON.stringify(pois)
-        );
-      })
-    })
+    callFunctions
+      .SearchPoint({ position: location, city, radius })
+      .then((res) => {
+        // 通过GPS的地址查询附近的poi数据
+        callFunctions
+          .getAddressPublicFunction({ address: res, offset })
+          .then((pois) => {
+            window.getNearbyAddressInfo &&
+              window.getNearbyAddressInfo.postMessage(JSON.stringify(pois));
+          });
+      });
   },
 
   // 绘制标绘
@@ -330,96 +371,147 @@ let callFunctions = {
   },
 
   // 通过坐标点查询
-  SearchPoint:({position, radius = 500,city})=>{
-    return new Promise((resolve,reject) => {
+  SearchPoint: ({ position, radius = 500, city }) => {
+    return new Promise((resolve, reject) => {
       var geocoder = new AMap.Geocoder({
         city: city, //城市设为北京，默认：“全国”
-        radius: radius //范围，默认：500
+        radius: radius, //范围，默认：500
       });
-      geocoder.getAddress(position,(status, result)=>{
-        if (status === 'complete'&&result.regeocode) {
+      geocoder.getAddress(position, (status, result) => {
+        if (status === "complete" && result.regeocode) {
           var address = result.regeocode.formattedAddress;
-          resolve(address)
-        }else{
-          reject({code:-1,message:"查询失败"})
+          resolve(address);
+        } else {
+          reject({ code: -1, message: "查询失败" });
         }
-      })
-    })
+      });
+    });
   },
 
   // 搜索地址
-  searchAddress:({address,city})=>{
-    return new Promise((resolve,reject) => {
+  searchAddress: ({ address, city }) => {
+    return new Promise((resolve, reject) => {
       let url = protocol + "//restapi.amap.com/v3/geocode/geo";
       let params = {
         key: baseConfig.GAODE_SERVER_APP_KEY,
         address: address,
         city: city || undefined,
       };
-      axios.get(url,{ params }).then(res => {
+      axios.get(url, { params }).then((res) => {
         if (res.status === 200) {
           let data = res.data;
-          resolve(data.geocodes)
-        }else{
-          reject(res)
+          resolve(data.geocodes);
+        } else {
+          reject(res);
         }
-      })
-    })
-
+      });
+    });
   },
 
   // 通过经纬度、关键字查询
-  searchNearByXY: ({xy, keywords, radius}) => {
+  searchNearByXY: ({ xy, keywords, radius, adcode, page }) => {
     return new Promise((resolve, reject) => {
       let url = protocol + "//restapi.amap.com/v3/place/around";
       let params = {
         key: baseConfig.GAODE_SERVER_APP_KEY,
         location: xy,
         keywords: keywords,
-        radius: radius
+        radius: radius,
+      };
+      if (adcode) {
+        params.city = adcode;
       }
-      axios.get(url,{ params }).then(res => {
+      if (page) {
+        params.page = page;
+      }
+      axios.get(url, { params }).then((res) => {
         if (res.status === 200) {
           let data = res.data;
-          resolve(data.pois)
-        }else{
-          reject(res)
+          resolve(data.pois);
+        } else {
+          reject(res);
         }
-      })
-    })
+      });
+    });
   },
+
+  // 通过经纬度、关键字查询
+  searchNearByXY2: ({ xy, keywords, radius, adcode, page }) => {
+    return new Promise((resolve, reject) => {
+      let url = protocol + "//restapi.amap.com/v3/place/around";
+      let params = {
+        key: baseConfig.GAODE_SERVER_APP_KEY,
+        location: xy,
+        keywords: keywords,
+        radius: radius,
+      };
+      if (adcode) {
+        params.city = adcode;
+      }
+      if (page) {
+        params.page = page;
+      }
+      axios.get(url, { params }).then((res) => {
+        if (res.status === 200) {
+          let data = res.data;
+          resolve(data);
+        } else {
+          reject(res);
+        }
+      });
+    });
+  },
+
+  // 根据经纬度获取所在城市
+  getCityByLonLat: ({ lon, lat }) => {
+    return new Promise((resolve, reject) => {
+      let url = "https://restapi.amap.com/v3/geocode/regeo";
+      let params = {
+        key: baseConfig.GAODE_SERVER_APP_KEY,
+        location: `${Number(lon).toFixed(6)},${Number(lat).toFixed(6)}`,
+      };
+      axios.get(url, { params }).then((res) => {
+        if (res.status === 200) {
+          let data = res.data;
+          resolve(data.regeocode);
+        } else {
+          reject(res);
+        }
+      });
+    });
+  },
+
   // 渲染项目列表
-  renderProjectList: ()=>{
+  renderProjectList: () => {
     lib.showProjectPoint();
   },
   // 隐藏已经渲染的列表
-  hideProjectList:()=>{
+  hideProjectList: () => {
     lib.hideProjectPoint();
   },
   // 渲染坐标点
-  renderCollection:(data = [])=>{
+  renderCollection: (data = []) => {
     callFunctions.addLayer();
-    if(data.length) lib.renderCollection(data,callFunctions.source);
-    else lib.getCollectionData(callFunctions.source)
-
+    if (data.length) lib.renderCollection(data, callFunctions.source);
+    else lib.getCollectionData(callFunctions.source);
   },
   // 清除渲染的元素
-  clearCollection:()=>{
+  clearCollection: () => {
     lib.clear();
   },
-  hideOverlay:()=>{
+  hideOverlay: () => {
     lib.hideOverlay();
   },
   // 视图根据元素显示中间位置
-  viewFitById: ({id})=>{
+  viewFitById: ({ id }) => {
     lib.fitCenter(id);
   },
   // 渲染分组坐标点
-  renderGoupPoint:(data)=>{
+  renderGoupPoint: (data) => {
     lib.renderGroupPoint(data);
   },
   // 清除分组坐标点
-  clearGroupPoint: ()=>{
+  clearGroupPoint: () => {
     lib.clearGroupPoint();
   },
   // 设置选中的分组点
@@ -427,54 +519,57 @@ let callFunctions = {
     lib.setActiveGroupPoint(id);
   },
   // 渲染分组的采集资料点
-  renderGroupCollectionPoint : (data)=>{
-    if(data){
+  renderGroupCollectionPoint: (data) => {
+    if (data) {
       let arr = [];
-      Array.isArray(data) ? (arr = data): arr = JSON.parse(data);
+      Array.isArray(data) ? (arr = data) : (arr = JSON.parse(data));
       lib.renderGroupCollectionPoint(arr);
     }
   },
-  clearGroupCollectionPoint : ()=>{
+  clearGroupCollectionPoint: () => {
     lib.clearGroupCollectionPoint();
   },
-  setActiveGroupCollectionPoint : (val)=>{
-    lib.setActiveGropCollectionPoint(val)
+  setActiveGroupCollectionPoint: (val) => {
+    lib.setActiveGropCollectionPoint(val);
   },
   // zoomIn 放大
-  zoomIn:()=>{
-    let view = _getMap('view');
+  zoomIn: () => {
+    let view = _getMap("view");
     let zoom = view.getZoom();
     let maxZoom = view.getMaxZoom();
-    if(zoom >= maxZoom) return ;
+    if (zoom >= maxZoom) return;
     zoom += 1;
     view.animate({
       center: view.getCenter(),
       zoom: zoom,
-      duration:200
+      duration: 200,
     });
   },
   // zoomOut 缩小
-  zoomOut:()=>{
-    let view = _getMap('view');
+  zoomOut: () => {
+    let view = _getMap("view");
     let zoom = view.getZoom();
     let minZoom = view.getMinZoom();
-    if(zoom <= minZoom) return ;
+    if (zoom <= minZoom) return;
     zoom -= 1;
     view.animate({
       center: view.getCenter(),
       zoom: zoom,
-      duration:200
+      duration: 200,
     });
   },
 
-  renderTestData :(data)=>{
+  renderTestData: (data) => {
     DetailAction.loadGeoJson(data);
   },
 
-  saveTestPoint : (val = {})=>{
-    DetailAction.savePoint(val)
-  }
+  saveTestPoint: (val = {}) => {
+    DetailAction.savePoint(val);
+  },
 
+  resolveGeojson: (name) => {
+    Event.Evt.firEvent("resolveGeojson", name)
+  }
 };
 
 window.CallWebMapFunction = CallWebFunction;

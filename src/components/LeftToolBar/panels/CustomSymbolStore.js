@@ -1,4 +1,6 @@
 import React, { Fragment } from "react";
+import axios from "axios";
+import { QuestionCircleOutlined } from "@ant-design/icons";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import styles from "../LeftToolBar.less";
 import { Input, Button, Tooltip, Upload, message, Popconfirm } from "antd";
@@ -6,9 +8,8 @@ import server from "../../../services/symbolStore";
 import { BASIC } from "../../../services/config";
 import { formatSize } from "../../../utils/utils";
 import RenameModal from "../components/RenameModal";
-import axios from "axios";
-import { QuestionCircleOutlined } from "@ant-design/icons";
 import { Icon } from 'antd'
+import { compress } from "../../../utils//pictureCompress"
 export default class CustomSymbolStore extends React.Component {
   constructor(props) {
     super(props);
@@ -93,26 +94,13 @@ export default class CustomSymbolStore extends React.Component {
     const checked = this.checkFileSize(file);
     if (checked) {
       return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        const me = this;
-        reader.onload = function () {
-          let tempImg = new Image();
-          tempImg.crossorigin = "anonymous";
-          tempImg.src = reader.result;
-          tempImg.onload = function async() {
-            if (tempImg.width > 48 || tempImg.height > 48) {
-              message.error("图片尺寸不能超过48*48像素");
-              reject(false);
-            } else {
-              const index = file.name.lastIndexOf(".");
-              me.setState({
-                uploadSymbolName: file.name.substr(0, index),
-              });
-              resolve(true);
-            }
-          };
-        };
+        compress(file, 48).then(res => {
+          const index = file.name.lastIndexOf(".");
+          this.setState({
+            uploadSymbolName: file.name.substr(0, index),
+          });
+          resolve(res)
+        })
       });
     } else {
       return Promise.reject();
@@ -297,7 +285,7 @@ export default class CustomSymbolStore extends React.Component {
                       onClick={() => this.setRemoveKey(item.id)}
                     >
                       <div className={styles.iconItem_img}>
-                        <img src={item.icon_url} alt="" />
+                        <img crossOrigin="anonymous" src={item.icon_url} alt="" />
                       </div>
                       <div className={styles.iconItem_name}>
                         {item.icon_name || "unkown"}

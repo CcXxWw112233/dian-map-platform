@@ -1,6 +1,7 @@
 import Observable from "ol/Observable";
 import Feature from "ol/Feature";
 import Overlay from "ol/Overlay";
+import { Cluster } from "ol/source";
 import PlotDraw from "./PlotDraw";
 import PlotEdit from "./PlotEdit";
 import FeatureEvent from "./events/FeatureEvent";
@@ -11,6 +12,7 @@ import PlotFactory from "./PlotFactory";
 import Constants from "./Constants";
 import { combineOpts, deepcopy } from "../util/core";
 import * as ArrTools from "../util/array";
+import DetailAction from "../../../lib/components/ProjectScouting/ScoutingDetail";
 // import Ajax from '../util/seieajax';
 
 import * as ol from "ol";
@@ -120,6 +122,7 @@ class PlottingLayer extends Observable {
     this._ls_mapclick = null;
 
     this.projectScoutingArr = [];
+    this.plotOverlayArr = [];
     //--合并地图选项
     combineOpts(this.opts, this.defaults, opts);
     //--创建layer
@@ -374,8 +377,10 @@ class PlottingLayer extends Observable {
     const showlayer = new VectorLayer({
       zIndex: 20,
       source: new VectorSource(),
+      // declutter: true,
     });
     // showlayer.setStyle(drawStyle);
+    // showlayer.setSource()
     showlayer.setMap(this.map);
     return showlayer;
   }
@@ -655,10 +660,12 @@ class PlottingLayer extends Observable {
    * 置顶一个图元
    */
   setToTop(feature_operator) {
-    this._sortByZindex();
-    const curIndex = this._getFeatureOperatorIndex(feature_operator);
-    ArrTools.moveToTop(this.feature_operators, curIndex);
-    this._resetZIndex();
+    if (feature_operator.feature) {
+      this._sortByZindex();
+      const curIndex = this._getFeatureOperatorIndex(feature_operator);
+      ArrTools.moveToTop(this.feature_operators, curIndex);
+      this._resetZIndex();
+    }
   }
   /**
    * @param {FeatureOperator} feature_operator 对象

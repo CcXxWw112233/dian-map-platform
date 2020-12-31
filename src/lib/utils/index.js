@@ -6,6 +6,7 @@ import {
   MultiLineString,
   MultiPoint,
   MultiPolygon,
+  Circle as defaultCircle,
 } from "ol/geom";
 import { Image } from "ol/layer";
 import Static from "ol/source/ImageStatic";
@@ -44,6 +45,7 @@ import * as olProj from "ol/proj";
 import { circular as circularPolygon } from "ol/geom/Polygon";
 
 import INITMAP from "../../utils/INITMAP";
+import { BASIC } from "../../services/config";
 
 // 新建feature
 export const addFeature = function (type, data) {
@@ -72,6 +74,9 @@ export const addFeature = function (type, data) {
       const circle4326 = circularPolygon(data ? projPt : [], data.radius);
       const circle3857 = circle4326.clone().transform("EPSG:4326", "EPSG:3857");
       return circle3857;
+    }
+    if (type === "defaultCircle") {
+      return new defaultCircle(data.coordinates, data.radius);
     }
   };
 
@@ -124,7 +129,7 @@ export const loadFeatureJSON = function (data, type = "WTK") {
   if (type === "WTK") {
     return new WKT().readFeature(data.source, data.options);
   }
-  return (new GeoJSON()).readFeatures(data);
+  return new GeoJSON().readFeatures(data);
 };
 
 const getPolygonFillColor = (properties = {}, fillColorKeyVals = []) => {
@@ -143,15 +148,19 @@ const getPolygonFillColor = (properties = {}, fillColorKeyVals = []) => {
       splitScope.push(tempArr1);
     });
     const val = Number(properties[proerty]);
-    for (let i = 0; i < splitScope.length; i++) {
-      const scopeVal = splitScope[i];
-      if (val < scopeVal[scopeVal.length - 1]) {
-        fillColor = fillColorKeyVals[i].fillColor;
-        break;
+    if (val === 0) {
+      fillColor = "#E0E0E0";
+    } else {
+      for (let i = 0; i < splitScope.length; i++) {
+        const scopeVal = splitScope[i];
+        if (val < scopeVal[scopeVal.length - 1]) {
+          fillColor = fillColorKeyVals[i].fillColor;
+          break;
+        }
       }
-    }
-    if (!fillColor) {
-      fillColor = fillColorKeyVals[fillColorKeyVals.length - 1].fillColor;
+      if (!fillColor) {
+        fillColor = fillColorKeyVals[fillColorKeyVals.length - 1].fillColor;
+      }
     }
   }
   return fillColor;
@@ -188,12 +197,20 @@ export const createStyle = function (
   });
   // 文字样式
   let text = new Text({
-    offsetX: 0,
-    offsetY: options.offsetY || -25,
+    // offsetX: 0,
+    // offsetY: options.offsetY === undefined ? -25 : options.offsetY,
+    offsetX: 25,
+    offsetY: options.offsetY === undefined ? 0 : options.offsetY,
+    textAlign: "left",
     overflow: true,
+    placement: options.placement || "point",
     text: options.showName
       ? fillColorKeyVals && fillColorKeyVals.length
-        ? `${options.text}(${properties[fillColorKeyVals[0].property]})`
+        ? `${options.text}(${
+            Number(properties[fillColorKeyVals[0].property]).toFixed(0) !== "0"
+              ? Number(properties[fillColorKeyVals[0].property]).toFixed(0)
+              : "暂无数据"
+          })`
         : options.text
       : "",
     fill: new Fill({
@@ -209,12 +226,11 @@ export const createStyle = function (
     }),
   });
   if (type === "Point") {
-    let isIcon = true;
-    if (!options.iconUrl) {
-      isIcon = false;
-    }else
-    if (!options.icon && !options.icon.hasOwnProperty("src")) {
-      isIcon = false;
+    let isIcon = false;
+    if (options.iconUrl) {
+      isIcon = true;
+    } else if (options.icon && options.icon.hasOwnProperty("src")) {
+      isIcon = true;
     }
     return new Style({
       image: isIcon
@@ -222,12 +238,14 @@ export const createStyle = function (
             src: options.iconUrl,
             color: options.pointColor || defaultColor,
             scale: options.iconScale || 0.8,
+            anchor: [0.5, 0.5],
             ...options.icon,
           })
         : new Circle({
             radius: options.radius || 5,
             fill: fill,
             stroke: stroke,
+            anchor: [0.5, 0.5],
           }),
       text: text,
       zIndex: options.zIndex || Infinity,
@@ -266,9 +284,19 @@ export const createStyle = function (
         src: options.iconUrl,
         color: options.pointColor ? options.pointColor : defaultColor,
         scale: options.iconScale || 0.6,
+        ...options.icon
       }),
       text: text,
       zIndex: options.zIndex || Infinity,
+    });
+  }
+  if (type === "Circle") {
+    return new Style({
+      fill,
+      stroke,
+      text,
+      zIndex: options.zIndex || Infinity,
+      radius: options.radius,
     });
   }
 };
@@ -343,6 +371,14 @@ export const drawBox = (source, data) => {
   });
 };
 
+export const drawCircle = (source, geometryFunction) => {
+  return new Draw({
+    source: source,
+    type: "Circle",
+    geometryFunction: geometryFunction,
+  });
+};
+
 // 添加source
 export const Source = function (data) {
   return new VectorSource({ ...data });
@@ -382,4 +418,7 @@ export const setSelectInteraction = function (data = {}) {
 };
 
 // 适应范围后的调整
-export const fitPadding = [200, 150, 80, 500];
+export const fitPadding =
+  BASIC.getUrlParam.isMobile === "1"
+    ? [100, 100, 240, 100]
+    : [200, 150, 80, 500];

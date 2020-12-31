@@ -22,6 +22,12 @@ export const plotEdit = {
   responseData: {},
   deactivate() {
     if (this.plottingLayer) {
+      if (window.featureOperator) {
+        let featureOperator = this.plottingLayer.feature_operators.filter(
+          (item) => item.guid === window.featureOperator.guid
+        )[0];
+        featureOperator.feature.getGeometry().isActive = false;
+      }
       window.featureOperator = null;
       this.plottingLayer.plotDraw.deactivate();
       this.plottingLayer.plotEdit.deactivate();
@@ -37,7 +43,7 @@ export const plotEdit = {
     if (!this.plottingLayer) {
       this.plottingLayer = new PlottingLayer(this.map);
       window.plottingLayer = this.plottingLayer;
-      this.bindEventListener();
+      // this.bindEventListener();
     }
     return this.plottingLayer;
   },

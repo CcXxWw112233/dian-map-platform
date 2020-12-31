@@ -1,22 +1,57 @@
 @import '../../../../globalSet/styles/globalStyles.less';
 .collection_detail{
   position: absolute;
+  overflow: hidden;
   animation-duration: 0.5s;
   top: 1%;
   right: 1%;
   z-index: 10;
   width: 19vw;
+  min-width: 290px;
   background-color: #fff;
   box-shadow:17px 17px 33px 0px rgba(102,144,255,0.1),12px 12px 20px 0px rgba(87,92,118,0.1);
   border-radius:8px;
   // padding-bottom: 30px;
   .detail_title{
+    background-color: #fff;
     text-align: right;
     padding: 8px 4px;
     border-bottom: 1px solid rgba(0,0,0,0.12);
     span{
       margin-right: 8px;
       font-size: 1.2em;
+      cursor: pointer;
+    }
+  }
+  .smallTitle{
+    // display: inline-block;
+    float: left;
+    .smallTitle_title{
+      float: left;
+      margin-left: 5px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+  }
+  .propertiesMap{
+    position: relative;
+    line-height: 30px;
+    .properties_item_key{
+      font-weight: bold;
+    }
+    .around_about{
+      position: absolute;
+      right: 20px;
+      top:0;
+      cursor: pointer;
+      span{
+        cursor: pointer;
+      }
+    }
+  }
+  .around_search_item{
+    margin-bottom: 10px;
+    span{
       cursor: pointer;
     }
   }
@@ -27,6 +62,8 @@
       .data_title{
         font-weight: bold;
         font-size: 1.2em;
+        padding-right: 23px;
+        word-break: break-all;
       }
       div[contenteditable]:empty:before{
         content: attr(placeholder);
@@ -96,17 +133,17 @@
   }
   .container_img{
     transition: all 0.3s linear;
-    padding: 5px 0;
+    // padding: 5px 0;
     text-align: center;
     background-color: #474A5B;
     height: 195px;
     overflow: hidden;
     img{
       height: 100%;
-      max-width: 100%;
+      width: 100%;
       margin: 0 auto;
     }
-    border-bottom: 1px solid rgba(0,0,0,0.12);
+    // border-bottom: 1px solid rgba(0,0,0,0.12);
   }
   .close{
     cursor: pointer;
@@ -115,5 +152,50 @@
     position: absolute;
     right: 0px;
     top: -25px;
+  }
+  .search_detail_container{
+    padding: 6px 10px;
+    .search_detail_title{
+      .back{
+        margin-left: 5px;
+        color: rgba(0,0,0,0.6);
+        cursor: pointer;
+      }
+      position: relative;
+      .closeBtn{
+        position: absolute;
+        right: 0;
+        font-size: 1.2em;
+        cursor: pointer;
+      }
+    }
+    .active{
+      background-image: url('../../../../assets/multiselect.png');
+    }
+    .content_item{
+      &:hover{
+        background: #EEF8FF;
+        .item_icon{
+          .active;
+        }
+      }
+    }
+    .item_icon{
+      display: inline-block;
+      width: 30px;
+      height: 30px;
+      background-image: url('../../../../assets/multiunselect.png');
+      background-size: 30px 30px;
+      background-repeat: no-repeat;
+      vertical-align: middle;
+    }
+    .detail_content_list{
+      margin: 10px 0;
+      line-height: 40px;
+    }
+    .search_detail_footer{
+      text-align: center;
+      padding: 8px 0;
+    }
   }
 }

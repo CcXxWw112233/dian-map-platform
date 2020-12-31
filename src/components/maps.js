@@ -10,6 +10,7 @@ const styles = {
   mapView: {
     width: "100%",
     height: "100%",
+    zIndex: 0,
   },
 };
 
@@ -75,7 +76,7 @@ export default class LayerMap extends React.Component {
   render() {
     return (
       <div
-        style={styles.mapView}
+        style={{ ...styles.mapView }}
         id="MapsView"
         onClick={(e) => {
           e.stopPropagation();

@@ -82,6 +82,16 @@ function Action() {
     });
   };
 
+
+  this.clearAreaExtent = (parent) => {
+    this.source && this.source.clear();
+    // parent && parent.goBackToNation()
+  }
+
+  this.goBackToNation = (parent) => {
+    parent && parent.goBackToNation();
+  }
+
   this.addAreaGeomToMap = (data) => {
     this.currentData = data;
     if (!data) return;
