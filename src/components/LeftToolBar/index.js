@@ -418,64 +418,64 @@ export default class LeftToolBar extends React.Component {
           </div>
         </div>
         <Panel>
-          <Project hidden={this.state.displayProject}></Project>
-          {this.state.displayPlot ? (
-            <Plot
-              parent={this}
-              plotType={this.state.plotType}
-              hidden={this.state.hidePlot}
-              updateFeatureOperatorList={this.updateFeatureOperatorList}
-              updateFeatureOperatorList2={this.updateFeatureOperatorList2}
-              goBackProject={() => {
-                this.setState({
-                  hidePlot: true,
-                  displayProject: true,
-                  selectedIndex: 0,
-                });
-              }}
-            ></Plot>
-          ) : null}
-          {this.state.displayTempPlot ? (
-            <TempPlot
-              parent={this}
-              displayProjctList={() => {
-                this.setState({
-                  displayProjectList: true,
-                  displayTempPlot: false,
-                });
-              }}
-              displayPlotPanel={(attrs) => {
-                this.isModifyPlot = true;
-                this.oldPlotName = attrs.name;
-                this.oldRemark = attrs.remark;
-                this.setState({
-                  plotType: this.dic[attrs.geometryType],
-                  displayPlot: true,
-                  displayTempPlot: false,
-                });
-              }}
-              editPlot={this.editPlot}
-            ></TempPlot>
-          ) : null}
-          {this.state.displayProjectList ? (
-            <ProjectList
-              featureOperatorList={this.featureOperatorList}
-              selectFeatureOperatorList={this.selectFeatureOperatorList}
-              goBackTempPlot={(list) => {
-                this.featureOperatorList = this.getArrDifference(
-                  list,
-                  this.featureOperatorList
-                );
-                this.setState({
-                  displayProjectList: false,
-                  displayTempPlot: true,
-                });
-              }}
-            ></ProjectList>
-          ) : null}
-          {this.state.displayCustomSymbolStore ? (
-            <CustomSymbolStore parent={this}></CustomSymbolStore>
-          ) : null}
+            <Project hidden={this.state.displayProject}></Project>
+            {this.state.displayPlot ? (
+              <Plot
+                parent={this}
+                plotType={this.state.plotType}
+                hidden={this.state.hidePlot}
+                updateFeatureOperatorList={this.updateFeatureOperatorList}
+                updateFeatureOperatorList2={this.updateFeatureOperatorList2}
+                goBackProject={() => {
+                  this.setState({
+                    hidePlot: true,
+                    displayProject: true,
+                    selectedIndex: 0,
+                  });
+                }}
+              ></Plot>
+            ) : null}
+            {this.state.displayTempPlot ? (
+              <TempPlot
+                parent={this}
+                displayProjctList={() => {
+                  this.setState({
+                    displayProjectList: true,
+                    displayTempPlot: false,
+                  });
+                }}
+                displayPlotPanel={(attrs) => {
+                  this.isModifyPlot = true;
+                  this.oldPlotName = attrs.name;
+                  this.oldRemark = attrs.remark;
+                  this.setState({
+                    plotType: this.dic[attrs.geometryType],
+                    displayPlot: true,
+                    displayTempPlot: false,
+                  });
+                }}
+                editPlot={this.editPlot}
+              ></TempPlot>
+            ) : null}
+            {this.state.displayProjectList ? (
+              <ProjectList
+                featureOperatorList={this.featureOperatorList}
+                selectFeatureOperatorList={this.selectFeatureOperatorList}
+                goBackTempPlot={(list) => {
+                  this.featureOperatorList = this.getArrDifference(
+                    list,
+                    this.featureOperatorList
+                  );
+                  this.setState({
+                    displayProjectList: false,
+                    displayTempPlot: true,
+                  });
+                }}
+              ></ProjectList>
+            ) : null}
+            {this.state.displayCustomSymbolStore ? (
+              <CustomSymbolStore parent={this}></CustomSymbolStore>
+            ) : null}
         </Panel>
       </div>
     );

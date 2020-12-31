@@ -1,8 +1,9 @@
 import React,{ Fragment} from 'react'
-import { Menu, Dropdown ,Popconfirm ,Input ,Button ,Space,Upload ,message} from 'antd';
+import { Menu, Dropdown ,Popconfirm ,Input ,Button ,Upload ,message} from 'antd';
 import { SettingOutlined ,
     // CheckCircleOutlined ,CloseCircleOutlined
 } from '@ant-design/icons'
+import Space from "../../../components/Space";
 import styles from '../ScoutingList.less'
 import animateCss from '../../../assets/css/animate.min.css'
 import globalStyle from '../../../globalSet/styles/globalStyles.less'

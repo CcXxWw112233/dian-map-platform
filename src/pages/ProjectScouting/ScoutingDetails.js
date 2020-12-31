@@ -11,14 +11,16 @@ import {
   Tabs,
   Button,
   message,
-  Space,
+  // Space,
   // Popover,
-  Empty,
+  // Empty,
   // Radio,
   // Form,
   // Input,
   // InputNumber,
 } from "antd";
+import Space from "../../components/Space";
+import Empty from "../../components/Empty";
 import { PlusCircleOutlined, CaretRightOutlined } from "@ant-design/icons";
 import Event from "../../lib/utils/event";
 import AudioControl from "./components/audioPlayControl";

@@ -2,9 +2,11 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import styles from './index.less'
 import { MyIcon } from '../../../../components/utils'
-import { Space ,Button ,message} from 'antd'
+import { Button ,message} from 'antd'
 import Action from '../../../../lib/components/ProjectScouting/playCollection'
 import Event from '../../../../lib/utils/event'
+import Space from "../../../../components/Space";
+
 const { Evt } = Event;
 
 export default class PlayCollectionControl extends React.PureComponent{

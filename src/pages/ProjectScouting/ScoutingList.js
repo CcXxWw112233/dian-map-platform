@@ -5,7 +5,9 @@ import globalStyle from "../../globalSet/styles/globalStyles.less";
 import { connect } from "dva";
 import Action from "../../lib/components/ProjectScouting/ScoutingList";
 import ScoutingItem from "./components/ScoutingItem";
-import { message, Empty } from "antd";
+import { message } from "antd";
+import Empty from "../../components/Empty";
+
 import Bitmap from "../../assets/Bitmap.png";
 
 const ScoutingAddBtn = ({ cb }) => {
