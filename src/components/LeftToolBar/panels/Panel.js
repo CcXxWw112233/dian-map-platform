@@ -1,5 +1,6 @@
 import React from "react";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
+import { Icon } from 'antd'
 
 import styles from "../LeftToolBar.less";
 import { connect } from "dva";
@@ -48,9 +49,9 @@ export default class Panel extends React.Component {
           }}
         >
           {this.state.openPanel ? (
-            <LeftOutlined style={directionStyle} />
+            <Icon type="left" style={directionStyle} />
           ) : (
-            <RightOutlined style={directionStyle} />
+            <Icon type="right" style={directionStyle} />
           )}
         </div>
         <a className={styles.changePackage} onClick={this.toOld} target="_self">

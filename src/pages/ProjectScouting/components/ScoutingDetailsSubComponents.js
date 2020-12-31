@@ -30,6 +30,8 @@ import {
   CloseOutlined,
   CheckOutlined,
 } from "@ant-design/icons";
+import { Icon } from 'antd'
+
 import { BASIC } from "../../../services/config";
 import Event from "../../../lib/utils/event";
 import mapApp from "../../../utils/INITMAP";
@@ -463,7 +465,7 @@ export const ScoutingHeader = (props) => {
                 onClick={() => saveItem()}
                 size="middle"
                 type="primary"
-                icon={<CheckCircleOutlined />}
+                icon={<Icon type="check-circle" CheckCircleOutlined />}
               ></Button>
               <Button
                 onClick={() => {
@@ -471,7 +473,7 @@ export const ScoutingHeader = (props) => {
                   onCancel && onCancel(data);
                 }}
                 size="middle"
-                icon={<CloseCircleOutlined />}
+                icon={<Icon type="close-circle" CloseCircleOutlined />}
               ></Button>
             </Fragment>
           ) : (
@@ -1098,7 +1100,7 @@ export const UploadItem = ({
                     size="small"
                     shape="circle"
                   >
-                    <CloseOutlined />
+                    <Icon type="close" CloseOutlined />
                   </Button>
                 </Col>
                 <Col span={3} style={{ textAlign: "center" }}>
@@ -1111,7 +1113,7 @@ export const UploadItem = ({
                     shape="circle"
                     type="primary"
                   >
-                    <CheckOutlined />
+                    <Icon type="check" CheckOutlined />
                   </Button>
                 </Col>
               </Fragment>

@@ -39,6 +39,7 @@ import LookingBack from "./components/LookingBack";
 import mapApp from "../../utils/INITMAP";
 
 import { CSSTransition } from "react-transition-group";
+import { Icon } from 'antd'
 
 const { Evt } = Event;
 const { TabPane } = Tabs;
@@ -1464,7 +1465,7 @@ export default class ScoutingDetails extends PureComponent {
                 activeKey={this.state.area_active_key}
                 expandIconPosition="left"
                 expandIcon={({ isActive }) => (
-                  <CaretRightOutlined rotate={isActive ? 90 : 0} />
+                  <Icon type="caret-right" CaretRightOutlined rotate={isActive ? 90 : 0} />
                 )}
               >
                 {area_list.map((item, index) => {
@@ -1628,7 +1629,7 @@ export default class ScoutingDetails extends PureComponent {
                 <Button
                   type="primary"
                   ghost
-                  icon={<PlusCircleOutlined />}
+                  icon={<Icon type="plus-circle" PlusCircleOutlined />}
                   onClick={this.pushAreaItem}
                   size="small"
                 >

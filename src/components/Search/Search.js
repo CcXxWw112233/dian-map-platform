@@ -3,6 +3,7 @@ import { Input, Dropdown, Button } from "antd";
 import throttle from "lodash/throttle";
 
 import { DownOutlined } from "@ant-design/icons";
+import { Icon } from 'antd'
 import commonSearchAction from "@/lib/components/Search/CommonSeach";
 
 import styles from "./Search.less";
@@ -222,7 +223,7 @@ export default class Search extends React.Component {
         <Dropdown overlay={areaPanel} trigger="click">
           <Button style={{ borderRadius: 0 }}>
             {this.props.locationName}
-            <DownOutlined />
+            <Icon type="down" />
           </Button>
         </Dropdown>
         <Dropdown

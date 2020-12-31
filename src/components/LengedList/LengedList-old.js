@@ -10,6 +10,8 @@ import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import { setLocal, getLocal } from "../../utils/sessionManage";
 import HouseDetail from "../HouseDetail";
 import { Row } from "antd";
+import { Icon } from 'antd'
+
 const Lenged = ({ data }) => {
   let activeKeys = [];
   data.forEach((item) => {
@@ -366,9 +368,9 @@ export default class LengedList extends PureComponent {
               });
             }}>
               {lengedSwitch === false ? (
-                <LeftOutlined className={styles.myDirection} />
+                <Icon type="left" className={styles.myDirection} />
               ) : (
-                  <RightOutlined className={styles.myDirection} />
+                  <Icon type="right" className={styles.myDirection} />
                 )}
             </div>
           </div>

@@ -8,7 +8,7 @@ import { formatSize } from "../../../utils/utils";
 import RenameModal from "../components/RenameModal";
 import axios from "axios";
 import { QuestionCircleOutlined } from "@ant-design/icons";
-
+import { Icon } from 'antd'
 export default class CustomSymbolStore extends React.Component {
   constructor(props) {
     super(props);
@@ -324,7 +324,7 @@ export default class CustomSymbolStore extends React.Component {
               </Button>
               <Popconfirm
                 title={`确定删除选择的${removeActives.length}个符号吗?`}
-                icon={<QuestionCircleOutlined style={{ color: "red" }} />}
+                icon={<Icon type="question-circle" style={{ color: "red" }} />}
                 onConfirm={this.toRemove}
                 okText="确定"
                 cancelText="取消"

@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { Dropdown, Button } from "antd";
 import { CaretUpOutlined, CaretDownOutlined } from "@ant-design/icons";
 import { SketchPicker } from "react-color";
-
+import { Icon } from 'antd'
 import btnStyles from "./btn.less";
 import panelStyles from "./panel.less";
 
@@ -125,7 +125,7 @@ export default class ColorPicker extends Component {
         placement={position}
       >
         {this.state.visible === false ? (
-          <CaretDownOutlined
+          <Icon type="caret-down" 
             style={{
               ...style,
               ...(this.props.disable === false ? non_disable : {}),
@@ -137,7 +137,7 @@ export default class ColorPicker extends Component {
             }}
           />
         ) : (
-          <CaretUpOutlined
+          <Icon type="caret-up"
             style={{ margin: "auto" }}
             onClick={() => {
               this.setState({
