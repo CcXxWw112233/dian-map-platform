@@ -1,3 +1,4 @@
+import { myZoomIn, myZoomOut } from "utils/drawing/public";
 export default function totalOverlay({ name, wranNumber, total, cb }) {
   let div = document.createElement("div");
   div.style.width = "76px";
@@ -11,12 +12,29 @@ export default function totalOverlay({ name, wranNumber, total, cb }) {
   div.style.fontSize = "12px";
   div.style.justifyContent = "center";
   div.style.cursor = "pointer";
-  div.onmouseover= function(){
-    div.style.background="rgba(255,50,0, 0.8)"
-  }
-  div.onmouseleave = function() {
+  div.onmouseover = function () {
+    div.style.background = "rgba(255,50,0, 0.8)";
+  };
+  div.onmouseleave = function () {
     div.style.background = "rgb(48,114,246, 0.8)";
-  }
+  };
+  const addEvent = (obj, xEvent, fn) => {
+    if (obj.attachEvent) {
+      obj.attachEvent("on" + xEvent, fn);
+    } else {
+      obj.addEventListener(xEvent, fn, false);
+    }
+  };
+  const onMouseWheel = (e) => {
+    console.log(e);
+    if (e.deltaY < 0) {
+      myZoomIn();
+    } else {
+      myZoomOut();
+    }
+  };
+  addEvent(div, "mousewheel", onMouseWheel);
+  addEvent(div, "DOMMouseScroll", onMouseWheel);
   if (cb) {
     div.onclick = cb;
   }
@@ -25,9 +43,8 @@ export default function totalOverlay({ name, wranNumber, total, cb }) {
   }
   let span = document.createElement("span");
   span.innerHTML = name;
-  span.style.cursor = "pointer"
+  span.style.cursor = "pointer";
   div.appendChild(span);
-  
 
   // let span2 = document.createElement("span");
   // span2.innerHTML = wranNumber > 0 ? wranNumber + "个预警" : "正常";
@@ -35,7 +52,7 @@ export default function totalOverlay({ name, wranNumber, total, cb }) {
 
   let span3 = document.createElement("span");
   span3.innerHTML = "总数:" + total;
-  span3.style.cursor = "pointer"
+  span3.style.cursor = "pointer";
   div.appendChild(span3);
   return div;
 }

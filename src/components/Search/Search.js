@@ -4,7 +4,7 @@ import throttle from "lodash/throttle";
 
 import { DownOutlined } from "@ant-design/icons";
 import commonSearchAction from "@/lib/components/Search/CommonSeach";
-
+import globalStyle from "@/globalSet/styles/globalStyles.less";
 import styles from "./Search.less";
 import AreaPanel from "./AreaPanel";
 import LocationPanel from "./LocationPanel";
@@ -13,7 +13,7 @@ import { BASIC } from "../../services/config";
 import { setSession, getSession } from "utils/sessionManage";
 import Event from "../../lib/utils/event";
 import areaSearchAction from "@/lib/components/Search/AreaSearch";
-import NewAreaPanel from "./NewAreaPanel"
+import NewAreaPanel from "./NewAreaPanel";
 
 import { connect } from "dva";
 
@@ -299,6 +299,9 @@ export default class Search extends React.Component {
         changeLocationPanelVisible={this.changeLocationPanelVisible}
       ></LocationPanel>
     );
+    const suffix = <i className={globalStyle.global_icon} onClick={() => {
+      Event.Evt.firEvent("displayAdvancedSearchPanel");
+    }}>&#xe68c;</i>;
     return (
       <div className={styles.wrap} style={this.props.style}>
         <Dropdown
@@ -329,6 +332,7 @@ export default class Search extends React.Component {
             onSearch={(value, event) => this.onSearch(value, event)}
             onChange={this.handleSearchInputChange}
             onFocus={this.onSearchFocus}
+            suffix={this.props.inProject ? suffix : <></>}
           />
         </Dropdown>
       </div>

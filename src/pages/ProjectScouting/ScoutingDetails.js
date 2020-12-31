@@ -204,29 +204,76 @@ export default class ScoutingDetails extends PureComponent {
       if (this.state.activeKey !== "1") return;
       let tmpArr = [];
       if (val) {
-        this.codeType = val.type;
-        this.code = val.code;
-        tmpArr = this.allFeatureList.filter((item) => {
-          return item[val.type] === val.code;
-        });
-        let tmpAreaList = [],
-          tmpNotAreaIdCollection = [];
-        this.areaList.forEach((item) => {
-          let data = JSON.parse(JSON.stringify(item));
-          if (data.collection) {
-            data.collection = data.collection.filter((item2) => {
-              return item2[val.type] === val.code;
+        if (Array.isArray(val)) {
+          val.forEach((item) => {
+            if (this.state.area_active_key !== "other") {
+              let area_active_key = this.state.area_active_key;
+              let areaList = this.areaList.filter((item) => {
+                return item.id === area_active_key;
+              });
+              if (areaList.length > 0) {
+                this.allFeatureList = areaList[0].collection;
+              }
+            } else {
+              this.allFeatureList = this.notAreaIdCollection;
+            }
+            let tmpArr2 = this.allFeatureList.filter((item2) => {
+              return item2[item.type] === item.code;
             });
-          }
-          tmpAreaList.push(data);
-        });
-        tmpNotAreaIdCollection = this.notAreaIdCollection.filter((item) => {
-          return item[val.type] === val.code;
-        });
-        this.setState({
-          area_list: tmpAreaList,
-          not_area_id_collection: tmpNotAreaIdCollection,
-        });
+            tmpArr = [...tmpArr, ...tmpArr2];
+          });
+          let tmpAreaList = [],
+            tmpNotAreaIdCollection = [];
+          this.areaList.forEach((item) => {
+            let data = JSON.parse(JSON.stringify(item));
+            if (data.collection) {
+              let collection = data.collection;
+              let tmpList = [];
+              val.forEach((item2) => {
+                let tmp = collection.filter((item3) => {
+                  return item3[item2.type] === item2.code;
+                });
+                tmpList = [...tmpList, ...tmp];
+              });
+              data.collection = tmpList;
+            }
+            tmpAreaList.push(data);
+          });
+          val.forEach((item) => {
+            let tmp = this.notAreaIdCollection.filter((item2) => {
+              return item2[item.type] === item.code;
+            });
+            tmpNotAreaIdCollection = [...tmpNotAreaIdCollection, ...tmp];
+          });
+          this.setState({
+            area_list: tmpAreaList,
+            not_area_id_collection: tmpNotAreaIdCollection,
+          });
+        } else {
+          this.codeType = val.type;
+          this.code = val.code;
+          tmpArr = this.allFeatureList.filter((item) => {
+            return item[val.type] === val.code;
+          });
+          let tmpAreaList = [],
+            tmpNotAreaIdCollection = [];
+          this.areaList.forEach((item) => {
+            let data = JSON.parse(JSON.stringify(item));
+            if (data.collection) {
+              data.collection = data.collection.filter((item2) => {
+                return item2[val.type] === val.code;
+              });
+            }
+            tmpAreaList.push(data);
+          });
+          tmpNotAreaIdCollection = this.notAreaIdCollection.filter((item) => {
+            return item[val.type] === val.code;
+          });
+          this.setState({
+            area_list: tmpAreaList,
+            not_area_id_collection: tmpNotAreaIdCollection,
+          });
+        }
       } else {
         tmpArr = this.allFeatureList;
         this.setState({
@@ -235,6 +282,11 @@ export default class ScoutingDetails extends PureComponent {
         });
       }
       const { config: lenged, dispatch, showFeatureName } = this.props;
+      // if (tmpArr.length === 0) {
+      //   this.areaList.forEach(item => {
+      //     tmpArr= [...tmpArr, ...item.collection]
+      //   })
+      // }
       Action.renderCollection(tmpArr || [], {
         lenged,
         dispatch,
