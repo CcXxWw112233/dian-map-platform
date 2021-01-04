@@ -1,15 +1,19 @@
 export default {
-  namespace:"user",
-  state:{
+  namespace: "user",
+  state: {
     // 状态
-    status: null
+    status: null,
+    userInfo: {} //用户信息
   },
-  effects:{
-
+  effects: {
+    *getUserInfo({ payload }, { put, select, call }) {},
+    *logOut({ payload }, { put, select, call }) {},
+    *getOrganizations({ payload }, { put, select, call }) {},
+    *changeOrganization({ payload }, { put, select, call }) {}
   },
-  reducers:{
-    updateState(state, { payload }){
-      return {...state, ...payload }
+  reducers: {
+    updateState(state, { payload }) {
+      return { ...state, ...payload };
     }
   }
-}
+};

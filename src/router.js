@@ -1,20 +1,30 @@
 import React from "react";
 import { Router, Route, Switch } from "dva/router";
 import dynamic from "dva/dynamic";
+// import Index from "./routes/Index";
 
 const IndexPage = () => import("./routes/IndexPage");
 const Login = () => import("./routes/Login");
+const Index = () => import("./routes/Index");
 
 function RouterConfig({ history, app }) {
   const routes = [
     {
+      path: "/",
+      component: Index
+    },
+    {
       path: "/home",
-      component: IndexPage,
+      component: IndexPage
     },
     {
       path: "/login",
-      component: Login,
+      component: Login
     },
+    {
+      path: "*",
+      component: Index
+    }
   ];
   return (
     <Router history={history}>
@@ -23,16 +33,16 @@ function RouterConfig({ history, app }) {
           return (
             <Route
               key={key}
-              exact
+              exact={path === "/"}
               path={path}
               component={dynamic({
                 app,
-                ...dynamics,
+                ...dynamics
               })}
             />
           );
         })}
-        <Route path="*" component={IndexPage}></Route>
+        {/* <Route path="*" component={Index} /> */}
         {/*  <Route path="/" exact component={IndexPage} /> */}
       </Switch>
     </Router>
