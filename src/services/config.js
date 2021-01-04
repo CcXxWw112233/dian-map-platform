@@ -51,5 +51,8 @@ const getBaseUrl = () => {
 }
 
 const BASIC = getBaseUrl();
+const REQUEST_UPMS = `/upms`; //用户信息接口
+const REQUEST_INTERGFACE_VERSION = "/v2"; //接口版本
 
-export { BASIC }
+
+export { BASIC, REQUEST_UPMS, REQUEST_INTERGFACE_VERSION }

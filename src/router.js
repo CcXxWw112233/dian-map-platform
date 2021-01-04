@@ -3,7 +3,7 @@ import { Router, Route, Switch } from "dva/router";
 import dynamic from "dva/dynamic";
 // import Index from "./routes/Index";
 
-const IndexPage = () => import("./routes/IndexPage");
+const RedirectComp = () => import("./routes/RedirectComp");
 const Login = () => import("./routes/Login");
 const Index = () => import("./routes/Index");
 
@@ -14,16 +14,12 @@ function RouterConfig({ history, app }) {
       component: Index
     },
     {
-      path: "/home",
-      component: IndexPage
-    },
-    {
       path: "/login",
       component: Login
     },
     {
       path: "*",
-      component: Index
+      component: RedirectComp
     }
   ];
   return (
@@ -33,7 +29,7 @@ function RouterConfig({ history, app }) {
           return (
             <Route
               key={key}
-              exact={path === "/"}
+              // exact={path === "/"}
               path={path}
               component={dynamic({
                 app,
@@ -42,7 +38,6 @@ function RouterConfig({ history, app }) {
             />
           );
         })}
-        {/* <Route path="*" component={Index} /> */}
         {/*  <Route path="/" exact component={IndexPage} /> */}
       </Switch>
     </Router>

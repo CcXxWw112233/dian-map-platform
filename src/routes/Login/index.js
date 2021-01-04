@@ -18,8 +18,11 @@ export default class Index extends Component {
   loginSuccess = val => {
     const { dispatch } = this.props;
     if (val.code === "0") {
-      let token = val.data.split("__")[0];
-      Cookie.set("Authorization", token);
+      const access_token = val.data.split("__")[0];
+      const refresh_token = val.data.split("__")[1];
+      Cookie.set("Authorization", access_token);
+      Cookie.set("refreshToken", refresh_token);
+
       message.success("登录成功");
       setTimeout(() => {
         dispatch(routerRedux.replace("/home"));
