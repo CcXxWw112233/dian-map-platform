@@ -265,11 +265,11 @@ export default class PublicData extends React.Component {
         let keywords = [];
         let keywords2 = [];
         for (let i = 0; i < checkedNodes.length; i++) {
-          if (checkedNodes[i].children.length === 0) {
-            if (checkedNodes[i].is_poi === "1") {
-              keywords.push(checkedNodes[i].title);
+          if (checkedNodes[i].props.children.length === 0) {
+            if (checkedNodes[i].props.is_poi === "1") {
+              keywords.push(checkedNodes[i].props.title);
             } else {
-              keywords2.push(checkedNodes[i].title);
+              keywords2.push(checkedNodes[i].props.title);
             }
           }
         }
