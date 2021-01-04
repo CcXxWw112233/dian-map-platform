@@ -8,6 +8,8 @@ import services from "../../../../services/planServices";
 import planServices from "../../../../services/planServices";
 import { formatSize } from "../../../../utils/utils";
 import { BASIC } from "../../../../services/config";
+import Cookies from 'js-cookie'
+
 const CreatePanelHeader = ({
   data,
   index: dataIndex,
@@ -253,7 +255,7 @@ const CreatePanelHeader = ({
             action={(file) => uploadFileAction(file)}
             beforeUpload={checkFileSize}
             multiple
-            headers={{ Authorization: BASIC.getUrlParam.token }}
+            headers={{ Authorization: Cookies.get('Authorization') }}
             onChange={(e) => {
               onupload(e);
             }}

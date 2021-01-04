@@ -7,22 +7,23 @@ import {
   COLLBACK_PRODUCTION_URL,
   WECHAT_APPID,
   COLLBACK_DEVELOPMENT_URL,
-  REQUEST_PREFIX,
+  REQUEST_PREFIX
 } from "../../globalSet/config";
 import { routerRedux } from "dva/router";
 import styles from "./index.less";
 import { connect } from "dva";
 
-@connect(()=>{})
+@connect(() => {})
 export default class Index extends Component {
-  loginSuccess = (val) => {
+  loginSuccess = val => {
     const { dispatch } = this.props;
-    debugger;
     if (val.code === "0") {
       let token = val.data.split("__")[0];
       Cookie.set("Authorization", token);
-      dispatch(routerRedux.replace("/home"));
       message.success("登录成功");
+      setTimeout(() => {
+        dispatch(routerRedux.replace("/home"));
+      }, 200);
     } else {
       message.error(val.message || "登录失败");
     }
@@ -55,7 +56,7 @@ export default class Index extends Component {
       appid: WECHAT_APPID,
       collBack_dev_url: COLLBACK_DEVELOPMENT_URL,
       location_name: "meeting",
-      collBack_pro_url: COLLBACK_PRODUCTION_URL,
+      collBack_pro_url: COLLBACK_PRODUCTION_URL
     };
     return (
       <div className={styles.container}>

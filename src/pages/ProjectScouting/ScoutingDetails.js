@@ -57,6 +57,7 @@ import PublicDataTreeComponent from "./components/PublicDataTreeComponent";
 import Plan from "./components/Plan";
 import { TransformCoordinate } from "../../lib/utils";
 import geojsonResource from "../../services/geojsonResource";
+import Cookies from 'js-cookie'
 
 const { Evt } = Event;
 const { TabPane } = Tabs;
@@ -1361,7 +1362,7 @@ export default class ScoutingDetails extends PureComponent {
           formdata.append("transparency", param.transparency);
           formdata.append("coord_sys_type", param.coord_sys_type);
           let saved = await Axios.post(`/api/map/ght/${val.id}`, formdata, {
-            headers: { Authorization: BASIC.getUrlParam.token },
+            headers: { Authorization: Cookies.get('Authorization') },
           });
 
           await Action.editCollection({

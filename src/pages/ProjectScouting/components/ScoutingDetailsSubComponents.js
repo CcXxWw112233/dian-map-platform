@@ -51,6 +51,7 @@ import Axios from "axios";
 import Search from "../../../components/Search/Search";
 import config from "../../../services/scouting";
 import { compress } from "../../../utils/pictureCompress";
+import Cookies from 'js-cookie'
 
 import { Collapse } from "antd";
 const { Panel } = Collapse;
@@ -65,7 +66,7 @@ export const UploadBgPic = ({ children, onUpload, onStart }) => {
         onStart && onStart();
         return true;
       }}
-      headers={{ Authorization: BASIC.getUrlParam.token }}
+      headers={{ Authorization: Cookies.get('Authorization') }}
       onChange={onUpload}
     >
       {children}
@@ -336,7 +337,7 @@ const UploadBtn = ({ onChange, parentTool, boardId }) => {
   });
 
   // const customRequest = (val)=>{
-  //     UploadFile(val.file, val.action,null, BASIC.getUrlParam.token ,(e)=>{
+  //     UploadFile(val.file, val.action,null, Cookies.get('Authorization') ,(e)=>{
   //       // console.log(e);
   //     },val)
   // }
@@ -345,7 +346,7 @@ const UploadBtn = ({ onChange, parentTool, boardId }) => {
       action="/api/map/file/upload"
       beforeUpload={checkFileSize}
       multiple
-      headers={{ Authorization: BASIC.getUrlParam.token }}
+      headers={{ Authorization: Cookies.get('Authorization') }}
       onChange={(e) => {
         onupload(e);
       }}
@@ -393,7 +394,7 @@ const Upload360PicBtn = ({
   });
 
   // const customRequest = (val)=>{
-  //     UploadFile(val.file, val.action,null, BASIC.getUrlParam.token ,(e)=>{
+  //     UploadFile(val.file, val.action,null, Cookies.get('Authorization') ,(e)=>{
   //       // console.log(e);
   //     },val)
   // }
@@ -402,7 +403,7 @@ const Upload360PicBtn = ({
       action="/api/map/file/upload"
       accept=".jpg, .jpeg, .png, .bmp, .mp4, .avi, .wmv"
       beforeUpload={checkFileSize360Pic}
-      headers={{ Authorization: BASIC.getUrlParam.token }}
+      headers={{ Authorization: Cookies.get('Authorization') }}
       onChange={(e) => {
         onupload(e);
       }}
@@ -535,7 +536,7 @@ export const ScoutingHeader = (props) => {
     formdata.append("transparency", transparency);
     formdata.append("coord_sys_type", coordSysType);
     let resp = await Axios.post(uploadUrl, formdata, {
-      headers: { Authorization: BASIC.getUrlParam.token },
+      headers: { Authorization: Cookies.get('Authorization') },
     });
     saveData = resp.data;
     return resp.data;
@@ -659,7 +660,7 @@ export const ScoutingHeader = (props) => {
         <Upload
           action={uploadUrl}
           accept=".jpg, .jpeg, .png, .bmp"
-          headers={{ Authorization: BASIC.getUrlParam.token }}
+          headers={{ Authorization: Cookies.get('Authorization') }}
           beforeUpload={beforeUploadPlan}
           transformFile={beforeTransformFile}
           data={{

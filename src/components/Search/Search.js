@@ -15,6 +15,7 @@ import { setSession, getSession } from "utils/sessionManage";
 import Event from "../../lib/utils/event";
 import areaSearchAction from "@/lib/components/Search/AreaSearch";
 import NewAreaPanel from "./NewAreaPanel"
+import Cookies from 'js-cookie'
 
 import { connect } from "dva";
 
@@ -149,7 +150,7 @@ export default class Search extends React.Component {
     );
   };
   handleSearchInputChange = (e) => {
-    const token = BASIC.getUrlParam.token;
+    const token = Cookies.get('Authorization');
     if (token) {
       const address = e.target.value;
       this.setState({

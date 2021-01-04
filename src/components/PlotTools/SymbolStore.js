@@ -10,6 +10,7 @@ import { config, planConf, electricPowerConf } from "../../utils/customConfig";
 import symbolStoreServices from "../../services/symbolStore";
 import { formatSize } from "../../utils/utils";
 import { BASIC } from "../../services/config";
+import Cookies from 'js-cookie'
 
 const { Panel } = Collapse;
 export default class SymbolStore extends Component {
@@ -354,7 +355,7 @@ export default class SymbolStore extends Component {
                     org_id: BASIC.getUrlParam.orgId,
                   }}
                   beforeUpload={this.beforeUpload}
-                  headers={{ Authorization: BASIC.getUrlParam.token }}
+                  headers={{ Authorization: Cookies.get('Authorization') }}
                   onChange={(e) => this.uploadChange(e)}
                 >
                   <Button type="primary" onClick={this.handleAddOrgSymbolClick}>

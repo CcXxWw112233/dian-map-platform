@@ -4,6 +4,7 @@ import { BASIC } from "./config";
 import { message } from "antd";
 import NProgress from "nprogress";
 import "nprogress/nprogress.css";
+import Cookies from 'js-cookie'
 
 const instance = axios.create({
   method: "GET",
@@ -14,7 +15,8 @@ NProgress.configure({ easing: "ease", speed: 500, showSpinner: false });
 let requestTimer = null,
   responseTimer = null;
 instance.interceptors.request.use(config => {
-  let token = BASIC.getUrlParam.token;
+  let token = Cookies.get('Authorization');
+  console.log("sssssaaa", token);
   if (token) {
     config.headers["Authorization"] = token;
     NProgress.start();

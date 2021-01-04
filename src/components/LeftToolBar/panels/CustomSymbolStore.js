@@ -10,6 +10,7 @@ import { formatSize } from "../../../utils/utils";
 import RenameModal from "../components/RenameModal";
 import { Icon } from 'antd'
 import { compress } from "../../../utils//pictureCompress"
+import Cookies from 'js-cookie'
 export default class CustomSymbolStore extends React.Component {
   constructor(props) {
     super(props);
@@ -116,7 +117,7 @@ export default class CustomSymbolStore extends React.Component {
   };
   onUpload = (name) => {
     let headers = {
-      Authorization: BASIC.getUrlParam.token,
+      Authorization: Cookies.get('Authorization'),
       "Content-Type": "multipart/form-data",
     };
     let data = {
@@ -333,7 +334,7 @@ export default class CustomSymbolStore extends React.Component {
                 }}
                 fileList={this.state.isUploadFileList}
                 beforeUpload={this.beforeUpload}
-                headers={{ Authorization: BASIC.getUrlParam.token }}
+                headers={{ Authorization: Cookies.get('Authorization') }}
                 onChange={(e) => this.uploadChange(e)}
                 customRequest={this.coustomFunction}
               >
