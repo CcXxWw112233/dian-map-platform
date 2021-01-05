@@ -106,7 +106,7 @@ export default {
       if (res.code === "0") {
         Cookies.remove("Authorization");
         Cookies.remove("refreshToken");
-        yield put(routerRedux.replace({ pathname: "/login?redirect=/home" }));
+        yield put(routerRedux.replace("/login?redirect=/home"));
       }
     },
     *routingJump({ payload }, { call, put }) {

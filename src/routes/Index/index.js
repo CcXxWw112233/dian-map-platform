@@ -46,7 +46,7 @@ export default class Index extends Component {
   };
 
   render() {
-    return <div>{this.state.show_route && this.renderRoute()}</div>;
+    return <div>{this.state.show_route && <IndexPage />}</div>;
   }
 }
 

@@ -10,7 +10,7 @@ const Index = () => import("./routes/Index");
 function RouterConfig({ history, app }) {
   const routes = [
     {
-      path: "/",
+      path: "/home",
       component: Index
     },
     {

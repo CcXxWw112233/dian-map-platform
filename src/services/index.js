@@ -4,7 +4,7 @@ import { BASIC } from "./config";
 import { message } from "antd";
 import NProgress from "nprogress";
 import "nprogress/nprogress.css";
-import Cookies from 'js-cookie'
+import Cookies from "js-cookie";
 
 const instance = axios.create({
   method: "GET",
@@ -15,7 +15,7 @@ NProgress.configure({ easing: "ease", speed: 500, showSpinner: false });
 let requestTimer = null,
   responseTimer = null;
 instance.interceptors.request.use(config => {
-  let token = Cookies.get('Authorization');
+  let token = Cookies.get("Authorization");
   console.log("sssssaaa", token);
   if (token) {
     config.headers["Authorization"] = token;
@@ -100,8 +100,9 @@ instance.interceptors.response.use(
 );
 //重定向路由
 function redirectToLogin() {
-  const { origin, pathname } = window.location;
-  window.location.href = `${origin}/login?redirect=${pathname}`;
+  const { origin, hash } = window.location;
+  const hashname = !!hash ? hash.replace("#", "") : hash;
+  window.location.href = `${origin}/#/login?redirect=${hashname}`;
 }
 
 // 公用的ajax请求方法。
