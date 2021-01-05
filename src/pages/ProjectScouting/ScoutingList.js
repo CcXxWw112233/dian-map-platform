@@ -23,7 +23,7 @@ const ScoutingAddBtn = ({ cb }) => {
     </div>
   );
 };
-@connect(({ controller: { mainVisible } }) => ({ mainVisible }))
+@connect(({ controller: { mainVisible }, user: { currentOrganizeId } }) => ({ mainVisible, currentOrganizeId }))
 export default class ScoutingList extends PureComponent {
   constructor(props) {
     super(props);
@@ -33,6 +33,13 @@ export default class ScoutingList extends PureComponent {
       selectedProject: null,
     };
     this.projectDatas = [];
+  }
+
+  componentWillReceiveProps(nextProps) {
+    //切换组织重新获取数据
+    if (nextProps.currentOrganizeId !== this.props.currentOrganizeId) {
+      this.renderBoardList()
+    }
   }
 
   componentDidMount() {

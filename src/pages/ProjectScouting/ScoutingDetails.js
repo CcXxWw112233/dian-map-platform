@@ -68,6 +68,7 @@ const { TabPane } = Tabs;
     openswitch: { showFeatureName },
     lengedList: { config },
     collectionDetail: { selectData, showCollectionsModal },
+    user: { currentOrganizeId }
   }) => ({
     mainVisible,
     lastPageState,
@@ -75,6 +76,7 @@ const { TabPane } = Tabs;
     showFeatureName,
     selectData,
     showCollectionsModal,
+    currentOrganizeId
   })
 )
 export default class ScoutingDetails extends PureComponent {
@@ -185,6 +187,11 @@ export default class ScoutingDetails extends PureComponent {
       "农林耕地",
       "地籍地貌",
     ];
+  }
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.currentOrganizeId !== this.props.currentOrganizeId) {
+      this.handleGoBackClick()
+    }
   }
   componentDidMount() {
     this.isGoBack = false;
