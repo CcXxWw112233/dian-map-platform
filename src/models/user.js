@@ -99,15 +99,7 @@ export default {
     },
     *changeOrganization({ payload }, { put, select, call }) {
       const res = yield call(changeCurrentOrg);
-      if (res.code === "0") {
-        yield put({
-          type: "updateState",
-          payload: {
-            organizes: res.data, ////当前用户所属组织列表
-            currentOrganize: res.data.length ? res.data[0] : {} //当前选中的组织
-          }
-        });
-      }
+      return res;
     },
     *logOut({ payload }, { put, select, call }) {
       const res = yield call(logOut);

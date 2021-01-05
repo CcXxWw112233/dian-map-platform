@@ -1,5 +1,14 @@
 import React, { Fragment } from "react";
-import { Collapse, Dropdown, Menu, Input, Col, Button, message } from "antd";
+import {
+  Collapse,
+  Dropdown,
+  Menu,
+  Input,
+  Col,
+  Button,
+  message,
+  Modal
+} from "antd";
 import { CloseOutlined, CheckOutlined } from "@ant-design/icons";
 import { MyIcon } from "../../../components/utils";
 import SystemManageModal from "./SystemManageModal";
@@ -7,6 +16,8 @@ import styles from "./SystemManage.less";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import systemManageServices from "../../../services/systemManage";
 import { guid } from "./lib";
+import { connect } from "dva";
+import OrgListSelect from "./OrgListSelect";
 const { Panel } = Collapse;
 
 export class ContentItem extends React.Component {
@@ -16,7 +27,7 @@ export class ContentItem extends React.Component {
       dropdownVisible: false,
       modalVisible: false,
       isModify: false,
-      roleName: "",
+      roleName: ""
     };
     this.newRoleName = "";
   }
@@ -24,19 +35,19 @@ export class ContentItem extends React.Component {
   componentDidMount() {
     const { data } = this.props;
     this.setState({
-      roleName: data.name,
+      roleName: data.name
     });
   }
 
-  setDropDownVisible = (val) => {
+  setDropDownVisible = val => {
     this.setState({
-      dropdownVisible: val,
+      dropdownVisible: val
     });
   };
-  controlMenu = (type) => {
+  controlMenu = type => {
     const { data } = this.props;
     this.setState({
-      dropdownVisible: false,
+      dropdownVisible: false
     });
     if (type === "rename") {
       this.setIsEdit(true);
@@ -44,7 +55,7 @@ export class ContentItem extends React.Component {
     } else if (type === "del") {
       systemManageServices
         .deleteSystemRole(data && data.id)
-        .then((res) => {
+        .then(res => {
           if (res) {
             if (res.code === "0") {
               const { parent } = this.props;
@@ -54,7 +65,7 @@ export class ContentItem extends React.Component {
             }
           }
         })
-        .catch((e) => {
+        .catch(e => {
           console.log(e);
         });
     }
@@ -64,41 +75,41 @@ export class ContentItem extends React.Component {
     parent.handleContentItemClick(type, data);
   };
 
-  setIsEdit = (value) => {
+  setIsEdit = value => {
     const { data } = this.props;
     this.setState({
       isModify: value,
-      roleName: this.newRoleName || data.name,
+      roleName: this.newRoleName || data.name
     });
   };
 
-  setRoleName = (value) => {
+  setRoleName = value => {
     this.newRoleName = value;
     this.setState({
-      roleName: value,
+      roleName: value
     });
   };
 
-  onModifyCancel = (e) => {
+  onModifyCancel = e => {
     e.stopPropagation();
     this.setIsEdit(false);
     const { data } = this.props;
     this.setRoleName(data.name);
   };
 
-  onModifyOk = (e) => {
+  onModifyOk = e => {
     e.stopPropagation();
     this.setIsEdit(false);
     const { data } = this.props;
     systemManageServices
       .modifySystemRoleName(data.id, {
-        name: this.state.roleName,
+        name: this.state.roleName
       })
-      .then((res) => {
+      .then(res => {
         if (res.code !== "0") {
           this.setState(
             {
-              roleName: data.name,
+              roleName: data.name
             },
             () => {
               message.info(res.message);
@@ -106,14 +117,14 @@ export class ContentItem extends React.Component {
           );
         }
       })
-      .catch((e) => {
+      .catch(e => {
         console.log(e);
       });
   };
 
   render() {
     const menu = (
-      <Menu onClick={(e) => this.controlMenu(e.key)}>
+      <Menu onClick={e => this.controlMenu(e.key)}>
         <Menu.Item key="rename">重命名</Menu.Item>
         {/* <Menu.Item key="copy">复制</Menu.Item> */}
         <Menu.Item key="del">
@@ -128,7 +139,7 @@ export class ContentItem extends React.Component {
             width: "90%",
             textAlign: "left",
             display: "flex",
-            flexDirection: "row",
+            flexDirection: "row"
           }}
           onClick={this.handleContentItemClick}
         >
@@ -140,12 +151,12 @@ export class ContentItem extends React.Component {
                   placeholder="请输入名称"
                   size="small"
                   autoFocus
-                  onChange={(e) => this.setRoleName(e.target.value.trim())}
-                  onPressEnter={(e) => {
+                  onChange={e => this.setRoleName(e.target.value.trim())}
+                  onPressEnter={e => {
                     e.stopPropagation();
                     this.setIsEdit(false);
                   }}
-                  onClick={(e) => {
+                  onClick={e => {
                     e.stopPropagation();
                   }}
                   allowClear
@@ -154,7 +165,7 @@ export class ContentItem extends React.Component {
               </Col>
               <Col span={3} style={{ textAlign: "right" }}>
                 <Button
-                  onClick={(e) => this.onModifyCancel(e)}
+                  onClick={e => this.onModifyCancel(e)}
                   size="small"
                   shape="circle"
                 >
@@ -164,7 +175,7 @@ export class ContentItem extends React.Component {
               <Col span={3} style={{ textAlign: "center" }}>
                 <Button
                   size="small"
-                  onClick={(e) => this.onModifyOk(e)}
+                  onClick={e => this.onModifyOk(e)}
                   shape="circle"
                   type="primary"
                 >
@@ -181,7 +192,7 @@ export class ContentItem extends React.Component {
             <Dropdown
               trigger="click"
               overlay={menu}
-              onVisibleChange={(val) => this.setDropDownVisible(val)}
+              onVisibleChange={val => this.setDropDownVisible(val)}
               visible={this.state.dropdownVisible}
             >
               <MyIcon type="icon-gengduo2" />
@@ -192,6 +203,7 @@ export class ContentItem extends React.Component {
     );
   }
 }
+@connect(mapStateToProps)
 export default class SystemManage extends React.Component {
   constructor(props) {
     super(props);
@@ -208,7 +220,7 @@ export default class SystemManage extends React.Component {
       loginUserName: "",
       loginUserEmail: "",
       loginUserAvatar: "",
-      collapseActiveKey: ["1", "2"],
+      collapseActiveKey: ["1", "2"]
     };
   }
 
@@ -216,38 +228,45 @@ export default class SystemManage extends React.Component {
     this.getAllData();
   }
 
+  componentWillReceiveProps(nextProps) {
+    //切换组织，重新拉取数据
+    if (this.props.currentOrganizeId !== nextProps.currentOrganizeId) {
+      this.getAllData();
+    }
+  }
+
   getAllData = () => {
-    systemManageServices.getLoginUser().then((res) => {
+    systemManageServices.getLoginUser().then(res => {
       if (res && res.data) {
         this.setState({
           loginUserName: res.data.name,
           loginUserEmail: res.data.email,
-          loginUserAvatar: res.data.avatar,
+          loginUserAvatar: res.data.avatar
         });
       }
     });
-    systemManageServices.getSystemRole().then((res) => {
+    systemManageServices.getSystemRole().then(res => {
       if (res && res.code === "0") {
         this.setState({
-          systemRole: res.data,
+          systemRole: res.data
         });
       }
     });
-    systemManageServices.getGlobalSystemRole().then((res) => {
+    systemManageServices.getGlobalSystemRole().then(res => {
       if (res && res.code === "0") {
         this.setState({
-          globalSystemRole: res.data,
+          globalSystemRole: res.data
         });
       }
     });
   };
 
-  onDelRoleClick = (id) => {
+  onDelRoleClick = id => {
     let arr = this.state.systemRole;
-    const index = arr.findIndex((item) => item.id === id);
+    const index = arr.findIndex(item => item.id === id);
     arr.splice(index, 1);
     this.setState({
-      systemRole: arr,
+      systemRole: arr
     });
   };
 
@@ -255,13 +274,13 @@ export default class SystemManage extends React.Component {
     const addNewRoleDom = this.refs["addNewRole"];
     this.setState({
       addRolePanelVisible: true,
-      topPosition: addNewRoleDom.offsetTop - 80 || 200,
+      topPosition: addNewRoleDom.offsetTop - 80 || 200
     });
   };
   handleAddNewRolePanelCancelClick = () => {
     this.setState({
       newRoleName: "",
-      addRolePanelVisible: false,
+      addRolePanelVisible: false
     });
   };
   handleAddNewRolePanelSaveClick = () => {
@@ -270,16 +289,16 @@ export default class SystemManage extends React.Component {
       return;
     }
     let oldRoleNameArr = this.state.systemRole.filter(
-      (item) => item.name === this.state.newRoleName
+      item => item.name === this.state.newRoleName
     );
     if (oldRoleNameArr.length > 0) {
       message.info(`已存在名称为${this.state.newRoleName}的角色，请重新输入。`);
       return;
     }
     const param = {
-      name: this.state.newRoleName,
+      name: this.state.newRoleName
     };
-    systemManageServices.addSystemRole(param).then((res) => {
+    systemManageServices.addSystemRole(param).then(res => {
       if (res && res.code === "0") {
         let arr = this.state.systemRole;
         arr = [...arr, res.data];
@@ -288,7 +307,7 @@ export default class SystemManage extends React.Component {
           addRolePanelVisible: false,
           modalVisible: true,
           selectedId: res.data.id,
-          selectedData: res.data,
+          selectedData: res.data
         });
       }
     });
@@ -296,35 +315,35 @@ export default class SystemManage extends React.Component {
 
   onModalOk = (keys, type) => {
     let newKeys = [];
-    keys.forEach((item) => {
+    keys.forEach(item => {
       if (!item.includes("-")) {
         newKeys.push(item);
       }
     });
     this.setState(
       {
-        modalVisible: false,
+        modalVisible: false
       },
       () => {
         const param = {
           function_ids: newKeys,
-          role_id: this.state.selectedId,
+          role_id: this.state.selectedId
         };
-        systemManageServices.addPermission2Role(param).then((res) => {
+        systemManageServices.addPermission2Role(param).then(res => {
           if (res && res.code === "0") {
             if (type === "project") {
-              systemManageServices.getSystemRole().then((res) => {
+              systemManageServices.getSystemRole().then(res => {
                 if (res && res.code === "0") {
                   this.setState({
-                    systemRole: res.data,
+                    systemRole: res.data
                   });
                 }
               });
             } else {
-              systemManageServices.getGlobalSystemRole().then((res) => {
+              systemManageServices.getGlobalSystemRole().then(res => {
                 if (res && res.code === "0") {
                   this.setState({
-                    globalSystemRole: res.data,
+                    globalSystemRole: res.data
                   });
                 }
               });
@@ -337,9 +356,9 @@ export default class SystemManage extends React.Component {
     );
   };
   onModalCancel = () => {};
-  handleNewRoleNameInputChange = (value) => {
+  handleNewRoleNameInputChange = value => {
     this.setState({
-      newRoleName: value,
+      newRoleName: value
     });
   };
   handleContentItemClick = (type, data) => {
@@ -347,16 +366,31 @@ export default class SystemManage extends React.Component {
       modalVisible: true,
       permissionType: type,
       selectedId: data.id,
-      selectedData: data,
+      selectedData: data
     });
   };
-  handleCollapseChange = (value) => {
+  handleCollapseChange = value => {
     this.setState({
-      collapseActiveKey: value,
+      collapseActiveKey: value
     });
   };
-
+  logOut = () => {
+    const { dispatch } = this.props;
+    Modal.confirm({
+      title: "确认退出登录?",
+      okText: "确认",
+      cancelText: "取消",
+      onOk() {
+        dispatch({
+          type: "user/logOut",
+          payload: {}
+        });
+      }
+    });
+  };
   render() {
+    const { currentOrganize = {} } = this.props;
+    const { name: org_name } = currentOrganize;
     return (
       <div className={styles.wrapper}>
         <div className={styles.header}>
@@ -374,8 +408,23 @@ export default class SystemManage extends React.Component {
             )}
           </div>
           <div className={styles.info}>
-            <span>{this.state.loginUserName}</span>
-            <span>{this.state.loginUserEmail}</span>
+            <div className={styles.info_name}>{this.state.loginUserName}</div>
+            <div className={styles.info_operate}>
+              <Dropdown overlay={<OrgListSelect />}>
+                <div className={styles.info_operate_org}>
+                  <div className={styles.info_operate_org_name}>{org_name}</div>
+                  <div
+                    className={`${globalStyle.global_icon} ${styles.info_operate_org_icon}`}
+                    style={{ fontSize: 12 }}
+                  >
+                    &#xe68a;
+                  </div>
+                </div>
+              </Dropdown>
+              <div className={styles.info_operate_logout} onClick={this.logOut}>
+                退出登录
+              </div>
+            </div>
           </div>
         </div>
         <p className={styles.title}>
@@ -388,10 +437,10 @@ export default class SystemManage extends React.Component {
           <Collapse
             expandIconPosition="right"
             activeKey={this.state.collapseActiveKey}
-            onChange={(value) => this.handleCollapseChange(value)}
+            onChange={value => this.handleCollapseChange(value)}
           >
             <Panel header={<span>项目角色管理</span>} key="1">
-              {this.state.systemRole.map((item) => {
+              {this.state.systemRole.map(item => {
                 return (
                   <ContentItem
                     key={guid()}
@@ -406,7 +455,7 @@ export default class SystemManage extends React.Component {
                   style={{
                     width: "90%",
                     textAlign: "left",
-                    color: "rgba(158, 166, 194, 1)",
+                    color: "rgba(158, 166, 194, 1)"
                   }}
                 >
                   <span>创建新角色</span>
@@ -452,10 +501,10 @@ export default class SystemManage extends React.Component {
                     placeholder="输入角色名称"
                     style={{ width: "92%", margin: "0 12px" }}
                     value={this.state.newRoleName}
-                    onChange={(e) =>
+                    onChange={e =>
                       this.handleNewRoleNameInputChange(e.target.value)
                     }
-                    onPressEnter={(e) =>
+                    onPressEnter={e =>
                       this.handleNewRoleNameInputChange(e.target.value)
                     }
                   />
@@ -463,7 +512,7 @@ export default class SystemManage extends React.Component {
               ) : null}
             </Panel>
             <Panel header={<span>应用管理</span>} key="2">
-              {this.state.globalSystemRole.map((item) => {
+              {this.state.globalSystemRole.map(item => {
                 return (
                   <ContentItem
                     key={guid()}
@@ -489,4 +538,12 @@ export default class SystemManage extends React.Component {
       </div>
     );
   }
+}
+function mapStateToProps({
+  user: { currentOrganize = {}, currentOrganizeId }
+}) {
+  return {
+    currentOrganize,
+    currentOrganizeId
+  };
 }
