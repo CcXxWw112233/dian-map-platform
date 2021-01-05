@@ -30,7 +30,7 @@ export default {
       const Bb = yield put({
         type: "getOrganizations",
         payload: {
-          set_default: has_default_org //是否存在
+          set_default: !has_default_org //是否存在,存在就不设置了，不存在就设置
         }
       });
       const getOrganizationsSync = () =>
@@ -47,9 +47,13 @@ export default {
         const current_org = res.data.current_org || {};
         const has_default_org = !!current_org.id && current_org.id !== "0";
         //更新用户信息和组织信息
-        const update_data = has_default_org
-          ? { currentOrganize: current_org || {} }
-          : {}; //当前选中的组织
+        let update_data = {};
+
+        ////当前选中的组织
+        if (has_default_org) {
+          // Cookies.set("orgId", current_org.id);
+          update_data = { currentOrganize: current_org || {} };
+        }
         yield put({
           type: "updateState",
           payload: {
@@ -66,9 +70,15 @@ export default {
       const { set_default } = payload;
       const res = yield call(getCurrentUserOrganizes);
       if (res.code === "0") {
-        const update_data = set_default
-          ? { currentOrganize: res.data.length ? res.data[0] : {} }
-          : {}; //当前选中的组织
+        //当前选中的组织
+        let update_data = {};
+        //如果需要设置默认
+        if (set_default) {
+          update_data = {
+            currentOrganize: res.data.length ? res.data[0] : {}
+          };
+          // Cookies.set("orgId", (res.data.length ? res.data[0] : {}).id);
+        }
         yield put({
           type: "updateState",
           payload: {
