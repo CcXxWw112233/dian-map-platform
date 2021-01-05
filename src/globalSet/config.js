@@ -7,6 +7,8 @@ export const baseConfig = {
     // 天地图的appkey
     TIANDITU_APP_KEY:"56e269a51b3c1af54dc6042407d8fdb3"
 };
+
+//微信登录所需参数配置
 export const WECHAT_APPID = "wx358dea60cb617301";
 export const COLLBACK_PRODUCTION_URL =
   "https://lingxi.di-an.com/dian_lingxi/upms/weChat/collBack";

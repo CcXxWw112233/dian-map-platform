@@ -11,6 +11,7 @@ import RenameModal from "../components/RenameModal";
 import { Icon } from 'antd'
 import { compress } from "../../../utils//pictureCompress"
 import Cookies from 'js-cookie'
+import { getSessionOrgId } from "../../../utils/sessionData";
 export default class CustomSymbolStore extends React.Component {
   constructor(props) {
     super(props);
@@ -122,7 +123,7 @@ export default class CustomSymbolStore extends React.Component {
     };
     let data = {
       icon_name: name,
-      org_id: BASIC.getUrlParam.orgId,
+      org_id: getSessionOrgId(),
     };
     let param = new FormData();
     param.append("file", this.transfromUploadIcon);
@@ -330,7 +331,7 @@ export default class CustomSymbolStore extends React.Component {
                 accept=".jpg, .jpeg, .png, .bmp"
                 data={{
                   icon_name: this.state.uploadSymbolName,
-                  org_id: BASIC.getUrlParam.orgId,
+                  org_id: getSessionOrgId(),
                 }}
                 fileList={this.state.isUploadFileList}
                 beforeUpload={this.beforeUpload}

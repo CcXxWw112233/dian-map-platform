@@ -21,6 +21,7 @@ import {
 } from "../../utils";
 
 import { gcj02_to_wgs84, wgs84_to_gcj02 } from "utils/transCoordinateSystem";
+import { getSessionOrgId } from "../../../utils/sessionData";
 
 const action = function () {
   const {
@@ -115,7 +116,7 @@ const action = function () {
 
   // 获取项目列表
   this.getList = async (data = {}) => {
-    let id = config.getUrlParam.orgId;
+    let id = getSessionOrgId();
     let obj = await GET_SCOUTING_LIST(id, data);
     this.projects = obj.data;
     return obj;

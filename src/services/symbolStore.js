@@ -1,3 +1,4 @@
+import { getSessionOrgId } from "../utils/sessionData";
 import { BASIC } from "./config";
 import { request } from "./index";
 export default {
@@ -5,7 +6,7 @@ export default {
   // 获取所有上传的符号
   GET_ICON: async () => {
     const param = {
-      org_id: BASIC.getUrlParam.orgId,
+      org_id: getSessionOrgId(),
     };
     let response = await request("GET", "/map/icon/load", param);
     if (BASIC.checkResponse(response)) {

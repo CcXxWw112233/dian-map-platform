@@ -1,8 +1,9 @@
+import { getSessionOrgId } from "../utils/sessionData";
 import { BASIC } from "./config";
 import { request } from "./index";
 const getBase64OrgId = () => {
-  const urlParam = BASIC.getUrlParam;
-  const obj = { orgId: urlParam.orgId };
+  // const urlParam = BASIC.getUrlParam;
+  const obj = { orgId: getSessionOrgId() };
   let str = JSON.stringify(obj);
   // str = encodeURI(str);
   const base64 = btoa(str);

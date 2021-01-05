@@ -6,6 +6,7 @@ import {
 } from "@/services/user";
 import Cookies from "js-cookie";
 import { routerRedux } from "dva/router";
+import { setSessionOrgId } from "../utils/sessionData";
 
 export default {
   namespace: "user",
@@ -14,6 +15,7 @@ export default {
     status: null,
     userInfo: {}, //用户信息
     currentOrganize: {}, //当前组织id
+    currentOrganizeId: "",
     organizes: [] //组织列表
   },
   effects: {
@@ -51,8 +53,11 @@ export default {
 
         ////当前选中的组织
         if (has_default_org) {
-          // Cookies.set("orgId", current_org.id);
-          update_data = { currentOrganize: current_org || {} };
+          update_data = {
+            currentOrganize: current_org || {},
+            currentOrganizeId: current_org.id
+          };
+          setSessionOrgId(current_org.id);
         }
         yield put({
           type: "updateState",
@@ -74,10 +79,12 @@ export default {
         let update_data = {};
         //如果需要设置默认
         if (set_default) {
+          const currentOrganize = res.data.length ? res.data[0] : {};
           update_data = {
-            currentOrganize: res.data.length ? res.data[0] : {}
+            currentOrganize,
+            currentOrganizeId: currentOrganize.id
           };
-          // Cookies.set("orgId", (res.data.length ? res.data[0] : {}).id);
+          setSessionOrgId(currentOrganize.id);
         }
         yield put({
           type: "updateState",
