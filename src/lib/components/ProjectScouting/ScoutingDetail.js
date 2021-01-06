@@ -452,8 +452,12 @@ function Action() {
       }
     }
     if (this.selectedFeature) {
+      let id = this.selectedFeature.get("id");
+      if (!id) {
+        return;
+      }
       let index = this.layer.projectScoutingArr.findIndex(
-        (item) => item.feature.get("id") === this.selectedFeature.get("id")
+        (item) => item.feature && item.feature.get("id") === id
       );
       let selectedFetureStyle = this.selectedFeature.getStyle();
 
@@ -542,8 +546,8 @@ function Action() {
       this.isCollectionTotal = !value;
       if (!me.oldLenged) return;
       if (me.tabActivekey !== "1") {
-        message.info("仅图层支持统计")
-        Event.Evt.firEvent("resetMoveMapMoveedListen")
+        message.info("仅图层支持统计");
+        Event.Evt.firEvent("resetMoveMapMoveedListen");
         return;
       }
       let obj = {
@@ -551,6 +555,12 @@ function Action() {
         dispatch: me.oldDispatch,
         showFeatureName: me.oldShowFeatureName,
       };
+      let zoom = INITMAP.map.getView().getZoom();
+      if (zoom >= 14) {
+        obj.showFeatureName = true;
+      } else {
+        obj.showFeatureName = false;
+      }
       me.overlayArr.forEach((item) => {
         InitMap.map.removeOverlay(item);
       });
@@ -818,7 +828,7 @@ function Action() {
     this.projectData = {
       coordinates: coor,
       name: data.board_name,
-    }
+    };
 
     if (data.radius) {
       let feature = addFeature("defaultCircle", {
@@ -1578,13 +1588,16 @@ function Action() {
     if (data && data.length) {
       nProgress.start();
       if (this.animateLine) {
-        this.animateLine.clear()
-        this.animateLine = null
+        this.animateLine.clear();
+        this.animateLine = null;
       }
       data.forEach((item) => {
         newIds.push(item.id);
         if (this.geojsonData[item.id]) {
-          res.push({...this.geojsonData[item.id], __needAnimate: !!item._animate});
+          res.push({
+            ...this.geojsonData[item.id],
+            __needAnimate: !!item._animate,
+          });
         } else {
           ids.push(item.id);
           if (item.resource_url) {
@@ -1623,11 +1636,11 @@ function Action() {
       key: "map:projectScouting",
       content: [],
     };
-    let hasAnimate = false
+    let hasAnimate = false;
     res.forEach((item, i) => {
       if (item.__needAnimate) {
         this.startAnimateForFeatures(item.data);
-        hasAnimate = true
+        hasAnimate = true;
       }
 
       let geojson = item.data;
@@ -1723,7 +1736,7 @@ function Action() {
     });
 
     if (hasAnimate) {
-      nProgress.start()
+      nProgress.start();
     }
 
     // Event.Evt.firEvent("updateGeojson", this.geoFeatures);
@@ -2706,7 +2719,7 @@ function Action() {
     this.removeAreaSelect();
     this.removePlanPicCollection();
     if (this.animateLine) {
-      this.animateLine.clear()
+      this.animateLine.clear();
       this.animateLine = null;
     }
     // if (!flag) InitMap.map.removeLayer(this.Layer);
@@ -3472,25 +3485,25 @@ function Action() {
   };
 
   let driving = new AMap.Driving({
-    policy: AMap.DrivingPolicy.LEAST_TIME
-  })
-  this.searchCache = {}
+    policy: AMap.DrivingPolicy.LEAST_TIME,
+  });
+  this.searchCache = {};
   // 调用高德查询线路规划
   this.searchByDrive = (from, to) => {
     return new Promise((resolve, reject) => {
-      let key = from.join('_') + '/' + to.join('_')
+      let key = from.join("_") + "/" + to.join("_");
       if (this.searchCache[key]) {
-        resolve(this.searchCache[key])
-        return
-      }else
-      driving.search(from, to, (status, result) => {
-        resolve(result)
-        this.searchCache[key] = result
-      })
-    }).catch(err => {
-      reject(err)
-    })
-  }
+        resolve(this.searchCache[key]);
+        return;
+      } else
+        driving.search(from, to, (status, result) => {
+          resolve(result);
+          this.searchCache[key] = result;
+        });
+    }).catch((err) => {
+      reject(err);
+    });
+  };
   /**
    * 动画功能渲染
    * @param data 动画渲染的数据列表 Object -> collection
@@ -3499,40 +3512,50 @@ function Action() {
     // console.log(data)
     // this.projectData 是项目数据，保存的坐标类型是 EPSG: 4326 渲染时要转换成 EPSG: 3857
     try {
-      let features = data.features
-      let from = {...this.projectData};
+      let features = data.features;
+      let from = { ...this.projectData };
       let arr = [];
-      ; (async () => {
+      (async () => {
         for (let i = 0; i < features.length; i++) {
-          let item = features[i]
+          let item = features[i];
           // if(item.type !== 'Point')
           let geometry = item.geometry;
-          let coordinates = geometry.coordinates
-          if(geometry.type !== 'Point') return
+          let coordinates = geometry.coordinates;
+          if (geometry.type !== "Point") return;
           // 取出每个需要渲染的点，将这些点获取到规划路线数据
           if (+coordinates[0] > 180)
-            coordinates = TransformCoordinate(coordinates, 'EPSG:3857', 'EPSG:4326');
+            coordinates = TransformCoordinate(
+              coordinates,
+              "EPSG:3857",
+              "EPSG:4326"
+            );
           if (+from.coordinates[0] > 180) {
-            from.coordinates = TransformCoordinate(from.coordinates, 'EPSG:3857', 'EPSG:4326');
+            from.coordinates = TransformCoordinate(
+              from.coordinates,
+              "EPSG:3857",
+              "EPSG:4326"
+            );
           }
-          let res = await this.searchByDrive(from.coordinates, coordinates).catch(err => console.log(err))
-          nProgress.inc(0.05)
-          let toArray = this.transformAMapDataFromRoad(res)
+          let res = await this.searchByDrive(
+            from.coordinates,
+            coordinates
+          ).catch((err) => console.log(err));
+          nProgress.inc(0.05);
+          let toArray = this.transformAMapDataFromRoad(res);
           let obj = {
             from,
             to: toArray,
             distance: res.routes[0].distance,
             time: res.routes[0].time,
-            properties: item.properties
-          }
-          arr.push(obj)
+            properties: item.properties,
+          };
+          arr.push(obj);
         }
-        this.renderDriveLines(arr)
-      })()
+        this.renderDriveLines(arr);
+      })();
     } catch (err) {
-      console.log(err)
+      console.log(err);
     }
-
   };
 
   /**
@@ -3543,31 +3566,38 @@ function Action() {
     let dic = InitMap.systemDic[key];
     let flag = InitMap.checkNowIsGcj02System(key);
     // let needChange = InitMap.checkUpdateMapSystem(key)
-    let arr = []
+    let arr = [];
     if (data.routes && data.routes[0]) {
-      let road = data.routes[0]
-      let steps = road.steps
-      steps.forEach(step => {
-        arr = arr.concat(step.path.map(s => TransformCoordinate((!flag) ? dic(s.lng, s.lat) : [s.lng, s.lat])))
-      })
+      let road = data.routes[0];
+      let steps = road.steps;
+      steps.forEach((step) => {
+        arr = arr.concat(
+          step.path.map((s) =>
+            TransformCoordinate(!flag ? dic(s.lng, s.lat) : [s.lng, s.lat])
+          )
+        );
+      });
     }
-    return arr
-  }
+    return arr;
+  };
 
   // 构建
-  this.animateLine = null
+  this.animateLine = null;
   // 渲染线路列表
   this.renderDriveLines = (data) => {
     if (!this.animateLine) {
-      this.animateLine = new AnimateLine({ startPoint: { ...this.projectData }, showStartPoint: true })
+      this.animateLine = new AnimateLine({
+        startPoint: { ...this.projectData },
+        showStartPoint: true,
+      });
       this.animateLine.renderEnd = () => {
-        nProgress.done()
-      }
+        nProgress.done();
+      };
     }
-    data.forEach(item => {
-      this.animateLine.addLine({...item, context: this.Source});
-    })
-  }
+    data.forEach((item) => {
+      this.animateLine.addLine({ ...item, context: this.Source });
+    });
+  };
 }
 
 let action = new Action();
