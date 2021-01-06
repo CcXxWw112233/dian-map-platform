@@ -128,6 +128,7 @@ export default class ColorPicker extends Component {
           <Icon type="caret-down" 
             style={{
               ...style,
+              fontSize: 14,
               ...(this.props.disable === false ? non_disable : {}),
             }}
             onClick={() => {
@@ -138,7 +139,7 @@ export default class ColorPicker extends Component {
           />
         ) : (
           <Icon type="caret-up"
-            style={{ margin: "auto" }}
+            style={{ margin: "auto", fontSize: 14 }}
             onClick={() => {
               this.setState({
                 visible: false,
