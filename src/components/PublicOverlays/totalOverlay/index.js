@@ -26,7 +26,6 @@ export default function totalOverlay({ name, wranNumber, total, cb }) {
     }
   };
   const onMouseWheel = (e) => {
-    console.log(e);
     if (e.deltaY < 0) {
       myZoomIn();
     } else {
