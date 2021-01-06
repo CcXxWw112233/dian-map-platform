@@ -11,3 +11,6 @@
 1.上方头像没有权限不显示，改为有无权限都显示 。
 2.点击用户界面，增加组织切换和退出登录。
 3.组织切换在相应要更新数据的组件中调用componentWillReceiveProps， 判断currentOrganizeId变化调用数据更新
+
+antd ui兼容
+1.去掉Space组件, Icon的引入方式

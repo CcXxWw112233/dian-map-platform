@@ -354,7 +354,7 @@ export default class ScoutingItem extends React.PureComponent {
                   }}
                 >
                   <Space size="middle">
-                    <Button size="small" onClick={this.EditEnd} ghost>
+                    <Button size="small" onClick={this.EditEnd} ghost style={{ marginRight: 8 }}>
                       取消
                     </Button>
                     <Button
