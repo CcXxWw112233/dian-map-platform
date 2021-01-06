@@ -1,3 +1,4 @@
+import { myZoomIn, myZoomOut } from "utils/drawing/public";
 export default function totalOverlay({ name, wranNumber, total, cb }) {
   let div = document.createElement("div");
   div.style.width = "76px";
@@ -17,6 +18,15 @@ export default function totalOverlay({ name, wranNumber, total, cb }) {
   div.onmouseleave = function() {
     div.style.background = "rgb(48,114,246, 0.8)";
   }
+  const onMouseWheel = (e) => {
+    if (e.deltaY < 0) {
+      myZoomIn();
+    } else {
+      myZoomOut();
+    }
+  };
+  addEvent(div, "mousewheel", onMouseWheel);
+  addEvent(div, "DOMMouseScroll", onMouseWheel);
   if (cb) {
     div.onclick = cb;
   }
