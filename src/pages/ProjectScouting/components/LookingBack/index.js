@@ -134,6 +134,9 @@ export default class LookingBack extends React.Component {
   InitOptionGroup = () => {
     let { options } = this.state;
     const { Option } = Select;
+    let disabledOptions = options.filter((item) => item.disabled === true);
+    let nonDisableOptions = options.filter((item) => !item.disabled);
+    options = [...nonDisableOptions, ...disabledOptions];
     return options.map((item) => {
       return (
         <Option key={item.id} disabled={item.disabled}>
@@ -347,10 +350,13 @@ export default class LookingBack extends React.Component {
                               <div
                                 style={{
                                   backgroundColor: "rgba(71, 74, 91, 1)",
-                                  padding: 14
+                                  padding: 14,
                                 }}
                               >
-                                <i className={globalStyle.global_icon} style={{fontSize: 28}}>
+                                <i
+                                  className={globalStyle.global_icon}
+                                  style={{ fontSize: 28 }}
+                                >
                                   &#xe68b;
                                 </i>
                               </div>

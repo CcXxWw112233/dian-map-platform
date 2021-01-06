@@ -5,7 +5,7 @@ import globalStyle from "@/globalSet/styles/globalStyles.less";
 import { Input, DatePicker, Button, Select, Tabs, Tag, message } from "antd";
 import "moment/locale/zh-cn";
 import locale from "antd/lib/date-picker/locale/zh_CN";
-import { areas, stars } from "./tmpData";
+import { areas, stars, brand } from "./tmpData";
 import Event from "../../../lib/utils/event";
 const { RangePicker } = DatePicker;
 const { Option } = Select;
@@ -182,6 +182,7 @@ const AreaPanel = ({ x, y, parent }) => {
   );
 };
 const BrandPanel = ({ x, y, parent }) => {
+  let [selectedTags, setSelectedTag] = useState(parent.selectedBrands);
   return (
     <div className={floatPanelStyles.wrapper} style={{ left: x, top: y }}>
       <p className={floatPanelStyles.title}>
@@ -201,8 +202,28 @@ const BrandPanel = ({ x, y, parent }) => {
       </p>
       <div
         className={floatPanelStyles.body}
-        style={{ height: "calc(100% - 60px)" }}
-      ></div>
+        style={{ height: "calc(100% - 60px)", textAlign: "left" }}
+      >
+        {brand.map((item) => {
+          return (
+            <CheckableTag
+              key={item.key}
+              checked={selectedTags.indexOf(item.key) > -1}
+              style={{
+                marginBottom: 12,
+              }}
+              onChange={(checked) => {
+                const nextSelectedTags = checked
+                  ? [...selectedTags, item.key]
+                  : selectedTags.filter((t) => t !== item.key);
+                setSelectedTag(nextSelectedTags);
+              }}
+            >
+              {item.name}
+            </CheckableTag>
+          );
+        })}
+      </div>
       <div className={floatPanelStyles.footer}>
         <Button
           style={{ color: "#5A86F5", background: "#F5F7FB", marginRight: 16 }}
@@ -212,9 +233,14 @@ const BrandPanel = ({ x, y, parent }) => {
         <Button
           style={{ background: "#5A86F5", color: "#fff" }}
           onClick={() => {
-            parent.setState({
-              showBrandPanel: false,
-            });
+            parent.setState(
+              {
+                showBrandPanel: false,
+              },
+              () => {
+                parent.updateSelectedBrand(selectedTags);
+              }
+            );
           }}
         >
           完成
@@ -234,12 +260,17 @@ export default class AdvancedSeach extends React.Component {
       brandPanelX: null,
       brandPanelY: null,
       selectedAreas: [],
+      keywordState: "",
       personNum: 20,
       lowerLimitPrice: 0,
       upperLimitPrice: 1000,
-      selectedStars: [],
+      selectedStarKeys: [],
+      selectedBrands: [],
     };
     this.selectedAreaCodes = [];
+    this.selectedBrandKeys = [];
+    this.selectedBrands = [];
+    this.selectStars = [];
   }
   updateSelectedArea = (selectedAreaCodes) => {
     this.selectedAreaCodes = selectedAreaCodes;
@@ -248,6 +279,15 @@ export default class AdvancedSeach extends React.Component {
     });
     this.setState({
       selectedAreas: selectedAreas,
+    });
+  };
+  updateSelectedBrand = (brandKeys) => {
+    this.selectedBrandKeys = brandKeys;
+    const selectedBrands = brand.filter((item) => {
+      return brandKeys.includes(item.key);
+    });
+    this.setState({
+      selectedBrands: selectedBrands,
     });
   };
   handleSelectClick = (e, type) => {
@@ -271,6 +311,14 @@ export default class AdvancedSeach extends React.Component {
     this.setState({
       selectedAreas: selectedAreas,
       showAreaPanel: false,
+    });
+  };
+
+  handleRemoveSelectedBrand = (e, key) => {
+    this.selectedBrandKeys = this.selectedBrandKeys.filter((t) => t !== key);
+    let selectedBrands = this.state.selectedBrands.filter((t) => t.key !== key);
+    this.setState({
+      selectedBrands: selectedBrands,
     });
   };
 
@@ -343,19 +391,30 @@ export default class AdvancedSeach extends React.Component {
   };
 
   handleStarClick = (key) => {
-    let { selectedStars } = this.state;
-    if (selectedStars.includes(key)) {
-      selectedStars = selectedStars.filter((item) => {
+    let { selectedStarKeys } = this.state;
+    if (selectedStarKeys.includes(key)) {
+      selectedStarKeys = selectedStarKeys.filter((item) => {
         return item !== key;
       });
+      this.selectStars = stars.filter((item) => {
+        return item.key !== key;
+      });
     } else {
-      selectedStars.push(key);
+      let currentStar = stars.filter((item) => {
+        return item.key === key;
+      })[0];
+      selectedStarKeys.push(key);
+      this.selectStars.push(currentStar);
     }
     this.setState({
-      selectedStars: selectedStars,
+      selectedStarKeys: selectedStarKeys,
     });
   };
-
+  onKeywordChange = (value) => {
+    this.setState({
+      keywordState: value,
+    });
+  };
   render() {
     return (
       <div className={styles.wrapper}>
@@ -368,7 +427,12 @@ export default class AdvancedSeach extends React.Component {
               <span>关键词</span>
             </p>
             <div className={styles.content}>
-              <Input allowClear placeholder="请输入关键词" />
+              <Input
+                allowClear
+                placeholder="请输入关键词"
+                value={this.state.keywordState}
+                onChange={(e) => this.onKeywordChange(e.target.value)}
+              />
             </div>
           </div>
           <div className={styles.block}>
@@ -452,29 +516,31 @@ export default class AdvancedSeach extends React.Component {
                 parent={this}
               ></BrandPanel>
             ) : null}
-            {/* <div className={`${styles.content} ${styles.inline}`}>
-              <Tag closable>华美达</Tag>
-              <div className={styles.label}>
-                <span>华美达</span>
-                <i className={globalStyle.global_icon}>&#xe7d0;</i>
-              </div>
-              <div className={styles.label}>
-                <span>皇冠假日酒店</span>
-                <i className={globalStyle.global_icon}>&#xe7d0;</i>
-              </div>
-              <div className={styles.label}>
-                <span>豪生</span>
-                <i className={globalStyle.global_icon}>&#xe7d0;</i>
-              </div>
-              <div className={styles.label}>
-                <span>洲际</span>
-                <i className={globalStyle.global_icon}>&#xe7d0;</i>
-              </div>
-              <div className={styles.label}>
-                <span>希尔顿</span>
-                <i className={globalStyle.global_icon}>&#xe7d0;</i>
-              </div>
-            </div> */}
+            <div className={`${styles.content} ${styles.inline}`}>
+              {this.state.selectedBrands.map((item) => {
+                return (
+                  <Tag
+                    key={item.key}
+                    closable
+                    onClose={(e) => this.handleRemoveSelectedBrand(e, item.key)}
+                    style={{
+                      marginBottom: 12,
+                    }}
+                  >
+                    {item.name}
+                  </Tag>
+                );
+              })}
+            </div>
+            {this.state.selectedBrands.length === 0 ? (
+              <i
+                className={globalStyle.global_icon}
+                style={{ fontSize: 40, margin: "10px auto" }}
+              >
+                {" "}
+                &#xe7d1;
+              </i>
+            ) : null}
           </div>
           <div className={styles.block}>
             <p className={styles.title}>
@@ -485,7 +551,7 @@ export default class AdvancedSeach extends React.Component {
                 return (
                   <div
                     className={`${styles.label2} ${
-                      this.state.selectedStars.includes(item.key)
+                      this.state.selectedStarKeys.includes(item.key)
                         ? styles.on
                         : ""
                     }`}
@@ -562,7 +628,13 @@ export default class AdvancedSeach extends React.Component {
           <Button
             style={{ background: "#5A86F5", color: "#fff" }}
             onClick={() => {
-              Event.Evt.firEvent("searchProjectData", this.state.selectedAreas);
+              let obj = {
+                selectedAreas: this.state.selectedAreas,
+                selectedBrands: this.state.selectedBrands,
+                selectedStars: this.selectStars,
+                keywordState: this.state.keywordState,
+              };
+              Event.Evt.firEvent("searchProjectData", obj);
               Event.Evt.firEvent("displayProjectPanel");
             }}
           >

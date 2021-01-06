@@ -204,19 +204,33 @@ export default class ScoutingDetails extends PureComponent {
       if (this.state.activeKey !== "1") return;
       let tmpArr = [];
       if (val) {
-        if (Array.isArray(val)) {
-          val.forEach((item) => {
-            if (this.state.area_active_key !== "other") {
-              let area_active_key = this.state.area_active_key;
-              let areaList = this.areaList.filter((item) => {
-                return item.id === area_active_key;
-              });
-              if (areaList.length > 0) {
-                this.allFeatureList = areaList[0].collection;
-              }
-            } else {
-              this.allFeatureList = this.notAreaIdCollection;
-            }
+        let area_active_key = this.state.area_active_key;
+        let areaList = this.areaList.filter((item) => {
+          return item.id === area_active_key;
+        });
+
+        if (this.state.area_active_key !== "other") {
+          if (areaList.length > 0) {
+            this.allFeatureList = areaList[0].collection;
+          }
+        } else {
+          this.allFeatureList = this.notAreaIdCollection;
+        }
+        if (val["selectedAreas"]) {
+          let {
+            selectedAreas,
+            selectedBrands,
+            selectedStars,
+            keywordState,
+          } = val;
+          if (keywordState) {
+            let allFeatureList = this.allFeatureList;
+            allFeatureList = allFeatureList.filter((item) => {
+              return item.title.indexOf(keywordState) > -1;
+            });
+            this.allFeatureList = allFeatureList;
+          }
+          selectedAreas.forEach((item) => {
             let tmpArr2 = this.allFeatureList.filter((item2) => {
               return item2[item.type] === item.code;
             });
@@ -228,18 +242,26 @@ export default class ScoutingDetails extends PureComponent {
             let data = JSON.parse(JSON.stringify(item));
             if (data.collection) {
               let collection = data.collection;
-              let tmpList = [];
-              val.forEach((item2) => {
-                let tmp = collection.filter((item3) => {
-                  return item3[item2.type] === item2.code;
+              if (keywordState) {
+                collection = collection.filter(
+                  (item) => item.title.indexOf(keywordState) > -1
+                );
+                data.collection = collection;
+              }
+              if (selectedAreas.length > 0) {
+                let tmpList = [];
+                selectedAreas.forEach((item2) => {
+                  let tmp = collection.filter((item3) => {
+                    return item3[item2.type] === item2.code;
+                  });
+                  tmpList = [...tmpList, ...tmp];
                 });
-                tmpList = [...tmpList, ...tmp];
-              });
-              data.collection = tmpList;
+                data.collection = tmpList;
+              }
             }
             tmpAreaList.push(data);
           });
-          val.forEach((item) => {
+          selectedAreas.forEach((item) => {
             let tmp = this.notAreaIdCollection.filter((item2) => {
               return item2[item.type] === item.code;
             });

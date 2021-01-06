@@ -301,7 +301,7 @@ export default class Search extends React.Component {
     );
     const suffix = <i className={globalStyle.global_icon} onClick={() => {
       Event.Evt.firEvent("displayAdvancedSearchPanel");
-    }}>&#xe68c;</i>;
+    }}>&#xe836;</i>;
     return (
       <div className={styles.wrap} style={this.props.style}>
         <Dropdown
