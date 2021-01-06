@@ -83,7 +83,7 @@ class IndexPage extends React.Component {
     });
     Event.Evt.on("resetMoveMapMoveedListen", () => {
       this.setState({
-        isMoveMapMoveedListen: false,
+        isMoveMapMoveedListen: true,
       });
     });
     const me = this;

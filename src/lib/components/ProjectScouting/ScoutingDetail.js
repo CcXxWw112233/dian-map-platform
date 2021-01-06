@@ -538,6 +538,11 @@ function Action() {
     Event.Evt.on("removeMapMoveEndListen", function (value) {
       this.isCollectionTotal = !value;
       if (!me.oldLenged) return;
+      if (me.tabActivekey !== "1") {
+        message.info("仅图层支持统计")
+        Event.Evt.firEvent("resetMoveMapMoveedListen")
+        return;
+      }
       let obj = {
         lenged: me.oldLenged,
         dispatch: me.oldDispatch,
@@ -570,6 +575,7 @@ function Action() {
         me.moveendListener = () => {};
       } else {
         //开启
+        InitMap.map.getView().setZoom(13);
         me.featureOverlay2 && InitMap.map.removeOverlay(me.featureOverlay2);
         if (me.tabActivekey === "1") {
           me.mapMoveEnd(me.oldFeatures, me.oldPonts, obj, value);
