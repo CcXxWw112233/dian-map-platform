@@ -121,6 +121,7 @@ function Action() {
   this.geojsonData = {};
   this.geojsonResources = {};
   this.geojsonRenderData = {};
+  this.tabActivekey = "1";
 
   Event.Evt.addEventListener("basemapchange", (key) => {
     if (!this.mounted) return;
@@ -199,8 +200,8 @@ function Action() {
     createStyle("Point", {
       icon: {
         src: isMulti
-          ? require("../../../assets/multiunselect.png")
-          : require("../../../assets/unselectlocation.png"),
+          ? require("../../../assets/multiselect.png")
+          : require("../../../assets/selectlocation.png"),
         crossOrigin: "anonymous",
         anchor: [0.5, 0.8],
       },
@@ -209,8 +210,8 @@ function Action() {
     createStyle("Point", {
       icon: {
         src: isMulti
-          ? require("../../../assets/multiselect.png")
-          : require("../../../assets/selectlocation.png"),
+          ? require("../../../assets/multiunselect.png")
+          : require("../../../assets/unselectlocation.png"),
         crossOrigin: "anonymous",
         anchor: [0.5, 0.8],
       },
@@ -304,6 +305,12 @@ function Action() {
     });
     me.overlayArr = [];
     this.layer.plotEdit.removePlotOverlay2();
+    this.features.forEach((item) => {
+      if (this.Source.getFeatureByUid(item.ol_uid)) {
+        this.Source.removeFeature(item);
+      }
+    });
+    this.features = [];
     if (zoom < 6) {
       level = 1;
     }
@@ -550,17 +557,25 @@ function Action() {
       me.overlayArr2 = [];
       // 关闭统计则渲染
       if (value) {
-        me.renderFeaturesCollection(me.oldFeatures, obj);
-        let pointCollection = me.renderPointCollection(me.oldPonts);
-        me.overlayArr2 = pointCollection;
-        me.features = me.features.concat(pointCollection);
-        me.Source.addFeatures(pointCollection);
+        if (me.tabActivekey === "1") {
+          me.renderFeaturesCollection(me.oldFeatures, obj);
+          let pointCollection = me.renderPointCollection(me.oldPonts);
+          me.overlayArr2 = pointCollection;
+          me.features = me.features.concat(pointCollection);
+          me.Source.addFeatures(pointCollection);
+        } else {
+          message.info("不支持统计。");
+        }
         INITMAP.map.un("moveend", me.moveendListener);
         me.moveendListener = () => {};
       } else {
         //开启
         me.featureOverlay2 && InitMap.map.removeOverlay(me.featureOverlay2);
-        me.mapMoveEnd(me.oldFeatures, me.oldPonts, obj, value);
+        if (me.tabActivekey === "1") {
+          me.mapMoveEnd(me.oldFeatures, me.oldPonts, obj, value);
+        } else {
+          message.info("不支持统计。");
+        }
       }
       me.isNeedMoveMapMoveedListen = value;
     });
@@ -821,7 +836,7 @@ function Action() {
         }
         let style = createStyle("Point", {
           icon: {
-            src: require("../../../assets/unselectlocation.png"),
+            src: require("../../../assets/selectlocation.png"),
             crossOrigin: "anonymous",
             anchor: [0.5, 0.8],
           },
@@ -868,7 +883,7 @@ function Action() {
             let styles = feature.getStyle();
             let imgstyle = createStyle("Point", {
               icon: {
-                src: require("../../../assets/selectlocation.png"),
+                src: require("../../../assets/unselectlocation.png"),
                 crossOrigin: "anonymous",
                 anchor: [0.5, 0.8],
               },
@@ -919,7 +934,7 @@ function Action() {
             let styles = this.feature_.getStyle();
             let imgstyle = createStyle("Point", {
               icon: {
-                src: require("../../../assets/unselectlocation.png"),
+                src: require("../../../assets/selectlocation.png"),
                 crossOrigin: "anonymous",
                 anchor: [0.5, 0.8],
               },
@@ -1116,7 +1131,7 @@ function Action() {
           text: "回看集合点",
           offsetY: -30,
           icon: {
-            src: require("../../../assets/unselectlocation.png"),
+            src: require("../../../assets/selectlocation.png"),
             anchor: [0.5, 0.8],
             crossOrigin: "anonymous",
           },
@@ -1323,7 +1338,7 @@ function Action() {
             offsetY: -30,
             text: coordinate[item][0].title,
             icon: {
-              src: require("../../../assets/unselectlocation.png"),
+              src: require("../../../assets/selectlocation.png"),
               anchor: [0.5, 0.8],
               crossOrigin: "anonymous",
             },

@@ -530,6 +530,7 @@ export default class ScoutingDetails extends PureComponent {
   onChange = (activeKey) => {
     const { dispatch } = this.props;
     this.setState({ activeKey });
+    Action.tabActivekey = activeKey;
     if (this.state.activeKey === activeKey) return;
     this.clearGroupPointer();
     Action.clearGroupCollectionPoint();
@@ -569,6 +570,7 @@ export default class ScoutingDetails extends PureComponent {
         isImg: true,
       },
     });
+    Event.Evt.firEvent("openLengedListPanel", false);
   };
 
   onEdit = (targetKey, action) => {
@@ -2714,6 +2716,7 @@ export default class ScoutingDetails extends PureComponent {
               //   notRenderCollection: visible,
               // });
             } else {
+              const { dispatch } = this.props;
               style =
                 this.props.parentTool &&
                 this.props.parentTool.getStyle(

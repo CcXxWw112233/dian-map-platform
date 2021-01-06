@@ -80,10 +80,12 @@ export default class LookingBack extends React.Component {
           collection: fArr,
         };
         arr.push(obj);
-      } else {
-        arr.push({ ...item, disabled: true, collection: [] });
       }
+      //  else {
+      //   arr.push({ ...item, disabled: true, collection: [] });
+      // }
     });
+    
     return arr;
   };
 
@@ -101,6 +103,7 @@ export default class LookingBack extends React.Component {
     clearTimeout(this.timer);
     this.timer = setTimeout(() => {
       let arr = this.filterNotImg(data);
+
       // console.log(arr)
       // DetailAction.renderGroupPointer(arr);
       this.setState(
@@ -134,6 +137,9 @@ export default class LookingBack extends React.Component {
   InitOptionGroup = () => {
     let { options } = this.state;
     const { Option } = Select;
+    let disabledOptions = options.filter((item) => item.disabled === true);
+    let nonDisableOptions = options.filter((item) => !item.disabled);
+    options = [...nonDisableOptions, ...disabledOptions];
     return options.map((item) => {
       return (
         <Option key={item.id} disabled={item.disabled}>
