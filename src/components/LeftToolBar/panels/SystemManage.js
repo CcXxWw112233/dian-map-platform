@@ -7,9 +7,10 @@ import {
   Col,
   Button,
   message,
-  Modal
+  Modal,
+  Icon
 } from "antd";
-import { CloseOutlined, CheckOutlined } from "@ant-design/icons";
+// import { CloseOutlined, CheckOutlined } from "@ant-design/icons";
 import { MyIcon } from "../../../components/utils";
 import SystemManageModal from "./SystemManageModal";
 import styles from "./SystemManage.less";
@@ -169,7 +170,8 @@ export class ContentItem extends React.Component {
                   size="small"
                   shape="circle"
                 >
-                  <CloseOutlined />
+                  <Icon type="close"></Icon>
+                  {/* <CloseOutlined /> */}
                 </Button>
               </Col>
               <Col span={3} style={{ textAlign: "center" }}>
@@ -179,7 +181,8 @@ export class ContentItem extends React.Component {
                   shape="circle"
                   type="primary"
                 >
-                  <CheckOutlined />
+                  <Icon type="check"></Icon>
+                  {/* <CheckOutlined /> */}
                 </Button>
               </Col>
             </Fragment>
