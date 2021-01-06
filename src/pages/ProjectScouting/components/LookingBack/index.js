@@ -80,10 +80,12 @@ export default class LookingBack extends React.Component {
           collection: fArr,
         };
         arr.push(obj);
-      } else {
-        arr.push({ ...item, disabled: true, collection: [] });
       }
+      //  else {
+      //   arr.push({ ...item, disabled: true, collection: [] });
+      // }
     });
+    
     return arr;
   };
 
@@ -101,6 +103,7 @@ export default class LookingBack extends React.Component {
     clearTimeout(this.timer);
     this.timer = setTimeout(() => {
       let arr = this.filterNotImg(data);
+
       // console.log(arr)
       // DetailAction.renderGroupPointer(arr);
       this.setState(

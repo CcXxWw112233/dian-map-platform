@@ -530,7 +530,7 @@ export default class ScoutingDetails extends PureComponent {
       arr = arr.filter((item) => !key.includes(item.id));
     }
     if (type === "reload") {
-      arr = collections;
+      arr = collections || this.state.all_collection;
     }
     this.updateAllCollectionReset(arr);
   };
@@ -604,6 +604,7 @@ export default class ScoutingDetails extends PureComponent {
   onChange = (activeKey) => {
     const { dispatch } = this.props;
     this.setState({ activeKey });
+    Action.tabActivekey = activeKey;
     if (this.state.activeKey === activeKey) return;
     this.clearGroupPointer();
     Action.clearGroupCollectionPoint();
@@ -643,6 +644,7 @@ export default class ScoutingDetails extends PureComponent {
         isImg: true,
       },
     });
+    Event.Evt.firEvent("openLengedListPanel", false);
   };
 
   onEdit = (targetKey, action) => {
@@ -2313,6 +2315,19 @@ export default class ScoutingDetails extends PureComponent {
     );
   };
 
+  /**
+   * 更新动画显示逻辑
+   */
+  changeAnimate = (visible, data) => {
+    let arr = this.state.all_collection.map((item) => {
+      if (item.id === data.id) {
+        item._animate = visible;
+      }
+      return item;
+    });
+    this.updateAllCollectionReset(arr);
+  };
+
   renderForActive = (key) => {
     const {
       area_list,
@@ -2437,6 +2452,7 @@ export default class ScoutingDetails extends PureComponent {
                           "cancel",
                           item
                         )}
+                        onChangeAnimate={this.changeAnimate}
                         onRecoverGeojsonIcon={this.onRecoverGeojsonIcon}
                         onModifyGeojsonIcon={this.onModifyGeojsonIcon}
                       />
@@ -2788,6 +2804,7 @@ export default class ScoutingDetails extends PureComponent {
               //   notRenderCollection: visible,
               // });
             } else {
+              const { dispatch } = this.props;
               style =
                 this.props.parentTool &&
                 this.props.parentTool.getStyle(

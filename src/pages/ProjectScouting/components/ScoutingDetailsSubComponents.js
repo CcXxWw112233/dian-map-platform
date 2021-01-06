@@ -21,6 +21,7 @@ import {
   Col,
   Checkbox,
   Empty,
+  Switch,
 } from "antd";
 import {
   CheckCircleOutlined,
@@ -879,34 +880,35 @@ export const ScoutingHeader = (props) => {
   );
 };
 
-export const ScoutingItem = ({
-  data,
-  dataSource = [],
-  onCollectionRemove,
-  onEditCollection,
-  areaList,
-  onSelectGroup,
-  onChangeDisplay = () => {},
-  onEditPlanPic = () => {},
-  onCopyCollection,
-  selected = [],
-  onModifyFeature = () => {},
-  onModifyRemark = () => {},
-  onRemarkSave = () => {},
-  onStopMofifyFeatureInDetails,
-  onDragEnd = () => {},
-  onMergeUp,
-  onMergeDown,
-  onMergeCancel,
-  CollectionEdit = false,
-  onSelectCollection,
-  onModifyGeojsonIcon = () => {},
-  onRecoverGeojsonIcon = () => {},
-  onCheckItem = () => {},
-  callback,
-  parent,
-  index,
-}) => {
+export const ScoutingItem = (props) => {
+  const {
+    data,
+    dataSource = [],
+    onCollectionRemove,
+    onEditCollection,
+    areaList,
+    onSelectGroup,
+    onChangeDisplay = () => {},
+    onEditPlanPic = () => {},
+    onCopyCollection,
+    selected = [],
+    onModifyFeature = () => {},
+    onModifyRemark = () => {},
+    onRemarkSave = () => {},
+    onStopMofifyFeatureInDetails,
+    onDragEnd = () => {},
+    onMergeUp,
+    onMergeDown,
+    onMergeCancel,
+    CollectionEdit = false,
+    onSelectCollection,
+    onModifyGeojsonIcon = () => {},
+    onRecoverGeojsonIcon = () => {},
+    onCheckItem = () => {},
+    callback,
+    parent,
+    index,
+  } = props
   const handleSelect = (val) => {
     // console.log(val);
     onSelectCollection && onSelectCollection(val);
@@ -965,6 +967,7 @@ export const ScoutingItem = ({
                             </span>
                             {item.type !== "groupCollection" ? (
                               <UploadItem
+                                {...props}
                                 selected={selected}
                                 Edit={CollectionEdit}
                                 onCheckItem={onCheckItem}
@@ -996,6 +999,7 @@ export const ScoutingItem = ({
                                 {item.child &&
                                   item.child.map((child, i) => (
                                     <UploadItem
+                                      {...props}
                                       selected={selected}
                                       Edit={CollectionEdit}
                                       onCheckItem={onCheckItem}
@@ -1086,7 +1090,9 @@ export const UploadItem = ({
   group_id,
   parent,
   onCheckItem = () => {},
-  onMergeCancel = () => {},
+  onMergeCancel = () => { },
+  onChangeAnimate = () => { },
+  disabledAnimateToggle = false
 }) => {
   let obj = { ...data };
   // 过滤后缀
@@ -1353,6 +1359,21 @@ export const UploadItem = ({
       {/* <Menu.Item key="display">
           {data.is_display === "0" ? "显示" : "隐藏"}
         </Menu.Item> */}
+      { data.collect_type === '8' &&
+      <Menu.Item key="showAnimate">
+        <div className={styles.toogleAnimate} onClick={(e)=> e.stopPropagation() }>
+          <span>
+            路线动画
+          </span>
+          <span>
+            <Switch size='small'
+              onChange={(val) => { onChangeAnimate && onChangeAnimate(val, data); }}
+            />
+          </span>
+        </div>
+      </Menu.Item>
+      }
+
       <Menu.Item key="removeBoard">
         <Popconfirm
           title="确定删除此资料吗?"
@@ -1558,6 +1579,7 @@ export const UploadItem = ({
             >
               <span
               // style={{ color: "#1769FF" }}
+                onClick={ e => e.stopPropagation()}
               >
                 <MyIcon type="icon-gengduo2" />
               </span>
