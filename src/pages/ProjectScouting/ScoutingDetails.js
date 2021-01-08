@@ -628,6 +628,12 @@ export default class ScoutingDetails extends PureComponent {
         mainVisible: "list",
       },
     });
+    dispatch({
+      type: "meetingSubscribe/updateData",
+      payload: {
+        panelVisible: false,
+      },
+    });
   };
 
   onChange = (activeKey) => {
