@@ -21,7 +21,8 @@ import { connect } from "dva";
   ({
     scoutingProject: { projectList },
     areaSearch: { locationName, adcode },
-  }) => ({ projectList, locationName, adcode })
+    permission: { projectId },
+  }) => ({ projectList, locationName, adcode, projectId })
 )
 export default class Search extends React.Component {
   constructor(props) {
@@ -41,6 +42,7 @@ export default class Search extends React.Component {
     this.placeholder = "搜索地址或项目";
     this.props.onRef(this);
     this.handleSearch = throttle(this.handleSearch, 1000);
+    this.tempProjectId = ["1340591617840648192"];
     // Event.Evt.on("changeAreaInSearch", (data) => {
     //   if (!data) return;
     //   let promise0 = areaSearchAction.getCity(data.provincecode);
@@ -299,9 +301,16 @@ export default class Search extends React.Component {
         changeLocationPanelVisible={this.changeLocationPanelVisible}
       ></LocationPanel>
     );
-    const suffix = <i className={globalStyle.global_icon} onClick={() => {
-      Event.Evt.firEvent("displayAdvancedSearchPanel");
-    }}>&#xe836;</i>;
+    const suffix = (
+      <i
+        className={globalStyle.global_icon}
+        onClick={() => {
+          Event.Evt.firEvent("displayAdvancedSearchPanel");
+        }}
+      >
+        &#xe836;
+      </i>
+    );
     return (
       <div className={styles.wrap} style={this.props.style}>
         <Dropdown
@@ -332,7 +341,9 @@ export default class Search extends React.Component {
             onSearch={(value, event) => this.onSearch(value, event)}
             onChange={this.handleSearchInputChange}
             onFocus={this.onSearchFocus}
-            suffix={this.props.inProject ? suffix : <></>}
+            suffix={
+              this.tempProjectId.includes(this.props.projectId) ? suffix : <></>
+            }
           />
         </Dropdown>
       </div>

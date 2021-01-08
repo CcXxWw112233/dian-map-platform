@@ -28,9 +28,11 @@ import LeftToolBar from "../components/LeftToolBar/index";
 import SearchBtn from "../pages/publicMapData/searchBtn";
 import BasemapGallery from "../components/BasemapGallery/BasemapGallery";
 
+import MeetingSubscribe from "../pages/ProjectScouting/components/MeetingSubscribe/index";
+
 @connect(
   ({
-    controller: { mainVisible, },
+    controller: { mainVisible },
     openswitch: {
       isShowMap,
       isShowMobile,
@@ -40,10 +42,10 @@ import BasemapGallery from "../components/BasemapGallery/BasemapGallery";
       isShowPhotoSwipe,
       panelDidMount,
       openPanel,
-      imagePreviewVisible
+      imagePreviewVisible,
     },
-    
     editPicture: { editShow },
+    meetingSubscribe: { panelVisible },
   }) => ({
     mainVisible,
     isShowMap,
@@ -55,7 +57,8 @@ import BasemapGallery from "../components/BasemapGallery/BasemapGallery";
     isShowPhotoSwipe,
     panelDidMount,
     openPanel,
-    imagePreviewVisible
+    imagePreviewVisible,
+    panelVisible,
   })
 )
 class IndexPage extends React.Component {
@@ -359,7 +362,8 @@ class IndexPage extends React.Component {
       isShowRightTools,
       isShowLeftToolBar,
       isShowPhotoSwipe,
-      imagePreviewVisible
+      imagePreviewVisible,
+      panelVisible,
     } = this.props;
     return (
       <div className={styles.normal} id="IndexPage">
@@ -435,6 +439,7 @@ class IndexPage extends React.Component {
           </a>
         )}
         {imagePreviewVisible && <ImagePreview />}
+        {panelVisible ? <MeetingSubscribe></MeetingSubscribe> : null}
       </div>
     );
   }

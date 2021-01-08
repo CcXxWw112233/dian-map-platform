@@ -64,6 +64,8 @@ const { TabPane } = Tabs;
     openswitch: { showFeatureName },
     lengedList: { config },
     collectionDetail: { selectData, showCollectionsModal },
+    meetingSubscribe: { hotelNames },
+    permission: { projectId },
   }) => ({
     mainVisible,
     lastPageState,
@@ -71,6 +73,8 @@ const { TabPane } = Tabs;
     showFeatureName,
     selectData,
     showCollectionsModal,
+    hotelNames,
+    projectId,
   })
 )
 export default class ScoutingDetails extends PureComponent {
@@ -181,6 +185,7 @@ export default class ScoutingDetails extends PureComponent {
       "农林耕地",
       "地籍地貌",
     ];
+    this.tempProjectId = ["1340591617840648192"];
   }
   componentDidMount() {
     this.isGoBack = false;
@@ -367,6 +372,26 @@ export default class ScoutingDetails extends PureComponent {
     });
   }
 
+  updateSelectedMeetingRooms = (hotelName) => {
+    let { hotelNames, projectId, dispatch } = this.props;
+    if (this.tempProjectId.includes(projectId)) {
+      let index = hotelNames.findIndex((item) => item === hotelName);
+      if (index > -1) {
+        hotelNames.splice(index, 1);
+      } else {
+        hotelNames.push(hotelName);
+      }
+      dispatch({
+        type: "meetingSubscribe/updateData",
+        payload: {
+          panelVisible: hotelNames.length > 0 ? true : false,
+          hotelNames: hotelNames,
+        },
+      });
+      Event.Evt.firEvent("updateMeetingRoom", hotelNames);
+    }
+  };
+
   setItemClickState = (val) => {
     this.isClickInPanel = val;
   };
@@ -422,21 +447,25 @@ export default class ScoutingDetails extends PureComponent {
         let coords = feature.getGeometry().getCoordinates();
         coords = TransformCoordinate(coords, "EPSG:3857", "EPSG:4326");
         Evt.firEvent("HouseDetailGetPoi", coords.join(","));
-        dispatch({
-          type: "collectionDetail/updateDatas",
-          payload: { selectPoi: coords.join(",") },
-        });
+        if (!this.tempProjectId.includes(this.props.projectId)) {
+          dispatch({
+            type: "collectionDetail/updateDatas",
+            payload: { selectPoi: coords.join(",") },
+          });
+        }
       }
       collection.properties_map = properties;
-      dispatch({
-        type: "collectionDetail/updateDatas",
-        payload: {
-          selectData: collection,
-          type: "edit",
-          isImg: false,
-          selectedFeature: feature,
-        },
-      });
+      if (!this.tempProjectId.includes(this.props.projectId)) {
+        dispatch({
+          type: "collectionDetail/updateDatas",
+          payload: {
+            selectData: collection,
+            type: "edit",
+            isImg: false,
+            selectedFeature: feature,
+          },
+        });
+      }
     }
   };
   // 点击了坐标点
@@ -1900,15 +1929,17 @@ export default class ScoutingDetails extends PureComponent {
       val = Object.assign({}, { properties_map: properties }, val);
     }
     // }
-    dispatch({
-      type: "collectionDetail/updateDatas",
-      payload: {
-        selectData: val,
-        selectedFeature: feature,
-        type: "edit",
-        isImg: type === "pic" || type === "video" || type === "interview",
-      },
-    });
+    if (!this.tempProjectId.includes(this.props.projectId)) {
+      dispatch({
+        type: "collectionDetail/updateDatas",
+        payload: {
+          selectData: val,
+          selectedFeature: feature,
+          type: "edit",
+          isImg: type === "pic" || type === "video" || type === "interview",
+        },
+      });
+    }
     Action.handleCollectionPoint(val);
   };
 
@@ -2608,12 +2639,24 @@ export default class ScoutingDetails extends PureComponent {
                     type="primary"
                     ghost
                     size="small"
-                    icon={<MyIcon type="icon-huabi" />}
+                    icon={
+                      <MyIcon
+                        type={
+                          !this.tempProjectId.includes(this.props.projectId)
+                            ? "icon-huabi"
+                            : "icon-xuanze"
+                        }
+                      />
+                    }
                     onClick={() => {
                       this.setState({ isEdit: true });
                     }}
                   >
-                    <span style={{ fontSize: "0.6rem" }}>编辑</span>
+                    <span style={{ fontSize: "0.6rem" }}>
+                      {this.tempProjectId.includes(this.props.projectId)
+                        ? "多选"
+                        : "编辑"}
+                    </span>
                   </Button>
                 </Space>
               ) : (
@@ -2851,6 +2894,9 @@ export default class ScoutingDetails extends PureComponent {
           timeout={300}
           unmountOnExit
         >
+          {/* {this.props.projectId !== "1340591617840648192" && (
+            <CollectionDetail />
+          )} */}
           <CollectionDetail />
         </CSSTransition>
         <BackTop target={() => this.scrollView.current} style={{ right: 10 }} />
