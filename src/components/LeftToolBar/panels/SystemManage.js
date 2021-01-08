@@ -19,6 +19,7 @@ import systemManageServices from "../../../services/systemManage";
 import { guid } from "./lib";
 import { connect } from "dva";
 import OrgListSelect from "./OrgListSelect";
+import { ENTRANCE_MODE_IFRAME } from "../../../globalSet/config";
 const { Panel } = Collapse;
 
 export class ContentItem extends React.Component {
@@ -413,20 +414,29 @@ export default class SystemManage extends React.Component {
           <div className={styles.info}>
             <div className={styles.info_name}>{this.state.loginUserName}</div>
             <div className={styles.info_operate}>
-              <Dropdown overlay={<OrgListSelect />}>
-                <div className={styles.info_operate_org}>
-                  <div className={styles.info_operate_org_name}>{org_name}</div>
+              {!ENTRANCE_MODE_IFRAME && (
+                <>
+                  <Dropdown overlay={<OrgListSelect />}>
+                    <div className={styles.info_operate_org}>
+                      <div className={styles.info_operate_org_name}>
+                        {org_name}
+                      </div>
+                      <div
+                        className={`${globalStyle.global_icon} ${styles.info_operate_org_icon}`}
+                        style={{ fontSize: 12 }}
+                      >
+                        &#xe68a;
+                      </div>
+                    </div>
+                  </Dropdown>
                   <div
-                    className={`${globalStyle.global_icon} ${styles.info_operate_org_icon}`}
-                    style={{ fontSize: 12 }}
+                    className={styles.info_operate_logout}
+                    onClick={this.logOut}
                   >
-                    &#xe68a;
+                    退出登录
                   </div>
-                </div>
-              </Dropdown>
-              <div className={styles.info_operate_logout} onClick={this.logOut}>
-                退出登录
-              </div>
+                </>
+              )}
             </div>
           </div>
         </div>

@@ -5,6 +5,7 @@ import { message } from "antd";
 import NProgress from "nprogress";
 import "nprogress/nprogress.css";
 import Cookies from "js-cookie";
+import { ENTRANCE_MODE_IFRAME } from "../globalSet/config";
 
 const instance = axios.create({
   method: "GET",
@@ -25,7 +26,9 @@ instance.interceptors.request.use(config => {
     if (BASIC.getUrlParam.isMobile === "1") return {};
     requestTimer = setTimeout(() => {
       message.error("缺少权限，无法试用地图");
-      redirectToLogin();
+      if (!ENTRANCE_MODE_IFRAME) {
+        redirectToLogin();
+      }
     }, 1000);
     return {};
   }
@@ -70,26 +73,30 @@ instance.interceptors.response.use(
         if (BASIC.getUrlParam.isMobile === "1") return {};
         responseTimer = setTimeout(() => {
           message.error("权限不足，请重新登录");
-          redirectToLogin();
-          // let url = "";
-          // try {
-          //   url = window.top.document.referrer;
-          // } catch (M) {
-          //   if (window.parent) {
-          //     try {
-          //       url = window.parent.document.referrer;
-          //     } catch (L) {
-          //       url = "";
-          //     }
-          //   }
-          // }
-          // if (url === "") {
-          //   url = document.referrer;
-          // }
-          // window.parent.location.href =
-          //   url ||
-          //   "https://lingxi.di-an.com/" +
-          //     "#/login?redirect=/technological/simplemode/home";
+          if (!ENTRANCE_MODE_IFRAME) {
+            //如果是独立应用入口
+            redirectToLogin();
+          } else {
+            let url = "";
+            try {
+              url = window.top.document.referrer;
+            } catch (M) {
+              if (window.parent) {
+                try {
+                  url = window.parent.document.referrer;
+                } catch (L) {
+                  url = "";
+                }
+              }
+            }
+            if (url === "") {
+              url = document.referrer;
+            }
+            window.parent.location.href =
+              url ||
+              "https://lingxi.di-an.com/" +
+                "#/login?redirect=/technological/simplemode/home";
+          }
         }, 1000);
       }
 
