@@ -6,7 +6,8 @@ export default class NewAreaPanel extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      cascaderOptions: [{ value: "0000000", label: "全国", children: [] }],
+      cascaderOptions: []
+      // cascaderOptions: [{ value: "0000000", label: "全国", children: [] }],
     };
   }
   componentDidMount() {

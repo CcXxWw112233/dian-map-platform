@@ -4,7 +4,7 @@ import throttle from "lodash/throttle";
 
 import { DownOutlined } from "@ant-design/icons";
 import commonSearchAction from "@/lib/components/Search/CommonSeach";
-
+import globalStyle from "@/globalSet/styles/globalStyles.less";
 import styles from "./Search.less";
 import AreaPanel from "./AreaPanel";
 import LocationPanel from "./LocationPanel";
@@ -13,7 +13,7 @@ import { BASIC } from "../../services/config";
 import { setSession, getSession } from "utils/sessionManage";
 import Event from "../../lib/utils/event";
 import areaSearchAction from "@/lib/components/Search/AreaSearch";
-import NewAreaPanel from "./NewAreaPanel"
+import NewAreaPanel from "./NewAreaPanel";
 
 import { connect } from "dva";
 
@@ -21,7 +21,8 @@ import { connect } from "dva";
   ({
     scoutingProject: { projectList },
     areaSearch: { locationName, adcode },
-  }) => ({ projectList, locationName, adcode })
+    permission: { projectId },
+  }) => ({ projectList, locationName, adcode, projectId })
 )
 export default class Search extends React.Component {
   constructor(props) {
@@ -41,6 +42,7 @@ export default class Search extends React.Component {
     this.placeholder = "搜索地址或项目";
     this.props.onRef(this);
     this.handleSearch = throttle(this.handleSearch, 1000);
+    this.tempProjectId = ["1340591617840648192"];
     // Event.Evt.on("changeAreaInSearch", (data) => {
     //   if (!data) return;
     //   let promise0 = areaSearchAction.getCity(data.provincecode);
@@ -299,6 +301,16 @@ export default class Search extends React.Component {
         changeLocationPanelVisible={this.changeLocationPanelVisible}
       ></LocationPanel>
     );
+    const suffix = (
+      <i
+        className={globalStyle.global_icon}
+        onClick={() => {
+          Event.Evt.firEvent("displayAdvancedSearchPanel");
+        }}
+      >
+        &#xe836;
+      </i>
+    );
     return (
       <div className={styles.wrap} style={this.props.style}>
         <Dropdown
@@ -329,6 +341,9 @@ export default class Search extends React.Component {
             onSearch={(value, event) => this.onSearch(value, event)}
             onChange={this.handleSearchInputChange}
             onFocus={this.onSearchFocus}
+            suffix={
+              this.tempProjectId.includes(this.props.projectId) && this.props.inProject ? suffix : <></>
+            }
           />
         </Dropdown>
       </div>

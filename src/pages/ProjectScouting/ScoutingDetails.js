@@ -64,6 +64,8 @@ const { TabPane } = Tabs;
     openswitch: { showFeatureName },
     lengedList: { config },
     collectionDetail: { selectData, showCollectionsModal },
+    meetingSubscribe: { hotelNames },
+    permission: { projectId },
   }) => ({
     mainVisible,
     lastPageState,
@@ -71,6 +73,8 @@ const { TabPane } = Tabs;
     showFeatureName,
     selectData,
     showCollectionsModal,
+    hotelNames,
+    projectId,
   })
 )
 export default class ScoutingDetails extends PureComponent {
@@ -181,6 +185,7 @@ export default class ScoutingDetails extends PureComponent {
       "农林耕地",
       "地籍地貌",
     ];
+    this.tempProjectId = ["1340591617840648192"];
   }
   componentDidMount() {
     this.isGoBack = false;
@@ -204,29 +209,129 @@ export default class ScoutingDetails extends PureComponent {
       if (this.state.activeKey !== "1") return;
       let tmpArr = [];
       if (val) {
-        this.codeType = val.type;
-        this.code = val.code;
-        tmpArr = this.allFeatureList.filter((item) => {
-          return item[val.type] === val.code;
+        let area_active_key = this.state.area_active_key;
+        let areaList = this.areaList.filter((item) => {
+          return item.id === area_active_key;
         });
-        let tmpAreaList = [],
-          tmpNotAreaIdCollection = [];
-        this.areaList.forEach((item) => {
-          let data = JSON.parse(JSON.stringify(item));
-          if (data.collection) {
-            data.collection = data.collection.filter((item2) => {
-              return item2[val.type] === val.code;
-            });
+
+        if (this.state.area_active_key !== "other") {
+          if (areaList.length > 0) {
+            this.allFeatureList = areaList[0].collection;
           }
-          tmpAreaList.push(data);
-        });
-        tmpNotAreaIdCollection = this.notAreaIdCollection.filter((item) => {
-          return item[val.type] === val.code;
-        });
-        this.setState({
-          area_list: tmpAreaList,
-          not_area_id_collection: tmpNotAreaIdCollection,
-        });
+        } else {
+          this.allFeatureList = this.notAreaIdCollection;
+        }
+        if (val["selectedAreas"]) {
+          let {
+            selectedAreas,
+            selectedBrands,
+            selectedStars,
+            keywordState,
+          } = val;
+          if (keywordState) {
+            let allFeatureList = this.allFeatureList;
+            allFeatureList = allFeatureList.filter((item) => {
+              return item.title.indexOf(keywordState) > -1;
+            });
+            this.allFeatureList = allFeatureList;
+          }
+          selectedAreas.forEach((item) => {
+            let tmpArr2 = this.allFeatureList.filter((item2) => {
+              return item2[item.type] === item.code;
+            });
+            tmpArr = [...tmpArr, ...tmpArr2];
+          });
+          let tmpAreaList = [],
+            tmpNotAreaIdCollection = [];
+          this.areaList.forEach((item) => {
+            let data = JSON.parse(JSON.stringify(item));
+            if (data.collection) {
+              let collection = data.collection;
+              if (keywordState) {
+                collection = collection.filter(
+                  (item) => item.title.indexOf(keywordState) > -1
+                );
+                data.collection = collection;
+              }
+              if (selectedAreas.length > 0) {
+                let tmpList = [];
+                selectedAreas.forEach((item2) => {
+                  let tmp = collection.filter((item3) => {
+                    return item3[item2.type] === item2.code;
+                  });
+                  tmpList = [...tmpList, ...tmp];
+                });
+                data.collection = tmpList;
+              }
+              if (selectedStars.length) {
+                let collection = data.collection;
+                let tmpList = [];
+                for (let i = 0; i < collection.length; i++) {
+                  // let n = Math.floor(Math.random() * collection.length);
+                  let selectedStar = selectedStars.filter((itemx) => {
+                    return itemx.name === collection[i].star;
+                  });
+                  if (selectedStar && selectedStar.length > 0) {
+                    tmpList.push(collection[i]);
+                  }
+                }
+                data.collection = tmpList;
+                tmpArr = tmpList;
+              }
+              if (selectedBrands.length > 0) {
+                let collection = data.collection;
+                let tmpList = [];
+                for (let i = 0; i < collection.length; i++) {
+                  // let n = Math.floor(Math.random() * collection.length);
+                  let selectedBrand = selectedBrands.filter((itemx) => {
+                    return itemx.name === collection[i].brand;
+                  });
+                  if (selectedBrand && selectedBrand.length > 0) {
+                    tmpList.push(collection[i]);
+                  }
+                }
+                data.collection = tmpList;
+                tmpArr = tmpList;
+              }
+            }
+            tmpAreaList.push(data);
+          });
+          selectedAreas.forEach((item) => {
+            let tmp = this.notAreaIdCollection.filter((item2) => {
+              return item2[item.type] === item.code;
+            });
+            tmpNotAreaIdCollection = [...tmpNotAreaIdCollection, ...tmp];
+          });
+          this.setState({
+            area_list: tmpAreaList,
+            not_area_id_collection: tmpNotAreaIdCollection,
+          });
+          tmpArr = tmpAreaList.filter((item) => item.id === area_active_key)[0].collection;
+        } else {
+          this.codeType = val.type;
+          this.code = val.code;
+          tmpArr = this.allFeatureList.filter((item) => {
+            return item[val.type] === val.code;
+          });
+          let tmpAreaList = [],
+            tmpNotAreaIdCollection = [];
+          this.areaList.forEach((item) => {
+            let data = JSON.parse(JSON.stringify(item));
+            if (data.collection) {
+              data.collection = data.collection.filter((item2) => {
+                return item2[val.type] === val.code;
+              });
+            }
+            tmpAreaList.push(data);
+          });
+          tmpNotAreaIdCollection = this.notAreaIdCollection.filter((item) => {
+            return item[val.type] === val.code;
+          });
+          this.setState({
+            area_list: tmpAreaList,
+            not_area_id_collection: tmpNotAreaIdCollection,
+          });
+        }
       } else {
         tmpArr = this.allFeatureList;
         this.setState({
@@ -235,6 +340,11 @@ export default class ScoutingDetails extends PureComponent {
         });
       }
       const { config: lenged, dispatch, showFeatureName } = this.props;
+      // if (tmpArr.length === 0) {
+      //   this.areaList.forEach(item => {
+      //     tmpArr= [...tmpArr, ...item.collection]
+      //   })
+      // }
       Action.renderCollection(tmpArr || [], {
         lenged,
         dispatch,
@@ -293,6 +403,26 @@ export default class ScoutingDetails extends PureComponent {
     });
   }
 
+  updateSelectedMeetingRooms = (hotelName) => {
+    let { hotelNames, projectId, dispatch } = this.props;
+    if (this.tempProjectId.includes(projectId)) {
+      let index = hotelNames.findIndex((item) => item === hotelName);
+      if (index > -1) {
+        hotelNames.splice(index, 1);
+      } else {
+        hotelNames.push(hotelName);
+      }
+      dispatch({
+        type: "meetingSubscribe/updateData",
+        payload: {
+          panelVisible: hotelNames.length > 0 ? true : false,
+          hotelNames: hotelNames,
+        },
+      });
+      Event.Evt.firEvent("updateMeetingRoom", hotelNames);
+    }
+  };
+
   setItemClickState = (val) => {
     this.isClickInPanel = val;
   };
@@ -348,21 +478,31 @@ export default class ScoutingDetails extends PureComponent {
         let coords = feature.getGeometry().getCoordinates();
         coords = TransformCoordinate(coords, "EPSG:3857", "EPSG:4326");
         Evt.firEvent("HouseDetailGetPoi", coords.join(","));
-        dispatch({
-          type: "collectionDetail/updateDatas",
-          payload: { selectPoi: coords.join(",") },
-        });
+        if (
+          !this.tempProjectId.includes(this.props.projectId) ||
+          !feature.get("meetingRoom")
+        ) {
+          dispatch({
+            type: "collectionDetail/updateDatas",
+            payload: { selectPoi: coords.join(",") },
+          });
+        }
       }
       collection.properties_map = properties;
-      dispatch({
-        type: "collectionDetail/updateDatas",
-        payload: {
-          selectData: collection,
-          type: "edit",
-          isImg: false,
-          selectedFeature: feature,
-        },
-      });
+      if (
+        !this.tempProjectId.includes(this.props.projectId) ||
+        !feature.get("meetingRoom")
+      ) {
+        dispatch({
+          type: "collectionDetail/updateDatas",
+          payload: {
+            selectData: collection,
+            type: "edit",
+            isImg: feature.get("pointType") === "pic" ? true : false,
+            selectedFeature: feature,
+          },
+        });
+      }
     }
   };
   // 点击了坐标点
@@ -523,6 +663,12 @@ export default class ScoutingDetails extends PureComponent {
       type: "controller/updateMainVisible",
       payload: {
         mainVisible: "list",
+      },
+    });
+    dispatch({
+      type: "meetingSubscribe/updateData",
+      payload: {
+        panelVisible: false,
       },
     });
   };
@@ -738,11 +884,21 @@ export default class ScoutingDetails extends PureComponent {
     let params = {
       board_id: this.state.current_board.board_id,
     };
+    let stars = ["经济型", "一星级", "二星级", "三星级", "四星级", "五星级"];
+    let brands = ["维也纳"];
     // 发起请求后，取消轮询
     Action.clearListen();
     // 再开始轮询--优化轮询机制
     Action.getCollectionList(params).then((res) => {
       let data = res.data.sort((a, b) => a.sort - b.sort);
+      data = data.map((item) => {
+        let ramdomIndex = Math.round(Math.random() * stars.length);
+        item.star = stars[ramdomIndex];
+        if (item.title.includes(brands[0])) {
+          item.brand = brands[0];
+        }
+        return item;
+      });
       // 轮询中，加入对比更新机制
       Action.oldData = data;
       // 将重组后的数据更新,保存没有关联区域的数据
@@ -795,6 +951,12 @@ export default class ScoutingDetails extends PureComponent {
         tmpNotAreaIdCollection
       );
     }
+    dispatch({
+      type: "lengedList/updateLengedList",
+      payload: {
+        config: [],
+      },
+    });
     this.setState(
       {
         all_collection: data,
@@ -1826,15 +1988,17 @@ export default class ScoutingDetails extends PureComponent {
       val = Object.assign({}, { properties_map: properties }, val);
     }
     // }
-    dispatch({
-      type: "collectionDetail/updateDatas",
-      payload: {
-        selectData: val,
-        selectedFeature: feature,
-        type: "edit",
-        isImg: type === "pic" || type === "video" || type === "interview",
-      },
-    });
+    if (!this.tempProjectId.includes(this.props.projectId)) {
+      dispatch({
+        type: "collectionDetail/updateDatas",
+        payload: {
+          selectData: val,
+          selectedFeature: feature,
+          type: "edit",
+          isImg: type === "pic" || type === "video" || type === "interview",
+        },
+      });
+    }
     Action.handleCollectionPoint(val);
   };
 
@@ -2534,12 +2698,24 @@ export default class ScoutingDetails extends PureComponent {
                     type="primary"
                     ghost
                     size="small"
-                    icon={<MyIcon type="icon-huabi" />}
+                    icon={
+                      <MyIcon
+                        type={
+                          !this.tempProjectId.includes(this.props.projectId)
+                            ? "icon-huabi"
+                            : "icon-xuanze"
+                        }
+                      />
+                    }
                     onClick={() => {
                       this.setState({ isEdit: true });
                     }}
                   >
-                    <span style={{ fontSize: "0.6rem" }}>编辑</span>
+                    <span style={{ fontSize: "0.6rem" }}>
+                      {this.tempProjectId.includes(this.props.projectId)
+                        ? "多选"
+                        : "编辑"}
+                    </span>
                   </Button>
                 </Space>
               ) : (
@@ -2570,6 +2746,13 @@ export default class ScoutingDetails extends PureComponent {
                         isEdit: false,
                         notAreaIdSelections: [],
                         selections: [],
+                      });
+                      // Event.Evt.firEvent("updateMeetingRoom", []);
+                      dispatch({
+                        type: "meetingSubscribe/updateData",
+                        payload: {
+                          panelVisible: false,
+                        },
                       });
                     }}
                     size="small"
@@ -2777,6 +2960,9 @@ export default class ScoutingDetails extends PureComponent {
           timeout={300}
           unmountOnExit
         >
+          {/* {this.props.projectId !== "1340591617840648192" && (
+            <CollectionDetail />
+          )} */}
           <CollectionDetail />
         </CSSTransition>
         <BackTop target={() => this.scrollView.current} style={{ right: 10 }} />

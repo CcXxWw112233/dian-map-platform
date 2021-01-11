@@ -353,10 +353,13 @@ export default class LookingBack extends React.Component {
                               <div
                                 style={{
                                   backgroundColor: "rgba(71, 74, 91, 1)",
-                                  padding: 14
+                                  padding: 14,
                                 }}
                               >
-                                <i className={globalStyle.global_icon} style={{fontSize: 28}}>
+                                <i
+                                  className={globalStyle.global_icon}
+                                  style={{ fontSize: 28 }}
+                                >
                                   &#xe68b;
                                 </i>
                               </div>

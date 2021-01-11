@@ -4,12 +4,14 @@ import { connect } from "dva";
 import styles from "./LeftToolBar.less";
 import Plot from "./panels/Plot";
 import Project from "./panels/Project";
+import AdvancedSearch from "./panels/AdvancedSearch";
 import TempPlot from "./panels/TempPlot";
 import ProjectList from "./panels/ProjectList";
 import CustomSymbolStore from "./panels/CustomSymbolStore";
 import SystemManage from "./panels/SystemManage";
 import Panel from "./panels/Panel";
 import ToolBar from "./toolbar";
+import Event from "../../lib/utils/event";
 import systemManageServices from "../../services/systemManage";
 
 import { lineDrawing, pointDrawing, polygonDrawing } from "utils/drawing";
@@ -38,6 +40,7 @@ export default class LeftToolBar extends React.Component {
       projectPermission: null,
       globalPermission: null,
       needUpdate: false,
+      displayAdvancedSearch: false,
     };
     this.dic = {
       Point: "point",
@@ -61,7 +64,34 @@ export default class LeftToolBar extends React.Component {
     this.projectRef = null;
     this.returnPanel = null;
     this.isGeojsonMifyIcon = false;
+
+    this.selectedAreas = [];
+    this.selectedBrands = [];
+    this.keywordState = ""
+    this.selectedStarKeys = [];
+    this.personNum = 20;
+    this.lowerLimitPrice = 0;
+    this.upperLimitPrice = 1000;
+    this.rangeTime = []
+
     this.getPersonalPermission();
+    Event.Evt.on("displayAdvancedSearchPanel", () => {
+      this.setState({
+        displayAdvancedSearch: true,
+        displayPlot: false,
+        displayProject: false,
+        displaySystemManage: false,
+        displayTempPlot: false,
+        displayCustomSymbolStore: false,
+        displayTempPlotIcon: false,
+      });
+    });
+    Event.Evt.on("displayProjectPanel", () => {
+      this.setState({
+        displayAdvancedSearch: false,
+        displayProject: true,
+      });
+    });
   }
 
   getPersonalPermission = () => {
@@ -312,6 +342,9 @@ export default class LeftToolBar extends React.Component {
             }
             projectPermission={this.state.projectPermission}
           ></Project>
+          {this.state.displayAdvancedSearch ? (
+            <AdvancedSearch parent={this}></AdvancedSearch>
+          ) : null}
           {this.state.displayPlot ? (
             <Plot
               parent={this}

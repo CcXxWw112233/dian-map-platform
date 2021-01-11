@@ -1511,6 +1511,10 @@ function Action() {
       if (!isGeojson) {
         let style = feature.getStyle();
         style.setImage(this.getImage());
+        let text = style.getText().getText();
+        if (!text) {
+          feature.getStyle().getText().setText(feature.get("title"));
+        }
         feature.setStyle(style);
         this.selectedFeature = feature;
       }
@@ -2024,12 +2028,6 @@ function Action() {
     this.removeOverlay();
     if (!data.length) {
       this.oldPlotFeatures = [];
-      dispatch({
-        type: "lengedList/updateLengedList",
-        payload: {
-          config: [],
-        },
-      });
       return;
     }
     // 取出有子集的数据，合并到列表展示中

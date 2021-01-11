@@ -105,7 +105,7 @@ export default function Meettings(props) {
     if (!users.length) {
       return message.warn("未选择联系人");
     }
-    message.success("正在发起会议");
+    message.info("正在发起会议");
     let ids = users.filter((item) => !item._type);
     let phone = users.filter((item) => item._type === "phone");
     ids = ids.map((item) => item.user_id);
@@ -117,19 +117,24 @@ export default function Meettings(props) {
       user_ids: ids.join(","),
       user_for: phone.join(","),
     };
-    Action.meetting.meettingStart(param).then((res) => {
-      let data = res.data;
-      if (data.start_url) {
-        let url = data.start_url;
-        message.destroy();
-        setTimeout(() => {
-          window.open(url, "_blank");
-        }, 2000);
-        setSelectUsers([]);
-        userPhone = [];
-        message.success("会议已发起,将自动跳转页面开启会议");
-      }
-    });
+    Action.meetting
+      .meettingStart(param)
+      .then((res) => {
+        let data = res.data;
+        if (data.start_url) {
+          let url = data.start_url;
+          message.destroy();
+          setTimeout(() => {
+            window.open(url, "_blank");
+          }, 2000);
+          setSelectUsers([]);
+          userPhone = [];
+          message.success("会议已发起,将自动跳转页面开启会议");
+        }
+      })
+      .catch((e) => {
+        message.error(e.message);
+      });
   };
   return (
     <div className={styles.meettingContainer}>

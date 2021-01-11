@@ -487,14 +487,14 @@ export default class PublicData extends React.Component {
     return (
       <div
         className={styles.wrapper}
-        style={{
-          height: "99%",
-          position: "absolute",
-        }}
+        // style={{
+        //   height: "99%",
+        //   position: "absolute",
+        // }}
       >
         <div
           className={globalStyle.autoScrollY}
-          style={{ height: "calc(88% - 50px)" }}
+          style={{ height: "calc(99% - 50px)" }}
         >
           {this.state.publicDataTree.length > 0 ? (
             <Tree
