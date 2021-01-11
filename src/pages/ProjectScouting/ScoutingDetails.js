@@ -263,6 +263,36 @@ export default class ScoutingDetails extends PureComponent {
                 });
                 data.collection = tmpList;
               }
+              if (selectedStars.length) {
+                let collection = data.collection;
+                let tmpList = [];
+                for (let i = 0; i < collection.length; i++) {
+                  // let n = Math.floor(Math.random() * collection.length);
+                  let selectedStar = selectedStars.filter((itemx) => {
+                    return itemx.name === collection[i].star;
+                  });
+                  if (selectedStar && selectedStar.length > 0) {
+                    tmpList.push(collection[i]);
+                  }
+                }
+                data.collection = tmpList;
+                tmpArr = tmpList;
+              }
+              if (selectedBrands.length > 0) {
+                let collection = data.collection;
+                let tmpList = [];
+                for (let i = 0; i < collection.length; i++) {
+                  // let n = Math.floor(Math.random() * collection.length);
+                  let selectedBrand = selectedBrands.filter((itemx) => {
+                    return itemx.name === collection[i].brand;
+                  });
+                  if (selectedBrand && selectedBrand.length > 0) {
+                    tmpList.push(collection[i]);
+                  }
+                }
+                data.collection = tmpList;
+                tmpArr = tmpList;
+              }
             }
             tmpAreaList.push(data);
           });
@@ -276,6 +306,7 @@ export default class ScoutingDetails extends PureComponent {
             area_list: tmpAreaList,
             not_area_id_collection: tmpNotAreaIdCollection,
           });
+          tmpArr = tmpAreaList.filter((item) => item.id === area_active_key)[0].collection;
         } else {
           this.codeType = val.type;
           this.code = val.code;
@@ -447,7 +478,10 @@ export default class ScoutingDetails extends PureComponent {
         let coords = feature.getGeometry().getCoordinates();
         coords = TransformCoordinate(coords, "EPSG:3857", "EPSG:4326");
         Evt.firEvent("HouseDetailGetPoi", coords.join(","));
-        if (!this.tempProjectId.includes(this.props.projectId)) {
+        if (
+          !this.tempProjectId.includes(this.props.projectId) ||
+          !feature.get("meetingRoom")
+        ) {
           dispatch({
             type: "collectionDetail/updateDatas",
             payload: { selectPoi: coords.join(",") },
@@ -455,13 +489,16 @@ export default class ScoutingDetails extends PureComponent {
         }
       }
       collection.properties_map = properties;
-      if (!this.tempProjectId.includes(this.props.projectId)) {
+      if (
+        !this.tempProjectId.includes(this.props.projectId) ||
+        !feature.get("meetingRoom")
+      ) {
         dispatch({
           type: "collectionDetail/updateDatas",
           payload: {
             selectData: collection,
             type: "edit",
-            isImg: false,
+            isImg: feature.get("pointType") === "pic" ? true : false,
             selectedFeature: feature,
           },
         });
@@ -847,11 +884,21 @@ export default class ScoutingDetails extends PureComponent {
     let params = {
       board_id: this.state.current_board.board_id,
     };
+    let stars = ["经济型", "一星级", "二星级", "三星级", "四星级", "五星级"];
+    let brands = ["维也纳"];
     // 发起请求后，取消轮询
     Action.clearListen();
     // 再开始轮询--优化轮询机制
     Action.getCollectionList(params).then((res) => {
       let data = res.data.sort((a, b) => a.sort - b.sort);
+      data = data.map((item) => {
+        let ramdomIndex = Math.round(Math.random() * stars.length);
+        item.star = stars[ramdomIndex];
+        if (item.title.includes(brands[0])) {
+          item.brand = brands[0];
+        }
+        return item;
+      });
       // 轮询中，加入对比更新机制
       Action.oldData = data;
       // 将重组后的数据更新,保存没有关联区域的数据
@@ -904,6 +951,12 @@ export default class ScoutingDetails extends PureComponent {
         tmpNotAreaIdCollection
       );
     }
+    dispatch({
+      type: "lengedList/updateLengedList",
+      payload: {
+        config: [],
+      },
+    });
     this.setState(
       {
         all_collection: data,
@@ -2693,6 +2746,13 @@ export default class ScoutingDetails extends PureComponent {
                         isEdit: false,
                         notAreaIdSelections: [],
                         selections: [],
+                      });
+                      // Event.Evt.firEvent("updateMeetingRoom", []);
+                      dispatch({
+                        type: "meetingSubscribe/updateData",
+                        payload: {
+                          panelVisible: false,
+                        },
                       });
                     }}
                     size="small"

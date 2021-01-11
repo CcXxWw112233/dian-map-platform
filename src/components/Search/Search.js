@@ -342,7 +342,7 @@ export default class Search extends React.Component {
             onChange={this.handleSearchInputChange}
             onFocus={this.onSearchFocus}
             suffix={
-              this.tempProjectId.includes(this.props.projectId) ? suffix : <></>
+              this.tempProjectId.includes(this.props.projectId) && this.props.inProject ? suffix : <></>
             }
           />
         </Dropdown>

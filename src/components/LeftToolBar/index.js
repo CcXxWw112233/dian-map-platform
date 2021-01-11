@@ -64,6 +64,16 @@ export default class LeftToolBar extends React.Component {
     this.projectRef = null;
     this.returnPanel = null;
     this.isGeojsonMifyIcon = false;
+
+    this.selectedAreas = [];
+    this.selectedBrands = [];
+    this.keywordState = ""
+    this.selectedStarKeys = [];
+    this.personNum = 20;
+    this.lowerLimitPrice = 0;
+    this.upperLimitPrice = 1000;
+    this.rangeTime = []
+
     this.getPersonalPermission();
     Event.Evt.on("displayAdvancedSearchPanel", () => {
       this.setState({
@@ -333,7 +343,7 @@ export default class LeftToolBar extends React.Component {
             projectPermission={this.state.projectPermission}
           ></Project>
           {this.state.displayAdvancedSearch ? (
-            <AdvancedSearch></AdvancedSearch>
+            <AdvancedSearch parent={this}></AdvancedSearch>
           ) : null}
           {this.state.displayPlot ? (
             <Plot

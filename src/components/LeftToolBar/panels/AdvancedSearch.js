@@ -227,6 +227,9 @@ const BrandPanel = ({ x, y, parent }) => {
       <div className={floatPanelStyles.footer}>
         <Button
           style={{ color: "#5A86F5", background: "#F5F7FB", marginRight: 16 }}
+          onClick={() => {
+            setSelectedTag([]);
+          }}
         >
           清空
         </Button>
@@ -266,11 +269,26 @@ export default class AdvancedSeach extends React.Component {
       upperLimitPrice: 1000,
       selectedStarKeys: [],
       selectedBrands: [],
+      rangeTime: [],
     };
     this.selectedAreaCodes = [];
     this.selectedBrandKeys = [];
     this.selectedBrands = [];
     this.selectStars = [];
+  }
+
+  componentDidMount() {
+    const { parent } = this.props;
+    this.setState({
+      selectedAreas: parent.selectedAreas,
+      selectedBrands: parent.selectedBrands,
+      keywordState: parent.keywordState,
+      selectedStarKeys: parent.selectedStarKeys,
+      personNum: parent.personNum,
+      lowerLimitPrice: parent.lowerLimitPrice,
+      upperLimitPrice: parent.upperLimitPrice,
+      rangeTime: parent.rangeTime,
+    });
   }
   updateSelectedArea = (selectedAreaCodes) => {
     this.selectedAreaCodes = selectedAreaCodes;
@@ -280,6 +298,8 @@ export default class AdvancedSeach extends React.Component {
     this.setState({
       selectedAreas: selectedAreas,
     });
+    const { parent } = this.props;
+    parent.selectedAreas = selectedAreas;
   };
   updateSelectedBrand = (brandKeys) => {
     this.selectedBrandKeys = brandKeys;
@@ -289,6 +309,8 @@ export default class AdvancedSeach extends React.Component {
     this.setState({
       selectedBrands: selectedBrands,
     });
+    const { parent } = this.props;
+    parent.selectedBrands = selectedBrands;
   };
   handleSelectClick = (e, type) => {
     if (type === 0) {
@@ -356,6 +378,8 @@ export default class AdvancedSeach extends React.Component {
         this.setState({
           lowerLimitPrice: num,
         });
+        const { parent } = this.props;
+        parent.lowerLimitPrice = num;
       } else {
         message.warn("最小价格应小于最大价格。");
       }
@@ -369,6 +393,8 @@ export default class AdvancedSeach extends React.Component {
         this.setState({
           upperLimitPrice: num,
         });
+        const { parent } = this.props;
+        parent.upperLimitPrice = num;
       } else {
         message.warn("最大价格应大于最小价格。");
       }
@@ -377,6 +403,7 @@ export default class AdvancedSeach extends React.Component {
 
   clearAll = () => {
     this.setState({
+      keywordState: "",
       showAreaPanel: false,
       showBrandPanel: false,
       areaPanelX: null,
@@ -384,10 +411,22 @@ export default class AdvancedSeach extends React.Component {
       brandPanelX: null,
       brandPanelY: null,
       selectedAreas: [],
+      selectedBrands: [],
+      selectedStarKeys: [],
       personNum: 20,
       lowerLimitPrice: 0,
       upperLimitPrice: 1000,
+      rangeTime: [],
     });
+    const { parent } = this.props;
+    parent.selectedAreas = [];
+    parent.selectedBrands = [];
+    parent.keywordState = "";
+    parent.selectedStarKeys = [];
+    parent.personNum = 20;
+    parent.lowerLimitPrice = 0;
+    parent.upperLimitPrice = 1000;
+    parent.rangeTime = [];
   };
 
   handleStarClick = (key) => {
@@ -409,11 +448,22 @@ export default class AdvancedSeach extends React.Component {
     this.setState({
       selectedStarKeys: selectedStarKeys,
     });
+    const { parent } = this.props;
+    parent.selectedStarKeys = selectedStarKeys;
   };
   onKeywordChange = (value) => {
     this.setState({
       keywordState: value,
     });
+    const { parent } = this.props;
+    parent.keywordState = value;
+  };
+  onTimeRangeChange = (dates) => {
+    this.setState({
+      rangeTime: dates,
+    });
+    const { parent } = this.props;
+    parent.rangeTime = dates;
   };
   render() {
     return (
@@ -440,7 +490,12 @@ export default class AdvancedSeach extends React.Component {
               <span>日期/时间</span>
             </p>
             <div className={styles.content}>
-              <RangePicker locale={locale} Fstyle={{ with: "100%" }} />
+              <RangePicker
+                locale={locale}
+                value={this.state.rangeTime}
+                onChange={this.onTimeRangeChange}
+                Fstyle={{ with: "100%" }}
+              />
             </div>
           </div>
           <div className={styles.block}>

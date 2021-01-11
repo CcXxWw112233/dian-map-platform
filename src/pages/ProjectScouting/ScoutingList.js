@@ -92,18 +92,19 @@ export default class ScoutingList extends PureComponent {
     return new Promise((resolve, reject) => {
       Action.getList()
         .then((res) => {
+          let data = res.data.reverse();
           this.setState({
-            projects: res.data.reverse(),
+            projects: data,
           });
-          this.projectDatas = res.data.reverse();
+          this.projectDatas = data;
           dispatch({
             type: "scoutingProject/updateList",
             payload: {
-              projectList: res.data.reverse(),
+              projectList: data,
               cb: this.handleClick.bind(this),
             },
           });
-          resolve(res.data.reverse());
+          resolve(data);
           // console.log(res)
         })
         .catch((err) => {

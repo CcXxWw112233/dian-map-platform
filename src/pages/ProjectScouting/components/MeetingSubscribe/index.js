@@ -17,22 +17,7 @@ export default class MeetingSubscribe extends React.Component {
     super(props);
     this.state = {
       showModal: false,
-      meetingRooms: [
-        {
-          hotelName: "深圳皇冠假日酒店1",
-          pic:
-            "https://dian-yinyi-map-test-public.oss-cn-beijing.aliyuncs.com/2021-01-06/379d1415859d4b959ed89e57b8b8369b.jpg",
-          star: 5,
-          free: Math.round(Math.random() * 3 + 1),
-        },
-        {
-          hotelName: "深圳皇冠假日酒店2",
-          pic:
-            "https://dian-yinyi-map-test-public.oss-cn-beijing.aliyuncs.com/2021-01-06/379d1415859d4b959ed89e57b8b8369b.jpg",
-          star: 5,
-          free: Math.round(Math.random() * 3 + 1),
-        },
-      ],
+      meetingRooms: [],
       checkedArr: [],
     };
     Event.Evt.on("updateMeetingRoom", (arr) => {
