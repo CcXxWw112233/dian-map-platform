@@ -25,12 +25,46 @@
       height: 56px;
       border-radius: 28px;
       background: rgba(122, 122, 122, 0.2);
+      margin-right: 12px;
     }
     .info {
+      flex: 1;
       display: flex;
       flex-direction: column;
-      margin-left: 12px;
       padding: 8px 0;
+      width: 100%;
+      .info_name {
+        text-align: left;
+      }
+      .info_operate {
+        display: flex;
+        justify-content: space-between;
+        cursor: pointer;
+        .info_operate_org {
+          flex: 1;
+          // margin-right: 16px;
+          text-align: left;
+          display: flex;
+          .info_operate_org_name {
+            // flex: 1;
+            max-width: 150px;
+            display: inline-block;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+          }
+          .info_operate_org_icon {
+            width: 20px;
+            line-height: 20px;
+          }
+        }
+        .info_operate_logout {
+          color: #3da2ff;
+        }
+        .info_operate_logout:hover {
+          color: #6a9aff;
+        }
+      }
     }
   }
   .title {

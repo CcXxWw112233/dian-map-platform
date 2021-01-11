@@ -8,7 +8,7 @@ require("polyfill");
 
 // 1. Initialize
 const app = dva({
-  history: createHistory(),
+  // history: createHistory(),
 });
 
 // 2. Plugins
@@ -16,6 +16,7 @@ const app = dva({
 
 // 3. Model
 // app.model(require('./models/example').default);
+app.model(require("./models/user").default);
 app.model(require("./models/maps").default);
 app.model(require("./models/overlay").default);
 app.model(require("./models/controller").default);

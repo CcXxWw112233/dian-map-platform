@@ -33,8 +33,7 @@ const getBaseUrl = () => {
   // console.log(process.env);
   if(NODE_ENV === 'development'){
     return {
-      // BASE_URL:"http://maptest.new-di.com",
-      BASE_URL:"http://test.lingxi.new-di.com",
+      BASE_URL:"http://maptest.new-di.com",
       API_URL: '/dian_map',
       // Geo_WFS:"http://localhost:8080/geoserver/wfs",
       Geo_WFS:"https://map.di-an.com/geoserver/wfs",
@@ -52,5 +51,8 @@ const getBaseUrl = () => {
 }
 
 const BASIC = getBaseUrl();
+const REQUEST_UPMS = `/upms`; //用户信息接口
+const REQUEST_INTERGFACE_VERSION = "/v2"; //接口版本
 
-export { BASIC }
+
+export { BASIC, REQUEST_UPMS, REQUEST_INTERGFACE_VERSION }

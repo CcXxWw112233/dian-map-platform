@@ -271,7 +271,7 @@ export default class ToolBar extends React.Component {
             this.props.isInvalidToolBar ? "invalid" : ""
           }`}
           style={{
-            ...this.parent.getStyle("map:board:role:manage", "org"),
+            // ...this.parent.getStyle("map:board:role:manage", "org"),
             ...{ background: "#fff" },
           }}
           disabled={this.parent.getDisabled("map:board:role:manage", "org")}

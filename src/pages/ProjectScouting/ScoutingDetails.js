@@ -12,9 +12,9 @@ import {
   Tabs,
   Button,
   message,
-  Space,
+  // Space,
   // Popover,
-  Empty,
+  // Empty,
   Popconfirm,
   Checkbox,
   Dropdown,
@@ -26,6 +26,8 @@ import {
   // Input,
   // InputNumber,
 } from "antd";
+import Space from "../../components/Space";
+import Empty from "../../components/Empty";
 import { PlusCircleOutlined, CaretRightOutlined } from "@ant-design/icons";
 import Event from "../../lib/utils/event";
 import AudioControl from "./components/audioPlayControl";
@@ -46,6 +48,7 @@ import LookingBack from "./components/LookingBack";
 import mapApp from "../../utils/INITMAP";
 
 import { CSSTransition } from "react-transition-group";
+import { Icon } from 'antd'
 import Axios from "axios";
 import { BASIC } from "../../services/config";
 import AboutAction from "../../lib/components/ProjectScouting/AroundAbout";
@@ -54,6 +57,7 @@ import PublicDataTreeComponent from "./components/PublicDataTreeComponent";
 import Plan from "./components/Plan";
 import { TransformCoordinate } from "../../lib/utils";
 import geojsonResource from "../../services/geojsonResource";
+import Cookies from 'js-cookie'
 
 const { Evt } = Event;
 const { TabPane } = Tabs;
@@ -66,6 +70,7 @@ const { TabPane } = Tabs;
     collectionDetail: { selectData, showCollectionsModal },
     meetingSubscribe: { hotelNames },
     permission: { projectId },
+    user: { currentOrganizeId }
   }) => ({
     mainVisible,
     lastPageState,
@@ -75,6 +80,7 @@ const { TabPane } = Tabs;
     showCollectionsModal,
     hotelNames,
     projectId,
+    currentOrganizeId
   })
 )
 export default class ScoutingDetails extends PureComponent {
@@ -186,6 +192,11 @@ export default class ScoutingDetails extends PureComponent {
       "地籍地貌",
     ];
     this.tempProjectId = ["1340591617840648192"];
+  }
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.currentOrganizeId !== this.props.currentOrganizeId) {
+      this.handleGoBackClick()
+    }
   }
   componentDidMount() {
     this.isGoBack = false;
@@ -1522,7 +1533,7 @@ export default class ScoutingDetails extends PureComponent {
           formdata.append("transparency", param.transparency);
           formdata.append("coord_sys_type", param.coord_sys_type);
           let saved = await Axios.post(`/api/map/ght/${val.id}`, formdata, {
-            headers: { Authorization: BASIC.getUrlParam.token },
+            headers: { Authorization: Cookies.get('Authorization') },
           });
 
           await Action.editCollection({
@@ -2447,7 +2458,7 @@ export default class ScoutingDetails extends PureComponent {
                 activeKey={this.state.area_active_key}
                 expandIconPosition="left"
                 expandIcon={({ isActive }) => (
-                  <CaretRightOutlined rotate={isActive ? 90 : 0} />
+                  <Icon type="caret-right" CaretRightOutlined rotate={isActive ? 90 : 0} />
                 )}
               >
                 {area_list.map((item, index) => {
@@ -2658,7 +2669,7 @@ export default class ScoutingDetails extends PureComponent {
                   <Button
                     type="primary"
                     ghost
-                    icon={<PlusCircleOutlined />}
+                    icon={<Icon type="plus-circle" PlusCircleOutlined />}
                     onClick={this.pushAreaItem}
                     size="small"
                     style={{

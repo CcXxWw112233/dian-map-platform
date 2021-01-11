@@ -4,6 +4,7 @@ import { message, Modal, Select } from "antd";
 import SoutingAction from "../../../src/services/scouting";
 import ScoutDetail from "../../lib/components/ProjectScouting/ScoutingDetail";
 import publicData from "../../services/publicData";
+import { getSessionOrgId } from "../../utils/sessionData";
 
 export default class MyModal extends react.Component {
   constructor(props) {
@@ -18,7 +19,7 @@ export default class MyModal extends react.Component {
   }
 
   componentDidMount() {
-    const orgId = SoutingAction.getUrlParam.orgId;
+    const orgId = getSessionOrgId();
     SoutingAction.GET_SCOUTING_LIST(orgId).then((res) => {
       if (res.code === "0") {
         this.setState({
