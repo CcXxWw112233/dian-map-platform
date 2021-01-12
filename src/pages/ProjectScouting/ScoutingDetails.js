@@ -185,7 +185,7 @@ export default class ScoutingDetails extends PureComponent {
       "农林耕地",
       "地籍地貌",
     ];
-    this.tempProjectId = ["1340591617840648192"];
+    this.tempProjectId = ["1340591617840648192","1348802078218260480"];
   }
   componentDidMount() {
     this.isGoBack = false;
