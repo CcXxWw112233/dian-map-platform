@@ -185,7 +185,7 @@ export default class ScoutingDetails extends PureComponent {
       "农林耕地",
       "地籍地貌",
     ];
-    this.tempProjectId = ["1340591617840648192","1348802078218260480"];
+    this.tempProjectId = ["1340591617840648192", "1348802078218260480"];
   }
   componentDidMount() {
     this.isGoBack = false;
@@ -204,6 +204,27 @@ export default class ScoutingDetails extends PureComponent {
         area_active_key: "other",
       });
       this.fetchCollection();
+    });
+    Event.Evt.on("updateProjectCollection", (data) => {
+      let { area_list: areaList, area_active_key: areaActiveKey } = this.state;
+      let currentGroup = [];
+      if (areaActiveKey !== "other") {
+        currentGroup = areaList.filter((item) => {
+          return item.id === areaActiveKey;
+        });
+      }
+      if (currentGroup.length) {
+        currentGroup[0].collection = data;
+      }
+      const { config: lenged, dispatch, showFeatureName } = this.props;
+      Action.renderCollection(data || [], {
+        lenged,
+        dispatch,
+        showFeatureName,
+      });
+      this.setState({
+        area_list: areaList,
+      });
     });
     Event.Evt.on("searchProjectData", (val) => {
       if (this.state.activeKey !== "1") return;
@@ -306,7 +327,8 @@ export default class ScoutingDetails extends PureComponent {
             area_list: tmpAreaList,
             not_area_id_collection: tmpNotAreaIdCollection,
           });
-          tmpArr = tmpAreaList.filter((item) => item.id === area_active_key)[0].collection;
+          tmpArr = tmpAreaList.filter((item) => item.id === area_active_key)[0]
+            .collection;
         } else {
           this.codeType = val.type;
           this.code = val.code;
@@ -892,8 +914,7 @@ export default class ScoutingDetails extends PureComponent {
     Action.getCollectionList(params).then((res) => {
       let data = res.data.sort((a, b) => a.sort - b.sort);
       data = data.map((item) => {
-        let ramdomIndex = Math.round(Math.random() * stars.length);
-        item.star = stars[ramdomIndex];
+        item.star = stars[Math.round(Math.random() * stars.length)];
         if (item.title.includes(brands[0])) {
           item.brand = brands[0];
         }
