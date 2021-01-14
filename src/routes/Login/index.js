@@ -65,6 +65,8 @@ export default class Index extends Component {
       <div className={styles.container}>
         <LoginPackge
           request_prefix={REQUEST_PREFIX + ""}
+          platformName="隐翼地图"
+          // platformLogoImg={require("../../assets/img/chengshi.png")}
           onEntryLogin={this.loginSuccess}
           beforeEntryLogin={this.onLoginStart}
           handleChangePassword={this.handleChangePassword}
