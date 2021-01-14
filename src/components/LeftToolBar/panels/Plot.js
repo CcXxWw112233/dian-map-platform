@@ -261,6 +261,25 @@ export default class Plot extends PureComponent {
     this.plotLayer = plotEdit.getPlottingLayer();
     const me = this;
     const { parent } = this.props;
+    ListAction.checkItem()
+      .then((res) => {
+        if (res) {
+          // 选择项目后
+          if (res.code === 0) {
+            me.projectId = res.data.board_id;
+            me.projectName = res.data.board_name;
+          } else {
+            // 未选择项目
+            me.projectId = "";
+            me.projectName = "";
+          }
+        }
+      })
+      .catch((e) => {
+        // 未选择项目
+        me.projectId = "";
+        me.projectName = "";
+      });
     Event.Evt.firEvent("setAttribute", {
       saveCb: this.handleSaveClick.bind(this),
       delCb: this.updatePlotList.bind(this),
@@ -378,9 +397,23 @@ export default class Plot extends PureComponent {
     }
     Event.Evt.on("resolveGeojson", (obj) => {
       // loadGeoJson(this, name);
-      loadExcel(this, obj).then(res => {
-        Event.Evt.firEvent("updateProjectCollection", res)
-      })
+      loadExcel(this, obj).then((res) => {
+        // let promise = res.map((item) => {
+        //   let newItem = {
+        //     collect_type: item.collect_type,
+        //     title: item.title,
+        //     target: item.target,
+        //     area_type_id:
+        //       window.ProjectGroupId === "other" ? "" : window.ProjectGroupId,
+        //     board_id: this.projectId,
+        //     districtcode: item.districtcode,
+        //     content: item.content,
+        //   };
+        //   return DetailAction.addCollection(newItem);
+        // });
+        // Promise.all(promise).then((resp) => {});
+        Event.Evt.firEvent("updateProjectCollection", res);
+      });
     });
   }
   componentWillUnmount() {
@@ -686,7 +719,6 @@ export default class Plot extends PureComponent {
     if (parent.isModifyPlot === false) {
       const { parent } = this.props;
       if (parent.isGeojsonMifyIcon) {
-
       } else {
         let drawing = plotEdit.create(
           this.plotDic[this.nextProps?.plotType || this.props.plotType]
