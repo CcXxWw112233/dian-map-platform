@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { Fragment } from "react";
 
 export default class index extends Component {
   setSize = () => {
@@ -25,11 +26,24 @@ export default class index extends Component {
   render() {
     const { children } = this.props;
     return (
-      <>
+      <Fragment>
         {React.Children.map(children, child => {
-          return child;
+          let childrenWithProps = null;
+          if (child) {
+            childrenWithProps = React.cloneElement(child, {
+              ...child.props
+            });
+          }
+          return (
+            <div style={{ marginLeft: this.setSize(), display:"inline-block"}}
+              {...this.props.style}
+              {...this.props.className}
+            >
+              {childrenWithProps}
+            </div>
+          )
         })}
-      </>
+      </Fragment>
     );
   }
 }

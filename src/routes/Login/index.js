@@ -64,6 +64,7 @@ export default class Index extends Component {
     return (
       <div className={styles.container}>
         <LoginPackge
+          closableWechat={ true }
           request_prefix={REQUEST_PREFIX + ""}
           platformName="隐翼地图"
           // platformLogoImg={require("../../assets/img/chengshi.png")}

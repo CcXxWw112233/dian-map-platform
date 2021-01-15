@@ -2730,14 +2730,14 @@ export default class ScoutingDetails extends PureComponent {
                   </Button>
                 </Space>
               ) : (
-                <Space style={{ paddingBottom: 10 }}>
+                <Space>
                   <Dropdown
                     trigger="click"
                     visible={this.state.showMoreAction}
                     onVisibleChange={(val) =>
                       this.setState({ showMoreAction: val })
                     }
-                    overlay={() => this.MultipleMenus()}
+                    overlay={this.MultipleMenus()}
                   >
                     <Button
                       type="primary"

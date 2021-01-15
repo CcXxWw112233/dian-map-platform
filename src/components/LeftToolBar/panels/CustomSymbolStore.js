@@ -287,7 +287,7 @@ export default class CustomSymbolStore extends React.Component {
                       onClick={() => this.setRemoveKey(item.id)}
                     >
                       <div className={styles.iconItem_img}>
-                        <img crossOrigin="anonymous" src={item.icon_url} alt="" />
+                        <img src={item.icon_url} alt="" />
                       </div>
                       <div className={styles.iconItem_name}>
                         {item.icon_name || "unkown"}
