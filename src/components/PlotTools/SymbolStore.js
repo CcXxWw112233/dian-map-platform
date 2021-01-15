@@ -12,6 +12,7 @@ import { formatSize } from "../../utils/utils";
 import { BASIC } from "../../services/config";
 import Cookies from 'js-cookie'
 import { getSessionOrgId } from "../../utils/sessionData";
+import { MAP_REQUEST_URL } from '../../services/config'
 
 const { Panel } = Collapse;
 export default class SymbolStore extends Component {
@@ -349,7 +350,7 @@ export default class SymbolStore extends Component {
               </div>
               <div style={{ width: "100%", height: 40, display: "flex" }}>
                 <Upload
-                  action="/api/map/icon"
+                  action={`${MAP_REQUEST_URL}/map/icon`}
                   accept=".jpg, .jpeg, .png, .bmp"
                   data={{
                     icon_name: this.state.uploadSymbolName,

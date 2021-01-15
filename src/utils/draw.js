@@ -3,7 +3,7 @@ import FeatureOperatorEvent from "./plot2ol/src/events/FeatureOperatorEvent";
 import mapApp from "./INITMAP";
 import { request } from "../services/index";
 import { config } from "./customConfig";
-import { BASIC } from "../services/config";
+import { BASIC, MAP_REQUEST_URL } from "../services/config";
 import Event from "../lib/utils/event";
 // import Overlay from 'ol/Overlay'
 // import * as DomUtils from './plot2ol/util/dom_util'
@@ -133,7 +133,7 @@ export const draw = {
           },
         });
       } else {
-        const url = `${this.baseUrl}/api/map/dict/${this.currentId}/mark`;
+        const url = `${this.baseUrl}${MAP_REQUEST_URL}/map/dict/${this.currentId}/mark`;
         request("GET", url).then((res) => {
           // 葛根
           if (this.type === "POLYGON" || this.type === "FREEHANDPOLYGON") {

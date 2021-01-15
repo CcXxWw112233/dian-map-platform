@@ -35,7 +35,7 @@ import {
 } from "@ant-design/icons";
 import { Icon } from 'antd'
 
-import { BASIC } from "../../../services/config";
+import { BASIC, MAP_REQUEST_URL } from "../../../services/config";
 import Event from "../../../lib/utils/event";
 import mapApp from "../../../utils/INITMAP";
 import { DefaultUpload } from "../../../utils/XhrUploadFile";
@@ -59,7 +59,7 @@ const { Panel } = Collapse;
 export const UploadBgPic = ({ children, onUpload, onStart }) => {
   return (
     <Upload
-      action="/api/map/file/upload/public"
+      action={`${MAP_REQUEST_URL}/map/file/upload/public`}
       showUploadList={false}
       accept=".jpg, .jpeg, .png, .bmp"
       beforeUpload={() => {
@@ -343,7 +343,7 @@ const UploadBtn = ({ onChange, parentTool, boardId }) => {
   // }
   return (
     <Upload
-      action="/api/map/file/upload"
+      action={`${MAP_REQUEST_URL}i/map/file/upload`}
       beforeUpload={checkFileSize}
       multiple
       headers={{ Authorization: Cookies.get('Authorization') }}
@@ -400,7 +400,7 @@ const Upload360PicBtn = ({
   // }
   return (
     <Upload
-      action="/api/map/file/upload"
+      action={`${MAP_REQUEST_URL}/map/file/upload`}
       accept=".jpg, .jpeg, .png, .bmp, .mp4, .avi, .wmv"
       beforeUpload={checkFileSize360Pic}
       headers={{ Authorization: Cookies.get('Authorization') }}
@@ -465,7 +465,7 @@ export const ScoutingHeader = (props) => {
   let [transparency, setTransparency] = useState("1");
   let [transformFile, setTransformFile] = useState(null);
   // let [ saveData, setSaveData ] = useState();
-  let [uploadUrl, setUploadUrl] = useState(`/api/map/ght/${data.id}`);
+  let [uploadUrl, setUploadUrl] = useState(`${MAP_REQUEST_URL}/map/ght/${data.id}`);
   // 保存事件
   const saveItem = () => {
     onSave && onSave(areaName);
@@ -1591,7 +1591,7 @@ export const UploadItem = ({
                 // style={{ color: "#1769FF" }}
                 onClick={(e) => e.stopPropagation()}
               >
-                <MyIcon type="icon-gengduo2" />
+                <MyIcon type="icon-gengduo1" />
               </span>
             </Dropdown>
           ) : (

@@ -1,4 +1,5 @@
 import code from './responseCode'
+export const MAP_REQUEST_URL = "/dian_map";
 const getBaseUrl = () => {
   const config = {
     // 获取url传递的参数
@@ -34,7 +35,7 @@ const getBaseUrl = () => {
   if(NODE_ENV === 'development'){
     return {
       BASE_URL:"http://maptest.new-di.com",
-      API_URL: '/dian_map',
+      API_URL: MAP_REQUEST_URL,
       // Geo_WFS:"http://localhost:8080/geoserver/wfs",
       Geo_WFS:"https://map.di-an.com/geoserver/wfs",
       ...config,
@@ -43,7 +44,7 @@ const getBaseUrl = () => {
   if(NODE_ENV === 'production'){
     return {
       BASE_URL:"https://map.di-an.com",
-      API_URL: '/dian_map',
+      API_URL: MAP_REQUEST_URL,
       Geo_WFS:"https://map.di-an.com/geoserver/wfs",
       ...config,
     }
