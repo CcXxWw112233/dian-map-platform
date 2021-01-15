@@ -26,9 +26,9 @@ export default class Zoom extends React.Component {
   }
   componentDidMount() {
     this.defaultZoom = mapApp.map.getView().getZoom();
-    const zoomBtn = this.refs.zoomBtn
-    const zoomBtnRect = zoomBtn.getBoundingClientRect()
-    this.lastY = zoomBtnRect.y
+    const zoomBtn = this.refs.zoomBtn;
+    const zoomBtnRect = zoomBtn.getBoundingClientRect();
+    this.lastY = zoomBtnRect.y;
   }
   onMouseDown(e) {
     e.preventDefault();
@@ -38,9 +38,9 @@ export default class Zoom extends React.Component {
     this.startEvent = this.transfromClient(e);
   }
 
-  transfromClient = (client)=>{
-    return {x: client.clientX, y: client.clientY}
-  }
+  transfromClient = (client) => {
+    return { x: client.clientX, y: client.clientY };
+  };
 
   onMouseUp() {
     this.moving = false;
@@ -63,22 +63,22 @@ export default class Zoom extends React.Component {
 
     // console.log(this.startEvent.y - moveClient.y);
     // step 大于0 放大
-    if(Math.abs(this.state.translateY) >= 250  && step > 0){
-      return ;
+    if (Math.abs(this.state.translateY) >= 250 && step > 0) {
+      return;
     }
-    if(this.state.translateY >= 0 && step < 0){
-      return ;
+    if (this.state.translateY >= 0 && step < 0) {
+      return;
     }
     this.startEvent = moveClient;
     this.setState({
-      translateY: this.state.translateY + (-step)
-    })
+      translateY: this.state.translateY + -step,
+    });
 
     // step < 0 说明向下移动，是缩小， 反之
     let zoom = mapApp.map.getView().getZoom();
-    if(step > 0){
+    if (step > 0) {
       zoom += this.zoomPixo;
-    }else{
+    } else {
       zoom -= this.zoomPixo;
     }
     mapApp.map.getView().setZoom(zoom);
@@ -122,15 +122,40 @@ export default class Zoom extends React.Component {
   }
 
   render() {
+    let newStyle = {};
+    let flag = false;
+    // newStyle = {
+    //   transform: "translateY(-310px)",
+    // };
+    if (this.props.parent.state.lengedListPanelVisible) {
+      flag = true;
+    }
+    if (this.props.parent.state.POIPanelVisible) {
+      flag = true;
+    }
+    if (flag) {
+      newStyle = {
+        transform: "translateY(-310px)",
+      };
+      // if (this.props.parent.state.showToolBox) {
+      //   newStyle = {
+      //     transform: "translateY(-270px))",
+      //   };
+      // } else {
+      //   newStyle = {
+      //     transform: "translateY(-310px)",
+      //   };
+      // }
+    }
     const style = this.state.showSlider ? { display: "" } : { display: "none" };
     return (
-      <div className={styles.wrapper}>
-        <div className={styles.slider} style={style}></div>
+      <div className={styles.wrapper} style={{ ...newStyle }}>
+        <div className={styles.slider} style={{ ...style }}></div>
         <div
           className={styles.btn}
           style={{
-            userSelect:'none',
-            touchAction:"none",
+            userSelect: "none",
+            touchAction: "none",
             transform: `translateY(${this.state.translateY}px)`,
           }}
           ref="zoomBtn"
@@ -146,13 +171,14 @@ export default class Zoom extends React.Component {
               this.setState({
                 showSlider: false,
               });
-            }else{
+            } else {
               // this.onMouseUp(e)
             }
           }}
         >
           <i
             className={globalStyle.global_icon}
+            style={{ height: 30, marginTop: 16 }}
             onClick={() => {
               myZoomIn();
             }}
@@ -161,6 +187,7 @@ export default class Zoom extends React.Component {
           </i>
           <i
             className={globalStyle.global_icon}
+            style={{ height: 30 }}
             onClick={() => {
               myZoomOut();
             }}

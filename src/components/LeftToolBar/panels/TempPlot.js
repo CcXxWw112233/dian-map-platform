@@ -32,7 +32,7 @@ export default class TempPlot extends React.Component {
     parent.featureOperatorList.forEach((operator, index) => {
       let feature = operator.feature;
       if (feature && feature.getGeometry()) {
-        feature.getGeometry().updatePlot(false);
+        feature.getGeometry().updatePlot && feature.getGeometry().updatePlot(false);
         newFeatureOperatorList.push(operator);
       }
     });
@@ -54,7 +54,7 @@ export default class TempPlot extends React.Component {
   componentWillUnmount() {
     plotEdit.deactivate();
     this.state.featureOperatorList.forEach((operator) => {
-      operator.feature.getGeometry().updatePlot(true);
+      operator.feature.getGeometry().updatePlot && operator.feature.getGeometry().updatePlot(true);
     });
   }
   onChange = (e) => {
@@ -133,13 +133,15 @@ export default class TempPlot extends React.Component {
     parent.hideTempPlotPanel();
   };
 
-  handleEditClick = (featureOperator) => {
+  handleEditClick = (e, featureOperator) => {
+    e.stopPropagation();
     const { parent } = this.props;
     parent.activeFeatureOperator = featureOperator;
-    this.props.displayPlotPanel(featureOperator.attrs, featureOperator);
+    this.props.displayPlotPanel(featureOperator.attrs, featureOperator, true);
   };
 
-  handleDelClick = (featureOperator) => {
+  handleDelClick = (e, featureOperator) => {
+    e.stopPropagation();
     if (featureOperator && featureOperator.guid) {
       let newList = [...this.state.featureOperatorList];
       const index = newList.findIndex((item) => {
@@ -248,7 +250,8 @@ export default class TempPlot extends React.Component {
     return list;
   };
 
-  handleRowClick = (featureOperator) => {
+  handleRowClick = (e, featureOperator) => {
+    e.stopPropagation();
     if (featureOperator && featureOperator.guid) {
       this.setState({
         selectedGuid: featureOperator.guid,
@@ -305,7 +308,7 @@ export default class TempPlot extends React.Component {
                         ? styles.active
                         : ""
                     }`}
-                    onClick={() => this.handleRowClick(featureOperator)}
+                    onClick={(e) => this.handleRowClick(e, featureOperator)}
                   >
                     <div
                       style={{
@@ -344,7 +347,9 @@ export default class TempPlot extends React.Component {
                           marginRight: 5,
                           color: "rgba(134,140,164,1)",
                         }}
-                        onClick={() => this.handleEditClick(featureOperator)}
+                        onClick={(e) =>
+                          this.handleEditClick(e, featureOperator)
+                        }
                       >
                         &#xe759;
                       </i>
@@ -354,7 +359,7 @@ export default class TempPlot extends React.Component {
                           fontSize: 18,
                           color: "rgba(134,140,164,1)",
                         }}
-                        onClick={() => this.handleDelClick(featureOperator)}
+                        onClick={(e) => this.handleDelClick(e, featureOperator)}
                       >
                         &#xe75a;
                       </i>

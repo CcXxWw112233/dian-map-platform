@@ -2,6 +2,7 @@ import { setSession } from "../../../utils/sessionManage";
 import listAction from "./ScoutingList";
 import PhotoSwipe from "../../../components/PhotoSwipe/action";
 import config from "../../../services/scouting";
+import geojsonResourceServices from "../../../services/geojsonResource";
 import { dateFormat, Different } from "../../../utils/utils";
 import { Pointer as PointerInteraction } from "ol/interaction";
 // import Select from 'ol/interaction/Select';
@@ -40,7 +41,11 @@ import { extend } from "ol/extent";
 import { always, never } from "ol/events/condition";
 import Event from "../../utils/event";
 import { message } from "antd";
-import { createPlottingFeature, createPopupOverlay } from "./createPlotting";
+import {
+  createPlottingFeature,
+  createPopupOverlay,
+  createFeatureOverlay,
+} from "./createPlotting";
 import { plotEdit } from "utils/plotEdit";
 import INITMAP from "../../../utils/INITMAP";
 import AboutAction from "./AroundAbout";
@@ -50,6 +55,13 @@ import Metting from "./meetting";
 import nProgress from "nprogress";
 import { getVectorContext } from "ol/render";
 import { Style, Circle, Stroke, Fill } from "ol/style";
+
+import totalOverlay from "../../../components/PublicOverlays/totalOverlay";
+import featureOverlay from "../../../components/PublicOverlays/featureOverlay";
+import throttle from "lodash/throttle";
+import { getPlotImages } from "./plotOverlayAction";
+import AnimateLine from "./AddAnimateLine";
+import { reject } from "lodash";
 
 function Action() {
   const {
@@ -70,9 +82,11 @@ function Action() {
     GET_DOWNLOAD_URL,
     EDIT_AREA_MESSAGE,
   } = config;
+  this.projectData = {}; // 保存项目数据，坐标
   this.activeFeature = {};
   this.layerId = "scoutingDetailLayer";
-  this.Layer = Layer({ id: this.layerId, zIndex: 40, declutter: true });
+  this.Layer = Layer({ id: this.layerId, zIndex: 40 });
+  // this.Layer = Layer({ id: this.layerId, zIndex: 40, declutter: true });
   this.Source = Source();
   this.features = [];
   this.overlays = [];
@@ -83,6 +97,35 @@ function Action() {
   this.geoFeatures = [];
   this.searchAroundCircle = null;
   this.searchPageIndex = 1;
+  this.overlayArr = [];
+  this.overlayArr2 = [];
+  this.featuresGroup = {};
+  this.pontsGroup = {};
+  this.isNeedMoveMapMoveedListen = false;
+  this.moveendListener = () => {};
+  this.changeFeatureTitleShowListener = () => {};
+  this.oldFeatures = null;
+  this.oldPonts = null;
+  this.oldLenged = null;
+  this.oldDispatch = null;
+  this.oldShowFeatureName = null;
+  this.oldZoom = null;
+  this.oldZoom2 = null;
+  this.oldPlotFeatures = null;
+  this.needRenderFetureStyle = true;
+  this.hasFeatureTotal = true;
+  this.featureOverlay2 = null;
+  this.selectedFeature = null;
+  this.lastSelectedFeature = null;
+  this.isCollectionTotal = false;
+  this.timeInterval = null;
+  this.hasMeetingRoom = null;
+  this.lastSelectedFeatureStyle = null;
+  this.geojsonData = {};
+  this.geojsonResources = {};
+  this.geojsonRenderData = {};
+  this.tabActivekey = "1";
+
   Event.Evt.addEventListener("basemapchange", (key) => {
     if (!this.mounted) return;
     if (InitMap.checkUpdateMapSystem(key)) {
@@ -160,8 +203,8 @@ function Action() {
     createStyle("Point", {
       icon: {
         src: isMulti
-          ? require("../../../assets/multiunselect.png")
-          : require("../../../assets/unselectlocation.png"),
+          ? require("../../../assets/multiselect.png")
+          : require("../../../assets/selectlocation.png"),
         crossOrigin: "anonymous",
         anchor: [0.5, 0.8],
       },
@@ -170,8 +213,8 @@ function Action() {
     createStyle("Point", {
       icon: {
         src: isMulti
-          ? require("../../../assets/multiselect.png")
-          : require("../../../assets/selectlocation.png"),
+          ? require("../../../assets/multiunselect.png")
+          : require("../../../assets/unselectlocation.png"),
         crossOrigin: "anonymous",
         anchor: [0.5, 0.8],
       },
@@ -185,7 +228,250 @@ function Action() {
       return TransformCoordinate(coor);
     }
   };
+
+  // 查询出该范围内的点的省市县code，
+  this.getCollectionTotal = (data, ponts, level) => {
+    const extent = InitMap.map.getView().calculateExtent(InitMap.map.getSize());
+    let coor1 = TransformCoordinate(
+      [extent[0], extent[1]],
+      "EPSG:3857",
+      "EPSG:4326"
+    );
+    let coor2 = TransformCoordinate(
+      [extent[2], extent[3]],
+      "EPSG:3857",
+      "EPSG:4326"
+    );
+    let minLon = coor1[0];
+    let maxLon = coor2[0];
+    let minLat = coor1[1];
+    let maxLat = coor2[1];
+    let totalObj = {};
+    let newwArr = [...data, ...ponts];
+    let propertyLonLat = "";
+    let propertyName = "";
+    let propertyCode = "";
+    if (level === 1) {
+      propertyLonLat = "province_lon_lat";
+      propertyName = "province_name";
+      propertyCode = "provincecode";
+    }
+    if (level === 2) {
+      propertyLonLat = "city_lon_lat";
+      propertyName = "city_name";
+      propertyCode = "citycode";
+    }
+    if (level === 3) {
+      propertyLonLat = "district_lon_lat";
+      propertyName = "district_name";
+      propertyCode = "districtcode";
+    }
+    newwArr.forEach((item) => {
+      if (item[propertyLonLat]) {
+        let lonlatArr = item[propertyLonLat].split(",");
+        if (
+          parseFloat(lonlatArr[0]) >= minLon &&
+          parseFloat(lonlatArr[0]) <= maxLon &&
+          parseFloat(lonlatArr[1]) >= minLat &&
+          parseFloat(lonlatArr[1]) <= maxLat
+        ) {
+          if (!totalObj[item[propertyCode]]) {
+            totalObj[item[propertyCode]] = {
+              name: item[propertyName],
+              total: 1,
+              lon: lonlatArr[0],
+              lat: lonlatArr[1],
+            };
+          } else {
+            totalObj[item[propertyCode]].total++;
+          }
+        }
+      }
+    });
+    return totalObj;
+  };
+
+  this.moveendCallBack = (
+    data,
+    ponts,
+    { lenged, dispatch, showFeatureName },
+    totalSwitch
+  ) => {
+    const zoom = InitMap.map.getView().getZoom();
+    let level = 3;
+    this.layer.projectScoutingArr.forEach((item) => {
+      this.layer.removeFeature(item);
+    });
+    const me = this;
+    me.overlayArr.forEach((item) => {
+      InitMap.map.removeOverlay(item);
+    });
+    me.overlayArr = [];
+    this.layer.plotEdit.removePlotOverlay2();
+    this.features.forEach((item) => {
+      if (this.Source.getFeatureByUid(item.ol_uid)) {
+        this.Source.removeFeature(item);
+      }
+    });
+    this.features = [];
+    if (zoom < 6) {
+      level = 1;
+    }
+    if (zoom >= 6 && zoom <= 9) {
+      level = 2;
+    }
+    if (zoom > 9 && zoom <= 14) {
+      level = 3;
+    }
+    if (zoom < 14) {
+      let totalObj = this.getCollectionTotal(data, ponts, level);
+      let keys = Object.keys(totalObj);
+      keys.forEach((item) => {
+        let coor = TransformCoordinate(
+          [totalObj[item].lon, totalObj[item].lat],
+          "EPSG:4326",
+          "EPSG:3857"
+        );
+        let ele = totalOverlay({
+          name: totalObj[item].name,
+          total: totalObj[item].total,
+          cb: function (e) {
+            if (zoom < 6) {
+              InitMap.map.getView().setZoom(9);
+            }
+            if (zoom >= 6 && zoom < 9) {
+              InitMap.map.getView().setZoom(13);
+            }
+            if (zoom >= 9 && zoom < 14) {
+              InitMap.map.getView().setZoom(14);
+            }
+            InitMap.map.getView().setCenter(coor);
+            if (level === 3) {
+              setTimeout(function () {
+                let currentAreaFeatures =
+                  me.features &&
+                  me.features.filter(
+                    (item2) => item2.get("districtcode") === item.code
+                  );
+                me.extentSource &&
+                  me.extentSource.addFeatures(currentAreaFeatures);
+                let { getUrlParam } = config;
+                let size = InitMap.map.getSize();
+                let flag = getUrlParam.isMobile === "1";
+                let obj = {
+                  size: flag ? size.map((item) => item / 2) : size,
+                  padding: !flag ? [200, 150, 80, 400] : [0, 0, 0, 0],
+                  nearest: true,
+                };
+                if (me.extentSource) {
+                  Fit(InitMap.view, me.extentSource.getExtent(), obj);
+                }
+              }, 100);
+            }
+          },
+        });
+        let newOverlay = createOverlay(ele);
+        newOverlay.setPosition(coor);
+        InitMap.map.addOverlay(newOverlay);
+        this.overlayArr.push(newOverlay);
+      });
+    } else {
+      // if (this.oldZoom2 !== zoom) {
+      this.renderFeaturesCollection(data, {
+        lenged,
+        dispatch,
+        showFeatureName: true,
+      });
+      let pointCollection = this.renderPointCollection(ponts);
+      this.overlayArr2.push(...pointCollection);
+      this.features.push(...pointCollection);
+      this.Source.addFeatures(pointCollection);
+      this.overlayArr.forEach((item) => {
+        InitMap.map.removeOverlay(item);
+      });
+      // }
+      this.changeLastSelectedFeatureStyle();
+      this.changeSelectedFeatureStyle();
+    }
+    this.oldZoom2 = JSON.parse(JSON.stringify(zoom));
+  };
+
+  this.removeFeatureOverlay = () => {
+    this.layer.plotEdit.removePlotOverlay2();
+    this.featureOverlay2 && InitMap.map.removeOverlay(this.featureOverlay2);
+    this.featureOverlay2 = null;
+    this.lastSelectedFeature = null;
+    this.selectedFeature = null;
+  };
+
+  this.mapMoveEnd = (data, ponts, { lenged, dispatch, showFeatureName }) => {
+    if (!data) {
+      return;
+    }
+    this.moveendCallBack(data, ponts, { lenged, dispatch, showFeatureName });
+    const me = this;
+    this.moveendListener = function (e) {
+      if (!me.isNeedMoveMapMoveedListen) {
+        this.moveendCallBack(data, ponts, {
+          lenged,
+          dispatch,
+          showFeatureName,
+        });
+      }
+    };
+    InitMap.map.on("moveend", (e) => this.moveendListener(e));
+    this.moveendListener = throttle(this.moveendListener, 1000);
+  };
+
+  this.changeLastSelectedFeatureStyle = () => {
+    this.lastSelectedFeature = this.selectedFeature;
+    if (this.lastSelectedFeature) {
+      let index = this.layer.projectScoutingArr.findIndex(
+        (item) => item.feature?.get("id") === this.lastSelectedFeature.get("id")
+      );
+      let lastSelectedFetureStyle = this.lastSelectedFeature.getStyle();
+      let image = this.getImage(false, this.lastSelectedFeature);
+      if (image) {
+        lastSelectedFetureStyle.setImage(
+          this.getImage(false, this.lastSelectedFeature)
+        );
+      }
+      if (index > -1 && image) {
+        this.layer.projectScoutingArr[index].feature.setStyle(
+          lastSelectedFetureStyle
+        );
+      }
+    }
+  };
+
+  this.changeSelectedFeatureStyle = (feature) => {
+    if (feature) {
+      let type = feature.getGeometry().getType();
+      if (type === "Point") {
+        this.selectedFeature = feature;
+      }
+    }
+    if (this.selectedFeature) {
+      let id = this.selectedFeature.get("id");
+      if (!id) {
+        return;
+      }
+      let index = this.layer.projectScoutingArr.findIndex(
+        (item) => item.feature && item.feature.get("id") === id
+      );
+      let selectedFetureStyle = this.selectedFeature.getStyle();
+
+      selectedFetureStyle.setImage(this.getImage(true));
+      if (index > -1) {
+        this.layer.projectScoutingArr[index].feature.setStyle(
+          selectedFetureStyle
+        );
+      }
+    }
+  };
+
   this.init = (dispatch) => {
+    // Event.Evt.firEvent("resetMoveMapMoveedListen");
     this.mounted = true;
     this.Layer.setSource(this.Source);
     const layers = InitMap.map.getLayers().getArray();
@@ -196,6 +482,7 @@ function Action() {
 
     if (!layer[0]) {
       InitMap.map.on("click", (evt) => {
+        this.featureOverlay2 && InitMap.map.removeOverlay(this.featureOverlay2);
         let obj = evt.map.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
           return { feature, layer };
         });
@@ -213,8 +500,124 @@ function Action() {
           }
         }
       });
+      const me = this;
+      this.changeFeatureTitleShowListener = function (e) {
+        if (me.hasFeatureTotal) {
+          if (me.oldPlotFeatures) {
+            if (!me.needRenderFetureStyle) return;
+            let zoom = InitMap.map.getView().getZoom();
+            let obj = {
+              lenged: me.oldLenged,
+              dispatch: me.oldDispatch,
+              showFeatureName: true,
+            };
+            if (zoom > 14) {
+              if (me.oldZoom && me.oldZoom <= 14) {
+                if (me.oldFeatures && me.oldFeatures.length > 0) {
+                  me.renderFeaturesCollection(me.oldPlotFeatures, obj);
+                  setTimeout(function () {
+                    me.changeLastSelectedFeatureStyle();
+                    me.changeSelectedFeatureStyle();
+                  }, 100);
+                }
+              }
+            } else {
+              if (me.oldZoom && me.oldZoom > 14) {
+                if (me.oldFeatures && me.oldFeatures.length > 0) {
+                  obj.showFeatureName = false;
+                  me.renderFeaturesCollection(me.oldPlotFeatures, obj);
+                  setTimeout(function () {
+                    me.changeLastSelectedFeatureStyle();
+                    me.changeSelectedFeatureStyle();
+                  }, 100);
+                }
+              }
+            }
+            me.oldZoom = JSON.parse(JSON.stringify(zoom));
+          }
+        }
+      };
+      InitMap.map.on("moveend", this.changeFeatureTitleShowListener);
       InitMap.map.addLayer(this.Layer);
     }
+    const me = this;
+    // 关闭/开启采集统计
+    Event.Evt.on("removeMapMoveEndListen", function (value) {
+      this.isCollectionTotal = !value;
+      if (!me.oldLenged) return;
+      if (me.tabActivekey !== "1") {
+        message.info("仅图层支持统计");
+        Event.Evt.firEvent("resetMoveMapMoveedListen");
+        return;
+      }
+      let obj = {
+        lenged: me.oldLenged,
+        dispatch: me.oldDispatch,
+        showFeatureName: me.oldShowFeatureName,
+      };
+      let zoom = INITMAP.map.getView().getZoom();
+      if (zoom >= 14) {
+        obj.showFeatureName = true;
+      } else {
+        obj.showFeatureName = false;
+      }
+      me.overlayArr.forEach((item) => {
+        InitMap.map.removeOverlay(item);
+      });
+      me.overlayArr2.forEach((item) => {
+        if (me.Source.getFeatureByUid(item.ol_uid)) {
+          me.Source.removeFeature(item);
+        }
+      });
+      plotEdit.plottingLayer &&
+        plotEdit.plottingLayer.plotEdit.removePlotOverlay2();
+      me.overlayArr = [];
+      me.overlayArr2 = [];
+      // 关闭统计则渲染
+      if (value) {
+        if (me.tabActivekey === "1") {
+          me.renderFeaturesCollection(me.oldFeatures, obj);
+          let pointCollection = me.renderPointCollection(me.oldPonts);
+          me.overlayArr2 = pointCollection;
+          me.features = me.features.concat(pointCollection);
+          me.Source.addFeatures(pointCollection);
+        } else {
+          message.info("不支持统计。");
+        }
+        INITMAP.map.un("moveend", me.moveendListener);
+        me.moveendListener = () => {};
+      } else {
+        //开启
+        InitMap.map.getView().setZoom(13);
+        me.featureOverlay2 && InitMap.map.removeOverlay(me.featureOverlay2);
+        if (me.tabActivekey === "1") {
+          me.mapMoveEnd(me.oldFeatures, me.oldPonts, obj, value);
+        } else {
+          message.info("不支持统计。");
+        }
+      }
+      me.isNeedMoveMapMoveedListen = value;
+    });
+
+    // 惠州电信演示
+    this.timeInterval && clearInterval(this.timeInterval);
+    this.timeInterval = setInterval(function () {
+      if (me.hasMeetingRoom) {
+        me.featureOverlay2 && InitMap.map.removeOverlay(me.featureOverlay2);
+        me.layer.plotEdit.removePlotOverlay2();
+        me.layer.projectScoutingArr.forEach((item) => {
+          if (item.feature) {
+            if (item.feature.get("meetingRoomNum")) {
+              item.feature.values_.meetingRoomNum = Math.round(
+                Math.random() * 3
+              );
+              const ele = featureOverlay(item.feature.get("meetingRoomNum"));
+              me.layer.plotEdit.createPlotOverlay2(ele, item);
+            }
+          }
+        });
+      }
+    }, 30000);
   };
   this.boxFeature = {};
   this.draw = null;
@@ -290,14 +693,45 @@ function Action() {
 
   this.dateFormat = dateFormat;
   this.onBack = () => {
+    Event.Evt.firEvent("openLengedListPanel", false);
+    this.timeInterval && clearInterval(this.timeInterval);
+    this.hasMeetingRoom = null;
     this.layer.projectScoutingArr &&
       this.layer.projectScoutingArr.forEach((item) => {
         INITMAP.map.removeOverlay(item.feature && item.feature.overlay);
         if (item.feature) this.layer.removeFeature(item);
       });
+    this.layer.plotOverlayArr.forEach((item) => {
+      INITMAP.map.removeOverlay(item);
+    });
     this.layer.projectScoutingArr = [];
     this.layer.plotEdit.plotClickCb = null;
     setSession(listAction.sesstionSaveKey, "");
+    this.overlayArr.forEach((item) => {
+      INITMAP.map.removeOverlay(item);
+    });
+    this.overlayArr2.forEach((item) => {
+      if (this.Source.getFeatureByUid(item.ol_uid)) {
+        this.Source.removeFeature(item);
+      }
+    });
+    this.layer.plotEdit.removePlotOverlay2();
+    INITMAP.map.un("moveend", this.moveendListener);
+    this.moveendListener = () => {};
+    this.clearGroupCollectionPoint();
+    // Event.Evt.firEvent("resetMoveMapMoveedListen");
+    this.isNeedMoveMapMoveedListen = false;
+    this.oldFeatures = null;
+    this.oldPonts = null;
+    this.oldLenged = null;
+    this.oldDispatch = null;
+    this.oldShowFeatureName = null;
+    this.hasFeatureTotal = false;
+    this.featureOverlay2 && INITMAP.map.removeOverlay(this.featureOverlay2);
+    this.lastSelectedFeature = null;
+    this.selectedFeature = null;
+    this.featureOverlay2 = null;
+    // Event.Evt.removeEventListener("removeMapMoveEndListen");
   };
   // 获取区域列表
   this.fetchAreaList = async (data) => {
@@ -376,6 +810,37 @@ function Action() {
     return Drag;
   })(PointerInteraction);
 
+  // 定位到项目位置
+  this.setToCenter = async (data) => {
+    let coor = [+data.coordinate_x, +data.coordinate_y];
+    if (!InitMap.checkNowIsGcj02System()) {
+      // 需要纠偏
+      let dic = InitMap.systemDic[InitMap.baseMapKey];
+      coor = dic(coor[0], coor[1]);
+    }
+    this.addAnimatePoint({
+      coordinates: coor,
+      transform: true,
+      name: data.board_name,
+    });
+
+    // 保存项目数据
+    this.projectData = {
+      coordinates: coor,
+      name: data.board_name,
+    };
+
+    if (data.radius) {
+      let feature = addFeature("defaultCircle", {
+        coordinates: TransformCoordinate(coor),
+        radius: Number(data.radius),
+      });
+      this.fitFeature(feature);
+    } else {
+      await this.toCenter({ center: coor, transform: true });
+    }
+  };
+
   // 添加坐标点
   this.addCollectionCoordinates = (isMultiple, data) => {
     this.dragEvt = new Drag();
@@ -397,7 +862,7 @@ function Action() {
         }
         let style = createStyle("Point", {
           icon: {
-            src: require("../../../assets/unselectlocation.png"),
+            src: require("../../../assets/selectlocation.png"),
             crossOrigin: "anonymous",
             anchor: [0.5, 0.8],
           },
@@ -431,11 +896,12 @@ function Action() {
         this.dragEvt.handleDownEvent = (evt) => {
           let map = evt.map;
 
-          let feature = map.forEachFeatureAtPixel(evt.pixel, function (
-            feature
-          ) {
-            return feature;
-          });
+          let feature = map.forEachFeatureAtPixel(
+            evt.pixel,
+            function (feature) {
+              return feature;
+            }
+          );
 
           if (feature && feature.get("ftype") === "select_coordinates") {
             this.coordinate_ = evt.coordinate;
@@ -443,7 +909,7 @@ function Action() {
             let styles = feature.getStyle();
             let imgstyle = createStyle("Point", {
               icon: {
-                src: require("../../../assets/selectlocation.png"),
+                src: require("../../../assets/unselectlocation.png"),
                 crossOrigin: "anonymous",
                 anchor: [0.5, 0.8],
               },
@@ -468,14 +934,15 @@ function Action() {
         this.dragEvt.handleMoveEvent = (evt) => {
           if (this.cursor_) {
             let map = evt.map;
-            let feature = map.forEachFeatureAtPixel(evt.pixel, function (
-              feature
-            ) {
-              return feature;
-            });
+            let feature = map.forEachFeatureAtPixel(
+              evt.pixel,
+              function (feature) {
+                return feature;
+              }
+            );
             let element = evt.map.getTargetElement();
             if (feature && feature.get("ftype") === "select_coordinates") {
-              if (element.style.cursor != this.cursor_) {
+              if (element.style.cursor !== this.cursor_) {
                 this.previousCursor_ = element.style.cursor;
                 element.style.cursor = this.cursor_;
               }
@@ -493,7 +960,7 @@ function Action() {
             let styles = this.feature_.getStyle();
             let imgstyle = createStyle("Point", {
               icon: {
-                src: require("../../../assets/unselectlocation.png"),
+                src: require("../../../assets/selectlocation.png"),
                 crossOrigin: "anonymous",
                 anchor: [0.5, 0.8],
               },
@@ -563,9 +1030,20 @@ function Action() {
       }
     });
     this.groupPointer = [];
+    this.overlayArr.forEach((item) => {
+      INITMAP.map.removeOverlay(item);
+    });
+    this.overlayArr2.forEach((item) => {
+      if (this.Source.getFeatureByUid(item.ol_uid)) {
+        this.Source.removeFeature(item);
+      }
+    });
+    INITMAP.map.un("moveend", this.moveendListener);
+    this.moveendListener = () => {};
   };
   // 点击事件
   const mapClick = (evt) => {
+    let pixel = evt.pixel;
     const obj = InitMap.map.forEachFeatureAtPixel(
       evt.pixel,
       (feature, layer) => {
@@ -578,6 +1056,16 @@ function Action() {
       if (p_type === "group") {
         Event.Evt.firEvent("handleGroupFeature", feature.get("p_id"));
       }
+      // let isGeojson = feature.get("isGeojson");
+      let featureType = feature.getGeometry().getType();
+      if (featureType === "Point") {
+        this.isActivity = null;
+        this.handlePlotClick(feature);
+      }
+      let coords = feature.getGeometry().getCoordinates();
+      if (!coords) return;
+      coords = TransformCoordinate(coords, "EPSG:3857", "EPSG:4326");
+      Event.Evt.firEvent("HouseDetailGetPoi", coords.join(","));
       // console.log(p_type)
     }
   };
@@ -669,7 +1157,7 @@ function Action() {
           text: "回看集合点",
           offsetY: -30,
           icon: {
-            src: require("../../../assets/unselectlocation.png"),
+            src: require("../../../assets/selectlocation.png"),
             anchor: [0.5, 0.8],
             crossOrigin: "anonymous",
           },
@@ -797,6 +1285,7 @@ function Action() {
       this.polygonOverlay.setPosition(null);
       InitMap.map.removeOverlay(this.polygonOverlay);
     }
+    this.removeFeatureOverlay();
   };
   this.removeFeatures = () => {
     this.removeOverlay();
@@ -875,7 +1364,7 @@ function Action() {
             offsetY: -30,
             text: coordinate[item][0].title,
             icon: {
-              src: require("../../../assets/unselectlocation.png"),
+              src: require("../../../assets/selectlocation.png"),
               anchor: [0.5, 0.8],
               crossOrigin: "anonymous",
             },
@@ -976,56 +1465,292 @@ function Action() {
     }
   };
 
-  this.handlePlotClick = (feature, pixel) => {
-    if (this.isActivity) return;
-    Event.Evt.firEvent("handleFeatureToLeftMenu", feature.get("id"));
-    Event.Evt.firEvent("handlePlotFeature", { feature, pixel });
-    return;
-    createPopupOverlay(feature, pixel);
+  this.getImage = (selected = true, feature) => {
+    let src = "";
+    if (selected) {
+      src = require("../../../assets/selectedplot.png");
+    } else {
+      if (feature) {
+        src = feature.get("featureType");
+      } else {
+        src = require("../../../assets/newplot.png");
+      }
+    }
+    if (src) {
+      let style = createStyle("Point", {
+        icon: {
+          src: src,
+          scale: selected ? 0.8 : 0.6,
+          crossOrigin: "anonymous",
+        },
+      });
+      return style.getImage();
+    }
+    return null;
   };
 
-  this.renderGeoJson = async (data) => {
-    // return new Promise((resolve) => {
-    let promise = [];
-    if (data && data.length) {
-      nProgress.start();
-      data.forEach((item) => {
-        if (item.resource_url) {
-          promise.push(
-            Axios.get(item.resource_url, {
-              headers: {
-                "Access-Control-Allow-Origin": "*",
-                "Content-Type": "application/json",
-              },
-            })
+  this.fitFeature = (feature) => {
+    Fit(InitMap.view, feature.getGeometry().getExtent(), { duration: 300 });
+  };
+
+  // 切换标绘选中状态
+  this.toggleFeatureStyle = (feature) => {
+    this.changeLastSelectedFeatureStyle();
+    this.changeSelectedFeatureStyle(feature);
+  };
+
+  // 标绘数据点击回调
+  this.handlePlotClick = (feature, pixel) => {
+    if (this.isActivity) return;
+    // 切换图标需求
+    if (!feature) return;
+    let geometryType = feature.getGeometry().getType();
+    if (geometryType === "Point") {
+      this.changeLastSelectedFeatureStyle();
+      let isGeojson = feature.get("isGeojson");
+      if (!isGeojson) {
+        let style = feature.getStyle();
+        style.setImage(this.getImage());
+        let text = style.getText().getText();
+        if (!text) {
+          feature.getStyle().getText().setText(feature.get("title"));
+        }
+        feature.setStyle(style);
+        this.selectedFeature = feature;
+      }
+    }
+    this.featureOverlay2 && InitMap.map.removeOverlay(this.featureOverlay2);
+    this.cancelSearchAround();
+    // Fit(InitMap.view, feature.getGeometry().getExtent(), { duration: 300 });
+    Event.Evt.firEvent("handleFeatureToLeftMenu", feature.get("id"));
+    // Event.Evt.firEvent("handlePlotFeature", { feature, pixel });
+    // return;
+    // createPopupOverlay(feature, pixel);
+    if (feature.get("meetingRoomNum") !== undefined) {
+      this.fitFeature(feature);
+      this.oldDispatch &&
+        this.oldDispatch({
+          type: "collectionDetail/updateDatas",
+          payload: { selectData: null },
+        });
+      const me = this;
+      let cb = function () {
+        me.featureOverlay2 && INITMAP.map.removeOverlay(me.featureOverlay2);
+        Event.Evt.firEvent("handlePlotFeature", { feature, pixel });
+      };
+
+      let id = feature.get("id");
+      getPlotImages(id).then((res) => {
+        if (res) {
+          this.featureOverlay2 = createFeatureOverlay(
+            feature,
+            feature.get("title"),
+            feature.get("meetingRoomNum"),
+            res[0]?.image_url,
+            cb
           );
+          InitMap.map.addOverlay(this.featureOverlay2);
+          this.layer.plotEdit.removePlotOverlay2();
+          let operatorArr = this.layer.projectScoutingArr;
+          operatorArr.forEach((item) => {
+            let feature = item.feature;
+            let meetingRoomNum = null;
+            if (feature) {
+              meetingRoomNum = feature.get("meetingRoomNum");
+              const ele = featureOverlay(meetingRoomNum);
+              this.layer.plotEdit.createPlotOverlay2(ele, item);
+            }
+          });
         }
       });
+    } else {
+      Event.Evt.firEvent("handlePlotFeature", { feature, pixel });
     }
-    let res = await Promise.all(promise);
+  };
+
+  this.getGeojsonIcon = () => {
+    return this.geojsonResources;
+  };
+
+  this.reRenderGeojson = () => {
+    this.clearGeoFeatures();
+    this.renderGeoJson(this.geojsonRenderData, {
+      lenged: this.oldDispatch,
+      dispatch: this.oldDispatch,
+    });
+  };
+
+  this.renderGeoJson = async (data, { lenged, dispatch }) => {
+    this.geojsonRenderData = data;
+    INITMAP.map.un("click", mapClick);
+    InitMap.map.on("click", mapClick);
+    let promise = [];
+    let res = [],
+      ids = [];
+    let newIds = [];
+    let geojsonResponseData = [];
+    if (data && data.length) {
+      nProgress.start();
+      if (this.animateLine) {
+        this.animateLine.clear();
+        this.animateLine = null;
+      }
+      data.forEach((item) => {
+        newIds.push(item.id);
+        if (this.geojsonData[item.id]) {
+          res.push({
+            ...this.geojsonData[item.id],
+            __needAnimate: !!item._animate,
+          });
+        } else {
+          ids.push(item.id);
+          if (item.resource_url) {
+            promise.push(
+              Axios.get(item.resource_url, {
+                headers: {
+                  "Access-Control-Allow-Origin": "*",
+                  "Content-Type": "application/json",
+                },
+              }).then((resp) => {
+                // 将绑定的是否需要动画功能进行判定渲染
+                return { ...resp, __needAnimate: !!item._animate };
+              })
+            );
+          }
+        }
+      });
+      let newRes = await Promise.all(promise);
+      newRes.forEach((item, index) => {
+        this.geojsonData[ids[index]] = item;
+      });
+      res = [...res, ...newRes];
+      if (newIds && newIds.length > 0) {
+        let geojsonResponse = await geojsonResourceServices.getList(
+          newIds.join(",")
+        );
+        if (geojsonResponse && geojsonResponse.code === "0") {
+          geojsonResponseData = geojsonResponse.data;
+        }
+      }
+    }
     nProgress.done();
-    res.forEach((item) => {
+    let newConfig = [];
+    this.lenged = {
+      title: "项目数据",
+      key: "map:projectScouting",
+      content: [],
+    };
+    let hasAnimate = false;
+    res.forEach((item, i) => {
+      if (item.__needAnimate) {
+        this.startAnimateForFeatures(item.data);
+        hasAnimate = true;
+      }
+
       let geojson = item.data;
       let features = loadFeatureJSON(geojson, "GeoJSON");
+      let iconUrl = "",
+        strokeColor = "",
+        fillColor = "";
+      let currentData = [];
       features.forEach((feature, index) => {
         let type = feature.getGeometry().getType();
         let icon = feature.get("iconUrl");
         icon = icon && icon.replace("../../../assets", "");
-        let style = createStyle(type, {
+        iconUrl = icon ? require("../../../assets" + icon) : null;
+        strokeColor = feature.get("strokeColor") || "rgba(255,0,0,0.3)";
+        fillColor = feature.get("fillColor") || "rgba(255,0,0,0.3)";
+        let options = {
           showName: (type !== "Point" && index < 15) || type === "Point",
-          text: feature.get("name") || geojson.name,
-          iconUrl: icon ? require("../../../assets" + icon) : null,
-          strokeColor: feature.get("strokeColor") || "rgba(255,0,0,0.3)",
-          fillColor: feature.get("fillColor") || "rgba(255,0,0,0.3)",
-          textFillColor: "rgba(255,0,0,0.9)",
+          text: geojson.hideName ? "" : feature.get("name") || geojson.name,
+          iconUrl: iconUrl,
+          strokeColor: strokeColor,
+          fillColor: fillColor,
+          textFillColor: "rgba(0,0,0,0.9)",
           textStrokeColor: "#FFFFFF",
           font: 14,
+        };
+        currentData = geojsonResponseData.filter((item) => {
+          return item.geojson_id === newIds[i];
         });
+        if (currentData && currentData.length === 1) {
+          options.iconUrl = currentData[0].image_base64;
+        }
+        if (type === "MultiLineString") {
+          options.strokeWidth = 4;
+        }
+        let style = createStyle(type, options);
         feature.setStyle(style);
+        feature.values_.isGeojson = true;
+        feature.values_.featureType = iconUrl;
         this.geoFeatures.push(feature);
       });
+      if (geojson.features.length > 0) {
+        if (geojson.lenged) {
+          geojson.lenged.forEach((item) => {
+            if (item.imgSrc) {
+              let imgSrc = null;
+              if (item.imgSrc.includes("../../../assets")) {
+                imgSrc = item.imgSrc;
+                imgSrc = imgSrc.replace("../../../assets", "");
+                imgSrc = require("../../../assets" + imgSrc);
+                item.imgSrc = imgSrc;
+              }
+              if (currentData && currentData.length === 1) {
+                let newItem = JSON.parse(JSON.stringify(item));
+                newItem.imgSrc = currentData[0].image_base64;
+                if (!this.geojsonResources[newIds[i]]) {
+                  this.geojsonResources[newIds[i]] = newItem.imgSrc;
+                }
+                this.lenged.content.push(newItem);
+              } else {
+                if (!this.geojsonResources[newIds[i]]) {
+                  this.geojsonResources[newIds[i]] = item.imgSrc;
+                }
+                this.lenged.content.push(item);
+              }
+            } else {
+              this.lenged.content.push(item);
+            }
+          });
+        }
+      }
+      if (!lenged) {
+        lenged = [];
+      }
+      if (!Array.isArray(lenged)) {
+        lenged = [lenged];
+      }
+      const lengedIndex = lenged.findIndex(
+        (lenged) => lenged.key === this.lenged.key
+      );
+      if (lengedIndex > -1) {
+        lenged[lengedIndex] = this.lenged;
+        newConfig = [...lenged];
+      } else {
+        newConfig = [...lenged.concat(this.lenged)];
+      }
+      if (newConfig.length === 1 && !newConfig[0].content.length) {
+        newConfig = [];
+      }
       this.Source.addFeatures(features);
+      if (features.length > 0) {
+        Event.Evt.firEvent("openLengedListPanel", true);
+      }
     });
+
+    if (hasAnimate) {
+      nProgress.start();
+    }
+
+    // Event.Evt.firEvent("updateGeojson", this.geoFeatures);
+    dispatch &&
+      dispatch({
+        type: "lengedList/updateLengedList",
+        payload: {
+          config: newConfig,
+        },
+      });
     return res;
   };
   this.clearGeoFeatures = () => {
@@ -1041,20 +1766,22 @@ function Action() {
   // 渲染标绘数据
   this.renderFeaturesCollection = async (
     data,
-    { lenged, dispatch, addSource = true, showFeatureName }
+    { lenged, dispatch, addSource = true, showFeatureName },
+    geoData
   ) => {
     const commonStyleOption = {
-      textFillColor: "rgba(255,0,0,1)",
+      // textFillColor: "rgba(255,0,0,1)",
+      textFillColor: "rgba(0, 0, 0, 1)",
       textStrokeColor: "#fff",
       textStrokeWidth: 3,
       font: "13px sans-serif",
       placement: "point",
-      iconScale: 1,
+      iconScale: 0.6,
       pointColor: "#fff",
       showName: showFeatureName,
     };
     this.lenged = {
-      title: "项目踏勘",
+      title: "项目数据",
       key: "map:projectScouting",
       content: [],
     };
@@ -1065,7 +1792,11 @@ function Action() {
           this.layer.removeFeature(item);
         }
       });
+      this.layer.plotOverlayArr.forEach((item) => {
+        InitMap.map.removeOverlay(item);
+      });
       this.layer.projectScoutingArr = [];
+      this.layer.plotOverlayArr = [];
       this.layer.plotEdit.updateCb = null;
     }
 
@@ -1097,6 +1828,7 @@ function Action() {
         } else {
           featureType = featureType.replace("img", "");
           iconUrl = require("../../../assets" + featureType);
+          content.featureType = iconUrl;
         }
         if (hasIndex < 0) {
           obj = {
@@ -1210,7 +1942,13 @@ function Action() {
         this.layer.plotEdit.plotClickCb = this.handlePlotClick.bind(this);
         operator.data = item;
         operator.updateFeatueToDB = this.updateFeatueToDB.bind(this);
-
+        if (content.geoType === "Point") {
+          if (content.meetingRoomNum !== undefined) {
+            this.hasMeetingRoom = true;
+            const ele = featureOverlay(content.meetingRoomNum);
+            plotEdit.plottingLayer.plotEdit.createPlotOverlay2(ele, operator);
+          }
+        }
         // 单个图片的多边形
         if (content.sigleImage) {
           let iconUrl = "";
@@ -1262,13 +2000,18 @@ function Action() {
     if (newConfig.length === 1 && !newConfig[0].content.length) {
       newConfig = [];
     }
-    dispatch &&
-      dispatch({
-        type: "lengedList/updateLengedList",
-        payload: {
-          config: newConfig,
-        },
-      });
+    if (!geoData || geoData.length === 0) {
+      dispatch &&
+        dispatch({
+          type: "lengedList/updateLengedList",
+          payload: {
+            config: newConfig,
+          },
+        });
+    }
+    if (data.length > 0) {
+      Event.Evt.firEvent("openLengedListPanel", true);
+    }
 
     // 添加区域选择
     this.addAreaSelect();
@@ -1277,18 +2020,14 @@ function Action() {
   // 渲染feature
   this.renderCollection = async (
     data,
-    { lenged, dispatch, animation = true, showFeatureName = true }
+    { lenged, dispatch, animation = true, showFeatureName = false }
   ) => {
     this.currentSet = { lenged, dispatch, animation, showFeatureName };
     // 删除元素
     this.removeFeatures();
+    this.removeOverlay();
     if (!data.length) {
-      dispatch({
-        type: "lengedList/updateLengedList",
-        payload: {
-          config: [],
-        },
-      });
+      this.oldPlotFeatures = [];
       return;
     }
     // 取出有子集的数据，合并到列表展示中
@@ -1312,34 +2051,105 @@ function Action() {
         item.collect_type !== "group"
     );
     let features = data.filter((item) => item.collect_type === "4");
+    this.oldPlotFeatures = features;
     let planPic = data.filter((item) => item.collect_type === "5");
     let geoData = data.filter((item) => item.collect_type === "8");
-
+    this.featuresGroup = {};
+    features.forEach((item) => {
+      if (item.provincecode) {
+        if (!this.featuresGroup[item.provincecode]) {
+          this.featuresGroup[item.provincecode] = [];
+        }
+        let index = this.featuresGroup[item.provincecode].findIndex(
+          (item2) => item2.id === item.id
+        );
+        if (index === -1) {
+          this.featuresGroup[item.provincecode].push(item);
+        }
+      }
+      if (item.citycode) {
+        if (!this.featuresGroup[item.citycode]) {
+          this.featuresGroup[item.citycode] = [];
+        }
+        let index = this.featuresGroup[item.citycode].findIndex(
+          (item2) => item2.id === item.id
+        );
+        if (index === -1) {
+          this.featuresGroup[item.citycode].push(item);
+        }
+      }
+      if (item.districtcode) {
+        if (!this.featuresGroup[item.districtcode]) {
+          this.featuresGroup[item.districtcode] = [];
+        }
+        let index = this.featuresGroup[item.districtcode].findIndex(
+          (item2) => item2.id === item.id
+        );
+        if (index === -1) {
+          this.featuresGroup[item.districtcode].push(item);
+        }
+      }
+    });
+    this.pontsGroup = {};
+    ponts.forEach((item) => {
+      if (item.provincecode) {
+        if (!this.pontsGroup[item.provincecode]) {
+          this.pontsGroup[item.provincecode] = [];
+        }
+        this.pontsGroup[item.provincecode].push(item);
+      }
+      if (item.citycode) {
+        if (!this.pontsGroup[item.citycode]) {
+          this.pontsGroup[item.citycode] = [];
+        }
+        this.pontsGroup[item.citycode].push(item);
+      }
+      if (item.districtcode) {
+        if (!this.pontsGroup[item.districtcode]) {
+          this.pontsGroup[item.districtcode] = [];
+        }
+        this.pontsGroup[item.districtcode].push(item);
+      }
+    });
+    this.oldFeatures = features;
+    this.oldPonts = ponts;
+    this.oldLenged = lenged;
+    this.oldDispatch = dispatch;
+    this.oldShowFeatureName = showFeatureName;
+    if (this.isCollectionTotal) {
+      this.mapMoveEnd(features, ponts, { lenged, dispatch, showFeatureName });
+    }
     // 清除变量
     this.layer.style = null;
     this.layer.attrs = null;
-    // this.layer.responseData = null;
-    // this.layer.saveCb = null;
-    // this.layer.deleteCb = null;
     this.layer.isDefault = null;
 
     // 渲染geo数据
-    await this.renderGeoJson(geoData).catch((err) => console.log(err));
+    await this.renderGeoJson(geoData, { lenged, dispatch }).catch((err) =>
+      console.log(err)
+    );
     // 渲染标绘数据
-    await this.renderFeaturesCollection(features, {
-      lenged,
-      dispatch,
-      showFeatureName,
-    });
+    if (!this.isCollectionTotal) {
+      await this.renderFeaturesCollection(
+        features,
+        {
+          lenged,
+          dispatch,
+          showFeatureName,
+        },
+        geoData
+      );
+    }
 
     const sou = this.layer.showLayer.getSource();
     // 渲染规划图
     let ext = await this.renderPlanPicCollection(planPic);
     // 渲染点的数据
-    let pointCollection = this.renderPointCollection(ponts);
-
-    this.features = this.features.concat(pointCollection);
-    this.Source.addFeatures(pointCollection);
+    if (!this.isCollectionTotal) {
+      let pointCollection = this.renderPointCollection(ponts);
+      this.features = this.features.concat(pointCollection);
+      this.Source.addFeatures(pointCollection);
+    }
     this.currentData = data;
     if (!animation) return this.features;
 
@@ -1415,6 +2225,11 @@ function Action() {
         //   );
         // }
       });
+  };
+
+  this.zoomToMap = () => {
+    let zoom = INITMAP.map.getView().getZoom();
+    InitMap.map.getView().setZoom(zoom < 14 ? 14 : zoom);
   };
 
   // type coordinate or extent
@@ -1901,13 +2716,17 @@ function Action() {
     this.removeFeatures();
     this.removeAreaSelect();
     this.removePlanPicCollection();
+    if (this.animateLine) {
+      this.animateLine.clear();
+      this.animateLine = null;
+    }
     // if (!flag) InitMap.map.removeLayer(this.Layer);
   };
-  this.RemoveArea = async (id) => {
-    return await DELETE_AREA(id);
+  this.RemoveArea = async (id, board_id) => {
+    return await DELETE_AREA(id, board_id);
   };
-  this.editAreaName = async (id, data) => {
-    return await EDIT_AREA_NAME(id, data);
+  this.editAreaName = async (id, data, board_id) => {
+    return await EDIT_AREA_NAME(id, data, board_id);
   };
 
   // 中断绘制
@@ -2233,6 +3052,7 @@ function Action() {
     });
   };
   this.clearListen = () => {
+    this.changeFeatureTitleShowListener = () => {};
     if (this.repeatRequst) {
       clearTimeout(this.repeatRequst);
     }
@@ -2452,54 +3272,6 @@ function Action() {
     };
     let listenerKey = this.Layer.on("postrender", animate);
   };
-
-  // 更新江西数据的临时方法
-  this.loadGeoJson = async (props = {}) => {
-    let { boardId, areaTypeId } = props;
-    return await Axios.get(require("../../../assets/json/3_3857.geojson")).then(
-      (res) => {
-        let { data } = res;
-        let features = loadFeatureJSON(data, "GeoJSON");
-        let p = [];
-        features.forEach((item, index) => {
-          let type = item.getGeometry().getType();
-          let name = item.get("Name");
-          let style = createStyle(type, {
-            fillColor: "rgba(255,0,0,0.45)",
-            showName: true,
-            text: name,
-          });
-          item.setStyle(style);
-          let param = {
-            area_type_id: areaTypeId,
-            board_id: boardId,
-            collect_type: 4,
-            target: "feature",
-            title: name,
-          };
-
-          let content = {
-            coordinates: item.getGeometry().getCoordinates()[0],
-            geoType: "Polygon",
-            featureType: "rgba(255,0,0,0.45)",
-            selectName: "自定义类型",
-            name: name,
-            coordSysType: 0,
-            strokeColor: "rgba(255,255,255,1)",
-          };
-          param.content = JSON.stringify(content);
-          // console.log(param);
-          p.push(this.addCollection(param));
-        });
-        Promise.all(p).then((res) => {
-          console.log(res);
-        });
-        // this.Source.addFeatures(features)
-        // console.log(features);
-      }
-    );
-  };
-
   this.savePoint = (val) => {
     let { data = [], featureType, board_id } = val;
     if (data.length) {
@@ -2708,6 +3480,121 @@ function Action() {
       AboutAction.clearLine();
     }
     InitMap.map.removeOverlay(this.searchAroundOverlay);
+  };
+
+  let driving = new AMap.Driving({
+    policy: AMap.DrivingPolicy.LEAST_TIME,
+  });
+  this.searchCache = {};
+  // 调用高德查询线路规划
+  this.searchByDrive = (from, to) => {
+    return new Promise((resolve, reject) => {
+      let key = from.join("_") + "/" + to.join("_");
+      if (this.searchCache[key]) {
+        resolve(this.searchCache[key]);
+        return;
+      } else
+        driving.search(from, to, (status, result) => {
+          resolve(result);
+          this.searchCache[key] = result;
+        });
+    }).catch((err) => {
+      reject(err);
+    });
+  };
+  /**
+   * 动画功能渲染
+   * @param data 动画渲染的数据列表 Object -> collection
+   */
+  this.startAnimateForFeatures = (data) => {
+    // console.log(data)
+    // this.projectData 是项目数据，保存的坐标类型是 EPSG: 4326 渲染时要转换成 EPSG: 3857
+    try {
+      let features = data.features;
+      let from = { ...this.projectData };
+      let arr = [];
+      (async () => {
+        for (let i = 0; i < features.length; i++) {
+          let item = features[i];
+          // if(item.type !== 'Point')
+          let geometry = item.geometry;
+          let coordinates = geometry.coordinates;
+          if (geometry.type !== "Point") return;
+          // 取出每个需要渲染的点，将这些点获取到规划路线数据
+          if (+coordinates[0] > 180)
+            coordinates = TransformCoordinate(
+              coordinates,
+              "EPSG:3857",
+              "EPSG:4326"
+            );
+          if (+from.coordinates[0] > 180) {
+            from.coordinates = TransformCoordinate(
+              from.coordinates,
+              "EPSG:3857",
+              "EPSG:4326"
+            );
+          }
+          let res = await this.searchByDrive(
+            from.coordinates,
+            coordinates
+          ).catch((err) => console.log(err));
+          nProgress.inc(0.05);
+          let toArray = this.transformAMapDataFromRoad(res);
+          let obj = {
+            from,
+            to: toArray,
+            distance: res.routes[0].distance,
+            time: res.routes[0].time,
+            properties: item.properties,
+          };
+          arr.push(obj);
+        }
+        this.renderDriveLines(arr);
+      })();
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  /**
+   * 处理高德返回线路数据
+   */
+  this.transformAMapDataFromRoad = (data) => {
+    let key = InitMap.baseMapKey;
+    let dic = InitMap.systemDic[key];
+    let flag = InitMap.checkNowIsGcj02System(key);
+    // let needChange = InitMap.checkUpdateMapSystem(key)
+    let arr = [];
+    if (data.routes && data.routes[0]) {
+      let road = data.routes[0];
+      let steps = road.steps;
+      steps.forEach((step) => {
+        arr = arr.concat(
+          step.path.map((s) =>
+            TransformCoordinate(!flag ? dic(s.lng, s.lat) : [s.lng, s.lat])
+          )
+        );
+      });
+    }
+    return arr;
+  };
+
+  // 构建
+  this.animateLine = null;
+  // 渲染线路列表
+  this.renderDriveLines = (data) => {
+    if (!this.animateLine) {
+      this.animateLine = new AnimateLine({
+        startPoint: { ...this.projectData },
+        showStartPoint: true,
+      });
+      this.animateLine.renderEnd = () => {
+        nProgress.done();
+      };
+    }
+    data.forEach((item) => {
+      this.animateLine.addLine({ ...item, context: this.Source });
+    });
   };
 }
 

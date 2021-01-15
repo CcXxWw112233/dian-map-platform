@@ -28,7 +28,7 @@ export default class CommonPanel extends React.Component {
             &#xe606;
           </i>
         </div>
-        <div className={styles.body} style={{ height: "calc(100% - 65px)"}}>{this.props.children}</div>
+        <div className={`${styles.body} ${globalStyle.autoScrollY}`} style={{ height: "calc(100% - 65px)"}}>{this.props.children}</div>
       </div>
     );
   }

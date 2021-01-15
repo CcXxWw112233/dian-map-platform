@@ -8,7 +8,11 @@ import { guid } from "./lib";
 import { symbols } from "./data";
 import { plotEdit } from "../../../utils/plotEdit";
 import FeatureOperatorEvent from "../../../utils/plot2ol/src/events/FeatureOperatorEvent";
-import { createStyle } from "../../../lib/utils/index";
+import {
+  createStyle,
+  loadFeatureJSON,
+  TransformCoordinate,
+} from "../../../lib/utils/index";
 import Event from "../../../lib/utils/event";
 
 import ListAction from "../../../lib/components/ProjectScouting/ScoutingList";
@@ -17,8 +21,9 @@ import { MyIcon } from "../../utils";
 import symbolStoreServices from "../../../services/symbolStore";
 import mapApp from "utils/INITMAP";
 import { DragPan } from "ol/interaction";
+import Axios from "axios";
 
-// import { loadGeoJson } from "../tmp"
+import { loadGeoJson } from "./tmp";
 
 const SymbolBlock = ({
   data,
@@ -250,6 +255,7 @@ export default class Plot extends PureComponent {
     this.baseMapKeys = ["gd_vec|gd_img|gg_img", "td_vec|td_img|td_ter"];
     this.isLoaded = true;
     this.msgtimer = null;
+    this.isSymbolClicked = false;
   }
   componentDidMount() {
     this.plotLayer = plotEdit.getPlottingLayer();
@@ -370,10 +376,15 @@ export default class Plot extends PureComponent {
     } else {
       this.getCustomSymbol();
     }
+    Event.Evt.on("resolveGeojson", (name) => {
+      loadGeoJson(this, name);
+    });
   }
   componentWillUnmount() {
     const { parent } = this.props;
     parent.isModifyPlot = false;
+    this.isSymbolClicked = false;
+    parent.isGeojsonMifyIcon = false;
     window.featureOperator = null;
     plotEdit.deactivate();
     this.plotLayer.un(FeatureOperatorEvent.ACTIVATE, this.operatorActive);
@@ -489,6 +500,9 @@ export default class Plot extends PureComponent {
   updatePlotList = (list) => {
     const { parent } = this.props;
     parent.updateFeatureOperatorList2(list);
+    if (parent.returnPanel) {
+      parent.leftToolBarRef.displayTempPlot();
+    }
   };
 
   // 从数组中找到operator
@@ -523,6 +537,7 @@ export default class Plot extends PureComponent {
   save2Group = (operator) => {
     return new Promise((resolve, reject) => {
       const { feature } = operator;
+
       let param = {
         coordinates: feature.getGeometry().getCoordinates(),
         geoType: feature.getGeometry().getType(),
@@ -537,22 +552,43 @@ export default class Plot extends PureComponent {
         board_id: this.projectId,
         content: JSON.stringify(param),
       };
-      // console.log(board);
-      DetailAction.addCollection(obj)
-        .then((res) => {
-          let obj = DetailAction.CollectionGroup.find(
-            (item) => item.id === window.ProjectGroupId
-          );
-          message.success(
-            `标绘已成功保存到${this.projectName}的${obj ? obj.name : "未"}分组`
-          );
-          this.plotLayer.removeFeature(operator);
-          resolve(res);
+      let xy = [];
+      if (param.geoType === "Point") {
+        xy = TransformCoordinate(param.coordinates, "EPSG:3857", "EPSG:4326");
+      } else {
+        const extent = operator.feature.getGeometry().getExtent();
+        let centerPoi = [
+          (extent[0] + extent[2]) / 2,
+          (extent[1] + extent[3]) / 2,
+        ];
+        xy = TransformCoordinate(centerPoi, "EPSG:3857", "EPSG:4326");
+      }
+      window
+        .CallWebMapFunction("getCityByLonLat", {
+          lon: xy[0],
+          lat: xy[1],
         })
-        .catch((err) => {
-          reject(err);
-          console.log(err);
-          message.error("保存失败，请稍后再试");
+        .then((res) => {
+          obj.districtcode = res.addressComponent?.adcode;
+          // console.log(board);
+          DetailAction.addCollection(obj)
+            .then((res) => {
+              let obj = DetailAction.CollectionGroup.find(
+                (item) => item.id === window.ProjectGroupId
+              );
+              message.success(
+                `标绘已成功保存到${this.projectName}的${
+                  obj ? obj.name : "未"
+                }分组`
+              );
+              this.plotLayer.removeFeature(operator);
+              resolve(res);
+            })
+            .catch((err) => {
+              reject(err);
+              console.log(err);
+              message.info(err.message);
+            });
         });
     });
   };
@@ -645,20 +681,25 @@ export default class Plot extends PureComponent {
       options
     );
     if (parent.isModifyPlot === false) {
-      let drawing = plotEdit.create(
-        this.plotDic[this.nextProps?.plotType || this.props.plotType]
-      );
-      Event.Evt.firEvent("setPlotDrawStyle", style);
-      Event.Evt.firEvent("setAttribute", {
-        style: style,
-        attrs: attrs,
-        // saveCb: this.handleSaveClick.bind(this),
-        // delCb: this.updatePlotList.bind(this),
-      });
-      drawing.plotDraw.on("draw_end", (e) => {
-        // console.log(e,'333333333333333')
-        this.setActiveDragPan(true);
-      });
+      const { parent } = this.props;
+      if (parent.isGeojsonMifyIcon) {
+
+      } else {
+        let drawing = plotEdit.create(
+          this.plotDic[this.nextProps?.plotType || this.props.plotType]
+        );
+        Event.Evt.firEvent("setPlotDrawStyle", style);
+        Event.Evt.firEvent("setAttribute", {
+          style: style,
+          attrs: attrs,
+          // saveCb: this.handleSaveClick.bind(this),
+          // delCb: this.updatePlotList.bind(this),
+        });
+        drawing.plotDraw.on("draw_end", (e) => {
+          // console.log(e,'333333333333333')
+          this.setActiveDragPan(true);
+        });
+      }
     } else if (parent.isModifyPlot === true && window.featureOperator) {
       if (window.featureOperator.feature) {
         this.setActiveDragPan(true);
@@ -741,6 +782,7 @@ export default class Plot extends PureComponent {
 
   // 点选图标后获取符号的回调
   getFillSymbol = (data, index, index2, typeItem) => {
+    this.isSymbolClicked = true;
     if (index !== undefined && index2 !== undefined) {
       if (
         this.dic[this.props.plotType] === "Polygon" ||
@@ -880,15 +922,22 @@ export default class Plot extends PureComponent {
       this.setActiveDragPan(false);
     }
     if (!window.featureOperator) {
-      let drawing = plotEdit.create(this.plotDic[plotType]);
-      Event.Evt.firEvent("setPlotDrawStyle", style);
-      Event.Evt.firEvent("setAttribute", {
-        style: style,
-        attrs: attrs,
-      });
-      drawing.on("draw_end", () => {
-        this.setActiveDragPan(true);
-      });
+      const { parent } = this.props;
+      if (parent.isGeojsonMifyIcon) {
+        if (this.isSymbolClicked) {
+          Event.Evt.firEvent("modifyGeojsonIcon", iconUrl);
+        }
+      } else {
+        let drawing = plotEdit.create(this.plotDic[plotType]);
+        Event.Evt.firEvent("setPlotDrawStyle", style);
+        Event.Evt.firEvent("setAttribute", {
+          style: style,
+          attrs: attrs,
+        });
+        drawing.on("draw_end", () => {
+          this.setActiveDragPan(true);
+        });
+      }
     } else {
       if (window.featureOperator.feature) {
         this.setActiveDragPan(true);
@@ -1064,6 +1113,10 @@ export default class Plot extends PureComponent {
             Event.Evt.firEvent("updatePlotFeature");
             this.props.goBackProject();
           });
+      }
+      const { parent } = this.props;
+      if (parent.returnPanel) {
+        parent.leftToolBarRef.displayTempPlot();
       }
     } else {
       message.info("请先标绘或选择要保存的标绘。");

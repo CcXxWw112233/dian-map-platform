@@ -71,9 +71,9 @@ export default class AreaPanel extends React.Component {
     };
   }
   componentDidMount() {
-    Event.Evt.on("returnNation",() => {
+    Event.Evt.on("returnNation", () => {
       this.handleClearClick();
-    })
+    });
     areaSearchAction.getProvince().then((res) => {
       if (res.code === "0") {
         const { dispatch } = this.props;
@@ -117,6 +117,26 @@ export default class AreaPanel extends React.Component {
     });
   }
 
+  componentWillUnmount() {
+    const { parent, dispatch } = this.props;
+    dispatch({
+      type: "areaSearch/update",
+      payload: {
+        provinceCode: null,
+        cityCode: null,
+        districtCode: null,
+        townCode: null,
+        villageCode: null,
+        cityDisabled: true,
+        districtDisabled: true,
+        townDisabled: true,
+        villageDisabled: true,
+        okDisabled: true,
+      },
+    });
+    areaSearchAction.clearAreaExtent(parent);
+  }
+
   updateSession = (type, code, name) => {
     if (type === "province") {
       setSession("city", "");
@@ -129,14 +149,29 @@ export default class AreaPanel extends React.Component {
 
   updatePublicData = (type, code, name) => {
     const queryStr = `${type}='${code}'`;
-    const { changeQueryStr } = this.props;
+    const { changeQueryStr, dispatch } = this.props;
     setSession("xzqhCode", `${type}|${code}|${name}`);
+    Event.Evt.firEvent("getPublicData", {
+      str: `${type}|${code}|${name}`,
+      dispatch: dispatch,
+    });
     changeQueryStr && changeQueryStr(queryStr);
+  };
+
+  goBackToNation = () => {
+    const { parent } = this.props;
+    if (this.props.inProject) {
+      Event.Evt.firEvent("searchProjectData");
+    }
+    this.handleClearClick();
+    areaSearchAction.goBackToNation(parent);
   };
 
   // 省份选择
   handleProvinceSelectChange = async (val, flag) => {
-    this.handleClearClick();
+    const { parent } = this.props;
+    areaSearchAction.clearAreaExtent(parent);
+    // this.props.changeAreaPanelVisible();
     const { dispatch, provinceOptions } = this.props;
     const name = provinceOptions?.filter((item) => {
       return item.code === val;
@@ -161,7 +196,12 @@ export default class AreaPanel extends React.Component {
         okDisabled: false,
       },
     });
-    Event.Evt.firEvent("searchProject", {type: "provincecode", code: val})
+    let obj = { type: "provincecode", code: val };
+    if (this.props.inProject) {
+      Event.Evt.firEvent("searchProjectData", obj);
+    } else {
+      Event.Evt.firEvent("searchProject", obj);
+    }
     const res = await areaSearchAction.getCity(val);
     if (res.code === "0") {
       dispatch({
@@ -175,7 +215,9 @@ export default class AreaPanel extends React.Component {
 
   // 地市选择
   handleCitySelectChange = async (val, flag) => {
-    this.handleClearClick();
+    const { parent } = this.props;
+    areaSearchAction.clearAreaExtent(parent);
+    // this.props.changeAreaPanelVisible();
     const { dispatch, cityOptions } = this.props;
     const name = cityOptions?.filter((item) => {
       return item.code === val;
@@ -197,7 +239,12 @@ export default class AreaPanel extends React.Component {
         villageDisabled: true,
       },
     });
-    Event.Evt.firEvent("searchProject", {type: "citycode", code: val})
+    let obj = { type: "citycode", code: val };
+    if (this.props.inProject) {
+      Event.Evt.firEvent("searchProjectData", obj);
+    } else {
+      Event.Evt.firEvent("searchProject", obj);
+    }
     const res = await areaSearchAction.getDistrict(val);
     if (res.code === "0") {
       dispatch({
@@ -210,7 +257,9 @@ export default class AreaPanel extends React.Component {
   };
   // 区县选择
   handleDistrictSelectChange = async (val, flag) => {
-    this.handleClearClick();
+    const { parent } = this.props;
+    areaSearchAction.clearAreaExtent(parent);
+    // this.props.changeAreaPanelVisible();
     const { dispatch, districtOptions } = this.props;
     const name = districtOptions?.filter((item) => {
       return item.code === val;
@@ -230,7 +279,12 @@ export default class AreaPanel extends React.Component {
         villageDisabled: true,
       },
     });
-    Event.Evt.firEvent("searchProject", {type: "districtcode", code: val})
+    let obj = { type: "districtcode", code: val };
+    if (this.props.inProject) {
+      Event.Evt.firEvent("searchProjectData", obj);
+    } else {
+      Event.Evt.firEvent("searchProject", obj);
+    }
     const res = await areaSearchAction.getTown(val);
     if (res.code === "0") {
       dispatch({
@@ -244,7 +298,9 @@ export default class AreaPanel extends React.Component {
 
   // 乡镇选择
   handleTownSelectChange = async (val) => {
-    this.handleClearClick();
+    const { parent } = this.props;
+    areaSearchAction.clearAreaExtent(parent);
+    // this.props.changeAreaPanelVisible();
     const { dispatch, townOptions } = this.props;
     const name = townOptions?.filter((item) => {
       return item.code === val;
@@ -272,7 +328,9 @@ export default class AreaPanel extends React.Component {
 
   // 村、社区选择
   handleVillageSelectChange = (val) => {
-    this.handleClearClick();
+    const { parent } = this.props;
+    areaSearchAction.clearAreaExtent(parent);
+    // this.props.changeAreaPanelVisible();
     const { dispatch } = this.props;
     dispatch({
       type: "areaSearch/update",
@@ -362,7 +420,7 @@ export default class AreaPanel extends React.Component {
         okDisabled: true,
       },
     });
-    const { parent } = this.props; 
+    const { parent } = this.props;
     areaSearchAction.clearAreaExtent(parent);
     this.props.changeAreaPanelVisible();
   };
@@ -471,7 +529,7 @@ export default class AreaPanel extends React.Component {
         </div>
         <div className={styles.locatePanelFooter}>
           <Button
-            onClick={this.handleClearClick}
+            onClick={this.goBackToNation}
             style={{ marginRight: 20 }}
             disabled={okDisabled}
           >

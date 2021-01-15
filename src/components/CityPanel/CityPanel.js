@@ -12,7 +12,7 @@ export default class CityPanel extends PureComponent {
           </span>
         </header>
         <ul className={styles.cityList}>
-          <li>全国</li>
+          <li>全部</li>
           <li>北京</li>
           <li>北京</li>
           <li>北京</li>

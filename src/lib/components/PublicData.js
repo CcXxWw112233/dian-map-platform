@@ -15,7 +15,7 @@ import PopupOverlay from "../../components/PublicOverlays/PopupOverlay/index";
 import baseOverlay from "../../components/PublicOverlays/baseOverlay/index";
 import { createOverlay } from "../../lib/utils/index";
 import { getLocal } from "../../utils/sessionManage";
-import DetailAction from "../../lib/components/ProjectScouting/ScoutingDetail";
+import DetailAction from "./ProjectScouting/ScoutingDetail";
 import {
   gcj02_to_wgs84,
   wgs84_to_gcj02,
@@ -32,8 +32,10 @@ const { getFeature, GET_GEO_DATA } = publicDataUrl;
 const publicData = {
   // 图层
   layer: Layer({ id: "publicDataLayer", zIndex: 11, declutter: true }),
+  layer2: Layer({ id: "publicDatalayer2", zIndex: 11 }),
   // 数据源
   source: Source(),
+  source2: Source(),
   // key -> value 所有feature
   features: {},
   // 获取到的geo数据
@@ -81,6 +83,8 @@ const publicData = {
   ],
   lastPopulationTypeName: "",
   hasInited: false,
+  lenged: null,
+  dispatch: null,
   init: function () {
     this.hasInited = true;
     event.Evt.on("transCoordinateSystems2PublicData", (key) => {
@@ -94,16 +98,27 @@ const publicData = {
     });
     // 如果有layer，就不addlayer
     let layer = mapApp.findLayerById(this.layer.get("id"));
+    let layer2 = mapApp.findLayerById(this.layer2.get("id"));
     getLocal("baseMapKey").then((res) => {
       this.lastBaseMap = res.data;
       this.currentBaseMap = this.lastBaseMap;
     });
     if (layer) {
       this.layer.setVisible(true);
+      this.layer2.setVisible(true);
     } else {
       this.layer.setSource(this.source);
+      this.layer2.setSource(this.source2);
       mapApp.addLayer(this.layer);
+      mapApp.addLayer(this.layer2);
       mapApp.map.on("click", (e) => {
+        console.log(e.coordinate)
+        let temp = TransformCoordinate(
+          e.coordinate,
+          "EPSG:3857",
+          "EPSG:4326"
+        );
+        console.log(temp)
         const feature = mapApp.map.forEachFeatureAtPixel(
           e.pixel,
           (feature, layer) => {
@@ -225,8 +240,9 @@ const publicData = {
     // 如果加载完成了，则继续加载
     if (this.status === "ready") {
       this.status = "loading";
-      this.activeTypeName = data.typeName + (data.cql_filter || "");
-      if (this.geomData[data.typeName + (data.cql_filter || "")]) {
+      // this.activeTypeName = data.typeName + (data.cql_filter || "");
+      this.activeTypeName = data.typeName;
+      if (this.geomData[data.typeName]) {
         // 使用缓存的数据
         this.renderFeatures(
           this.geomData[this.activeTypeName],
@@ -250,7 +266,8 @@ const publicData = {
         getFeature(url ? url : GET_GEO_DATA, params)
           .then((res) => {
             // 数据缓存，后期优化成本地缓存
-            this.geomData[data.typeName + (data.cql_filter || "")] = res;
+            // this.geomData[data.typeName + (data.cql_filter || "")] = res;
+            this.geomData[data.typeName] = res;
             // 渲染，并且删除加载过后的loadkey
             this.renderFeatures(res, data, fillColor);
             this.status = "ready";
@@ -274,7 +291,7 @@ const publicData = {
     }
   },
 
-  getADPoi: async function (keywords) {
+  getADPoi: async function (keywords, type = 3) {
     let keys = [];
     // if (that.features) {
     //   keys = Object.keys(that.features);
@@ -311,7 +328,8 @@ const publicData = {
         }
         let coords = TransformCoordinate(temp, "EPSG:4326", "EPSG:3857");
         const options = {
-          textFillColor: "#3F48CC",
+          // textFillColor: "#3F48CC",
+          textFillColor: "rgba(255,0,0,1)",
           textStrokeColor: "#fff",
           textStrokeWidth: 3,
           font: "13px sans-serif",
@@ -322,13 +340,26 @@ const publicData = {
           text: item.name,
           iconUrl: require("../../assets/location.svg"),
         };
-
-        if (keys.includes(item.type3)) {
+        let flag = false;
+        let poiType = null;
+        if (keys.includes(item.type3) && type === 3) {
+          flag = true;
+          poiType = item.type3;
+        }
+        if (keys.includes(item.type2) && type === 2) {
+          flag = true;
+          poiType = item.type2;
+        }
+        if (keys.includes(item.type1) && type === 1) {
+          flag = true;
+          poiType = item.type1;
+        }
+        if (flag) {
           const style = createStyle("Point", options);
           const feature = addFeature("Point", { coordinates: coords });
           feature.setStyle(style);
           this.source && this.source.addFeature(feature);
-          this.features[item.type3].push(feature);
+          this.features[poiType].push(feature);
         }
       });
     }
@@ -347,23 +378,45 @@ const publicData = {
   //  }
   // },
 
-  getPopulationDatas: async function (fillColor, name, loadFeatureKeys) {
+  getPopulationDatas: async function (
+    fillColor,
+    name,
+    loadFeatureKeys,
+    dispatch,
+    lenged,
+    str
+  ) {
+    if (lenged) {
+      this.lenged = lenged;
+    }
+    if (dispatch) {
+      this.dispatch = dispatch;
+    }
     if (this.lastPopulationTypeName) {
       this.removeFeatures(this.lastPopulationTypeName);
     }
-    const xzqhSession = await getSession("xzqhCode");
     let type = 0;
     let code = 100000;
-    if (xzqhSession.code === 0) {
-      if (xzqhSession.data) {
-        const tempArr = xzqhSession.data.split("|");
-        if (tempArr[0] === "districtcode") {
-          type = 1;
+    if (!str) {
+      const xzqhSession = await getSession("xzqhCode");
+      if (xzqhSession.code === 0) {
+        if (xzqhSession.data) {
+          const tempArr = xzqhSession.data.split("|");
+          if (tempArr[0] === "districtcode") {
+            type = 1;
+          }
+          code = tempArr[1];
         }
-        code = tempArr[1];
       }
+    } else {
+      const tmpArr = str.split("|");
+      if (tmpArr[0] === "districtcode") {
+        type = 1;
+      }
+      code = tmpArr[1];
     }
     this.activeTypeName = name + "_" + code;
+    // this.activeTypeName = name;
     if (!this.features[this.activeTypeName]) {
       this.features[this.activeTypeName] = [];
       let res = await publicDataServices.getPopulationDatas(code, type);
@@ -382,41 +435,89 @@ const publicData = {
         });
         const region = (max - min) / 5;
         fillColor = [];
+        let lengedArr = [];
         fillColor.push({
           fillColor: this.colors[0],
           property: this.popupKeyVals[name],
           scope: `0-${min}`,
         });
+        // lengedArr.push({
+        //   bgColor: this.colors[0],
+        //   font: `0-${min}`,
+        // })
         fillColor.push({
           fillColor: this.colors[1],
           property: this.popupKeyVals[name],
-          scope: `${min}-${min + region}`,
+          scope: `${min.toFixed(0)}-${(min + region).toFixed(0)}`,
+        });
+        lengedArr.push({
+          bgColor: this.colors[1],
+          font: `${min.toFixed(0)}-${(min + region).toFixed(0)}`,
         });
         fillColor.push({
           fillColor: this.colors[2],
           property: this.popupKeyVals[name],
-          scope: `${min + region}-${min + region * 2}`,
+          scope: `${(min + region).toFixed(0)}-${(min + region * 2).toFixed(
+            0
+          )}`,
+        });
+        lengedArr.push({
+          bgColor: this.colors[2],
+          font: `${(min + region).toFixed(0)}-${(min + region * 2).toFixed(0)}`,
         });
         fillColor.push({
           fillColor: this.colors[3],
           property: this.popupKeyVals[name],
-          scope: `${min + region * 2}-${min + region * 3}`,
+          scope: `${(min + region * 2).toFixed(0)}-${(min + region * 3).toFixed(
+            0
+          )}`,
+        });
+        lengedArr.push({
+          bgColor: this.colors[3],
+          font: `${(min + region * 2).toFixed(0)}-${(min + region * 3).toFixed(
+            0
+          )}`,
         });
         fillColor.push({
           fillColor: this.colors[4],
           property: this.popupKeyVals[name],
-          scope: `${min + region * 3}-${min + region * 4}`,
+          scope: `${(min + region * 3).toFixed(0)}-${(min + region * 4).toFixed(
+            0
+          )}`,
+        });
+        lengedArr.push({
+          bgColor: this.colors[4],
+          font: `${(min + region * 3).toFixed(0)}-${(min + region * 4).toFixed(
+            0
+          )}`,
         });
         fillColor.push({
           fillColor: this.colors[5],
           property: this.popupKeyVals[name],
-          scope: `${min + region * 4}-${min + region * 5}`,
+          scope: `${(min + region * 4).toFixed(0)}-${(min + region * 5).toFixed(
+            0
+          )}`,
+        });
+        lengedArr.push({
+          bgColor: this.colors[5],
+          font: `${(min + region * 4).toFixed(0)}-${(min + region * 5).toFixed(
+            0
+          )}`,
         });
         fillColor.push({
           fillColor: this.colors[6],
           property: this.popupKeyVals[name],
-          scope: `-${max}`,
+          scope: `-${max.toFixed(0)}`,
         });
+        lengedArr.push({
+          bgColor: this.colors[6],
+          font: `>${max.toFixed(0)}`,
+        });
+        lengedArr.push({
+          bgColor: "#E0E0E0",
+          font: "暂无数据",
+        });
+        this.lenged.content = lengedArr;
         data.forEach((item) => {
           let newData = {
             source: item.geom,
@@ -441,6 +542,13 @@ const publicData = {
           this.features[this.activeTypeName].push(newFeature);
           this.source.addFeature(newFeature);
         });
+        this.dispatch &&
+          this.dispatch({
+            type: "lengedList/updateLengedList",
+            payload: {
+              config: [this.lenged],
+            },
+          });
       }
     } else {
       this.features[this.activeTypeName].forEach((item) => {
@@ -671,8 +779,11 @@ const publicData = {
 
             feature.setStyle(style);
           }
-
-          this.source.addFeature(feature);
+          if (option.typeName !== "lingxi:dichan_loupan_point") {
+            this.source.addFeature(feature);
+          } else {
+            this.source2.addFeature(feature);
+          }
           if (!this.features[this.activeTypeName]) {
             this.features[this.activeTypeName] = [];
           }
@@ -682,7 +793,12 @@ const publicData = {
       }
     }
     // 视图平移
-    this.areaForExtent(this.source.getExtent());
+    // this.areaForExtent(this.source.getExtent());
+    if (option.typeName !== "lingxi:dichan_loupan_point") {
+      this.areaForExtent(this.source.getExtent());
+    } else {
+      this.areaForExtent(this.source2.getExtent());
+    }
   },
 
   createCircle: function (coordinates) {
@@ -705,14 +821,18 @@ const publicData = {
   // 清除选到server key 图层
   removeFeatures: function (typeNames) {
     typeNames = typeof typeNames === "string" ? [typeNames] : typeNames;
-    const me = this;
     if (Array.isArray(typeNames)) {
+      let that = this;
       typeNames.forEach((item) => {
-        if (me.features[item]) {
-          me.features[item].forEach((feature) => {
+        if (that.features[item]) {
+          that.features[item].forEach((feature) => {
             // 这里removeFeature有个bug，底层代码中找不到对应的feature，所以这里进行uid判断，有才执行删除
-            if (me.source.getFeatureByUid(feature.ol_uid))
-              me.source.removeFeature(feature);
+            if (that.source.getFeatureByUid(feature.ol_uid)) {
+              that.source.removeFeature(feature);
+            }
+            if (that.source2.getFeatureByUid(feature.ol_uid)) {
+              that.source2.removeFeature(feature);
+            }
           });
           // me.features[item] = null;
         }
@@ -736,6 +856,7 @@ const publicData = {
     this.removeFeatures(keys);
     this.features = {};
     this.source && this.source.clear();
+    this.source2 && this.source2.clear();
     this.circleFeature = null;
     this.removeLpInfo();
     event.Evt.firEvent("removeHousePOI");

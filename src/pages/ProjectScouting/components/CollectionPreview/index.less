@@ -1,21 +1,66 @@
-.viewBoxContainer{
+.viewBoxContainer {
   position: absolute;
   width: calc(10vw);
-  transition: width 0.3s cubic-bezier(0.7, 0.3, 0.1, 1) ;
+  transition: width 0.3s cubic-bezier(0.7, 0.3, 0.1, 1);
   // transition-delay: 0.1s;
   height: 100%;
   background-color: rgba(71, 74, 91, 1);
-  top:0;
+  top: 0;
   z-index: 0;
   right: 0;
-  .closeModal{
+  .panorama_arrow {
+    width: 120px;
+    height: 38px;
+    // border-radius: 40px;
+    background-image: url("../../../../assets/panorama/arrow.png");
+    // background-color: rgb(255, 255, 255);
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 100%;
+    // border-radius: 10px;
+    // box-shadow: 17px 0px 33px 0px rgba(102, 144, 255, 0.1),
+    //   12px 0px 20px 0px rgba(87, 92, 118, 0.1);
+    filter: drop-shadow(0px 70px 0px rgba(0,0,0,0.2));
+    :global(.hotspot) {
+      display: none;
+    }
+  }
+  .panorama_add {
+    width: 40px;
+    height: 40px;
+    border-radius: 40px;
+    background-image: url("../../../../assets/panorama/add.png");
+    // background-color: rgb(255, 255, 255);
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 100%;
+    border-radius: 10px;
+    :global(.hotspot) {
+      display: none;
+    }
+  }
+  .panorama_modify {
+    width: 40px;
+    height: 40px;
+    border-radius: 40px;
+    background-image: url("../../../../assets/panorama/modify.png");
+    // background-color: rgb(255, 255, 255);
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 100%;
+    border-radius: 10px;
+    :global(.hotspot) {
+      display: none;
+    }
+  }
+  .closeModal {
     position: absolute;
     right: 20px;
     top: 20px;
-    width:40px;
-    height:40px;
-    background:rgba(158,166,194,0.2);
-    border-radius:99px;
+    width: 40px;
+    height: 40px;
+    background: rgba(158, 166, 194, 0.2);
+    border-radius: 99px;
     color: #fff;
     line-height: 40px;
     text-align: center;
@@ -23,30 +68,30 @@
     cursor: pointer;
     z-index: 10;
   }
-  .tools{
+  .tools {
     position: absolute;
     left: 50%;
     z-index: 5;
     transform: translateX(-50%);
     bottom: 20px;
-    & > span{
+    & > span {
       display: inline-block;
       border-radius: 99px;
       width: 40px;
       height: 40px;
       text-align: center;
       line-height: 40px;
-      background-color: rgba(158,166,194,0.2);
+      background-color: rgba(158, 166, 194, 0.2);
       margin-right: 10px;
-      color: rgba(255,255,255,0.5);
+      color: rgba(255, 255, 255, 0.5);
       cursor: pointer;
-      &:hover{
-        background-color: rgba(208,211,226,0.8);
-        color: rgba(255,255,255,1);
+      &:hover {
+        background-color: rgba(208, 211, 226, 0.8);
+        color: rgba(255, 255, 255, 1);
       }
     }
   }
-  .editImg{
+  .editImg {
     width: 100%;
     height: 100%;
     background-color: rgba(71, 74, 91, 1);
@@ -55,7 +100,7 @@
     left: 0;
     z-index: 10;
   }
-  .contentTitle{
+  .contentTitle {
     position: absolute;
     top: 20px;
     left: 50%;
@@ -63,26 +108,26 @@
     color: #fff;
     z-index: 5;
     text-align: center;
-    &> div{
-      text-shadow: 0 0 5px rgba(0,0,0,0.9);
+    & > div {
+      text-shadow: 0 0 5px rgba(0, 0, 0, 0.9);
       margin-top: 10px;
     }
   }
-  .CollectionPreviewContainer{
+  .CollectionPreviewContainer {
     width: 100%;
     height: 100%;
   }
-  .goBackMap{
+  .goBackMap {
     position: absolute;
     left: 10px;
     bottom: 20px;
     width: 60px;
     cursor: pointer;
-    img{
+    img {
       width: 100%;
     }
   }
-  .activeMedia{
+  .activeMedia {
     height: 100%;
     width: 90%;
     position: relative;
@@ -91,7 +136,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    img{
+    img {
       display: inline-block;
       max-width: 100%;
       max-height: 100%;
@@ -100,10 +145,10 @@
       // object-fit: cover;
     }
   }
-  &.imgContentNotFull{
+  &.imgContentNotFull {
     height: 65%;
     // transition: height 0.3s linear;
-    .slidebar{
+    .slidebar {
       position: absolute;
       height: 60px;
       width: 48px;
@@ -113,14 +158,13 @@
       left: 50%;
       transform: translateX(-50%);
       z-index: 10;
-      background: url('../../../../assets/slidebar.png') no-repeat;
+      background: url("../../../../assets/slidebar.png") no-repeat;
       background-size: 48px 24px;
       // background-color: rgba(106, 113, 145, 1);
-
     }
   }
-  &.imgContentIsFull{
-    transition: height 0.3s linear, width 0.3s cubic-bezier(0.7, 0.3, 0.1, 1) ;
+  &.imgContentIsFull {
+    transition: height 0.3s linear, width 0.3s cubic-bezier(0.7, 0.3, 0.1, 1);
     height: 100% !important;
   }
 }

@@ -1,16 +1,15 @@
 import React from "react";
 import styles from "./Main.less";
 
-
 export default class Main extends React.Component {
   constructor(props) {
-    super(props)
+    super(props);
     this.state = {
-      show: true
-    }
+      show: true,
+    };
   }
   render(h) {
-    const {row, visible, children} = this.props
+    const { row, visible, children, style } = this.props;
     let mainStyle = {
       flexDirection: "column",
     };
@@ -18,16 +17,22 @@ export default class Main extends React.Component {
       mainStyle.flexDirection = "row";
     }
     let visibleStyle = {
-      display: ''
-    }
+      display: "",
+    };
     if (!visible) {
-      visibleStyle.display = 'none'
+      visibleStyle.display = "none";
     }
     return (
-    <div className={[styles.wrap].join(" ")}
-    style={{...mainStyle,background: "rgba(238,248,255,1)"}}>
-      {children}
-    </div>
-    )
+      <div
+        className={[styles.wrap].join(" ")}
+        style={{
+          ...mainStyle,
+          ...(style || {}),
+          background: "rgba(238,248,255,1)",
+        }}
+      >
+        {children}
+      </div>
+    );
   }
 }

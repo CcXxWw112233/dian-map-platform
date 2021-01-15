@@ -4,6 +4,8 @@ import {
   defaults as defaultInteractions,
   DragRotateAndZoom,
   DragPan,
+  Modify,
+  Select,
 } from "ol/interaction";
 
 import TileLayer from "ol/layer/Tile";
@@ -52,9 +54,15 @@ const initMap = function () {
     init: function (mapId) {
       this.mapId = mapId;
       this.status = "rendering";
+      var select = new Select({
+        wrapX: false,
+      });
+      let modify = new Modify({
+        features: select.getFeatures(),
+      });
       return new Promise((resolve, reject) => {
         this.map = new Map({
-          interactions: defaultInteractions().extend([new DragRotateAndZoom()]),
+          interactions: defaultInteractions().extend([ new DragRotateAndZoom()]),
           layers: [],
           target: mapId,
           view: this.initView(),
@@ -75,7 +83,7 @@ const initMap = function () {
         projection: "EPSG:3857",
         minZoom: 5,
         zoom: 10,
-        maxZoom: 20,
+        maxZoom: 18,
         enableRotation: false,
       });
       return this.view;

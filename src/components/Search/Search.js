@@ -4,7 +4,7 @@ import throttle from "lodash/throttle";
 
 import { DownOutlined } from "@ant-design/icons";
 import commonSearchAction from "@/lib/components/Search/CommonSeach";
-
+import globalStyle from "@/globalSet/styles/globalStyles.less";
 import styles from "./Search.less";
 import AreaPanel from "./AreaPanel";
 import LocationPanel from "./LocationPanel";
@@ -12,6 +12,8 @@ import { getMyPosition } from "utils/getMyPosition";
 import { BASIC } from "../../services/config";
 import { setSession, getSession } from "utils/sessionManage";
 import Event from "../../lib/utils/event";
+import areaSearchAction from "@/lib/components/Search/AreaSearch";
+import NewAreaPanel from "./NewAreaPanel";
 
 import { connect } from "dva";
 
@@ -19,7 +21,8 @@ import { connect } from "dva";
   ({
     scoutingProject: { projectList },
     areaSearch: { locationName, adcode },
-  }) => ({ projectList, locationName, adcode })
+    permission: { projectId },
+  }) => ({ projectList, locationName, adcode, projectId })
 )
 export default class Search extends React.Component {
   constructor(props) {
@@ -39,13 +42,43 @@ export default class Search extends React.Component {
     this.placeholder = "搜索地址或项目";
     this.props.onRef(this);
     this.handleSearch = throttle(this.handleSearch, 1000);
+    this.tempProjectId = ["1340591617840648192"];
+    // Event.Evt.on("changeAreaInSearch", (data) => {
+    //   if (!data) return;
+    //   let promise0 = areaSearchAction.getCity(data.provincecode);
+    //   let promise1 = areaSearchAction.getDistrict(data.citycode);
+    //   Promise.all([promise0, promise1]).then((res) => {
+    //     if (res.length > 0) {
+    //       let currentCity = res[0].data.filter(
+    //         (item) => item.code === data.citycode
+    //       )[0];
+    //       let cityOptions = res[0].data;
+    //       let districtOptions = res[1].data;
+    //       const { dispatch } = this.props;
+    //       dispatch({
+    //         type: "areaSearch/update",
+    //         payload: {
+    //           provinceCode: data.provincecode,
+    //           cityCode: data.citycode,
+    //           cityOptions: cityOptions,
+    //           districtOptions: districtOptions,
+    //           cityDisabled: false,
+    //           districtDisabled: false,
+    //           okDisabled: false,
+    //           locationName: currentCity.name,
+    //           adcode: data.citycode,
+    //         },
+    //       });
+    //     }
+    //   });
+    // });
   }
   componentDidMount() {
     setSession("xzqhCode", "");
     setSession("city", "");
     setSession("province", "");
     setSession("district", "");
-    const options = {
+    let options = {
       type: "nationcode",
       adcode: "100000",
       locationName: "全国",
@@ -65,9 +98,11 @@ export default class Search extends React.Component {
     };
     this.updateState(options);
     Event.Evt.firEvent("searchProject");
+    Event.Evt.firEvent("searchProjectData");
   };
 
   updateState = (val, noNeedUpdate = false) => {
+    if (!val) return;
     if (val.locationName) {
       const { dispatch } = this.props;
       dispatch({
@@ -147,31 +182,62 @@ export default class Search extends React.Component {
   //     });
   //   });
   // };
-  handleSearch = (address, locationName, offset) => {
+  handleSearch = (address, localtionName, offset) => {
     this.setState({
       searchLoading: true,
     });
-    commonSearchAction
-      .getPOI(address, locationName, offset)
-      .then((res) => {
-        let scoutingProjectList = [];
-        if (!this.props.isOnMap) {
-          scoutingProjectList = this.props.projectList.filter((item) => {
-            return item.board_name.indexOf(address) > -1;
-          });
-        }
-        this.setState({
-          searchResult: scoutingProjectList.concat(res),
-          searchLoading: false,
-          searchPanelVisible: res.length ? true : false,
-        });
-      })
-      .catch((e) => {
-        this.setState({
-          searchLoading: false,
-          searchPanelVisible: false,
-        });
+    if (address === "") {
+      this.setState({
+        searchResult: [],
+        searchLoading: false,
+        searchPanelVisible: false,
       });
+      return;
+    }
+    let scoutingProjectList = [];
+    const { collectData, groupId } = this.props;
+    if (collectData) {
+      let tmp = [];
+      let groupData = [];
+      let newGroupId = groupId === "other" ? "" : groupId;
+      groupData = collectData.filter((item) => {
+        return item.area_type_id === newGroupId;
+      });
+      tmp = groupData.filter((item) => {
+        return item.title.includes(address);
+      });
+      scoutingProjectList = tmp;
+    }
+    if (!this.props.inProject) {
+      localtionName = localtionName === "全国" ? "" : localtionName;
+      commonSearchAction
+        .getPOI(address, localtionName, offset)
+        .then((res) => {
+          if (!this.props.isOnMap) {
+            let tmp = this.props.projectList.filter((item) => {
+              return item.board_name.indexOf(address) > -1;
+            });
+            scoutingProjectList = [...scoutingProjectList, ...tmp];
+          }
+          this.setState({
+            searchResult: scoutingProjectList.concat(res),
+            searchLoading: false,
+            searchPanelVisible: scoutingProjectList.length ? true : false,
+          });
+        })
+        .catch((e) => {
+          this.setState({
+            searchLoading: false,
+            searchPanelVisible: false,
+          });
+        });
+    } else {
+      this.setState({
+        searchResult: scoutingProjectList,
+        searchLoading: false,
+        searchPanelVisible: scoutingProjectList.length ? true : false,
+      });
+    }
   };
   changeAreaPanelVisible = () => {
     this.setState({
@@ -218,6 +284,7 @@ export default class Search extends React.Component {
     const areaPanel = (
       <AreaPanel
         handleClose={this.handleAreaClose}
+        inProject={this.props.inProject}
         updateLocationName={this.updateLocationName}
         changeQueryStr={this.props.changeQueryStr}
         changeAreaPanelVisible={this.changeAreaPanelVisible}
@@ -230,8 +297,19 @@ export default class Search extends React.Component {
         getSearchHistory={this.getSearchHistory}
         searchResult={this.state.searchResult}
         updateSearchValue={this.updateSearchValue}
+        parent={this}
         changeLocationPanelVisible={this.changeLocationPanelVisible}
       ></LocationPanel>
+    );
+    const suffix = (
+      <i
+        className={globalStyle.global_icon}
+        onClick={() => {
+          Event.Evt.firEvent("displayAdvancedSearchPanel");
+        }}
+      >
+        &#xe836;
+      </i>
     );
     return (
       <div className={styles.wrap} style={this.props.style}>
@@ -246,6 +324,7 @@ export default class Search extends React.Component {
             <DownOutlined />
           </Button>
         </Dropdown>
+        {/* <NewAreaPanel></NewAreaPanel> */}
         <Dropdown
           overlay={locationPanel}
           visible={this.state.searchPanelVisible}
@@ -262,6 +341,9 @@ export default class Search extends React.Component {
             onSearch={(value, event) => this.onSearch(value, event)}
             onChange={this.handleSearchInputChange}
             onFocus={this.onSearchFocus}
+            suffix={
+              this.tempProjectId.includes(this.props.projectId) && this.props.inProject ? suffix : <></>
+            }
           />
         </Dropdown>
       </div>

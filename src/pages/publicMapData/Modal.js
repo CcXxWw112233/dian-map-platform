@@ -36,7 +36,28 @@ export default class MyModal extends react.Component {
       });
   };
   onOk = () => {
-    const { data } = this.props;
+    if (!this.projectId) {
+      message.info("请选择项目。");
+      return;
+    } else {
+      if (!this.state.selectedGroupId) {
+        message.info("请选择组织。");
+        return;
+      }
+    }
+    const { data, parent } = this.props;
+    if (parent.props.projectPermission) {
+      let index = parent.props.projectPermission[this.projectId].findIndex(
+        (item) => item === "map:collect:add:web"
+      );
+      if (index === -1) {
+        message.info("您无权限引入,请联系管理员。");
+        return;
+      }
+    } else {
+      message.info("您无权限引入,请联系管理员。");
+      return;
+    }
     const { selectedGroupId } = this.state;
     let groupId = selectedGroupId;
     if (selectedGroupId === "other") {
@@ -47,6 +68,8 @@ export default class MyModal extends react.Component {
       .then((res) => {
         if (res.code === "0") {
           message.info("已将所选内容引入到项目,请到项目中查看。");
+        } else {
+          message.info(res.message);
         }
       })
       .catch((e) => console.log(e));

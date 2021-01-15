@@ -7,7 +7,9 @@ export default {
     zIndex:10,
     type:'view',
     isImg: true,
-    small: false
+    small: false,
+    selectPoi: "",
+    selectedFeature: null
   },
   effects:{
 

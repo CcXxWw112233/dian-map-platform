@@ -1,9 +1,11 @@
 import React from "react";
-import { Badge } from "antd";
-
+import { Badge, Tooltip } from "antd";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import styles from "./LeftToolBar.less";
+import Event from "../../lib/utils/event";
+import { connect } from "dva";
 
+@connect(({openswitch: {openPanel}}) => ({openPanel}))
 export default class ToolBar extends React.Component {
   constructor(props) {
     super(props);
@@ -22,8 +24,11 @@ export default class ToolBar extends React.Component {
             displayTempPlot: false,
             displayCustomSymbolStore: false,
             displayProjectList: false,
+            displaySystemManage: false,
           });
           this.parent.deactivate();
+          this.openPanel();
+          this.hideSearchBtn();
         },
       },
       {
@@ -38,8 +43,11 @@ export default class ToolBar extends React.Component {
             displayTempPlot: false,
             displayCustomSymbolStore: false,
             plotType: "point",
+            displaySystemManage: false,
           });
           this.parent.deactivate();
+          this.hideSearchBtn();
+          this.openPanel();
         },
       },
       {
@@ -54,8 +62,11 @@ export default class ToolBar extends React.Component {
             displayTempPlot: false,
             displayCustomSymbolStore: false,
             plotType: "freeLine",
+            displaySystemManage: false,
           });
           this.parent.deactivate();
+          this.hideSearchBtn();
+          this.openPanel();
         },
       },
       {
@@ -70,8 +81,11 @@ export default class ToolBar extends React.Component {
             displayTempPlot: false,
             displayCustomSymbolStore: false,
             plotType: "line",
+            displaySystemManage: false,
           });
           this.parent.deactivate();
+          this.hideSearchBtn();
+          this.openPanel();
         },
       },
       {
@@ -86,8 +100,11 @@ export default class ToolBar extends React.Component {
             displayTempPlot: false,
             displayCustomSymbolStore: false,
             plotType: "freePolygon",
+            displaySystemManage: false,
           });
           this.parent.deactivate();
+          this.hideSearchBtn();
+          this.openPanel();
         },
       },
       {
@@ -102,8 +119,11 @@ export default class ToolBar extends React.Component {
             displayTempPlot: false,
             displayCustomSymbolStore: false,
             plotType: "polygon",
+            displaySystemManage: false,
           });
           this.parent.deactivate();
+          this.hideSearchBtn();
+          this.openPanel();
         },
       },
       {
@@ -118,8 +138,11 @@ export default class ToolBar extends React.Component {
             displayTempPlot: false,
             displayCustomSymbolStore: false,
             plotType: "rect",
+            displaySystemManage: false,
           });
           this.parent.deactivate();
+          this.hideSearchBtn();
+          this.openPanel();
         },
       },
       {
@@ -134,8 +157,11 @@ export default class ToolBar extends React.Component {
             displayTempPlot: false,
             displayCustomSymbolStore: false,
             plotType: "circle",
+            displaySystemManage: false,
           });
           this.parent.deactivate();
+          this.hideSearchBtn();
+          this.openPanel();
         },
       },
       {
@@ -150,8 +176,11 @@ export default class ToolBar extends React.Component {
             displayTempPlot: false,
             displayCustomSymbolStore: false,
             plotType: "arrow",
+            displaySystemManage: false,
           });
           this.parent.deactivate();
+          this.hideSearchBtn();
+          this.openPanel();
         },
       },
     ];
@@ -159,12 +188,63 @@ export default class ToolBar extends React.Component {
       selectedIndex: 0,
       hoveredIndex: -1,
       operatorListLength: 0,
+      update: false,
     };
+    Event.Evt.on("openModifyPointPanel", (icon) => {
+      this.parent.setState({
+        displayPlot: true,
+        hidePlot: false,
+        displayProject: false,
+        displayTempPlot: false,
+        displayCustomSymbolStore: false,
+        plotType: "point",
+        displaySystemManage: false,
+      });
+      this.parent.deactivate();
+      this.parent.isGeojsonMifyIcon = true;
+      this.hideSearchBtn();
+      this.openPanel();
+    })
   }
+
+  openPanel = () => {
+    const { dispatch, openPanel } = this.props;
+    if (!openPanel) {
+      dispatch({
+        type: "openswitch/updateDatas",
+        payload: {
+          openPanel: true,
+        },
+      });
+    }
+  };
+
+  hideSearchBtn = () => {
+    Event.Evt.firEvent("displaySearchBtn", {
+      visible: false,
+      keywords: [],
+    });
+  };
   updateListLen = (len = 0) => {
     this.setState({
       operatorListLength: len,
     });
+  };
+
+  displayTempPlot = () => {
+    this.setState({
+      selectedIndex: -1,
+    });
+    this.parent.setState({
+      displayPlot: false,
+      hidePlot: false,
+      displayProject: false,
+      displayTempPlot: true,
+      displaySystemManage: false,
+      displayCustomSymbolStore: false,
+      plotType: "",
+    });
+    this.hideSearchBtn();
   };
   render() {
     let tempPlotItemStyle = { bottom: 60, left: 4 };
@@ -185,16 +265,43 @@ export default class ToolBar extends React.Component {
           zIndex: 9,
         }}
       >
+        {/* {functionName="map:board:role:manage" type="org"} */}
         <div
           className={`${styles.circle} ${
             this.props.isInvalidToolBar ? "invalid" : ""
           }`}
-          style={{ background: "#fff" }}
+          style={{
+            ...this.parent.getStyle("map:board:role:manage", "org"),
+            ...{ background: "#fff" },
+          }}
+          disabled={this.parent.getDisabled("map:board:role:manage", "org")}
         >
           {/* <img crossOrigin="anonymous" alt="" src=""></img> */}
-          <i className={globalStyle.global_icon} style={{ fontSize: 26 }}>
-            &#xe764;
-          </i>
+          <Tooltip title="权限管理" placement="right">
+            <i
+              className={globalStyle.global_icon}
+              style={{ fontSize: 26 }}
+              onClick={() => {
+                this.parent.setState({
+                  displayPlot: false,
+                  hidePlot: false,
+                  displayProject: false,
+                  displayTempPlot: false,
+                  displayCustomSymbolStore: false,
+                  displayProjectList: false,
+                  displaySystemManage: true,
+                });
+                this.setState({
+                  selectedIndex: -1,
+                });
+                this.parent.deactivate();
+                this.openPanel();
+                this.hideSearchBtn();
+              }}
+            >
+              &#xe764;
+            </i>
+          </Tooltip>
         </div>
         <div
           className={`${globalStyle.autoScrollY} ${
@@ -256,21 +363,16 @@ export default class ToolBar extends React.Component {
           })}
         </div>
         {/* 临时标绘 */}
-        <Badge count={this.state.operatorListLength} className={styles.temp} offset={[0, 20]}>
+        <Badge
+          count={this.state.operatorListLength}
+          className={styles.temp}
+          offset={[0, 20]}
+        >
           <div
             className={`${styles.circle} ${styles.temp}`}
             onClick={() => {
-              this.setState({
-                selectedIndex: -1,
-              });
-              this.parent.setState({
-                displayPlot: false,
-                hidePlot: false,
-                displayProject: false,
-                displayTempPlot: true,
-                displayCustomSymbolStore: false,
-                plotType: "",
-              });
+              this.openPanel();
+              this.displayTempPlot();
             }}
             style={{
               ...tempPlotItemStyle,
@@ -304,10 +406,18 @@ export default class ToolBar extends React.Component {
               displayProject: false,
               displayTempPlot: false,
               displayCustomSymbolStore: true,
+              displaySystemManage: false,
               plotType: "",
             });
+            this.parent.deactivate();
+            this.openPanel();
+            this.hideSearchBtn();
           }}
-          style={customSymbolStoreStyle}
+          style={{
+            ...customSymbolStoreStyle,
+            ...this.parent.getStyle("map:plot:mark:custom", "org"),
+          }}
+          disabled={this.parent.getDisabled("map:plot:mark:custom", "org")}
         >
           <i
             className={globalStyle.global_icon}

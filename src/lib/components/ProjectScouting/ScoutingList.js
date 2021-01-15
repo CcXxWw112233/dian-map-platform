@@ -3,6 +3,7 @@ import InitMap from "../../../utils/INITMAP";
 import {
   project,
   addProjectOverlay,
+  DragCircleRadius,
 } from "../../../components/PublicOverlays/index";
 import { setSession, getSession } from "../../../utils/sessionManage";
 import event from "../../utils/event";
@@ -15,11 +16,11 @@ import {
   Fit,
   createOverlay,
   drawPoint,
+  drawCircle,
+  getPoint,
 } from "../../utils";
 
 import { gcj02_to_wgs84, wgs84_to_gcj02 } from "utils/transCoordinateSystem";
-
-// import addFeaturesOverlay from '../../../components/PublicOverlays/addFeaturesOverlay'
 
 const action = function () {
   const {
@@ -32,6 +33,7 @@ const action = function () {
   this.overlays = [];
   this.draw = null;
   this.addProjectFeature = {};
+  this.addProjectCircleFeature = null;
   this.addProjectOverlay = {};
   this.sesstionSaveKey = "ScoutingItemId";
   this.projects = [];
@@ -44,7 +46,11 @@ const action = function () {
     td_img: gcj02_to_wgs84,
     td_ter: gcj02_to_wgs84,
   };
+  this.projectExtentFeature = null;
   this.currentData = null;
+  this.defaultRadius = null;
+  this.circleRadius = null;
+  this.projectExtentOverlay = null;
   this.addProjecStyle = createStyle("Point", {
     iconUrl: require("../../../assets/addPointLocation.png"),
     icon: { anchorOrigin: "bottom-left", anchor: [0.5, 0.25] },
@@ -85,7 +91,8 @@ const action = function () {
     }
   };
 
-  this.init = async () => {
+  this.init = async (dispatch) => {
+    this.dispatch = dispatch;
     this.mounted = true;
     const layers = InitMap.map.getLayers().getArray();
     const layer = layers.filter((layer) => {
@@ -105,6 +112,7 @@ const action = function () {
     // }))
     return InitMap.map;
   };
+
   // 获取项目列表
   this.getList = async (data = {}) => {
     let id = config.getUrlParam.orgId;
@@ -175,6 +183,7 @@ const action = function () {
     this.currentData = JSON.parse(JSON.stringify(data));
     this.Source && this.Source.clear();
     this.clearOverlay();
+
     data &&
       data.forEach((item) => {
         let styleOption = {
@@ -292,6 +301,7 @@ const action = function () {
       this.Source.getFeatureByUid(this.addProjectFeature.ol_uid)
     ) {
       this.Source.removeFeature(this.addProjectFeature);
+      this.Source.removeFeature(this.addProjectCircleFeature);
     }
   };
 
@@ -340,6 +350,13 @@ const action = function () {
   this.handleClickBoard = (data) => {
     // 保存选中数据到本地
     setSession(this.sesstionSaveKey, data.board_id);
+    this.dispatch &&
+      this.dispatch({
+        type: "permission/updateDatas",
+        payload: {
+          projectId: data.board_id,
+        },
+      });
     try {
       if (window.parent) {
         window.parent.postMessage("map_board_change_" + data.board_id, "*");
@@ -395,7 +412,132 @@ const action = function () {
       this.Source.clear();
       this.clearOverlay();
       this.removeDraw();
+      this.removeFeatureAndOvelay();
     }
+  };
+  this.addBoardRadius = () => {
+    return new Promise((resolve) => {
+      this.draw = drawCircle(this.Source);
+      this.draw.on("drawend", (e) => {
+        InitMap.map.removeInteraction(this.draw);
+        let feature = e.feature;
+        let center = feature.getGeometry().getCenter();
+        let centerFeature = addFeature("Point", { coordinates: center });
+        centerFeature.setStyle(this.addProjecStyle);
+        this.Source.addFeature(centerFeature);
+        this.addProjectFeature = centerFeature;
+        this.addProjectCircleFeature = feature;
+        resolve(feature);
+      });
+      InitMap.map.addInteraction(this.draw);
+    });
+  };
+
+  this.formatUnit = (size) => {
+    if (size) {
+      return size < 1000
+        ? size.toFixed(2) + "米"
+        : (size / 1000).toFixed(2) + "千米";
+    }
+    return null;
+  };
+
+  const updateRadius = (feature, radius) => {
+    let f = this.formatUnit(radius);
+    feature.getGeometry().setRadius(radius);
+    let style = feature.getStyle();
+    style.getText().setText(f);
+  };
+
+  const updateOverlayPosition = () => {
+    let extent = this.projectExtentFeature.getGeometry().getExtent();
+    let rightTop = getPoint(extent, "topRight");
+    let rightBottom = getPoint(extent, "bottomRight");
+    let point = [rightTop[0], (rightTop[1] + rightBottom[1]) / 2];
+    // console.log(coor,coord,overlayElement);
+    this.projectExtentOverlay.setPosition(point);
+  };
+
+  this.removeFeatureAndOvelay = () => {
+    this.projectExtentFeature &&
+      this.Source.removeFeature(this.projectExtentFeature);
+    this.projectExtentFeature = null;
+    this.projectExtentOverlay &&
+      InitMap.map.removeOverlay(this.projectExtentOverlay);
+    this.projectExtentOverlay = null;
+  };
+
+  // 添加项目范围
+  this.addProjectExtent = (data) => {
+    this.defaultRadius = Number(data.radius);
+    let coordinates = TransformCoordinate([
+      +data.coordinate_x,
+      +data.coordinate_y,
+    ]);
+    this.projectExtentFeature = addFeature("defaultCircle", {
+      coordinates: coordinates,
+      radius: this.defaultRadius,
+    });
+    let style = createStyle("Circle", {
+      fillColor: "rgba(193, 232, 255, 0.3)",
+      strokeColor: "rgba(99, 199, 255, 0.5)",
+      strokeWidth: 2,
+      radius: this.defaultRadius,
+      showName: false,
+      offsetY: 0,
+      textFillColor: "#ff0000",
+      textStrokeColor: "#ffffff",
+      textStrokeWidth: 2,
+    });
+    this.projectExtentFeature.setStyle(style);
+    this.Source.addFeature(this.projectExtentFeature);
+    Fit(InitMap.view, this.projectExtentFeature.getGeometry().getExtent());
+    let ele = new DragCircleRadius({
+      format: this.formatUnit(this.defaultRadius),
+    });
+    this.projectExtentOverlay = createOverlay(ele.element, {
+      offset: [-20, 0],
+    });
+    InitMap.map.addOverlay(this.projectExtentOverlay);
+    updateOverlayPosition();
+    let _pixel = InitMap.map.getPixelFromCoordinate(coordinates);
+    let coord = null;
+    let radius;
+    ele.on = {
+      mouseDown: () => {
+        _pixel = InitMap.map.getPixelFromCoordinate(coordinates);
+      },
+      mouseMove: (evt, step) => {
+        var pixel = [evt.clientX, _pixel[1]];
+        coord = InitMap.map.getCoordinateFromPixel(pixel);
+        radius = coord[0] - coordinates[0];
+        this.circleRadius = radius;
+        this.projectExtentOverlay.setPosition(coord);
+        let text = this.formatUnit(radius);
+        ele.updateRadius(text);
+        updateRadius(this.projectExtentFeature, radius);
+      },
+      mouseUp: async () => {
+        Fit(InitMap.view, this.projectExtentFeature.getGeometry().getExtent(), {
+          duration: 300,
+        });
+        config.EDIT_BOARD_NAME(data.board_id, { radius: this.circleRadius });
+      },
+      change: (text) => {
+        let t = +text;
+        radius = t;
+        this.circleRadius = radius;
+        updateRadius(this.projectExtentFeature, t);
+        ele.updateRadius(this.formatUnit(t));
+        updateOverlayPosition(
+          this.projectExtentOverlay,
+          this.projectExtentFeature
+        );
+        Fit(InitMap.view, this.projectExtentFeature.getGeometry().getExtent(), {
+          duration: 300,
+        });
+      },
+    };
   };
 };
 action.prototype.on = event.Evt.on;

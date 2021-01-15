@@ -33,8 +33,9 @@ const getBaseUrl = () => {
   // console.log(process.env);
   if(NODE_ENV === 'development'){
     return {
-      BASE_URL:"http://maptest.new-di.com",
-      API_URL: '/api',
+      // BASE_URL:"http://maptest.new-di.com",
+      BASE_URL:"http://test.lingxi.new-di.com",
+      API_URL: '/dian_map',
       // Geo_WFS:"http://localhost:8080/geoserver/wfs",
       Geo_WFS:"https://map.di-an.com/geoserver/wfs",
       ...config,
@@ -43,7 +44,7 @@ const getBaseUrl = () => {
   if(NODE_ENV === 'production'){
     return {
       BASE_URL:"https://map.di-an.com",
-      API_URL: '/api',
+      API_URL: '/dian_map',
       Geo_WFS:"https://map.di-an.com/geoserver/wfs",
       ...config,
     }

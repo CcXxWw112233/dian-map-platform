@@ -1,40 +1,46 @@
-.baseOverlay{
-    & > div{
-        pointer-events:auto;
+.baseOverlay {
+  & > div {
+    pointer-events: auto;
+  }
+  position: relative;
+  // border-radius: 5px;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  // padding: 8px 6px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2), 0 0 5px rgba(0, 0, 0, 0.2);
+  white-space: nowrap;
+  max-width: auto;
+  user-select: none;
+  svg {
+    transform: translateY(-4px);
+  }
+  .baseOverlayAngle {
+    position: absolute;
+    // border: 10px solid transparent;
+    &.bottomCenter {
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: -20px;
     }
-    position: relative;
-    // border-radius: 5px;
-    border: 2px solid rgba(255 ,255,255,0.6);
-    // padding: 8px 6px;
-    box-shadow: 0 6px 16px rgba(0 ,0,0,0.2),0 0 5px rgba(0,0,0,0.2); 
-    white-space: nowrap;
-    max-width: auto;
-    user-select: none;
-    svg{
-        transform: translateY(-4px);
+    &.bottomLeft {
+      left: 0;
+      bottom: -20px;
     }
-    .baseOverlayAngle{
-        position: absolute;
-        // border: 10px solid transparent;
-        &.bottomCenter{
-            left: 50%;
-            transform: translateX(-50%);
-            bottom: -20px;
-        }
-        &.bottomLeft{
-            left: 0;
-            bottom: -20px;
-        }
-        &.bottomRight{
-            right: 5px;
-            bottom: -20px;
-        }
-        &.rightTop{
-            top:10px;
-            left: -10px;
-        }
+    &.bottomRight {
+      right: 5px;
+      bottom: -20px;
     }
+    &.rightTop {
+      top: 10px;
+      left: -10px;
+    }
+    &.topCenter {
+      left: 50%;
+      transform: translateX(-50%);
+      transform: translateX(-50%) rotate(180deg);
+      top: -20px;
+    }
+  }
 }
-:global(.activeOverlayDefault){
-    z-index: 10;
+:global(.activeOverlayDefault) {
+  z-index: 10;
 }

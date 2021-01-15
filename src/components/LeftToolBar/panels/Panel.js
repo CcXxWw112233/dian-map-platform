@@ -2,15 +2,26 @@ import React from "react";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 
 import styles from "../LeftToolBar.less";
+import BasemapGallery from "../../BasemapGallery/BasemapGallery";
 import { connect } from "dva";
 
-@connect(({openswitch: {openPanel}})=>({openPanel}))
+@connect(({ openswitch: { openPanel } }) => ({ openPanel }))
 export default class Panel extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       // openPanel: true,
     };
+  }
+
+  componentDidMount() {
+    const { dispatch } = this.props;
+    dispatch({
+      type: "openswitch/updateDatas",
+      payload: {
+        panelDidMount: true,
+      },
+    });
   }
 
   toOld = () => {
@@ -23,10 +34,8 @@ export default class Panel extends React.Component {
   };
 
   render() {
-    const { dispatch,openPanel} = this.props;
-    const panelStyle = openPanel
-      ? {}
-      : { transform: "translateX(-100%)" };
+    const { dispatch, openPanel } = this.props;
+    const panelStyle = openPanel ? {} : { transform: "translateX(-100%)" };
     const directionStyle = { display: "table-cell", verticalAlign: "middle" };
     return (
       <div className={styles.panel} style={panelStyle} id="leftPanel">
@@ -50,9 +59,10 @@ export default class Panel extends React.Component {
             <RightOutlined style={directionStyle} />
           )}
         </div>
-        <a className={styles.changePackage} onClick={this.toOld} target="_self">
+        {/* <a className={styles.changePackage} onClick={this.toOld} target="_self">
           切换旧版
-        </a>
+        </a> */}
+        {/* {this.props.isShowBasemapGallery && <BasemapGallery style={{left: "104%"}}/>} */}
       </div>
     );
   }

@@ -33,6 +33,9 @@ app.model(require("./models/editPicture").default);
 app.model(require("./models/areaSearch").default);
 app.model(require("./models/collectionDetail").default);
 app.model(require("./models/scoutingDetail").default);
+app.model(require("./models/publicDataLink").default);
+app.model(require("./models/permission").default);
+app.model(require("./models/meetingSubscribe").default);
 // 4. Router
 app.router(require("./router").default);
 

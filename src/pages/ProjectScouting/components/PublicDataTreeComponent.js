@@ -1,150 +1,187 @@
 import react from "react";
 import { Collapse } from "antd";
 
-import styles from "../ScoutingDetails.less";
 import publicDataStyles from "../PublicDataTreeComponent.less";
-import { MyIcon } from "../../../components/utils";
-import PublicDataAction from "../../../lib/components/PublicData";
-import publicDataConf from "../../publicMapData/public_data";
-import globalStyle from "@/globalSet/styles/globalStyles.less";
-import { guid } from "../../../lib/components/index";
+import PublicDataTreeDetailItem from "./PublicDataTreeDetailItem";
+import PublicDataTreeComponetHeader from "./PublicDataTreeComponetHeader";
+import datas from "../../publicMapData/public_data";
+import { connect } from "dva";
 
-const { Panel } = Collapse;
-
-class DetailItem extends react.Component {
+@connect(({ publicDataLink: { publicDataLinkArr } }) => ({ publicDataLinkArr }))
+export default class PublicDataTreeComponent extends react.Component {
   constructor(props) {
     super(props);
-    this.eyeOpen = "icon-yanjing_xianshi";
-    this.eyeClose = "icon-yanjing_yincang";
-    this.populationDatas = ["人口分布", "人口密度", "就业岗位", "居民用地"];
     this.state = {
-      eyeState: false,
-    };
+      firstActiveKey: "",
+      activeKeys: [],
+      firstEyeActive: false,
+      secondEyeActive: false,
+    }
+    this.datas = null;
+    this.firstActiveKey = ""
+    
+    this.activeKeys = []
+    this.firstEyeActive = false;
+    this.secondEyeActive = false;
   }
-  handleEyeClick = (data) => {
-    this.setState(
-      {
-        eyeState: !this.state.eyeState,
-      },
-      () => {
-        // 显示
-        if (this.state.eyeState) {
-          if (!PublicDataAction.hasInited) {
-            PublicDataAction.init();
-          }
-          if (data && data.is_poi === "1") {
-            PublicDataAction.getADPoi([data.title]);
-          } else {
-            const isPopulation = this.populationDatas.includes(data.title);
-            let conf = publicDataConf.filter(
-              (item) => item.title === data.title
-            )[0];
-            if (!conf) return;
-            let loadFeatureKeys = conf.loadFeatureKeys[0];
-            const fillColorKeyVals = data.fillColorKeyVals;
-            if (isPopulation) {
-              PublicDataAction.getPopulationDatas(
-                fillColorKeyVals,
-                data.title,
-                loadFeatureKeys
-              );
-            } else {
-              PublicDataAction.getPublicData({
-                url: "",
-                data: loadFeatureKeys,
-                fillColor: fillColorKeyVals,
-              });
-            }
-          }
-        } else {
-          // 隐藏
-          if (data && data.is_poi === "1") {
-            PublicDataAction.removeFeatures(data.title);
-          } else {
-            const isPopulation = this.populationDatas.includes(data.title);
-            if (isPopulation) {
-              // 人口
-              PublicDataAction.removeFeatures(
-                PublicDataAction.lastPopulationTypeName
-              );
-            } else {
+
+  /***
+   * type=1,复制到分组
+   * type=2,移动到分组
+   * type=3,删除
+   */
+  updateData = (callbackData, type = 1) => {
+    const { updateCollection } = this.props;
+    let id1 = datas.id,
+      id2 = "",
+      id3 = "";
+    if (callbackData.id === datas.id) {
+      id1 = datas.id;
+    } else {
+      for (let i = 0; i < datas.content.length; i++) {
+        if (datas.content[i].id === callbackData.id) {
+          id2 = callbackData.id;
+          break;
+        }
+      }
+      if (id2 === "") {
+        for (let i = 0; i < datas.content.length; i++) {
+          const child = datas.content[i].children;
+          for (let j = 0; j < child.length; j++) {
+            if (child[j].id === callbackData.id) {
+              id3 = child[j].id;
+              break;
             }
           }
         }
       }
-    );
+    }
+    // 删除
+    if (type === 3) {
+
+    } else if (type === 2) { // 移动
+      updateCollection && updateCollection(datas)
+    } else { //复制
+      updateCollection && updateCollection(datas)
+    }
   };
-  render() {
-    const { data } = this.props;
-    return (
-      <div
-        className={styles.uploadItem + ` ${globalStyle.btn}`}
-        key={data.id}
-        style={{ flexDirection: "row" }}
-      >
-        <div className={styles.uploadIcon}>
-          <MyIcon type="icon-bianzu78beifen12" />
-        </div>
-        <div className={publicDataStyles.text}>
-          <span>{data.title}</span>
-        </div>
-        <div
-          className={styles.uploadItemOperation}
-          onClick={() => this.handleEyeClick(data)}
-        >
-          <MyIcon type={this.state.eyeState ? this.eyeOpen : this.eyeClose} />
-        </div>
-      </div>
-    );
+
+  firstCollapseChange = (e) => {
+    const { index, publicDataLinkArr, dispatch } = this.props
+    if (!publicDataLinkArr[index]) {
+      publicDataLinkArr[index] = {}
+    }
+    publicDataLinkArr[index].key = e
+    publicDataLinkArr[index].children = []
+
+    if (Array.isArray(e)) {
+      dispatch({
+        type: "publicDataLink/update",
+        payload: {
+          publicDataLinkArr: publicDataLinkArr
+        }
+      })
+      this.setState({
+        firstActiveKey: e
+      })
+    }
   }
-}
-export default class PublicDataTreeComponent extends react.Component {
-  constructor(props) {
-    super(props);
+
+  collapseChange = (e, index) => {
+    const { index: parentIndex, publicDataLinkArr, dispatch } = this.props;
+    if (!publicDataLinkArr[parentIndex].children) {
+      publicDataLinkArr[parentIndex].children = []
+    }
+    publicDataLinkArr[parentIndex].children[index] = e
+    if (Array.isArray(e)) {
+      dispatch({
+        type: "publicDataLink/update",
+        payload: {
+          publicDataLinkArr: publicDataLinkArr
+        }
+      })
+      this.activeKeys[index] = e
+      this.setState({
+        activeKeys: this.activeKeys
+      })
+    }
   }
-  render() {
-    const { datas } = this.props;
-    return datas.map((item) => {
-      if (item.children.length === 0) {
-        return <DetailItem key={item.id} data={item} />;
-      } else {
-        return (
-          <Collapse bordered={false} ghost key={guid()}>
-            {item.children.map((item2) => {
-              return (
-                <Panel header={item2.title} key={item2.id}>
-                  {item2.children.length > 0 &&
-                  item2.children[0].children.length > 0 ? (
-                    <Collapse ghost bordered={false} key={item2.id + "0"}>
-                      {item2.children.map((item3) => {
-                        if (item3.children.length > 0) {
-                          return (
-                            <Panel header={item3.title} key={item3.id}>
-                              {item3.children.map((item4) => {
-                                return (
-                                  <DetailItem key={item4.id} data={item4} />
-                                );
-                              })}
-                            </Panel>
-                          );
-                        } else {
-                          return null;
+
+  render () {
+    const { datas, callback, index: parentIndex, publicDataLinkArr } = this.props;
+    const { Panel } = Collapse;
+    if (datas)
+      return (
+        <Collapse activeKey={publicDataLinkArr[parentIndex]?.key || ""} bordered={false} ghost key={datas.id} className={publicDataStyles.wrapper} onChange={(e) => this.firstCollapseChange(e)}>
+          <Panel
+            className={publicDataStyles.header}
+            key={datas.id}
+            header={
+              <PublicDataTreeComponetHeader
+                data={datas}
+                collectionId={datas.id}
+                areaList={this.props.areaList}
+                callback={callback}
+                // parent={this}
+                isFirst={true}
+              />
+            }
+          >
+            {datas.content &&
+              datas.content.map((item, index) => {
+                if (item.children && item.children.length > 0) {
+                  this.activeKeys = Array(item.children.length).fill("");
+                  return (
+                    <Collapse bordered={false} ghost key={item.id + "00"} activeKey={publicDataLinkArr[parentIndex]?.children[index] ||""} onChange={(e) => this.collapseChange(e, index)}>
+                      <Panel
+                        key={item.id}
+                        header={
+                          <PublicDataTreeComponetHeader
+                            data={item}
+                            collectionId={datas.id}
+                            areaList={this.props.areaList}
+                            callback={callback}
+                            // parent={this}
+                            // showEyeByFirst={this.state.firstEyeActive}
+                            
+                          />
                         }
-                      })}
+                      >
+                        {item.children.map((item2) => {
+                          return (
+                            <PublicDataTreeDetailItem
+                              key={item2.id}
+                              data={item2}
+                              collectionId={datas.id}
+                              areaList={this.props.areaList}
+                              callback={callback}
+                              changeQueryStr={this.props.changeQueryStr}
+                              // parent={this}
+                              // showEyeByFirst={this.state.firstEyeActive}
+                              // showEyeBySecond={this.state.secondEyeActive}
+                            />
+                          );
+                        })}
+                      </Panel>
                     </Collapse>
-                  ) : null}
-                  {item2.children.length > 0 &&
-                  item2.children[0].children.length === 0
-                    ? item2.children.map((item3) => {
-                        return <DetailItem key={item3.id} data={item3} />;
-                      })
-                    : null}
-                </Panel>
-              );
-            })}
-          </Collapse>
-        );
-      }
-    });
+                  );
+                } else {
+                  return (
+                    <PublicDataTreeDetailItem
+                      key={item.id}
+                      data={item}
+                      collectionId={datas.id}
+                      areaList={this.props.areaList}
+                      callback={callback}
+                      changeQueryStr={this.props.changeQueryStr}
+                      // parent={this}
+                      // showEyeByFirst={this.state.firstEyeActive}
+                    />
+                  );
+                }
+              })}
+          </Panel>
+        </Collapse>
+      );
   }
 }

@@ -16,34 +16,49 @@ import FlutterComponents from "../pages/FlutterComponents";
 import MatrixEdit from "../components/MatrixEdit";
 import { BASIC } from "../services/config";
 import UploadNotification from "../components/UploadNotification";
+import ImagePreview from "../pages/ProjectScouting/components/CollectionDetail/imagePreview";
 
 // new ui
-import BasemapGallery from "../components/BasemapGallery/BasemapGallery";
+// import BasemapGallery from "../components/BasemapGallery/BasemapGallery";
+import Zoom from "../components/Zoom/index";
 import RightTools from "../components/RightTools/index";
 
 import LeftToolBar from "../components/LeftToolBar/index";
 
 import SearchBtn from "../pages/publicMapData/searchBtn";
+import BasemapGallery from "../components/BasemapGallery/BasemapGallery";
+
+import MeetingSubscribe from "../pages/ProjectScouting/components/MeetingSubscribe/index";
 
 @connect(
   ({
     controller: { mainVisible },
     openswitch: {
+      isShowMap,
       isShowMobile,
       isShowBasemapGallery,
       isShowRightTools,
       isShowLeftToolBar,
       isShowPhotoSwipe,
+      panelDidMount,
+      openPanel,
+      imagePreviewVisible,
     },
     editPicture: { editShow },
+    meetingSubscribe: { panelVisible },
   }) => ({
     mainVisible,
+    isShowMap,
     isShowMobile,
     editShow,
     isShowBasemapGallery,
     isShowRightTools,
     isShowLeftToolBar,
     isShowPhotoSwipe,
+    panelDidMount,
+    openPanel,
+    imagePreviewVisible,
+    panelVisible,
   })
 )
 class IndexPage extends React.Component {
@@ -55,21 +70,46 @@ class IndexPage extends React.Component {
     this.positionTimer = null;
     this.queryStr = "";
     this.publicDataChild = null;
-    // this.state = {
-    //   draw_
-    // }
+    this.state = {
+      visible: true,
+      placement: "left",
+      left: "0px",
+      draw_visible: false,
+      isMoveMapMoveedListen: true,
+    };
   }
-  state = {
-    visible: true,
-    placement: "left",
-    left: "0px",
-    draw_visible: false,
-  };
   componentDidMount() {
     this.checkListCach();
     Event.Evt.on("hasFeatureToProject", (data) => {
       console.log(data);
       this.addFeatureForProject(data);
+    });
+    Event.Evt.on("resetMoveMapMoveedListen", () => {
+      this.setState({
+        isMoveMapMoveedListen: true,
+      });
+    });
+    const me = this;
+    window.addEventListener("resize", function () {
+      const width = document.getElementById("leftPanel").clientWidth;
+      const transform = `translateX(${width}px)`;
+      me.setState({
+        transform: transform,
+      });
+    });
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const { openPanel, panelDidMount } = nextProps;
+    let transform = "translateX(0px)";
+    if (panelDidMount) {
+      if (openPanel) {
+        const width = document.getElementById("leftPanel").clientWidth;
+        transform = `translateX(${width}px)`;
+      }
+    }
+    this.setState({
+      transform: transform,
     });
   }
 
@@ -299,30 +339,107 @@ class IndexPage extends React.Component {
     }, 5 * 1000);
   };
 
+  toOld = () => {
+    let search = window.location.search || window.location.hash;
+    let origin = window.location.origin;
+    let href = origin + "/oldpage/" + search.replace("#/", "");
+    setTimeout(() => {
+      window.open(href, "_self");
+    }, 500);
+  };
+
   render() {
+    window.addEventListener("resize", () => {
+      this.setState({
+        update: this.state.update + 1,
+      });
+    });
     let {
+      isShowMap,
       isShowMobile,
       editShow,
       isShowBasemapGallery,
       isShowRightTools,
       isShowLeftToolBar,
       isShowPhotoSwipe,
+      imagePreviewVisible,
+      panelVisible,
     } = this.props;
     return (
       <div className={styles.normal} id="IndexPage">
         {/* 地图主体 */}
-        <LayerMap onLoad={this.MapOnload} />
-        {isShowBasemapGallery && <BasemapGallery />}
+        {isShowMap && <LayerMap onLoad={this.MapOnload} />}
+        {/* {isShowBasemapGallery && <BasemapGallery />} */}
         {isShowRightTools && <RightTools />}
         <LeftToolBar isShowLeftToolBar={isShowLeftToolBar} />
         {isShowPhotoSwipe && <PhotoSwipe />}
         {/* 是否显示手机页面 */}
         {isShowMobile && <FlutterComponents />}
         {editShow && <MatrixEdit />}
+        {/* {isShowRightTools && <Zoom />} */}
         {/* 文件上传通知 */}
         {/* {!isShowMobile && } */}
         <UploadNotification />
         <SearchBtn></SearchBtn>
+        {isShowBasemapGallery && <BasemapGallery />}
+        {/* {isShowBasemapGallery && (
+          <a
+            // className={styles.changePackage}
+            style={{
+              position: "absolute",
+              left: 66,
+              padding: "4px 8px",
+              borderRadius: "50px",
+              backgroundColor: "#fff",
+              top: "24px",
+              color: "#595959",
+              border: "1px solid #dedede",
+              fontSize: "12px",
+              width: "72px",
+              transition: "transform 0.3s cubic-bezier(0.7, 0.3, 0.1, 1)",
+              transform: this.state.transform,
+            }}
+            onClick={this.toOld}
+            target="_self"
+          >
+            切换旧版
+          </a>
+        )} */}
+        {isShowBasemapGallery && (
+          <a
+            style={{
+              position: "absolute",
+              left: 66,
+              padding: "4px 8px",
+              borderRadius: "50px",
+              backgroundColor: "#fff",
+              bottom: "100px",
+              color: "#595959",
+              border: "1px solid #dedede",
+              fontSize: "12px",
+              width: "100px",
+              transition: "transform 0.3s cubic-bezier(0.7, 0.3, 0.1, 1)",
+              transform: this.state.transform,
+            }}
+            onClick={() => {
+              this.setState(
+                {
+                  isMoveMapMoveedListen: !this.state.isMoveMapMoveedListen,
+                },
+                () => {
+                  Event.Evt.firEvent(
+                    "removeMapMoveEndListen",
+                    this.state.isMoveMapMoveedListen
+                  );
+                }
+              );
+            }}
+          >
+            {this.state.isMoveMapMoveedListen ? "开启统计" : "关闭统计"}
+          </a>
+        )}
+        {imagePreviewVisible && <ImagePreview />}
+        {panelVisible ? <MeetingSubscribe></MeetingSubscribe> : null}
       </div>
     );
   }

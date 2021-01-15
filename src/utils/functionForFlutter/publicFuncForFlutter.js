@@ -566,6 +566,16 @@ let callFunctions = {
   saveTestPoint: (val = {}) => {
     DetailAction.savePoint(val);
   },
+
+  resolveGeojson: ({ fileName, featureType, selectName, needRandom }) => {
+    // 参数：name, featureType, selectName
+    Event.Evt.firEvent("resolveGeojson", {
+      fileName,
+      featureType,
+      selectName,
+      needRandom,
+    });
+  },
 };
 
 window.CallWebMapFunction = CallWebFunction;

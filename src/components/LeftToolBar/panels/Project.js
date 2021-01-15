@@ -12,6 +12,7 @@ import Search from "../../Search/Search";
 import ScoutAction from "../../../lib/components/ProjectScouting/ScoutingList";
 import mapApp from "utils/INITMAP";
 import { TransformCoordinate } from "@/lib/utils";
+import AddPlan from "../../../pages/ProjectScouting/components/Plan/addPlan";
 
 import { connect } from "dva";
 
@@ -22,19 +23,27 @@ import { connect } from "dva";
 export default class Project extends React.Component {
   constructor(props) {
     super(props);
+    this.props.onRef(this);
     this.queryStr = "";
     this.publicDataChild = null;
     this.searchChild = null;
+    this.scoutingDetailChild = null;
     this.publicDataTree = null;
     this.publicDataCheckedKeys = [];
     this.publicDataExpandedKeys = [];
     this.publicDataLastKeywords = [];
     this.publicDataLastKeywords2 = [];
     this.lastSingle = null;
+    this.singleNodes = null;
     this.hasRenderPublicData = false;
     this.activePanelKey = "1";
     this.state = {
       openPanel: true,
+      update: false,
+      showAddPlan: false,
+      boardId: "",
+      planGroupId: "",
+      planId: "",
     };
     this.getLoaction = throttle(this.getLoaction, 1000);
   }
@@ -92,6 +101,11 @@ export default class Project extends React.Component {
     this.publicDataChild && this.publicDataChild.getAllData(this.queryStr);
   };
 
+  changeQueryStr2 = (value) => {
+    this.scoutingDetailChild &&
+      this.scoutingDetailChild.getPopulationData(value);
+  };
+
   getQueryStr = () => {
     return this.queryStr;
   };
@@ -104,6 +118,10 @@ export default class Project extends React.Component {
     this.searchChild = ref;
   };
 
+  onScoutingDetailsRef = (ref) => {
+    this.scoutingDetailChild = ref;
+  };
+
   // 检查缓存中是否存在id，进行判断渲染
   checkListCach = () => {
     let { dispatch } = this.props;
@@ -113,6 +131,12 @@ export default class Project extends React.Component {
           type: "controller/updateMainVisible",
           payload: {
             mainVisible: res.code === 0 ? "detail" : "list",
+          },
+        });
+        dispatch({
+          type: "permission/updateDatas",
+          payload: {
+            projectId: res.data.board_id,
           },
         });
       })
@@ -128,7 +152,11 @@ export default class Project extends React.Component {
 
   render() {
     const { TabPane } = Tabs;
-    const { hidden } = this.props;
+    let { hidden, parent } = this.props;
+    let style2 = {};
+    if (this.state.showAddPlan) {
+      style2 = { display: "none" };
+    }
     return (
       <div
         style={{ width: "100%", height: "100%" }}
@@ -169,13 +197,31 @@ export default class Project extends React.Component {
                   }}
                 >
                   <TabPane tab={<span>项目数据</span>} key="1">
-                    <ProjectScouting></ProjectScouting>
+                    <ProjectScouting
+                      toolParent={this.props.parent}
+                      update={this.state.update}
+                    ></ProjectScouting>
                   </TabPane>
-                  <TabPane tab={<span>公共数据</span>} key="2">
+                  <TabPane
+                    tab={<span>公共数据</span>}
+                    key="2"
+                    style={{
+                      ...this.props.parent.getStyle(
+                        "map:collect:poi:view",
+                        "org"
+                      ),
+                    }}
+                    disabled={this.props.parent.getDisabled(
+                      "map:collect:poi:view",
+                      "org"
+                    )}
+                  >
                     <PublicData
                       parent={this}
+                      toolParent={parent}
                       getQueryStr={this.getQueryStr}
                       onRef={this.onRef}
+                      projectPermission={this.props.projectPermission}
                     />
                   </TabPane>
                 </Tabs>
@@ -187,12 +233,27 @@ export default class Project extends React.Component {
             <Spin />
           </div>
         ) : (
-          <Main>
+          <Main style={style2}>
             <ScoutingDetails
               displayPlotPanel={this.props.displayPlotPanel}
+              parentTool={this.props.parent}
+              changeQueryStr={this.changeQueryStr}
+              parent={this}
+              showAddPlan={this.state.showAddPlan}
             ></ScoutingDetails>
           </Main>
         )}
+        {this.state.showAddPlan ? (
+          <AddPlan
+            parent={this}
+            taskName={this.state.taskName}
+            isAdd={this.state.isAdd}
+            boardId={this.state.boardId}
+            planId={this.state.planId}
+            data={this.state.data}
+            planGroupId={this.state.planGroupId}
+          />
+        ) : null}
       </div>
     );
   }
