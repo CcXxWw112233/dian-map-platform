@@ -44,7 +44,7 @@ export default class Search extends React.Component {
     this.placeholder = "搜索地址或项目";
     this.props.onRef(this);
     this.handleSearch = throttle(this.handleSearch, 1000);
-    this.tempProjectId = ["1340591617840648192"];
+    this.tempProjectId = ["1340591617840648192","1348802078218260480"];
     // Event.Evt.on("changeAreaInSearch", (data) => {
     //   if (!data) return;
     //   let promise0 = areaSearchAction.getCity(data.provincecode);

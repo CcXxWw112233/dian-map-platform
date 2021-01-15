@@ -567,9 +567,9 @@ let callFunctions = {
     DetailAction.savePoint(val);
   },
 
-  resolveGeojson: ({ fileName, featureType, selectName, needRandom }) => {
+  resolveExcel: ({ fileName, featureType, selectName, needRandom }) => {
     // 参数：name, featureType, selectName
-    Event.Evt.firEvent("resolveGeojson", {
+    Event.Evt.firEvent("resolveExcel", {
       fileName,
       featureType,
       selectName,

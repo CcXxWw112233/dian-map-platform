@@ -127,6 +127,9 @@ export const poiLayer = {
     });
     newFeature.setStyle(style);
     this.poiList.push(newFeature);
+    if (!this.source) {
+      this.init();
+    }
     this.source.addFeature(newFeature);
   },
   removePoi: function () {
