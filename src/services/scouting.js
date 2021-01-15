@@ -1,4 +1,4 @@
-import { BASIC } from "./config";
+import { BASIC, MAP_REQUEST_URL } from "./config";
 import { request } from "./index";
 import checkResponse from "./checkResponse";
 import { getSession } from "utils/sessionManage";
@@ -286,7 +286,7 @@ export default {
   },
   // 规划图接口
   PLAN_IMG_URL: (id) => {
-    return `/api/map/ght/${id}/image`;
+    return `${MAP_REQUEST_URL}/map/ght/${id}/image`;
   },
   // 保存修改的规划图
   SAVE_EDIT_PLAN_IMG: async (id, data) => {

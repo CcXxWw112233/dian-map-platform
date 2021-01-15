@@ -12,6 +12,7 @@ import { Icon } from 'antd'
 import { compress } from "../../../utils//pictureCompress"
 import Cookies from 'js-cookie'
 import { getSessionOrgId } from "../../../utils/sessionData";
+import { MAP_REQUEST_URL } from '../../../services/config'
 export default class CustomSymbolStore extends React.Component {
   constructor(props) {
     super(props);
@@ -130,7 +131,7 @@ export default class CustomSymbolStore extends React.Component {
     param.append("org_id", data.org_id);
     param.append("icon_name", data.icon_name);
     axios
-      .post("/api/map/icon", param, { headers })
+      .post(`${MAP_REQUEST_URL}/map/icon`, param, { headers })
       .then((res) => {
         if (BASIC.checkResponse(res.data)) {
           this.setState({
@@ -327,7 +328,7 @@ export default class CustomSymbolStore extends React.Component {
           ) : (
             <Fragment>
               <Upload
-                action="/api/map/icon"
+                action={`${MAP_REQUEST_URL}/map/icon`}
                 accept=".jpg, .jpeg, .png, .bmp"
                 data={{
                   icon_name: this.state.uploadSymbolName,

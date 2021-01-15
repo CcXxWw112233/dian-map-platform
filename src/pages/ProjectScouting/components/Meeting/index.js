@@ -35,6 +35,9 @@ export default function Meettings(props) {
       .fetchUsers({ board_id: props.board.board_id })
       .then((res) => {
         let data = res.data;
+        data = (data || []).map(item => {
+          return item.user;
+        })
         setBoardUsers(data);
       });
   };
@@ -153,8 +156,9 @@ export default function Meettings(props) {
               shape="square"
               className={styles.avatar}
               onClick={addPhone}
-              icon={<MyIcon type="icon-querentianjia" />}
-            />
+            >
+              <MyIcon type="icon-querentianjia" />
+            </Avatar>
           ) : (
             <Popover
               title={<div style={{ padding: "5px 0" }}>联系人</div>}
@@ -172,21 +176,21 @@ export default function Meettings(props) {
                     return (
                       <div
                         className={styles.border_user}
-                        key={item.user_id || index}
+                        key={item?.user_id || index}
                         onClick={() => clickAddUser(item)}
                       >
                         <Row gutter={6} align="middle">
                           <Col span={4}>
-                            <Avatar src={item.avatar} />
+                            <Avatar icon="user" src={item.avatar} />
                           </Col>
                           <Col style={{ textAlign: "left" }} span={18}>
-                            <span>{item.name}</span>
+                            <span>{item?.name}</span>
                           </Col>
                           <Col span={2}>
                             <Checkbox
-                              value={item.user_id}
+                              value={item?.user_id}
                               onClick={(e) => e.stopPropagation()}
-                              checked={selectUsers.includes(item.user_id)}
+                              checked={selectUsers.includes(item?.user_id)}
                             ></Checkbox>
                           </Col>
                         </Row>
@@ -200,8 +204,9 @@ export default function Meettings(props) {
                 shape="square"
                 className={styles.avatar}
                 onClick={getUsersList}
-                icon={<MyIcon type="icon-tianjiachengyuan" />}
-              />
+                >
+                  <MyIcon type="icon-tianjiachengyuan" />
+                </Avatar>
             </Popover>
           )}
         </div>
@@ -222,12 +227,14 @@ export default function Meettings(props) {
             >
               {item._type === "phone" ? (
                 <Avatar
-                  icon={<MyIcon type="icon-weidenglutouxiang" />}
                   style={{ background: "rgba(141, 185, 255, 1)" }}
                   className={styles.user_avatar}
-                />
+                >
+                  <MyIcon type="icon-weidenglutouxiang" />
+                </Avatar>
               ) : (
-                <Avatar src={item.avatar} className={styles.user_avatar} />
+                  <Avatar icon="user" src={item.avatar} className={styles.user_avatar} >
+                  </Avatar>
               )}
               <span>{item.name}</span>
               <span

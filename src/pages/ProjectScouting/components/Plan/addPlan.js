@@ -878,6 +878,7 @@ export default class AddPlan extends React.Component {
                   display: "flex",
                   width: "calc(100% - 36px)",
                   borderBottom: "1px rgba(230, 232, 241, 1) solid",
+                  height: "100%"
                 }}
               >
                 <DatePicker
@@ -885,7 +886,8 @@ export default class AddPlan extends React.Component {
                   size="small"
                   placeholder="选择提醒时间"
                   bordered={false}
-                  style={{ width: "calc(100% - 36px", padding: 0 }}
+                  className={styles.plan_picker}
+                  style={{ width: "calc(100% - 36px", padding: 0 , height: '100%'}}
                   format="YYYY年MM月DD日 HH时mm分"
                   locale={locale}
                   disabledDate={this.disabledDate}
@@ -1003,6 +1005,7 @@ export default class AddPlan extends React.Component {
                 <DatePicker
                   allowClear={false}
                   size="small"
+                  className={styles.plan_picker}
                   placeholder="添加截止日期"
                   bordered={false}
                   mode="date"
@@ -1010,7 +1013,7 @@ export default class AddPlan extends React.Component {
                   locale={locale}
                   disabledDate={this.disabledDate}
                   disabledTime={this.disabledDateTime}
-                  style={{ width: "calc(100% - 36px", padding: 0 }}
+                  style={{ width: "calc(100% - 36px", padding: 0, height: '100%' }}
                   value={
                     this.state.endTime ? moment(this.state.endTime) : undefined
                   }
