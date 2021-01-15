@@ -2,6 +2,8 @@ import React from "react";
 import PropTypes from "prop-types";
 import { DownOutlined } from "@ant-design/icons";
 import { Dropdown, Button, Menu } from "antd";
+import { Icon } from 'antd'
+
 // import { MyIcon } from "components/utils";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 
@@ -22,7 +24,7 @@ const DropOption = ({ options }) => {
   const icon = options.icon;
   let downOutlined, myOvelay;
   if (children.length > 0) {
-    downOutlined = <DownOutlined />;
+    downOutlined = <Icon type="down" />;
     myOvelay = <Menu>{menu}</Menu>;
   } else {
     return (

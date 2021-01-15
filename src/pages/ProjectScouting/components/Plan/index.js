@@ -1,6 +1,6 @@
 import React, { useState, Fragment } from "react";
-import { Collapse, Col, Input, Button, message, Upload, Tooltip } from "antd";
-import { CloseOutlined, CheckOutlined } from "@ant-design/icons";
+import { Collapse, Col, Input, Button, message, Upload, Tooltip, Icon } from "antd";
+// import { CloseOutlined, CheckOutlined } from "@ant-design/icons";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import { MyIcon } from "components/utils";
 import styles from "./style.less";
@@ -8,6 +8,8 @@ import services from "../../../../services/planServices";
 import planServices from "../../../../services/planServices";
 import { formatSize } from "../../../../utils/utils";
 import { BASIC } from "../../../../services/config";
+import Cookies from 'js-cookie'
+
 const CreatePanelHeader = ({
   data,
   index: dataIndex,
@@ -198,8 +200,9 @@ const CreatePanelHeader = ({
                 }}
                 size="small"
                 shape="circle"
-              >
-                <CloseOutlined />
+                >
+                <Icon type="close"></Icon>
+                {/* <CloseOutlined /> */}
               </Button>
             </Col>
             <Col span={3} style={{ textAlign: "center" }}>
@@ -210,8 +213,9 @@ const CreatePanelHeader = ({
                 }}
                 shape="circle"
                 type="primary"
-              >
-                <CheckOutlined />
+                >
+                  <Icon type="check"></Icon>
+                {/* <CheckOutlined /> */}
               </Button>
             </Col>
           </Fragment>
@@ -253,7 +257,7 @@ const CreatePanelHeader = ({
             action={(file) => uploadFileAction(file)}
             beforeUpload={checkFileSize}
             multiple
-            headers={{ Authorization: BASIC.getUrlParam.token }}
+            headers={{ Authorization: Cookies.get('Authorization') }}
             onChange={(e) => {
               onupload(e);
             }}

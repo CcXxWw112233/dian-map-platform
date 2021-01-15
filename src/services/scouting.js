@@ -2,17 +2,18 @@ import { BASIC } from "./config";
 import { request } from "./index";
 import checkResponse from "./checkResponse";
 import { getSession } from "utils/sessionManage";
+import { getSessionOrgId } from "../utils/sessionData";
 const getBase64OrgId = () => {
-  const urlParam = BASIC.getUrlParam;
-  const obj = { orgId: urlParam.orgId };
+  // const urlParam = BASIC.getUrlParam;
+  const obj = { orgId: getSessionOrgId() };
   let str = JSON.stringify(obj);
   // str = encodeURI(str);
   const base64 = btoa(str);
   return base64;
 };
 const getBase64 = (id) => {
-  const urlParam = BASIC.getUrlParam;
-  const obj = { orgId: urlParam.orgId, boardId: id };
+  // const urlParam = BASIC.getUrlParam;
+  const obj = { orgId: getSessionOrgId(), boardId: id };
   let str = JSON.stringify(obj);
   // str = encodeURI(str);
   const base64 = btoa(str);
@@ -60,7 +61,7 @@ export default {
       "POST",
       "/map/board",
       {
-        org_id: BASIC.getUrlParam.orgId,
+        org_id: getSessionOrgId(),
         ...data,
       },
       {
@@ -329,7 +330,7 @@ export default {
       "/map/board/meeting",
       {
         ...data,
-        _organization_id: BASIC.getUrlParam.orgId,
+        _organization_id: getSessionOrgId(),
       },
       {
         BaseInfo: base64,

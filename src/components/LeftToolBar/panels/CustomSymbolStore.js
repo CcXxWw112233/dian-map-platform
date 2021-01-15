@@ -8,8 +8,10 @@ import server from "../../../services/symbolStore";
 import { BASIC } from "../../../services/config";
 import { formatSize } from "../../../utils/utils";
 import RenameModal from "../components/RenameModal";
+import { Icon } from 'antd'
 import { compress } from "../../../utils//pictureCompress"
-
+import Cookies from 'js-cookie'
+import { getSessionOrgId } from "../../../utils/sessionData";
 export default class CustomSymbolStore extends React.Component {
   constructor(props) {
     super(props);
@@ -116,12 +118,12 @@ export default class CustomSymbolStore extends React.Component {
   };
   onUpload = (name) => {
     let headers = {
-      Authorization: BASIC.getUrlParam.token,
+      Authorization: Cookies.get('Authorization'),
       "Content-Type": "multipart/form-data",
     };
     let data = {
       icon_name: name,
-      org_id: BASIC.getUrlParam.orgId,
+      org_id: getSessionOrgId(),
     };
     let param = new FormData();
     param.append("file", this.transfromUploadIcon);
@@ -285,7 +287,7 @@ export default class CustomSymbolStore extends React.Component {
                       onClick={() => this.setRemoveKey(item.id)}
                     >
                       <div className={styles.iconItem_img}>
-                        <img crossOrigin="anonymous" src={item.icon_url} alt="" />
+                        <img src={item.icon_url} alt="" />
                       </div>
                       <div className={styles.iconItem_name}>
                         {item.icon_name || "unkown"}
@@ -312,7 +314,7 @@ export default class CustomSymbolStore extends React.Component {
               </Button>
               <Popconfirm
                 title={`确定删除选择的${removeActives.length}个符号吗?`}
-                icon={<QuestionCircleOutlined style={{ color: "red" }} />}
+                icon={<Icon type="question-circle" style={{ color: "red" }} />}
                 onConfirm={this.toRemove}
                 okText="确定"
                 cancelText="取消"
@@ -329,11 +331,11 @@ export default class CustomSymbolStore extends React.Component {
                 accept=".jpg, .jpeg, .png, .bmp"
                 data={{
                   icon_name: this.state.uploadSymbolName,
-                  org_id: BASIC.getUrlParam.orgId,
+                  org_id: getSessionOrgId(),
                 }}
                 fileList={this.state.isUploadFileList}
                 beforeUpload={this.beforeUpload}
-                headers={{ Authorization: BASIC.getUrlParam.token }}
+                headers={{ Authorization: Cookies.get('Authorization') }}
                 onChange={(e) => this.uploadChange(e)}
                 customRequest={this.coustomFunction}
               >

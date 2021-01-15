@@ -213,17 +213,10 @@
   .HomeTabs {
     .ant-tabs-nav-wrap {
       overflow: unset !important;
+      padding: 10px 0;
     }
-  }
-  .HomeTabs .ant-tabs-nav-list {
-    width: 90%;
-    justify-content: center;
-    align-items: center;
-    border-radius: 50px !important;
-    background-color: #fff;
-    button {
-      position: relative;
-      z-index: 10;
+    .ant-tabs-nav-scroll{
+      overflow: unset;
     }
     .ant-tabs-ink-bar {
       border-radius: 50px;
@@ -236,12 +229,27 @@
         rgba(106, 154, 255, 1) 100%
       ) !important;
     }
-    .ant-tabs-tab {
-      transition: all 0.3s linear;
+    .ant-tabs-nav .ant-tabs-tab{
+      z-index: 2;
     }
     .ant-tabs-tab.ant-tabs-tab-active {
       // border-radius: 50px;
       color: #fff;
+    }
+  }
+  .HomeTabs .ant-tabs-nav-list {
+    width: 90%;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50px !important;
+    background-color: #fff;
+    button {
+      position: relative;
+      z-index: 10;
+    }
+
+    .ant-tabs-tab {
+      transition: all 0.3s linear;
     }
   }
 }

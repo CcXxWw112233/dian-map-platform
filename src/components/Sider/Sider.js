@@ -2,6 +2,7 @@ import React, { PureComponent } from "react";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import styles from "./Sider.less";
 import { connect } from 'dva'
+import { Icon } from 'antd'
 
 @connect(({openswitch:{ slideSwitch ,showSlideButton}})=>({ slideSwitch ,showSlideButton}))
 export default class Sider extends PureComponent {
@@ -55,9 +56,9 @@ export default class Sider extends PureComponent {
           showSlideButton ?
             <div className={styles.conttroller} onClick={this.showDrawer}>
             {slideSwitch ? (
-              <LeftOutlined className={styles.myDirection} />
+              <Icon type="left" LeftOutlined className={styles.myDirection} />
             ) : (
-              <RightOutlined className={styles.myDirection} />
+              <Icon type="right" RightOutlined className={styles.myDirection} />
             )}
             <span className={styles.txt}>{slideSwitch ? '收起':'展开'}</span> 
           </div>

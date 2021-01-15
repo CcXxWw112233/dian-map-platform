@@ -13,16 +13,18 @@ import {
   Button,
   message,
   Upload,
-  Space,
+  // Space,
   Dropdown,
   Menu,
   Popconfirm,
   Popover,
   Col,
   Checkbox,
-  Empty,
-  Switch,
+  Switch
+  // Empty,
 } from "antd";
+import Empty from "../../../components/Empty";
+
 import {
   CheckCircleOutlined,
   CloseCircleOutlined,
@@ -31,6 +33,8 @@ import {
   CloseOutlined,
   CheckOutlined,
 } from "@ant-design/icons";
+import { Icon } from 'antd'
+
 import { BASIC } from "../../../services/config";
 import Event from "../../../lib/utils/event";
 import mapApp from "../../../utils/INITMAP";
@@ -47,6 +51,7 @@ import Axios from "axios";
 import Search from "../../../components/Search/Search";
 import config from "../../../services/scouting";
 import { compress } from "../../../utils/pictureCompress";
+import Cookies from 'js-cookie'
 
 import { Collapse } from "antd";
 const { Panel } = Collapse;
@@ -61,7 +66,7 @@ export const UploadBgPic = ({ children, onUpload, onStart }) => {
         onStart && onStart();
         return true;
       }}
-      headers={{ Authorization: BASIC.getUrlParam.token }}
+      headers={{ Authorization: Cookies.get('Authorization') }}
       onChange={onUpload}
     >
       {children}
@@ -332,7 +337,7 @@ const UploadBtn = ({ onChange, parentTool, boardId }) => {
   });
 
   // const customRequest = (val)=>{
-  //     UploadFile(val.file, val.action,null, BASIC.getUrlParam.token ,(e)=>{
+  //     UploadFile(val.file, val.action,null, Cookies.get('Authorization') ,(e)=>{
   //       // console.log(e);
   //     },val)
   // }
@@ -341,7 +346,7 @@ const UploadBtn = ({ onChange, parentTool, boardId }) => {
       action="/api/map/file/upload"
       beforeUpload={checkFileSize}
       multiple
-      headers={{ Authorization: BASIC.getUrlParam.token }}
+      headers={{ Authorization: Cookies.get('Authorization') }}
       onChange={(e) => {
         onupload(e);
       }}
@@ -389,7 +394,7 @@ const Upload360PicBtn = ({
   });
 
   // const customRequest = (val)=>{
-  //     UploadFile(val.file, val.action,null, BASIC.getUrlParam.token ,(e)=>{
+  //     UploadFile(val.file, val.action,null, Cookies.get('Authorization') ,(e)=>{
   //       // console.log(e);
   //     },val)
   // }
@@ -398,7 +403,7 @@ const Upload360PicBtn = ({
       action="/api/map/file/upload"
       accept=".jpg, .jpeg, .png, .bmp, .mp4, .avi, .wmv"
       beforeUpload={checkFileSize360Pic}
-      headers={{ Authorization: BASIC.getUrlParam.token }}
+      headers={{ Authorization: Cookies.get('Authorization') }}
       onChange={(e) => {
         onupload(e);
       }}
@@ -531,7 +536,7 @@ export const ScoutingHeader = (props) => {
     formdata.append("transparency", transparency);
     formdata.append("coord_sys_type", coordSysType);
     let resp = await Axios.post(uploadUrl, formdata, {
-      headers: { Authorization: BASIC.getUrlParam.token },
+      headers: { Authorization: Cookies.get('Authorization') },
     });
     saveData = resp.data;
     return resp.data;
@@ -655,7 +660,7 @@ export const ScoutingHeader = (props) => {
         <Upload
           action={uploadUrl}
           accept=".jpg, .jpeg, .png, .bmp"
-          headers={{ Authorization: BASIC.getUrlParam.token }}
+          headers={{ Authorization: Cookies.get('Authorization') }}
           beforeUpload={beforeUploadPlan}
           transformFile={beforeTransformFile}
           data={{
@@ -776,7 +781,7 @@ export const ScoutingHeader = (props) => {
                 onClick={() => saveItem()}
                 size="middle"
                 type="primary"
-                icon={<CheckCircleOutlined />}
+                icon={<Icon type="check-circle" CheckCircleOutlined />}
               ></Button>
               <Button
                 onClick={() => {
@@ -784,7 +789,7 @@ export const ScoutingHeader = (props) => {
                   onCancel && onCancel(data);
                 }}
                 size="middle"
-                icon={<CloseCircleOutlined />}
+                icon={<Icon type="close-circle" CloseCircleOutlined />}
               ></Button>
             </Fragment>
           ) : (
@@ -1524,7 +1529,7 @@ export const UploadItem = ({
                     size="small"
                     shape="circle"
                   >
-                    <CloseOutlined />
+                    <Icon type="close" CloseOutlined />
                   </Button>
                 </Col>
                 <Col span={3} style={{ textAlign: "center" }}>
@@ -1537,7 +1542,7 @@ export const UploadItem = ({
                     shape="circle"
                     type="primary"
                   >
-                    <CheckOutlined />
+                    <Icon type="check" CheckOutlined />
                   </Button>
                 </Col>
               </Fragment>
