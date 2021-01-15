@@ -191,7 +191,7 @@ export default class ScoutingDetails extends PureComponent {
       "农林耕地",
       "地籍地貌"
     ];
-    this.tempProjectId = ["1340591617840648192"];
+    this.tempProjectId = ["1340591617840648192", "1348802078218260480"];
   }
   componentWillReceiveProps(nextProps) {
     if (nextProps.currentOrganizeId !== this.props.currentOrganizeId) {
@@ -216,7 +216,28 @@ export default class ScoutingDetails extends PureComponent {
       });
       this.fetchCollection();
     });
-    Event.Evt.on("searchProjectData", val => {
+    Event.Evt.on("updateProjectCollection", (data) => {
+      let { area_list: areaList, area_active_key: areaActiveKey } = this.state;
+      let currentGroup = [];
+      if (areaActiveKey !== "other") {
+        currentGroup = areaList.filter((item) => {
+          return item.id === areaActiveKey;
+        });
+      }
+      if (currentGroup.length) {
+        currentGroup[0].collection = data;
+      }
+      const { config: lenged, dispatch, showFeatureName } = this.props;
+      Action.renderCollection(data || [], {
+        lenged,
+        dispatch,
+        showFeatureName,
+      });
+      this.setState({
+        area_list: areaList,
+      });
+    });
+    Event.Evt.on("searchProjectData", (val) => {
       if (this.state.activeKey !== "1") return;
       let tmpArr = [];
       if (val) {
@@ -660,6 +681,10 @@ export default class ScoutingDetails extends PureComponent {
         });
         // 获取区域分类的数据列表
         window.ProjectGroupId = active;
+        let obj = this.areaList.filter(item => {
+          return item.id === active
+        })[0]
+        window.ProjectGroupName = obj.name
         this.fetchCollection();
       })
       .catch(err => {
@@ -901,9 +926,8 @@ export default class ScoutingDetails extends PureComponent {
     // 再开始轮询--优化轮询机制
     Action.getCollectionList(params).then(res => {
       let data = res.data.sort((a, b) => a.sort - b.sort);
-      data = data.map(item => {
-        let ramdomIndex = Math.round(Math.random() * stars.length);
-        item.star = stars[ramdomIndex];
+      data = data.map((item) => {
+        item.star = stars[Math.round(Math.random() * stars.length)];
         if (item.title.includes(brands[0])) {
           item.brand = brands[0];
         }

@@ -1410,6 +1410,7 @@ export const UploadItem = ({
 
   const itemClick = (val) => {
     parent.setItemClickState(true);
+    parent.scrollForFeature(val.id);
     let feature = Action.findFeature(val.id);
     if (feature && feature.get("meetingRoomNum") !== undefined) {
       Action.fitFeature(feature);

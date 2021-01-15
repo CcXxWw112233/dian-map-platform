@@ -588,7 +588,10 @@ function Action() {
         me.moveendListener = () => {};
       } else {
         //开启
-        InitMap.map.getView().setZoom(13);
+        InitMap.map
+          .getView()
+          .animate({ zoom: 13 }, { center: INITMAP.map.getView().getCenter() });
+        // InitMap.map.getView().setZoom(13);
         me.featureOverlay2 && InitMap.map.removeOverlay(me.featureOverlay2);
         if (me.tabActivekey === "1") {
           me.mapMoveEnd(me.oldFeatures, me.oldPonts, obj, value);
