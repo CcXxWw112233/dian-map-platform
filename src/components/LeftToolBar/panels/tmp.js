@@ -19,7 +19,6 @@ const loadExcel = (
         let json = XLSX.utils.sheet_to_json(
           workbook.Sheets[workbook.SheetNames[0]]
         );
-        json = XLSX.utils.sheet_to_json()
         let tempSnowflake = new Snowflake(1, 1, 0);
         json.forEach((item) => {
           let id = tempSnowflake.nextId();
