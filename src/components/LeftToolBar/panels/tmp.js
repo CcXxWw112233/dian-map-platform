@@ -10,7 +10,7 @@ const loadExcel = (
 ) => {
   return new Promise((resolve) => {
     let xhr = new XMLHttpRequest();
-    xhr.open("get", require(`../../../assets/excel/${fileName}.csv`), true);
+    xhr.open("get", require(`../../../assets/excel/${fileName}.xlsx`), true);
     xhr.responseType = "arraybuffer";
     xhr.onload = function (e) {
       if (xhr.status == 200) {
@@ -29,7 +29,7 @@ const loadExcel = (
           item.is_display = "1";
           let content = {};
           content["coordinates"] = TransformCoordinate(
-            [Number(item.lon), Number(item.lat)],
+            [item.lon, item.lat],
             "EPSG:4326",
             "EPSG:3857"
           );

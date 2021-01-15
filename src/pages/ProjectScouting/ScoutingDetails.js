@@ -670,6 +670,10 @@ export default class ScoutingDetails extends PureComponent {
         });
         // 获取区域分类的数据列表
         window.ProjectGroupId = active;
+        let obj = this.areaList.filter(item => {
+          return item.id === active
+        })[0]
+        window.ProjectGroupName = obj.name
         this.fetchCollection();
       })
       .catch((err) => {
