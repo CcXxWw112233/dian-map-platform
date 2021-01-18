@@ -24,7 +24,7 @@ export default class LengedList extends React.Component {
           display: "flex",
           flexDirection: "column",
           position: "relative",
-          top: "30%",
+          top: "30%"
         }}
       >
         <i
@@ -44,7 +44,7 @@ export default class LengedList extends React.Component {
     }
     lengedList = Array.from(new Set(lengedList));
     let content = [];
-    lengedList.forEach((item) => {
+    lengedList.forEach(item => {
       if (Array.isArray(item.content)) {
         content = [...content, ...item.content];
       }
@@ -60,7 +60,7 @@ export default class LengedList extends React.Component {
               let style = {
                 marginRight: 10,
                 height: 20,
-                width: 20,
+                width: 20
               };
               if (itemContent.bgColor) {
                 style.backgroundColor = itemContent.bgColor;
@@ -95,7 +95,11 @@ export default class LengedList extends React.Component {
                 style = { ...style, ...itemContent.style };
               }
               return (
-                <Row className={styles.row} key={index} style={{paddingLeft: 20, marginBottom: 5}}>
+                <Row
+                  className={styles.row}
+                  key={index}
+                  style={{ paddingLeft: 20, marginBottom: 5, display: "flex" }}
+                >
                   <div style={style}></div>
                   <div
                     style={{

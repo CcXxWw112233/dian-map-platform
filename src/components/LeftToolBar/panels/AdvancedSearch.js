@@ -23,7 +23,7 @@ const AreaPanel = ({ x, y, parent }) => {
           className={globalStyle.global_icon}
           onClick={() => {
             parent.setState({
-              showAreaPanel: false,
+              showAreaPanel: false
             });
           }}
         >
@@ -37,18 +37,18 @@ const AreaPanel = ({ x, y, parent }) => {
         <Tabs>
           <TabPane tab="ABCDE" key="1">
             <div className={floatPanelStyles.content}>
-              {areas.map((item) => {
+              {areas.map(item => {
                 return (
                   <CheckableTag
                     key={item.code}
                     checked={selectedTags.indexOf(item.code) > -1}
                     style={{
-                      marginBottom: 12,
+                      marginBottom: 12
                     }}
-                    onChange={(checked) => {
+                    onChange={checked => {
                       const nextSelectedTags = checked
                         ? [...selectedTags, item.code]
-                        : selectedTags.filter((t) => t !== item.code);
+                        : selectedTags.filter(t => t !== item.code);
                       setSelectedTag(nextSelectedTags);
                     }}
                   >
@@ -60,18 +60,18 @@ const AreaPanel = ({ x, y, parent }) => {
           </TabPane>
           <TabPane tab="FGHJ" key="2">
             <div className={floatPanelStyles.content}>
-              {areas.map((item) => {
+              {areas.map(item => {
                 return (
                   <CheckableTag
                     key={item.code}
                     checked={selectedTags.indexOf(item.code) > -1}
                     style={{
-                      marginBottom: 12,
+                      marginBottom: 12
                     }}
-                    onChange={(checked) => {
+                    onChange={checked => {
                       const nextSelectedTags = checked
                         ? [...selectedTags, item.code]
-                        : selectedTags.filter((t) => t !== item.code);
+                        : selectedTags.filter(t => t !== item.code);
                       setSelectedTag(nextSelectedTags);
                     }}
                   >
@@ -83,18 +83,18 @@ const AreaPanel = ({ x, y, parent }) => {
           </TabPane>
           <TabPane tab="KLMN" key="3">
             <div className={floatPanelStyles.content}>
-              {areas.map((item) => {
+              {areas.map(item => {
                 return (
                   <CheckableTag
                     key={item.code}
                     checked={selectedTags.indexOf(item.code) > -1}
                     style={{
-                      marginBottom: 12,
+                      marginBottom: 12
                     }}
-                    onChange={(checked) => {
+                    onChange={checked => {
                       const nextSelectedTags = checked
                         ? [...selectedTags, item.code]
-                        : selectedTags.filter((t) => t !== item.code);
+                        : selectedTags.filter(t => t !== item.code);
                       setSelectedTag(nextSelectedTags);
                     }}
                   >
@@ -106,18 +106,18 @@ const AreaPanel = ({ x, y, parent }) => {
           </TabPane>
           <TabPane tab="PQRST" key="4">
             <div className={floatPanelStyles.content}>
-              {areas.map((item) => {
+              {areas.map(item => {
                 return (
                   <CheckableTag
                     key={item.code}
                     checked={selectedTags.indexOf(item.code) > -1}
                     style={{
-                      marginBottom: 12,
+                      marginBottom: 12
                     }}
-                    onChange={(checked) => {
+                    onChange={checked => {
                       const nextSelectedTags = checked
                         ? [...selectedTags, item.code]
-                        : selectedTags.filter((t) => t !== item.code);
+                        : selectedTags.filter(t => t !== item.code);
                       setSelectedTag(nextSelectedTags);
                     }}
                   >
@@ -129,18 +129,18 @@ const AreaPanel = ({ x, y, parent }) => {
           </TabPane>
           <TabPane tab="WXYZ" key="5">
             <div className={floatPanelStyles.content}>
-              {areas.map((item) => {
+              {areas.map(item => {
                 return (
                   <CheckableTag
                     key={item.code}
                     checked={selectedTags.indexOf(item.code) > -1}
                     style={{
-                      marginBottom: 12,
+                      marginBottom: 12
                     }}
-                    onChange={(checked) => {
+                    onChange={checked => {
                       const nextSelectedTags = checked
                         ? [...selectedTags, item.code]
-                        : selectedTags.filter((t) => t !== item.code);
+                        : selectedTags.filter(t => t !== item.code);
                       setSelectedTag(nextSelectedTags);
                     }}
                   >
@@ -167,7 +167,7 @@ const AreaPanel = ({ x, y, parent }) => {
           onClick={() => {
             parent.setState(
               {
-                showAreaPanel: false,
+                showAreaPanel: false
               },
               () => {
                 parent.updateSelectedArea(selectedTags);
@@ -193,7 +193,7 @@ const BrandPanel = ({ x, y, parent }) => {
           className={globalStyle.global_icon}
           onClick={() => {
             parent.setState({
-              showBrandPanel: false,
+              showBrandPanel: false
             });
           }}
         >
@@ -204,18 +204,18 @@ const BrandPanel = ({ x, y, parent }) => {
         className={floatPanelStyles.body}
         style={{ height: "calc(100% - 60px)", textAlign: "left" }}
       >
-        {brand.map((item) => {
+        {brand.map(item => {
           return (
             <CheckableTag
               key={item.key}
               checked={selectedTags.indexOf(item.key) > -1}
               style={{
-                marginBottom: 12,
+                marginBottom: 12
               }}
-              onChange={(checked) => {
+              onChange={checked => {
                 const nextSelectedTags = checked
                   ? [...selectedTags, item.key]
-                  : selectedTags.filter((t) => t !== item.key);
+                  : selectedTags.filter(t => t !== item.key);
                 setSelectedTag(nextSelectedTags);
               }}
             >
@@ -238,7 +238,7 @@ const BrandPanel = ({ x, y, parent }) => {
           onClick={() => {
             parent.setState(
               {
-                showBrandPanel: false,
+                showBrandPanel: false
               },
               () => {
                 parent.updateSelectedBrand(selectedTags);
@@ -269,7 +269,7 @@ export default class AdvancedSeach extends React.Component {
       upperLimitPrice: 1000,
       selectedStarKeys: [],
       selectedBrands: [],
-      rangeTime: [],
+      rangeTime: []
     };
     this.selectedAreaCodes = [];
     this.selectedBrandKeys = [];
@@ -287,27 +287,27 @@ export default class AdvancedSeach extends React.Component {
       personNum: parent.personNum,
       lowerLimitPrice: parent.lowerLimitPrice,
       upperLimitPrice: parent.upperLimitPrice,
-      rangeTime: parent.rangeTime,
+      rangeTime: parent.rangeTime
     });
   }
-  updateSelectedArea = (selectedAreaCodes) => {
+  updateSelectedArea = selectedAreaCodes => {
     this.selectedAreaCodes = selectedAreaCodes;
-    const selectedAreas = areas.filter((item) => {
+    const selectedAreas = areas.filter(item => {
       return selectedAreaCodes.includes(item.code);
     });
     this.setState({
-      selectedAreas: selectedAreas,
+      selectedAreas: selectedAreas
     });
     const { parent } = this.props;
     parent.selectedAreas = selectedAreas;
   };
-  updateSelectedBrand = (brandKeys) => {
+  updateSelectedBrand = brandKeys => {
     this.selectedBrandKeys = brandKeys;
-    const selectedBrands = brand.filter((item) => {
+    const selectedBrands = brand.filter(item => {
       return brandKeys.includes(item.key);
     });
     this.setState({
-      selectedBrands: selectedBrands,
+      selectedBrands: selectedBrands
     });
     const { parent } = this.props;
     parent.selectedBrands = selectedBrands;
@@ -317,34 +317,46 @@ export default class AdvancedSeach extends React.Component {
       this.setState({
         showAreaPanel: true,
         areaPanelX: e.currentTarget.getBoundingClientRect().x - 20,
-        areaPanelY: e.currentTarget.getBoundingClientRect().y,
+        areaPanelY: e.currentTarget.getBoundingClientRect().y
       });
     } else {
       this.setState({
         showBrandPanel: true,
         brandPanelX: e.currentTarget.getBoundingClientRect().x - 20,
-        brandPanelY: e.currentTarget.getBoundingClientRect().y,
+        brandPanelY: e.currentTarget.getBoundingClientRect().y
       });
     }
   };
   handleRemoveSelectedArea = (e, code) => {
-    this.selectedAreaCodes = this.selectedAreaCodes.filter((t) => t !== code);
-    let selectedAreas = this.state.selectedAreas.filter((t) => t.code !== code);
-    this.setState({
-      selectedAreas: selectedAreas,
-      showAreaPanel: false,
-    });
+    this.selectedAreaCodes = this.selectedAreaCodes.filter(t => t !== code);
+    let selectedAreas = this.state.selectedAreas.filter(t => t.code !== code);
+    this.setState(
+      {
+        selectedAreas: selectedAreas,
+        showAreaPanel: false
+      },
+      () => {
+        const { parent } = this.props;
+        parent.selectedAreas = selectedAreas;
+      }
+    );
   };
 
   handleRemoveSelectedBrand = (e, key) => {
-    this.selectedBrandKeys = this.selectedBrandKeys.filter((t) => t !== key);
-    let selectedBrands = this.state.selectedBrands.filter((t) => t.key !== key);
-    this.setState({
-      selectedBrands: selectedBrands,
-    });
+    this.selectedBrandKeys = this.selectedBrandKeys.filter(t => t !== key);
+    let selectedBrands = this.state.selectedBrands.filter(t => t.key !== key);
+    this.setState(
+      {
+        selectedBrands: selectedBrands
+      },
+      () => {
+        const { parent } = this.props;
+        parent.selectedBrands = selectedBrands;
+      }
+    );
   };
 
-  testNum = (e) => {
+  testNum = e => {
     const { value } = e.target;
     const reg = /^-?\d*(\.\d*)?$/;
     if ((!isNaN(value) && reg.test(value)) || value === "" || value === "-") {
@@ -352,11 +364,11 @@ export default class AdvancedSeach extends React.Component {
     }
     return -1;
   };
-  onPersonNumChange = (e) => {
+  onPersonNumChange = e => {
     let num = this.testNum(e);
     if (num !== -1) {
       this.setState({
-        personNum: num,
+        personNum: num
       });
     }
   };
@@ -371,12 +383,12 @@ export default class AdvancedSeach extends React.Component {
       this.onPersonNumBlur();
     }
   };
-  onLowerLimitPriceChange = (e) => {
+  onLowerLimitPriceChange = e => {
     let num = this.testNum(e);
     if (num !== -1) {
       if (num < this.state.upperLimitPrice) {
         this.setState({
-          lowerLimitPrice: num,
+          lowerLimitPrice: num
         });
         const { parent } = this.props;
         parent.lowerLimitPrice = num;
@@ -386,12 +398,12 @@ export default class AdvancedSeach extends React.Component {
     }
   };
 
-  onuUpperLimitPriceChage = (e) => {
+  onuUpperLimitPriceChage = e => {
     let num = this.testNum(e);
     if (num !== -1) {
       if (num > this.state.lowerLimitPrice) {
         this.setState({
-          upperLimitPrice: num,
+          upperLimitPrice: num
         });
         const { parent } = this.props;
         parent.upperLimitPrice = num;
@@ -416,7 +428,7 @@ export default class AdvancedSeach extends React.Component {
       personNum: 20,
       lowerLimitPrice: 0,
       upperLimitPrice: 1000,
-      rangeTime: [],
+      rangeTime: []
     });
     const { parent } = this.props;
     parent.selectedAreas = [];
@@ -429,38 +441,38 @@ export default class AdvancedSeach extends React.Component {
     parent.rangeTime = [];
   };
 
-  handleStarClick = (key) => {
+  handleStarClick = key => {
     let { selectedStarKeys } = this.state;
     if (selectedStarKeys.includes(key)) {
-      selectedStarKeys = selectedStarKeys.filter((item) => {
+      selectedStarKeys = selectedStarKeys.filter(item => {
         return item !== key;
       });
-      this.selectStars = stars.filter((item) => {
+      this.selectStars = stars.filter(item => {
         return item.key !== key;
       });
     } else {
-      let currentStar = stars.filter((item) => {
+      let currentStar = stars.filter(item => {
         return item.key === key;
       })[0];
       selectedStarKeys.push(key);
       this.selectStars.push(currentStar);
     }
     this.setState({
-      selectedStarKeys: selectedStarKeys,
+      selectedStarKeys: selectedStarKeys
     });
     const { parent } = this.props;
     parent.selectedStarKeys = selectedStarKeys;
   };
-  onKeywordChange = (value) => {
+  onKeywordChange = value => {
     this.setState({
-      keywordState: value,
+      keywordState: value
     });
     const { parent } = this.props;
     parent.keywordState = value;
   };
-  onTimeRangeChange = (dates) => {
+  onTimeRangeChange = dates => {
     this.setState({
-      rangeTime: dates,
+      rangeTime: dates
     });
     const { parent } = this.props;
     parent.rangeTime = dates;
@@ -481,7 +493,7 @@ export default class AdvancedSeach extends React.Component {
                 allowClear
                 placeholder="请输入关键词"
                 value={this.state.keywordState}
-                onChange={(e) => this.onKeywordChange(e.target.value)}
+                onChange={e => this.onKeywordChange(e.target.value)}
               />
             </div>
           </div>
@@ -508,9 +520,11 @@ export default class AdvancedSeach extends React.Component {
               </div> */}
               <Button
                 shape="circle"
-                icon={<i className={globalStyle.global_icon}>&#xe7dc;</i>}
-                onClick={(e) => this.handleSelectClick(e, 0)}
-              ></Button>
+                // icon={<i className={globalStyle.global_icon}>&#xe7dc;</i>}
+                onClick={e => this.handleSelectClick(e, 0)}
+              >
+                <i className={globalStyle.global_icon}>&#xe7dc;</i>
+              </Button>
             </p>
             {this.state.showAreaPanel ? (
               <AreaPanel
@@ -520,14 +534,14 @@ export default class AdvancedSeach extends React.Component {
               ></AreaPanel>
             ) : null}
             <div className={`${styles.content} ${styles.inline}`}>
-              {this.state.selectedAreas.map((item) => {
+              {this.state.selectedAreas.map(item => {
                 return (
                   <Tag
                     key={item.code}
                     closable
-                    onClose={(e) => this.handleRemoveSelectedArea(e, item.code)}
+                    onClose={e => this.handleRemoveSelectedArea(e, item.code)}
                     style={{
-                      marginBottom: 12,
+                      marginBottom: 12
                     }}
                   >
                     {item.name}
@@ -560,9 +574,11 @@ export default class AdvancedSeach extends React.Component {
               </div> */}
               <Button
                 shape="circle"
-                icon={<i className={globalStyle.global_icon}>&#xe7dc;</i>}
-                onClick={(e) => this.handleSelectClick(e, 1)}
-              ></Button>
+                // icon={<i className={globalStyle.global_icon}>&#xe7dc;</i>}
+                onClick={e => this.handleSelectClick(e, 1)}
+              >
+                <i className={globalStyle.global_icon}>&#xe7dc;</i>
+              </Button>
             </p>
             {this.state.showBrandPanel ? (
               <BrandPanel
@@ -572,14 +588,14 @@ export default class AdvancedSeach extends React.Component {
               ></BrandPanel>
             ) : null}
             <div className={`${styles.content} ${styles.inline}`}>
-              {this.state.selectedBrands.map((item) => {
+              {this.state.selectedBrands.map(item => {
                 return (
                   <Tag
                     key={item.key}
                     closable
-                    onClose={(e) => this.handleRemoveSelectedBrand(e, item.key)}
+                    onClose={e => this.handleRemoveSelectedBrand(e, item.key)}
                     style={{
-                      marginBottom: 12,
+                      marginBottom: 12
                     }}
                   >
                     {item.name}
@@ -602,7 +618,7 @@ export default class AdvancedSeach extends React.Component {
               <span>星级</span>
             </p>
             <div className={`${styles.content} ${styles.inline}`}>
-              {stars.map((item) => {
+              {stars.map(item => {
                 return (
                   <div
                     className={`${styles.label2} ${
@@ -687,7 +703,7 @@ export default class AdvancedSeach extends React.Component {
                 selectedAreas: this.state.selectedAreas,
                 selectedBrands: this.state.selectedBrands,
                 selectedStars: this.selectStars,
-                keywordState: this.state.keywordState,
+                keywordState: this.state.keywordState
               };
               Event.Evt.firEvent("searchProjectData", obj);
               Event.Evt.firEvent("displayProjectPanel");
