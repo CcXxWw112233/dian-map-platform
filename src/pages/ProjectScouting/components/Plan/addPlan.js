@@ -31,7 +31,7 @@ export default class AddPlan extends React.Component {
       selectedUserArr: [],
       dropDownVisible: false,
       profilePhotos: [],
-      selectAll: false,
+      selectAll: false
     };
     this.planId = "";
     this.data = null;
@@ -44,13 +44,13 @@ export default class AddPlan extends React.Component {
     // document.addEventListener("click", this.saveToDB);
     document.getElementById("MapsView").onclick = this.saveToDB;
     const { boardId, planId } = this.props;
-    systemManageServices.getProjectMember(boardId).then((res0) => {
+    systemManageServices.getProjectMember(boardId).then(res0 => {
       if (res0 && res0.code === "0") {
         this.setState({
-          projectMember: res0.data,
+          projectMember: res0.data
         });
         if (planId) {
-          planServices.getTaskRemind(planId).then((res) => {
+          planServices.getTaskRemind(planId).then(res => {
             if (res && res.code) {
               this.remindId = res.data.id;
               this.getRemindTime(res.data.remind_time || "");
@@ -59,7 +59,7 @@ export default class AddPlan extends React.Component {
                 selectAll:
                   res0.data?.length === res.data.remind_users?.length
                     ? true
-                    : false,
+                    : false
               });
             }
           });
@@ -73,13 +73,13 @@ export default class AddPlan extends React.Component {
       .removeEventListener("click", this.saveToDB);
   }
 
-  saveToDB = (e) => {
+  saveToDB = e => {
     e.stopImmediatePropagation();
     if (this.state.isAdd) {
       if (!this.state.newPlan) return;
       this.handleSaveNewPlan(this.state.newPlan);
       this.setState({
-        isAdd: false,
+        isAdd: false
       });
     }
     if (this.state.addStepState) {
@@ -88,7 +88,7 @@ export default class AddPlan extends React.Component {
     }
   };
 
-  getRemindTime = (timestamp) => {
+  getRemindTime = timestamp => {
     if (timestamp) {
       this.remindTimestamp = timestamp;
       let date = new Date();
@@ -112,16 +112,16 @@ export default class AddPlan extends React.Component {
           " " +
           h.toString() +
           mi.toString() +
-          s.toString(),
+          s.toString()
       });
     } else {
       this.setState({
-        remindTime: "",
+        remindTime: ""
       });
     }
   };
 
-  getFormatTime = (timestamp) => {
+  getFormatTime = timestamp => {
     let date = new Date();
     date.setTime(timestamp);
     let y = date.getFullYear();
@@ -142,10 +142,10 @@ export default class AddPlan extends React.Component {
     const { isAdd, planId } = this.props;
     if (!isAdd) {
       this.setState({
-        isAdd: isAdd,
+        isAdd: isAdd
       });
       if (planId) {
-        planServices.getPlanDetail(planId).then((res) => {
+        planServices.getPlanDetail(planId).then(res => {
           if (res && res.code === "0") {
             if (res.data) {
               let timestamp = "";
@@ -157,7 +157,7 @@ export default class AddPlan extends React.Component {
                   endTime:
                     result.y.toString() +
                     result.m.toString() +
-                    result.d.toString(),
+                    result.d.toString()
                 });
               }
               if (res.data.remind_time) {
@@ -170,7 +170,7 @@ export default class AddPlan extends React.Component {
                     result.d.toString() +
                     result.h.toString() +
                     result.mi.toString() +
-                    result.s.toString(),
+                    result.s.toString()
                 });
               }
               if (res.data.complete_time) {
@@ -188,13 +188,13 @@ export default class AddPlan extends React.Component {
                     ":" +
                     result.mi.toString() +
                     ":" +
-                    result.s.toString(),
+                    result.s.toString()
                 });
               }
               this.setState({
                 newPlan: res.data.name,
                 data: res.data,
-                taskDetails: res.data.child_tasks || [],
+                taskDetails: res.data.child_tasks || []
               });
             }
           }
@@ -203,7 +203,7 @@ export default class AddPlan extends React.Component {
     }
   };
 
-  disabledDate = (current) => {
+  disabledDate = current => {
     return current && current < moment().add(-1, "day");
   };
   range = (start, end) => {
@@ -227,33 +227,33 @@ export default class AddPlan extends React.Component {
       return {
         disabledHours: () => this.range(0, 60).splice(4, 20),
         disabledMinutes: () => this.getMinutes(0, 60),
-        disabledSeconds: () => [55, 56],
+        disabledSeconds: () => [55, 56]
       };
     }
     return {
       disabledHours: () => [...this.range(0, 6), ...this.range(23, 24)],
-      disabledMinutes: () => this.getMinutes(0, 60),
+      disabledMinutes: () => this.getMinutes(0, 60)
       // disabledSeconds: () => [55, 56],
     };
   };
-  addStep = (e) => {
+  addStep = e => {
     e.stopPropagation();
     if (this.state.addStepState === false) {
       this.setState({
-        addStepState: true,
+        addStepState: true
       });
     }
   };
-  addStepInputChange = (value) => {
+  addStepInputChange = value => {
     this.setState({
-      newStep: value,
+      newStep: value
     });
   };
 
-  handleSaveNewStep = (value) => {
+  handleSaveNewStep = value => {
     // planServices.updateBoardTask("", )
     this.setState({
-      addStepState: false,
+      addStepState: false
     });
     if (!value) return;
     if (value.trim() === "") return;
@@ -261,36 +261,36 @@ export default class AddPlan extends React.Component {
     let planId = this.planId || this.props.planId;
     planServices
       .createBoardTask(boardId, planGroupId, value, planId)
-      .then((res) => {
+      .then(res => {
         if (res && res.code === "0") {
-          planServices.getPlanDetail(planId).then((res) => {
+          planServices.getPlanDetail(planId).then(res => {
             if (res && res.code === "0") {
               if (res.data) {
                 this.setState({
                   newPlan: res.data.name,
-                  taskDetails: res.data.child_tasks || [],
+                  taskDetails: res.data.child_tasks || []
                 });
               }
             }
           });
           this.setState({
             isAdd: false,
-            newStep: "",
+            newStep: ""
           });
         } else {
           message.warn(res.message);
         }
       })
-      .catch((e) => {
+      .catch(e => {
         message.error(e.message);
       });
   };
-  addPlanInputChange = (value) => {
+  addPlanInputChange = value => {
     this.setState({
-      newPlan: value,
+      newPlan: value
     });
   };
-  handleSaveNewPlan = (value) => {
+  handleSaveNewPlan = value => {
     if (!value) return;
     if (value.trim() === "") return;
     const { boardId, planGroupId } = this.props;
@@ -300,18 +300,18 @@ export default class AddPlan extends React.Component {
         return;
       }
       this.setState({
-        isModify: false,
+        isModify: false
       });
       planServices
         .updateBoardTask("", planId, value, "0")
-        .then((res) => {
+        .then(res => {
           if (res && res.code === "0") {
             this.planId = res.data.id;
-            planServices.getPlanDetail(res.data.id).then((res) => {
+            planServices.getPlanDetail(res.data.id).then(res => {
               if (res && res.code === "0") {
                 this.setState({
                   isAdd: false,
-                  data: res.data,
+                  data: res.data
                 });
               }
             });
@@ -319,20 +319,20 @@ export default class AddPlan extends React.Component {
             message.warn(res.message);
           }
         })
-        .catch((e) => {
+        .catch(e => {
           message.error(e.message);
         });
     } else {
       planServices
         .createBoardTask(boardId, planGroupId, value)
-        .then((res) => {
+        .then(res => {
           if (res && res.code === "0") {
             this.planId = res.data.id;
-            planServices.getPlanDetail(res.data.id).then((res) => {
+            planServices.getPlanDetail(res.data.id).then(res => {
               if (res && res.code === "0") {
                 this.setState({
                   isAdd: false,
-                  data: res.data,
+                  data: res.data
                 });
               }
             });
@@ -340,24 +340,24 @@ export default class AddPlan extends React.Component {
             message.warn(res.message);
           }
         })
-        .catch((e) => {
+        .catch(e => {
           message.error(e.message);
         });
     }
   };
-  handleDelPlanClick = (data) => {
+  handleDelPlanClick = data => {
     if (!data) return;
     let planId = this.planId || this.props.planId;
     planServices
       .deleteBoardTask(data.id)
-      .then((res) => {
+      .then(res => {
         if (res && res.code === "0") {
-          planServices.getPlanDetail(planId).then((res) => {
+          planServices.getPlanDetail(planId).then(res => {
             if (res && res.code === "0") {
               if (res.data) {
                 this.setState({
                   newPlan: res.data.name,
-                  taskDetails: res.data.child_tasks || [],
+                  taskDetails: res.data.child_tasks || []
                 });
               }
             }
@@ -366,29 +366,34 @@ export default class AddPlan extends React.Component {
           message.warn(res.message);
         }
       })
-      .catch((e) => {
+      .catch(e => {
         message.error(e.message);
       });
   };
 
   // 提醒事件
-  handleRemindTimeClick = (value) => {
+  handleRemindTimeClick = value => {
     this.remindTimestamp = value._d.getTime();
     this.getRemindTime(this.remindTimestamp);
     this.handleRemindClick();
   };
-  handleLastDateClick = (value) => {
+  handleLastDateClick = value => {
     const timestamp = value._d.getTime();
     let planId = this.planId || this.props.planId;
     planServices
       .updateBoardTask(timestamp, planId, "")
-      .then((res) => {
+      .then(res => {
         if (res && res.code === "0") {
+          let result = this.getFormatTime(res.data.end_time);
+          this.setState({
+            endTime:
+              result.y.toString() + result.m.toString() + result.d.toString()
+          });
         } else {
           message.warn(res.message);
         }
       })
-      .catch((e) => {
+      .catch(e => {
         message.error(e.message);
       });
   };
@@ -396,17 +401,17 @@ export default class AddPlan extends React.Component {
     let planId = this.planId || this.props.planId;
     planServices
       .updateBoardTask("", planId, "", "1")
-      .then((res) => {
+      .then(res => {
         if (res && res.code === "0") {
           this.remindTimestamp = "";
           this.setState({
-            endTime: "",
+            endTime: ""
           });
         } else {
           message.warn(res.message);
         }
       })
-      .catch((e) => {
+      .catch(e => {
         message.error(e.message);
       });
   };
@@ -415,13 +420,13 @@ export default class AddPlan extends React.Component {
     if (data.is_favorite !== "1") {
       planServices
         .collectFavoriteTask(data.id)
-        .then((res) => {
+        .then(res => {
           if (res && res.code === "0") {
-            planServices.getPlanDetail(data.id).then((res) => {
+            planServices.getPlanDetail(data.id).then(res => {
               if (res && res.code === "0") {
                 if (res.data) {
                   this.setState({
-                    data: res.data,
+                    data: res.data
                   });
                 }
               }
@@ -430,19 +435,19 @@ export default class AddPlan extends React.Component {
             message.warn(res.message);
           }
         })
-        .catch((e) => {
+        .catch(e => {
           message.error(e.message);
         });
     } else {
       planServices
         .cancelFavoriteTask(data.id)
-        .then((res) => {
+        .then(res => {
           if (res && res.code === "0") {
-            planServices.getPlanDetail(data.id).then((res) => {
+            planServices.getPlanDetail(data.id).then(res => {
               if (res && res.code === "0") {
                 if (res.data) {
                   this.setState({
-                    data: res.data,
+                    data: res.data
                   });
                 }
               }
@@ -451,7 +456,7 @@ export default class AddPlan extends React.Component {
             message.warn(res.message);
           }
         })
-        .catch((e) => {
+        .catch(e => {
           message.error(e.message);
         });
     }
@@ -461,41 +466,42 @@ export default class AddPlan extends React.Component {
     let selectedUserArr = this.state.selectedUserArr;
     if (selectedUserArr[index]) {
       selectedUserArr[index] = null;
+      selectedUserArr.splice(index, 1);
     } else {
       selectedUserArr[index] = item.user;
     }
-    let tmpArr = selectedUserArr.filter((item) => item !== null);
+    let tmpArr = selectedUserArr.filter(item => item !== null);
     if (tmpArr.length === this.state.projectMember.length) {
       selectAll = true;
     }
     this.setState({
       selectedUser: selectedUserArr,
-      selectAll: selectAll,
+      selectAll: selectAll
     });
   };
-  ondropDownVisibleChange = (e) => {
+  ondropDownVisibleChange = e => {
     this.setState({
-      dropDownVisible: e,
+      dropDownVisible: e
     });
   };
 
   handleSelectAll = () => {
     this.setState(
       {
-        selectAll: !this.state.selectAll,
+        selectAll: !this.state.selectAll
       },
       () => {
         if (this.state.selectAll) {
           let arr = [];
-          this.state.projectMember.forEach((item) => {
+          this.state.projectMember.forEach(item => {
             arr.push(item.user);
           });
           this.setState({
-            selectedUserArr: arr,
+            selectedUserArr: arr
           });
         } else {
           this.setState({
-            selectedUserArr: [],
+            selectedUserArr: []
           });
         }
       }
@@ -507,13 +513,15 @@ export default class AddPlan extends React.Component {
       return;
     }
     this.setState({
-      dropDownVisible: false,
+      dropDownVisible: false
     });
     let selectedUserIdsStr = "";
-    if (this.state.selectedUserArr) {
-      selectedUserIdsStr = this.state.selectedUserArr
-        .map((item) => item.id)
-        .join(",");
+    let { selectedUserArr: oldSelectedUserArr } = this.state;
+    if (oldSelectedUserArr) {
+      selectedUserIdsStr =
+        oldSelectedUserArr.length > 0
+          ? oldSelectedUserArr.map(item => item.id).join(",")
+          : "";
     }
     if (!this.remindId) {
       planServices
@@ -522,14 +530,14 @@ export default class AddPlan extends React.Component {
           this.props.planId || this.planId,
           selectedUserIdsStr
         )
-        .then((res) => {
+        .then(res => {
           if (res && res.code === "0") {
             this.remindId = res.data?.id;
           } else {
             message.warn(res.message);
           }
         })
-        .catch((e) => {
+        .catch(e => {
           message.error(e.message);
         });
     } else {
@@ -539,33 +547,33 @@ export default class AddPlan extends React.Component {
           this.remindTimestamp,
           selectedUserIdsStr
         )
-        .then((res) => {
+        .then(res => {
           if (res && res.code === "0") {
           } else {
             message.warn(res.message);
           }
         })
-        .catch((e) => {
+        .catch(e => {
           message.error(e.message);
         });
     }
   };
   handleClearRemindTime = () => {
     let selectedUserIdsStr = this.state.selectedUserArr
-      .map((item) => item.id)
+      .map(item => item.id)
       .join(",");
     planServices
       .updateTaskRemind(this.remindId, "0", selectedUserIdsStr)
-      .then((res) => {
+      .then(res => {
         if (res && res.code === "0") {
           this.setState({
-            remindTime: "",
+            remindTime: ""
           });
         } else {
           message.warn(res.message);
         }
       })
-      .catch((e) => {
+      .catch(e => {
         message.error(e.message);
       });
   };
@@ -633,12 +641,12 @@ export default class AddPlan extends React.Component {
           <div style={{ width: "calc(100% - 76px)" }}></div>
           <Button
             style={{
-              marginRight: 12,
+              marginRight: 12
             }}
             onClick={() => {
               this.setState({
                 selectedUserArr: [],
-                selectAll: false,
+                selectAll: false
               });
             }}
           >
@@ -647,7 +655,7 @@ export default class AddPlan extends React.Component {
           <Button
             style={{
               color: "#fff",
-              background: "rgba(134, 179, 255, 1)",
+              background: "rgba(134, 179, 255, 1)"
             }}
             onClick={this.handleRemindClick}
           >
@@ -676,7 +684,7 @@ export default class AddPlan extends React.Component {
             onClick={() => {
               const { parent } = this.props;
               parent.setState({
-                showAddPlan: false,
+                showAddPlan: false
               });
             }}
           >
@@ -686,7 +694,7 @@ export default class AddPlan extends React.Component {
             <div
               style={{
                 fontSize: 12,
-                color: "#999",
+                color: "#999"
               }}
             >
               <span>完成时间：</span>
@@ -711,8 +719,8 @@ export default class AddPlan extends React.Component {
                   allowClear
                   placeholder="添加计划"
                   value={this.state.newPlan}
-                  onChange={(e) => this.addPlanInputChange(e.target.value)}
-                  onPressEnter={(e) => this.handleSaveNewPlan(e.target.value)}
+                  onChange={e => this.addPlanInputChange(e.target.value)}
+                  onPressEnter={e => this.handleSaveNewPlan(e.target.value)}
                 />
               </div>
             ) : (
@@ -723,22 +731,22 @@ export default class AddPlan extends React.Component {
                   style={{
                     color: this.state.completeTime
                       ? "#8db9ff"
-                      : "rgba(208, 211, 226, 1)",
+                      : "rgba(208, 211, 226, 1)"
                   }}
                   dangerouslySetInnerHTML={{
-                    __html: this.state.completeTime ? "&#xe7f8;" : " &#xe7f2;",
+                    __html: this.state.completeTime ? "&#xe7f8;" : " &#xe7f2;"
                   }}
                 ></i>
                 <div
                   style={{
                     display: "flex",
                     width: "calc(100% - 36px)",
-                    borderBottom: "1px rgba(230, 232, 241, 1) solid",
+                    borderBottom: "1px rgba(230, 232, 241, 1) solid"
                   }}
                   onClick={() =>
                     this.setState({
                       isAdd: true,
-                      isModify: true,
+                      isModify: true
                     })
                   }
                 >
@@ -750,7 +758,7 @@ export default class AddPlan extends React.Component {
                   </div>
                   <i
                     className={globalStyle.global_icon}
-                    onClick={(e) =>
+                    onClick={e =>
                       this.handleCollectPlan(
                         e,
                         this.state.data || this.props.data
@@ -760,7 +768,7 @@ export default class AddPlan extends React.Component {
                       color:
                         is_favorite === "1"
                           ? "rgba(255, 183, 96, 1)"
-                          : "rgba(209, 213, 228, 1)",
+                          : "rgba(209, 213, 228, 1)"
                     }}
                   >
                     &#xe7f1;
@@ -781,7 +789,7 @@ export default class AddPlan extends React.Component {
                     style={{
                       display: "flex",
                       width: "calc(100% - 36px)",
-                      borderBottom: "1px rgba(230, 232, 241, 1) solid",
+                      borderBottom: "1px rgba(230, 232, 241, 1) solid"
                     }}
                   >
                     <div
@@ -807,7 +815,7 @@ export default class AddPlan extends React.Component {
               style={{
                 ...(this.state.isAdd
                   ? { pointerEvents: "none", cursor: "not-allowed" }
-                  : {}),
+                  : {})
               }}
             >
               {!this.state.addStepState ? (
@@ -822,7 +830,7 @@ export default class AddPlan extends React.Component {
                     style={{
                       display: "flex",
                       width: "calc(100% - 36px)",
-                      borderBottom: "1px rgba(230, 232, 241, 1) solid",
+                      borderBottom: "1px rgba(230, 232, 241, 1) solid"
                     }}
                   >
                     <span style={{ color: "rgba(101, 143, 255, 1)" }}>
@@ -842,17 +850,15 @@ export default class AddPlan extends React.Component {
                     style={{
                       display: "flex",
                       width: "calc(100% - 36px)",
-                      borderBottom: "1px rgba(230, 232, 241, 1) solid",
+                      borderBottom: "1px rgba(230, 232, 241, 1) solid"
                     }}
                   >
                     <Input
                       allowClear
                       placeholder="添加步骤"
                       value={this.state.newStep}
-                      onChange={(e) => this.addStepInputChange(e.target.value)}
-                      onPressEnter={(e) =>
-                        this.handleSaveNewStep(e.target.value)
-                      }
+                      onChange={e => this.addStepInputChange(e.target.value)}
+                      onPressEnter={e => this.handleSaveNewStep(e.target.value)}
                     />
                   </div>
                 </Fragment>
@@ -864,7 +870,7 @@ export default class AddPlan extends React.Component {
               style={{
                 ...(this.state.isAdd
                   ? { pointerEvents: "none", cursor: "not-allowed" }
-                  : {}),
+                  : {})
               }}
             >
               <i
@@ -887,21 +893,25 @@ export default class AddPlan extends React.Component {
                   placeholder="选择提醒时间"
                   bordered={false}
                   className={styles.plan_picker}
-                  style={{ width: "calc(100% - 36px", padding: 0 , height: '100%'}}
+                  style={{
+                    width: "calc(100% - 36px",
+                    padding: 0,
+                    height: "100%"
+                  }}
                   format="YYYY年MM月DD日 HH时mm分"
                   locale={locale}
                   disabledDate={this.disabledDate}
                   disabledTime={this.disabledDateTime}
                   showTime={{
                     defaultValue: moment("00:00", "HH:mm"),
-                    minuteStep: 5,
+                    minuteStep: 5
                   }}
                   value={
                     this.state.remindTime
                       ? moment(this.state.remindTime)
                       : undefined
                   }
-                  onChange={(value) => this.handleRemindTimeClick(value)}
+                  onChange={value => this.handleRemindTimeClick(value)}
                 />
                 <i
                   className={globalStyle.global_icon}
@@ -924,13 +934,13 @@ export default class AddPlan extends React.Component {
                   trigger="click"
                   overlay={this.createDropDownOverlay()}
                   visible={this.state.dropDownVisible}
-                  onVisibleChange={(e) => this.ondropDownVisibleChange(e)}
+                  onVisibleChange={e => this.ondropDownVisibleChange(e)}
                 >
                   <div
                     style={{
                       display: "flex",
                       width: "calc(100% - 36px)",
-                      borderBottom: "1px rgba(230, 232, 241, 1) solid",
+                      borderBottom: "1px rgba(230, 232, 241, 1) solid"
                     }}
                   >
                     {this.state.selectedUserArr &&
@@ -950,7 +960,7 @@ export default class AddPlan extends React.Component {
                   display: "flex",
                   flexFlow: "row wrap",
                   paddingLeft: 30,
-                  margin: "5px auto",
+                  margin: "5px auto"
                 }}
               >
                 {this.state.selectedUserArr &&
@@ -985,7 +995,7 @@ export default class AddPlan extends React.Component {
               style={{
                 ...(this.state.isAdd
                   ? { pointerEvents: "none", cursor: "not-allowed" }
-                  : {}),
+                  : {})
               }}
             >
               <i
@@ -998,7 +1008,7 @@ export default class AddPlan extends React.Component {
                 style={{
                   display: "flex",
                   width: "calc(100% - 36px)",
-                  borderBottom: "1px rgba(230, 232, 241, 1) solid",
+                  borderBottom: "1px rgba(230, 232, 241, 1) solid"
                 }}
               >
                 {/* <span>添加截止日期</span> */}
@@ -1013,11 +1023,15 @@ export default class AddPlan extends React.Component {
                   locale={locale}
                   disabledDate={this.disabledDate}
                   disabledTime={this.disabledDateTime}
-                  style={{ width: "calc(100% - 36px", padding: 0, height: '100%' }}
+                  style={{
+                    width: "calc(100% - 36px",
+                    padding: 0,
+                    height: "100%"
+                  }}
                   value={
                     this.state.endTime ? moment(this.state.endTime) : undefined
                   }
-                  onChange={(value) => this.handleLastDateClick(value)}
+                  onChange={value => this.handleLastDateClick(value)}
                 />
                 <i
                   className={globalStyle.global_icon}

@@ -399,20 +399,20 @@ export default class Plot extends PureComponent {
       // loadGeoJson(this, name);
       obj.fileName = window.ProjectGroupName;
       loadExcel(this, obj).then((res) => {
-        // let promise = res.map((item) => {
-        //   let newItem = {
-        //     collect_type: item.collect_type,
-        //     title: item.title,
-        //     target: item.target,
-        //     area_type_id:
-        //       window.ProjectGroupId === "other" ? "" : window.ProjectGroupId,
-        //     board_id: this.projectId,
-        //     districtcode: item.districtcode,
-        //     content: item.content,
-        //   };
-        //   return DetailAction.addCollection(newItem);
-        // });
-        // Promise.all(promise).then((resp) => {});
+        let promise = res.map((item) => {
+          let newItem = {
+            collect_type: item.collect_type,
+            title: item.title,
+            target: item.target,
+            area_type_id:
+              window.ProjectGroupId === "other" ? "" : window.ProjectGroupId,
+            board_id: this.projectId,
+            districtcode: item.districtcode,
+            content: item.content,
+          };
+          return DetailAction.addCollection(newItem);
+        });
+        Promise.all(promise).then((resp) => {});
         Event.Evt.firEvent("updateProjectCollection", res);
       });
     });
