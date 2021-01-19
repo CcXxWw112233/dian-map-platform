@@ -94,6 +94,7 @@ export default class LeftToolBar extends React.Component {
     });
   }
 
+  // 获取权限
   getPersonalPermission = () => {
     let promise1 = systemManageServices.getPersonalPermission2Global();
     let promise2 = systemManageServices.getPersonalPermission2Project();

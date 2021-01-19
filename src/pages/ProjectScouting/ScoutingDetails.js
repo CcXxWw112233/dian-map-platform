@@ -216,11 +216,11 @@ export default class ScoutingDetails extends PureComponent {
       });
       this.fetchCollection();
     });
-    Event.Evt.on("updateProjectCollection", (data) => {
+    Event.Evt.on("updateProjectCollection", data => {
       let { area_list: areaList, area_active_key: areaActiveKey } = this.state;
       let currentGroup = [];
       if (areaActiveKey !== "other") {
-        currentGroup = areaList.filter((item) => {
+        currentGroup = areaList.filter(item => {
           return item.id === areaActiveKey;
         });
       }
@@ -231,13 +231,13 @@ export default class ScoutingDetails extends PureComponent {
       Action.renderCollection(data || [], {
         lenged,
         dispatch,
-        showFeatureName,
+        showFeatureName
       });
       this.setState({
-        area_list: areaList,
+        area_list: areaList
       });
     });
-    Event.Evt.on("searchProjectData", (val) => {
+    Event.Evt.on("searchProjectData", val => {
       if (this.state.activeKey !== "1") return;
       let tmpArr = [];
       if (val) {
@@ -434,16 +434,21 @@ export default class ScoutingDetails extends PureComponent {
         }, 1);
       }
     });
+    // Evt.on("updateSelectedMeetingRooms", this.updateSelectedMeetingRooms);
   }
 
-  updateSelectedMeetingRooms = hotelName => {
+  updateSelectedMeetingRooms = (hotelName, multiple = true) => {
     let { hotelNames, projectId, dispatch } = this.props;
     if (this.tempProjectId.includes(projectId)) {
-      let index = hotelNames.findIndex(item => item === hotelName);
-      if (index > -1) {
-        hotelNames.splice(index, 1);
+      if (multiple) {
+        let index = hotelNames.findIndex(item => item === hotelName);
+        if (index > -1) {
+          hotelNames.splice(index, 1);
+        } else {
+          hotelNames.push(hotelName);
+        }
       } else {
-        hotelNames.push(hotelName);
+        hotelNames = [hotelName];
       }
       dispatch({
         type: "meetingSubscribe/updateData",
@@ -507,25 +512,24 @@ export default class ScoutingDetails extends PureComponent {
     if (collection) {
       let ftype = feature.getGeometry().getType();
       let properties = this.getProperties(ftype, feature.getGeometry());
+      let tempProjectId = this.tempProjectId;
+      const { projectId } = this.props;
       if (ftype === "Point") {
         let coords = feature.getGeometry().getCoordinates();
         coords = TransformCoordinate(coords, "EPSG:3857", "EPSG:4326");
         Evt.firEvent("HouseDetailGetPoi", coords.join(","));
-        if (
-          !this.tempProjectId.includes(this.props.projectId) ||
-          !feature.get("meetingRoom")
-        ) {
+        if (!tempProjectId.includes(projectId) && !feature.get("meetingRoom")) {
           dispatch({
             type: "collectionDetail/updateDatas",
             payload: { selectPoi: coords.join(",") }
           });
         }
+        if (tempProjectId.includes(projectId)) {
+          this.updateSelectedMeetingRooms(feature.get("title"), false);
+        }
       }
       collection.properties_map = properties;
-      if (
-        !this.tempProjectId.includes(this.props.projectId) ||
-        !feature.get("meetingRoom")
-      ) {
+      if (!tempProjectId.includes(projectId) && !feature.get("meetingRoom")) {
         dispatch({
           type: "collectionDetail/updateDatas",
           payload: {
@@ -682,9 +686,9 @@ export default class ScoutingDetails extends PureComponent {
         // 获取区域分类的数据列表
         window.ProjectGroupId = active;
         let obj = this.areaList.filter(item => {
-          return item.id === active
-        })[0]
-        window.ProjectGroupName = obj.name
+          return item.id === active;
+        })[0];
+        window.ProjectGroupName = obj.name;
         this.fetchCollection();
       })
       .catch(err => {
@@ -926,7 +930,7 @@ export default class ScoutingDetails extends PureComponent {
     // 再开始轮询--优化轮询机制
     Action.getCollectionList(params).then(res => {
       let data = res.data.sort((a, b) => a.sort - b.sort);
-      data = data.map((item) => {
+      data = data.map(item => {
         item.star = stars[Math.round(Math.random() * stars.length)];
         if (item.title.includes(brands[0])) {
           item.brand = brands[0];
@@ -1552,9 +1556,13 @@ export default class ScoutingDetails extends PureComponent {
           formdata.append("extent", param.extent);
           formdata.append("transparency", param.transparency);
           formdata.append("coord_sys_type", param.coord_sys_type);
-          let saved = await Axios.post(`${MAP_REQUEST_URL}/map/ght/${val.id}`, formdata, {
-            headers: { Authorization: Cookies.get("Authorization") }
-          });
+          let saved = await Axios.post(
+            `${MAP_REQUEST_URL}/map/ght/${val.id}`,
+            formdata,
+            {
+              headers: { Authorization: Cookies.get("Authorization") }
+            }
+          );
 
           await Action.editCollection({
             id: collection.id,
@@ -2758,7 +2766,10 @@ export default class ScoutingDetails extends PureComponent {
                     overlay={this.MultipleMenus()}
                   >
                     <Button type="primary" ghost size="small">
-                        <MyIcon type="icon-duoxuan" style={{fontSize: '1.3rem'}}/>
+                      <MyIcon
+                        type="icon-duoxuan"
+                        style={{ fontSize: "1.3rem" }}
+                      />
                       操作
                     </Button>
                   </Dropdown>
