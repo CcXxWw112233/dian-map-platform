@@ -38,9 +38,11 @@ export default class Index extends Component {
       type: "user/initGetAuth",
       payload: {}
     }).then(res => {
-      this.setState({
-        show_route: true
-      });
+      setTimeout(() => {
+        this.setState({
+          show_route: true
+        });
+      }, 1000);
     });
   }
   componentDidMount() {

@@ -8,10 +8,15 @@ export async function getUserInfo(params) {
     "GET",
     `${REQUEST_UPMS}${REQUEST_INTERGFACE_VERSION}/user`
   );
-  if (BASIC.checkResponse(response)) {
-    return response.data;
+  if (response) {
+    return Promise.resolve(response.data);
+  } else {
+    return Promise.resolve({});
   }
-  return Promise.reject(response && response.data);
+  // if (BASIC.checkResponse(response)) {
+  //   return response.data;
+  // }
+  // return Promise.reject(response && response.data);
 }
 //退出登录
 export async function logOut(data) {
@@ -28,10 +33,15 @@ export async function logOut(data) {
 // 查询用户组织列表
 export async function getCurrentUserOrganizes(params) {
   let response = await request("GET", `${REQUEST_UPMS}/organization/map`);
-  if (BASIC.checkResponse(response)) {
-    return response.data;
+  if (response) {
+    return Promise.resolve(response.data);
+  } else {
+    return Promise.resolve({});
   }
-  return Promise.reject(response && response.data);
+  // if (BASIC.checkResponse(response)) {
+  //   return response.data;
+  // }
+  // return Promise.reject(response && response.data);
 }
 // 切换组织
 export async function changeCurrentOrg(data) {
