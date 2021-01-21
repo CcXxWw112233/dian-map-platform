@@ -190,14 +190,14 @@ export default class BasemapGallery extends PureComponent {
                 })}
             </div>
             <div className={styles.switch}>
-              <Row style={{ marginBottom: 8 }}>
+              <Row style={{ marginBottom: 8 }} style={{display: "flex"}}>
                 <Switch
                   checked={this.state.showRoadLabel}
                   onChange={(e) => this.onRoadLabelChange(e)}
                 ></Switch>
                 <div className={styles.nameDiv}>路网</div>
               </Row>
-              <Row>
+              <Row style={{display: "flex"}}>
                 <Switch
                   checked={this.state.showPlotLabel}
                   onChange={(e) => this.onPlotLabelChange(e)}
