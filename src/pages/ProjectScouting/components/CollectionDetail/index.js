@@ -7,7 +7,7 @@ import { MyIcon } from "../../../../components/utils";
 import PhotoSwipe from "../../../../components/PhotoSwipe/action";
 import { keepLastIndex } from "../../../../utils/utils";
 import DetailAction from "../../../../lib/components/ProjectScouting/ScoutingDetail";
-import { message, Row, Col, Carousel, Tag } from "antd";
+import { message, Row, Col, Carousel, Tag, Spin } from "antd";
 import Event from "../../../../lib/utils/event";
 import EditDescription from "./editDescription";
 // import Slider from "react-slick";
@@ -22,7 +22,7 @@ import { func } from "prop-types";
     zIndex,
     type,
     isImg,
-    small,
+    small
   })
 )
 export default class CollectionDetail extends React.Component {
@@ -34,12 +34,13 @@ export default class CollectionDetail extends React.Component {
       activeImg: {},
       disabled: false,
       currentIndex: 0,
+      showSpin: true,
       sliderPages: {
         total: 1,
-        current: 1,
+        current: 1
       },
       isSearch: false,
-      checkedTag: "roadTraffic",
+      checkedTag: "roadTraffic"
     };
     this.content = React.createRef();
     this.slider = React.createRef();
@@ -47,12 +48,12 @@ export default class CollectionDetail extends React.Component {
     this.tags = [
       {
         key: "roadTraffic",
-        label: "道路交通",
+        label: "道路交通"
       },
       {
         key: "railTransit",
-        label: "轨道交通",
-      },
+        label: "轨道交通"
+      }
       // {
       //   key:"UrbanTransportation",
       //   label: "城市交通"
@@ -65,10 +66,18 @@ export default class CollectionDetail extends React.Component {
 
   componentDidMount() {
     this.InitActiveImg(this.props);
+    const me = this;
+    if (document.getElementById("id_ImgPreview")) {
+      document.getElementById("id_ImgPreview").onload = function() {
+        me.setState({
+          showSpin: false
+        });
+      };
+    }
   }
 
   // 预览图片
-  previewImg = (e) => {
+  previewImg = e => {
     // clearTimeout(this.timeout)
     // this.timeout = setTimeout(() => {
 
@@ -78,7 +87,7 @@ export default class CollectionDetail extends React.Component {
       let w = this.loadedImage.width;
       let h = this.loadedImage.height;
       PhotoSwipe.show([
-        { w, h, src: this.loadedImage.src, title: selectData.title },
+        { w, h, src: this.loadedImage.src, title: selectData.title }
       ]);
     } else {
       this.imageLoaing = true;
@@ -86,14 +95,24 @@ export default class CollectionDetail extends React.Component {
       if (!url) return;
       let img = new Image();
       img.src = url;
+      this.setState({
+        showSpin: true
+      });
       img.onload = () => {
-        this.imageLoaing = false;
-        this.loadedImage = img;
-        let w = img.width;
-        let h = img.height;
-        PhotoSwipe.show([
-          { w, h, src: this.loadedImage.src, title: selectData.title },
-        ]);
+        this.setState(
+          {
+            showSpin: false
+          },
+          () => {
+            this.imageLoaing = false;
+            this.loadedImage = img;
+            let w = img.width;
+            let h = img.height;
+            PhotoSwipe.show([
+              { w, h, src: this.loadedImage.src, title: selectData.title }
+            ]);
+          }
+        );
       };
     }
   };
@@ -108,7 +127,10 @@ export default class CollectionDetail extends React.Component {
         if (window.getSelection) {
           var newNode = document.createElement("span");
           newNode.innerHTML = text;
-          window.getSelection().getRangeAt(0).insertNode(newNode);
+          window
+            .getSelection()
+            .getRangeAt(0)
+            .insertNode(newNode);
         } else {
           document.selection.createRange().pasteHTML(text);
         }
@@ -147,11 +169,11 @@ export default class CollectionDetail extends React.Component {
     }
   };
   // 编辑
-  editEnd = (flag) => {
+  editEnd = flag => {
     // console.log(flag)
     this.setState(
       {
-        isEdit: flag,
+        isEdit: flag
       },
       () => {
         if (flag) {
@@ -167,11 +189,11 @@ export default class CollectionDetail extends React.Component {
     );
   };
   // 设置
-  setActiveImg = (type) => {
+  setActiveImg = type => {
     let { selectData } = this.props;
     let { activeImg } = this.state;
     if (selectData && selectData.length) {
-      let index = selectData.find((item) => activeImg.id === item.id);
+      let index = selectData.find(item => activeImg.id === item.id);
       if (index !== -1) {
         switch (type) {
           case "next":
@@ -184,7 +206,7 @@ export default class CollectionDetail extends React.Component {
     }
   };
 
-  InitActiveImg = (props) => {
+  InitActiveImg = props => {
     const { selectData, type } = props;
     let { sliderPages } = this.state;
     if (selectData) {
@@ -195,14 +217,14 @@ export default class CollectionDetail extends React.Component {
           activeImg: data,
           disabled: type === "view",
           currentIndex: 0,
-          sliderPages: { ...sliderPages, total: selectData.length, current: 1 },
+          sliderPages: { ...sliderPages, total: selectData.length, current: 1 }
         });
       } else {
         this.setState({
           activeImg: selectData,
           disabled: type === "view",
           currentIndex: 0,
-          sliderPages: { ...sliderPages, total: 1, current: 1 },
+          sliderPages: { ...sliderPages, total: 1, current: 1 }
         });
       }
     }
@@ -211,6 +233,9 @@ export default class CollectionDetail extends React.Component {
   componentWillReceiveProps(nextProps) {
     this.loadedImage = null;
     const { selectData } = nextProps;
+    this.setState({
+      showSpin: true
+    });
     if (this.props.selectData !== selectData) {
       this.InitActiveImg(nextProps);
       this.detailBack();
@@ -227,24 +252,24 @@ export default class CollectionDetail extends React.Component {
     if (val.description === text) return;
     let param = {
       id: val.id,
-      description: text,
+      description: text
     };
-    DetailAction.editCollection(param).then((res) => {
+    DetailAction.editCollection(param).then(res => {
       message.success("保存成功");
       dispatch({
         type: "collectionDetail/updateDatas",
         payload: {
-          selectData: selectData.map((item) => {
+          selectData: selectData.map(item => {
             if (item.id === val.id) {
               item.description = text;
             }
             return item;
           }),
-          type: "edit",
-        },
+          type: "edit"
+        }
       });
       let datas = DetailAction.oldData;
-      let data = datas.map((item) => {
+      let data = datas.map(item => {
         if (item.id === val.id) {
           item.description = text;
         }
@@ -255,46 +280,50 @@ export default class CollectionDetail extends React.Component {
   };
 
   allVideoStop = () => {
-    document.querySelectorAll("video").forEach((item) => {
+    document.querySelectorAll("video").forEach(item => {
       item.pause();
     });
-    document.querySelectorAll("audio").forEach((item) => {
+    document.querySelectorAll("audio").forEach(item => {
       item.pause();
     });
   };
 
-  slideChange = (current) => {
+  slideChange = current => {
     let { sliderPages } = this.state;
     this.allVideoStop();
     this.setState({
       currentIndex: current,
-      sliderPages: { ...sliderPages, current: current + 1 },
+      sliderPages: { ...sliderPages, current: current + 1 }
     });
   };
-  checkRender = (val) => {
+
+  checkRender = val => {
     let type = DetailAction.checkCollectionType(val.target);
     if (type === "pic") {
       return (
-        <img
-          crossOrigin="anonymous"
-          src={val.resource_url}
-          alt=""
-          onClick={(e) => {
-            if (!this.imageLoaing) {
-              this.previewImg(e);
-            } else {
-              message.info("图片正在加载中,请勿重复点击！");
-            }
-          }}
-        />
+        <Spin tip="加载中..." spinning={this.state.showSpin}>
+          <img
+            crossOrigin="anonymous"
+            src={val.resource_url}
+            alt=""
+            id="id_ImgPreview"
+            onClick={e => {
+              if (!this.imageLoaing) {
+                this.previewImg(e);
+              } else {
+                message.info("图片正在加载中,请勿重复点击！");
+              }
+            }}
+          />
+        </Spin>
       );
     }
     if (type === "video" || type === "interview") {
       let config = {
         file: {
           forceVideo: type === "video",
-          forceAudio: type === "interview",
-        },
+          forceAudio: type === "interview"
+        }
       };
       return (
         <ReactPlayer
@@ -309,17 +338,17 @@ export default class CollectionDetail extends React.Component {
     } else return "";
   };
 
-  changeSmall = (val) => {
+  changeSmall = val => {
     const { dispatch } = this.props;
     dispatch({
       type: "collectionDetail/updateDatas",
       payload: {
-        small: val,
-      },
+        small: val
+      }
     });
     this.allVideoStop();
   };
-  renderPropertiesMap = (val) => {
+  renderPropertiesMap = val => {
     // console.log(val)
     if (val.properties_map) {
       let property = val.properties_map;
@@ -340,7 +369,7 @@ export default class CollectionDetail extends React.Component {
     DetailAction.cancelSearchAround();
     dispatch({
       type: "collectionDetail/updateDatas",
-      payload: { selectData: null, isImg: true },
+      payload: { selectData: null, isImg: true }
     });
   };
 
@@ -357,7 +386,7 @@ export default class CollectionDetail extends React.Component {
       }
     }
     this.setState({
-      isSearch: isSearchFlag,
+      isSearch: isSearchFlag
     });
   };
 
@@ -380,7 +409,7 @@ export default class CollectionDetail extends React.Component {
     }
     // this.activeType = type;
     this.setState({
-      activeType: type,
+      activeType: type
     });
     // 开始搜索
     this.searchAroundAbout(data, this.state.isSearch, type);
@@ -388,7 +417,7 @@ export default class CollectionDetail extends React.Component {
 
   handleTag = (tag, checked) => {
     this.setState({
-      checkedTag: tag.key,
+      checkedTag: tag.key
     });
   };
   componentWillUnmount() {
@@ -476,7 +505,7 @@ export default class CollectionDetail extends React.Component {
                 afterChange={this.slideChange}
               >
                 {selectData &&
-                  selectData.map((item) => {
+                  selectData.map(item => {
                     return (
                       <div key={item.id}>
                         {isImg && (
@@ -510,7 +539,7 @@ export default class CollectionDetail extends React.Component {
                         </span> */}
                               <div className={styles.around_search_item}>
                                 <div>周边快查</div>
-                                {this.tags.map((tags) => {
+                                {this.tags.map(tags => {
                                   return (
                                     <Tag
                                       key={tags.key}

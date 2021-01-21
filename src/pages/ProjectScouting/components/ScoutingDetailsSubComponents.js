@@ -919,7 +919,7 @@ export const ScoutingItem = (props) => {
     onSelectCollection && onSelectCollection(val);
   };
   return (
-    <DragDropContext onDragEnd={() => onDragEnd.bind(this, data)}>
+    <DragDropContext onDragEnd={(result) => onDragEnd(data, result)}>
       <Droppable droppableId="droppable">
         {(provided, snapshot) => (
           <div {...provided.droppableProps} ref={provided.innerRef}>
