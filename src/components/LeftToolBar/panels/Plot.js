@@ -294,6 +294,7 @@ export default class Plot extends PureComponent {
       parent.isModifyPlot = true;
       let operator = e.feature_operator;
       me.plotType = operator.attrs.plotType;
+      parent.leftToolBarRef.updateSelectedPlotType(me.plotType);
       window.featureOperator = operator;
       if (!operator.isScouting) {
         Event.Evt.firEvent("setAttribute", {
@@ -338,7 +339,6 @@ export default class Plot extends PureComponent {
           customStrokeSelectedColor = operator.attrs.strokeColor;
           customFillSelectedColor = operator.attrs.featureType;
         }
-        me.updateSymbol();
         me.setState({
           name: operator.getName(),
           customStrokeSelectedColor: customStrokeSelectedColor
