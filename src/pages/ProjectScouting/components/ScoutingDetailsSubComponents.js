@@ -343,7 +343,7 @@ const UploadBtn = ({ onChange, parentTool, boardId }) => {
   // }
   return (
     <Upload
-      action={`${MAP_REQUEST_URL}i/map/file/upload`}
+      action={`${MAP_REQUEST_URL}/map/file/upload`}
       beforeUpload={checkFileSize}
       multiple
       headers={{ Authorization: Cookies.get('Authorization') }}
