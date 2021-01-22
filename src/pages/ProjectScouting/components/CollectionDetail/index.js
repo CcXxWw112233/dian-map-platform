@@ -61,7 +61,7 @@ export default class CollectionDetail extends React.Component {
     ];
     this.imageLoaing = false;
     this.loadedImage = null;
-    // this.previewImg = throttle(this.previewImg, 1000);
+    this.lastResourceId = "";   // this.previewImg = throttle(this.previewImg, 1000);
   }
 
   componentDidMount() {
@@ -217,15 +217,19 @@ export default class CollectionDetail extends React.Component {
           activeImg: data,
           disabled: type === "view",
           currentIndex: 0,
+          showSpin: this.lastResourceId !== data.id,
           sliderPages: { ...sliderPages, total: selectData.length, current: 1 }
         });
+        this.lastResourceId = data.id;
       } else {
         this.setState({
           activeImg: selectData,
           disabled: type === "view",
           currentIndex: 0,
+          showSpin: this.lastResourceId !== selectData.id,
           sliderPages: { ...sliderPages, total: 1, current: 1 }
         });
+        this.lastResourceId = selectData;
       }
     }
   };
@@ -233,9 +237,6 @@ export default class CollectionDetail extends React.Component {
   componentWillReceiveProps(nextProps) {
     this.loadedImage = null;
     const { selectData } = nextProps;
-    this.setState({
-      showSpin: true
-    });
     if (this.props.selectData !== selectData) {
       this.InitActiveImg(nextProps);
       this.detailBack();
