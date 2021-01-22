@@ -375,7 +375,7 @@ export default class Plot extends PureComponent {
     };
     this.operatorDeactive = function(e) {
       // if (!e.feature_operator.isScouting) {
-      me.plotType = "";
+      // me.plotType = "";
       parent.isModifyPlot = false;
       me.symbol = null;
       me.sigleImage = null;
