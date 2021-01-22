@@ -415,8 +415,8 @@ const publicData = {
       }
       code = tmpArr[1];
     }
-    this.activeTypeName = name + "_" + code;
-    // this.activeTypeName = name;
+    // this.activeTypeName = name + "_" + code;
+    this.activeTypeName = name;
     if (!this.features[this.activeTypeName]) {
       this.features[this.activeTypeName] = [];
       let res = await publicDataServices.getPopulationDatas(code, type);

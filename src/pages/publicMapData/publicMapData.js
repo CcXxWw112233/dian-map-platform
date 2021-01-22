@@ -218,6 +218,7 @@ export default class PublicData extends React.Component {
       )[0];
       if (currentNode) {
         if (this.lastSingle) {
+          this.removeLastFeature();
           const index = newCheckedKeys.findIndex(
             (key) => key === this.lastSingle.id
           );
@@ -230,7 +231,7 @@ export default class PublicData extends React.Component {
               checkedNodes.splice(index2, 1);
 
             }
-            this.removeLastFeature();
+            // this.removeLastFeature();
           } else {
             if (this.lastSingle.id === currentNode.id) {
               const index2 = checkedNodes.findIndex(
@@ -239,7 +240,7 @@ export default class PublicData extends React.Component {
               if (index2 > -1) {
                 checkedNodes.splice(index2, 1);
               }
-              this.removeLastFeature();
+              // this.removeLastFeature();
               currentNode = null;
             }
           }
