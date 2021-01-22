@@ -61,7 +61,7 @@ export default class CollectionDetail extends React.Component {
     ];
     this.imageLoaing = false;
     this.loadedImage = null;
-    this.lastResourceId = "";   // this.previewImg = throttle(this.previewImg, 1000);
+    this.lastResourceId = ""; // this.previewImg = throttle(this.previewImg, 1000);
   }
 
   componentDidMount() {
@@ -229,7 +229,7 @@ export default class CollectionDetail extends React.Component {
           showSpin: this.lastResourceId !== selectData.id,
           sliderPages: { ...sliderPages, total: 1, current: 1 }
         });
-        this.lastResourceId = selectData;
+        this.lastResourceId = selectData.id;
       }
     }
   };
@@ -237,6 +237,15 @@ export default class CollectionDetail extends React.Component {
   componentWillReceiveProps(nextProps) {
     this.loadedImage = null;
     const { selectData } = nextProps;
+    if (Array.isArray(this.props.selectData)) {
+      if (this.props.selectData[0].id === this.lastResourceId) {
+        return false;
+      }
+    } else {
+      if (this.props.selectData.id === this.lastResourceId) {
+        return false;
+      }
+    }
     if (this.props.selectData !== selectData) {
       this.InitActiveImg(nextProps);
       this.detailBack();

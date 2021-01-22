@@ -224,16 +224,17 @@ export default class PublicData extends React.Component {
           if (index > -1) {
             newCheckedKeys.splice(index, 1);
             const index2 = checkedNodes.findIndex(
-              (item) => item.id === this.lastSingle.id
+              (item) => item.key === this.lastSingle.id
             );
             if (index2 > -1) {
               checkedNodes.splice(index2, 1);
+
             }
             this.removeLastFeature();
           } else {
             if (this.lastSingle.id === currentNode.id) {
               const index2 = checkedNodes.findIndex(
-                (item) => item.id === this.lastSingle.id
+                (item) => item.key === this.lastSingle.id
               );
               if (index2 > -1) {
                 checkedNodes.splice(index2, 1);
