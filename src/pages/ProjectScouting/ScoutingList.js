@@ -222,7 +222,7 @@ export default class ScoutingList extends PureComponent {
       radius: val.radius,
     })
       .then((res) => {
-        let { data } = res;
+        let { data } = res || {};
         // 添加数据
         this.setState(
           {

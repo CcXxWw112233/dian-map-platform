@@ -2936,11 +2936,10 @@ function Action() {
             this.staticimg && this.staticimg.setOpacity(val);
           },
           enter: val => {
-            // console.log(val)
             resolve({
-              feature: e.feature,
+              feature: this.boxFeature,
               ...val,
-              extent: e.feature.getGeometry().getExtent(),
+              extent: this.boxFeature.getGeometry().getExtent(),
               url: globalurl,
               blobFile: file
             });

@@ -642,7 +642,7 @@ export default class ScoutingDetails extends PureComponent {
   getDetails = flag => {
     ScouListAction.checkItem().then(res => {
       // console.log(res)
-      let { data } = res;
+      let { data } = res || {};
       Event.Evt.firEvent("changeAreaInSearch", data);
       this.setState(
         {

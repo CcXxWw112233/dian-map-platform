@@ -104,14 +104,14 @@ export default class LeftToolBar extends React.Component {
           let globalPermission = {},
             projectPermission = {};
           if (res[0]["code"] === "0") {
-            globalPermission = res[0].data;
+            globalPermission = res[0]?.data;
           } else {
-            message.error(res[0].message);
+            message.error(res[0]?.message);
           }
           if (res[1]["code"] === "0") {
-            projectPermission = res[1].data;
+            projectPermission = res[1]?.data;
           } else {
-            message.error(res[1].message);
+            message.error(res[1]?.message);
           }
           this.setState(
             {
@@ -140,7 +140,8 @@ export default class LeftToolBar extends React.Component {
         }
       })
       .catch(e => {
-        message.error(e.message);
+        console.error(e)
+        // message.error(e.message);
       });
   };
 

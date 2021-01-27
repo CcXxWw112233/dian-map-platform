@@ -17,7 +17,6 @@ let requestTimer = null,
   responseTimer = null;
 instance.interceptors.request.use(config => {
   let token = Cookies.get("Authorization");
-  console.log("sssssaaa", token);
   if (token) {
     config.headers["Authorization"] = token;
     NProgress.start();
@@ -25,7 +24,7 @@ instance.interceptors.request.use(config => {
     clearTimeout(requestTimer);
     if (BASIC.getUrlParam.isMobile === "1") return {};
     requestTimer = setTimeout(() => {
-      message.error("缺少权限，无法试用地图");
+      // message.error("缺少权限，无法试用地图");
       if (!ENTRANCE_MODE_IFRAME) {
         redirectToLogin();
       }
@@ -106,7 +105,7 @@ instance.interceptors.response.use(
   }
 );
 //重定向路由
-function redirectToLogin() {
+export function redirectToLogin() {
   const { origin, hash } = window.location;
   const hashname = !!hash ? hash.replace("#", "") : hash;
   window.location.href = `${origin}/#/login?redirect=${hashname}`;

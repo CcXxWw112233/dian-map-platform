@@ -157,7 +157,7 @@ class IndexPage extends React.Component {
   checkListCach = () => {
     let { dispatch } = this.props;
     ScoutAction.checkItem()
-      .then((res) => {
+      .then((res = {}) => {
         dispatch({
           type: "scoutingDetail/updateDatas",
           payload: {

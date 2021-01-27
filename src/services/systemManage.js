@@ -248,6 +248,6 @@ export default {
         BaseInfo: base64
       }
     );
-    return response.data;
+    return response ? response.data : {};
   }
 };

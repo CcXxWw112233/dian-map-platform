@@ -7,6 +7,7 @@ import { ENTRANCE_MODE_IFRAME } from "../../globalSet/config";
 import Cookies from "js-cookie";
 import { setSessionOrgId } from "../../utils/sessionData";
 import { BASIC } from "../../services/config";
+import { redirectToLogin } from "../../services";
 @connect(mapStateToProps)
 export default class Index extends Component {
   constructor(props) {
@@ -46,7 +47,9 @@ export default class Index extends Component {
     });
   }
   componentDidMount() {
-    console.log("ssssaaaasd", this.props);
+    if (BASIC.getIsDomain()) {
+      redirectToLogin();
+    }
   }
   renderRoute = () => {
     return (
