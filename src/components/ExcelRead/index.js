@@ -72,6 +72,8 @@ export default class ExcelRead extends React.Component {
         data: data,
         visible: true,
       });
+    } else {
+      message.warn("表格无数据，请确保第一个Sheet中有数据")
     }
   };
   readFile = (val) => {

@@ -489,10 +489,9 @@ export default class PublicData extends React.Component {
     return (
       <div
         className={styles.wrapper}
-        // style={{
-        //   height: "99%",
-        //   position: "absolute",
-        // }}
+        style={{
+          height: "calc(100vh - 150px)",
+        }}
       >
         <div
           className={globalStyle.autoScrollY}
