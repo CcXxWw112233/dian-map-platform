@@ -1787,7 +1787,7 @@ function Action() {
       placement: "point",
       iconScale: 0.6,
       pointColor: "#fff",
-      showName: showFeatureName
+      showName: showFeatureName === undefined ? true : showFeatureName
     };
     this.lenged = {
       title: "项目数据",

@@ -222,6 +222,8 @@ export default {
     let res = await getSession("ScoutingItemId");
     let board_id = res.data;
     let base64 = getBase64(board_id);
+    delete data.province_name
+    delete data.city_name
     // let newData = { area_type_id: data.area_type_id, id: data.id };
     let response = await request("PUT", "/map/collection", data, {
       BaseInfo: base64,
