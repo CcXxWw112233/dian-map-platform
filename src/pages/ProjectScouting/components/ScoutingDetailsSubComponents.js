@@ -819,18 +819,20 @@ export const ScoutingHeader = (props) => {
               />
               <Button
                 onClick={() => saveItem()}
-                size="middle"
+                size="small"
                 type="primary"
-                icon={<Icon type="check-circle" CheckCircleOutlined />}
-              ></Button>
+              >
+                <Icon type="check-circle" CheckCircleOutlined />
+              </Button>
               <Button
                 onClick={() => {
                   setIsEdit(false);
                   onCancel && onCancel(data);
                 }}
-                size="middle"
-                icon={<Icon type="close-circle" CloseCircleOutlined />}
-              ></Button>
+                size="small"
+              >
+                <Icon type="close-circle" CloseCircleOutlined />
+              </Button>
             </Fragment>
           ) : (
             <div className={styles.groupTitle}>
