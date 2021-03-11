@@ -102,12 +102,12 @@ export default {
       return res;
     },
     *logOut({ payload }, { put, select, call }) {
-      const res = yield call(logOut);
-      if (res.code === "0") {
+      // const res = yield call(logOut);
+      // if (res.code === "0") {
         Cookies.remove("Authorization");
         Cookies.remove("refreshToken");
         yield put(routerRedux.replace("/login?redirect=/home"));
-      }
+      // }
     },
     *routingJump({ payload }, { call, put }) {
       const { route } = payload;

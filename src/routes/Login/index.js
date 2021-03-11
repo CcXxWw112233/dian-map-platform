@@ -13,7 +13,7 @@ import { routerRedux } from "dva/router";
 import styles from "./index.less";
 import { connect } from "dva";
 
-@connect(() => {})
+@connect(() => ({}))
 export default class Index extends Component {
   loginSuccess = val => {
     const { dispatch } = this.props;
