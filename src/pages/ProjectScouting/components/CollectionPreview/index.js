@@ -22,7 +22,7 @@ import { PanoramaOverlay, ImagePanel } from "./panels";
   ({ openswitch: { openPanel }, scoutingDetail: { collections, board } }) => ({
     openPanel,
     collections,
-    board,
+    board
   })
 )
 export default class CollectionPreview extends React.Component {
@@ -44,7 +44,7 @@ export default class CollectionPreview extends React.Component {
       hotspot: [],
       panoramaList: [],
       selectedPitch: null,
-      selectedYaw: null,
+      selectedYaw: null
     };
     this.imgContent = React.createRef();
     this.touchStart = false;
@@ -73,17 +73,17 @@ export default class CollectionPreview extends React.Component {
       }
       return {
         updateStyle: {
-          width: document.body.clientWidth - width,
+          width: document.body.clientWidth - width
         },
-        ...obj,
+        ...obj
       };
     } else {
       let dom1 = document.querySelector("#leftToolBar");
       return {
         updateStyle: {
-          width: document.body.clientWidth - (dom1 ? dom1.clientWidth : 0),
+          width: document.body.clientWidth - (dom1 ? dom1.clientWidth : 0)
         },
-        ...obj,
+        ...obj
       };
     }
     return null;
@@ -97,8 +97,8 @@ export default class CollectionPreview extends React.Component {
         type: "collectionDetail/updateDatas",
         payload: {
           selectData: this.state.active,
-          type: "view",
-        },
+          type: "view"
+        }
       });
       const { currentData } = this.props;
       if (currentData) {
@@ -137,7 +137,7 @@ export default class CollectionPreview extends React.Component {
 
     window.addEventListener("resize", () => {
       this.setState({
-        update: this.state.update + 1,
+        update: this.state.update + 1
       });
     });
   }
@@ -147,57 +147,57 @@ export default class CollectionPreview extends React.Component {
   //   this.getList(currentData.id);
   // }
 
-  handleMoveToPanoramaLink = (item) => {
+  handleMoveToPanoramaLink = item => {
     let pannellumRef = this.refs["pannellum"];
     let viewer = pannellumRef.getViewer();
     viewer.setPitch(item.pitch);
     viewer.setYaw(item.yaw);
     let arr = this.state.hotspot;
-    let selectIndex = arr.findIndex((item0) => item0.id === item.id);
+    let selectIndex = arr.findIndex(item0 => item0.id === item.id);
     arr[selectIndex].cssClass = styles.panorama_modify;
     this.setState({
       hotspot: arr,
-      isModifyPanorama: true,
+      isModifyPanorama: true
     });
   };
 
-  getList = (id) => {
-    panoramaServices.getList(id).then((res) => {
+  getList = id => {
+    panoramaServices.getList(id).then(res => {
       if (res && res.code === "0") {
         let datas = res.data;
         // datas.forEach((item) => {
         //   item.cssClass = styles.panorama_arrow;
         // });
-        datas.map((item) => (item.cssClass = styles.panorama_arrow));
+        datas.map(item => (item.cssClass = styles.panorama_arrow));
         const { timeData } = this.props;
         const keys = Object.keys(timeData);
         let datas2 = [];
-        keys.forEach((item) => {
+        keys.forEach(item => {
           if (timeData[item].length > 0) {
-            timeData[item].forEach((item0) => {
+            timeData[item].forEach(item0 => {
               datas2.push(item0.data);
             });
           }
         });
-        datas.forEach((item0) => {
-          let data = datas2.filter((item) => item.id === item0.target_id);
+        datas.forEach(item0 => {
+          let data = datas2.filter(item => item.id === item0.target_id);
           if (data.length > 0) {
             item0.imageUrl = data[0].resource_url;
           }
         });
 
-        let hotspot = this.state.hotspot.filter((item) => item.isAdd === true);
+        let hotspot = this.state.hotspot.filter(item => item.isAdd === true);
 
         hotspot = [...hotspot, ...datas];
         this.setState({
           panoramaList: res.data,
-          hotspot: hotspot,
+          hotspot: hotspot
         });
       }
     });
   };
   // 简化坐标
-  getPointer = (e) => {
+  getPointer = e => {
     return { x: e.pageX, y: e.pageY };
   };
 
@@ -208,7 +208,7 @@ export default class CollectionPreview extends React.Component {
       height + 60,
       100,
       40,
-      Math.abs(this.state.updateStyle.width - document.body.clientWidth),
+      Math.abs(this.state.updateStyle.width - document.body.clientWidth)
     ];
     this.fitview({ padding });
   };
@@ -220,13 +220,13 @@ export default class CollectionPreview extends React.Component {
         this.view,
         extent,
         {
-          padding,
+          padding
         },
         duration
-      ).then((res) => {});
+      ).then(res => {});
   };
 
-  pointerdown = (e) => {
+  pointerdown = e => {
     if (e.target) {
       if (e.target.id === "slidebar_preview") {
         this.touchStart = true;
@@ -235,7 +235,7 @@ export default class CollectionPreview extends React.Component {
     }
   };
 
-  pointermove = (e) => {
+  pointermove = e => {
     let { onFull } = this.props;
     if (!this.touchStart) return;
     let { current } = this.imgContent;
@@ -260,8 +260,8 @@ export default class CollectionPreview extends React.Component {
         targetHeight + 60,
         100,
         40,
-        Math.abs(this.state.updateStyle.width - document.body.clientWidth),
-      ],
+        Math.abs(this.state.updateStyle.width - document.body.clientWidth)
+      ]
     });
     let percent = (targetHeight / this.windowHeight).toFixed(4);
     // current.style.height = targetHeight +'px';
@@ -277,32 +277,32 @@ export default class CollectionPreview extends React.Component {
   onChageEdit = () => {
     let { onFull, dispatch } = this.props;
     this.setState({
-      isEdit: true,
+      isEdit: true
     });
     dispatch({
       type: "openswitch/updateDatas",
       payload: {
-        openPanel: false,
-      },
+        openPanel: false
+      }
     });
     onFull && onFull();
   };
 
   exit = () => {
     this.setState({
-      isEdit: false,
+      isEdit: false
     });
   };
 
   handleSavePanoramaName = (id, newName) => {
-    panoramaServices.modify({ id: id, name: newName }).then((res) => {
+    panoramaServices.modify({ id: id, name: newName }).then(res => {
       if (res && res.code === "0") {
       }
     });
   };
 
   // 保存全景链接
-  handleSavePanoramaLink = (selectData) => {
+  handleSavePanoramaLink = selectData => {
     const { currentData } = this.props;
     panoramaServices
       .add(
@@ -311,21 +311,21 @@ export default class CollectionPreview extends React.Component {
         this.state.selectedPitch,
         this.state.selectedYaw
       )
-      .then((res) => {
+      .then(res => {
         if (res && res.code === "0") {
           const { currentData } = this.props;
-          panoramaServices.getList(currentData.id).then((res) => {
+          panoramaServices.getList(currentData.id).then(res => {
             if (res && res.code === "0") {
               let index = this.state.hotspot.findIndex(
-                (item) => item.isAdd === true
+                item => item.isAdd === true
               );
               let newHotspot = this.state.hotspot;
               newHotspot.splice(index, 1);
               let arr = res.data;
-              arr.map((item) => (item.cssClass = styles.panorama_arrow));
+              arr.map(item => (item.cssClass = styles.panorama_arrow));
               this.setState({
                 panoramaList: res.data,
-                hotspot: [...newHotspot, ...arr],
+                hotspot: [...newHotspot, ...arr]
               });
               this.handleCloseImagePanel();
             }
@@ -343,7 +343,7 @@ export default class CollectionPreview extends React.Component {
         pitch: pitch,
         yaw: yaw,
         cssClass: styles.panorama_add,
-        isAdd: true,
+        isAdd: true
       };
       let arr = this.state.hotspot;
       this.setState(
@@ -352,7 +352,7 @@ export default class CollectionPreview extends React.Component {
           isAddPanorama: false,
           isShowImagePanel: true,
           selectedPitch: pitch,
-          selectedYaw: yaw,
+          selectedYaw: yaw
         },
         () => {
           pannellumRef.getViewer().setPitch(pitch);
@@ -370,7 +370,7 @@ export default class CollectionPreview extends React.Component {
       this.isOutside = false;
       this.setState(
         {
-          imageUrl: item.imageUrl,
+          imageUrl: item.imageUrl
         },
         () => {
           const { parent } = this.props;
@@ -427,12 +427,15 @@ export default class CollectionPreview extends React.Component {
       ) : (
         <img crossOrigin="anonymous" src={data?.resource_url} alt="" />
       );
-    } else if (type === "video" || type === "interview") {
+    } else if (
+      (data.collect_type === "10" && type === "video") ||
+      (data.collect_type === "10" && type === "interview")
+    ) {
       let config = {
         file: {
-          forceVideo: type === "video",
-          forceAudio: type === "interview",
-        },
+          forceVideo: (data.collect_type === "10" && type === "video"),
+          forceAudio: (data.collect_type === "10" && type === "interview")
+        }
       };
       return (
         <Fragment>
@@ -443,7 +446,7 @@ export default class CollectionPreview extends React.Component {
               paddingTop: 20,
               ...(data.collect_type === "10"
                 ? { display: "" }
-                : { display: "none" }),
+                : { display: "none" })
             }}
           >
             <PannellumVideo
@@ -466,7 +469,7 @@ export default class CollectionPreview extends React.Component {
               paddingTop: 20,
               ...(data.collect_type === "10"
                 ? { display: "none" }
-                : { display: "" }),
+                : { display: "" })
             }}
           >
             <ReactPlayer
@@ -486,13 +489,13 @@ export default class CollectionPreview extends React.Component {
     let arr = Array.from(this.props.collections);
     let param = {
       id: data.id,
-      resource_id: resource_id,
+      resource_id: resource_id
     };
     // 修改采集数据的resource_id 并且更新列表
-    DetailAction.editCollection(param).then((res) => {
+    DetailAction.editCollection(param).then(res => {
       message.success("保存成功");
       this.exit();
-      arr = arr.map((item) => {
+      arr = arr.map(item => {
         if (item.id === data.id) {
           item.resource_id = resource_id;
           item.resource_url = url;
@@ -502,8 +505,8 @@ export default class CollectionPreview extends React.Component {
       this.props.dispatch({
         type: "openswitch/updateDatas",
         payload: {
-          openPanel: true,
-        },
+          openPanel: true
+        }
       });
       Event.Evt.firEvent("CollectionUpdate:reload", arr);
     });
@@ -517,9 +520,9 @@ export default class CollectionPreview extends React.Component {
       collect_type: 3,
       resource_id: file_resource_id,
       target: suffix && suffix.replace(".", ""),
-      title: name,
+      title: name
     };
-    DetailAction.addCollection(params).then((res) => {
+    DetailAction.addCollection(params).then(res => {
       message.success("保存成功");
       let arr = Array.from(collections);
       arr = arr.concat(res.data);
@@ -527,8 +530,8 @@ export default class CollectionPreview extends React.Component {
       this.props.dispatch({
         type: "openswitch/updateDatas",
         payload: {
-          openPanel: true,
-        },
+          openPanel: true
+        }
       });
       this.exit();
     });
@@ -538,33 +541,33 @@ export default class CollectionPreview extends React.Component {
     message.info('点击图片添加"坐标定位"');
     this.setState({
       overlayVisible: false,
-      isAddPanorama: true,
+      isAddPanorama: true
     });
   };
 
   handleCloseImagePanel = () => {
     let arr = this.state.hotspot;
-    let index = arr.findIndex((item) => item.isAdd === true);
+    let index = arr.findIndex(item => item.isAdd === true);
     arr.splice(index, 1);
     this.setState({
       isShowImagePanel: false,
-      hotspot: arr,
+      hotspot: arr
     });
   };
 
-  handleDelPanoramaScene = (id) => {
-    panoramaServices.delete(id).then((res) => {
+  handleDelPanoramaScene = id => {
+    panoramaServices.delete(id).then(res => {
       if (res && res.code === "0") {
         message.info("删除成功");
         const { currentData } = this.props;
         if (currentData) {
-          panoramaServices.getList(currentData.id).then((res) => {
+          panoramaServices.getList(currentData.id).then(res => {
             if (res && res.code === "0") {
               let arr = res.data;
-              arr.map((item) => (item.cssClass = styles.panorama_arrow));
+              arr.map(item => (item.cssClass = styles.panorama_arrow));
               this.setState({
                 panoramaList: res.data,
-                hotspot: arr,
+                hotspot: arr
               });
             }
           });
@@ -575,7 +578,7 @@ export default class CollectionPreview extends React.Component {
 
   handleDropdownClick = () => {
     this.setState({
-      overlayVisible: !this.state.overlayVisible,
+      overlayVisible: !this.state.overlayVisible
     });
   };
 
@@ -603,8 +606,8 @@ export default class CollectionPreview extends React.Component {
                 selectData: null,
                 zIndex: 10,
                 type: "view",
-                isImg: true,
-              },
+                isImg: true
+              }
             });
           }}
         >

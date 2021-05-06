@@ -20,7 +20,8 @@ import {
   Dropdown,
   Menu,
   Popover,
-  BackTop
+  BackTop,
+  notification
   // Radio,
   // Form,
   // Input,
@@ -1174,6 +1175,7 @@ export default class ScoutingDetails extends PureComponent {
   cancelEditCollection = () => {
     message.destroy();
     // Action.removeDraw();
+    Action.abortPointAddDraw();
     this.showOtherSlide();
   };
 
@@ -1288,7 +1290,6 @@ export default class ScoutingDetails extends PureComponent {
         }
       })
       .catch(err => {
-        console.log(err);
         this.cancelEditCollection();
       });
   };
@@ -1410,7 +1411,7 @@ export default class ScoutingDetails extends PureComponent {
       this.clearGroupPointer();
     }
     this.hiddenDetail();
-    this.setState({ area_selected: [key] });
+    this.setState({ area_selected: key ? [key] : "" });
     if (key) {
       let obj = this.state.area_list.find(item => item.id === key);
       if (obj) {
@@ -2115,11 +2116,12 @@ export default class ScoutingDetails extends PureComponent {
     );
   };
 
-  // 设置分类坐标点
+  /** 设置分类坐标点 */
   onSetCoordinates = async val => {
     message.success(
       <span>
-        选取一个坐标设置为分类展示点 或{" "}
+        选取一个坐标设置为分类展示点
+        {/* 或{" "}
         <a
           onClick={e => {
             e.stopPropagation();
@@ -2127,37 +2129,45 @@ export default class ScoutingDetails extends PureComponent {
           }}
         >
           取消选择
-        </a>
+        </a> */}
       </span>,
       0
     );
     val.title = val.name;
-    let res = await Action.addCollectionPosition(val);
-    // console.log(res);
-    let { feature } = res;
-    let coor = feature.getGeometry().getCoordinates();
+    // let res = await Action.addCollectionPosition(val);
+    const res = await Action.addCollectionCoordinates(false, val).catch(
+      err => false
+    );
+    if (!res) {
+      this.cancelEditCollection();
+      return;
+    }
+    let coor = res;
     let resp = await Action.setGropCoordinates(val.id, {
-      coordinate: coor
-    }).catch(err => console.log(err));
-    let arr = Action.transform(coor);
+      coordinate: [coor.longitude, coor.latitude]
+    }).catch(err => message.warn(err.message));
     if (resp) {
-      message.success("保存成功");
+      notification.success({
+        message: "保存成功",
+        description: "保存分组中的坐标点成功，折叠分类面板后，展示分类的坐标点"
+      });
       this.cancelEditCollection();
       let list = this.state.area_list.map(item => {
         if (item.id === val.id) {
-          item.longitude = arr[0];
-          item.latitude = arr[1];
+          item.longitude = coor.longitude;
+          item.latitude = coor.latitude;
         }
         return item;
       });
 
-      // 更新全局的分组数据，不需要请求
-      this.updateCollection(Array.from(this.state.all_collection), list);
+      if (!this.state.area_active_key || !this.state.area_active_key?.length)
+        // 更新全局的分组数据，不需要请求
+        this.updateCollection(Array.from(this.state.all_collection), list);
 
       // 闭合分组
-      this.setActiveCollapse("");
+      // this.setActiveCollapse("");
       // 渲染分类坐标
-      this.renderGroupPointer();
+      // this.renderGroupPointer();
       Action.clearGroupCollectionPoint();
     }
   };

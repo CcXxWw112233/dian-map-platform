@@ -7,7 +7,15 @@ export default {
       NODE_ENVI: process.env.NODE_ENVI
     }
   },
-  proxy: {},
+  proxy: {
+    '/dian_map/': {
+      target: 'http://test.map.new-di.com/',
+      changeOrigin: true,
+      pathRewrite: {
+        '^': '',
+      },
+    }
+  },
   alias: {
     api: resolve(__dirname, "./src/services/"),
     components: resolve(__dirname, "./src/components"),

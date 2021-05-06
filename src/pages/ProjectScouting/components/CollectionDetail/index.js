@@ -95,9 +95,6 @@ export default class CollectionDetail extends React.Component {
       if (!url) return;
       let img = new Image();
       img.src = url;
-      this.setState({
-        showSpin: true
-      });
       img.onload = () => {
         this.setState(
           {
@@ -217,7 +214,6 @@ export default class CollectionDetail extends React.Component {
           activeImg: data,
           disabled: type === "view",
           currentIndex: 0,
-          showSpin: this.lastResourceId !== data.id,
           sliderPages: { ...sliderPages, total: selectData.length, current: 1 }
         });
         this.lastResourceId = data.id;
@@ -226,7 +222,6 @@ export default class CollectionDetail extends React.Component {
           activeImg: selectData,
           disabled: type === "view",
           currentIndex: 0,
-          showSpin: this.lastResourceId !== selectData.id,
           sliderPages: { ...sliderPages, total: 1, current: 1 }
         });
         this.lastResourceId = selectData.id;
@@ -311,12 +306,14 @@ export default class CollectionDetail extends React.Component {
     let type = DetailAction.checkCollectionType(val.target);
     if (type === "pic") {
       return (
-        <Spin tip="加载中..." spinning={this.state.showSpin}>
+        <Spin tip="加载中..." spinning={false}>
           <img
             crossOrigin="anonymous"
             src={val.resource_url}
             alt=""
             id="id_ImgPreview"
+            onload={() => this.setState({ showSpin: false })}
+            onError={() => this.setState({ showSpin: false })}
             onClick={e => {
               if (!this.imageLoaing) {
                 this.previewImg(e);
@@ -328,7 +325,7 @@ export default class CollectionDetail extends React.Component {
         </Spin>
       );
     }
-    if (type === "video" || type === "interview") {
+    if (type === "interview") {
       let config = {
         file: {
           forceVideo: type === "video",

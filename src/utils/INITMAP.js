@@ -7,6 +7,7 @@ import {
   Modify,
   Select,
 } from "ol/interaction";
+import DEvent, {INITMAPEND} from '../lib/utils/event'
 
 import TileLayer from "ol/layer/Tile";
 import XYZ from "ol/source/XYZ";
@@ -75,6 +76,8 @@ const initMap = function () {
         };
         // 回调
         resolve({ map: this.map, view: this.view });
+        /** 构建成功触发 */
+        DEvent.Evt.firEvent(INITMAPEND, this.map)
       });
     },
     initView: function (center = [12682417.401133642, 2573911.8265894186]) {

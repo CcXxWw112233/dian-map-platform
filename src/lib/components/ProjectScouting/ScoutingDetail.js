@@ -125,6 +125,10 @@ function Action() {
   this.geojsonResources = {};
   this.geojsonRenderData = {};
   this.tabActivekey = "1";
+  /** 给数据关联坐标点的特征元素 */
+  this.setCoordinatePointFeature = null;
+  /** 给数据关联坐标的坐标弹窗 */
+  this.setCoordinatePointOverlay = null;
 
   Event.Evt.addEventListener("basemapchange", key => {
     if (!this.mounted) return;
@@ -435,7 +439,7 @@ function Action() {
         lastSelectedFetureStyle.setImage(
           this.getImage(false, this.lastSelectedFeature)
         );
-        lastSelectedFetureStyle.getText().setText("");
+        // lastSelectedFetureStyle.getText().setText("");
       }
       if (index > -1 && image) {
         this.layer.projectScoutingArr[index].feature.setStyle(
@@ -525,7 +529,7 @@ function Action() {
             } else {
               if (me.oldZoom && me.oldZoom > 14) {
                 if (me.oldFeatures && me.oldFeatures.length > 0) {
-                  obj.showFeatureName = false;
+                  // obj.showFeatureName = false;
                   me.renderFeaturesCollection(me.oldPlotFeatures, obj);
                   setTimeout(function() {
                     me.changeLastSelectedFeatureStyle();
@@ -735,6 +739,10 @@ function Action() {
     this.lastSelectedFeature = null;
     this.selectedFeature = null;
     this.featureOverlay2 = null;
+    /** 给数据关联坐标点的特征元素 */
+    this.setCoordinatePointFeature = null;
+    /** 给数据关联坐标的坐标弹窗 */
+    this.setCoordinatePointOverlay = null;
     // Event.Evt.removeEventListener("removeMapMoveEndListen");
   };
   // 获取区域列表
@@ -762,7 +770,6 @@ function Action() {
   // 添加分类的坐标点
   this.setGropCoordinates = async (id, data) => {
     let { coordinate } = data;
-    coordinate = TransformCoordinate(coordinate, "EPSG:3857", "EPSG:4326");
     let param = {
       longitude: coordinate[0],
       latitude: coordinate[1]
@@ -845,7 +852,10 @@ function Action() {
     }
   };
 
-  // 添加坐标点
+  /** 添加坐标点
+   * @param {boolean} isMultiple 是否多点关联
+   * @param {{title: string}} data 展示的数据
+   */
   this.addCollectionCoordinates = (isMultiple, data) => {
     this.dragEvt = new Drag();
     this.hideCollectionOverlay();
@@ -876,20 +886,23 @@ function Action() {
           textStrokeColor: isMultiple ? "rgba(0,0,0,0)" : "#ffffff",
           zIndex: 22
         });
-        let f = addFeature("Point", {
+        let f = (this.setCoordinatePointFeature = addFeature("Point", {
           coordinates: coordinate,
           ftype: "select_coordinates"
-        });
+        }));
         f.setStyle(style);
         this.Layer.setZIndex(50);
         this.Source.addFeature(f);
 
         let ele = new SetCoordinateForCollection({});
-        let overlay = createOverlay(ele.element, {
-          position: coordinate,
-          positioning: "bottom-center",
-          offset: [0, -40]
-        });
+        let overlay = (this.setCoordinatePointOverlay = createOverlay(
+          ele.element,
+          {
+            position: coordinate,
+            positioning: "bottom-center",
+            offset: [0, -40]
+          }
+        ));
         InitMap.map.addOverlay(overlay);
 
         let p = this.transform(coordinate);
@@ -979,28 +992,36 @@ function Action() {
         };
         ele.on = {
           save: val => {
-            // console.log(val)
             resolve(val);
-            cancelAdd();
+            this.abortPointAddDraw();
             this.isActivity = false;
           },
           cancel: () => {
-            cancelAdd();
+            this.abortPointAddDraw();
             reject();
             this.isActivity = false;
           }
-        };
-        const cancelAdd = () => {
-          InitMap.map.removeInteraction(this.dragEvt);
-          this.dragEvt = null;
-          this.Source.removeFeature(f);
-          InitMap.map.removeOverlay(overlay);
         };
       });
     });
   };
 
-  // 添加关联点的交互 ---废弃 已有 addCollectionCoordinate 代替
+  /** 中止关联坐标点 */
+  this.abortPointAddDraw = () => {
+    InitMap.map.removeInteraction(this.dragEvt);
+    this.dragEvt = null;
+    if (this.setCoordinatePointFeature) {
+      this.Source.removeFeature(this.setCoordinatePointFeature);
+    }
+
+    if (this.setCoordinatePointOverlay) {
+      InitMap.map.removeOverlay(this.setCoordinatePointOverlay);
+    }
+    this.setCoordinatePointFeature = null;
+    this.setCoordinatePointOverlay = null;
+  };
+
+  // 添加关联点的交互 ---废弃 已有 addCollectionCoordinates 代替
   this.addCollectionPosition = data => {
     return new Promise((resolve, reject) => {
       let style = createStyle("Point", {
@@ -1012,12 +1033,10 @@ function Action() {
       });
       this.draw = drawPoint(this.Source, { style });
       this.draw.on("drawend", e => {
-        let { feature } = e;
-
-        feature.setStyle(style);
-        this.activeFeature = feature;
-        InitMap.map.removeInteraction(this.draw);
+        e.feature.setStyle(style);
+        this.activeFeature = e.feature;
         resolve(e);
+        this.removeDraw();
       });
       InitMap.map.addInteraction(this.draw);
     });
@@ -1107,8 +1126,10 @@ function Action() {
     if (!coordinate) return undefined;
     let coor = TransformCoordinate(coordinate);
     let feature = this.Source.getFeaturesAtCoordinate(coor);
-    // console.log(feature)
-
+    InitMap.map.getView().animate({
+      center: feature[0].getGeometry().getCoordinates(),
+      duration: 200
+    });
     feature.forEach(item => {
       let style = item.getStyle();
       style.setZIndex(10);
@@ -1121,6 +1142,7 @@ function Action() {
     });
   };
 
+  /** 渲染分组中的数据元素 */
   this.renderGoupCollectionForLookingBack = data => {
     this.clearGroupCollectionPoint();
     InitMap.map.un("click", LookingBackPointClick);
@@ -2144,7 +2166,7 @@ function Action() {
         {
           lenged,
           dispatch,
-          showFeatureName
+          showFeatureName: true
         },
         geoData
       );
@@ -3112,7 +3134,7 @@ function Action() {
 
   // 清空选中状态
   this.clearSelectPoint = () => {
-    this.features.forEach(item => {
+    this.features = this.features.map(item => {
       // if(!uids.includes(item.ol_uid)){
       if (item.get("ftype") === "collection") {
         let style = item.getStyle();
@@ -3120,10 +3142,15 @@ function Action() {
         style.setImage(pointUnselect(item.get("multi")).getImage());
         item.setStyle(style);
       }
+      return item;
       // }
     });
   };
 
+  /**
+   * 点击了图层中的特征元素
+   * @param {Feature} feature
+   */
   this.handleFeatureCollectionPoint = feature => {
     Event.Evt.firEvent("handleFeatureToLeftMenu", feature.get("id"));
     this.clearSelectPoint();

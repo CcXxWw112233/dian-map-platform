@@ -4,7 +4,7 @@ export default function(response){
     if(BASIC.checkResponse(response)){
       resolve(response.data);
     }else {
-      reject(response && response.data);
+      reject(response);
     }
   })
 }

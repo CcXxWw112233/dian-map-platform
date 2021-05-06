@@ -47,3 +47,6 @@ function Event(){
 export default {
     Evt: new Event()
 };
+
+/** 构建地图结束 */
+export const INITMAPEND = 'initmapend'
