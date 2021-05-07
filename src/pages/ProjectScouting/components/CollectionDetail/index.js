@@ -13,8 +13,6 @@ import EditDescription from "./editDescription";
 // import Slider from "react-slick";
 import ReactPlayer from "react-player";
 import TrafficDetail from "./TrafficDetail";
-import throttle from "lodash/throttle";
-import { func } from "prop-types";
 
 @connect(
   ({ collectionDetail: { selectData, zIndex, type, isImg, small } }) => ({
@@ -312,7 +310,7 @@ export default class CollectionDetail extends React.Component {
             src={val.resource_url}
             alt=""
             id="id_ImgPreview"
-            onload={() => this.setState({ showSpin: false })}
+            onLoad={() => this.setState({ showSpin: false })}
             onError={() => this.setState({ showSpin: false })}
             onClick={e => {
               if (!this.imageLoaing) {

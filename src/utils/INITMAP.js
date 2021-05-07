@@ -14,6 +14,7 @@ import XYZ from "ol/source/XYZ";
 
 import { baseMaps, baseMapDictionary } from "utils/mapSource";
 import { gcj02_to_wgs84, wgs84_to_gcj02 } from "utils/transCoordinateSystem";
+import { MAPCONFIG } from "../globalSet/constans";
 
 const initMap = function () {
   return {
@@ -84,9 +85,9 @@ const initMap = function () {
       this.view = new View({
         center: center,
         projection: "EPSG:3857",
-        minZoom: 5,
-        zoom: 10,
-        maxZoom: 18,
+        minZoom: MAPCONFIG.minZoom,
+        zoom: MAPCONFIG.zoom,
+        maxZoom: MAPCONFIG.maxZoom,
         enableRotation: false,
       });
       return this.view;

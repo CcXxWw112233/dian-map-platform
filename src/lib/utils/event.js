@@ -48,5 +48,11 @@ export default {
     Evt: new Event()
 };
 
-/** 构建地图结束 */
+/** 构建地图结束事件 */
 export const INITMAPEND = 'initmapend'
+
+/** 点击查看的元素点事件 */
+export const CLICKVIEWFEATURE = 'clickviewfeature'
+
+/** 分类图标被点击的元素点事件 */
+export const CLICKVIEWGROUPFEATURE = 'clickviewgroupfeature'
