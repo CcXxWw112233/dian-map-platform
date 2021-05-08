@@ -1,18 +1,18 @@
-import React, { Fragment } from "react";
-import styles from "./index.less";
-import { connect } from "dva";
-import ReactDOM from "react-dom";
-import { MyIcon } from "../../../../components/utils";
+import React, { Fragment } from 'react'
+import styles from './index.less'
+import { connect } from 'dva'
+import ReactDOM from 'react-dom'
+import { MyIcon } from '../../../../components/utils'
 // import animateCss from '../../../../assets/css/animate.min.css';
-import PhotoSwipe from "../../../../components/PhotoSwipe/action";
-import { keepLastIndex } from "../../../../utils/utils";
-import DetailAction from "../../../../lib/components/ProjectScouting/ScoutingDetail";
-import { message, Row, Col, Carousel, Tag, Spin } from "antd";
-import Event from "../../../../lib/utils/event";
-import EditDescription from "./editDescription";
+import PhotoSwipe from '../../../../components/PhotoSwipe/action'
+import { keepLastIndex } from '../../../../utils/utils'
+import DetailAction from '../../../../lib/components/ProjectScouting/ScoutingDetail'
+import { message, Row, Col, Carousel, Tag, Spin } from 'antd'
+import Event from '../../../../lib/utils/event'
+import EditDescription from './editDescription'
 // import Slider from "react-slick";
-import ReactPlayer from "react-player";
-import TrafficDetail from "./TrafficDetail";
+import ReactPlayer from 'react-player'
+import TrafficDetail from './TrafficDetail'
 
 @connect(
   ({ collectionDetail: { selectData, zIndex, type, isImg, small } }) => ({
@@ -24,9 +24,9 @@ import TrafficDetail from "./TrafficDetail";
   })
 )
 export default class CollectionDetail extends React.Component {
-  timeout = null;
+  timeout = null
   constructor(props) {
-    super(props);
+    super(props)
     this.state = {
       isEdit: false,
       activeImg: {},
@@ -38,39 +38,39 @@ export default class CollectionDetail extends React.Component {
         current: 1
       },
       isSearch: false,
-      checkedTag: "roadTraffic"
-    };
-    this.content = React.createRef();
-    this.slider = React.createRef();
-    this.activeType = "";
+      checkedTag: 'roadTraffic'
+    }
+    this.content = React.createRef()
+    this.slider = React.createRef()
+    this.activeType = ''
     this.tags = [
       {
-        key: "roadTraffic",
-        label: "道路交通"
+        key: 'roadTraffic',
+        label: '道路交通'
       },
       {
-        key: "railTransit",
-        label: "轨道交通"
+        key: 'railTransit',
+        label: '轨道交通'
       }
       // {
       //   key:"UrbanTransportation",
       //   label: "城市交通"
       // }
-    ];
-    this.imageLoaing = false;
-    this.loadedImage = null;
-    this.lastResourceId = ""; // this.previewImg = throttle(this.previewImg, 1000);
+    ]
+    this.imageLoaing = false
+    this.loadedImage = null
+    this.lastResourceId = '' // this.previewImg = throttle(this.previewImg, 1000);
   }
 
   componentDidMount() {
-    this.InitActiveImg(this.props);
-    const me = this;
-    if (document.getElementById("id_ImgPreview")) {
-      document.getElementById("id_ImgPreview").onload = function() {
+    this.InitActiveImg(this.props)
+    const me = this
+    if (document.getElementById('id_ImgPreview')) {
+      document.getElementById('id_ImgPreview').onload = function() {
         me.setState({
           showSpin: false
-        });
-      };
+        })
+      }
     }
   }
 
@@ -80,89 +80,89 @@ export default class CollectionDetail extends React.Component {
     // this.timeout = setTimeout(() => {
 
     // })
-    let { selectData = {} } = this.props;
+    let { selectData = {} } = this.props
     if (this.loadedImage) {
-      let w = this.loadedImage.width;
-      let h = this.loadedImage.height;
+      let w = this.loadedImage.width
+      let h = this.loadedImage.height
       PhotoSwipe.show([
         { w, h, src: this.loadedImage.src, title: selectData.title }
-      ]);
+      ])
     } else {
-      this.imageLoaing = true;
-      let url = e.target?.src;
-      if (!url) return;
-      let img = new Image();
-      img.src = url;
+      this.imageLoaing = true
+      let url = e.target?.src
+      if (!url) return
+      let img = new Image()
+      img.src = url
       img.onload = () => {
         this.setState(
           {
             showSpin: false
           },
           () => {
-            this.imageLoaing = false;
-            this.loadedImage = img;
-            let w = img.width;
-            let h = img.height;
+            this.imageLoaing = false
+            this.loadedImage = img
+            let w = img.width
+            let h = img.height
             PhotoSwipe.show([
               { w, h, src: this.loadedImage.src, title: selectData.title }
-            ]);
+            ])
           }
-        );
-      };
+        )
+      }
     }
-  };
+  }
   // 粘贴文本格式化
   textFormat(e) {
-    e.preventDefault();
-    var text;
-    var clp = (e.originalEvent || e).clipboardData;
+    e.preventDefault()
+    var text
+    var clp = (e.originalEvent || e).clipboardData
     if (clp === undefined || clp === null) {
-      text = window.clipboardData.getData("text") || "";
-      if (text !== "") {
+      text = window.clipboardData.getData('text') || ''
+      if (text !== '') {
         if (window.getSelection) {
-          var newNode = document.createElement("span");
-          newNode.innerHTML = text;
+          var newNode = document.createElement('span')
+          newNode.innerHTML = text
           window
             .getSelection()
             .getRangeAt(0)
-            .insertNode(newNode);
+            .insertNode(newNode)
         } else {
-          document.selection.createRange().pasteHTML(text);
+          document.selection.createRange().pasteHTML(text)
         }
       }
     } else {
-      text = clp.getData("text/plain") || "";
+      text = clp.getData('text/plain') || ''
       if (clp.files.length) {
-        let file = clp.files[0];
-        let { type } = file;
-        let url = URL.createObjectURL(file);
-        let img = new Image();
-        img.src = url;
-        img.crossorigin = "anonymous";
-        let canvas = document.createElement("canvas");
-        let ctx = canvas.getContext("2d");
+        let file = clp.files[0]
+        let { type } = file
+        let url = URL.createObjectURL(file)
+        let img = new Image()
+        img.src = url
+        img.crossorigin = 'anonymous'
+        let canvas = document.createElement('canvas')
+        let ctx = canvas.getContext('2d')
         img.onload = () => {
-          canvas.width = img.width;
-          canvas.height = img.height;
-          ctx.drawImage(img, 0, 0, img.width, img.height);
-          let baseUrl = canvas.toDataURL("image/jpeg", 1);
-          document.execCommand("insertimage", false, baseUrl);
-          img = null;
-          canvas = null;
-          ctx = null;
-        };
+          canvas.width = img.width
+          canvas.height = img.height
+          ctx.drawImage(img, 0, 0, img.width, img.height)
+          let baseUrl = canvas.toDataURL('image/jpeg', 1)
+          document.execCommand('insertimage', false, baseUrl)
+          img = null
+          canvas = null
+          ctx = null
+        }
       }
-      if (text !== "") {
-        document.execCommand("insertText", false, text);
+      if (text !== '') {
+        document.execCommand('insertText', false, text)
       }
     }
   }
   toEdit = () => {
-    let { isEdit } = this.state;
+    let { isEdit } = this.state
     if (!isEdit) {
-      this.editEnd(true);
+      this.editEnd(true)
     }
-  };
+  }
   // 编辑
   editEnd = flag => {
     // console.log(flag)
@@ -173,136 +173,136 @@ export default class CollectionDetail extends React.Component {
       () => {
         if (flag) {
           setTimeout(() => {
-            let { current } = this.content;
-            current.focus();
-            keepLastIndex(current);
-          }, 50);
+            let { current } = this.content
+            current.focus()
+            keepLastIndex(current)
+          }, 50)
         } else {
-          this.saveEdit();
+          this.saveEdit()
         }
       }
-    );
-  };
+    )
+  }
   // 设置
   setActiveImg = type => {
-    let { selectData } = this.props;
-    let { activeImg } = this.state;
+    let { selectData } = this.props
+    let { activeImg } = this.state
     if (selectData && selectData.length) {
-      let index = selectData.find(item => activeImg.id === item.id);
+      let index = selectData.find(item => activeImg.id === item.id)
       if (index !== -1) {
         switch (type) {
-          case "next":
-            break;
-          case "prev":
-            break;
+          case 'next':
+            break
+          case 'prev':
+            break
           default:
         }
       }
     }
-  };
+  }
 
   InitActiveImg = props => {
-    const { selectData, type } = props;
-    let { sliderPages } = this.state;
+    const { selectData, type } = props
+    let { sliderPages } = this.state
     if (selectData) {
-      let isArr = Array.isArray(selectData);
+      let isArr = Array.isArray(selectData)
       if (isArr) {
-        let data = selectData[0];
+        let data = selectData[0]
         this.setState({
           activeImg: data,
-          disabled: type === "view",
+          disabled: type === 'view',
           currentIndex: 0,
           sliderPages: { ...sliderPages, total: selectData.length, current: 1 }
-        });
-        this.lastResourceId = data.id;
+        })
+        this.lastResourceId = data.id
       } else {
         this.setState({
           activeImg: selectData,
-          disabled: type === "view",
+          disabled: type === 'view',
           currentIndex: 0,
           sliderPages: { ...sliderPages, total: 1, current: 1 }
-        });
-        this.lastResourceId = selectData.id;
+        })
+        this.lastResourceId = selectData.id
       }
     }
-  };
+  }
 
   componentWillReceiveProps(nextProps) {
-    this.loadedImage = null;
-    const { selectData } = nextProps;
+    this.loadedImage = null
+    const { selectData } = nextProps
     if (Array.isArray(this.props.selectData)) {
       if (this.props.selectData[0]?.id === this.lastResourceId) {
-        return false;
+        return false
       }
     } else {
       if (this.props.selectData?.id === this.lastResourceId) {
-        return false;
+        return false
       }
     }
     if (this.props.selectData !== selectData) {
-      this.InitActiveImg(nextProps);
-      this.detailBack();
+      this.InitActiveImg(nextProps)
+      this.detailBack()
     }
   }
 
   saveEdit = (text, val) => {
-    let { selectData, dispatch } = this.props;
+    let { selectData, dispatch } = this.props
     selectData = Array.isArray(selectData)
       ? selectData
       : selectData
       ? [selectData]
-      : [];
-    if (val.description === text) return;
+      : []
+    if (val.description === text) return
     let param = {
       id: val.id,
       description: text
-    };
+    }
     DetailAction.editCollection(param).then(res => {
-      message.success("保存成功");
+      message.success('保存成功')
       dispatch({
-        type: "collectionDetail/updateDatas",
+        type: 'collectionDetail/updateDatas',
         payload: {
           selectData: selectData.map(item => {
             if (item.id === val.id) {
-              item.description = text;
+              item.description = text
             }
-            return item;
+            return item
           }),
-          type: "edit"
+          type: 'edit'
         }
-      });
-      let datas = DetailAction.oldData;
+      })
+      let datas = DetailAction.oldData
       let data = datas.map(item => {
         if (item.id === val.id) {
-          item.description = text;
+          item.description = text
         }
-        return item;
-      });
-      Event.Evt.firEvent("CollectionUpdate:reload", data);
-    });
-  };
+        return item
+      })
+      Event.Evt.firEvent('CollectionUpdate:reload', data)
+    })
+  }
 
   allVideoStop = () => {
-    document.querySelectorAll("video").forEach(item => {
-      item.pause();
-    });
-    document.querySelectorAll("audio").forEach(item => {
-      item.pause();
-    });
-  };
+    document.querySelectorAll('video').forEach(item => {
+      item.pause()
+    })
+    document.querySelectorAll('audio').forEach(item => {
+      item.pause()
+    })
+  }
 
   slideChange = current => {
-    let { sliderPages } = this.state;
-    this.allVideoStop();
+    let { sliderPages } = this.state
+    this.allVideoStop()
     this.setState({
       currentIndex: current,
       sliderPages: { ...sliderPages, current: current + 1 }
-    });
-  };
+    })
+  }
 
   checkRender = val => {
-    let type = DetailAction.checkCollectionType(val.target);
-    if (type === "pic") {
+    let type = DetailAction.checkCollectionType(val.target)
+    if (type === 'pic') {
       return (
         <Spin tip="加载中..." spinning={false}>
           <img
@@ -314,22 +314,22 @@ export default class CollectionDetail extends React.Component {
             onError={() => this.setState({ showSpin: false })}
             onClick={e => {
               if (!this.imageLoaing) {
-                this.previewImg(e);
+                this.previewImg(e)
               } else {
-                message.info("图片正在加载中,请勿重复点击！");
+                message.info('图片正在加载中,请勿重复点击！')
               }
             }}
           />
         </Spin>
-      );
+      )
     }
-    if (type === "interview") {
+    if (type === 'interview' || type === 'video') {
       let config = {
         file: {
-          forceVideo: type === "video",
-          forceAudio: type === "interview"
+          forceVideo: type === 'video',
+          forceAudio: type === 'interview'
         }
-      };
+      }
       return (
         <ReactPlayer
           config={config}
@@ -339,107 +339,107 @@ export default class CollectionDetail extends React.Component {
           height="195px"
           light={true}
         />
-      );
-    } else return "";
-  };
+      )
+    } else return ''
+  }
 
   changeSmall = val => {
-    const { dispatch } = this.props;
+    const { dispatch } = this.props
     dispatch({
-      type: "collectionDetail/updateDatas",
+      type: 'collectionDetail/updateDatas',
       payload: {
         small: val
       }
-    });
-    this.allVideoStop();
-  };
+    })
+    this.allVideoStop()
+  }
   renderPropertiesMap = val => {
     // console.log(val)
     if (val.properties_map) {
-      let property = val.properties_map;
-      let data = Object.keys(val.properties_map);
+      let property = val.properties_map
+      let data = Object.keys(val.properties_map)
       return data.map((item, index) => (
         <div className={styles.properties_item} key={index}>
           <span className={styles.properties_item_key}>{item}</span>:
           <span dangerouslySetInnerHTML={{ __html: property[item] }}></span>
         </div>
-      ));
+      ))
     }
-    return "";
-  };
+    return ''
+  }
 
   detailClose = () => {
-    const { dispatch } = this.props;
-    DetailAction.clearSelectPoint();
-    DetailAction.cancelSearchAround();
+    const { dispatch } = this.props
+    DetailAction.clearSelectPoint()
+    DetailAction.cancelSearchAround()
     dispatch({
-      type: "collectionDetail/updateDatas",
+      type: 'collectionDetail/updateDatas',
       payload: { selectData: null, isImg: true }
-    });
-  };
+    })
+  }
 
   searchAroundAbout = (val, flag, type) => {
-    let isSearchFlag = !flag;
+    let isSearchFlag = !flag
     if (flag) {
-      DetailAction.cancelSearchAround();
+      DetailAction.cancelSearchAround()
     } else {
-      DetailAction.cancelSearchAround();
-      DetailAction.init();
-      let f = DetailAction.addSearchAround({ id: val.id, stype: type });
+      DetailAction.cancelSearchAround()
+      DetailAction.init()
+      let f = DetailAction.addSearchAround({ id: val.id, stype: type })
       if (f === false) {
-        isSearchFlag = false;
+        isSearchFlag = false
       }
     }
     this.setState({
       isSearch: isSearchFlag
-    });
-  };
+    })
+  }
 
-  checkType = () => {};
+  checkType = () => {}
 
   toSearch = (val, data) => {
-    let type;
+    let type
     switch (val.key) {
-      case "roadTraffic":
-        type = "高速路入口";
-        break;
-      case "railTransit":
-        type = "火车站";
-        break;
-      case "UrbanTransportation":
-        type = "";
-        break;
+      case 'roadTraffic':
+        type = '高速路入口'
+        break
+      case 'railTransit':
+        type = '火车站'
+        break
+      case 'UrbanTransportation':
+        type = ''
+        break
       default:
-        type = "";
+        type = ''
     }
     // this.activeType = type;
     this.setState({
       activeType: type
-    });
+    })
     // 开始搜索
-    this.searchAroundAbout(data, this.state.isSearch, type);
-  };
+    this.searchAroundAbout(data, this.state.isSearch, type)
+  }
 
   handleTag = (tag, checked) => {
     this.setState({
       checkedTag: tag.key
-    });
-  };
+    })
+  }
   componentWillUnmount() {
-    DetailAction.cancelSearchAround();
+    DetailAction.cancelSearchAround()
   }
   detailBack = () => {
-    this.searchAroundAbout({}, this.state.isSearch);
-  };
+    this.searchAroundAbout({}, this.state.isSearch)
+  }
 
   render() {
-    const { sliderPages, currentIndex } = this.state;
-    let { zIndex, selectData, isImg, small } = this.props;
+    const { sliderPages, currentIndex } = this.state
+    let { zIndex, selectData, isImg, small } = this.props
     selectData = Array.isArray(selectData)
       ? selectData
       : selectData
       ? [selectData]
-      : null;
+      : null
     return ReactDOM.createPortal(
       <div className={`${styles.collection_detail}`} style={{ zIndex: zIndex }}>
         {!this.state.isSearch ? (
@@ -461,7 +461,7 @@ export default class CollectionDetail extends React.Component {
                     {sliderPages.current}/{sliderPages.total}
                   </span>
                   <span
-                    style={{ fontSize: "0.7em" }}
+                    style={{ fontSize: '0.7em' }}
                     onClick={() => this.changeSmall(true)}
                   >
                     <MyIcon type="icon-suoxiao1" />
@@ -482,14 +482,14 @@ export default class CollectionDetail extends React.Component {
             </div>
             <div
               className={`${styles.container}`}
-              style={{ height: small ? 0 : "auto" }}
+              style={{ height: small ? 0 : 'auto' }}
             >
               {selectData && selectData.length > 1 && (
                 <Fragment>
                   <span
                     className={styles.prev}
                     onClick={() => {
-                      this.slider.current?.prev();
+                      this.slider.current?.prev()
                     }}
                   >
                     <MyIcon type="icon-bianzu681" />
@@ -497,7 +497,7 @@ export default class CollectionDetail extends React.Component {
                   <span
                     className={styles.next}
                     onClick={() => {
-                      this.slider.current?.next();
+                      this.slider.current?.next()
                     }}
                   >
                     <MyIcon type="icon-bianzu671" />
@@ -557,7 +557,7 @@ export default class CollectionDetail extends React.Component {
                                     >
                                       {tags.label}
                                     </Tag>
-                                  );
+                                  )
                                 })}
                               </div>
                             </div>
@@ -571,29 +571,29 @@ export default class CollectionDetail extends React.Component {
                                 xs={8}
                                 sm={6}
                                 md={8}
-                                style={{ textAlign: "center" }}
+                                style={{ textAlign: 'center' }}
                               >
                                 {DetailAction.dateFormat(
                                   item.create_time,
-                                  "yyyy/MM/dd"
+                                  'yyyy/MM/dd'
                                 )}
                               </Col>
                               <Col
                                 xs={8}
                                 sm={6}
                                 md={8}
-                                style={{ textAlign: "center" }}
+                                style={{ textAlign: 'center' }}
                               >
                                 {DetailAction.dateFormat(
                                   item.create_time,
-                                  "HH:mm"
+                                  'HH:mm'
                                 )}
                               </Col>
                             </Row>
                           </div>
                         </div>
                       </div>
-                    );
+                    )
                   })}
               </Carousel>
             </div>
@@ -608,6 +608,6 @@ export default class CollectionDetail extends React.Component {
         )}
       </div>,
       document.body
-    );
+    )
   }
 }

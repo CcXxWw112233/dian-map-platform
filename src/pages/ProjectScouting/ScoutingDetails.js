@@ -211,6 +211,7 @@ export default class ScoutingDetails extends PureComponent {
     Action.removeListPoint()
     // 构建地图组件
     Action.init(this.props.dispatch)
+    Action.CollectionGroup = []
     // 当外部的数据保存成功后的回调
     // console.log(Event.Evt)
     Event.Evt.on('addCollectionForFeature', data => {
