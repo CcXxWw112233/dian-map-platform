@@ -231,11 +231,11 @@ export default class CollectionDetail extends React.Component {
     this.loadedImage = null;
     const { selectData } = nextProps;
     if (Array.isArray(this.props.selectData)) {
-      if (this.props.selectData[0].id === this.lastResourceId) {
+      if (this.props.selectData[0]?.id === this.lastResourceId) {
         return false;
       }
     } else {
-      if (this.props.selectData.id === this.lastResourceId) {
+      if (this.props.selectData?.id === this.lastResourceId) {
         return false;
       }
     }
