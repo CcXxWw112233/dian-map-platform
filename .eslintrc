@@ -1,48 +1,57 @@
 {
   "root": true,
-  "extends": ["umi", "prettier", "prettier/react"],
+  "extends": ["umi"],
   "globals": {
     "AMap": true,
     "getNearbyAddressInfo": true
-  },
-  "parser": "babel-eslint",
-  "plugins": ["react", "prettier"],
-  "env": {
-    "browser": true,
-    "node": true,
-    "es6": true,
-    "mocha": true,
-    "jest": true,
-    "jasmine": true
-  },
-  "rules": {
-    "prettier/prettier": ["warn", {}, {}],
-    "react/jsx-no-bind": "off",
-    "react/no-deprecated": "off",
-    "jsx-a11y/href-no-hash": "off",
-    "jsx-a11y/alt-text": "off",
-    "no-unused-vars": "off",
-    "eqeqeq": "off",
-    "no-unreachable": "off",
-    "radix": "off",
-    "array-callback-return": "off",
-    "no-unused-expressions": "off"
-  },
-  "parserOptions": {
-    "ecmaVersion": 7,
-    "sourceType": "module",
-    "ecmaFeatures": {
-      "legacyDecorators": true,
-      "experimentalObjectRestSpread": true
-    }
-  },
-  "settings": {
-    "polyfills": ["fetch", "Promise"],
-    "react": {
-      "version": "detect"
-    }
   }
 }
+
+// {
+//   "root": true,
+//   "extends": ["umi", "prettier", "prettier/react"],
+//   "globals": {
+//     "AMap": true,
+//     "getNearbyAddressInfo": true
+//   },
+//   "parser": "babel-eslint",
+//   "plugins": ["react", "prettier"],
+//   "env": {
+//     "browser": true,
+//     "node": true,
+//     "es6": true,
+//     "mocha": true,
+//     "jest": true,
+//     "jasmine": true
+//   },
+//   "rules": {
+//     "prettier/prettier": ["warn", {}, {}],
+//     "react/jsx-no-bind": "off",
+//     "react/no-deprecated": "off",
+//     "jsx-a11y/href-no-hash": "off",
+//     "jsx-a11y/alt-text": "off",
+//     "no-unused-vars": "off",
+//     "eqeqeq": "off",
+//     "no-unreachable": "off",
+//     "radix": "off",
+//     "array-callback-return": "off",
+//     "no-unused-expressions": "off"
+//   },
+//   "parserOptions": {
+//     "ecmaVersion": 7,
+//     "sourceType": "module",
+//     "ecmaFeatures": {
+//       "legacyDecorators": true,
+//       "experimentalObjectRestSpread": true
+//     }
+//   },
+//   "settings": {
+//     "polyfills": ["fetch", "Promise"],
+//     "react": {
+//       "version": "detect"
+//     }
+//   }
+// }
 // https://www.jianshu.com/p/dd07cca0a48e
 // "rules": {
 //   "generator-star-spacing": [0],
