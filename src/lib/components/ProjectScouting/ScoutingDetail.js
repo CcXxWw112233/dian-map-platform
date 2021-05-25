@@ -27,14 +27,14 @@ import {
   getExtentIsEmpty,
   animate,
   loadFeatureJSON,
-  getExtent,
+  getExtent
 } from "../../utils/index";
 import {
   CollectionOverlay,
   settingsOverlay,
   areaDetailOverlay,
   SetCoordinateForCollection,
-  DragCircleRadius,
+  DragCircleRadius
 } from "../../../components/PublicOverlays";
 import { Modify } from "ol/interaction";
 import { extend } from "ol/extent";
@@ -44,7 +44,7 @@ import { message } from "antd";
 import {
   createPlottingFeature,
   createPopupOverlay,
-  createFeatureOverlay,
+  createFeatureOverlay
 } from "./createPlotting";
 import { plotEdit } from "utils/plotEdit";
 import INITMAP from "../../../utils/INITMAP";
@@ -80,7 +80,7 @@ function Action() {
     MERGE_COLLECTION,
     CANCEL_COLLECTION_MERGE,
     GET_DOWNLOAD_URL,
-    EDIT_AREA_MESSAGE,
+    EDIT_AREA_MESSAGE
   } = config;
   this.projectData = {}; // 保存项目数据，坐标
   this.activeFeature = {};
@@ -125,8 +125,12 @@ function Action() {
   this.geojsonResources = {};
   this.geojsonRenderData = {};
   this.tabActivekey = "1";
+  /** 给数据关联坐标点的特征元素 */
+  this.setCoordinatePointFeature = null;
+  /** 给数据关联坐标的坐标弹窗 */
+  this.setCoordinatePointOverlay = null;
 
-  Event.Evt.addEventListener("basemapchange", (key) => {
+  Event.Evt.addEventListener("basemapchange", key => {
     if (!this.mounted) return;
     if (InitMap.checkUpdateMapSystem(key)) {
       if (this.searchAroundOverlay) {
@@ -136,7 +140,7 @@ function Action() {
       // 此图层的纠偏操作
       let features = this.Layer.getSource().getFeatures();
       let dic = InitMap.systemDic[key];
-      features.forEach((item) => {
+      features.forEach(item => {
         let type = item.getGeometry().getType();
         if (type === "Point") {
           let coordinate = this.transform(item.getGeometry().getCoordinates());
@@ -161,7 +165,7 @@ function Action() {
         let source = this.layer.showLayer.getSource();
         let fs = source.getFeatures();
 
-        fs.forEach((item) => {
+        fs.forEach(item => {
           let type = item.getGeometry().getType();
           if (type === "Point") {
             let coor = item.getGeometry().getCoordinates();
@@ -173,11 +177,11 @@ function Action() {
           } else if (type === "Polygon") {
             let coor = item.getGeometry().getCoordinates();
             let list = coor[0];
-            list = list.map((cor) => this.changeCoordinate(cor, dic));
+            list = list.map(cor => this.changeCoordinate(cor, dic));
             item.getGeometry().setCoordinates([list]);
           } else if (type === "LineString") {
             let coor = item.getGeometry().getCoordinates();
-            coor = coor.map((cor) => this.changeCoordinate(cor, dic));
+            coor = coor.map(cor => this.changeCoordinate(cor, dic));
             item.getGeometry().setCoordinates(coor);
           } else if (type === "MultiPolygon" || type === "MultiLineString") {
             needReload = true;
@@ -199,26 +203,26 @@ function Action() {
     //   this.renderCollection(this.currentData, this.currentSet);
     // }
   });
-  const pointUnselect = (isMulti) =>
+  const pointUnselect = isMulti =>
     createStyle("Point", {
       icon: {
         src: isMulti
           ? require("../../../assets/multiselect.png")
           : require("../../../assets/selectlocation.png"),
         crossOrigin: "anonymous",
-        anchor: [0.5, 0.8],
-      },
+        anchor: [0.5, 0.8]
+      }
     });
-  const pointSelect = (isMulti) =>
+  const pointSelect = isMulti =>
     createStyle("Point", {
       icon: {
         src: isMulti
           ? require("../../../assets/multiunselect.png")
           : require("../../../assets/unselectlocation.png"),
         crossOrigin: "anonymous",
-        anchor: [0.5, 0.8],
+        anchor: [0.5, 0.8]
       },
-      iconScale: 1,
+      iconScale: 1
     });
 
   this.changeCoordinate = (coordinates, dic) => {
@@ -266,7 +270,7 @@ function Action() {
       propertyName = "district_name";
       propertyCode = "districtcode";
     }
-    newwArr.forEach((item) => {
+    newwArr.forEach(item => {
       if (item[propertyLonLat]) {
         let lonlatArr = item[propertyLonLat].split(",");
         if (
@@ -280,7 +284,7 @@ function Action() {
               name: item[propertyName],
               total: 1,
               lon: lonlatArr[0],
-              lat: lonlatArr[1],
+              lat: lonlatArr[1]
             };
           } else {
             totalObj[item[propertyCode]].total++;
@@ -299,16 +303,16 @@ function Action() {
   ) => {
     const zoom = InitMap.map.getView().getZoom();
     let level = 3;
-    this.layer.projectScoutingArr.forEach((item) => {
+    this.layer.projectScoutingArr.forEach(item => {
       this.layer.removeFeature(item);
     });
     const me = this;
-    me.overlayArr.forEach((item) => {
+    me.overlayArr.forEach(item => {
       InitMap.map.removeOverlay(item);
     });
     me.overlayArr = [];
     this.layer.plotEdit.removePlotOverlay2();
-    this.features.forEach((item) => {
+    this.features.forEach(item => {
       if (this.Source.getFeatureByUid(item.ol_uid)) {
         this.Source.removeFeature(item);
       }
@@ -326,7 +330,7 @@ function Action() {
     if (zoom < 14) {
       let totalObj = this.getCollectionTotal(data, ponts, level);
       let keys = Object.keys(totalObj);
-      keys.forEach((item) => {
+      keys.forEach(item => {
         let coor = TransformCoordinate(
           [totalObj[item].lon, totalObj[item].lat],
           "EPSG:4326",
@@ -335,7 +339,7 @@ function Action() {
         let ele = totalOverlay({
           name: totalObj[item].name,
           total: totalObj[item].total,
-          cb: function (e) {
+          cb: function(e) {
             if (zoom < 6) {
               InitMap.map.getView().setZoom(9);
             }
@@ -347,11 +351,11 @@ function Action() {
             }
             InitMap.map.getView().setCenter(coor);
             if (level === 3) {
-              setTimeout(function () {
+              setTimeout(function() {
                 let currentAreaFeatures =
                   me.features &&
                   me.features.filter(
-                    (item2) => item2.get("districtcode") === item.code
+                    item2 => item2.get("districtcode") === item.code
                   );
                 me.extentSource &&
                   me.extentSource.addFeatures(currentAreaFeatures);
@@ -359,16 +363,16 @@ function Action() {
                 let size = InitMap.map.getSize();
                 let flag = getUrlParam.isMobile === "1";
                 let obj = {
-                  size: flag ? size.map((item) => item / 2) : size,
+                  size: flag ? size.map(item => item / 2) : size,
                   padding: !flag ? [200, 150, 80, 400] : [0, 0, 0, 0],
-                  nearest: true,
+                  nearest: true
                 };
                 if (me.extentSource) {
                   Fit(InitMap.view, me.extentSource.getExtent(), obj);
                 }
               }, 100);
             }
-          },
+          }
         });
         let newOverlay = createOverlay(ele);
         newOverlay.setPosition(coor);
@@ -380,13 +384,13 @@ function Action() {
       this.renderFeaturesCollection(data, {
         lenged,
         dispatch,
-        showFeatureName: true,
+        showFeatureName: true
       });
       let pointCollection = this.renderPointCollection(ponts);
       this.overlayArr2.push(...pointCollection);
       this.features.push(...pointCollection);
       this.Source.addFeatures(pointCollection);
-      this.overlayArr.forEach((item) => {
+      this.overlayArr.forEach(item => {
         InitMap.map.removeOverlay(item);
       });
       // }
@@ -410,16 +414,16 @@ function Action() {
     }
     this.moveendCallBack(data, ponts, { lenged, dispatch, showFeatureName });
     const me = this;
-    this.moveendListener = function (e) {
+    this.moveendListener = function(e) {
       if (!me.isNeedMoveMapMoveedListen) {
         this.moveendCallBack(data, ponts, {
           lenged,
           dispatch,
-          showFeatureName,
+          showFeatureName
         });
       }
     };
-    InitMap.map.on("moveend", (e) => this.moveendListener(e));
+    InitMap.map.on("moveend", e => this.moveendListener(e));
     this.moveendListener = throttle(this.moveendListener, 1000);
   };
 
@@ -427,7 +431,7 @@ function Action() {
     this.lastSelectedFeature = this.selectedFeature;
     if (this.lastSelectedFeature) {
       let index = this.layer.projectScoutingArr.findIndex(
-        (item) => item.feature?.get("id") === this.lastSelectedFeature.get("id")
+        item => item.feature?.get("id") === this.lastSelectedFeature.get("id")
       );
       let lastSelectedFetureStyle = this.lastSelectedFeature.getStyle();
       let image = this.getImage(false, this.lastSelectedFeature);
@@ -435,6 +439,7 @@ function Action() {
         lastSelectedFetureStyle.setImage(
           this.getImage(false, this.lastSelectedFeature)
         );
+        // lastSelectedFetureStyle.getText().setText("");
       }
       if (index > -1 && image) {
         this.layer.projectScoutingArr[index].feature.setStyle(
@@ -444,7 +449,7 @@ function Action() {
     }
   };
 
-  this.changeSelectedFeatureStyle = (feature) => {
+  this.changeSelectedFeatureStyle = feature => {
     if (feature) {
       let type = feature.getGeometry().getType();
       if (type === "Point") {
@@ -457,7 +462,7 @@ function Action() {
         return;
       }
       let index = this.layer.projectScoutingArr.findIndex(
-        (item) => item.feature && item.feature.get("id") === id
+        item => item.feature && item.feature.get("id") === id
       );
       let selectedFetureStyle = this.selectedFeature.getStyle();
 
@@ -470,18 +475,18 @@ function Action() {
     }
   };
 
-  this.init = (dispatch) => {
+  this.init = dispatch => {
     // Event.Evt.firEvent("resetMoveMapMoveedListen");
     this.mounted = true;
     this.Layer.setSource(this.Source);
     const layers = InitMap.map.getLayers().getArray();
-    const layer = layers.filter((layer) => {
+    const layer = layers.filter(layer => {
       return layer.get("id") === this.Layer.get("id");
     });
     this.layer = plotEdit.getPlottingLayer(dispatch);
 
     if (!layer[0]) {
-      InitMap.map.on("click", (evt) => {
+      InitMap.map.on("click", evt => {
         this.featureOverlay2 && InitMap.map.removeOverlay(this.featureOverlay2);
         let obj = evt.map.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
           return { feature, layer };
@@ -501,7 +506,7 @@ function Action() {
         }
       });
       const me = this;
-      this.changeFeatureTitleShowListener = function (e) {
+      this.changeFeatureTitleShowListener = function(e) {
         if (me.hasFeatureTotal) {
           if (me.oldPlotFeatures) {
             if (!me.needRenderFetureStyle) return;
@@ -509,13 +514,13 @@ function Action() {
             let obj = {
               lenged: me.oldLenged,
               dispatch: me.oldDispatch,
-              showFeatureName: true,
+              showFeatureName: true
             };
             if (zoom > 14) {
               if (me.oldZoom && me.oldZoom <= 14) {
                 if (me.oldFeatures && me.oldFeatures.length > 0) {
                   me.renderFeaturesCollection(me.oldPlotFeatures, obj);
-                  setTimeout(function () {
+                  setTimeout(function() {
                     me.changeLastSelectedFeatureStyle();
                     me.changeSelectedFeatureStyle();
                   }, 100);
@@ -524,9 +529,9 @@ function Action() {
             } else {
               if (me.oldZoom && me.oldZoom > 14) {
                 if (me.oldFeatures && me.oldFeatures.length > 0) {
-                  obj.showFeatureName = false;
+                  // obj.showFeatureName = false;
                   me.renderFeaturesCollection(me.oldPlotFeatures, obj);
-                  setTimeout(function () {
+                  setTimeout(function() {
                     me.changeLastSelectedFeatureStyle();
                     me.changeSelectedFeatureStyle();
                   }, 100);
@@ -542,7 +547,7 @@ function Action() {
     }
     const me = this;
     // 关闭/开启采集统计
-    Event.Evt.on("removeMapMoveEndListen", function (value) {
+    Event.Evt.on("removeMapMoveEndListen", function(value) {
       this.isCollectionTotal = !value;
       if (!me.oldLenged) return;
       if (me.tabActivekey !== "1") {
@@ -553,7 +558,7 @@ function Action() {
       let obj = {
         lenged: me.oldLenged,
         dispatch: me.oldDispatch,
-        showFeatureName: me.oldShowFeatureName,
+        showFeatureName: me.oldShowFeatureName
       };
       let zoom = INITMAP.map.getView().getZoom();
       if (zoom >= 14) {
@@ -561,10 +566,10 @@ function Action() {
       } else {
         obj.showFeatureName = false;
       }
-      me.overlayArr.forEach((item) => {
+      me.overlayArr.forEach(item => {
         InitMap.map.removeOverlay(item);
       });
-      me.overlayArr2.forEach((item) => {
+      me.overlayArr2.forEach(item => {
         if (me.Source.getFeatureByUid(item.ol_uid)) {
           me.Source.removeFeature(item);
         }
@@ -588,7 +593,10 @@ function Action() {
         me.moveendListener = () => {};
       } else {
         //开启
-        InitMap.map.getView().setZoom(13);
+        InitMap.map
+          .getView()
+          .animate({ zoom: 13 }, { center: INITMAP.map.getView().getCenter() });
+        // InitMap.map.getView().setZoom(13);
         me.featureOverlay2 && InitMap.map.removeOverlay(me.featureOverlay2);
         if (me.tabActivekey === "1") {
           me.mapMoveEnd(me.oldFeatures, me.oldPonts, obj, value);
@@ -601,11 +609,11 @@ function Action() {
 
     // 惠州电信演示
     this.timeInterval && clearInterval(this.timeInterval);
-    this.timeInterval = setInterval(function () {
+    this.timeInterval = setInterval(function() {
       if (me.hasMeetingRoom) {
         me.featureOverlay2 && InitMap.map.removeOverlay(me.featureOverlay2);
         me.layer.plotEdit.removePlotOverlay2();
-        me.layer.projectScoutingArr.forEach((item) => {
+        me.layer.projectScoutingArr.forEach(item => {
           if (item.feature) {
             if (item.feature.get("meetingRoomNum")) {
               item.feature.values_.meetingRoomNum = Math.round(
@@ -631,7 +639,7 @@ function Action() {
   this.meetting = new Metting();
 
   // 通过范围获取坐标点
-  let getBoxCoordinates = (extent) => {
+  let getBoxCoordinates = extent => {
     if (extent.length) {
       let LT = getPoint(extent, "topLeft");
       let RT = getPoint(extent, "topRight");
@@ -653,10 +661,10 @@ function Action() {
     const itemKeyVals = {
       paper: [], // 图纸
       interview: ["aac", "mp3", "语音", "m4a", "flac"], // 访谈
-      pic: ["jpg", "PNG", "gif", "jpeg", "bmp"].map((item) =>
+      pic: ["jpg", "PNG", "gif", "jpeg", "bmp"].map(item =>
         item.toLocaleLowerCase()
       ),
-      video: ["MP4", "WebM", "Ogg", "avi"].map((item) =>
+      video: ["MP4", "WebM", "Ogg", "avi"].map(item =>
         item.toLocaleLowerCase()
       ),
       word: [
@@ -670,12 +678,12 @@ function Action() {
         "rar",
         "txt",
         "xmind",
-        "pdf",
-      ].map((item) => item.toLocaleLowerCase()),
+        "pdf"
+      ].map(item => item.toLocaleLowerCase()),
       annotate: [], // 批注
       plotting: ["feature"], // 标绘
       planPic: ["plan"], // 规划图
-      address: ["board_xlsx"],
+      address: ["board_xlsx"]
     };
 
     let keys = Object.keys(itemKeyVals);
@@ -697,20 +705,20 @@ function Action() {
     this.timeInterval && clearInterval(this.timeInterval);
     this.hasMeetingRoom = null;
     this.layer.projectScoutingArr &&
-      this.layer.projectScoutingArr.forEach((item) => {
+      this.layer.projectScoutingArr.forEach(item => {
         INITMAP.map.removeOverlay(item.feature && item.feature.overlay);
         if (item.feature) this.layer.removeFeature(item);
       });
-    this.layer.plotOverlayArr.forEach((item) => {
+    this.layer.plotOverlayArr.forEach(item => {
       INITMAP.map.removeOverlay(item);
     });
     this.layer.projectScoutingArr = [];
     this.layer.plotEdit.plotClickCb = null;
     setSession(listAction.sesstionSaveKey, "");
-    this.overlayArr.forEach((item) => {
+    this.overlayArr.forEach(item => {
       INITMAP.map.removeOverlay(item);
     });
-    this.overlayArr2.forEach((item) => {
+    this.overlayArr2.forEach(item => {
       if (this.Source.getFeatureByUid(item.ol_uid)) {
         this.Source.removeFeature(item);
       }
@@ -731,49 +739,52 @@ function Action() {
     this.lastSelectedFeature = null;
     this.selectedFeature = null;
     this.featureOverlay2 = null;
+    /** 给数据关联坐标点的特征元素 */
+    this.setCoordinatePointFeature = null;
+    /** 给数据关联坐标的坐标弹窗 */
+    this.setCoordinatePointOverlay = null;
     // Event.Evt.removeEventListener("removeMapMoveEndListen");
   };
   // 获取区域列表
-  this.fetchAreaList = async (data) => {
+  this.fetchAreaList = async data => {
     return await GET_AREA_LIST(data);
   };
   // 添加区域
-  this.addArea = async (data) => {
+  this.addArea = async data => {
     return await ADD_AREA_BOARD(data);
   };
 
   // 添加踏勘列表
-  this.addCollection = async (data) => {
+  this.addCollection = async data => {
     return await ADD_COLLECTION(data);
   };
   // 获取采集列表
-  this.getCollectionList = async (data) => {
+  this.getCollectionList = async data => {
     return await GET_COLLECTION_LIST(data);
   };
   // 删除采集数据
-  this.removeCollection = async (id) => {
+  this.removeCollection = async id => {
     return await DELETE_COLLECTION(id);
   };
 
   // 添加分类的坐标点
   this.setGropCoordinates = async (id, data) => {
     let { coordinate } = data;
-    coordinate = TransformCoordinate(coordinate, "EPSG:3857", "EPSG:4326");
     let param = {
       longitude: coordinate[0],
-      latitude: coordinate[1],
+      latitude: coordinate[1]
     };
     // console.log(coordinate)
     return await EDIT_AREA_MESSAGE(id, param);
   };
 
-  const Drag = /*@__PURE__*/ (function (PointerInteraction) {
+  const Drag = /*@__PURE__*/ (function(PointerInteraction) {
     function Drag() {
       PointerInteraction.call(this, {
         handleDownEvent: () => {}, //handleDownEvent
         handleDragEvent: () => {}, //handleDragEvent,
         handleMoveEvent: () => {}, //handleMoveEvent,
-        handleUpEvent: () => {}, //handleUpEvent,
+        handleUpEvent: () => {} //handleUpEvent,
       });
 
       /**
@@ -811,7 +822,7 @@ function Action() {
   })(PointerInteraction);
 
   // 定位到项目位置
-  this.setToCenter = async (data) => {
+  this.setToCenter = async data => {
     let coor = [+data.coordinate_x, +data.coordinate_y];
     if (!InitMap.checkNowIsGcj02System()) {
       // 需要纠偏
@@ -821,19 +832,19 @@ function Action() {
     this.addAnimatePoint({
       coordinates: coor,
       transform: true,
-      name: data.board_name,
+      name: data.board_name
     });
 
     // 保存项目数据
     this.projectData = {
       coordinates: coor,
-      name: data.board_name,
+      name: data.board_name
     };
 
     if (data.radius) {
       let feature = addFeature("defaultCircle", {
         coordinates: TransformCoordinate(coor),
-        radius: Number(data.radius),
+        radius: Number(data.radius)
       });
       this.fitFeature(feature);
     } else {
@@ -841,17 +852,20 @@ function Action() {
     }
   };
 
-  // 添加坐标点
+  /** 添加坐标点
+   * @param {boolean} isMultiple 是否多点关联
+   * @param {{title: string}} data 展示的数据
+   */
   this.addCollectionCoordinates = (isMultiple, data) => {
     this.dragEvt = new Drag();
     this.hideCollectionOverlay();
     this.isActivity = true;
     return new Promise((resolve, reject) => {
-      InitMap.map.once("click", (event) => {
+      InitMap.map.once("click", event => {
         let { coordinate } = event;
         let handlefeature = InitMap.map.forEachFeatureAtPixel(
           event.pixel,
-          (feature) => feature
+          feature => feature
         );
         if (handlefeature) {
           let type = handlefeature.getGeometry().getType();
@@ -864,28 +878,31 @@ function Action() {
           icon: {
             src: require("../../../assets/selectlocation.png"),
             crossOrigin: "anonymous",
-            anchor: [0.5, 0.8],
+            anchor: [0.5, 0.8]
           },
           text: isMultiple ? "point" : data.title,
           showName: true,
           textFillColor: isMultiple ? "rgba(0,0,0,0)" : "#ff0000",
           textStrokeColor: isMultiple ? "rgba(0,0,0,0)" : "#ffffff",
-          zIndex: 22,
+          zIndex: 22
         });
-        let f = addFeature("Point", {
+        let f = (this.setCoordinatePointFeature = addFeature("Point", {
           coordinates: coordinate,
-          ftype: "select_coordinates",
-        });
+          ftype: "select_coordinates"
+        }));
         f.setStyle(style);
         this.Layer.setZIndex(50);
         this.Source.addFeature(f);
 
         let ele = new SetCoordinateForCollection({});
-        let overlay = createOverlay(ele.element, {
-          position: coordinate,
-          positioning: "bottom-center",
-          offset: [0, -40],
-        });
+        let overlay = (this.setCoordinatePointOverlay = createOverlay(
+          ele.element,
+          {
+            position: coordinate,
+            positioning: "bottom-center",
+            offset: [0, -40]
+          }
+        ));
         InitMap.map.addOverlay(overlay);
 
         let p = this.transform(coordinate);
@@ -893,15 +910,12 @@ function Action() {
         ele.setLat(p[1]);
 
         InitMap.map.addInteraction(this.dragEvt);
-        this.dragEvt.handleDownEvent = (evt) => {
+        this.dragEvt.handleDownEvent = evt => {
           let map = evt.map;
 
-          let feature = map.forEachFeatureAtPixel(
-            evt.pixel,
-            function (feature) {
-              return feature;
-            }
-          );
+          let feature = map.forEachFeatureAtPixel(evt.pixel, function(feature) {
+            return feature;
+          });
 
           if (feature && feature.get("ftype") === "select_coordinates") {
             this.coordinate_ = evt.coordinate;
@@ -911,8 +925,8 @@ function Action() {
               icon: {
                 src: require("../../../assets/unselectlocation.png"),
                 crossOrigin: "anonymous",
-                anchor: [0.5, 0.8],
-              },
+                anchor: [0.5, 0.8]
+              }
             });
             styles.setImage(imgstyle.getImage());
             feature.setStyle(styles);
@@ -920,7 +934,7 @@ function Action() {
           }
           return !!feature;
         };
-        this.dragEvt.handleDragEvent = (evt) => {
+        this.dragEvt.handleDragEvent = evt => {
           if (this.coordinate_) {
             let deltaX = evt.coordinate[0] - this.coordinate_[0];
             let deltaY = evt.coordinate[1] - this.coordinate_[1];
@@ -931,15 +945,14 @@ function Action() {
             }
           }
         };
-        this.dragEvt.handleMoveEvent = (evt) => {
+        this.dragEvt.handleMoveEvent = evt => {
           if (this.cursor_) {
             let map = evt.map;
-            let feature = map.forEachFeatureAtPixel(
-              evt.pixel,
-              function (feature) {
-                return feature;
-              }
-            );
+            let feature = map.forEachFeatureAtPixel(evt.pixel, function(
+              feature
+            ) {
+              return feature;
+            });
             let element = evt.map.getTargetElement();
             if (feature && feature.get("ftype") === "select_coordinates") {
               if (element.style.cursor !== this.cursor_) {
@@ -962,8 +975,8 @@ function Action() {
               icon: {
                 src: require("../../../assets/selectlocation.png"),
                 crossOrigin: "anonymous",
-                anchor: [0.5, 0.8],
-              },
+                anchor: [0.5, 0.8]
+              }
             });
 
             styles.setImage(imgstyle.getImage());
@@ -978,62 +991,68 @@ function Action() {
           return false;
         };
         ele.on = {
-          save: (val) => {
-            // console.log(val)
+          save: val => {
             resolve(val);
-            cancelAdd();
+            this.abortPointAddDraw();
             this.isActivity = false;
           },
           cancel: () => {
-            cancelAdd();
+            this.abortPointAddDraw();
             reject();
             this.isActivity = false;
-          },
-        };
-        const cancelAdd = () => {
-          InitMap.map.removeInteraction(this.dragEvt);
-          this.dragEvt = null;
-          this.Source.removeFeature(f);
-          InitMap.map.removeOverlay(overlay);
+          }
         };
       });
     });
   };
 
-  // 添加关联点的交互 ---废弃 已有 addCollectionCoordinate 代替
-  this.addCollectionPosition = (data) => {
+  /** 中止关联坐标点 */
+  this.abortPointAddDraw = () => {
+    InitMap.map.removeInteraction(this.dragEvt);
+    this.dragEvt = null;
+    if (this.setCoordinatePointFeature) {
+      this.Source.removeFeature(this.setCoordinatePointFeature);
+    }
+
+    if (this.setCoordinatePointOverlay) {
+      InitMap.map.removeOverlay(this.setCoordinatePointOverlay);
+    }
+    this.setCoordinatePointFeature = null;
+    this.setCoordinatePointOverlay = null;
+  };
+
+  // 添加关联点的交互 ---废弃 已有 addCollectionCoordinates 代替
+  this.addCollectionPosition = data => {
     return new Promise((resolve, reject) => {
       let style = createStyle("Point", {
         iconUrl: require("../../../assets/addPointLocation.png"),
         text: data.title,
         showName: true,
         textFillColor: "#ff0000",
-        textStrokeColor: "#ffffff",
+        textStrokeColor: "#ffffff"
       });
       this.draw = drawPoint(this.Source, { style });
-      this.draw.on("drawend", (e) => {
-        let { feature } = e;
-
-        feature.setStyle(style);
-        this.activeFeature = feature;
-        InitMap.map.removeInteraction(this.draw);
+      this.draw.on("drawend", e => {
+        e.feature.setStyle(style);
+        this.activeFeature = e.feature;
         resolve(e);
+        this.removeDraw();
       });
       InitMap.map.addInteraction(this.draw);
     });
   };
   // 清除分组的点
   this.clearGroupPointer = () => {
-    this.groupPointer.forEach((item) => {
+    this.groupPointer.forEach(item => {
       if (this.Source.getFeatureByUid(item.ol_uid)) {
         this.Source.removeFeature(item);
       }
     });
     this.groupPointer = [];
-    this.overlayArr.forEach((item) => {
+    this.overlayArr.forEach(item => {
       INITMAP.map.removeOverlay(item);
     });
-    this.overlayArr2.forEach((item) => {
+    this.overlayArr2.forEach(item => {
       if (this.Source.getFeatureByUid(item.ol_uid)) {
         this.Source.removeFeature(item);
       }
@@ -1042,7 +1061,7 @@ function Action() {
     this.moveendListener = () => {};
   };
   // 点击事件
-  const mapClick = (evt) => {
+  const mapClick = evt => {
     let pixel = evt.pixel;
     const obj = InitMap.map.forEachFeatureAtPixel(
       evt.pixel,
@@ -1071,7 +1090,7 @@ function Action() {
   };
 
   // 地图点击
-  const LookingBackPointClick = (evt) => {
+  const LookingBackPointClick = evt => {
     const obj = InitMap.map.forEachFeatureAtPixel(
       evt.pixel,
       (feature, layer) => {
@@ -1088,8 +1107,8 @@ function Action() {
   };
 
   // 设置active的坐标点
-  this.setGroupCollectionActive = (data) => {
-    this.groupCollectionPointer.forEach((item) => {
+  this.setGroupCollectionActive = data => {
+    this.groupCollectionPointer.forEach(item => {
       let style = item.getStyle();
       style.setZIndex(1);
       // style.getImage().getFill().setColor("#577DFF");
@@ -1102,14 +1121,16 @@ function Action() {
       data.location.latitude &&
       data.location.longitude && [
         +data.location.longitude,
-        +data.location.latitude,
+        +data.location.latitude
       ];
     if (!coordinate) return undefined;
     let coor = TransformCoordinate(coordinate);
     let feature = this.Source.getFeaturesAtCoordinate(coor);
-    // console.log(feature)
-
-    feature.forEach((item) => {
+    InitMap.map.getView().animate({
+      center: feature[0].getGeometry().getCoordinates(),
+      duration: 200
+    });
+    feature.forEach(item => {
       let style = item.getStyle();
       style.setZIndex(10);
       if (style.getImage()) {
@@ -1121,12 +1142,13 @@ function Action() {
     });
   };
 
-  this.renderGoupCollectionForLookingBack = (data) => {
+  /** 渲染分组中的数据元素 */
+  this.renderGoupCollectionForLookingBack = data => {
     this.clearGroupCollectionPoint();
     InitMap.map.un("click", LookingBackPointClick);
     if (data && data.length) {
       let obj = {};
-      data.forEach((d) => {
+      data.forEach(d => {
         let item = d.data || d;
         if (
           item.location &&
@@ -1141,12 +1163,12 @@ function Action() {
       });
       // 提取相同坐标点的数据
       let objkeys = Object.keys(obj);
-      objkeys.forEach((item) => {
+      objkeys.forEach(item => {
         let collections = obj[item];
-        let coordinate = item.split("/").map((i) => +i);
+        let coordinate = item.split("/").map(i => +i);
         let feature = addFeature("Point", {
           coordinates: TransformCoordinate(coordinate),
-          collections,
+          collections
         });
         let style = createStyle("Point", {
           radius: 8,
@@ -1159,13 +1181,13 @@ function Action() {
           icon: {
             src: require("../../../assets/selectlocation.png"),
             anchor: [0.5, 0.8],
-            crossOrigin: "anonymous",
+            crossOrigin: "anonymous"
           },
           // text: item.title || item.name,
           textFillColor: "rgba(255,255,255,0)",
           textStrokeColor: "rgba(255,255,255,0)",
           textStrokeWidth: 1,
-          font: 10,
+          font: 10
         });
         feature.setStyle(style);
         this.groupCollectionPointer.push(feature);
@@ -1175,7 +1197,7 @@ function Action() {
         this.Source.addFeatures(this.groupCollectionPointer);
         Fit(InitMap.view, this.Source.getExtent(), {
           size: InitMap.map.getSize(),
-          padding: fitPadding,
+          padding: fitPadding
         });
         InitMap.map.on("click", LookingBackPointClick);
       }
@@ -1185,7 +1207,7 @@ function Action() {
   // 清除坐标点的数据
   this.clearGroupCollectionPoint = () => {
     if (this.groupCollectionPointer.length) {
-      this.groupCollectionPointer.forEach((item) => {
+      this.groupCollectionPointer.forEach(item => {
         if (this.Source.getFeatureByUid(item.ol_uid)) {
           this.Source.removeFeature(item);
         }
@@ -1195,14 +1217,20 @@ function Action() {
   };
 
   // 设置选中的样式
-  this.setActiveGoupPointer = (id) => {
-    this.groupPointer.map((item) => {
+  this.setActiveGoupPointer = id => {
+    this.groupPointer.map(item => {
       let style = item.getStyle();
       if (item.get("p_id") === id) {
-        style.getImage().getFill().setColor("#FE2042");
+        style
+          .getImage()
+          .getFill()
+          .setColor("#FE2042");
         style.getImage().setRadius(12);
       } else {
-        style.getImage().getFill().setColor("#577DFF");
+        style
+          .getImage()
+          .getFill()
+          .setColor("#577DFF");
         style.getImage().setRadius(9);
       }
       item.setStyle(style);
@@ -1211,22 +1239,22 @@ function Action() {
   };
 
   // 渲染分组的点
-  this.renderGroupPointer = (data) => {
+  this.renderGroupPointer = data => {
     InitMap.map.un("click", mapClick);
     this.clearGroupPointer();
     if (data.length) {
       data = data.filter(
-        (item) =>
+        item =>
           item.hasOwnProperty("longitude") && item.hasOwnProperty("latitude")
       );
       let fs = [];
       InitMap.map.on("click", mapClick);
-      data.forEach((item) => {
+      data.forEach(item => {
         let coordinate = TransformCoordinate([+item.longitude, +item.latitude]);
         let feature = addFeature("Point", {
           coordinates: coordinate,
           p_id: item.id,
-          p_type: "group",
+          p_type: "group"
         });
         let style = createStyle("Point", {
           radius: 8,
@@ -1238,7 +1266,7 @@ function Action() {
           textFillColor: "#FF4628",
           textStrokeColor: "#ffffff",
           textStrokeWidth: 1,
-          font: 14,
+          font: 14
         });
         feature.setStyle(style);
         fs.push(feature);
@@ -1248,17 +1276,17 @@ function Action() {
         this.Source.addFeatures(fs);
         Fit(InitMap.view, this.Source.getExtent(), {
           size: InitMap.map.getSize(),
-          padding: fitPadding,
+          padding: fitPadding
         });
       }
     }
   };
 
-  this.transform = (coor) => {
+  this.transform = coor => {
     return TransformCoordinate(coor, "EPSG:3857", "EPSG:4326");
   };
   // 发送修改的坐标点
-  this.editCollection = async (data) => {
+  this.editCollection = async data => {
     return await EDIT_COLLECTION(data);
   };
   // 去除添加交互的方法
@@ -1270,14 +1298,14 @@ function Action() {
   };
 
   // 查找数据中，有存在效坐标的资料
-  const findHasLocationData = (data) => {
+  const findHasLocationData = data => {
     let arr = data.filter(
-      (item) => !!item.location && Object.keys(item.location).length >= 2
+      item => !!item.location && Object.keys(item.location).length >= 2
     );
     return arr;
   };
   this.removeOverlay = () => {
-    this.overlays.forEach((item) => {
+    this.overlays.forEach(item => {
       InitMap.map.removeOverlay(item);
     });
     this.overlays = [];
@@ -1292,7 +1320,7 @@ function Action() {
     this.clearGeoFeatures();
     this.removePlanPicCollection();
     // 删除元素
-    this.features.forEach((item) => {
+    this.features.forEach(item => {
       if (this.Source.getFeatureByUid(item.ol_uid)) {
         this.Source.removeFeature(item);
       }
@@ -1301,7 +1329,7 @@ function Action() {
     // console.log(this.layer, "77777777777777777777");
     if (this.layer) {
       this.layer.projectScoutingArr &&
-        this.layer.projectScoutingArr.forEach((item) => {
+        this.layer.projectScoutingArr.forEach(item => {
           INITMAP.map.removeOverlay(item.feature && item.feature.overlay);
           if (item.feature) this.layer.removeFeature(item);
           this.selectedFeatureOperator = null;
@@ -1321,7 +1349,7 @@ function Action() {
     // console.log(array)
     let features = [];
     let coordinate = {};
-    array.forEach((item) => {
+    array.forEach(item => {
       let key = [+item.location.longitude, +item.location.latitude];
       key = key.join("/");
 
@@ -1331,8 +1359,8 @@ function Action() {
       !coordinate[key] && (coordinate[key] = []);
       coordinate[key].push(item);
     });
-    Object.keys(coordinate).forEach((item) => {
-      let coor = item.split("/").map((c) => +c);
+    Object.keys(coordinate).forEach(item => {
+      let coor = item.split("/").map(c => +c);
       let d = coordinate[item][0];
       if (!Number(d.location.coordSysType)) {
         if (baseMapKeys[0].indexOf(baseMapKey) > -1) {
@@ -1366,8 +1394,8 @@ function Action() {
             icon: {
               src: require("../../../assets/selectlocation.png"),
               anchor: [0.5, 0.8],
-              crossOrigin: "anonymous",
-            },
+              crossOrigin: "anonymous"
+            }
           };
         } else
           return {
@@ -1384,8 +1412,8 @@ function Action() {
             icon: {
               src: require("../../../assets/multiunselect.png"),
               anchor: [0.5, 0.8],
-              crossOrigin: "anonymous",
-            },
+              crossOrigin: "anonymous"
+            }
           };
       };
       let feature = addFeature("Point", {
@@ -1394,7 +1422,7 @@ function Action() {
         ftype: "collection",
         data: coordinate[item],
         multi: coordinate[item].length > 1,
-        ...(coordinate[item][0] || null),
+        ...(coordinate[item][0] || null)
       });
       let style = createStyle("Point", moreStyle());
 
@@ -1406,7 +1434,7 @@ function Action() {
   };
 
   // 查找feature
-  this.findFeature = (id) => {
+  this.findFeature = id => {
     for (let i = 0; i < this.layer.projectScoutingArr.length; i++) {
       const feature = this.layer.projectScoutingArr[i].feature;
       if (feature?.get("id") && feature?.get("id") === id) {
@@ -1447,7 +1475,7 @@ function Action() {
   };
 
   //修改备注
-  this.modifyRemark = async (data) => {
+  this.modifyRemark = async data => {
     let newData = { ...data };
     newData.create_by && delete newData.create_by;
     newData.create_time && delete newData.create_time;
@@ -1456,7 +1484,7 @@ function Action() {
   };
 
   // 查找规划图
-  this.findImgLayer = (id) => {
+  this.findImgLayer = id => {
     for (let i = 0; i < this.imgs.length; i++) {
       let item = this.imgs[i];
       if (item.get("id") && item.get("id") === id) {
@@ -1481,20 +1509,20 @@ function Action() {
         icon: {
           src: src,
           scale: selected ? 0.8 : 0.6,
-          crossOrigin: "anonymous",
-        },
+          crossOrigin: "anonymous"
+        }
       });
       return style.getImage();
     }
     return null;
   };
 
-  this.fitFeature = (feature) => {
+  this.fitFeature = feature => {
     Fit(InitMap.view, feature.getGeometry().getExtent(), { duration: 300 });
   };
 
   // 切换标绘选中状态
-  this.toggleFeatureStyle = (feature) => {
+  this.toggleFeatureStyle = feature => {
     this.changeLastSelectedFeatureStyle();
     this.changeSelectedFeatureStyle(feature);
   };
@@ -1513,7 +1541,10 @@ function Action() {
         style.setImage(this.getImage());
         let text = style.getText().getText();
         if (!text) {
-          feature.getStyle().getText().setText(feature.get("title"));
+          feature
+            .getStyle()
+            .getText()
+            .setText(feature.get("title"));
         }
         feature.setStyle(style);
         this.selectedFeature = feature;
@@ -1531,16 +1562,16 @@ function Action() {
       this.oldDispatch &&
         this.oldDispatch({
           type: "collectionDetail/updateDatas",
-          payload: { selectData: null },
+          payload: { selectData: null }
         });
       const me = this;
-      let cb = function () {
+      let cb = function() {
         me.featureOverlay2 && INITMAP.map.removeOverlay(me.featureOverlay2);
         Event.Evt.firEvent("handlePlotFeature", { feature, pixel });
       };
 
       let id = feature.get("id");
-      getPlotImages(id).then((res) => {
+      getPlotImages(id).then(res => {
         if (res) {
           this.featureOverlay2 = createFeatureOverlay(
             feature,
@@ -1552,7 +1583,7 @@ function Action() {
           InitMap.map.addOverlay(this.featureOverlay2);
           this.layer.plotEdit.removePlotOverlay2();
           let operatorArr = this.layer.projectScoutingArr;
-          operatorArr.forEach((item) => {
+          operatorArr.forEach(item => {
             let feature = item.feature;
             let meetingRoomNum = null;
             if (feature) {
@@ -1576,7 +1607,7 @@ function Action() {
     this.clearGeoFeatures();
     this.renderGeoJson(this.geojsonRenderData, {
       lenged: this.oldDispatch,
-      dispatch: this.oldDispatch,
+      dispatch: this.oldDispatch
     });
   };
 
@@ -1595,12 +1626,12 @@ function Action() {
         this.animateLine.clear();
         this.animateLine = null;
       }
-      data.forEach((item) => {
+      data.forEach(item => {
         newIds.push(item.id);
         if (this.geojsonData[item.id]) {
           res.push({
             ...this.geojsonData[item.id],
-            __needAnimate: !!item._animate,
+            __needAnimate: !!item._animate
           });
         } else {
           ids.push(item.id);
@@ -1609,9 +1640,9 @@ function Action() {
               Axios.get(item.resource_url, {
                 headers: {
                   "Access-Control-Allow-Origin": "*",
-                  "Content-Type": "application/json",
-                },
-              }).then((resp) => {
+                  "Content-Type": "application/json"
+                }
+              }).then(resp => {
                 // 将绑定的是否需要动画功能进行判定渲染
                 return { ...resp, __needAnimate: !!item._animate };
               })
@@ -1638,7 +1669,7 @@ function Action() {
     this.lenged = {
       title: "项目数据",
       key: "map:projectScouting",
-      content: [],
+      content: []
     };
     let hasAnimate = false;
     res.forEach((item, i) => {
@@ -1668,9 +1699,9 @@ function Action() {
           fillColor: fillColor,
           textFillColor: "rgba(0,0,0,0.9)",
           textStrokeColor: "#FFFFFF",
-          font: 14,
+          font: 14
         };
-        currentData = geojsonResponseData.filter((item) => {
+        currentData = geojsonResponseData.filter(item => {
           return item.geojson_id === newIds[i];
         });
         if (currentData && currentData.length === 1) {
@@ -1687,7 +1718,7 @@ function Action() {
       });
       if (geojson.features.length > 0) {
         if (geojson.lenged) {
-          geojson.lenged.forEach((item) => {
+          geojson.lenged.forEach(item => {
             if (item.imgSrc) {
               let imgSrc = null;
               if (item.imgSrc.includes("../../../assets")) {
@@ -1722,7 +1753,7 @@ function Action() {
         lenged = [lenged];
       }
       const lengedIndex = lenged.findIndex(
-        (lenged) => lenged.key === this.lenged.key
+        lenged => lenged.key === this.lenged.key
       );
       if (lengedIndex > -1) {
         lenged[lengedIndex] = this.lenged;
@@ -1748,14 +1779,14 @@ function Action() {
       dispatch({
         type: "lengedList/updateLengedList",
         payload: {
-          config: newConfig,
-        },
+          config: newConfig
+        }
       });
     return res;
   };
   this.clearGeoFeatures = () => {
     if (this.geoFeatures.length) {
-      this.geoFeatures.forEach((item) => {
+      this.geoFeatures.forEach(item => {
         if (this.Source.getFeatureByUid(item.ol_uid)) {
           this.Source.removeFeature(item);
         }
@@ -1778,21 +1809,21 @@ function Action() {
       placement: "point",
       iconScale: 0.6,
       pointColor: "#fff",
-      showName: showFeatureName,
+      showName: showFeatureName === undefined ? true : showFeatureName
     };
     this.lenged = {
       title: "项目数据",
       key: "map:projectScouting",
-      content: [],
+      content: []
     };
     if (addSource) {
-      this.layer.projectScoutingArr.forEach((item) => {
+      this.layer.projectScoutingArr.forEach(item => {
         if (item && item.feature) {
           InitMap.map.removeOverlay(item.feature.overlay);
           this.layer.removeFeature(item);
         }
       });
-      this.layer.plotOverlayArr.forEach((item) => {
+      this.layer.plotOverlayArr.forEach(item => {
         InitMap.map.removeOverlay(item);
       });
       this.layer.projectScoutingArr = [];
@@ -1813,7 +1844,7 @@ function Action() {
       let iconUrl = "";
       let obj = null;
       const hasIndex = this.lenged.content.findIndex(
-        (item0) => item0.font === content.selectName
+        item0 => item0.font === content.selectName
       );
       const featureLowerType = content.geoType.toLowerCase();
       if (featureType.indexOf("&#") > -1) {
@@ -1837,7 +1868,7 @@ function Action() {
               content.selectName === "自定义类型"
                 ? item.title
                 : content.selectName,
-            type: featureLowerType,
+            type: featureLowerType
           };
           this.lenged.content.push(obj);
         }
@@ -1852,7 +1883,7 @@ function Action() {
               !content.selectName
                 ? item.title
                 : content.selectName,
-            type: featureLowerType,
+            type: featureLowerType
           };
           if (content.sigleImage) {
             if (content.sigleImage.indexOf("data:image") > -1) {
@@ -1881,7 +1912,7 @@ function Action() {
           strokeColor: strokeColor,
           iconUrl: iconUrl,
           text: item.title,
-          ...commonStyleOption,
+          ...commonStyleOption
         });
       }
       if (content.geoType === "LineString") {
@@ -1889,7 +1920,7 @@ function Action() {
           strokeWidth: 4,
           strokeColor: featureType,
           text: item.title,
-          ...commonStyleOption,
+          ...commonStyleOption
         });
       }
       if (content.geoType === "Polygon") {
@@ -1901,14 +1932,14 @@ function Action() {
           img.src = iconUrl;
           // const me = this;
           let promise = new Promise((resolve, reject) => {
-            img.onload = function () {
+            img.onload = function() {
               const pat = context.createPattern(img, "repeat");
               let options = {
                 strokeWidth: 2,
                 strokeColor: "",
                 fillColor: pat,
                 text: item.title,
-                ...commonStyleOption,
+                ...commonStyleOption
               };
               myStyle = createStyle(content.geoType, options);
               feature.setStyle(myStyle);
@@ -1928,7 +1959,7 @@ function Action() {
           strokeWidth: 2,
           strokeColor: strokeColor,
           fillColor: featureType,
-          text: item.title,
+          text: item.title
         });
       }
 
@@ -1972,8 +2003,8 @@ function Action() {
     if (!addSource) {
       return this.features;
     }
-    lst.forEach((item) => {
-      let obj = data.find((d) => d.id === item.get("id"));
+    lst.forEach(item => {
+      let obj = data.find(d => d.id === item.get("id"));
       let operator = this.layer._addFeature(item);
       operator.isScouting = true;
       operator.data = obj;
@@ -1989,7 +2020,7 @@ function Action() {
       lenged = [lenged];
     }
     const lengedIndex = lenged.findIndex(
-      (lenged) => lenged.key === this.lenged.key
+      lenged => lenged.key === this.lenged.key
     );
     if (lengedIndex > -1) {
       lenged[lengedIndex] = this.lenged;
@@ -2005,8 +2036,8 @@ function Action() {
         dispatch({
           type: "lengedList/updateLengedList",
           payload: {
-            config: newConfig,
-          },
+            config: newConfig
+          }
         });
     }
     if (data.length > 0) {
@@ -2032,7 +2063,7 @@ function Action() {
     }
     // 取出有子集的数据，合并到列表展示中
     let arr = [];
-    data.forEach((item) => {
+    data.forEach(item => {
       if (item.type !== "groupCollection") {
         arr.push(item);
       } else {
@@ -2042,26 +2073,26 @@ function Action() {
     // 将所有数据更新
     data = arr;
     // 过滤不显示的数据
-    data = data.filter((item) => item.is_display === "1");
+    data = data.filter(item => item.is_display === "1");
 
     let ponts = data.filter(
-      (item) =>
+      item =>
         item.collect_type !== "4" &&
         item.collect_type !== "5" &&
         item.collect_type !== "group"
     );
-    let features = data.filter((item) => item.collect_type === "4");
+    let features = data.filter(item => item.collect_type === "4");
     this.oldPlotFeatures = features;
-    let planPic = data.filter((item) => item.collect_type === "5");
-    let geoData = data.filter((item) => item.collect_type === "8");
+    let planPic = data.filter(item => item.collect_type === "5");
+    let geoData = data.filter(item => item.collect_type === "8");
     this.featuresGroup = {};
-    features.forEach((item) => {
+    features.forEach(item => {
       if (item.provincecode) {
         if (!this.featuresGroup[item.provincecode]) {
           this.featuresGroup[item.provincecode] = [];
         }
         let index = this.featuresGroup[item.provincecode].findIndex(
-          (item2) => item2.id === item.id
+          item2 => item2.id === item.id
         );
         if (index === -1) {
           this.featuresGroup[item.provincecode].push(item);
@@ -2072,7 +2103,7 @@ function Action() {
           this.featuresGroup[item.citycode] = [];
         }
         let index = this.featuresGroup[item.citycode].findIndex(
-          (item2) => item2.id === item.id
+          item2 => item2.id === item.id
         );
         if (index === -1) {
           this.featuresGroup[item.citycode].push(item);
@@ -2083,7 +2114,7 @@ function Action() {
           this.featuresGroup[item.districtcode] = [];
         }
         let index = this.featuresGroup[item.districtcode].findIndex(
-          (item2) => item2.id === item.id
+          item2 => item2.id === item.id
         );
         if (index === -1) {
           this.featuresGroup[item.districtcode].push(item);
@@ -2091,7 +2122,7 @@ function Action() {
       }
     });
     this.pontsGroup = {};
-    ponts.forEach((item) => {
+    ponts.forEach(item => {
       if (item.provincecode) {
         if (!this.pontsGroup[item.provincecode]) {
           this.pontsGroup[item.provincecode] = [];
@@ -2125,7 +2156,7 @@ function Action() {
     this.layer.isDefault = null;
 
     // 渲染geo数据
-    await this.renderGeoJson(geoData, { lenged, dispatch }).catch((err) =>
+    await this.renderGeoJson(geoData, { lenged, dispatch }).catch(err =>
       console.log(err)
     );
     // 渲染标绘数据
@@ -2135,7 +2166,7 @@ function Action() {
         {
           lenged,
           dispatch,
-          showFeatureName,
+          showFeatureName: true
         },
         geoData
       );
@@ -2238,7 +2269,7 @@ function Action() {
     type = "coordinate",
     duration = 800,
     zoom,
-    transform = true,
+    transform = true
   }) => {
     this.selectedFeatureOperator &&
       this.layer.setToTop(this.selectedFeatureOperator);
@@ -2248,13 +2279,13 @@ function Action() {
       return await animate({
         center: center,
         zoom: zoom ? zoom : InitMap.view.getMaxZoom() - 2,
-        duration,
+        duration
       });
     } else if (type === "extent") {
       return await Fit(InitMap.view, center, {
         size: InitMap.map.getSize(),
         padding: fitPadding,
-        duration,
+        duration
       });
     }
     this.selectedFeatureOperator = null;
@@ -2282,7 +2313,7 @@ function Action() {
         // 创建polygon
         let box = addFeature("Polygon", {
           coordinates: [coor],
-          ftype: "editImageLayer",
+          ftype: "editImageLayer"
         });
         // 添加元素
         this.Source.addFeature(box);
@@ -2296,7 +2327,7 @@ function Action() {
             if (feature.get("ftype") === "editImageLayer") {
               return true;
             }
-          },
+          }
         });
         // 添加交互
         InitMap.map.addInteraction(select);
@@ -2304,7 +2335,7 @@ function Action() {
         let modify = new Modify({
           features: select.getFeatures(),
           condition: always,
-          insertVertexCondition: never,
+          insertVertexCondition: never
         });
         // 添加修改交互
         InitMap.map.addInteraction(modify);
@@ -2313,13 +2344,13 @@ function Action() {
         let ele = new settingsOverlay();
         // 创建overlay
         let overlay = createOverlay(ele.element, {
-          position: coor[1],
+          position: coor[1]
         });
         // 添加overlay
         InitMap.map.addOverlay(overlay);
 
         // 修改的事件
-        modify.on("modifyend", (e) => {
+        modify.on("modifyend", e => {
           // console.log(e)
           let { features } = e;
           let feature = features.getArray()[0];
@@ -2340,10 +2371,10 @@ function Action() {
         staticImg.setOpacity(ele.opacityValue);
         // 弹框上面的交互事件
         ele.on = {
-          change: (opacity) => {
+          change: opacity => {
             staticImg.setOpacity(opacity);
           },
-          enter: (val) => {
+          enter: val => {
             closeAll();
             // console.log(val)
             let ext = staticImg.getSource().getImageExtent();
@@ -2393,12 +2424,12 @@ function Action() {
                   pictureUrl: imgUrl,
                   position: { x: topLeft[0], y: topLeft[1] },
                   pictureWidth: w,
-                  pictureHeight: h,
-                },
+                  pictureHeight: h
+                }
               });
 
             // 保存新的图层
-            Event.Evt.on("ImgEditComplete", (data) => {
+            Event.Evt.on("ImgEditComplete", data => {
               url = data.url;
               let title =
                 collection.title.indexOf(respdata.layer_format) !== -1
@@ -2406,7 +2437,7 @@ function Action() {
                   : collection.title + respdata.layer_format;
               file = new File([data.blob], title, {
                 type: "image/png",
-                lastModified: Date.now(),
+                lastModified: Date.now()
               });
               let tl = [data.extent[0], data.extent[1]];
               let rb = [data.extent[2], data.extent[3]];
@@ -2438,8 +2469,8 @@ function Action() {
                 dispatch({
                   type: "editPicture/updateDatas",
                   payload: {
-                    editShow: false,
-                  },
+                    editShow: false
+                  }
                 });
             });
             // 点击了取消保存
@@ -2453,11 +2484,11 @@ function Action() {
                 dispatch({
                   type: "editPicture/updateDatas",
                   payload: {
-                    editShow: false,
-                  },
+                    editShow: false
+                  }
                 });
             });
-          },
+          }
         };
 
         // 释放所有事件
@@ -2484,7 +2515,7 @@ function Action() {
 
   //   删除已存在的规划图
   this.removePlanPicCollection = () => {
-    this.imgs && this.imgs.forEach((item) => InitMap.map.removeLayer(item));
+    this.imgs && this.imgs.forEach(item => InitMap.map.removeLayer(item));
     // if(this.imgs && this.imgs.length)
     // window.stop();
     this.imgs = [];
@@ -2493,13 +2524,13 @@ function Action() {
   let _that = this;
 
   // 加载规划图,可以自定义
-  let loading = function (staticimg, extent, resp) {
+  let loading = function(staticimg, extent, resp) {
     // 规划图加载状态
     this.box = "";
-    staticimg.on("imageloadstart", (e) => {
+    staticimg.on("imageloadstart", e => {
       let coor = getBoxCoordinates(extent);
       this.box = addFeature("Polygon", {
-        coordinates: [coor],
+        coordinates: [coor]
       });
       this.box.setStyle(
         createStyle("Polygon", {
@@ -2508,12 +2539,12 @@ function Action() {
           textFillColor: "rgb(255,0,0)",
           textStrokeColor: "rgba(255,255,255,0.8)",
           font: 16,
-          fillColor: "rgba(0,0,0,0.25)",
+          fillColor: "rgba(0,0,0,0.25)"
         })
       );
       _that.Source.addFeature(this.box);
     });
-    staticimg.on("imageloadend", (e) => {
+    staticimg.on("imageloadend", e => {
       _that.Source.removeFeature(this.box);
       this.box = null;
     });
@@ -2524,7 +2555,7 @@ function Action() {
     });
   };
 
-  this.getNewExtent = (extent) => {
+  this.getNewExtent = extent => {
     if (extent && extent.length === 4) {
       const baseMapKey = InitMap.baseMapKey;
       const systemDic = InitMap.systemDic;
@@ -2548,8 +2579,8 @@ function Action() {
   };
 
   //   渲染规划图
-  this.renderPlanPicCollection = async (data) => {
-    this.imgs.forEach((item) => {
+  this.renderPlanPicCollection = async data => {
+    this.imgs.forEach(item => {
       //   console.log(item)
       InitMap.map.removeLayer(item);
     });
@@ -2559,7 +2590,7 @@ function Action() {
     // 所有规划图加载的范围
     let ext = [Infinity, Infinity, -Infinity, -Infinity];
 
-    let promise = data.map((item) => {
+    let promise = data.map(item => {
       if (item.resource_id) {
         return GET_PLAN_PIC(item.resource_id);
       }
@@ -2568,10 +2599,10 @@ function Action() {
     this.removePlanPicCollection();
     // .then((res) => {
     this.imgs = [];
-    res.forEach((item) => {
+    res.forEach(item => {
       let resp = item.data;
       let extent = resp.extent
-        ? resp.extent.split(",").map((e) => parseFloat(e))
+        ? resp.extent.split(",").map(e => parseFloat(e))
         : [];
 
       // 数据为gcj02坐标系 并且当前坐标系非gcj02坐标系时要转换
@@ -2589,7 +2620,7 @@ function Action() {
       // let url = config.BASE_URL + PLAN_IMG_URL(resp.id);
       let img = ImageStatic(PLAN_IMG_URL(resp.id), extent, {
         opacity: +resp.transparency,
-        minZoom: 10,
+        minZoom: 10
       });
       let stati = img.getSource();
       // 添加规划图加载状态
@@ -2605,7 +2636,7 @@ function Action() {
       }
     });
 
-    this.imgs.forEach((item) => {
+    this.imgs.forEach(item => {
       //   console.log(item)
       InitMap.map.addLayer(item);
     });
@@ -2615,13 +2646,13 @@ function Action() {
   };
 
   // 设置overlay层叠问题
-  this.editZIndexOverlay = (id) => {
+  this.editZIndexOverlay = id => {
     let overlay = InitMap.map.getOverlayById(id);
     // console.log(overlay)
     if (!overlay) return;
     let className = "activeOverlayDefault";
     let activeOverlays = document.querySelectorAll("." + className);
-    activeOverlays.forEach((item) => {
+    activeOverlays.forEach(item => {
       item.classList.remove(className);
     });
 
@@ -2639,33 +2670,33 @@ function Action() {
     let ele = new CollectionOverlay({
       ...data,
       angleColor: "#fff",
-      placement: "bottomCenter",
+      placement: "bottomCenter"
     });
     let overlay = createOverlay(ele.element, {
       positioning: "bottom-center",
       offset: [0, -25],
-      id: data.id,
+      id: data.id
     });
     InitMap.map.addOverlay(overlay);
     this.overlays.push(overlay);
     overlay.setPosition(coor);
 
     if (ele.audio) {
-      ele.audio.addEventListener("play", (e) => {
+      ele.audio.addEventListener("play", e => {
         Event.Evt.firEvent("hasAudioStart", {
           ele: e.target,
-          ...data,
+          ...data
         });
       });
-      ele.audio.addEventListener("pause", (e) => {
+      ele.audio.addEventListener("pause", e => {
         // console.log(e,'pause')
       });
-      ele.audio.ontimeupdate = (e) => {
+      ele.audio.ontimeupdate = e => {
         // console.log(e.target.currentTime)
       };
     }
     if (ele.video) {
-      ele.video.onplay = (e) => {};
+      ele.video.onplay = e => {};
     }
 
     ele.on = {
@@ -2692,7 +2723,7 @@ function Action() {
           isLoading = false;
         };
       },
-      preview: async (val) => {
+      preview: async val => {
         // console.log(val)
         let { target, resource_url, resource_id } = val;
         let ty = this.checkCollectionType(target);
@@ -2706,7 +2737,7 @@ function Action() {
             window.open(message, "_blank");
           }
         }
-      },
+      }
     };
   };
 
@@ -2744,7 +2775,7 @@ function Action() {
     this.staticimg = ImageStatic(url, extent, {
       className: "staticImg",
       ...data,
-      zIndex: 18,
+      zIndex: 18
     });
     InitMap.map.addLayer(this.staticimg);
   };
@@ -2802,7 +2833,7 @@ function Action() {
   };
 
   // 点击的时候添加overlay
-  this.addSelectOverlay = (feature) => {
+  this.addSelectOverlay = feature => {
     let type = feature.getGeometry().getType();
     let coor = feature.getGeometry().getExtent();
     let point = getPoint(coor, "topRight");
@@ -2816,22 +2847,22 @@ function Action() {
         remark,
         placement: "rightTop",
         angleColor: "#fff",
-        titleColor: fill,
+        titleColor: fill
       });
       // 缩放
       Fit(InitMap.view, coor, {
-        padding: [200, 220, 80, 400],
+        padding: [200, 220, 80, 400]
       });
 
       this.polygonOverlay = createOverlay(ele.element, {
-        offset: type === "Point" ? [10, 0] : [0, 0],
+        offset: type === "Point" ? [10, 0] : [0, 0]
       });
       ele.on = {
         close: () => {
           this.areaSelect.dispatchEvent({ type: "select", selected: [] });
           // 重新加载select选择器
           this.addAreaSelect();
-        },
+        }
       };
       InitMap.map.addOverlay(this.polygonOverlay);
       this.polygonOverlay.setPosition(point);
@@ -2847,7 +2878,7 @@ function Action() {
     this.modify = new Modify({
       features: this.select.getFeatures(),
       condition: always,
-      insertVertexCondition: never,
+      insertVertexCondition: never
     });
     // snap = new Snap({features:this.select.getFeatures()});
     InitMap.map.addInteraction(this.modify);
@@ -2859,7 +2890,7 @@ function Action() {
   // 隐藏显示的资料overlay
   this.hideCollectionOverlay = () => {
     if (!this.overlays.length) return;
-    this.overlays.map((item) => {
+    this.overlays.map(item => {
       item.set("oldPosition", item.getPosition());
 
       item.setPosition(null);
@@ -2870,7 +2901,7 @@ function Action() {
   // 显示采集资料的overlay
   this.showCollectionOverlay = () => {
     if (!this.overlays.length) return;
-    this.overlays.map((item) => {
+    this.overlays.map(item => {
       // console.log(item);
       let oldPosition = item.get("oldPosition");
       item.setPosition(oldPosition);
@@ -2887,7 +2918,7 @@ function Action() {
       let globalurl = url,
         file = null;
       this.drawBox = drawBox(this.Source, {});
-      this.drawBox.on("drawend", (e) => {
+      this.drawBox.on("drawend", e => {
         this.boxFeature = e.feature;
         // console.log(e.feature.getGeometry().getCoordinates())
         let extent = this.boxFeature.getGeometry().getExtent();
@@ -2910,7 +2941,7 @@ function Action() {
 
         let { modify } = this.setSelect();
 
-        modify.on("modifyend", (e) => {
+        modify.on("modifyend", e => {
           let features = e.features;
           let f = features.getArray()[0];
           this.boxFeature = f;
@@ -2921,19 +2952,18 @@ function Action() {
         });
         //
         ele.on = {
-          change: (val) => {
+          change: val => {
             // console.log(val)
             drawImgOpacity = val;
             this.staticimg && this.staticimg.setOpacity(val);
           },
-          enter: (val) => {
-            // console.log(val)
+          enter: val => {
             resolve({
-              feature: e.feature,
+              feature: this.boxFeature,
               ...val,
-              extent: e.feature.getGeometry().getExtent(),
+              extent: this.boxFeature.getGeometry().getExtent(),
               url: globalurl,
-              blobFile: file,
+              blobFile: file
             });
             overlay.setPosition(null);
             InitMap.map.removeOverlay(overlay);
@@ -2979,16 +3009,16 @@ function Action() {
                   pictureUrl: url,
                   position: { x: topLeft[0], y: topLeft[1] },
                   pictureWidth: w,
-                  pictureHeight: h,
-                },
+                  pictureHeight: h
+                }
               });
 
             // 保存新的图层
-            Event.Evt.on("ImgEditComplete", (data) => {
+            Event.Evt.on("ImgEditComplete", data => {
               globalurl = data.url;
               file = new File([data.blob], files.name, {
                 type: files.type,
-                lastModified: Date.now(),
+                lastModified: Date.now()
               });
               let tl = [data.extent[0], data.extent[1]];
               let rb = [data.extent[2], data.extent[3]];
@@ -3020,8 +3050,8 @@ function Action() {
                 dispatch({
                   type: "editPicture/updateDatas",
                   payload: {
-                    editShow: false,
-                  },
+                    editShow: false
+                  }
                 });
             });
             // 点击了取消保存
@@ -3038,11 +3068,11 @@ function Action() {
                 dispatch({
                   type: "editPicture/updateDatas",
                   payload: {
-                    editShow: false,
-                  },
+                    editShow: false
+                  }
                 });
             });
-          },
+          }
         };
       });
       this.drawBox.on("drawabort", () => {
@@ -3057,7 +3087,7 @@ function Action() {
       clearTimeout(this.repeatRequst);
     }
   };
-  this.addToListen = (param) => {
+  this.addToListen = param => {
     clearTimeout(this.repeatRequst);
     this.repeatRequst = setTimeout(() => {
       this.addListenAjax(param);
@@ -3065,7 +3095,7 @@ function Action() {
     }, requestTime);
   };
   // 添加轮询机制
-  this.addListenAjax = async (param) => {
+  this.addListenAjax = async param => {
     let oldData = this.oldData;
     let res = await this.getCollectionList(param);
     let data = res.data;
@@ -3090,21 +3120,21 @@ function Action() {
   };
 
   // 保存排序操作
-  this.saveSortCollection = async (data) => {
+  this.saveSortCollection = async data => {
     return await SORT_COLLECTION_DATA(data);
   };
   // 保存合并操作
-  this.saveMergeCollection = async (data) => {
+  this.saveMergeCollection = async data => {
     return await MERGE_COLLECTION(data);
   };
   // 取消合并操作
-  this.cancelMergeCollection = async (data) => {
+  this.cancelMergeCollection = async data => {
     return await CANCEL_COLLECTION_MERGE(data);
   };
 
   // 清空选中状态
   this.clearSelectPoint = () => {
-    this.features.forEach((item) => {
+    this.features = this.features.map(item => {
       // if(!uids.includes(item.ol_uid)){
       if (item.get("ftype") === "collection") {
         let style = item.getStyle();
@@ -3112,11 +3142,16 @@ function Action() {
         style.setImage(pointUnselect(item.get("multi")).getImage());
         item.setStyle(style);
       }
+      return item;
       // }
     });
   };
 
-  this.handleFeatureCollectionPoint = (feature) => {
+  /**
+   * 点击了图层中的特征元素
+   * @param {Feature} feature
+   */
+  this.handleFeatureCollectionPoint = feature => {
     Event.Evt.firEvent("handleFeatureToLeftMenu", feature.get("id"));
     this.clearSelectPoint();
     if (feature) {
@@ -3126,22 +3161,22 @@ function Action() {
       feature.setStyle(style);
     }
   };
-  this.getFeatureByPlotCoordinate = (coor) => {
+  this.getFeatureByPlotCoordinate = coor => {
     if (this.layer.showLayer) {
       let source = this.layer.showLayer.getSource();
       return source.getFeaturesAtCoordinate(coor);
     }
     return [];
   };
-  this.getFeatureByCoordinate = (coor) => {
+  this.getFeatureByCoordinate = coor => {
     coor = TransformCoordinate(coor);
     return this.Source.getFeaturesAtCoordinate(coor);
   };
-  this.getFeatureById = (id) => {
-    return this.features.find((item) => item.get("id") === id);
+  this.getFeatureById = id => {
+    return this.features.find(item => item.get("id") === id);
   };
   // 点的数据选中状态
-  this.handleCollectionPoint = (data) => {
+  this.handleCollectionPoint = data => {
     // console.log(data);
     let { location } = data;
     this.clearSelectPoint();
@@ -3157,7 +3192,7 @@ function Action() {
       // console.log(feature);
       // let uids = feature.map(item => item.ol_uid)|| [];
       if (feature && feature.length) {
-        feature.forEach((item) => {
+        feature.forEach(item => {
           let fstyle = item.getStyle();
           fstyle.setZIndex(50);
           fstyle.setImage(pointSelect(item.get("multi")).getImage());
@@ -3167,7 +3202,7 @@ function Action() {
     }
   };
   // 采集资料的点击事件
-  this.handleCollection = async (val) => {
+  this.handleCollection = async val => {
     let { target, resource_url, title, resource_id } = val;
     let pointType = this.checkCollectionType(target);
     if (pointType === "word") {
@@ -3214,7 +3249,7 @@ function Action() {
     feature,
     coordinates,
     transform = true,
-    name,
+    name
   }) => {
     if (!feature) {
       if (transform) {
@@ -3231,13 +3266,13 @@ function Action() {
         textFillColor: "#ff0000",
         font: 14,
         textStrokeColor: "#ffffff",
-        zIndex: 40,
+        zIndex: 40
       });
       feature.setStyle(fstyle);
       this.Source.addFeature(feature);
     }
     let start = new Date().getTime();
-    const animate = (event) => {
+    const animate = event => {
       let vectorContext = getVectorContext(event);
       let frameState = event.frameState;
       let flashGeom = feature.getGeometry().clone();
@@ -3249,13 +3284,13 @@ function Action() {
         image: new Circle({
           radius: radius,
           fill: new Fill({
-            color: `rgba(75, 122, 255, ${opacity})`,
+            color: `rgba(75, 122, 255, ${opacity})`
           }),
           stroke: new Stroke({
             color: `rgba(75, 122, 255,${opacity})`,
-            width: 0.25 + opacity,
-          }),
-        }),
+            width: 0.25 + opacity
+          })
+        })
       });
       let s = feature.getStyle();
       s.getImage().setOpacity(opacity);
@@ -3272,21 +3307,21 @@ function Action() {
     };
     let listenerKey = this.Layer.on("postrender", animate);
   };
-  this.savePoint = (val) => {
+  this.savePoint = val => {
     let { data = [], featureType, board_id } = val;
     if (data.length) {
       let p = [];
-      data.forEach((item) => {
+      data.forEach(item => {
         let feature = addFeature("Point", {
           coordinates: TransformCoordinate(item.coordinate),
-          name: item.name,
+          name: item.name
         });
         let style = createStyle("Point", {
           icon: {
             src: require("../../../assets/json/company3.png"),
             crossOrigin: "anonymous",
-            anchor: [0.5, 0],
-          },
+            anchor: [0.5, 0]
+          }
         });
         feature.setStyle(style);
         let param = {
@@ -3303,12 +3338,12 @@ function Action() {
             coordinates: feature.getGeometry().getCoordinates(),
             coordSysType: 0,
             geometryType: "Point",
-            featureType,
-          }),
+            featureType
+          })
         };
         p.push(this.addCollection(param));
       });
-      Promise.all(p).then((res) => {
+      Promise.all(p).then(res => {
         console.log(res, "保存成功了");
       });
     }
@@ -3323,7 +3358,7 @@ function Action() {
   //   console.log(data);
   // }
 
-  this.formatUnit = (size) => {
+  this.formatUnit = size => {
     if (size) {
       return size < 1000
         ? size.toFixed(2) + "米"
@@ -3348,12 +3383,12 @@ function Action() {
     this.searchAroundOverlay.setPosition(point);
   };
 
-  this.setSearchIndex = (index) => {
+  this.setSearchIndex = index => {
     this.searchPageIndex = index;
   };
 
   this.updateSearch = (id, type, index) => {
-    let sFeature = this.features.find((item) => item.get("id") === id);
+    let sFeature = this.features.find(item => item.get("id") === id);
     let coordinates = [];
     if (sFeature) {
       coordinates = sFeature.getGeometry().getCoordinates();
@@ -3362,14 +3397,14 @@ function Action() {
       position: coordinates,
       radius: this.circleRadius,
       type: type,
-      pageIndex: index,
+      pageIndex: index
     });
   };
   // 添加周边搜索
   this.addSearchAround = ({ id, feature, stype = "高速路入口" }) => {
     let sFeature = null;
     if (id) {
-      sFeature = this.features.find((item) => item.get("id") === id);
+      sFeature = this.features.find(item => item.get("id") === id);
     } else if (feature) {
       sFeature = feature;
     } else return false;
@@ -3382,7 +3417,7 @@ function Action() {
         let coordinates = geometry.getCoordinates();
         let f = addFeature("defaultCircle", {
           coordinates,
-          radius: defaultRadius,
+          radius: defaultRadius
         });
         let style = createStyle("Circle", {
           fillColor: "rgba(193, 232, 255, 0.3)",
@@ -3394,23 +3429,23 @@ function Action() {
           offsetY: 0,
           textFillColor: "#ff0000",
           textStrokeColor: "#ffffff",
-          textStrokeWidth: 2,
+          textStrokeWidth: 2
         });
         f.setStyle(style);
         this.searchAroundCircle = f;
         this.Source.addFeature(this.searchAroundCircle);
         let ele = new DragCircleRadius({
-          format: this.formatUnit(defaultRadius),
+          format: this.formatUnit(defaultRadius)
         });
         this.searchAroundOverlay = createOverlay(ele.element, {
-          offset: [-20, 0],
+          offset: [-20, 0]
         });
         // 启动搜索功能
         this.searchByPosition({
           position: coordinates,
           radius: defaultRadius,
           type: stype,
-          pageIndex: this.searchPageIndex,
+          pageIndex: this.searchPageIndex
         });
         updateOverlayPosition(this.searchAroundOverlay, f);
 
@@ -3440,11 +3475,11 @@ function Action() {
               position: coordinates,
               radius,
               type: stype,
-              pageIndex: this.searchPageIndex,
+              pageIndex: this.searchPageIndex
             });
             Fit(InitMap.view, f.getGeometry().getExtent(), { duration: 300 });
           },
-          change: (text) => {
+          change: text => {
             let t = +text;
             radius = t;
             this.circleRadius = radius;
@@ -3456,9 +3491,9 @@ function Action() {
               position: coordinates,
               radius: t,
               type: stype,
-              pageIndex: this.searchPageIndex,
+              pageIndex: this.searchPageIndex
             });
-          },
+          }
         };
       } else {
         message.warn("暂时只支持坐标点的周边查询");
@@ -3468,7 +3503,7 @@ function Action() {
       Fit(InitMap.view, this.searchAroundCircle.getGeometry().getExtent(), {
         size: InitMap.map.getSize(),
         padding: fitPadding,
-        duration: 300,
+        duration: 300
       });
       return true;
     }
@@ -3483,7 +3518,7 @@ function Action() {
   };
 
   let driving = new AMap.Driving({
-    policy: AMap.DrivingPolicy.LEAST_TIME,
+    policy: AMap.DrivingPolicy.LEAST_TIME
   });
   this.searchCache = {};
   // 调用高德查询线路规划
@@ -3498,7 +3533,7 @@ function Action() {
           resolve(result);
           this.searchCache[key] = result;
         });
-    }).catch((err) => {
+    }).catch(err => {
       reject(err);
     });
   };
@@ -3506,7 +3541,7 @@ function Action() {
    * 动画功能渲染
    * @param data 动画渲染的数据列表 Object -> collection
    */
-  this.startAnimateForFeatures = (data) => {
+  this.startAnimateForFeatures = data => {
     // console.log(data)
     // this.projectData 是项目数据，保存的坐标类型是 EPSG: 4326 渲染时要转换成 EPSG: 3857
     try {
@@ -3537,7 +3572,7 @@ function Action() {
           let res = await this.searchByDrive(
             from.coordinates,
             coordinates
-          ).catch((err) => console.log(err));
+          ).catch(err => console.log(err));
           nProgress.inc(0.05);
           let toArray = this.transformAMapDataFromRoad(res);
           let obj = {
@@ -3545,7 +3580,7 @@ function Action() {
             to: toArray,
             distance: res.routes[0].distance,
             time: res.routes[0].time,
-            properties: item.properties,
+            properties: item.properties
           };
           arr.push(obj);
         }
@@ -3559,7 +3594,7 @@ function Action() {
   /**
    * 处理高德返回线路数据
    */
-  this.transformAMapDataFromRoad = (data) => {
+  this.transformAMapDataFromRoad = data => {
     let key = InitMap.baseMapKey;
     let dic = InitMap.systemDic[key];
     let flag = InitMap.checkNowIsGcj02System(key);
@@ -3568,9 +3603,9 @@ function Action() {
     if (data.routes && data.routes[0]) {
       let road = data.routes[0];
       let steps = road.steps;
-      steps.forEach((step) => {
+      steps.forEach(step => {
         arr = arr.concat(
-          step.path.map((s) =>
+          step.path.map(s =>
             TransformCoordinate(!flag ? dic(s.lng, s.lat) : [s.lng, s.lat])
           )
         );
@@ -3582,17 +3617,17 @@ function Action() {
   // 构建
   this.animateLine = null;
   // 渲染线路列表
-  this.renderDriveLines = (data) => {
+  this.renderDriveLines = data => {
     if (!this.animateLine) {
       this.animateLine = new AnimateLine({
         startPoint: { ...this.projectData },
-        showStartPoint: true,
+        showStartPoint: true
       });
       this.animateLine.renderEnd = () => {
         nProgress.done();
       };
     }
-    data.forEach((item) => {
+    data.forEach(item => {
       this.animateLine.addLine({ ...item, context: this.Source });
     });
   };

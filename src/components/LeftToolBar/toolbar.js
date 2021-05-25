@@ -5,12 +5,23 @@ import styles from "./LeftToolBar.less";
 import Event from "../../lib/utils/event";
 import { connect } from "dva";
 
-@connect(({openswitch: {openPanel}}) => ({openPanel}))
+@connect(({ openswitch: { openPanel } }) => ({ openPanel }))
 export default class ToolBar extends React.Component {
   constructor(props) {
     super(props);
     this.parent = props.parent;
     this.props.onRef(this);
+    this.plotTypes = [
+      "",
+      "point",
+      "freeLine",
+      "line",
+      "freePolygon",
+      "polygon",
+      "rect",
+      "circle",
+      "arrow"
+    ];
     this.leftTools = [
       {
         name: "项目",
@@ -24,12 +35,12 @@ export default class ToolBar extends React.Component {
             displayTempPlot: false,
             displayCustomSymbolStore: false,
             displayProjectList: false,
-            displaySystemManage: false,
+            displaySystemManage: false
           });
           this.parent.deactivate();
           this.openPanel();
           this.hideSearchBtn();
-        },
+        }
       },
       {
         name: "标记点",
@@ -43,12 +54,12 @@ export default class ToolBar extends React.Component {
             displayTempPlot: false,
             displayCustomSymbolStore: false,
             plotType: "point",
-            displaySystemManage: false,
+            displaySystemManage: false
           });
           this.parent.deactivate();
           this.hideSearchBtn();
           this.openPanel();
-        },
+        }
       },
       {
         name: "描绘",
@@ -62,12 +73,12 @@ export default class ToolBar extends React.Component {
             displayTempPlot: false,
             displayCustomSymbolStore: false,
             plotType: "freeLine",
-            displaySystemManage: false,
+            displaySystemManage: false
           });
           this.parent.deactivate();
           this.hideSearchBtn();
           this.openPanel();
-        },
+        }
       },
       {
         name: "直线",
@@ -81,12 +92,12 @@ export default class ToolBar extends React.Component {
             displayTempPlot: false,
             displayCustomSymbolStore: false,
             plotType: "line",
-            displaySystemManage: false,
+            displaySystemManage: false
           });
           this.parent.deactivate();
           this.hideSearchBtn();
           this.openPanel();
-        },
+        }
       },
       {
         name: "自由面",
@@ -100,12 +111,12 @@ export default class ToolBar extends React.Component {
             displayTempPlot: false,
             displayCustomSymbolStore: false,
             plotType: "freePolygon",
-            displaySystemManage: false,
+            displaySystemManage: false
           });
           this.parent.deactivate();
           this.hideSearchBtn();
           this.openPanel();
-        },
+        }
       },
       {
         name: "标面",
@@ -119,12 +130,12 @@ export default class ToolBar extends React.Component {
             displayTempPlot: false,
             displayCustomSymbolStore: false,
             plotType: "polygon",
-            displaySystemManage: false,
+            displaySystemManage: false
           });
           this.parent.deactivate();
           this.hideSearchBtn();
           this.openPanel();
-        },
+        }
       },
       {
         name: "矩形",
@@ -138,12 +149,12 @@ export default class ToolBar extends React.Component {
             displayTempPlot: false,
             displayCustomSymbolStore: false,
             plotType: "rect",
-            displaySystemManage: false,
+            displaySystemManage: false
           });
           this.parent.deactivate();
           this.hideSearchBtn();
           this.openPanel();
-        },
+        }
       },
       {
         name: "圆形",
@@ -157,12 +168,12 @@ export default class ToolBar extends React.Component {
             displayTempPlot: false,
             displayCustomSymbolStore: false,
             plotType: "circle",
-            displaySystemManage: false,
+            displaySystemManage: false
           });
           this.parent.deactivate();
           this.hideSearchBtn();
           this.openPanel();
-        },
+        }
       },
       {
         name: "箭头",
@@ -176,21 +187,21 @@ export default class ToolBar extends React.Component {
             displayTempPlot: false,
             displayCustomSymbolStore: false,
             plotType: "arrow",
-            displaySystemManage: false,
+            displaySystemManage: false
           });
           this.parent.deactivate();
           this.hideSearchBtn();
           this.openPanel();
-        },
-      },
+        }
+      }
     ];
     this.state = {
       selectedIndex: 0,
       hoveredIndex: -1,
       operatorListLength: 0,
-      update: false,
+      update: false
     };
-    Event.Evt.on("openModifyPointPanel", (icon) => {
+    Event.Evt.on("openModifyPointPanel", icon => {
       this.parent.setState({
         displayPlot: true,
         hidePlot: false,
@@ -198,13 +209,13 @@ export default class ToolBar extends React.Component {
         displayTempPlot: false,
         displayCustomSymbolStore: false,
         plotType: "point",
-        displaySystemManage: false,
+        displaySystemManage: false
       });
       this.parent.deactivate();
       this.parent.isGeojsonMifyIcon = true;
       this.hideSearchBtn();
       this.openPanel();
-    })
+    });
   }
 
   openPanel = () => {
@@ -213,8 +224,18 @@ export default class ToolBar extends React.Component {
       dispatch({
         type: "openswitch/updateDatas",
         payload: {
-          openPanel: true,
-        },
+          openPanel: true
+        }
+      });
+    }
+  };
+
+  // 更新标绘模块图标
+  updateSelectedPlotType = plotType => {
+    let index = this.plotTypes.findIndex(item => item === plotType);
+    if (index > 0) {
+      this.setState({
+        selectedIndex: index
       });
     }
   };
@@ -222,18 +243,18 @@ export default class ToolBar extends React.Component {
   hideSearchBtn = () => {
     Event.Evt.firEvent("displaySearchBtn", {
       visible: false,
-      keywords: [],
+      keywords: []
     });
   };
   updateListLen = (len = 0) => {
     this.setState({
-      operatorListLength: len,
+      operatorListLength: len
     });
   };
 
   displayTempPlot = () => {
     this.setState({
-      selectedIndex: -1,
+      selectedIndex: -1
     });
     this.parent.setState({
       displayPlot: false,
@@ -242,7 +263,7 @@ export default class ToolBar extends React.Component {
       displayTempPlot: true,
       displaySystemManage: false,
       displayCustomSymbolStore: false,
-      plotType: "",
+      plotType: ""
     });
     this.hideSearchBtn();
   };
@@ -262,7 +283,7 @@ export default class ToolBar extends React.Component {
           width: "100%",
           height: "100%",
           background: "#6a9aff",
-          zIndex: 9,
+          zIndex: 9
         }}
       >
         {/* {functionName="map:board:role:manage" type="org"} */}
@@ -271,8 +292,8 @@ export default class ToolBar extends React.Component {
             this.props.isInvalidToolBar ? "invalid" : ""
           }`}
           style={{
-            ...this.parent.getStyle("map:board:role:manage", "org"),
-            ...{ background: "#fff" },
+            // ...this.parent.getStyle("map:board:role:manage", "org"),
+            ...{ background: "#fff" }
           }}
           disabled={this.parent.getDisabled("map:board:role:manage", "org")}
         >
@@ -289,10 +310,10 @@ export default class ToolBar extends React.Component {
                   displayTempPlot: false,
                   displayCustomSymbolStore: false,
                   displayProjectList: false,
-                  displaySystemManage: true,
+                  displaySystemManage: true
                 });
                 this.setState({
-                  selectedIndex: -1,
+                  selectedIndex: -1
                 });
                 this.parent.deactivate();
                 this.openPanel();
@@ -333,17 +354,17 @@ export default class ToolBar extends React.Component {
                 style={divStyle}
                 onPointerOver={() => {
                   this.setState({
-                    hoveredIndex: index,
+                    hoveredIndex: index
                   });
                 }}
                 onPointerLeave={() => {
                   this.setState({
-                    hoveredIndex: -1,
+                    hoveredIndex: -1
                   });
                 }}
                 onPointerDown={() => {
                   this.setState({
-                    selectedIndex: index,
+                    selectedIndex: index
                   });
                   item.cb && item.cb();
                 }}
@@ -377,7 +398,7 @@ export default class ToolBar extends React.Component {
             style={{
               ...tempPlotItemStyle,
               display: "table",
-              position: "unset",
+              position: "unset"
             }}
           >
             <i
@@ -386,7 +407,7 @@ export default class ToolBar extends React.Component {
                 fontSize: 30,
                 color: "#fff",
                 display: "table-cell",
-                verticalAlign: "middle",
+                verticalAlign: "middle"
               }}
             >
               &#xe765;
@@ -398,7 +419,7 @@ export default class ToolBar extends React.Component {
           className={`${styles.circle} ${styles.temp}`}
           onClick={() => {
             this.setState({
-              selectedIndex: -1,
+              selectedIndex: -1
             });
             this.parent.setState({
               displayPlot: false,
@@ -407,7 +428,7 @@ export default class ToolBar extends React.Component {
               displayTempPlot: false,
               displayCustomSymbolStore: true,
               displaySystemManage: false,
-              plotType: "",
+              plotType: ""
             });
             this.parent.deactivate();
             this.openPanel();
@@ -415,7 +436,7 @@ export default class ToolBar extends React.Component {
           }}
           style={{
             ...customSymbolStoreStyle,
-            ...this.parent.getStyle("map:plot:mark:custom", "org"),
+            ...this.parent.getStyle("map:plot:mark:custom", "org")
           }}
           disabled={this.parent.getDisabled("map:plot:mark:custom", "org")}
         >

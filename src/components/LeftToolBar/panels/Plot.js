@@ -11,7 +11,7 @@ import FeatureOperatorEvent from "../../../utils/plot2ol/src/events/FeatureOpera
 import {
   createStyle,
   loadFeatureJSON,
-  TransformCoordinate,
+  TransformCoordinate
 } from "../../../lib/utils/index";
 import Event from "../../../lib/utils/event";
 
@@ -23,7 +23,7 @@ import mapApp from "utils/INITMAP";
 import { DragPan } from "ol/interaction";
 import Axios from "axios";
 
-import { loadGeoJson } from "./tmp";
+import { loadGeoJson, loadExcel } from "./tmp";
 
 const SymbolBlock = ({
   data,
@@ -32,7 +32,7 @@ const SymbolBlock = ({
   strokeColor,
   fillColor,
   plotType,
-  cb,
+  cb
 }) => {
   return (
     <div>
@@ -42,7 +42,7 @@ const SymbolBlock = ({
           padding: "0 4px",
           background: "#fff",
           transform: "translate(10px, 10px)",
-          fontSize: "12px",
+          fontSize: "12px"
         }}
       >
         {data.item.typeName}
@@ -50,7 +50,7 @@ const SymbolBlock = ({
       <div
         style={{
           border: "1px solid rgba(226,229,236,1)",
-          borderRadius: 8,
+          borderRadius: 8
           // margin: "20px auto",
         }}
       >
@@ -69,7 +69,7 @@ const SymbolBlock = ({
             let divStyle = {
               margin: 2,
               borderRadius: 10,
-              border: "2px solid #fff",
+              border: "2px solid #fff"
             };
             if (indexStr !== "") {
               const indexArr = indexStr.split("|");
@@ -82,7 +82,7 @@ const SymbolBlock = ({
                 divStyle = {
                   margin: 2,
                   borderRadius: 10,
-                  border: "2px solid #7FA7FF",
+                  border: "2px solid #7FA7FF"
                 };
               }
             }
@@ -97,7 +97,7 @@ const SymbolBlock = ({
                   {item.iconfont && item.iconfont.indexOf("&#") > -1 ? (
                     <i
                       style={style}
-                      onClick={(e) => {
+                      onClick={e => {
                         cb(e, data.index, index, item);
                       }}
                       className={globalStyle.global_icon}
@@ -109,7 +109,7 @@ const SymbolBlock = ({
                       type={item.iconfont}
                       style={{ fontSize: 32, background: "none" }}
                       className={styles.symbol}
-                      onClick={(e) => {
+                      onClick={e => {
                         cb(e, data.index, index, item);
                       }}
                     ></MyIcon>
@@ -121,11 +121,11 @@ const SymbolBlock = ({
                           ? {
                               width: 44,
                               height: 24,
-                              display: "inline-flex",
+                              display: "inline-flex"
                             }
                           : {}
                       }
-                      onClick={(e) => {
+                      onClick={e => {
                         cb(e, data.index, index, item);
                       }}
                     >
@@ -136,7 +136,7 @@ const SymbolBlock = ({
                           border: item.line ? `2px solid ${item.color}` : "",
                           height: item.line ? 0 : "",
                           margin: item.line ? "11px auto" : "",
-                          transform: item.line ? "translateY(-1px)" : "",
+                          transform: item.line ? "translateY(-1px)" : ""
                         }}
                         // onClick={(e) => {
                         //   cb(e, data.index, index, item);
@@ -152,9 +152,9 @@ const SymbolBlock = ({
                         backgroundColor: "rgba(255,255,255,1)",
                         backgroundRepeat: "no-repeat",
                         backgroundPosition: "center",
-                        backgroundSize: "100%",
+                        backgroundSize: "100%"
                       }}
-                      onClick={(e) => {
+                      onClick={e => {
                         cb(e, data.index, index, item);
                       }}
                     ></div>
@@ -186,7 +186,7 @@ export default class Plot extends PureComponent {
       strokePercent: "1",
       fillPercent: "1",
       symbols: [],
-      openPanel: true,
+      openPanel: true
     };
     this.fillColor = "rgba(106, 154, 255, 1)";
     this.strokeColor = "rgba(106, 154, 255, 1)";
@@ -213,7 +213,7 @@ export default class Plot extends PureComponent {
       { fill: "rgba(130, 138, 169, 1)", border: "rgba(130, 138, 169, 1)" },
       { fill: "rgba(208, 211, 226, 1)", border: "rgba(208, 211, 226, 1)" },
       { fill: "rgba(93, 64, 55, 1)", border: "rgba(93, 64, 55, 1)" },
-      { fill: "rgba(141, 110, 99, 1)", border: "rgba(141, 110, 99, 1)" },
+      { fill: "rgba(141, 110, 99, 1)", border: "rgba(141, 110, 99, 1)" }
     ];
     this.dic = {
       point: "Point",
@@ -223,7 +223,7 @@ export default class Plot extends PureComponent {
       freePolygon: "Polygon",
       rect: "Polygon",
       circle: "Polygon",
-      arrow: "Polygon",
+      arrow: "Polygon"
     };
     this.plotDic = {
       point: "MARKER",
@@ -233,7 +233,7 @@ export default class Plot extends PureComponent {
       freePolygon: "FREEHAND_POLYGON",
       arrow: "FINE_ARROW",
       rect: "RECTANGLE",
-      circle: "CIRCLE",
+      circle: "CIRCLE"
     };
     this.commonStyleOptions = {
       textFillColor: "rgba(255,0,0,1)",
@@ -244,7 +244,7 @@ export default class Plot extends PureComponent {
       iconScale: 1,
       PointColor: "#fff",
       showName: true,
-      commonFunc: null,
+      commonFunc: null
     };
     this.operatorActive = null;
     this.operatorDeactive = null;
@@ -256,32 +256,52 @@ export default class Plot extends PureComponent {
     this.isLoaded = true;
     this.msgtimer = null;
     this.isSymbolClicked = false;
+    this.plotType = "";
   }
   componentDidMount() {
+    this.plotType = this.props.plotType;
     this.plotLayer = plotEdit.getPlottingLayer();
     const me = this;
     const { parent } = this.props;
+    ListAction.checkItem()
+      .then(res => {
+        if (res) {
+          // 选择项目后
+          if (res.code === 0) {
+            me.projectId = res.data.board_id;
+            me.projectName = res.data.board_name;
+          } else {
+            // 未选择项目
+            me.projectId = "";
+            me.projectName = "";
+          }
+        }
+      })
+      .catch(e => {
+        // 未选择项目
+        me.projectId = "";
+        me.projectName = "";
+      });
     Event.Evt.firEvent("setAttribute", {
       saveCb: this.handleSaveClick.bind(this),
-      delCb: this.updatePlotList.bind(this),
+      delCb: this.updatePlotList.bind(this)
     });
-    if (
-      this.props.plotType === "freeLine" ||
-      this.props.plotType === "freePolygon"
-    ) {
+    if (this.plotType === "freeLine" || this.plotType === "freePolygon") {
       this.setActiveDragPan(false);
     }
-    this.operatorActive = function (e) {
+    this.operatorActive = function(e) {
       // 激活即修改状态
       parent.isModifyPlot = true;
       let operator = e.feature_operator;
+      me.plotType = operator.attrs.plotType;
+      parent.leftToolBarRef.updateSelectedPlotType(me.plotType);
       window.featureOperator = operator;
       if (!operator.isScouting) {
         Event.Evt.firEvent("setAttribute", {
           saveCb: me.handleSaveClick.bind(me),
-          delCb: me.updatePlotList.bind(me),
+          delCb: me.updatePlotList.bind(me)
         });
-        let tmp = parent.featureOperatorList.filter((tmpOperator) => {
+        let tmp = parent.featureOperatorList.filter(tmpOperator => {
           return tmpOperator.guid === operator.guid;
         })[0];
         if (!tmp) {
@@ -290,7 +310,7 @@ export default class Plot extends PureComponent {
         me.plotName = window.featureOperator.getName();
         me.plotLayer.setToTop(window.featureOperator);
         ListAction.checkItem()
-          .then((res) => {
+          .then(res => {
             if (res) {
               // 选择项目后
               if (res.code === 0) {
@@ -304,12 +324,31 @@ export default class Plot extends PureComponent {
               }
             }
           })
-          .catch((e) => {
+          .catch(e => {
             // 未选择项目
             me.projectId = "";
             me.projectName = "";
             me.savePlot2TempPlot(operator);
           });
+        let customStrokeSelectedColor = "",
+          customFillSelectedColor = "";
+        if (me.dic[operator.attrs.plotType] === "LineString") {
+          customStrokeSelectedColor = operator.attrs.featureType;
+        }
+        if (me.dic[operator.attrs.plotType] === "Polygon") {
+          customStrokeSelectedColor = operator.attrs.strokeColor;
+          customFillSelectedColor = operator.attrs.featureType;
+        }
+        me.setState({
+          name: operator.getName(),
+          customStrokeSelectedColor: customStrokeSelectedColor
+            ? customStrokeSelectedColor
+            : me.state.customStrokeSelectedColor,
+          customFillSelectedColor: customFillSelectedColor
+            ? customFillSelectedColor
+            : me.state.customFillSelectedColor
+        });
+
         switch (me.props.plotType) {
           case "freePolygon":
           case "polygon":
@@ -320,7 +359,7 @@ export default class Plot extends PureComponent {
               let iconUrl = me.getCurrentIcon(me.symbol, {
                 fontSize: 38,
                 fillColor: "rgba(80, 130, 255, 1)",
-                strokeColor: "rgba(80, 130, 255, 1)",
+                strokeColor: "rgba(80, 130, 255, 1)"
               });
               plotEdit.plottingLayer.plotEdit.createPlotOverlay(
                 iconUrl,
@@ -334,8 +373,9 @@ export default class Plot extends PureComponent {
       } else {
       }
     };
-    this.operatorDeactive = function (e) {
+    this.operatorDeactive = function(e) {
       // if (!e.feature_operator.isScouting) {
+      // me.plotType = "";
       parent.isModifyPlot = false;
       me.symbol = null;
       me.sigleImage = null;
@@ -348,7 +388,7 @@ export default class Plot extends PureComponent {
     this.plotLayer.on(FeatureOperatorEvent.ACTIVATE, this.operatorActive);
     this.plotLayer.on(FeatureOperatorEvent.DEACTIVATE, this.operatorDeactive);
     if (!parent.isModifyPlot) {
-      if (this.props.plotType === "point") {
+      if (this.plotType === "point") {
         this.symbol = this.refs.defaultSymbol.innerText;
         this.getPointDefaultSymbol();
       } else {
@@ -365,19 +405,37 @@ export default class Plot extends PureComponent {
       this.plotRemark = parent.oldRemark;
       this.setState({
         name: parent.oldPlotName,
-        remark: parent.oldRemark,
+        remark: parent.oldRemark
       });
     }
     if (parent.customSymbols) {
       const mySymbols = symbols;
       this.setState({
-        symbols: [parent.customSymbols, ...mySymbols],
+        symbols: [parent.customSymbols, ...mySymbols]
       });
     } else {
       this.getCustomSymbol();
     }
-    Event.Evt.on("resolveGeojson", (name) => {
-      loadGeoJson(this, name);
+    Event.Evt.on("resolveExcel", obj => {
+      // loadGeoJson(this, name);
+      obj.fileName = window.ProjectGroupName;
+      loadExcel(this, obj).then(res => {
+        let promise = res.map(item => {
+          let newItem = {
+            collect_type: item.collect_type,
+            title: item.title,
+            target: item.target,
+            area_type_id:
+              window.ProjectGroupId === "other" ? "" : window.ProjectGroupId,
+            board_id: this.projectId,
+            districtcode: item.districtcode,
+            content: item.content
+          };
+          return DetailAction.addCollection(newItem);
+        });
+        Promise.all(promise).then(resp => {});
+        Event.Evt.firEvent("updateProjectCollection", res);
+      });
     });
   }
   componentWillUnmount() {
@@ -394,6 +452,7 @@ export default class Plot extends PureComponent {
 
   componentWillReceiveProps(nextProps) {
     this.handleResetClick();
+    this.plotType = nextProps.plotType;
     if (nextProps.hidden === false) {
       const { parent } = this.props;
       if (parent.isModifyPlot === true) {
@@ -402,7 +461,7 @@ export default class Plot extends PureComponent {
 
         this.setState({
           name: parent.oldPlotName,
-          remark: parent.oldRemark,
+          remark: parent.oldRemark
         });
         if (parent.activeFeatureOperator) {
           window.featureOperator = parent.activeFeatureOperator;
@@ -433,7 +492,7 @@ export default class Plot extends PureComponent {
 
   setActiveDragPan = (active = true) => {
     let interactions = mapApp.map.getInteractions().getArray();
-    interactions.forEach((item) => {
+    interactions.forEach(item => {
       if (item instanceof DragPan) {
         item.setActive(active);
       }
@@ -451,6 +510,19 @@ export default class Plot extends PureComponent {
     }
   };
 
+  // 更细页面样式
+  updateSymbol = () => {
+    const { parent } = this.props;
+    if (parent.customSymbols) {
+      const mySymbols = symbols;
+      this.setState({
+        symbols: [parent.customSymbols, ...mySymbols]
+      });
+    } else {
+      this.getCustomSymbol();
+    }
+  };
+
   // 获取自定义图标符号
   getCustomSymbol = () => {
     this.isLoaded = false;
@@ -458,22 +530,22 @@ export default class Plot extends PureComponent {
     const mySymbols = symbols;
     if (parent.customSymbols) {
       this.setState({
-        symbols: [parent.customSymbols, ...mySymbols],
+        symbols: [parent.customSymbols, ...mySymbols]
       });
     } else {
       this.customSymbols = {
         typeName: "自定义图标",
         type: "point|polygon|freePolygon|rect|circle|arrow",
-        content: [],
+        content: []
       };
       symbolStoreServices
         .GET_ICON()
-        .then((res) => {
+        .then(res => {
           this.isLoaded = true;
           if (res.code === "0") {
             const data = res.data;
             if (Array.isArray(data)) {
-              data.forEach((item) => {
+              data.forEach(item => {
                 const temp = { name: item.icon_name, imageUrl: item.icon_url };
                 this.customSymbols.content.push(temp);
               });
@@ -482,22 +554,22 @@ export default class Plot extends PureComponent {
             }
           }
         })
-        .catch((err) => {
+        .catch(err => {
           this.isLoaded = true;
           const mySymbols = symbols;
           this.setState({
-            symbols: mySymbols,
+            symbols: mySymbols
           });
           console.log(err);
         });
     }
   };
 
-  savePlot2TempPlot = (operator) => {
+  savePlot2TempPlot = operator => {
     this.props.updateFeatureOperatorList(operator);
   };
 
-  updatePlotList = (list) => {
+  updatePlotList = list => {
     const { parent } = this.props;
     parent.updateFeatureOperatorList2(list);
     if (parent.returnPanel) {
@@ -506,7 +578,7 @@ export default class Plot extends PureComponent {
   };
 
   // 从数组中找到operator
-  findOperatorFromList = (id) => {
+  findOperatorFromList = id => {
     const { parent } = this.props;
     let index = -1;
     for (let i = 0; i < parent.featureOperatorList.length; i++) {
@@ -521,12 +593,12 @@ export default class Plot extends PureComponent {
   // 创建标绘名称
   createPlotName = () => {
     const { parent } = this.props;
-    let count = parent.featureOperatorList.filter((operator) => {
+    let count = parent.featureOperatorList.filter(operator => {
       return operator.attrs.selectName?.indexOf(this.selectName) > -1;
     }).length;
     this.plotName = this.selectName + "#" + (count + 1);
     this.setState({
-      name: this.plotName,
+      name: this.plotName
     });
   };
 
@@ -534,14 +606,14 @@ export default class Plot extends PureComponent {
     return require("../../../utils/INITMAP").default;
   };
   // 保存标绘到分组
-  save2Group = (operator) => {
+  save2Group = operator => {
     return new Promise((resolve, reject) => {
       const { feature } = operator;
 
       let param = {
         coordinates: feature.getGeometry().getCoordinates(),
         geoType: feature.getGeometry().getType(),
-        ...operator.attrs,
+        ...operator.attrs
       };
       let obj = {
         collect_type: 4,
@@ -550,7 +622,7 @@ export default class Plot extends PureComponent {
         area_type_id:
           window.ProjectGroupId === "other" ? "" : window.ProjectGroupId,
         board_id: this.projectId,
-        content: JSON.stringify(param),
+        content: JSON.stringify(param)
       };
       let xy = [];
       if (param.geoType === "Point") {
@@ -559,22 +631,22 @@ export default class Plot extends PureComponent {
         const extent = operator.feature.getGeometry().getExtent();
         let centerPoi = [
           (extent[0] + extent[2]) / 2,
-          (extent[1] + extent[3]) / 2,
+          (extent[1] + extent[3]) / 2
         ];
         xy = TransformCoordinate(centerPoi, "EPSG:3857", "EPSG:4326");
       }
       window
         .CallWebMapFunction("getCityByLonLat", {
           lon: xy[0],
-          lat: xy[1],
+          lat: xy[1]
         })
-        .then((res) => {
+        .then(res => {
           obj.districtcode = res.addressComponent?.adcode;
           // console.log(board);
           DetailAction.addCollection(obj)
-            .then((res) => {
+            .then(res => {
               let obj = DetailAction.CollectionGroup.find(
-                (item) => item.id === window.ProjectGroupId
+                item => item.id === window.ProjectGroupId
               );
               message.success(
                 `标绘已成功保存到${this.projectName}的${
@@ -584,7 +656,7 @@ export default class Plot extends PureComponent {
               this.plotLayer.removeFeature(operator);
               resolve(res);
             })
-            .catch((err) => {
+            .catch(err => {
               reject(err);
               console.log(err);
               message.info(err.message);
@@ -592,7 +664,7 @@ export default class Plot extends PureComponent {
         });
     });
   };
-  handleInputChange = (val) => {
+  handleInputChange = val => {
     let newVal = val.replace(/\s+/g, "");
     // if (!newVal) {
     //   message.info("标绘名称不能空白！");
@@ -600,12 +672,12 @@ export default class Plot extends PureComponent {
     // }
     this.plotName = newVal;
     this.setState({
-      name: newVal,
+      name: newVal
     });
     if (window.featureOperator) {
       if (!this.plotName) {
         const { parent } = this.props;
-        let count = parent.featureOperatorList.filter((operator) => {
+        let count = parent.featureOperatorList.filter(operator => {
           return operator.attrs.selectName?.indexOf(this.selectName) > -1;
         }).length;
         this.plotName = this.selectName + "#" + (count + 1);
@@ -619,10 +691,10 @@ export default class Plot extends PureComponent {
       window.featureOperator.setName(this.plotName);
     }
   };
-  onTextAreaChange = (val) => {
+  onTextAreaChange = val => {
     this.plotRemark = val;
     this.setState({
-      remark: val,
+      remark: val
     });
     if (window.featureOperator) {
       window.featureOperator.attrs.remark = this.plotRemark;
@@ -634,68 +706,58 @@ export default class Plot extends PureComponent {
     if (!parent.isModifyPlot) {
       this.createPlotName();
     }
-    if (
-      this.props.plotType === "freeLine" ||
-      this.props.plotType === "freePolygon"
-    )
+    if (this.plotType === "freeLine" || this.plotType === "freePolygon")
       this.setActiveDragPan(false);
     let options = {
       ...this.commonStyleOptions,
       strokeColor: this.strokeColor,
       text: this.plotName,
-      showName: true,
+      showName: true
     };
     let attrs = {
       name: this.plotName,
       featureType:
-        this.dic[this.nextProps?.plotType || this.props.plotType] === "Polygon"
+        this.dic[this.plotType] === "Polygon"
           ? this.fillColor
           : this.strokeColor,
       remark: this.state.remark,
       selectName: "自定义类型",
-      plotType: this.props.plotType,
-      geometryType: this.dic[this.props.plotType],
-      coordSysType: 0,
+      plotType: this.plotType,
+      geometryType: this.dic[this.plotType],
+      coordSysType: 0
     };
     if (this.baseMapKeys[0].indexOf(mapApp.baseMapKey) === -1) {
       attrs.coordSysType = 1;
     }
-    const plotType = this.nextProps?.plotType || this.props.plotType;
-    if (this.dic[plotType] === "Polygon") {
+    if (this.dic[this.plotType] === "Polygon") {
       options = { ...options, fillColor: this.fillColor };
       attrs = { ...attrs, strokeColor: this.strokeColor };
-    } else if (this.dic[plotType] === "Point") {
+    } else if (this.dic[this.plotType] === "Point") {
       const iconUrl = this.getCurrentIcon(this.symbol, {
         fontSize: 38,
         fillColor: this.fillColor,
-        strokeColor: this.strokeColor,
+        strokeColor: this.strokeColor
       });
       options = {
         ...options,
-        iconUrl: iconUrl,
+        iconUrl: iconUrl
       };
       attrs.featureType = iconUrl;
     }
-    const style = createStyle(
-      this.dic[this.nextProps?.plotType || this.props.plotType],
-      options
-    );
+    const style = createStyle(this.dic[this.plotType], options);
     if (parent.isModifyPlot === false) {
       const { parent } = this.props;
       if (parent.isGeojsonMifyIcon) {
-
       } else {
-        let drawing = plotEdit.create(
-          this.plotDic[this.nextProps?.plotType || this.props.plotType]
-        );
+        let drawing = plotEdit.create(this.plotDic[this.plotType]);
         Event.Evt.firEvent("setPlotDrawStyle", style);
         Event.Evt.firEvent("setAttribute", {
           style: style,
-          attrs: attrs,
+          attrs: attrs
           // saveCb: this.handleSaveClick.bind(this),
           // delCb: this.updatePlotList.bind(this),
         });
-        drawing.plotDraw.on("draw_end", (e) => {
+        drawing.plotDraw.on("draw_end", e => {
           // console.log(e,'333333333333333')
           this.setActiveDragPan(true);
         });
@@ -704,7 +766,7 @@ export default class Plot extends PureComponent {
       if (window.featureOperator.feature) {
         this.setActiveDragPan(true);
         const geoType = window.featureOperator.feature.getGeometry().getType();
-        if (geoType === this.dic[this.props.plotType]) {
+        if (geoType === this.dic[this.plotType]) {
           window.featureOperator.feature.setStyle(style);
           window.featureOperator.attrs = attrs;
         } else {
@@ -764,16 +826,16 @@ export default class Plot extends PureComponent {
     let iconUrl = this.getCurrentIcon(this.symbol, {
       fontSize: 38,
       fillColor: this.fillColor,
-      strokeColor: this.strokeColor,
+      strokeColor: this.strokeColor
     });
     let options = {
       ...this.commonStyleOptions,
       text: this.plotName,
-      showName: true,
+      showName: true
     };
     options = {
       ...options,
-      iconUrl: iconUrl,
+      iconUrl: iconUrl
     };
     this.featureType = iconUrl;
     this.selectName = "自定义类型";
@@ -785,32 +847,32 @@ export default class Plot extends PureComponent {
     this.isSymbolClicked = true;
     if (index !== undefined && index2 !== undefined) {
       if (
-        this.dic[this.props.plotType] === "Polygon" ||
-        this.dic[this.props.plotType] === "LineString"
+        this.dic[this.plotType] === "Polygon" ||
+        this.dic[this.plotType] === "LineString"
       ) {
         if (index !== 0) {
           this.setState({
             symbolSelectedIndex: `${index}|${index2}`,
             fillSelectedIndex: -1,
-            strokeSelectedIndex: -1,
+            strokeSelectedIndex: -1
           });
         } else {
           this.setState({
-            symbolSelectedIndex: `${index}|${index2}`,
+            symbolSelectedIndex: `${index}|${index2}`
           });
         }
-      } else if (this.dic[this.props.plotType] === "Point") {
+      } else if (this.dic[this.plotType] === "Point") {
         if (index === 0) {
           this.fillColor = "rgba(106, 154, 255, 1)";
           this.setState({
             symbolSelectedIndex: `${index}|${index2}`,
             fillSelectedIndex: -1,
             strokeSelectedIndex: -1,
-            customFillSelectedColor: "rgba(106, 154, 255, 1)",
+            customFillSelectedColor: "rgba(106, 154, 255, 1)"
           });
         } else {
           this.setState({
-            symbolSelectedIndex: `${index}|${index2}`,
+            symbolSelectedIndex: `${index}|${index2}`
           });
         }
       }
@@ -846,44 +908,42 @@ export default class Plot extends PureComponent {
       iconUrl = this.getCurrentIcon(this.symbol, {
         fontSize: 38,
         fillColor:
-          this.props.plotType === "point"
-            ? this.fillColor
-            : "rgba(80, 130, 255, 1)",
+          this.plotType === "point" ? this.fillColor : "rgba(80, 130, 255, 1)"
         // strokeColor:
         //   this.props.plotType === "point"
         //     ? this.strokeColor
         //     : "rgba(80, 130, 255, 1)",
       });
     }
-    if (this.dic[this.props.plotType] === "Point") {
+    if (this.dic[this.plotType] === "Point") {
       this.featureType = iconUrl;
-    } else if (this.dic[this.props.plotType] === "LineString") {
+    } else if (this.dic[this.plotType] === "LineString") {
       this.featureType = this.strokeColor;
     }
     let options = {
       ...this.commonStyleOptions,
       text: this.plotName,
-      showName: true,
+      showName: true
     };
-    switch (this.dic[this.props.plotType]) {
+    switch (this.dic[this.plotType]) {
       case "Polygon":
       case "LineString":
         options = {
           ...options,
           strokeColor:
-            index === 0 && this.dic[this.props.plotType] === "Polygon"
+            index === 0 && this.dic[this.plotType] === "Polygon"
               ? this.state.customStrokeSelectedColor
               : this.strokeColor,
           fillColor:
-            index === 0 && this.dic[this.props.plotType] === "Polygon"
+            index === 0 && this.dic[this.plotType] === "Polygon"
               ? this.state.customFillSelectedColor
-              : this.fillColor,
+              : this.fillColor
         };
         break;
       default:
         options = {
           ...options,
-          iconUrl: iconUrl,
+          iconUrl: iconUrl
         };
         break;
     }
@@ -892,33 +952,29 @@ export default class Plot extends PureComponent {
 
   // 创建标绘入口
   createPlot = (options, iconUrl) => {
-    const plotType = this.nextProps?.plotType || this.props.plotType;
-    const style = createStyle(this.dic[plotType], options);
+    const style = createStyle(this.dic[this.plotType], options);
     let attrs = {
       name: this.plotName,
       strokeColor: this.strokeColor,
       remark: this.plotRemark,
       selectName: this.selectName,
-      plotType: this.props.plotType,
-      geometryType: this.dic[this.props.plotType],
-      coordSysType: 0, //坐标系类型，0代表gcj02，1代表wgs84
+      plotType: this.plotType,
+      geometryType: this.dic[this.plotType],
+      coordSysType: 0 //坐标系类型，0代表gcj02，1代表wgs84
     };
     if (this.baseMapKeys[0].indexOf(mapApp.baseMapKey) === -1) {
       attrs.coordSysType = 1;
     }
-    if (this.dic[this.props.plotType] === "Polygon") {
+    if (this.dic[this.plotType] === "Polygon") {
       attrs = {
         ...attrs,
         sigleImage: iconUrl,
-        featureType: this.fillColor,
+        featureType: this.fillColor
       };
     } else {
       attrs = { ...attrs, featureType: this.featureType };
     }
-    if (
-      this.props.plotType === "freeLine" ||
-      this.props.plotType === "freePolygon"
-    ) {
+    if (this.plotType === "freeLine" || this.plotType === "freePolygon") {
       this.setActiveDragPan(false);
     }
     if (!window.featureOperator) {
@@ -928,11 +984,11 @@ export default class Plot extends PureComponent {
           Event.Evt.firEvent("modifyGeojsonIcon", iconUrl);
         }
       } else {
-        let drawing = plotEdit.create(this.plotDic[plotType]);
+        let drawing = plotEdit.create(this.plotDic[this.plotType]);
         Event.Evt.firEvent("setPlotDrawStyle", style);
         Event.Evt.firEvent("setAttribute", {
           style: style,
-          attrs: attrs,
+          attrs: attrs
         });
         drawing.on("draw_end", () => {
           this.setActiveDragPan(true);
@@ -942,11 +998,13 @@ export default class Plot extends PureComponent {
       if (window.featureOperator.feature) {
         this.setActiveDragPan(true);
         const geoType = window.featureOperator.feature.getGeometry().getType();
-        if (geoType === this.dic[this.props.plotType]) {
+        const { parent } = this.props;
+        let plotType = parent.isModifyPlot ? this.plotType : this.plotType;
+        if (geoType === this.dic[plotType]) {
           window.featureOperator.feature.setStyle(style);
           window.featureOperator.setName(attrs.name);
           window.featureOperator.attrs = attrs;
-          if (this.dic[this.props.plotType] === "Polygon") {
+          if (this.dic[this.plotType] === "Polygon") {
             if (iconUrl) {
               plotEdit.plottingLayer.plotEdit.createPlotOverlay(
                 iconUrl,
@@ -971,13 +1029,13 @@ export default class Plot extends PureComponent {
     }
   };
 
-  handleCustomStrokeColorOkClick = (value) => {
+  handleCustomStrokeColorOkClick = value => {
     this.strokeColor = value;
     // this.fillColor = this.state.customFillSelectedColor;
     if (window.featureOperator) {
       plotEdit.plottingLayer.plotEdit.removePlotOverlay(window.featureOperator);
     }
-    if (this.dic[this.props.plotType] !== "Point") {
+    if (this.dic[this.plotType] !== "Point") {
       this.symbol = "";
       this.selectName = "自定义类型";
     } else {
@@ -991,7 +1049,7 @@ export default class Plot extends PureComponent {
         strokeSelectedIndex: -1,
         customStrokeSelectedColor: value,
         symbolSelectedIndex:
-          this.props.plotType === "point" ? this.state.symbolSelectedIndex : "",
+          this.plotType === "point" ? this.state.symbolSelectedIndex : ""
       },
       () => {
         this.updateStateCallbackFunc();
@@ -999,13 +1057,13 @@ export default class Plot extends PureComponent {
     );
   };
 
-  handleCustomFillColorOkClick = (value) => {
+  handleCustomFillColorOkClick = value => {
     this.fillColor = value;
     // this.strokeColor = this.state.customStrokeSelectedColor;
     if (window.featureOperator) {
       plotEdit.plottingLayer.plotEdit.removePlotOverlay(window.featureOperator);
     }
-    if (this.dic[this.props.plotType] !== "Point") {
+    if (this.dic[this.plotType] !== "Point") {
       this.symbol = "";
       this.selectName = "自定义类型";
     } else {
@@ -1019,7 +1077,7 @@ export default class Plot extends PureComponent {
         fillSelectedIndex: -1,
         customFillSelectedColor: value,
         symbolSelectedIndex:
-          this.props.plotType === "point" ? this.state.symbolSelectedIndex : "",
+          this.plotType === "point" ? this.state.symbolSelectedIndex : ""
       },
       () => {
         this.updateStateCallbackFunc();
@@ -1046,7 +1104,7 @@ export default class Plot extends PureComponent {
       customStrokeSelectedColor: "rgba(106, 154, 255, 1)",
       symbolSelectedIndex: "",
       strokePercent: "1",
-      fillPercent: "1",
+      fillPercent: "1"
     });
     plotEdit.deactivate();
   };
@@ -1063,7 +1121,7 @@ export default class Plot extends PureComponent {
         if (this.projectId) {
           let featureOperator = window.featureOperator;
           this.save2Group(featureOperator)
-            .then((resp) => {
+            .then(resp => {
               let data = resp.data;
               let coll = data && data[0];
               if (coll) {
@@ -1081,7 +1139,7 @@ export default class Plot extends PureComponent {
               Event.Evt.firEvent("updatePlotFeature");
               this.props.goBackProject();
             })
-            .catch((err) => {
+            .catch(err => {
               message.info("已保存到临时标绘。");
               plotEdit.deactivate();
             });
@@ -1099,13 +1157,13 @@ export default class Plot extends PureComponent {
         let newAttrs = {
           ...window.featureOperator.attrs,
           coordinates: feature.getGeometry().getCoordinates(),
-          geoType: feature.getGeometry().getType(),
+          geoType: feature.getGeometry().getType()
         };
         newAttrs.coordSysType =
           mapApp.baseMapKeys[0].indexOf(mapApp.baseMapKey) > -1 ? 0 : 1;
         const content = JSON.stringify(newAttrs);
         window.featureOperator.updateFeatueToDB &&
-          window.featureOperator.updateFeatueToDB(data, content).then((res) => {
+          window.featureOperator.updateFeatueToDB(data, content).then(res => {
             const { parent } = this.props;
             parent.activeFeatureOperator = null;
             plotEdit.deactivate();
@@ -1141,7 +1199,10 @@ export default class Plot extends PureComponent {
     const { TextArea } = Input;
     const disableStyle = { color: "rgba(0,0,0,0.2)" };
     const style = { marginTop: 18, marginRight: 10 };
-    const { plotType } = this.props;
+    let { plotType, parent } = this.props;
+    if (parent.isModifyPlot) {
+      plotType = this.plotType;
+    }
     return (
       <div
         style={{ width: "100%", height: "100%" }}
@@ -1169,7 +1230,7 @@ export default class Plot extends PureComponent {
         <div
           className={`${styles.body} ${globalStyle.autoScrollY}`}
           style={{
-            height: "calc(100% - 110px)",
+            height: "calc(100% - 110px)"
           }}
         >
           <div className={styles.content}>
@@ -1177,22 +1238,22 @@ export default class Plot extends PureComponent {
               style={{
                 width: "100%",
                 height: 40,
-                marginBottom: 20,
+                marginBottom: 20
               }}
               placeholder="输入名称"
               allowClear
               value={this.state.name}
-              onChange={(e) => this.handleInputChange(e.target.value)}
+              onChange={e => this.handleInputChange(e.target.value)}
             />
             <TextArea
               style={{
                 width: "100%",
-                height: 120,
+                height: 120
               }}
               placeholder="填写备注"
               allowClear
               value={this.state.remark}
-              onChange={(e) => this.onTextAreaChange(e.target.value)}
+              onChange={e => this.onTextAreaChange(e.target.value)}
             />
             <i
               className={globalStyle.global_icon}
@@ -1208,7 +1269,7 @@ export default class Plot extends PureComponent {
                   padding: "0 4px",
                   background: "#fff",
                   transform: "translate(10px, 10px)",
-                  fontSize: "12px",
+                  fontSize: "12px"
                 }}
               >
                 自定义颜色
@@ -1221,7 +1282,7 @@ export default class Plot extends PureComponent {
                   borderRadius: 8,
                   display: "flex",
                   flexDirection: "row",
-                  padding: "0 14px",
+                  padding: "0 14px"
                 }}
               >
                 <div className={styles.header} style={style}>
@@ -1230,7 +1291,7 @@ export default class Plot extends PureComponent {
                       this.dic[plotType] === "Point"
                         ? {
                             ...disableStyle,
-                            ...{ fontSize: "14px" },
+                            ...{ fontSize: "14px" }
                           }
                         : { fontSize: "14px" }
                     }
@@ -1245,7 +1306,7 @@ export default class Plot extends PureComponent {
                           ? "rgba(0,0,0,0.2)"
                           : this.state.customStrokeSelectedColor,
                       margin: 8,
-                      width: "calc(100% - 74px)",
+                      width: "calc(100% - 74px)"
                     }}
                   ></div>
                   <ColorPicker
@@ -1259,7 +1320,7 @@ export default class Plot extends PureComponent {
                       this.dic[plotType] === "LineString"
                         ? {
                             ...disableStyle,
-                            ...{ fontSize: "14px" },
+                            ...{ fontSize: "14px" }
                           }
                         : { fontSize: "14px" }
                     }
@@ -1274,7 +1335,7 @@ export default class Plot extends PureComponent {
                           ? "rgba(0,0,0,0.2)"
                           : this.state.customFillSelectedColor,
                       margin: 8,
-                      width: "calc(100% - 74px)",
+                      width: "calc(100% - 74px)"
                     }}
                   ></div>
                   <ColorPicker
@@ -1335,7 +1396,7 @@ export default class Plot extends PureComponent {
               background: "rgba(163,205,255,0.2)",
               borderRadius: 4,
               border: "2px solid rgba(127,167,255,1)",
-              color: "rgba(102, 144, 255, 1)",
+              color: "rgba(102, 144, 255, 1)"
             }}
             onClick={this.handleSaveClick}
           >

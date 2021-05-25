@@ -218,27 +218,29 @@ export default class PublicData extends React.Component {
       )[0];
       if (currentNode) {
         if (this.lastSingle) {
+          this.removeLastFeature();
           const index = newCheckedKeys.findIndex(
             (key) => key === this.lastSingle.id
           );
           if (index > -1) {
             newCheckedKeys.splice(index, 1);
             const index2 = checkedNodes.findIndex(
-              (item) => item.id === this.lastSingle.id
+              (item) => item.key === this.lastSingle.id
             );
             if (index2 > -1) {
               checkedNodes.splice(index2, 1);
+
             }
-            this.removeLastFeature();
+            // this.removeLastFeature();
           } else {
             if (this.lastSingle.id === currentNode.id) {
               const index2 = checkedNodes.findIndex(
-                (item) => item.id === this.lastSingle.id
+                (item) => item.key === this.lastSingle.id
               );
               if (index2 > -1) {
                 checkedNodes.splice(index2, 1);
               }
-              this.removeLastFeature();
+              // this.removeLastFeature();
               currentNode = null;
             }
           }
@@ -265,11 +267,11 @@ export default class PublicData extends React.Component {
         let keywords = [];
         let keywords2 = [];
         for (let i = 0; i < checkedNodes.length; i++) {
-          if (checkedNodes[i].children.length === 0) {
-            if (checkedNodes[i].is_poi === "1") {
-              keywords.push(checkedNodes[i].title);
+          if (checkedNodes[i].props.children.length === 0) {
+            if (checkedNodes[i].props.is_poi === "1") {
+              keywords.push(checkedNodes[i].props.title);
             } else {
-              keywords2.push(checkedNodes[i].title);
+              keywords2.push(checkedNodes[i].props.title);
             }
           }
         }
@@ -487,10 +489,9 @@ export default class PublicData extends React.Component {
     return (
       <div
         className={styles.wrapper}
-        // style={{
-        //   height: "99%",
-        //   position: "absolute",
-        // }}
+        style={{
+          height: "calc(100vh - 150px)",
+        }}
       >
         <div
           className={globalStyle.autoScrollY}

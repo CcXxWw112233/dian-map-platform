@@ -7,12 +7,14 @@ import {
   Modify,
   Select,
 } from "ol/interaction";
+import DEvent, {INITMAPEND} from '../lib/utils/event'
 
 import TileLayer from "ol/layer/Tile";
 import XYZ from "ol/source/XYZ";
 
 import { baseMaps, baseMapDictionary } from "utils/mapSource";
 import { gcj02_to_wgs84, wgs84_to_gcj02 } from "utils/transCoordinateSystem";
+import { MAPCONFIG } from "../globalSet/constans";
 
 const initMap = function () {
   return {
@@ -75,15 +77,17 @@ const initMap = function () {
         };
         // 回调
         resolve({ map: this.map, view: this.view });
+        /** 构建成功触发 */
+        DEvent.Evt.firEvent(INITMAPEND, this.map)
       });
     },
     initView: function (center = [12682417.401133642, 2573911.8265894186]) {
       this.view = new View({
         center: center,
         projection: "EPSG:3857",
-        minZoom: 5,
-        zoom: 10,
-        maxZoom: 18,
+        minZoom: MAPCONFIG.minZoom,
+        zoom: MAPCONFIG.zoom,
+        maxZoom: MAPCONFIG.maxZoom,
         enableRotation: false,
       });
       return this.view;

@@ -1,5 +1,6 @@
 import React from "react";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
+import { Icon } from 'antd'
 
 import styles from "../LeftToolBar.less";
 import BasemapGallery from "../../BasemapGallery/BasemapGallery";
@@ -54,9 +55,9 @@ export default class Panel extends React.Component {
           }}
         >
           {openPanel ? (
-            <LeftOutlined style={directionStyle} />
-          ) : (
-            <RightOutlined style={directionStyle} />
+            <Icon type="left" style={directionStyle} />
+            ) : (
+            <Icon type="right" style={directionStyle} />
           )}
         </div>
         {/* <a className={styles.changePackage} onClick={this.toOld} target="_self">

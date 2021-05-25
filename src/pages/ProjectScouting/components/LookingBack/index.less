@@ -5,6 +5,36 @@
   flex-direction: column;
   overflow: hidden;
   background-color: #fff;
+  .backGroupList{
+    .global_icon;
+    cursor: pointer;
+  }
+  .grouplist{
+    height: 100%;
+    overflow-y: auto;
+    .autoScrollY;
+    .group_item{
+      cursor: pointer;
+      &:hover{
+        background-color: #eef8ff;
+      }
+      text-align: left;
+      padding: 8px 15px;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+      color: #555;
+    }
+    .detail_icon{
+      float: right;
+      .global_icon;
+    }
+    .group_name{
+      display: inline-block;
+      width: 80%;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+  }
   .lookGroupTitle {
     flex: none;
     text-align: left;
@@ -16,6 +46,7 @@
       .tofull {
         font-size: 1.3em;
         float: right;
+        cursor: pointer;
       }
     }
     .remarks {

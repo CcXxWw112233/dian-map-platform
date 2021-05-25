@@ -3,6 +3,7 @@ import { Input, Dropdown, Button } from "antd";
 import throttle from "lodash/throttle";
 
 import { DownOutlined } from "@ant-design/icons";
+import { Icon } from 'antd'
 import commonSearchAction from "@/lib/components/Search/CommonSeach";
 import globalStyle from "@/globalSet/styles/globalStyles.less";
 import styles from "./Search.less";
@@ -13,7 +14,8 @@ import { BASIC } from "../../services/config";
 import { setSession, getSession } from "utils/sessionManage";
 import Event from "../../lib/utils/event";
 import areaSearchAction from "@/lib/components/Search/AreaSearch";
-import NewAreaPanel from "./NewAreaPanel";
+import NewAreaPanel from "./NewAreaPanel"
+import Cookies from 'js-cookie'
 
 import { connect } from "dva";
 
@@ -42,7 +44,7 @@ export default class Search extends React.Component {
     this.placeholder = "搜索地址或项目";
     this.props.onRef(this);
     this.handleSearch = throttle(this.handleSearch, 1000);
-    this.tempProjectId = ["1340591617840648192"];
+    this.tempProjectId = ["1340591617840648192","1348802078218260480"];
     // Event.Evt.on("changeAreaInSearch", (data) => {
     //   if (!data) return;
     //   let promise0 = areaSearchAction.getCity(data.provincecode);
@@ -150,7 +152,7 @@ export default class Search extends React.Component {
     );
   };
   handleSearchInputChange = (e) => {
-    const token = BASIC.getUrlParam.token;
+    const token = Cookies.get('Authorization');
     if (token) {
       const address = e.target.value;
       this.setState({
@@ -321,7 +323,7 @@ export default class Search extends React.Component {
         >
           <Button style={{ borderRadius: 0 }}>
             {this.props.locationName}
-            <DownOutlined />
+            <Icon type="down" />
           </Button>
         </Dropdown>
         {/* <NewAreaPanel></NewAreaPanel> */}

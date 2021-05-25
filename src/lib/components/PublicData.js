@@ -26,6 +26,7 @@ import publicDataServices from "../../services/publicData";
 import { message } from "antd";
 import { baseConfig } from "../../globalSet/config";
 import { getSession } from "utils/sessionManage";
+import { fill } from "lodash";
 
 const { getFeature, GET_GEO_DATA } = publicDataUrl;
 
@@ -415,8 +416,8 @@ const publicData = {
       }
       code = tmpArr[1];
     }
-    this.activeTypeName = name + "_" + code;
-    // this.activeTypeName = name;
+    // this.activeTypeName = name + "_" + code;
+    this.activeTypeName = name;
     if (!this.features[this.activeTypeName]) {
       this.features[this.activeTypeName] = [];
       let res = await publicDataServices.getPopulationDatas(code, type);
@@ -536,6 +537,12 @@ const publicData = {
           styleOpt.text = text;
           styleOpt.showName = true;
           styleOpt.fillColor = fillColor;
+          // console.log(this.popupKeyVals[name])
+            // 删除所有的
+          // let arr = (fillColor || []).map(item => {
+          //   delete item.property;
+          //   return {...item}
+          // })
           const style = createStyle("MultiPolygon", styleOpt, item, fillColor);
           const newFeature = loadFeatureJSON(newData);
           newFeature.setStyle(style);

@@ -5,8 +5,9 @@ import globalStyle from "../../globalSet/styles/globalStyles.less";
 import { connect } from "dva";
 import Action from "../../lib/components/ProjectScouting/ScoutingList";
 import ScoutingItem from "./components/ScoutingItem";
+import { message } from "antd";
+import Empty from "../../components/Empty";
 import PermissionModal from "./components/permissionModal";
-import { message, Empty } from "antd";
 import Bitmap from "../../assets/Bitmap.png";
 import Event from "../../lib/utils/event";
 import { feature } from "@turf/turf";
@@ -22,7 +23,7 @@ const ScoutingAddBtn = ({ cb }) => {
     </div>
   );
 };
-@connect(({ controller: { mainVisible } }) => ({ mainVisible }))
+@connect(({ controller: { mainVisible }, user: { currentOrganizeId } }) => ({ mainVisible, currentOrganizeId }))
 export default class ScoutingList extends PureComponent {
   constructor(props) {
     super(props);
@@ -32,6 +33,13 @@ export default class ScoutingList extends PureComponent {
       selectedProject: null,
     };
     this.projectDatas = [];
+  }
+
+  componentWillReceiveProps(nextProps) {
+    //切换组织重新获取数据
+    if (nextProps.currentOrganizeId !== this.props.currentOrganizeId) {
+      this.renderBoardList()
+    }
   }
 
   componentDidMount() {
@@ -214,7 +222,7 @@ export default class ScoutingList extends PureComponent {
       radius: val.radius,
     })
       .then((res) => {
-        let { data } = res;
+        let { data } = res || {};
         // 添加数据
         this.setState(
           {

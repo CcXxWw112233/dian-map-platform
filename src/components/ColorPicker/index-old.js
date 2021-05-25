@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import { Dropdown, Button } from "antd";
-import { UpOutlined, DownOutlined } from "@ant-design/icons";
+// import { UpOutlined, DownOutlined } from "@ant-design/icons";
 import { SketchPicker } from "react-color";
+import { Icon } from 'antd'
 
 import btnStyles from "./btn.less";
 import panelStyles from "./panel.less";
@@ -127,7 +128,7 @@ export default class ColorPicker extends Component {
           onClick={this.handleColorPickerBtnClick}
         >
           <div style={{ backgroundColor: backgroundColor }}>
-            {this.state.visible ? <UpOutlined /> : <DownOutlined />}
+            {this.state.visible ? <Icon type="up" /> :  <Icon type="down" />}
           </div>
         </div>
       </Dropdown>

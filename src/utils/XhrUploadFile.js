@@ -1,7 +1,8 @@
 import axios from 'axios';
-import { BASIC } from '../services/config';
+import { BASIC, MAP_REQUEST_URL } from '../services/config';
 import checkResponse from '../services/checkResponse';
 import NProgress from 'nprogress';
+import Cookies from 'js-cookie'
 
 export const DefaultUpload = (file, data)=>{
   return new Promise((resolve,reject) => {
@@ -11,9 +12,9 @@ export const DefaultUpload = (file, data)=>{
     for(let key in data){
       param.append(key,data[key])
     }
-    axios.post('/api/map/file/upload', param , {
+    axios.post(`${MAP_REQUEST_URL}/map/file/upload`, param , {
       headers:{
-        Authorization:BASIC.getUrlParam.token
+        Authorization:Cookies.get('Authorization')
       }
     }).then(resp => {
       if(checkResponse(resp.data)){

@@ -4,17 +4,19 @@ import { BASIC } from "./config";
 import { message } from "antd";
 import NProgress from "nprogress";
 import "nprogress/nprogress.css";
+import Cookies from "js-cookie";
+import { ENTRANCE_MODE_IFRAME } from "../globalSet/config";
 
 const instance = axios.create({
   method: "GET",
-  baseURL: BASIC.API_URL,
+  baseURL: BASIC.API_URL
 });
 NProgress.inc(0.3);
 NProgress.configure({ easing: "ease", speed: 500, showSpinner: false });
 let requestTimer = null,
   responseTimer = null;
-instance.interceptors.request.use((config) => {
-  let token = BASIC.getUrlParam.token;
+instance.interceptors.request.use(config => {
+  let token = Cookies.get("Authorization");
   if (token) {
     config.headers["Authorization"] = token;
     NProgress.start();
@@ -22,7 +24,10 @@ instance.interceptors.request.use((config) => {
     clearTimeout(requestTimer);
     if (BASIC.getUrlParam.isMobile === "1") return {};
     requestTimer = setTimeout(() => {
-      message.error("缺少权限，无法试用地图");
+      // message.error("缺少权限，无法试用地图");
+      if (!ENTRANCE_MODE_IFRAME) {
+        redirectToLogin();
+      }
     }, 1000);
     return {};
   }
@@ -30,7 +35,7 @@ instance.interceptors.request.use((config) => {
 });
 
 instance.interceptors.response.use(
-  (config) => {
+  config => {
     let { data } = config;
     NProgress.done();
     if (data.code === BASIC.TOKEN_AUTH_ERROR) {
@@ -50,7 +55,7 @@ instance.interceptors.response.use(
       return config;
     } else return config;
   },
-  (err) => {
+  err => {
     NProgress.done();
     if (err && err.response) {
       if (err.response.status === BASIC.SERVER_ERROR) {
@@ -67,25 +72,30 @@ instance.interceptors.response.use(
         if (BASIC.getUrlParam.isMobile === "1") return {};
         responseTimer = setTimeout(() => {
           message.error("权限不足，请重新登录");
-          let url = "";
-          try {
-            url = window.top.document.referrer;
-          } catch (M) {
-            if (window.parent) {
-              try {
-                url = window.parent.document.referrer;
-              } catch (L) {
-                url = "";
+          if (!ENTRANCE_MODE_IFRAME) {
+            //如果是独立应用入口
+            redirectToLogin();
+          } else {
+            let url = "";
+            try {
+              url = window.top.document.referrer;
+            } catch (M) {
+              if (window.parent) {
+                try {
+                  url = window.parent.document.referrer;
+                } catch (L) {
+                  url = "";
+                }
               }
             }
+            if (url === "") {
+              url = document.referrer;
+            }
+            window.parent.location.href =
+              url ||
+              "https://lingxi.di-an.com/" +
+                "#/login?redirect=/technological/simplemode/home";
           }
-          if (url === "") {
-            url = document.referrer;
-          }
-          window.parent.location.href =
-            url ||
-            "https://lingxi.di-an.com/" +
-              "#/login?redirect=/technological/simplemode/home";
         }, 1000);
       }
 
@@ -94,6 +104,12 @@ instance.interceptors.response.use(
     return err && err.response;
   }
 );
+//重定向路由
+export function redirectToLogin() {
+  const { origin, hash } = window.location;
+  const hashname = !!hash ? hash.replace("#", "") : hash;
+  window.location.href = `${origin}/#/login?redirect=${hashname}`;
+}
 
 // 公用的ajax请求方法。
 let request = (method, url, data, header) => {
@@ -104,12 +120,12 @@ let request = (method, url, data, header) => {
     url,
     ...obj,
     headers: {
-      ...header,
-    },
+      ...header
+    }
   });
 };
 
-const strParam = (data) => {
+const strParam = data => {
   let url = "";
   for (var k in data) {
     let value = data[k] !== undefined ? data[k] : "";
@@ -125,7 +141,7 @@ const getFeature = (url, options) => {
     version: "1.0.0",
     request: "GetFeature",
     outputFormat: "text/javascript",
-    format_options: "callback:cb",
+    format_options: "callback:cb"
   };
   const myUrl =
     url +
@@ -133,7 +149,7 @@ const getFeature = (url, options) => {
     strParam({ ...myOptions, ...options });
   const opts = {
     param: "callback",
-    name: "cb",
+    name: "cb"
   };
   return new Promise((resolve, reject) => {
     originJsonp(myUrl, opts, (err, data) => {

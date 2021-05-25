@@ -5,7 +5,7 @@ import {
   Popconfirm,
   Input,
   Button,
-  Space,
+  // Space,
   Upload,
   message,
 } from "antd";
@@ -13,6 +13,7 @@ import {
   SettingOutlined,
   // CheckCircleOutlined ,CloseCircleOutlined
 } from "@ant-design/icons";
+import Space from "../../../components/Space";
 import styles from "../ScoutingList.less";
 import animateCss from "../../../assets/css/animate.min.css";
 import globalStyle from "../../../globalSet/styles/globalStyles.less";
@@ -353,7 +354,7 @@ export default class ScoutingItem extends React.PureComponent {
                   }}
                 >
                   <Space size="middle">
-                    <Button size="small" onClick={this.EditEnd} ghost>
+                    <Button size="small" onClick={this.EditEnd} ghost style={{ marginRight: 8 }}>
                       取消
                     </Button>
                     <Button

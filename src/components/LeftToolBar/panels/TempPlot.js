@@ -141,7 +141,9 @@ export default class TempPlot extends React.Component {
   };
 
   handleDelClick = (e, featureOperator) => {
-    e.stopPropagation();
+    if(e)
+      e.stopPropagation();
+
     if (featureOperator && featureOperator.guid) {
       let newList = [...this.state.featureOperatorList];
       const index = newList.findIndex((item) => {
@@ -230,7 +232,7 @@ export default class TempPlot extends React.Component {
     if (arr.length > 0) {
       let arr = this.getSelectedData();
       arr.forEach((operator) => {
-        this.handleDelClick(operator);
+        this.handleDelClick(null, operator);
       });
     } else {
       message.info("请先选择需要删除的标绘。");

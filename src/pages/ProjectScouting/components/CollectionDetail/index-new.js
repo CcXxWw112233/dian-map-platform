@@ -21,6 +21,7 @@ import Event from "../../../../lib/utils/event";
 import { compress } from "../../../../utils/pictureCompress";
 import { getSession } from "utils/sessionManage";
 import { connect } from "dva";
+import Cookies from 'js-cookie'
 
 @connect(
   ({
@@ -458,7 +459,7 @@ export default class NewCollectionDetail extends React.Component {
                       action={(file) => this.uploadFileAction(file)}
                       accept=".jpg, .jpeg, .png, .bmp"
                       beforeUpload={this.checkFileSize}
-                      headers={{ Authorization: BASIC.getUrlParam.token }}
+                      headers={{ Authorization: Cookies.get('Authorization') }}
                       onChange={this.onUpload}
                       fileList={this.fileList}
                     >

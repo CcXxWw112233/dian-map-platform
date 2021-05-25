@@ -13,16 +13,18 @@ import {
   Button,
   message,
   Upload,
-  Space,
+  // Space,
   Dropdown,
   Menu,
   Popconfirm,
   Popover,
   Col,
   Checkbox,
-  Empty,
-  Switch,
+  Switch
+  // Empty,
 } from "antd";
+import Empty from "../../../components/Empty";
+
 import {
   CheckCircleOutlined,
   CloseCircleOutlined,
@@ -31,7 +33,9 @@ import {
   CloseOutlined,
   CheckOutlined,
 } from "@ant-design/icons";
-import { BASIC } from "../../../services/config";
+import { Icon } from 'antd'
+
+import { BASIC, MAP_REQUEST_URL } from "../../../services/config";
 import Event from "../../../lib/utils/event";
 import mapApp from "../../../utils/INITMAP";
 import { DefaultUpload } from "../../../utils/XhrUploadFile";
@@ -47,6 +51,7 @@ import Axios from "axios";
 import Search from "../../../components/Search/Search";
 import config from "../../../services/scouting";
 import { compress } from "../../../utils/pictureCompress";
+import Cookies from 'js-cookie'
 
 import { Collapse } from "antd";
 const { Panel } = Collapse;
@@ -54,14 +59,14 @@ const { Panel } = Collapse;
 export const UploadBgPic = ({ children, onUpload, onStart }) => {
   return (
     <Upload
-      action="/api/map/file/upload/public"
+      action={`${MAP_REQUEST_URL}/map/file/upload/public`}
       showUploadList={false}
       accept=".jpg, .jpeg, .png, .bmp"
       beforeUpload={() => {
         onStart && onStart();
         return true;
       }}
-      headers={{ Authorization: BASIC.getUrlParam.token }}
+      headers={{ Authorization: Cookies.get('Authorization') }}
       onChange={onUpload}
     >
       {children}
@@ -332,16 +337,16 @@ const UploadBtn = ({ onChange, parentTool, boardId }) => {
   });
 
   // const customRequest = (val)=>{
-  //     UploadFile(val.file, val.action,null, BASIC.getUrlParam.token ,(e)=>{
+  //     UploadFile(val.file, val.action,null, Cookies.get('Authorization') ,(e)=>{
   //       // console.log(e);
   //     },val)
   // }
   return (
     <Upload
-      action="/api/map/file/upload"
+      action={`${MAP_REQUEST_URL}/map/file/upload`}
       beforeUpload={checkFileSize}
       multiple
-      headers={{ Authorization: BASIC.getUrlParam.token }}
+      headers={{ Authorization: Cookies.get('Authorization') }}
       onChange={(e) => {
         onupload(e);
       }}
@@ -389,16 +394,16 @@ const Upload360PicBtn = ({
   });
 
   // const customRequest = (val)=>{
-  //     UploadFile(val.file, val.action,null, BASIC.getUrlParam.token ,(e)=>{
+  //     UploadFile(val.file, val.action,null, Cookies.get('Authorization') ,(e)=>{
   //       // console.log(e);
   //     },val)
   // }
   return (
     <Upload
-      action="/api/map/file/upload"
+      action={`${MAP_REQUEST_URL}/map/file/upload`}
       accept=".jpg, .jpeg, .png, .bmp, .mp4, .avi, .wmv"
       beforeUpload={checkFileSize360Pic}
-      headers={{ Authorization: BASIC.getUrlParam.token }}
+      headers={{ Authorization: Cookies.get('Authorization') }}
       onChange={(e) => {
         onupload(e);
       }}
@@ -460,7 +465,7 @@ export const ScoutingHeader = (props) => {
   let [transparency, setTransparency] = useState("1");
   let [transformFile, setTransformFile] = useState(null);
   // let [ saveData, setSaveData ] = useState();
-  let [uploadUrl, setUploadUrl] = useState(`/api/map/ght/${data.id}`);
+  let [uploadUrl, setUploadUrl] = useState(`${MAP_REQUEST_URL}/map/ght/${data.id}`);
   // 保存事件
   const saveItem = () => {
     onSave && onSave(areaName);
@@ -481,7 +486,52 @@ export const ScoutingHeader = (props) => {
     if (key === "setCoordinates") {
       onSetCoordinates && onSetCoordinates(data);
     }
+    if ("uploadPlan" === key) {
+      let fileInput = document.createElement("input");
+      fileInput.type = "file";
+      fileInput.accept = ".jpg, .jpeg, .png, .bmp";
+      fileInput.onchange = (evt) => {
+        let target = evt.target;
+        let file = target.files[0];
+        customUpload(file)
+        fileInput = null;
+      };
+      fileInput.click();
+    }
   };
+
+  // 自定义上传
+  const customUpload = async (file) => {
+    beforeUploadPlan(file).then(msg => {
+      if (msg === false) {
+        // 取消了，没有走确定
+      } else {
+        // 画完了规划图范围
+        // 处理画完之后的数据，范围等等
+        sendPlanPicture(msg);
+      }
+    }).catch(err => {
+      console.log(err);
+    })
+  }
+
+  // 保存规划图
+  const sendPlanPicture = (data) => {
+    let keys = Object.keys(data);
+    let formData = new FormData();
+    keys.forEach(key => {
+      formData.append(key, data[key])
+    })
+    Axios.post(uploadUrl, formData, { headers: { Authorization: Cookies.get("Authorization") } }).then((res) => {
+      message.success("上传成功");
+      let response = res.data;
+      // onStartUploadPlan()
+      BASIC.checkResponse(response)
+        ? onUploadPlan &&
+          onUploadPlan(response.data, [], hasChangeFile, saveData)
+        : onError && onError(response, data.file);
+    })
+  }
 
   // 开始上传
   const startUpload = ({ file, fileList, event }) => {
@@ -507,10 +557,7 @@ export const ScoutingHeader = (props) => {
     let { response } = file;
     onUploadPlan && onUploadPlan(null, fileList, hasChangeFile, saveData);
     if (response) {
-      BASIC.checkResponse(response)
-        ? onUploadPlan &&
-          onUploadPlan(response.data, fileList, hasChangeFile, saveData)
-        : onError && onError(response, file);
+
 
       hasChangeFile = false;
       saveData = null;
@@ -520,9 +567,9 @@ export const ScoutingHeader = (props) => {
   };
 
   // 设置更新的文件
-  const beforeTransformFile = () => {
-    return Promise.resolve(transformFile);
-  };
+  // const beforeTransformFile = () => {
+  //   return Promise.resolve(transformFile);
+  // };
 
   const firstUpload = async (file, extent) => {
     let formdata = new FormData();
@@ -531,7 +578,7 @@ export const ScoutingHeader = (props) => {
     formdata.append("transparency", transparency);
     formdata.append("coord_sys_type", coordSysType);
     let resp = await Axios.post(uploadUrl, formdata, {
-      headers: { Authorization: BASIC.getUrlParam.token },
+      headers: { Authorization: Cookies.get('Authorization') },
     });
     saveData = resp.data;
     return resp.data;
@@ -550,35 +597,32 @@ export const ScoutingHeader = (props) => {
       let url = window.URL.createObjectURL(val);
       Action.addPlanPictureDraw(url, val, dispatch)
         .then(async (res) => {
-          let { feature } = res;
-          let extent = feature.getGeometry().getExtent();
-          // console.log(extent)
+          let beforeData = {};
+          // let { feature } = res;
+          // let extent = feature.getGeometry().getExtent();
           // 设置透明度,设置范围大小
-          setTransparency(res.opacity);
-          setPlanExtent(extent.join(","));
+          // setTransparency(res.opacity);
+          // setPlanExtent(extent.join(","));
           const baseMapKeys = mapApp.baseMapKeys;
           const baseMapKey = mapApp.baseMapKey;
-          setCoordSysType(baseMapKeys[0].indexOf(baseMapKey) > -1 ? 0 : 1);
-          // await (()=>{
-          //   return new Promise(resolve => {
-          //     setTimeout(()=>{
-          //       resolve()
-          //     },300)
-          //   })
+          // setCoordSysType(baseMapKeys[0].indexOf(baseMapKey) > -1 ? 0 : 1);
 
-          // })()
-          // console.log(planExtent)
+          beforeData.transparency = res.opacity;
+          beforeData.extent = res.extent.join(',');
+          beforeData.coord_sys_type = baseMapKeys[0].indexOf(baseMapKey) > -1 ? 0 : 1;
           if (res.blobFile) {
             // 设置文件
             hasChangeFile = true;
-            setTransformFile(res.blobFile);
+            // setTransformFile(res.blobFile);
+            beforeData.file = res.blobFile;
             // 如果改变了文件，则先保存一份
-            await firstUpload(val, extent.join(","));
+            await firstUpload(val, res.extent.join(","));
           } else {
             // 设置原文件
-            setTransformFile(val);
+            // setTransformFile(val);
+            beforeData.file = val
           }
-          resolve({ ...val });
+          resolve(beforeData);
           // resolve({})
         })
         .catch((err) => {
@@ -652,10 +696,11 @@ export const ScoutingHeader = (props) => {
           parentTool.getDisabled("map:collect:add:web", "project", boardId)
         }
       >
-        <Upload
+        <div>上传规划图</div>
+        {/* <Upload
           action={uploadUrl}
           accept=".jpg, .jpeg, .png, .bmp"
-          headers={{ Authorization: BASIC.getUrlParam.token }}
+          headers={{ Authorization: Cookies.get('Authorization') }}
           beforeUpload={beforeUploadPlan}
           transformFile={beforeTransformFile}
           data={{
@@ -667,7 +712,7 @@ export const ScoutingHeader = (props) => {
           showUploadList={false}
         >
           <div>上传规划图</div>
-        </Upload>
+        </Upload> */}
       </Menu.Item>
       <Menu.Item
         key="uploadExcel"
@@ -774,18 +819,20 @@ export const ScoutingHeader = (props) => {
               />
               <Button
                 onClick={() => saveItem()}
-                size="middle"
+                size="small"
                 type="primary"
-                icon={<CheckCircleOutlined />}
-              ></Button>
+              >
+                <Icon type="check-circle" CheckCircleOutlined />
+              </Button>
               <Button
                 onClick={() => {
                   setIsEdit(false);
                   onCancel && onCancel(data);
                 }}
-                size="middle"
-                icon={<CloseCircleOutlined />}
-              ></Button>
+                size="small"
+              >
+                <Icon type="close-circle" CloseCircleOutlined />
+              </Button>
             </Fragment>
           ) : (
             <div className={styles.groupTitle}>
@@ -914,7 +961,7 @@ export const ScoutingItem = (props) => {
     onSelectCollection && onSelectCollection(val);
   };
   return (
-    <DragDropContext onDragEnd={() => onDragEnd.bind(this, data)}>
+    <DragDropContext onDragEnd={(result) => onDragEnd(data, result)}>
       <Droppable droppableId="droppable">
         {(provided, snapshot) => (
           <div {...provided.droppableProps} ref={provided.innerRef}>
@@ -1405,6 +1452,7 @@ export const UploadItem = ({
 
   const itemClick = (val) => {
     parent.setItemClickState(true);
+    parent.scrollForFeature(val.id);
     let feature = Action.findFeature(val.id);
     if (feature && feature.get("meetingRoomNum") !== undefined) {
       Action.fitFeature(feature);
@@ -1524,7 +1572,7 @@ export const UploadItem = ({
                     size="small"
                     shape="circle"
                   >
-                    <CloseOutlined />
+                    <Icon type="close" CloseOutlined />
                   </Button>
                 </Col>
                 <Col span={3} style={{ textAlign: "center" }}>
@@ -1537,7 +1585,7 @@ export const UploadItem = ({
                     shape="circle"
                     type="primary"
                   >
-                    <CheckOutlined />
+                    <Icon type="check" CheckOutlined />
                   </Button>
                 </Col>
               </Fragment>
@@ -1585,7 +1633,7 @@ export const UploadItem = ({
                 // style={{ color: "#1769FF" }}
                 onClick={(e) => e.stopPropagation()}
               >
-                <MyIcon type="icon-gengduo2" />
+                <MyIcon type="icon-gengduo1" />
               </span>
             </Dropdown>
           ) : (

@@ -394,7 +394,7 @@
     transform: translateX(-50%);
     width: 100%;
     background-color: #fff;
-    padding-top: 12px;
+    padding: 12px;
     box-shadow: 0 -6px 16px rgba(0, 0, 0, 0.15);
     .btn {
       width: 90%;
@@ -458,7 +458,7 @@
       margin: 0;
     }
     .ant-tabs-nav .ant-tabs-tab {
-      padding: 6px 0;
+      padding: 6px 15px;
     }
     .ant-tabs-content-holder {
       height: 100%;
@@ -484,13 +484,40 @@
       }
       .ant-tabs-nav-wrap {
         overflow: unset;
+        padding: 10px 0;
       }
       .ant-tabs-nav {
-        margin-bottom: 15px;
+        margin: 8px auto;
         background-color: #fff;
+        text-align: center;
         &::before {
           border: 0;
         }
+      }
+      .ant-tabs-nav-scroll{
+        overflow: unset;
+        display: flex;
+      }
+      .ant-tabs-ink-bar {
+        border-radius: 50px;
+        height: 100%;
+        box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.1),
+          0px 8px 16px 0px rgba(74, 144, 226, 0.15);
+        background: linear-gradient(
+          204deg,
+          rgba(134, 179, 255, 1) 0%,
+          rgba(106, 154, 255, 1) 100%
+        ) !important;
+      }
+      .ant-tabs-nav .ant-tabs-tab{
+        z-index: 2;
+      }
+      .ant-tabs-tab {
+        transition: all 0.3s linear;
+      }
+      .ant-tabs-tab.ant-tabs-tab-active {
+        // border-radius: 50px;
+        color: #fff;
       }
       .ant-tabs-nav-list {
         width: 90%;
@@ -505,24 +532,6 @@
           z-index: 10;
           text-align: center;
           justify-content: center;
-        }
-        .ant-tabs-ink-bar {
-          border-radius: 50px;
-          height: 100%;
-          box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.1),
-            0px 8px 16px 0px rgba(74, 144, 226, 0.15);
-          background: linear-gradient(
-            204deg,
-            rgba(134, 179, 255, 1) 0%,
-            rgba(106, 154, 255, 1) 100%
-          ) !important;
-        }
-        .ant-tabs-tab {
-          transition: all 0.3s linear;
-        }
-        .ant-tabs-tab.ant-tabs-tab-active {
-          // border-radius: 50px;
-          color: #fff;
         }
       }
     }

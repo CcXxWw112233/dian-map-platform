@@ -2,9 +2,10 @@ import React, { useState, useMemo } from "react";
 import styles from "./index.less";
 import { MyIcon } from "../../../../components/utils";
 import Event from "../../../../lib/utils/event";
-import { Empty, Pagination } from "antd";
+import {  Pagination } from "antd";
 import DetailAction from "../../../../lib/components/ProjectScouting/ScoutingDetail";
 import InitMap from "../../../../utils/INITMAP";
+import Empty from "../../../../components/Empty";
 
 export default function TrafficDetail(props) {
   const [poiData, setPoiData] = useState([]);

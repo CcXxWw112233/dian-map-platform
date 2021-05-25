@@ -245,13 +245,13 @@ export default class RightTools extends React.Component {
                     <Button
                       shape="circle"
                       size="large"
-                      icon={icon}
+                      // icon={icon}
                       onClick={() => {
                         item.cb(index);
                       }}
                       style={btnSelectedStyle}
                     >
-                      {item.iconfont ? "" : item.name}
+                      {item.iconfont ? icon: item.name}
                     </Button>
                   </Tooltip>
                 </li>
@@ -311,7 +311,7 @@ export default class RightTools extends React.Component {
                         }}
                         style={btnSelectedStyle}
                       >
-                        {item.iconfont ? "" : item.name}
+                        {item.iconfont ? icon: item.name}
                       </Button>
                     </Tooltip>
                   </li>

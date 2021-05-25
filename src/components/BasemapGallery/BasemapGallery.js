@@ -12,9 +12,10 @@ import { baseMapDictionary } from "utils/mapSource";
 import event from "../../lib/utils/event";
 import { connect } from "dva";
 
-@connect(({ openswitch: { openPanel, panelDidMount } }) => ({
+@connect(({ openswitch: { openPanel, panelDidMount, showFeatureName } }) => ({
   openPanel,
   panelDidMount,
+  showFeatureName
 }))
 export default class BasemapGallery extends PureComponent {
   constructor(props) {
@@ -70,6 +71,13 @@ export default class BasemapGallery extends PureComponent {
     mapApp.showRoadLabel(this.selectBaseMapKey, val);
   };
   onPlotLabelChange = (val) => {
+    const { showFeatureName, dispatch } = this.props
+    dispatch({
+      type: 'openswitch/updateDatas',
+      payload: {
+        showFeatureName: !showFeatureName
+      }
+    })
     this.setState(
       {
         showPlotLabel: val,
@@ -190,16 +198,16 @@ export default class BasemapGallery extends PureComponent {
                 })}
             </div>
             <div className={styles.switch}>
-              <Row style={{ marginBottom: 8 }}>
+              <Row style={{ marginBottom: 8 }} style={{display: "flex"}}>
                 <Switch
                   checked={this.state.showRoadLabel}
                   onChange={(e) => this.onRoadLabelChange(e)}
                 ></Switch>
                 <div className={styles.nameDiv}>路网</div>
               </Row>
-              <Row>
+              <Row style={{display: "flex"}}>
                 <Switch
-                  checked={this.state.showPlotLabel}
+                  checked={this.props.showFeatureName}
                   onChange={(e) => this.onPlotLabelChange(e)}
                 ></Switch>
                 <div className={styles.nameDiv}>名称</div>
